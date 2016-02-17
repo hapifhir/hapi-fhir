@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 
@@ -64,16 +65,16 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 
-		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
+		IIdType id = mySubscriptionDao.create(subs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		mySubscriptionDao.purgeInactiveSubscriptions();
-		mySubscriptionDao.read(id);
+		mySubscriptionDao.read(id, new ServletRequestDetails());
 
 		Thread.sleep(1500);
 
 		myDaoConfig.setSchedulingDisabled(false);
 		mySubscriptionDao.purgeInactiveSubscriptions();
 		try {
-			mySubscriptionDao.read(id);
+			mySubscriptionDao.read(id, new ServletRequestDetails());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -95,9 +96,9 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 
-		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
+		IIdType id = mySubscriptionDao.create(subs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		mySubscriptionDao.purgeInactiveSubscriptions();
-		mySubscriptionDao.read(id);
+		mySubscriptionDao.read(id, new ServletRequestDetails());
 
 		mySubscriptionDao.getUndeliveredResourcesAndPurge(mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id));
 		
@@ -106,7 +107,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		myDaoConfig.setSchedulingDisabled(false);
 		mySubscriptionDao.purgeInactiveSubscriptions();
 		try {
-			mySubscriptionDao.read(id);
+			mySubscriptionDao.read(id, new ServletRequestDetails());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -120,7 +121,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 
-		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
+		IIdType id = mySubscriptionDao.create(subs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		TypedQuery<SubscriptionTable> q = myEntityManager.createQuery("SELECT t from SubscriptionTable t WHERE t.mySubscriptionResource.myId = :id", SubscriptionTable.class);
 		q.setParameter("id", id.getIdPartAsLong());
@@ -130,15 +131,15 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		assertNotNull(table.getNextCheck());
 		assertEquals(table.getNextCheck(), table.getSubscriptionResource().getPublished().getValue());
 		assertEquals(SubscriptionStatusEnum.REQUESTED.getCode(), myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
-		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
+		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id, new ServletRequestDetails()).getStatusElement().getValueAsEnum());
 
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		mySubscriptionDao.update(subs);
+		mySubscriptionDao.update(subs, new ServletRequestDetails());
 
 		assertEquals(SubscriptionStatusEnum.ACTIVE.getCode(), myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
-		assertEquals(SubscriptionStatusEnum.ACTIVE, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
+		assertEquals(SubscriptionStatusEnum.ACTIVE, mySubscriptionDao.read(id, new ServletRequestDetails()).getStatusElement().getValueAsEnum());
 
-		mySubscriptionDao.delete(id);
+		mySubscriptionDao.delete(id, new ServletRequestDetails());
 
 		assertNull(myEntityManager.find(SubscriptionTable.class, table.getId()));
 
@@ -151,10 +152,10 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setId(id);
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
-		mySubscriptionDao.update(subs);
+		mySubscriptionDao.update(subs, new ServletRequestDetails());
 
 		assertEquals(SubscriptionStatusEnum.REQUESTED.getCode(), myEntityManager.createQuery("SELECT t FROM SubscriptionTable t WHERE t.myResId = " + id.getIdPart(), SubscriptionTable.class).getSingleResult().getStatus());
-		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
+		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id, new ServletRequestDetails()).getStatusElement().getValueAsEnum());
 	}
 
 	@Test
@@ -163,7 +164,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation");
 		try {
-			mySubscriptionDao.create(subs);
+			mySubscriptionDao.create(subs, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
@@ -173,7 +174,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("http://foo.com/Observation?AAA=BBB");
 		try {
-			mySubscriptionDao.create(subs);
+			mySubscriptionDao.create(subs, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
@@ -183,7 +184,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("ObservationZZZZ?a=b");
 		try {
-			mySubscriptionDao.create(subs);
+			mySubscriptionDao.create(subs, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: ObservationZZZZ"));
@@ -193,7 +194,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			mySubscriptionDao.create(subs);
+			mySubscriptionDao.create(subs, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.channel.type must be populated on this server"));
@@ -203,7 +204,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
-		assertTrue(mySubscriptionDao.create(subs).getId().hasIdPart());
+		assertTrue(mySubscriptionDao.create(subs, new ServletRequestDetails()).getId().hasIdPart());
 
 	}
 
@@ -214,7 +215,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		String methodName = "testDeleteSubscriptionWithFlaggedResources";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Subscription subs;
 
@@ -226,7 +227,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		IIdType subsId = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
+		IIdType subsId = mySubscriptionDao.create(subs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		Long subsPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(subsId);
 
 		assertNull(mySubscriptionTableDao.findOne(subsPid).getLastClientPoll());
@@ -239,12 +240,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		Observation obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
@@ -258,7 +259,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		 * Delete the subscription
 		 */
 
-		mySubscriptionDao.delete(subsId);
+		mySubscriptionDao.delete(subsId, new ServletRequestDetails());
 
 		assertThat(mySubscriptionFlaggedResourceDataDao.count(), not(greaterThan(0L)));
 		assertThat(mySubscriptionTableDao.count(), not(greaterThan(0L)));
@@ -266,14 +267,14 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		/*
 		 * Delete a second time just to make sure that works
 		 */
-		mySubscriptionDao.delete(subsId);
+		mySubscriptionDao.delete(subsId, new ServletRequestDetails());
 
 		/*
 		 * Re-create the subscription
 		 */
 
 		subs.setId(subsId);
-		mySubscriptionDao.update(subs).getId();
+		mySubscriptionDao.update(subs, new ServletRequestDetails()).getId();
 
 		assertThat(mySubscriptionFlaggedResourceDataDao.count(), not(greaterThan(0L)));
 		assertThat(mySubscriptionTableDao.count(), (greaterThan(0L)));
@@ -285,7 +286,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
@@ -302,12 +303,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		String methodName = "testSubscriptionResourcesAppear";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Subscription subs;
 
@@ -319,13 +320,13 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		Long subsId1 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs).getId());
+		Long subsId1 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs, new ServletRequestDetails()).getId());
 
 		subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		Long subsId2 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs).getId());
+		Long subsId2 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs, new ServletRequestDetails()).getId());
 
 		assertNull(mySubscriptionTableDao.findOne(subsId1).getLastClientPoll());
 
@@ -335,12 +336,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType afterId1 = myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType afterId2 = myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
@@ -381,7 +382,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		 */
 		
 		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(100);
+		mySystemDao.performReindexingPass(100, new ServletRequestDetails());
 
 		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
 
@@ -394,7 +395,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 			ourLog.info("Updating observation");
 			Observation nextObs = (Observation) next;
 			nextObs.addPerformer().setDisplay("Some display");
-			myObservationDao.update(nextObs);
+			myObservationDao.update(nextObs, new ServletRequestDetails());
 		}
 
 		assertEquals(6, mySubscriptionDao.pollForNewUndeliveredResources());
@@ -410,12 +411,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		String methodName = "testSubscriptionResourcesAppear2";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType oId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType oId = myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Subscription subs;
 
@@ -427,7 +428,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		Long subsId1 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs).getId());
+		Long subsId1 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs, new ServletRequestDetails()).getId());
 
 		assertNull(mySubscriptionTableDao.findOne(subsId1).getLastClientPoll());
 
@@ -435,7 +436,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		
 		ourLog.info("pId: {}   - oId: {}", pId, oId);
 		
-		myObservationDao.update(myObservationDao.read(oId));
+		myObservationDao.update(myObservationDao.read(oId, new ServletRequestDetails()), new ServletRequestDetails());
 		
 		assertEquals(1, mySubscriptionDao.pollForNewUndeliveredResources());
 		ourLog.info("Between passes");
@@ -447,12 +448,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
@@ -476,7 +477,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		mySubscriptionDao.pollForNewUndeliveredResources();
 		assertEquals(4, mySubscriptionFlaggedResourceDataDao.count());

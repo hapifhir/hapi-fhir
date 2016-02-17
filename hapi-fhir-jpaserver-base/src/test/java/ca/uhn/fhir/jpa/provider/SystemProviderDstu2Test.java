@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -190,18 +191,18 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSuggest");
-		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType ptId = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		obs.getSubject().setReference(ptId);
-		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType obsId = myObservationDao.create(obs, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.setId(obsId);
 		obs.getSubject().setReference(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
-		myObservationDao.update(obs);
+		myObservationDao.update(obs, new ServletRequestDetails());
 		
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
@@ -226,12 +227,12 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	public void testSuggestKeywordsInvalid() throws Exception {
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSuggest");
-		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType ptId = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
-		myObservationDao.create(obs);
+		myObservationDao.create(obs, new ServletRequestDetails());
 		
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
@@ -379,7 +380,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 20; i ++) {
 			Patient p = new Patient();
 			p.addName().addFamily("PATIENT_" + i);
-			myPatientDao.create(p);
+			myPatientDao.create(p, new ServletRequestDetails());
 		}
 		
 		Bundle req = new Bundle();
@@ -403,7 +404,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 20; i ++) {
 			Patient p = new Patient();
 			p.addName().addFamily("PATIENT_" + i);
-			myPatientDao.create(p);
+			myPatientDao.create(p, new ServletRequestDetails());
 		}
 		
 		Bundle req = new Bundle();

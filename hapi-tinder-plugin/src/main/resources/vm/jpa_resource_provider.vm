@@ -45,7 +45,9 @@ public class ${className}ResourceProvider extends
 	@Search()
 	public ca.uhn.fhir.rest.server.IBundleProvider search(
 			javax.servlet.http.HttpServletRequest theServletRequest,
-	
+			
+			ca.uhn.fhir.rest.method.RequestDetails theRequestDetails,
+			
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringAndListParam theId, 
@@ -155,6 +157,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
+			paramMap.setRequestDetails(theRequestDetails);
 
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;

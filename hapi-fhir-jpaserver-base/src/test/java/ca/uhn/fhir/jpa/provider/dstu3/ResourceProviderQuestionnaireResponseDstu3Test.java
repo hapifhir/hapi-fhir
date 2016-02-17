@@ -7,18 +7,17 @@ import static org.junit.Assert.fail;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -52,11 +51,11 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testCreateWithLocalReference() {
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType ptId1 = myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();
 		q1.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-		IIdType qId = myQuestionnaireDao.create(q1).getId().toUnqualifiedVersionless();
+		IIdType qId = myQuestionnaireDao.create(q1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
 		qr1.getQuestionnaire().setReferenceElement(qId);
@@ -74,11 +73,11 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testCreateWithAbsoluteReference() {
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType ptId1 = myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();
 		q1.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-		IIdType qId = myQuestionnaireDao.create(q1).getId().toUnqualifiedVersionless();
+		IIdType qId = myQuestionnaireDao.create(q1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
 		qr1.getQuestionnaire().setReferenceElement(qId.withServerBase("http://example.com", "Questionnaire"));

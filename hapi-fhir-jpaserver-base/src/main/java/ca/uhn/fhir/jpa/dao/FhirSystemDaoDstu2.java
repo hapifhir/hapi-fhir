@@ -198,9 +198,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	}
 
 	@Override
-	public MetaDt metaGetOperation() {
+	public MetaDt metaGetOperation(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
@@ -259,7 +259,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		String actionName = "Transaction";
@@ -379,7 +379,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
-				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false);
+				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 				break;
 			}
@@ -390,12 +390,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
-					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
+					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
 					if (deleted != null) {
 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
 					}
 				} else {
-					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts);
+					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
 					for (ResourceTable deleted : allDeleted) {
 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());						
 					}
@@ -419,10 +419,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
 					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
-					outcome = resourceDao.update(res, null, false);
+					outcome = resourceDao.update(res, null, false, theRequestDetails);
 				} else {
 					res.setId((String) null);
-					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false, theRequestDetails);
 				}
 
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
@@ -471,7 +471,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false, updateTime);
+			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false, updateTime, theRequestDetails);
 		}
 
 		myEntityManager.flush();

@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
@@ -114,14 +115,15 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			HttpServletRequest theServletRequest,
 			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding 
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding, 
+			RequestDetails theRequestDetails 
 			) {
 		//@formatter:on
 		
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding);
+			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			if (result.isFound()==false) {
 				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
 			}

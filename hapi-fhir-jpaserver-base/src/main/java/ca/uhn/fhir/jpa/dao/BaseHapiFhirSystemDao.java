@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -62,15 +63,15 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public void deleteAllTagsOnServer() {
+	public void deleteAllTagsOnServer(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
 
 		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
 	}
 
-	private int doPerformReindexingPass(final Integer theCount) {
+	private int doPerformReindexingPass(final Integer theCount, final RequestDetails theRequestDetails) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		return txTemplate.execute(new TransactionCallback<Integer>() {
@@ -102,7 +103,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 						@SuppressWarnings("rawtypes")
 						final IFhirResourceDao dao = getDao(resource.getClass());
 
-						dao.reindex(resource, resourceTable);
+						dao.reindex(resource, resourceTable, theRequestDetails);
 					} catch (Exception e) {
 						ourLog.error("Failed to index resource {}: {}", new Object[] { resourceTable.getIdDt(), e.toString(), e });
 						throw new ReindexFailureException(resourceTable.getId());
@@ -120,9 +121,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 	@Override
-	public TagList getAllTags() {
+	public TagList getAllTags(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -155,9 +156,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 	@Override
-	public IBundleProvider history(Date theSince) {
+	public IBundleProvider history(Date theSince, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -194,9 +195,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public int performReindexingPass(final Integer theCount) {
+	public int performReindexingPass(final Integer theCount, RequestDetails theRequestDetails) {
 		try {
-			return doPerformReindexingPass(theCount);
+			return doPerformReindexingPass(theCount, theRequestDetails);
 		} catch (ReindexFailureException e) {
 			ourLog.warn("Reindexing failed for resource {}", e.getResourceId());
 			markResourceAsIndexingFailed(e.getResourceId());

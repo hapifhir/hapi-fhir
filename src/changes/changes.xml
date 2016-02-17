@@ -59,6 +59,18 @@
 			<action type="add">
 				JPA server now supports :above and :below qualifiers on URI search params
 			</action>
+			<action type="add">
+				The RequestDetails and ActionRequestDetails objects which are passed to 
+				server interceptor methods and may also be used as server provider method
+				arguments now has a new method 
+				<![CDATA[
+				<code>Map&lt;String, String&gt; getUserData()</code>
+				]]>
+				which can be used to pass data and objects between interceptor methods to
+				to providers. This can be useful, for instance, if an authorization
+				interceptor wants to pass the logged in user's details to other parts
+				of the server.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

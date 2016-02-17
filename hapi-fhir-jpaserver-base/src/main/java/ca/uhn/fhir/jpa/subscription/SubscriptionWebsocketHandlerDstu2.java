@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler implements ISubscriptionWebsocketHandler, Runnable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandlerDstu2.class);
@@ -145,7 +146,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 		public void closing() {
 			ourLog.info("Deleting subscription {}", mySubscriptionId);
 			try {
-				mySubscriptionDao.delete(mySubscriptionId);
+				mySubscriptionDao.delete(mySubscriptionId, new ServletRequestDetails());
 			} catch (Exception e) {
 				handleFailure(e);
 			}
@@ -232,7 +233,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 			}
 
 			try {
-				Subscription subscription = mySubscriptionDao.read(id);
+				Subscription subscription = mySubscriptionDao.read(id, new ServletRequestDetails());
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
 				myState = new BoundStaticSubscipriptionState(theSession);
@@ -269,7 +270,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 					}
 				}
 				
-				IIdType id = mySubscriptionDao.create(subscription).getId();
+				IIdType id = mySubscriptionDao.create(subscription, new ServletRequestDetails()).getId();
 
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();

@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaServerInterceptorAdapter;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 
@@ -48,7 +49,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 	public void testJpaCreate() {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
-		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
+		Long id = myPatientDao.create(p, new ServletRequestDetails()).getId().getIdPartAsLong();
 		
 		ArgumentCaptor<ActionRequestDetails> detailsCapt;
 		ArgumentCaptor<ResourceTable> tableCapt;
@@ -68,7 +69,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		 */
 		p = new Patient();
 		p.addName().addFamily("PATIENT1");
-		Long id2 = myPatientDao.create(p, "Patient?family=PATIENT").getId().getIdPartAsLong();
+		Long id2 = myPatientDao.create(p, "Patient?family=PATIENT", new ServletRequestDetails()).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
@@ -82,9 +83,9 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 	public void testJpaDelete() {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
-		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
+		Long id = myPatientDao.create(p, new ServletRequestDetails()).getId().getIdPartAsLong();
 
-		myPatientDao.delete(new IdDt("Patient", id));
+		myPatientDao.delete(new IdDt("Patient", id), new ServletRequestDetails());
 		
 		ArgumentCaptor<ActionRequestDetails> detailsCapt;
 		ArgumentCaptor<ResourceTable> tableCapt;
@@ -102,12 +103,12 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 	public void testJpaUpdate() {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
-		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
+		Long id = myPatientDao.create(p, new ServletRequestDetails()).getId().getIdPartAsLong();
 
 		p = new Patient();
 		p.setId(new IdDt(id));
 		p.addName().addFamily("PATIENT1");
-		Long id2 = myPatientDao.update(p).getId().getIdPartAsLong();
+		Long id2 = myPatientDao.update(p, new ServletRequestDetails()).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
 		ArgumentCaptor<ActionRequestDetails> detailsCapt;
@@ -126,7 +127,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		p = new Patient();
 		p.setId(new IdDt(id));
 		p.addName().addFamily("PATIENT2");
-		id2 = myPatientDao.update(p, "Patient?family=PATIENT1").getId().getIdPartAsLong();
+		id2 = myPatientDao.update(p, "Patient?family=PATIENT1", new ServletRequestDetails()).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
@@ -141,7 +142,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 
 		p = new Patient();
 		p.addName().addFamily("PATIENT3");
-		id2 = myPatientDao.update(p, "Patient?family=ZZZ").getId().getIdPartAsLong();
+		id2 = myPatientDao.update(p, "Patient?family=ZZZ", new ServletRequestDetails()).getId().getIdPartAsLong();
 		assertNotEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);

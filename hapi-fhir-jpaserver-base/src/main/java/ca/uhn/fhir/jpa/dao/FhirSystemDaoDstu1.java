@@ -54,7 +54,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1.class);
 
 	@Override
-	public MetaDt metaGetOperation() {
+	public MetaDt metaGetOperation(RequestDetails theRequestDetails) {
 		throw new NotImplementedOperationException("meta not supported in DSTU1");
 	}
 
@@ -64,7 +64,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		long start = System.currentTimeMillis();
@@ -270,7 +270,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 				ResourceMetadataKeyEnum.DELETED_AT.put(resource, new InstantDt(deletedTimestampOrNull));
 			}
 
-			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime);
+			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime, theRequestDetails);
 		}
 
 		long delay = System.currentTimeMillis() - start;

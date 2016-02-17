@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
@@ -63,14 +64,14 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	public void testGetResourceCounts() {
 		Observation obs = new Observation();
 		obs.getName().addCoding().setSystem("urn:system").setCode("testGetResourceCountsO01");
-		ourObservationDao.create(obs);
+		ourObservationDao.create(obs, new ServletRequestDetails());
 
 		Map<String, Long> oldCounts = ourSystemDao.getResourceCounts();
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testGetResourceCountsP01");
 		patient.addName().addFamily("Tester").addGiven("Joe");
-		ourPatientDao.create(patient);
+		ourPatientDao.create(patient, new ServletRequestDetails());
 
 		Map<String, Long> newCounts = ourSystemDao.getResourceCounts();
 
@@ -92,21 +93,21 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testHistory");
 		patient.addName().addFamily("Tester").addGiven("Joe");
-		IIdType pid = ourPatientDao.create(patient).getId().toVersionless();
+		IIdType pid = ourPatientDao.create(patient, new ServletRequestDetails()).getId().toVersionless();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IIdType newpid = ourPatientDao.update(patient).getId();
+		IIdType newpid = ourPatientDao.update(patient, new ServletRequestDetails()).getId();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IIdType newpid2 = ourPatientDao.update(patient).getId();
+		IIdType newpid2 = ourPatientDao.update(patient, new ServletRequestDetails()).getId();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IIdType newpid3 = ourPatientDao.update(patient).getId();
+		IIdType newpid3 = ourPatientDao.update(patient, new ServletRequestDetails()).getId();
 
-		IBundleProvider values = ourSystemDao.history(start);
+		IBundleProvider values = ourSystemDao.history(start, new ServletRequestDetails());
 		assertEquals(4, values.size());
 
 		List<IBaseResource> res = values.getResources(0, 4);
@@ -117,18 +118,18 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 		Location loc = new Location();
 		loc.getAddress().addLine("AAA");
-		IIdType lid = ourLocationDao.create(loc).getId();
+		IIdType lid = ourLocationDao.create(loc, new ServletRequestDetails()).getId();
 
 		Location loc2 = new Location();
 		loc2.getAddress().addLine("AAA");
-		ourLocationDao.create(loc2).getId();
+		ourLocationDao.create(loc2, new ServletRequestDetails()).getId();
 
 		Thread.sleep(2000);
 
-		values = ourLocationDao.history(start);
+		values = ourLocationDao.history(start, new ServletRequestDetails());
 		assertEquals(2, values.size());
 
-		values = ourLocationDao.history(lid.getIdPartAsLong(), start);
+		values = ourLocationDao.history(lid.getIdPartAsLong(), start, new ServletRequestDetails());
 		assertEquals(1, values.size());
 
 	}
@@ -219,44 +220,44 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	@Test
 	public void testTagOperationss() throws Exception {
 
-		TagList preSystemTl = ourSystemDao.getAllTags();
+		TagList preSystemTl = ourSystemDao.getAllTags(new ServletRequestDetails());
 
 		TagList tl1 = new TagList();
 		tl1.addTag("testGetAllTagsScheme1", "testGetAllTagsTerm1", "testGetAllTagsLabel1");
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("foo").setValue("testGetAllTags01");
 		ResourceMetadataKeyEnum.TAG_LIST.put(p1, tl1);
-		ourPatientDao.create(p1);
+		ourPatientDao.create(p1, new ServletRequestDetails());
 
 		TagList tl2 = new TagList();
 		tl2.addTag("testGetAllTagsScheme2", "testGetAllTagsTerm2", "testGetAllTagsLabel2");
 		Observation o1 = new Observation();
 		o1.getName().setText("testGetAllTags02");
 		ResourceMetadataKeyEnum.TAG_LIST.put(o1, tl2);
-		IIdType o1id = ourObservationDao.create(o1).getId();
+		IIdType o1id = ourObservationDao.create(o1, new ServletRequestDetails()).getId();
 		assertTrue(o1id.getVersionIdPart() != null);
 
-		TagList postSystemTl = ourSystemDao.getAllTags();
+		TagList postSystemTl = ourSystemDao.getAllTags(new ServletRequestDetails());
 		assertEquals(preSystemTl.size() + 2, postSystemTl.size());
 		assertEquals("testGetAllTagsLabel1", postSystemTl.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1").getLabel());
 
-		TagList tags = ourPatientDao.getAllResourceTags();
+		TagList tags = ourPatientDao.getAllResourceTags(new ServletRequestDetails());
 		assertEquals("testGetAllTagsLabel1", tags.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1").getLabel());
 		assertNull(tags.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
-		TagList tags2 = ourObservationDao.getTags(o1id);
+		TagList tags2 = ourObservationDao.getTags(o1id, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertEquals("testGetAllTagsLabel2", tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2").getLabel());
 
 		o1.setId(o1id);
-		IIdType o1id2 = ourObservationDao.update(o1).getId();
+		IIdType o1id2 = ourObservationDao.update(o1, new ServletRequestDetails()).getId();
 		assertTrue(o1id2.getVersionIdPart() != null);
 
-		tags2 = ourObservationDao.getTags(o1id);
+		tags2 = ourObservationDao.getTags(o1id, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertEquals("testGetAllTagsLabel2", tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2").getLabel());
 
-		tags2 = ourObservationDao.getTags(o1id2);
+		tags2 = ourObservationDao.getTags(o1id2, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
@@ -264,12 +265,12 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		 * Remove a tag from a version
 		 */
 
-		ourObservationDao.removeTag(o1id2, TagTypeEnum.TAG, "testGetAllTagsScheme2", "testGetAllTagsTerm2");
-		tags2 = ourObservationDao.getTags(o1id2);
+		ourObservationDao.removeTag(o1id2, TagTypeEnum.TAG, "testGetAllTagsScheme2", "testGetAllTagsTerm2", new ServletRequestDetails());
+		tags2 = ourObservationDao.getTags(o1id2, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
-		tags2 = ourObservationDao.getTags(o1id);
+		tags2 = ourObservationDao.getTags(o1id, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
@@ -277,13 +278,13 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		 * Add a tag
 		 */
 		ourObservationDao.addTag(o1id2, TagTypeEnum.TAG, "testGetAllTagsScheme3", "testGetAllTagsTerm3", "testGetAllTagsLabel3");
-		tags2 = ourObservationDao.getTags(o1id2);
+		tags2 = ourObservationDao.getTags(o1id2, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 		assertNotNull(tags2.getTag("testGetAllTagsScheme3", "testGetAllTagsTerm3"));
 		assertEquals("testGetAllTagsLabel3", tags2.getTag("testGetAllTagsScheme3", "testGetAllTagsTerm3").getLabel());
 
-		tags2 = ourObservationDao.getTags(o1id);
+		tags2 = ourObservationDao.getTags(o1id, new ServletRequestDetails());
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 

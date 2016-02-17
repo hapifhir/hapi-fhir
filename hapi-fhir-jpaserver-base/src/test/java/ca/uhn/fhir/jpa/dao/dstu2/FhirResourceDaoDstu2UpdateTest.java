@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2UpdateTest.class);
@@ -54,14 +55,14 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 
-		MethodOutcome outcome = myPatientDao.create(patient);
+		MethodOutcome outcome = myPatientDao.create(patient, new ServletRequestDetails());
 		assertNotNull(outcome.getId());
 		assertFalse(outcome.getId().isEmpty());
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
 		Date now = new Date();
-		Patient retrieved = myPatientDao.read(outcome.getId());
+		Patient retrieved = myPatientDao.read(outcome.getId(), new ServletRequestDetails());
 		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 		assertTrue(published.before(now));
@@ -71,7 +72,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		reset(myInterceptor);
 		retrieved.getIdentifierFirstRep().setValue("002");
-		MethodOutcome outcome2 = myPatientDao.update(retrieved);
+		MethodOutcome outcome2 = myPatientDao.update(retrieved, new ServletRequestDetails());
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
 		assertEquals("2", outcome2.getId().getVersionIdPart());
@@ -86,7 +87,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		Date now2 = new Date();
 
-		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless());
+		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), new ServletRequestDetails());
 
 		assertEquals("2", retrieved2.getId().getVersionIdPart());
 		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue());
@@ -102,7 +103,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		 * Get history
 		 */
 
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null);
+		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, new ServletRequestDetails());
 
 		assertEquals(2, historyBundle.size());
 
@@ -125,7 +126,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(p).getId();
+		IIdType id = myPatientDao.create(p, new ServletRequestDetails()).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -133,9 +134,9 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
 
-		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName);
+		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName, new ServletRequestDetails());
 
-		p = myPatientDao.read(id.toVersionless());
+		p = myPatientDao.read(id.toVersionless(), new ServletRequestDetails());
 		assertThat(p.getId().toVersionless().toString(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getId().toVersionless());
 		assertNotEquals(id, p.getId());
@@ -151,10 +152,10 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
 
-		IIdType id = myPatientDao.update(p).getId();
+		IIdType id = myPatientDao.update(p, new ServletRequestDetails()).getId();
 		assertEquals("Patient/" + methodName, id.toUnqualifiedVersionless().getValue());
 
-		p = myPatientDao.read(id);
+		p = myPatientDao.read(id, new ServletRequestDetails());
 		assertEquals(methodName, p.getIdentifierFirstRep().getValue());
 	}
 
@@ -165,7 +166,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.setId("0" + methodName);
 		p.addName().addFamily(methodName);
 
-		myPatientDao.update(p);
+		myPatientDao.update(p, new ServletRequestDetails());
 	}
 
 	/**
@@ -190,7 +191,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			profileList.add(new IdDt("http://foo1"));
 			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
 
-			p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+			p1id = myPatientDao.create(p1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient p1 = new Patient();
@@ -207,10 +208,10 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			profileList.add(new IdDt("http://foo2"));
 			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
 
-			myPatientDao.update(p1);
+			myPatientDao.update(p1, new ServletRequestDetails());
 		}
 		{
-			Patient p1 = myPatientDao.read(p1id);
+			Patient p1 = myPatientDao.read(p1id, new ServletRequestDetails());
 			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(p1);
 			assertThat(tagList, containsInAnyOrder(new Tag("tag_scheme1", "tag_term1"), new Tag("tag_scheme2", "tag_term2")));
 			List<BaseCodingDt> secList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(p1);
@@ -229,12 +230,12 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2AAA");
 		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2AAA");
-		IIdType p1id = myPatientDao.create(p1).getId();
+		IIdType p1id = myPatientDao.create(p1, new ServletRequestDetails()).getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2BBB");
 		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
-		myPatientDao.create(p2).getId();
+		myPatientDao.create(p2, new ServletRequestDetails()).getId();
 
 		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(1, ids.size());
@@ -242,7 +243,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");
-		MethodOutcome update2 = myPatientDao.update(p1);
+		MethodOutcome update2 = myPatientDao.update(p1, new ServletRequestDetails());
 		IIdType p1id2 = update2.getId();
 
 		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
@@ -252,10 +253,10 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
-		p1 = myPatientDao.read(p1id);
+		p1 = myPatientDao.read(p1id, new ServletRequestDetails());
 		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getNameFirstRep().getGivenAsSingleString());
 
-		p1 = myPatientDao.read(p1id2);
+		p1 = myPatientDao.read(p1id2, new ServletRequestDetails());
 		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getNameFirstRep().getGivenAsSingleString());
 
 	}
@@ -265,13 +266,13 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IIdType p1id = myPatientDao.create(p1).getId();
+		IIdType p1id = myPatientDao.create(p1, new ServletRequestDetails()).getId();
 
 		Organization p2 = new Organization();
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
 			p2.setId(new IdDt("Organization/" + p1id.getIdPart()));
-			myOrganizationDao.update(p2);
+			myOrganizationDao.update(p2, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			// good
@@ -279,7 +280,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		try {
 			p2.setId(new IdDt("Patient/" + p1id.getIdPart()));
-			myOrganizationDao.update(p2);
+			myOrganizationDao.update(p2, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			ourLog.error("Good", e);
@@ -301,12 +302,12 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			tl.add(new IdDt("http://foo/bar"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
 
-			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+			id = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		// Do a read
 		{
-			Patient patient = myPatientDao.read(id);
+			Patient patient = myPatientDao.read(id, new ServletRequestDetails());
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
@@ -326,12 +327,12 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			tl.add(new IdDt("http://foo/bar"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
 
-			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+			id = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		// Do a read
 		{
-			Patient patient = myPatientDao.read(id);
+			Patient patient = myPatientDao.read(id, new ServletRequestDetails());
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
@@ -347,12 +348,12 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			tl.add(new IdDt("http://foo/baz"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
 
-			id = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			id = myPatientDao.update(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		// Do a read
 		{
-			Patient patient = myPatientDao.read(id);
+			Patient patient = myPatientDao.read(id, new ServletRequestDetails());
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/baz", tl.get(0).getValue());
@@ -367,7 +368,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/9999999999999999");
 		try {
-			myPatientDao.update(p);
+			myPatientDao.update(p, new ServletRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only"));
@@ -381,7 +382,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/123:456");
 		try {
-			myPatientDao.update(p);
+			myPatientDao.update(p, new ServletRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
@@ -395,7 +396,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/123");
 		try {
-			myPatientDao.update(p);
+			myPatientDao.update(p, new ServletRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
@@ -408,11 +409,11 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
 		p.addName().addFamily("Hello");
 		p.setId("Patient/123abc");
-		IIdType id = myPatientDao.update(p).getId();
+		IIdType id = myPatientDao.update(p, new ServletRequestDetails()).getId();
 		assertEquals("123abc", id.getIdPart());
 		assertEquals("1", id.getVersionIdPart());
 
-		p = myPatientDao.read(id.toUnqualifiedVersionless());
+		p = myPatientDao.read(id.toUnqualifiedVersionless(), new ServletRequestDetails());
 		assertEquals("Patient/123abc", p.getId().toUnqualifiedVersionless().getValue());
 		assertEquals("Hello", p.getName().get(0).getFamily().get(0).getValue());
 
