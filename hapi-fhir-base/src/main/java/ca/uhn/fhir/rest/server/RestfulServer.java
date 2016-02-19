@@ -621,10 +621,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			/*
-			 * Actualy invoke the server method. This call is to a HAPI method binding, which is an object that wraps a specific implementing (user-supplied) method, but handles its input and provides
-			 * its output back to the client.
+			 * Actualy invoke the server method. This call is to a HAPI method binding, which 
+			 * is an object that wraps a specific implementing (user-supplied) method, but 
+			 * handles its input and provides its output back to the client.
 			 * 
-			 * This is basically the end of processing for a successful request, since the method binding replies to the client and closes the response.
+			 * This is basically the end of processing for a successful request, since the 
+			 * method binding replies to the client and closes the response.
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
 

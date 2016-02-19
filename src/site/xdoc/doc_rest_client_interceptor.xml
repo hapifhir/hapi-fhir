@@ -92,7 +92,7 @@
 				</p>
 				
 				<macro name="snippet">
-					<param name="id" value="cookie" />
+					<param name="id" value="gzip" />
 					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 			

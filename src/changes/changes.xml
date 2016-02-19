@@ -71,6 +71,12 @@
 				interceptor wants to pass the logged in user's details to other parts
 				of the server.
 			</action>
+			<action type="fix" issue="297">
+				<![CDATA[When <code>IServerInterceptor#incomingRequestPreHandled()</code> is called 
+				for a <code>@Validate</code> method, the resource was not populated in the
+				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!  
+				]]>
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
