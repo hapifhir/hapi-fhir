@@ -223,7 +223,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ResourceBinding resourceBinding = null;
 		BaseMethodBinding<?> resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
-		if (Constants.URL_TOKEN_METADATA.equals(resourceName) || requestType == RequestTypeEnum.OPTIONS) {
+		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails)) {
 			resourceMethod = myServerConformanceMethod;
 		} else if (resourceName == null) {
 			resourceBinding = myServerBinding;
@@ -1396,7 +1396,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	private static boolean partIsOperation(String nextString) {
-		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$');
+		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$' || nextString.equals(Constants.URL_TOKEN_METADATA));
 	}
 
 	public static boolean requestIsBrowser(HttpServletRequest theRequest) {

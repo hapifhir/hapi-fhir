@@ -77,6 +77,13 @@
 				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!  
 				]]>
 			</action>
+			<action type="fix" issue="298">
+				<![CDATA[
+					Request to server at <code>[baseUrl]/metadata</code> with an HTTP method
+					other than GET (e.g. POST, PUT) should result in an HTTP 405. Thanks to 
+					Michael Lawley for reporting! 
+				]]>
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
