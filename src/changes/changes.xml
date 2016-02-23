@@ -59,6 +59,13 @@
 			<action type="add">
 				JPA server now supports :above and :below qualifiers on URI search params
 			</action>
+			<action type="add">
+				Add optional support (disabled by default for now) to JPA server to support
+				inline references containing search URLs. These URLs will be resolved when
+				a resource is being created/updated and replaced with the single matching
+				resource. This is being used as a part of the May 2016 Connectathon for
+				a testing scenario.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

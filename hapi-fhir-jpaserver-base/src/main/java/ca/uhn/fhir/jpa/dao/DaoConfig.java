@@ -34,6 +34,32 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class DaoConfig {
 
+	// ***
+	// update setter javadoc if default changes
+	// ***
+	private boolean myAllowInlineMatchUrlReferences = false; 
+	
+	/**
+	 * @see #setAllowInlineMatchUrlReferences(boolean)
+	 */
+	public boolean isAllowInlineMatchUrlReferences() {
+		return myAllowInlineMatchUrlReferences;
+	}
+
+	/**
+	 * Should references containing match URLs be resolved and replaced in create and update operations. For
+	 * example, if this property is set to true and a resource is created containing a reference
+	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
+	 * to the usual match URL rules.
+	 * <p>
+	 * Default is false for now, as this is an experimental feature.
+	 * </p>
+	 * @since 1.5
+	 */
+	public void setAllowInlineMatchUrlReferences(boolean theAllowInlineMatchUrlReferences) {
+		myAllowInlineMatchUrlReferences = theAllowInlineMatchUrlReferences;
+	}
+
 	private boolean myAllowMultipleDelete;
 	private int myHardSearchLimit = 1000;
 	private int myHardTagListLimit = 1000;
