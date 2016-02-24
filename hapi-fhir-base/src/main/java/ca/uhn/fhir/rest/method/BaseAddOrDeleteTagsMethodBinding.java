@@ -56,8 +56,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	private String myResourceName;
 	private Integer myTagListParamIndex;
 
-	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, Class<? extends IResource> theTypeFromMethodAnnotation) {
-		super(theMethod, theConetxt, theProvider);
+	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, Class<? extends IResource> theTypeFromMethodAnnotation) {
+		super(theMethod, theContext, theProvider);
 
 		if (theProvider instanceof IResourceProvider) {
 			myType = ((IResourceProvider) theProvider).getResourceType();
@@ -69,7 +69,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName() + " parameter. Please specity a resource type in the method annotation on this method");
 		}
 		
-		myResourceName = theConetxt.getResourceDefinition(myType).getName();
+		myResourceName = theContext.getResourceDefinition(myType).getName();
 
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);

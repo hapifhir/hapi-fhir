@@ -167,15 +167,15 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
 			if (id.hasVersionIdPart()) {
-				retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
+				retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
 			} else {
-				retVal = createReadInvocation(id, resourceName);
+				retVal = createReadInvocation(getContext(), id, resourceName);
 			}
 		} else {
 			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
 			String resourceName = getResourceName();
 
-			retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
+			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -249,20 +249,20 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return mySupportsVersion || myVersionIdIndex != null;
 	}
 
-	public static HttpGetClientInvocation createAbsoluteReadInvocation(IIdType theId) {
-		return new HttpGetClientInvocation(theId.toVersionless().getValue());
+	public static HttpGetClientInvocation createAbsoluteReadInvocation(FhirContext theContext, IIdType theId) {
+		return new HttpGetClientInvocation(theContext, theId.toVersionless().getValue());
 	}
 
-	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IIdType theId) {
-		return new HttpGetClientInvocation(theId.getValue());
+	public static HttpGetClientInvocation createAbsoluteVReadInvocation(FhirContext theContext, IIdType theId) {
+		return new HttpGetClientInvocation(theContext, theId.getValue());
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart()).getValue());
+	public static HttpGetClientInvocation createReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart()).getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
+	public static HttpGetClientInvocation createVReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
 	}
 
 	@Override

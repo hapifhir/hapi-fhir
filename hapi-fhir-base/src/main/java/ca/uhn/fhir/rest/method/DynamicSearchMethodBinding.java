@@ -48,8 +48,8 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	private HashSet<String> myParamNames;
 	private Integer myIdParamIndex;
 
-	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, IDynamicSearchResourceProvider theProvider) {
-		super(theReturnResourceType, theMethod, theConetxt, theProvider);
+	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, IDynamicSearchResourceProvider theProvider) {
+		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myProvider = theProvider;
 		mySearchParameters = myProvider.getSearchParameters();

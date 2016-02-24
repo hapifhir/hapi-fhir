@@ -20,9 +20,14 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import org.apache.http.client.HttpClient;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.Header;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public interface IRestfulClientFactory {
@@ -76,11 +81,20 @@ public interface IRestfulClientFactory {
 	int getConnectTimeout();
 
 	/**
-	 * Returns the Apache HTTP client instance. This method will not return null.
-	 * 
-	 * @see #setHttpClient(HttpClient)
+	 * Returns the HTTP client instance. This method will not return null.
+	 * @param theUrl
+	 *            The complete FHIR url to which the http request will be sent
+	 * @param theIfNoneExistParams
+	 *            The params for header "If-None-Exist" as a hashmap
+	 * @param theIfNoneExistString
+	 *            The param for header "If-None-Exist" as a string
+	 * @param theRequestType
+	 *            the type of HTTP request (GET, DELETE, ..) 
+	 * @param theHeaders
+	 *            the headers to be sent together with the http request
+	 * @return the HTTP client instance
 	 */
-	HttpClient getHttpClient();
+	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead
@@ -172,7 +186,7 @@ public interface IRestfulClientFactory {
 	 * @param theHttpClient
 	 *            An HTTP client instance to use, or <code>null</code>
 	 */
-	void setHttpClient(HttpClient theHttpClient);
+	<T> void setHttpClient(T theHttpClient);
 
 	/**
 	 * Sets the HTTP proxy to use for outgoing connections
@@ -234,4 +248,12 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	void setPoolMaxPerRoute(int thePoolMaxPerRoute);
+	
+	void validateServerBase(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
+
+	/**
+	 * This method is internal to HAPI - It may change in future versions, use with caution.
+	 */	
+	void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
+
 }

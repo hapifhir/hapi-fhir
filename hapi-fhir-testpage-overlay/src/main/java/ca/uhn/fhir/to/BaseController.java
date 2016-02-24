@@ -52,6 +52,8 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.to.model.HomeRequest;
@@ -290,7 +292,7 @@ public class BaseController {
 		returnsResource = ResultType.NONE;
 		ourLog.warn("Failed to invoke server", e);
 	
-		if (theClient.getLastResponse() == null) {
+		if (e != null) {
 			theModel.put("errorMsg", "Error: " + e.getMessage());
 		}
 	
@@ -653,17 +655,17 @@ public class BaseController {
 		}
 	
 		@Override
-		public void interceptRequest(HttpRequestBase theRequest) {
+		public void interceptRequest(IHttpRequest theRequest) {
 			assert myLastRequest == null;
-			myLastRequest = theRequest;
+			myLastRequest = (HttpRequestBase) theRequest;
 		}
 	
 		@Override
-		public void interceptResponse(HttpResponse theResponse) throws IOException {
+		public void interceptResponse(IHttpResponse theResponse) throws IOException {
 			assert myLastResponse == null;
-			myLastResponse = theResponse;
+			myLastResponse = (HttpResponse) theResponse;
 	
-			HttpEntity respEntity = theResponse.getEntity();
+			HttpEntity respEntity = myLastResponse.getEntity();
 			if (respEntity != null) {
 				final byte[] bytes;
 				try {
@@ -673,7 +675,7 @@ public class BaseController {
 				}
 	
 				myResponseBody = new String(bytes, "UTF-8");
-				theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
 			}
 		}
 	

@@ -340,16 +340,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		case GET:
 		default:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
 			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName);
 			}
 			break;
 		case GET_WITH_SEARCH:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
 			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
 			}
 			break;
 		case POST:
@@ -456,8 +456,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(String theSearchUrl, Map<String, List<String>> theParams) {
-		return new HttpGetClientInvocation(theParams, theSearchUrl);
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+		return new HttpGetClientInvocation(theContext, theParams, theSearchUrl);
 	}
 
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.client.api;
 
 /*
  * #%L
@@ -20,26 +20,32 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+/**
+ * Http Request. Allows addition of headers and execution of the request.
+ */
+public interface IHttpRequest {
+	
+	/**
+	 * Add a header to the request
+	 * @param theName the header name
+	 * @param theValue the header value
+	 */
+	public void addHeader(String theName, String theValue);    
 
-public class DeleteTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
+	/**
+	 * Execute the request
+	 * @return the response
+	 * @throws IOException
+	 */
+	public IHttpResponse execute() throws IOException;
 
-	public DeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, DeleteTags theDeleteTags) {
-		super(theMethod, theContext, theProvider, theDeleteTags.type());
-	}
-
-	@Override
-	protected boolean isDelete() {
-		return true;
-	}
-
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.DELETE_TAGS;
-	}
+	/**
+	 * @return all request headers in lower case
+	 */
+	public Map<String, List<String>> getAllHeaders();
 
 }

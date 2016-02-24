@@ -15,6 +15,8 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.to.Controller;
@@ -163,12 +165,12 @@ public class HomeRequest {
 		retVal.registerInterceptor(new IClientInterceptor() {
 
 			@Override
-			public void interceptResponse(HttpResponse theRequest) {
+			public void interceptResponse(IHttpResponse theRequest) {
 				// nothing
 			}
 
 			@Override
-			public void interceptRequest(HttpRequestBase theRequest) {
+			public void interceptRequest(IHttpRequest theRequest) {
 				if (isNotBlank(remoteAddr)) {
 					theRequest.addHeader("x-forwarded-for", remoteAddr);
 				}
