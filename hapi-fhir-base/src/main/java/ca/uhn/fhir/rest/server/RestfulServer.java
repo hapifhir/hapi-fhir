@@ -517,7 +517,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String fhirServerBase = null;
-		boolean requestIsBrowser = requestIsBrowser(theRequest);
 		ServletRequestDetails requestDetails = new ServletRequestDetails();
 		requestDetails.setServer(this);
 		requestDetails.setRequestType(theRequestType);
@@ -1391,11 +1390,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	private static boolean partIsOperation(String nextString) {
 		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$');
-	}
-
-	public static boolean requestIsBrowser(HttpServletRequest theRequest) {
-		String userAgent = theRequest.getHeader("User-Agent");
-		return userAgent != null && userAgent.contains("Mozilla");
 	}
 
 }

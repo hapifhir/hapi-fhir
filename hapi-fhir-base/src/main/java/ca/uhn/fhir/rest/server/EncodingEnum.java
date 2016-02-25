@@ -44,6 +44,7 @@ public enum EncodingEnum {
 	;
 
 	private static HashMap<String, EncodingEnum> ourContentTypeToEncoding;
+	private static HashMap<String, EncodingEnum> ourContentTypeToEncodingStrict;
 
 	static {
 		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
@@ -51,6 +52,9 @@ public enum EncodingEnum {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
 		}
+		
+		// Add before we add the lenient ones
+		ourContentTypeToEncodingStrict = new HashMap<String, EncodingEnum>(ourContentTypeToEncoding);
 
 		/*
 		 * These are wrong, but we add them just to be tolerant of other
@@ -88,8 +92,28 @@ public enum EncodingEnum {
 		return myResourceContentType;
 	}
 
+	/**
+	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is lenient!</b> Things like "application/xml" will return {@link EncodingEnum#XML}
+	 * even if the "+fhir" part is missing from the expected content type.
+	 * </p>
+	 */
 	public static EncodingEnum forContentType(String theContentType) {
 		return ourContentTypeToEncoding.get(theContentType);
+	}
+
+	/**
+	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is NOT lenient!</b> Things like "application/xml" will return <code>null</code>
+	 * </p>
+	 * @see #forContentType(String)
+	 */
+	public static EncodingEnum forContentTypeStrict(String theContentType) {
+		return ourContentTypeToEncodingStrict.get(theContentType);
 	}
 
 	public String getFormatContentType() {

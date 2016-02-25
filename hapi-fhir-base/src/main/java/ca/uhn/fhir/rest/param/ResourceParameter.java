@@ -107,8 +107,10 @@ public class ResourceParameter implements IParameter {
 				return IOUtils.toString(createRequestReader(theRequest));
 			} catch (IOException e) {
 				// Shouldn't happen since we're reading from a byte array
-				throw new InternalErrorException("Failed to load request");
+				throw new InternalErrorException("Failed to load request", e);
 			}
+		case BODY_BYTE_ARRAY:
+			return theRequest.loadRequestContents();
 		case ENCODING:
 			return RestfulServerUtils.determineRequestEncoding(theRequest);
 		case RESOURCE:
@@ -209,23 +211,27 @@ public class ResourceParameter implements IParameter {
 	}
 
 	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
-		IBaseResource retVal;
+		IBaseResource retVal = null;
+		
 		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
-			FhirContext ctx = theRequest.getServer().getFhirContext();
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+			if (EncodingEnum.forContentTypeStrict(ct) == null) {
+			FhirContext ctx = theRequest.getServer().getFhirContext();
 			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
 			binary.setContentType(ct);
 			binary.setContent(theRequest.loadRequestContents());
-
 			retVal = binary;
-		} else {
+			}
+		}
+		
+		if (retVal == null) {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
 		return retVal;
 	}
 
 	public enum Mode {
-		BODY, ENCODING, RESOURCE
+		BODY, BODY_BYTE_ARRAY, ENCODING, RESOURCE
 	}
 
 }

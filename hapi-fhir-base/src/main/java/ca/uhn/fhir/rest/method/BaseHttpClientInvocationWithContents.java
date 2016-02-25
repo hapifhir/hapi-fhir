@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -56,6 +57,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
  */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHttpClientInvocationWithContents.class);
 
 	private final Bundle myBundle;
 	private final BundleTypeEnum myBundleType;
@@ -208,21 +210,24 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;
-			
-			/*
-			 * Note: Be careful about changing which constructor we use for ByteArrayEntity,
-			 * as Android's version of HTTPClient doesn't support the newer ones for
-			 * whatever reason.
-			 */
-			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent());
-
-			HttpRequestBase retVal = createRequest(url, entity);
-			addMatchHeaders(retVal, url);
-			super.addHeadersToRequest(retVal, null);
-			if (isNotBlank(binary.getContentType())) {
-				retVal.addHeader(Constants.HEADER_CONTENT_TYPE, binary.getContentType());
+			if (isBlank(binary.getContentType()) || EncodingEnum.forContentTypeStrict(binary.getContentType()) != null) {
+				ourLog.trace("Binary has Content-Type {}, encoding as a FHIR resource instead of raw", binary.getContentType());
+			} else {
+				/*
+				 * Note: Be careful about changing which constructor we use for ByteArrayEntity,
+				 * as Android's version of HTTPClient doesn't support the newer ones for
+				 * whatever reason.
+				 */
+				ByteArrayEntity entity = new ByteArrayEntity(binary.getContent());
+	
+				HttpRequestBase retVal = createRequest(url, entity);
+				addMatchHeaders(retVal, url);
+				super.addHeadersToRequest(retVal, null);
+				if (isNotBlank(binary.getContentType())) {
+					retVal.addHeader(Constants.HEADER_CONTENT_TYPE, binary.getContentType());
+				}
+				return retVal;
 			}
-			return retVal;
 		}
 
 		IParser parser;

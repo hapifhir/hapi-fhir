@@ -84,6 +84,25 @@
 				User-Agent, etc.) Thanks to Peter Van Houte of Agfa Healthcare for
 				reporting!
 			</action>
+			<action type="fix">
+				Handling of Binary resources containing embedded FHIR resources for
+				create/update/etc operations has been corrected per the FHIR rules
+				outlined at
+				<a href="http://hl7.org/fhir/binary.html">Binary Resource</a> in both
+				the client and server. 
+				<![CDATA[<br/><br/>]]>
+				Essentially, if the Binary contains something
+				that isn't FHIR (e.g. an image with an image content-type) the
+				client will send the raw data with the image content type to the server. The
+				server will place the content type and raw data into a Binary resource instance
+				and pass those to the resource provider. This part was already correct previous
+				to 1.5. 
+				<![CDATA[<br/><br/>]]>
+				On the other hand, if the Binary contains a FHIR content type, the Binary
+				is now sent by the client to the server as a Binary resource with a FHIR content-type,
+				and the embedded FHIR content is contained in the appropriate fields. The server
+				will pass this "outer" Binary resource to the resource provider code. 
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
