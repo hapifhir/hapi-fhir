@@ -649,10 +649,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			}
 
-			if (requestIsBrowser) {
-				// if request is coming from a browser, prompt the user to enter login credentials
-				theResponse.setHeader("WWW-Authenticate", "BASIC realm=\"FHIR\"");
-			}
 			writeExceptionToResponse(theResponse, e);
 
 		} catch (Throwable e) {

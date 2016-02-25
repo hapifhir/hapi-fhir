@@ -66,6 +66,17 @@
 				resource. This is being used as a part of the May 2016 Connectathon for
 				a testing scenario.
 			</action>
+			<action type="add">
+				The server no longer adds a 
+				<![CDATA[<code>WWW-Authenticate</code>]]>
+				header to the response if any resource provider code throws an
+				<![CDATA[<code>AuthenticationException</code>]]>. This header is 
+				used for interactive authentication, which isn't generally 
+				appropriate for FHIR. We added code to add this header a long time
+				ago for testing purposes and it never got removed. Please let us
+				know if you need the ability to add this header automatically. Thanks
+				to Lars Kristian Roland for pointing this out.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
