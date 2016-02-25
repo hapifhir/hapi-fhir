@@ -27,11 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -47,7 +45,7 @@ public abstract class BaseHttpClientInvocation {
 	}
 
 	public void addHeader(String theName, String theValue) {
-		myHeaders.add(new BasicHeader(theName, theValue));
+		myHeaders.add(new Header(theName, theValue));
 	}
 
 	/**

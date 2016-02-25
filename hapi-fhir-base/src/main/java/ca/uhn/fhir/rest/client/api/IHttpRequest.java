@@ -48,4 +48,12 @@ public interface IHttpRequest {
 	 */
 	public Map<String, List<String>> getAllHeaders();
 
+	/**
+	 * Return the requestbody as a string.
+	 * If this is not supported by the underlying technology, null is returned 
+	 * @return a string representation of the request or null if not supported or empty.
+	 * @throws IOException 
+	 */
+	public String getRequestBodyFromStream() throws IOException;
+
 }

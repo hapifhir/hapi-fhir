@@ -38,8 +38,6 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -222,12 +220,9 @@ public abstract class BaseClient implements IRestfulClient {
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
-				if (httpRequest instanceof HttpEntityEnclosingRequest) {
-					HttpEntity entity = ((HttpEntityEnclosingRequest) httpRequest).getEntity();
-					if (entity.isRepeatable()) {
-						String content = IOUtils.toString(entity.getContent());
-						ourLog.info("Client request body: {}", content);
-					}
+				String body = httpRequest.getRequestBodyFromStream();
+				if(body != null) {
+					ourLog.info("Client request body: {}", body);
 				}
 			}
 

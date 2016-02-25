@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
@@ -84,21 +82,17 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogRequestBody) {
-			if (theRequest instanceof HttpEntityEnclosingRequest) {
-				HttpEntity entity = ((HttpEntityEnclosingRequest) theRequest).getEntity();
-				if (entity.isRepeatable()) {
-					try {
-						String content = IOUtils.toString(entity.getContent());
-						myLog.info("Client request body:\n{}", content);
-					} catch (IllegalStateException e) {
-						myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
-					} catch (IOException e) {
-						myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
-					}
+			try {
+				String content = theRequest.getRequestBodyFromStream();
+				if (content != null) {
+					myLog.info("Client request body:\n{}", content);
 				}
+			} catch (IllegalStateException e) {
+				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
+			} catch (IOException e) {
+				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
-
 	}
 
 	@Override
@@ -127,17 +121,22 @@ public class LoggingInterceptor implements IClientInterceptor {
 
 		if (myLogResponseBody) {
 			theResponse.bufferEntitity();
-			InputStream respEntity = theResponse.readEntity();
-			if (respEntity != null) {
-				final byte[] bytes;
-				try {
-					bytes = IOUtils.toByteArray(respEntity);
-				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+			InputStream respEntity = null;
+			try  {
+				respEntity = theResponse.readEntity();
+				if (respEntity != null) {
+					final byte[] bytes;
+					try {
+						bytes = IOUtils.toByteArray(respEntity);
+					} catch (IllegalStateException e) {
+						throw new InternalErrorException(e);
+					}
+					myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
+				} else {
+					myLog.info("Client response body: (none)");
 				}
-				myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
-			} else {
-				myLog.info("Client response body: (none)");
+			} finally {
+				IOUtils.closeQuietly(respEntity);
 			}
 		}
 	}

@@ -28,10 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
@@ -60,8 +58,9 @@ public class JaxRsHttpResponse implements IHttpResponse {
 
 	@Override
 	public String getMimeType() {
-		ContentType ct = ContentType.parse(myResponse.getHeaderString(HttpHeaders.CONTENT_TYPE));
-		return ct != null ? ct.getMimeType() : null;
+		MediaType mediaType = myResponse.getMediaType();
+		//Keep only type and subtype and do not include the parameters such as charset
+		return new MediaType(mediaType.getType(), mediaType.getSubtype()).toString();
 	}
 
 	@Override
@@ -94,7 +93,7 @@ public class JaxRsHttpResponse implements IHttpResponse {
 	
 	@Override
 	public void bufferEntitity() {
-		if(myResponse.hasEntity()) {
+		if(!myBufferedEntity && myResponse.hasEntity()) {
 			myBufferedEntity = true;
 			myResponse.bufferEntity();
 		} else {

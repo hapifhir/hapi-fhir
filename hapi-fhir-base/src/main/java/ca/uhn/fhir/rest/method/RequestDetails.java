@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 /*
  * #%L
@@ -273,5 +274,10 @@ public abstract class RequestDetails {
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
 	}
+
+	/**
+	 * Return the charset as defined by the header contenttype. Return null if it is not set.
+	 */
+	public abstract Charset getCharset();
 
 }

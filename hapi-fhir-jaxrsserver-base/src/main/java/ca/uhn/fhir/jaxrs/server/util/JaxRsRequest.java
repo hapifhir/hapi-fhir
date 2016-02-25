@@ -23,10 +23,12 @@ package ca.uhn.fhir.jaxrs.server.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -149,8 +151,8 @@ public class JaxRsRequest extends RequestDetails {
 		}
 	}
 
-	private String theResourceString;
-	private HttpHeaders headers;
+	private String myResourceString;
+	private HttpHeaders myHeaders;
 	private AbstractJaxRsProvider myServer;
 
 	/**
@@ -162,8 +164,8 @@ public class JaxRsRequest extends RequestDetails {
 	 */
 	public JaxRsRequest(AbstractJaxRsProvider server, String resourceString, RequestTypeEnum requestType,
 			RestOperationTypeEnum restOperation) {
-		this.headers = server.getHeaders();
-		this.theResourceString = resourceString;
+		this.myHeaders = server.getHeaders();
+		this.myResourceString = resourceString;
 		this.setRestOperationType(restOperation);
 		setServer(server);
 		setFhirServerBase(server.getBaseForServer());
@@ -192,7 +194,7 @@ public class JaxRsRequest extends RequestDetails {
 
 	@Override
 	public List<String> getHeaders(String name) {
-		List<String> requestHeader = headers.getRequestHeader(name);
+		List<String> requestHeader = myHeaders.getRequestHeader(name);
 		return requestHeader == null ? Collections.<String> emptyList() : requestHeader;
 	}
 
@@ -203,7 +205,7 @@ public class JaxRsRequest extends RequestDetails {
 
 	@Override
 	protected byte[] getByteStreamRequestContents() {
-		return StringUtils.defaultIfEmpty(theResourceString, "")
+		return StringUtils.defaultIfEmpty(myResourceString, "")
 				.getBytes(ResourceParameter.determineRequestCharset(this));
 	}
 
@@ -225,5 +227,19 @@ public class JaxRsRequest extends RequestDetails {
 	public InputStream getInputStream() {
 		// not yet implemented
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Charset getCharset() {
+		String charset = null;
+		
+		if(myHeaders.getMediaType() != null && myHeaders.getMediaType().getParameters() != null) {
+			charset = myHeaders.getMediaType().getParameters().get(MediaType.CHARSET_PARAMETER);
+		}
+		if(charset != null) {
+			return Charset.forName(charset);
+		} else {
+			return null;
+		}
 	}
 }

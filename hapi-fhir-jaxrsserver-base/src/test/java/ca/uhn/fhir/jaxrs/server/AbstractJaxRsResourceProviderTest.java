@@ -105,9 +105,9 @@ public class AbstractJaxRsResourceProviderTest {
 		
 		jettyServer.start();
 
+		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
         serverBase = "http://localhost:" + ourPort + "/";
         client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);

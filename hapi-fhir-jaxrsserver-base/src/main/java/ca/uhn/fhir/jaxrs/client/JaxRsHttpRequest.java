@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Response;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -86,12 +87,20 @@ public class JaxRsHttpRequest implements IHttpRequest {
 
 	@Override
 	public IHttpResponse execute() {
-		return new JaxRsHttpResponse(getRequest().build(getRequestType().name(), getEntity()).invoke());
+		Invocation invocation = getRequest().build(getRequestType().name(), getEntity());
+		Response response = invocation.invoke();
+		return new JaxRsHttpResponse(response);
 	}
 
 	@Override
 	public Map<String, List<String>> getAllHeaders() {
 		return this.myHeaders;
+	}
+
+	@Override
+	public String getRequestBodyFromStream() {
+		// not supported
+		return null;
 	}
 
 }

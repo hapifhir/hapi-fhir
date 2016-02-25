@@ -23,9 +23,8 @@ package ca.uhn.fhir.jaxrs.client;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
-
-import org.apache.http.Header;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

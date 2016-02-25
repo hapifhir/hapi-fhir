@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;

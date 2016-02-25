@@ -23,10 +23,9 @@ package ca.uhn.fhir.rest.client;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.Header;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 

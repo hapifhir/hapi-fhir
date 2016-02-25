@@ -26,7 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
@@ -82,6 +85,17 @@ public class ApacheHttpRequest implements IHttpRequest {
 	@Override
 	public String toString() {
 		return myRequest.toString();
+	}
+
+	@Override
+	public String getRequestBodyFromStream() throws IOException {
+		if (myRequest instanceof HttpEntityEnclosingRequest) {
+			HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
+			if (entity.isRepeatable()) {
+				return IOUtils.toString(entity.getContent());
+			}
+		}
+		return null;
 	}
 
 }

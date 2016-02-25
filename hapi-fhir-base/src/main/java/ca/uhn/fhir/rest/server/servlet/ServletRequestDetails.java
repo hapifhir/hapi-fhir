@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.servlet;
 
-import java.io.ByteArrayInputStream;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,10 +19,13 @@ import java.io.ByteArrayInputStream;
  * limitations under the License.
  * #L%
  */
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -174,6 +176,18 @@ public class ServletRequestDetails extends RequestDetails {
 		}
 		retVal.setParameters(paramNames);
 		return retVal;
+	}
+
+	@Override
+	public Charset getCharset() {
+		String ct = getHeader(Constants.HEADER_CONTENT_TYPE);
+
+		Charset charset = null;
+		if (isNotBlank(ct)) {
+			ContentType parsedCt = ContentType.parse(ct);
+			charset = parsedCt.getCharset();
+		}
+		return charset;
 	}
 
 }
