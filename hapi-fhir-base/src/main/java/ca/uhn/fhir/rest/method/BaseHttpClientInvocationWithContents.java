@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -213,9 +215,13 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			 * whatever reason.
 			 */
 			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent());
-			entity.setContentType(binary.getContentType());
+
 			HttpRequestBase retVal = createRequest(url, entity);
 			addMatchHeaders(retVal, url);
+			super.addHeadersToRequest(retVal, null);
+			if (isNotBlank(binary.getContentType())) {
+				retVal.addHeader(Constants.HEADER_CONTENT_TYPE, binary.getContentType());
+			}
 			return retVal;
 		}
 

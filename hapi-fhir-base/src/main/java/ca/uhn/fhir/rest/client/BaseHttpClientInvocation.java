@@ -93,12 +93,13 @@ public abstract class BaseHttpClientInvocation {
 			}
 		}
 		
-		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)");
+		String versionString = VersionUtil.getVersion();
+		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + versionString + " (FHIR Client)");
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 		
 		if (theEncoding == null) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_ALL);
+			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
 		} else if (theEncoding == EncodingEnum.JSON) {
 			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 		} else if (theEncoding == EncodingEnum.XML) {

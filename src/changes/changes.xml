@@ -77,6 +77,13 @@
 				know if you need the ability to add this header automatically. Thanks
 				to Lars Kristian Roland for pointing this out.
 			</action>
+			<action type="fix">
+				In the client, the create/update operations on a Binary resource 
+				(which use the raw binary's content type as opposed to the FHIR
+				content type) were not including any request headers (Content-Type, 
+				User-Agent, etc.) Thanks to Peter Van Houte of Agfa Healthcare for
+				reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
