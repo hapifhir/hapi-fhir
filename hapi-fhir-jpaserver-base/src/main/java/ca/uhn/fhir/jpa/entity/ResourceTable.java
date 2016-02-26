@@ -144,6 +144,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	//@formatter:on
 	private String myContentText;
 
+	@Column(name = "HAS_CONTAINED", nullable = true)
+	private boolean myHasContainedResource;
+
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
@@ -157,6 +160,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
+
+	@Column(name = "IS_CONTAINED", nullable = true)
+	private boolean myIsContainedResource;
 
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	private String myLanguage;
@@ -173,13 +179,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "SP_COORDS_PRESENT")
 	private boolean myParamsCoordsPopulated;
-	
+
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
 	@Column(name = "SP_DATE_PRESENT")
 	private boolean myParamsDatePopulated;
-
+	
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
@@ -340,8 +346,16 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return false;
 	}
 
+	public boolean isHasContainedResource() {
+		return myHasContainedResource;
+	}
+
 	public boolean isHasLinks() {
 		return myHasLinks;
+	}
+
+	public boolean isIsContainedResource() {
+		return myIsContainedResource;
 	}
 
 	public boolean isParamsCoordsPopulated() {
@@ -376,6 +390,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myContentText = theContentText;
 	}
 
+	public void setHasContainedResource(boolean theHasContainedResource) {
+		myHasContainedResource = theHasContainedResource;
+	}
+
 	public void setHasLinks(boolean theHasLinks) {
 		myHasLinks = theHasLinks;
 	}
@@ -386,6 +404,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
+	}
+
+	public void setIsContainedResource(boolean theIsContainedResource) {
+		myIsContainedResource = theIsContainedResource;
 	}
 
 	public void setLanguage(String theLanguage) {

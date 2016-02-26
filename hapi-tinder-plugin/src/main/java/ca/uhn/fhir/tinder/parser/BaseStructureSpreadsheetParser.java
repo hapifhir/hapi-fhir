@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -404,7 +405,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	/**
 	 * Subclasses may override
 	 */
-	protected void postProcess(BaseElement theTarget) {
+	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		// nothing
 	}
 

@@ -26,12 +26,21 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	}
 
 	@Override
-	protected void postProcess(BaseElement theTarget) {
+	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		super.postProcess(theTarget);
 		
 		if ("Bundle".equals(theTarget.getName())) {
 			addEverythingToSummary(theTarget);
 		}
+		
+		if (getVersion().equals("dstu2") && theTarget instanceof Resource) {
+			try {
+				new CompartmentParser(getVersion(), (Resource) theTarget).parse();
+			} catch (Exception e) {
+				throw new MojoFailureException(e.toString(), e);
+			}
+		}
+		
 	}
 
 	private void addEverythingToSummary(BaseElement theTarget) {

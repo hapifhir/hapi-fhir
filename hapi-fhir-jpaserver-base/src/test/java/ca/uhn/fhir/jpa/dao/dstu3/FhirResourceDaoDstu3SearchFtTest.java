@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
@@ -56,15 +57,15 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map;
 		
 		map = new SearchParameterMap();
-		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 		map = new SearchParameterMap();
-		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
-		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
 		map.add(Constants.PARAM_CONTENT, new StringParam("obs1"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
 
@@ -358,7 +359,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
-		IIdType devId2 = myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
+		myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
 		obs1.getSubject().setReferenceElement(ptId1);
