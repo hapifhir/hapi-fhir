@@ -539,9 +539,11 @@ class ModelScanner {
 				 */
 				List<Class<? extends IBaseResource>> refTypesList = new ArrayList<Class<? extends IBaseResource>>();
 				for (Class<? extends IElement> nextType : childAnnotation.type()) {
-					if (IBaseResource.class.isAssignableFrom(nextType) == false) {
-						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class
-								+ " but contains a non-resource type: " + nextType.getCanonicalName());
+					if (IBaseReference.class.isAssignableFrom(nextType)) {
+						refTypesList.add(myVersion.isRi() ? IAnyResource.class : IResource.class);
+						continue;
+					} else if (IBaseResource.class.isAssignableFrom(nextType) == false) {
+						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 					}
 					refTypesList.add((Class<? extends IBaseResource>) nextType);
 					addScanAlso(nextType);

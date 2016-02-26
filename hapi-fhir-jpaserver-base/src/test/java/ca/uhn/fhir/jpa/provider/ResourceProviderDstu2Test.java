@@ -99,6 +99,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
@@ -123,19 +124,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testEverythingInstanceWithContentFilter() {
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType ptId1 = myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
 		pt2.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		IIdType ptId2 = myPatientDao.create(pt2, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Device dev1 = new Device();
 		dev1.setManufacturer("Some Manufacturer");
-		IIdType devId1 = myDeviceDao.create(dev1).getId().toUnqualifiedVersionless();
+		IIdType devId1 = myDeviceDao.create(dev1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
-		myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
+		myDeviceDao.create(dev2, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
 		obs1.getText().setDiv("<div>OBSTEXT1</div>");
@@ -143,19 +144,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		obs1.getCode().addCoding().setCode("CODE1");
 		obs1.setValue(new StringDt("obsvalue1"));
 		obs1.getDevice().setReference(devId1);
-		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+		IIdType obsId1 = myObservationDao.create(obs1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
 		obs2.getSubject().setReference(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
 		obs2.setValue(new StringDt("obsvalue2"));
-		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+		IIdType obsId2 = myObservationDao.create(obs2, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
 		obs3.getSubject().setReference(ptId2);
 		obs3.getCode().addCoding().setCode("CODE3");
 		obs3.setValue(new StringDt("obsvalue3"));
-		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
+		IIdType obsId3 = myObservationDao.create(obs3, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		List<IIdType> actual;
 		StringAndListParam param;
@@ -553,12 +554,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("FAM1");
-		IIdType id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(p, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("FAM2");
-		IIdType id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id2 = myPatientDao.create(p, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		try {
 			//@formatter:off
@@ -973,16 +974,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
-		IIdType medId = myMedicationDao.create(med).getId().toUnqualifiedVersionless();
+		IIdType medId = myMedicationDao.create(med, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		Patient pat = new Patient();
 		pat.addAddress().addLine(methodName);
-		IIdType patId = myPatientDao.create(pat).getId().toUnqualifiedVersionless();
+		IIdType patId = myPatientDao.create(pat, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 
 		MedicationOrder mo = new MedicationOrder();
 		mo.getPatient().setReference(patId);
 		mo.setMedication(new ResourceReferenceDt(medId));
-		IIdType moId = myMedicationOrderDao.create(mo).getId().toUnqualifiedVersionless();
+		IIdType moId = myMedicationOrderDao.create(mo, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		
 		Parameters output = ourClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
@@ -1491,13 +1492,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+			id1 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 		IIdType id2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+			id2 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		//@formatter:off
@@ -1714,7 +1715,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testSearchWithInvalidSort() throws Exception {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
-		myObservationDao.create(o);
+		myObservationDao.create(o, new ServletRequestDetails());
 		//@formatter:off
 		ourClient
 				.search()
@@ -1957,7 +1958,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Read back directly from the DAO
 		{
-			Organization returned = myOrganizationDao.read(orgId);
+			Organization returned = myOrganizationDao.read(orgId, new ServletRequestDetails());
 			String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));

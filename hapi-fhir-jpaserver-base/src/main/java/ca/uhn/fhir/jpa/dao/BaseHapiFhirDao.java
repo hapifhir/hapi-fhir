@@ -124,6 +124,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -929,9 +930,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * first time.
 	 * 
 	 * @param theEntity
-	 *           The resource
-	 * @param theResource
-	 *           The resource being persisted
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 * @param theTag
+	 *           The tag
+	 * @return Returns <code>true</code> if the tag should be removed
+	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 */
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing
@@ -1259,15 +1262,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime, RequestDetails theRequestDetails) {
+		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime, theRequestDetails);
+	}
+
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime) {
+	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime, RequestDetails theRequestDetails) {
 
 		/*
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
 			if (thePerformIndexing) {
-				validateResourceForStorage((T) theResource, theEntity);
+				validateResourceForStorage((T) theResource, theEntity, theRequestDetails);
 			}
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
@@ -1584,8 +1591,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 *           The resource that is about to be persisted
 	 * @param theEntityToSave
 	 *           TODO
+	 * @param theRequestDetails TODO
 	 */
-	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
+	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
 		Object tag = null;
 		if (theResource instanceof IResource) {
 			IResource res = (IResource) theResource;

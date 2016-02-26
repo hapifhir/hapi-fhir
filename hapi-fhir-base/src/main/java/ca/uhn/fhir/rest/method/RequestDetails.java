@@ -37,24 +37,27 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public abstract class RequestDetails {
 
-	private byte[] myRequestContents;
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
 	private IIdType myId;
 	private String myOperation;
 	private Map<String, String[]> myParameters;
+	private byte[] myRequestContents;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
 	private boolean myRespondGzip;
+	private IRestfulResponse myResponse;
 	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-	private IRestfulResponse myResponse;
+	private Map<Object, Object> myUserData;
+	protected abstract byte[] getByteStreamRequestContents();
 
 	public String getCompartmentName() {
 		return myCompartmentName;
@@ -73,9 +76,27 @@ public abstract class RequestDetails {
 		return myFhirServerBase;
 	}
 
+	public abstract String getHeader(String name);
+
+	public abstract List<String> getHeaders(String name);
+
 	public IIdType getId() {
 		return myId;
 	}
+
+	/**
+	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
+	 * the body, not both.
+	 *
+	 * @return a {@link InputStream} object containing the body of the request
+	 *
+	 * @exception IllegalStateException
+	 *               if the {@link #getReader} method has already been called for this request
+	 *
+	 * @exception IOException
+	 *               if an input or output exception occurred
+	 */
+	public abstract InputStream getInputStream() throws IOException;
 
 	public String getOperation() {
 		return myOperation;
@@ -84,6 +105,26 @@ public abstract class RequestDetails {
 	public Map<String, String[]> getParameters() {
 		return myParameters;
 	}
+
+	/**
+	 * Retrieves the body of the request as character data using a <code>BufferedReader</code>. The reader translates the
+	 * character data according to the character encoding used on the body. Either this method or {@link #getInputStream}
+	 * may be called to read the body, not both.
+	 * 
+	 * @return a <code>Reader</code> containing the body of the request
+	 *
+	 * @exception UnsupportedEncodingException
+	 *               if the character set encoding used is not supported and the text cannot be decoded
+	 *
+	 * @exception IllegalStateException
+	 *               if {@link #getInputStream} method has been called on this request
+	 *
+	 * @exception IOException
+	 *               if an input or output exception occurred
+	 *
+	 * @see javax.servlet.http.HttpServletRequest#getInputStream
+	 */
+	public abstract Reader getReader() throws IOException;
 
 	/**
 	 * The part of the request URL that comes after the server base.
@@ -103,6 +144,10 @@ public abstract class RequestDetails {
 		return myResourceName;
 	}
 
+	public IRestfulResponse getResponse() {
+		return myResponse;
+	}
+
 	public RestOperationTypeEnum getRestOperationType() {
 		return myRestOperationType;
 	}
@@ -113,12 +158,43 @@ public abstract class RequestDetails {
 
 	public abstract IRestfulServerDefaults getServer();
 
+	/**
+	 * Returns the server base URL (with no trailing '/') for a given request
+	 */
+	public abstract String getServerBaseForRequest();
+
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
 		return myUnqualifiedToQualifiedNames;
 	}
 
+	/**
+	 * Returns a map which can be used to hold any user specific data to pass it from one
+	 * part of the request handling chain to another. Data in this map can use any key, although
+	 * user code should try to use keys which are specific enough to avoid conflicts.
+	 * <p>
+	 * A new map is created for each individual request that is handled by the server,
+	 * so this map can be used (for example) to pass authorization details from an interceptor
+	 * to the resource providers, or from an interceptor's {@link IServerInterceptor#incomingRequestPreHandled(RestOperationTypeEnum, ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails)} 
+	 * method to the {@link IServerInterceptor#outgoingResponse(RequestDetails, org.hl7.fhir.instance.model.api.IBaseResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
+	 * method.  
+	 * </p>
+	 */
+	public Map<Object, Object> getUserData() {
+		if (myUserData == null) {
+			myUserData = new HashMap<Object, Object>();
+		}
+		return myUserData;
+	}
+
 	public boolean isRespondGzip() {
 		return myRespondGzip;
+	}
+
+	public final byte[] loadRequestContents() {
+		if (myRequestContents == null) {
+			myRequestContents = getByteStreamRequestContents();
+		}
+		return myRequestContents;
 	}
 
 	public void setCompartmentName(String theCompartmentName) {
@@ -186,6 +262,10 @@ public abstract class RequestDetails {
 		myRespondGzip = theRespondGzip;
 	}
 
+	public void setResponse(IRestfulResponse theResponse) {
+		this.myResponse = theResponse;
+	}
+
 	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
 		myRestOperationType = theRestOperationType;
 	}
@@ -193,65 +273,5 @@ public abstract class RequestDetails {
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
 	}
-
-	public IRestfulResponse getResponse() {
-		return myResponse;
-	}
-
-	public void setResponse(IRestfulResponse theResponse) {
-		this.myResponse = theResponse;
-	}
-
-	public abstract String getHeader(String name);
-
-	public final byte[] loadRequestContents() {
-		if (myRequestContents == null) {
-			myRequestContents = getByteStreamRequestContents();
-		}
-		return myRequestContents;
-	}
-
-	protected abstract byte[] getByteStreamRequestContents();
-
-	public abstract List<String> getHeaders(String name);
-
-	/**
-	 * Retrieves the body of the request as character data using a <code>BufferedReader</code>. The reader translates the
-	 * character data according to the character encoding used on the body. Either this method or {@link #getInputStream}
-	 * may be called to read the body, not both.
-	 * 
-	 * @return a <code>Reader</code> containing the body of the request
-	 *
-	 * @exception UnsupportedEncodingException
-	 *               if the character set encoding used is not supported and the text cannot be decoded
-	 *
-	 * @exception IllegalStateException
-	 *               if {@link #getInputStream} method has been called on this request
-	 *
-	 * @exception IOException
-	 *               if an input or output exception occurred
-	 *
-	 * @see javax.servlet.http.HttpServletRequest#getInputStream
-	 */
-	public abstract Reader getReader() throws IOException;
-
-	/**
-	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
-	 * the body, not both.
-	 *
-	 * @return a {@link InputStream} object containing the body of the request
-	 *
-	 * @exception IllegalStateException
-	 *               if the {@link #getReader} method has already been called for this request
-	 *
-	 * @exception IOException
-	 *               if an input or output exception occurred
-	 */
-	public abstract InputStream getInputStream() throws IOException;
-
-	/**
-	 * Returns the server base URL (with no trailing '/') for a given request
-	 */
-	public abstract String getServerBaseForRequest();
 
 }

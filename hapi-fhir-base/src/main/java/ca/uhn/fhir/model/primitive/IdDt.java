@@ -49,7 +49,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * limit of 36 characters.
  * </p>
  * <p>
- * regex: [a-z0-9\-\.]{1,36}
+ * regex: [a-z-Z0-9\-\.]{1,36}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf=StringDt.class)

@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
@@ -37,7 +38,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 		upload.setId("");
-		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
+		myExtensionalVsId = myValueSetDao.create(upload, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
 	}
 
 	@Test

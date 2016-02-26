@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -50,11 +51,13 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
@@ -62,6 +65,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
 	private boolean myCanOperateAtInstanceLevel;
 	private boolean myCanOperateAtServerLevel;
+	private boolean myCanOperateAtTypeLevel;
 	private String myDescription;
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
@@ -69,7 +73,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
-	private boolean myCanOperateAtTypeLevel;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
 			OperationParam[] theReturnParams) {
@@ -86,7 +89,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myCanOperateAtTypeLevel = true;
 		}
-		
+
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
 			myDescription = description.formalDefinition();
@@ -180,13 +183,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return myOtherOperatiopnType;
-	}
-	
-	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return BundleTypeEnum.COLLECTION;
+	}
+
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return myOtherOperatiopnType;
 	}
 
 	public List<ReturnType> getReturnParams() {
@@ -211,7 +214,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		if (!myName.equals(theRequest.getOperation())) {
 			return false;
 		}
-		
+
+		RequestTypeEnum requestType = theRequest.getRequestType();
+		if (requestType != RequestTypeEnum.GET && requestType != RequestTypeEnum.POST) {
+			// Operations can only be invoked with GET and POST
+			return false;
+		}
+
 		boolean requestHasId = theRequest.getId() != null;
 		if (requestHasId) {
 			if (isCanOperateAtInstanceLevel() == false) {
@@ -246,9 +255,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
-			// always ok
+			// all good
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			if (!myIdempotent) {
 				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
@@ -273,6 +282,15 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
+	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
+			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
+			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
+		}
+		return super.invokeServer(theServer, theRequest);
+	}
+
 	public boolean isCanOperateAtInstanceLevel() {
 		return this.myCanOperateAtInstanceLevel;
 	}
@@ -283,6 +301,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public boolean isIdempotent() {
 		return myIdempotent;
+	}
+
+	@Override
+	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
+		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+		theDetails.setResource((IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY));
 	}
 
 	public void setDescription(String theDescription) {

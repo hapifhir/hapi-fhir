@@ -223,7 +223,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ResourceBinding resourceBinding = null;
 		BaseMethodBinding<?> resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
-		if (Constants.URL_TOKEN_METADATA.equals(resourceName) || requestType == RequestTypeEnum.OPTIONS) {
+		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails)) {
 			resourceMethod = myServerConformanceMethod;
 		} else if (resourceName == null) {
 			resourceBinding = myServerBinding;
@@ -620,10 +620,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			/*
-			 * Actualy invoke the server method. This call is to a HAPI method binding, which is an object that wraps a specific implementing (user-supplied) method, but handles its input and provides
-			 * its output back to the client.
+			 * Actualy invoke the server method. This call is to a HAPI method binding, which 
+			 * is an object that wraps a specific implementing (user-supplied) method, but 
+			 * handles its input and provides its output back to the client.
 			 * 
-			 * This is basically the end of processing for a successful request, since the method binding replies to the client and closes the response.
+			 * This is basically the end of processing for a successful request, since the 
+			 * method binding replies to the client and closes the response.
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
@@ -1389,7 +1391,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	private static boolean partIsOperation(String nextString) {
-		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$');
+		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$' || nextString.equals(Constants.URL_TOKEN_METADATA));
 	}
 
 }

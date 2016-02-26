@@ -25,6 +25,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -34,24 +35,39 @@ import javax.persistence.UniqueConstraint;
 
 //@formatter:off
 @Table(name="TRM_CODESYSTEM", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_CS_RESOURCEPID", columnNames= {"RES_ID"})
+	@UniqueConstraint(name="IDX_CS_CODESYSTEM", columnNames= {"CODE_SYSTEM_URI"})
 })
 @Entity()
 //@formatter:on
 public class TermCodeSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Id()
-	@SequenceGenerator(name="SEQ_CODESYSTEM_PID", sequenceName="SEQ_CODESYSTEM_PID")
-	@GeneratedValue()
-	@Column(name="PID")
-	private Long myPid;
-	
-	@OneToOne()
-	@JoinColumn(name="RES_ID", referencedColumnName="RES_ID", nullable=false, updatable=false)
-	private ResourceTable myResource;
-	
-	@Column(name="RES_VERSION_ID", nullable=false, updatable=false)
-	private Long myResourceVersionId;
+	@Column(name="CODE_SYSTEM_URI", nullable=false)
+	private String myCodeSystemUri;
 
+	@Id()
+	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
+	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEM_PID")
+	@Column(name = "PID")
+	private Long myPid;
+
+	@OneToOne()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false)
+	private ResourceTable myResource;
+
+	public String getCodeSystemUri() {
+		return myCodeSystemUri;
+	}
+
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	public void setCodeSystemUri(String theCodeSystemUri) {
+		myCodeSystemUri = theCodeSystemUri;
+	}
+
+	public void setResource(ResourceTable theResource) {
+		myResource = theResource;
+	}
 }

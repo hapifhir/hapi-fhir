@@ -50,7 +50,6 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -59,6 +58,8 @@ import ca.uhn.fhir.util.ParametersUtil;
 
 public class OperationParameter implements IParameter {
 
+	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
+	
 	private IConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
@@ -210,14 +211,7 @@ public class OperationParameter implements IParameter {
 
 			FhirContext ctx = theRequest.getServer().getFhirContext();
 
-			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				return null;
-			}
-
-			// Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
-			Class<IBaseResource> wantedResourceType = null;
-			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theMethodBinding, wantedResourceType);
-
+			IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
 			if (def.getName().equals("Parameters")) {
 

@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -57,20 +58,20 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theId, theDate);
+			return myDao.history(theId, theDate, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate);
+			return myDao.history(theDate, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -82,30 +83,30 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@GetTags
-	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theResourceId) {
+	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theResourceId, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.getTags(theResourceId);
+			return myDao.getTags(theResourceId, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@GetTags
-	public TagList getTagsForResourceType(HttpServletRequest theRequest) {
+	public TagList getTagsForResourceType(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.getAllResourceTags();
+			return myDao.getAllResourceTags(theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IIdType theId) {
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.read(theId);
+			return myDao.read(theId, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

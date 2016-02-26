@@ -24,7 +24,9 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -32,26 +34,50 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="TRM_CONCEPT")
+@Table(name="TRM_CONCEPT_PC_LINK")
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+	@ManyToOne()
+	@JoinColumn(name="CHILD_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CHILD"))
+	private TermConcept myChild;
+
+	@ManyToOne()
+	@JoinColumn(name="CODESYSTEM_PID", nullable=false, foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CS"))
+	private TermCodeSystemVersion myCodeSystem;
+
+	@ManyToOne()
+	@JoinColumn(name="PARENT_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_PARENT"))
+	private TermConcept myParent;
+
 	@Id()
 	@SequenceGenerator(name="SEQ_CONCEPT_PC_PID", sequenceName="SEQ_CONCEPT_PC_PID")
-	@GeneratedValue()
+	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PC_PID")
 	@Column(name="PID")
 	private Long myPid;
 
-	@ManyToOne
-	@JoinColumn(name="PARENT_PID", nullable=false)
-	private TermConcept myParent;
-	
-	@ManyToOne
-	@JoinColumn(name="CHILD_PID", nullable=false)
-	private TermConcept myChild;
+	public TermConcept getChild() {
+		return myChild;
+	}
 
-	@ManyToOne
-	@JoinColumn(name="CODESYSTEM_PID", nullable=false)
-	private TermCodeSystem myCodeSystem;
+	public TermCodeSystemVersion getCodeSystem() {
+		return myCodeSystem;
+	}
+	
+	public TermConcept getParent() {
+		return myParent;
+	}
+
+	public void setChild(TermConcept theChild) {
+		myChild = theChild;
+	}
+	
+	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
+		myCodeSystem = theCodeSystem;
+	}
+
+	public void setParent(TermConcept theParent) {
+		myParent = theParent;
+	}
 	
 }

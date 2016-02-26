@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -64,8 +65,8 @@ public class FhirResourceDaoQuestionnaireResponseDstu3 extends FhirResourceDaoDs
 	}
 	
 	@Override
-	protected void validateResourceForStorage(QuestionnaireResponse theResource, ResourceTable theEntityToSave) {
-		super.validateResourceForStorage(theResource, theEntityToSave);
+	protected void validateResourceForStorage(QuestionnaireResponse theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
+		super.validateResourceForStorage(theResource, theEntityToSave, theRequestDetails);
 		if (!myValidateResponses) {
 			return;
 		}
@@ -89,6 +90,13 @@ public class FhirResourceDaoQuestionnaireResponseDstu3 extends FhirResourceDaoDs
 
 	public class JpaResourceLoader implements IResourceLoader {
 
+		private RequestDetails myRequestDetails;
+
+		public JpaResourceLoader(RequestDetails theRequestDetails) {
+			super();
+			myRequestDetails = theRequestDetails;
+		}
+
 		@Override
 		public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
 
@@ -98,11 +106,11 @@ public class FhirResourceDaoQuestionnaireResponseDstu3 extends FhirResourceDaoDs
 			 */
 			if ("ValueSet".equals(theType.getSimpleName())) {
 				IFhirResourceDao<ValueSet> dao = getDao(ValueSet.class);
-				ValueSet in = dao.read(theId);
+				ValueSet in = dao.read(theId, myRequestDetails);
 				return (T) in;
 			} else if ("Questionnaire".equals(theType.getSimpleName())) {
 				IFhirResourceDao<Questionnaire> dao = getDao(Questionnaire.class);
-				Questionnaire vs = dao.read(theId);
+				Questionnaire vs = dao.read(theId, myRequestDetails);
 				return (T) vs;
 			} else {
 				// Should not happen, validator will only ask for these two

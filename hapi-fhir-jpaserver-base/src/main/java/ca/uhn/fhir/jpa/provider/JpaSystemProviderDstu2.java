@@ -187,9 +187,9 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle, MetaDt
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
-	public Parameters meta() {
+	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
+		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theRequestDetails));
 		return parameters;
 	}
 	

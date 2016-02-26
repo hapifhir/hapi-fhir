@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -101,7 +102,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu3 extends Interc
 		if (requestId != null && requestId.hasIdPart()) {
 			Subscription existing;
 			try {
-				existing = myDao.read(requestId);
+				existing = myDao.read(requestId, new ServletRequestDetails());
 				SubscriptionStatus existingStatus = existing.getStatusElement().getValue();
 				if (existingStatus != newStatus) {
 					verifyActiveStatus(subscription, newStatus, existingStatus);

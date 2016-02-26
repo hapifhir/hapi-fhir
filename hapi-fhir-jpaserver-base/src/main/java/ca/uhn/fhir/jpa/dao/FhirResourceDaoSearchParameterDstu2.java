@@ -27,6 +27,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
+import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<SearchParameter>implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
@@ -46,9 +48,10 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 			return;
 		}
 
-		int count = mySystemDao.performReindexingPass(100);
+		RequestDetails requestDetails = new ServletRequestDetails();
+		int count = mySystemDao.performReindexingPass(100, requestDetails);
 		for (int i = 0; i < 50 && count > 0; i++) {
-			count = mySystemDao.performReindexingPass(100);
+			count = mySystemDao.performReindexingPass(100, requestDetails);
 			try {
 				Thread.sleep(DateUtils.MILLIS_PER_SECOND);
 			} catch (InterruptedException e) {

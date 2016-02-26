@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -83,8 +84,16 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			return true;
 		}
 
-		if (theRequest.getRequestType() == RequestTypeEnum.GET && "metadata".equals(theRequest.getOperation())) {
-			return true;
+		if (theRequest.getResourceName() != null) {
+			return false;
+		}
+		
+		if ("metadata".equals(theRequest.getOperation())) {
+			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+				return true;
+			} else {
+				throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			}
 		}
 
 		return false;

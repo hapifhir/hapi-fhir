@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -48,82 +49,92 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
-	DaoMethodOutcome create(T theResource);
+	DaoMethodOutcome create(T theResource, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome create(T theResource, String theIfNoneExist);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
 	/**
 	 * @param thePerformIndexing
 	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *           won't be indexed and searches won't work.
+	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
+	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome delete(IIdType theResource);
+	DaoMethodOutcome delete(IIdType theResource, RequestDetails theRequestDetails);
 
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
+	 * @param theRequestDetails TODO
 	 */
-	ResourceTable delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate);
+	ResourceTable delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
+	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome deleteByUrl(String theString);
+	DaoMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
+	 * @param theRequestDetails TODO
 	 * @return 
 	 */
-	List<ResourceTable> deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate);
+	List<ResourceTable> deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
-	TagList getAllResourceTags();
+	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
 	Class<T> getResourceType();
 
-	TagList getTags(IIdType theResourceId);
+	TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails);
 
-	IBundleProvider history(Date theSince);
+	IBundleProvider history(Date theSince, RequestDetails theRequestDetails);
 
-	IBundleProvider history(IIdType theId, Date theSince);
+	IBundleProvider history(IIdType theId, Date theSince, RequestDetails theRequestDetails);
 
-	IBundleProvider history(Long theId, Date theSince);
-
-	/**
-	 * Not supported in DSTU1!
-	 */
-	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd);
+	IBundleProvider history(Long theId, Date theSince, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
+	 * @param theRequestDetails TODO
 	 */
-	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel);
+	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
+	 * @param theRequestDetails TODO
 	 */
-	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType);
+	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
+	 * @param theRequestDetails TODO
 	 */
-	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId);
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
+
+	/**
+	 * Not supported in DSTU1!
+	 * @param theRequestDetails TODO
+	 */
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails);
 
 	Set<Long> processMatchUrl(String theMatchUrl);
 
 	/**
 	 * 
 	 * @param theId
+	 * @param theRequestDetails TODO
 	 * @return
 	 * @throws ResourceNotFoundException
 	 *            If the ID is not known to the server
 	 */
-	T read(IIdType theId);
+	T read(IIdType theId, RequestDetails theRequestDetails);
 
 	BaseHasResource readEntity(IIdType theId);
 
@@ -137,10 +148,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
 	 * version or update the resource's update time.
+	 * @param theRequestDetails TODO
 	 */
-	void reindex(T theResource, ResourceTable theEntity);
+	void reindex(T theResource, ResourceTable theEntity, RequestDetails theRequestDetails);
 
-	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm);
+	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails);
 
 	IBundleProvider search(Map<String, IQueryParameterType> theParams);
 
@@ -154,21 +166,23 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids, DateRangeParam theLastUpdated);
 
-	DaoMethodOutcome update(T theResource);
+	DaoMethodOutcome update(T theResource, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome update(T theResource, String theMatchUrl);
+	DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails);
 
 	/**
 	 * @param thePerformIndexing
 	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *           won't be indexed and searches won't work.
+	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing);
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
+	 * @param theRequestDetails TODO
 	 */
-	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
+	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 //	/**
 //	 * Invoke the everything operation

@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -43,6 +44,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	/**
 	 * Patient/123/$everything
+	 * @param theRequestDetails 
 	 */
 	//@formatter:off
 	@Operation(name = "everything", idempotent = true)
@@ -70,13 +72,15 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 			List<StringDt> theNarrative,
 
 			@Sort
-			SortSpec theSortSpec
+			SortSpec theSortSpec, 
+			
+			RequestDetails theRequestDetails
 			) {
 		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative));
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -84,6 +88,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	/**
 	 * /Patient/$everything
+	 * @param theRequestDetails 
 	 */
 	//@formatter:off
 		@Operation(name = "everything", idempotent = true)
@@ -108,13 +113,15 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				List<StringDt> theNarrative,
 
 				@Sort
-				SortSpec theSortSpec
+				SortSpec theSortSpec, 
+				
+				RequestDetails theRequestDetails
 				) {
 			//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative));
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -79,7 +79,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity on objects it creates as a convenience.
  * </p>
  * <p>
- * Regex for ID: [a-z0-9\-\.]{1,36}
+ * Regex for ID: [a-zA-Z0-9\-\.]{1,36}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf=StringType.class)

@@ -103,6 +103,31 @@
 				and the embedded FHIR content is contained in the appropriate fields. The server
 				will pass this "outer" Binary resource to the resource provider code. 
 			</action>
+			<action type="add">
+				The RequestDetails and ActionRequestDetails objects which are passed to 
+				server interceptor methods and may also be used as server provider method
+				arguments now has a new method 
+				<![CDATA[
+				<code>Map&lt;String, String&gt; getUserData()</code>
+				]]>
+				which can be used to pass data and objects between interceptor methods to
+				to providers. This can be useful, for instance, if an authorization
+				interceptor wants to pass the logged in user's details to other parts
+				of the server.
+			</action>
+			<action type="fix" issue="297">
+				<![CDATA[When <code>IServerInterceptor#incomingRequestPreHandled()</code> is called 
+				for a <code>@Validate</code> method, the resource was not populated in the
+				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!  
+				]]>
+			</action>
+			<action type="fix" issue="298">
+				<![CDATA[
+					Request to server at <code>[baseUrl]/metadata</code> with an HTTP method
+					other than GET (e.g. POST, PUT) should result in an HTTP 405. Thanks to 
+					Michael Lawley for reporting! 
+				]]>
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

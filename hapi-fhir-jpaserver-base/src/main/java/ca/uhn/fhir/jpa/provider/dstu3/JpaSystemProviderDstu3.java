@@ -189,9 +189,9 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProvider<Bundle, Meta> 
 		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
-	public Parameters meta() {
+	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
+		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theRequestDetails));
 		return parameters;
 	}
 	

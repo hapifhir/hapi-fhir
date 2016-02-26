@@ -243,6 +243,7 @@ public class FhirContext {
 	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IBaseResource theResource) {
+		Validate.notNull(theResource, "theResource must not be null");
 		return getResourceDefinition(theResource.getClass());
 	}
 

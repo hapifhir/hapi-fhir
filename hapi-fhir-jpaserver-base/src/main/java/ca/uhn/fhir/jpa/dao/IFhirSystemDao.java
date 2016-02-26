@@ -35,14 +35,15 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Use with caution! This deletes everything!!
+	 * @param theRequestDetails TODO
 	 */
-	void deleteAllTagsOnServer();
+	void deleteAllTagsOnServer(RequestDetails theRequestDetails);
 
-	TagList getAllTags();
+	TagList getAllTags(RequestDetails theRequestDetails);
 
 	Map<String, Long> getResourceCounts();
 
-	IBundleProvider history(Date theDate);
+	IBundleProvider history(Date theDate, RequestDetails theRequestDetails);
 
 	/**
 	 * Marks all indexes as needing fresh indexing
@@ -53,10 +54,11 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Not supported for DSTU1
+	 * @param theRequestDetails TODO
 	 */
-	MT metaGetOperation();
+	MT metaGetOperation(RequestDetails theRequestDetails);
 
-	int performReindexingPass(Integer theCount);
+	int performReindexingPass(Integer theCount, RequestDetails theRequestDetails);
 
 	T transaction(RequestDetails theRequestDetails, T theResources);
 

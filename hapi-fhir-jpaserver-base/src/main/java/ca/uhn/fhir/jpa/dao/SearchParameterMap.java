@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -45,6 +46,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private RequestDetails myRequestDetails;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
 
@@ -101,6 +103,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myCount;
 	}
 
+	public EverythingModeEnum getEverythingMode() {
+		return myEverythingMode;
+	}
+
 	public Set<Include> getIncludes() {
 		if (myIncludes == null) {
 			myIncludes = new HashSet<Include>();
@@ -112,6 +118,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myLastUpdated;
 	}
 
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
+	}
+
 	public Set<Include> getRevIncludes() {
 		if (myRevIncludes == null) {
 			myRevIncludes = new HashSet<Include>();
@@ -121,10 +131,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public SortSpec getSort() {
 		return mySort;
-	}
-
-	public EverythingModeEnum getEverythingMode() {
-		return myEverythingMode;
 	}
 
 	public void setCount(Integer theCount) {
@@ -141,6 +147,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	public void setRequestDetails(RequestDetails theRequestDetails) {
+		myRequestDetails = theRequestDetails;
 	}
 
 	public void setRevIncludes(Set<Include> theRevIncludes) {
@@ -164,35 +174,35 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	public enum EverythingModeEnum {
-		//@formatter:off
-		PATIENT_TYPE(true, false, false), 
-		PATIENT_INSTANCE(true, false, true), 
+		ENCOUNTER_INSTANCE(false, true, true), 
 		ENCOUNTER_TYPE(false, true, false), 
-		ENCOUNTER_INSTANCE(false, true, true);
+		PATIENT_INSTANCE(true, false, true), 
+		//@formatter:off
+		PATIENT_TYPE(true, false, false);
 		//@formatter:on
 
-		private final boolean myPatient;
-
-		public boolean isPatient() {
-			return myPatient;
-		}
-
-		public boolean isEncounter() {
-			return myEncounter;
-		}
-
-		public boolean isInstance() {
-			return myInstance;
-		}
-
 		private final boolean myEncounter;
+
 		private final boolean myInstance;
+
+		private final boolean myPatient;
 
 		private EverythingModeEnum(boolean thePatient, boolean theEncounter, boolean theInstance) {
 			assert thePatient ^ theEncounter;
 			myPatient = thePatient;
 			myEncounter = theEncounter;
 			myInstance = theInstance;
+		}
+
+		public boolean isEncounter() {
+			return myEncounter;
+		}
+		public boolean isInstance() {
+			return myInstance;
+		}
+
+		public boolean isPatient() {
+			return myPatient;
 		}
 	}
 

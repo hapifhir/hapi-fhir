@@ -21,36 +21,138 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@Table(name="TRM_CONCEPT")
+@Table(name="TRM_CONCEPT", uniqueConstraints= {
+	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
+})
 public class TermConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	@Id()
-	@SequenceGenerator(name="SEQ_CONCEPT_PID", sequenceName="SEQ_CONCEPT_PID")
-	@GeneratedValue()
-	@Column(name="PID")
-	private Long myPid;
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="myParent")
+	private Collection<TermConceptParentChildLink> myChildren;
 
-	@ManyToOne()
-	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
-	private TermCodeSystem myCodeSystem;
-	
 	@Column(name="CODE", length=100, nullable=false)
 	private String myCode;
 	
+	@ManyToOne()
+	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
+	private TermCodeSystemVersion myCodeSystem;
+	
 	@Column(name="DISPLAY", length=200, nullable=true)
 	private String myDisplay;
+
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="myChild")
+	private Collection<TermConceptParentChildLink> myParents;
+
+	@Id()
+	@SequenceGenerator(name="SEQ_CONCEPT_PID", sequenceName="SEQ_CONCEPT_PID")
+	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PID")
+	@Column(name="PID")
+	private Long myPid;
+
+	public TermConcept() {
+		super();
+	}
+
+	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
+		setCodeSystem(theCs);
+		setCode(theCode);
+	}
+
+	public TermConcept addChild(TermConcept theChild) {
+		Validate.notNull(theChild.getCodeSystem(), "theChild.getCodeSystem() must not return null");
+		TermConceptParentChildLink link = new TermConceptParentChildLink();
+		link.setParent(this);
+		link.setCodeSystem(theChild.getCodeSystem());
+		link.setChild(theChild);
+		getChildren().add(link);
+		return this;
+	}
+
+	@Override
+	public boolean equals(Object theObj) {
+		if (!(theObj instanceof TermConcept)) {
+			return false;
+		}
+		if (theObj == this) {
+			return true;
+		}
+		
+		TermConcept obj = (TermConcept)theObj;
+		if (obj.myPid == null) {
+			return false;
+		}
+		
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myPid, obj.myPid);
+		return b.isEquals();
+	}
+
+	public Collection<TermConceptParentChildLink> getChildren() {
+		if (myChildren == null) {
+			myChildren = new ArrayList<TermConceptParentChildLink>();
+		}
+		return myChildren;
+	}
+
+	public String getCode() {
+		return myCode;
+	}
+
+	public TermCodeSystemVersion getCodeSystem() {
+		return myCodeSystem;
+	}
+
+	public String getDisplay() {
+		return myDisplay;
+	}
+
+	public Collection<TermConceptParentChildLink> getParents() {
+		if (myParents == null) {
+			myParents = new ArrayList<TermConceptParentChildLink>();
+		}
+		return myParents;
+	}
 	
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(myPid);
+		return b.toHashCode();
+	}
+	
+	public void setCode(String theCode) {
+		myCode = theCode;
+	}
+
+	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
+		myCodeSystem = theCodeSystem;
+	}
+
+	public void setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
+	}
+
 }
