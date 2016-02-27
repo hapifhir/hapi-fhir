@@ -18,6 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -66,6 +67,7 @@ public class JaxRsPatientProviderTest {
 		//@formatter:on
 		jettyServer.start();
 
+		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");

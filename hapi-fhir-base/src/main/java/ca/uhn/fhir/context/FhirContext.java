@@ -47,7 +47,7 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -298,9 +298,22 @@ public class FhirContext {
 		return myIdToResourceDefinition.values();
 	}
 
+	/**
+	 * Set the restful client factory
+	 * @param theRestfulClientFactory
+	 */
+	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		this.myRestfulClientFactory = theRestfulClientFactory;
+	}
+
+	/**
+	 * Get the restful client factory. If no factory has been set, this will be initialized with 
+	 * a new ApacheRestfulClientFactory.
+	 * @return the factory used to create the restful clients
+	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new RestfulClientFactory(this);
+			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
 		}
 		return myRestfulClientFactory;
 	}

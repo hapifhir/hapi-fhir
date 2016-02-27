@@ -23,19 +23,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.AbstractHttpEntity;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -47,10 +38,11 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
  * @author James Agnew
@@ -63,7 +55,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final BundleTypeEnum myBundleType;
 	private final String myContents;
 	private boolean myContentsIsBundle;
-	private final FhirContext myContext;
 	private Map<String, List<String>> myIfNoneExistParams;
 	private String myIfNoneExistString;
 	private boolean myOmitResourceId = false;
@@ -74,7 +65,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final String myUrlPath;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
-		myContext = theContext;
+		super(theContext);
 		myResource = null;
 		myTagList = null;
 		myUrlPath = null;
@@ -84,8 +75,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource,
+			Map<String, List<String>> theParams, String... theUrlPath) {
+		super(theContext);
 		myResource = theResource;
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
@@ -98,8 +90,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, String theUrlPath) {
-		super();
-		myContext = theContext;
+		super(theContext);
 		myResource = theResource;
 		myUrlPath = theUrlPath;
 		myTagList = null;
@@ -109,8 +100,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
-		myContext = theContext;
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources,
+			BundleTypeEnum theBundleType) {
+		super(theContext);
 		myResource = null;
 		myTagList = null;
 		myUrlPath = null;
@@ -120,8 +112,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = theBundleType;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams,
+			String... theUrlPath) {
+		super(theContext);
 		myResource = null;
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
@@ -133,8 +126,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
-		myContext = theContext;
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle,
+			String theUrlPath) {
+		super(theContext);
 		myResource = null;
 		myTagList = null;
 		myUrlPath = theUrlPath;
@@ -145,8 +139,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents,
+			Map<String, List<String>> theParams, String... theUrlPath) {
+		super(theContext);
 		myResource = null;
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
@@ -159,13 +154,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlPath) {
-		super();
+		super(theContext);
 		if (theTagList == null) {
 			throw new NullPointerException("Tag list must not be null");
 		}
 
 		myResource = null;
-		myContext = theContext;
 		myTagList = theTagList;
 		myResources = null;
 		myBundle = null;
@@ -175,23 +169,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 	}
 
-	private void addMatchHeaders(HttpRequestBase theHttpRequest, StringBuilder theUrlBase) {
-		if (myIfNoneExistParams != null) {
-			StringBuilder b = newHeaderBuilder(theUrlBase);
-			appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
-			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
-		}
-
-		if (myIfNoneExistString != null) {
-			StringBuilder b = newHeaderBuilder(theUrlBase);
-			b.append(b.indexOf("?") == -1 ? '?' : '&');
-			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
-			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
-		}
-	}
-
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {
+	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {
 		StringBuilder url = new StringBuilder();
 
 		if (myUrlPath == null) {
@@ -207,43 +186,46 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
-			IBaseBinary binary = (IBaseBinary) myResource;
-			if (isBlank(binary.getContentType()) || EncodingEnum.forContentTypeStrict(binary.getContentType()) != null) {
-				ourLog.trace("Binary has Content-Type {}, encoding as a FHIR resource instead of raw", binary.getContentType());
+			return httpClient.createBinaryRequest((IBaseBinary) myResource);
+		} else {
+			EncodingEnum encoding = theEncoding;
+			if (myContents != null) {
+				encoding = MethodUtil.detectEncoding(myContents);
+			}
+
+			if (encoding == null) {
+				encoding = EncodingEnum.XML;
+			}
+
+			if (myParams != null) {
+				return httpClient.createParamRequest(myParams, encoding);
 			} else {
-				/*
-				 * Note: Be careful about changing which constructor we use for ByteArrayEntity,
-				 * as Android's version of HTTPClient doesn't support the newer ones for
-				 * whatever reason.
-				 */
-				ByteArrayEntity entity = new ByteArrayEntity(binary.getContent());
-	
-				HttpRequestBase retVal = createRequest(url, entity);
-				addMatchHeaders(retVal, url);
-				super.addHeadersToRequest(retVal, null);
-				if (isNotBlank(binary.getContentType())) {
-					retVal.addHeader(Constants.HEADER_CONTENT_TYPE, binary.getContentType());
-				}
-				return retVal;
+				String contents = parseContents(thePrettyPrint, encoding);
+				String contentType = getContentType(encoding);
+				return httpClient.createByteRequest(contents, contentType, encoding);
 			}
 		}
+	}
 
-		IParser parser;
-		String contentType;
-		EncodingEnum encoding = null;
-		encoding = theEncoding;
-
-		if (myContents != null) {
-			encoding = MethodUtil.detectEncoding(myContents);
+	private String getContentType(EncodingEnum encoding) {
+		if (myBundle != null || (getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1
+				&& ((myContents != null && myContentsIsBundle) || myResources != null))) {
+			return encoding.getBundleContentType();
+		} else {
+			return encoding.getResourceContentType();
 		}
+	}
+
+	private String parseContents(Boolean thePrettyPrint, EncodingEnum encoding) {
+		IParser parser;
 
 		if (encoding == EncodingEnum.JSON) {
-			parser = myContext.newJsonParser();
+			parser = getFhirContext().newJsonParser();
 		} else {
-			encoding = EncodingEnum.XML;
-			parser = myContext.newXmlParser();
+			parser = getFhirContext().newXmlParser();
 		}
 		
 		if (thePrettyPrint != null) {
@@ -251,84 +233,27 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 		
 		parser.setOmitResourceId(myOmitResourceId);
-
-		AbstractHttpEntity entity;
-		if (myParams != null) {
-			contentType = null;
-			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-			for (Entry<String, List<String>> nextParam : myParams.entrySet()) {
-				List<String> value = nextParam.getValue();
-				for (String s : value) {
-					parameters.add(new BasicNameValuePair(nextParam.getKey(), s));
-				}
-			}
-			try {
-				entity = new UrlEncodedFormEntity(parameters, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new InternalErrorException("Server does not support UTF-8 (should not happen)", e);
-			}
-		} else {
-			String contents;
-			if (myTagList != null) {
-				contents = parser.encodeTagListToString(myTagList);
-				contentType = encoding.getResourceContentType();
-			} else if (myBundle != null) {
-				contents = parser.encodeBundleToString(myBundle);
-				contentType = encoding.getBundleContentType();
-			} else if (myResources != null) {
-				IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
-				bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
-				Bundle bundle = bundleFactory.getDstu1Bundle();
-				if (bundle != null) {
-					contents = parser.encodeBundleToString(bundle);
-					contentType = encoding.getBundleContentType();
-				} else {
-					IBaseResource bundleRes = bundleFactory.getResourceBundle();
-					contents = parser.encodeResourceToString(bundleRes);
-					contentType = encoding.getResourceContentType();
-				}
-			} else if (myContents != null) {
-				contents = myContents;
-				if (myContentsIsBundle && myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-					contentType = encoding.getBundleContentType();
-				} else {
-					contentType = encoding.getResourceContentType();
-				}
+		if (myTagList != null) {
+			return parser.encodeTagListToString(myTagList);
+		} else if (myBundle != null) {
+			return parser.encodeBundleToString(myBundle);
+		} else if (myResources != null) {
+			IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
+			bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
+			Bundle bundle = bundleFactory.getDstu1Bundle();
+			if (bundle != null) {
+				return parser.encodeBundleToString(bundle);
 			} else {
-				contents = parser.encodeResourceToString(myResource);
-				contentType = encoding.getResourceContentType();
+				IBaseResource bundleRes = bundleFactory.getResourceBundle();
+				return parser.encodeResourceToString(bundleRes);
 			}
-			
-			/*
-			 * We aren't using a StringEntity here because the constructors supported by
-			 * Android aren't available in non-Android, and vice versa. Since we add the
-			 * content type header manually, it makes no difference which one
-			 * we use anyhow.
-			 */
-			entity = new ByteArrayEntity(contents.getBytes(Constants.CHARSET_UTF8));
+		} else if (myContents != null) {
+			return myContents;
+		} else {
+			return parser.encodeResourceToString(myResource);
 		}
-
-		HttpRequestBase retVal = createRequest(url, entity);
-		super.addHeadersToRequest(retVal, encoding);
-		addMatchHeaders(retVal, url);
-
-		if (contentType != null) {
-			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
-		}
-
-		return retVal;
 	}
 
-	protected abstract HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity);
-
-	private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
-		StringBuilder b = new StringBuilder();
-		b.append(theUrlBase);
-		if (theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == '/') {
-			b.deleteCharAt(b.length() - 1);
-		}
-		return b;
-	}
 	public void setIfNoneExistParams(Map<String, List<String>> theIfNoneExist) {
 		myIfNoneExistParams = theIfNoneExist;
 	}
@@ -340,5 +265,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public void setOmitResourceId(boolean theOmitResourceId) {
 		myOmitResourceId = theOmitResourceId;
 	}
+
+	/**
+	 * Get the HTTP request type.
+	 */
+	protected abstract RequestTypeEnum getRequestType();
 
 }

@@ -25,10 +25,10 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -52,7 +52,7 @@ public class BasicAuthInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequest) {
 		String authorizationUnescaped = StringUtils.defaultString(myUsername) + ":" + StringUtils.defaultString(myPassword);
         String encoded;
         try {
@@ -64,7 +64,7 @@ public class BasicAuthInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) throws IOException {
+	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		// nothing
 	}
 

@@ -20,12 +20,10 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.AbstractHttpEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContents {
 
@@ -38,10 +36,8 @@ public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContent
 	}
 
 	@Override
-	protected HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity) {
-		HttpPut retVal = new HttpPut(theUrl.toString());
-		retVal.setEntity(theEntity);
-		return retVal;
+	protected RequestTypeEnum getRequestType() {
+		return RequestTypeEnum.PUT;
 	}
 
 }

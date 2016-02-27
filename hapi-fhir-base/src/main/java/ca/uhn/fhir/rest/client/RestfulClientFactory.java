@@ -28,27 +28,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
@@ -56,18 +45,18 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class RestfulClientFactory implements IRestfulClientFactory {
+public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
-	private HttpClient myHttpClient;
 	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory>();
-	private HttpHost myProxy;
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<String>());
+	private String myProxyUsername;
+	private String myProxyPassword;	
 	private int myPoolMaxTotal = DEFAULT_POOL_MAX;
 	private int myPoolMaxPerRoute = DEFAULT_POOL_MAX_PER_ROUTE;
 	
@@ -97,45 +86,21 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		return myConnectTimeout;
 	}
 
-	@Override
-	public synchronized HttpClient getHttpClient() {
-		if (myHttpClient == null) {
-
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			connectionManager.setMaxTotal(myPoolMaxTotal);
-			connectionManager.setDefaultMaxPerRoute(myPoolMaxPerRoute);
-			
-			//@formatter:off
-			RequestConfig defaultRequestConfig = RequestConfig.custom()
-				    .setSocketTimeout(mySocketTimeout)
-				    .setConnectTimeout(myConnectTimeout)
-				    .setConnectionRequestTimeout(myConnectionRequestTimeout)
-				    .setStaleConnectionCheckEnabled(true)
-				    .setProxy(myProxy)
-				    .build();
-			
-			HttpClientBuilder builder = HttpClients.custom()
-				.setConnectionManager(connectionManager)
-				.setDefaultRequestConfig(defaultRequestConfig)
-				.disableCookieManagement();
-			
-			if (myProxy != null && StringUtils.isNotBlank(myProxyUsername) && StringUtils.isNotBlank(myProxyPassword)) {
-				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(new AuthScope(myProxy.getHostName(), myProxy.getPort()), new UsernamePasswordCredentials(myProxyUsername, myProxyPassword));
-				builder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
-				builder.setDefaultCredentialsProvider(credsProvider);
-			}
-			
-			myHttpClient = builder.build();
-			//@formatter:on
-
-		}
-
-		return myHttpClient;
+	/**
+	 * Return the proxy username to authenticate with the HTTP proxy
+	 * @param The proxy username
+	 */	
+	protected String getProxyUsername() {
+		return myProxyUsername;
 	}
 	
-	private String myProxyUsername;
-	private String myProxyPassword;
+	/**
+	 * Return the proxy password to authenticate with the HTTP proxy
+	 * @param The proxy password
+	 */	
+	protected String getProxyPassword() {
+		return myProxyPassword;
+	}
 
 	@Override
 	public void setProxyCredentials(String theUsername, String thePassword) {
@@ -189,7 +154,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
-			HttpClient httpClient = getHttpClient();
+			IHttpClient httpClient = getHttpClient(theServerBase);
 			invocationHandler = new ClientInvocationHandlerFactory(httpClient, myContext, theServerBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
 				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
@@ -205,14 +170,12 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 
 	@Override
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
-		HttpClient httpClient = getHttpClient();
+		IHttpClient httpClient = getHttpClient(theServerBase);
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
 
-	/**
-	 * This method is internal to HAPI - It may change in future versions, use with caution.
-	 */
-	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
+	@Override
+	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, BaseClient theClient) {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
 		switch (myServerValidationMode) {
@@ -238,13 +201,13 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setConnectionRequestTimeout(int theConnectionRequestTimeout) {
 		myConnectionRequestTimeout = theConnectionRequestTimeout;
-		myHttpClient = null;
+		resetHttpClient();
 	}
 
 	@Override
 	public synchronized void setConnectTimeout(int theConnectTimeout) {
 		myConnectTimeout = theConnectTimeout;
-		myHttpClient = null;
+		resetHttpClient();
 	}
 
 	/**
@@ -256,26 +219,13 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		}
 		myContext = theContext;
 	}
-
+	
 	/**
-	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to
-	 * <code>null</code>, which is the default, a new HTTP client with default settings will be created.
-	 * 
-	 * @param theHttpClient
-	 *            An HTTP client instance to use, or <code>null</code>
+	 * Return the fhir context
+	 * @return the fhir context 
 	 */
-	@Override
-	public synchronized void setHttpClient(HttpClient theHttpClient) {
-		myHttpClient = theHttpClient;
-	}
-
-	@Override
-	public void setProxy(String theHost, Integer thePort) {
-		if (theHost != null) {
-			myProxy = new HttpHost(theHost, thePort, "http");
-		} else {
-			myProxy = null;
-		}
+	public FhirContext getFhirContext() {
+		return myContext;
 	}
 
 	@Override
@@ -287,24 +237,39 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setSocketTimeout(int theSocketTimeout) {
 		mySocketTimeout = theSocketTimeout;
-		myHttpClient = null;
+		resetHttpClient();
 	}
 
 	@Override
 	public synchronized void setPoolMaxTotal(int thePoolMaxTotal) {
 		myPoolMaxTotal = thePoolMaxTotal;
-		myHttpClient = null;
+		resetHttpClient();
 	}
 
 	@Override
 	public synchronized void setPoolMaxPerRoute(int thePoolMaxPerRoute) {
 		myPoolMaxPerRoute = thePoolMaxPerRoute;
-		myHttpClient = null;
+		resetHttpClient();
+	}
+	
+	 /**
+	 * Instantiates a new client invocation handler
+	 * @param theClient 
+	 *                 the client which will invoke the call
+	 * @param theUrlBase 
+	 *                 the url base
+	 * @param theMethodToReturnValue
+	 * @param theBindings
+	 * @param theMethodToLambda
+	 * @return a newly created client invocation handler
+	 */
+	ClientInvocationHandler newInvocationHandler(IHttpClient theClient, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ClientInvocationHandlerFactory.ILambda> theMethodToLambda) {
+		return new ClientInvocationHandler(theClient, getFhirContext(), theUrlBase.toString(), theMethodToReturnValue,
+				theBindings, theMethodToLambda, this);
 	}
 
-	@SuppressWarnings("unchecked")
-	void validateServerBase(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
-
+	@Override
+	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, BaseClient theClient) {
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
 		client.setEncoding(theClient.getEncoding());
 		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
@@ -363,5 +328,18 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
 		setServerValidationMode(theServerValidationMode);
 	}
+	
+	/**
+	 * Get the http client for the given server base
+	 * @param theServerBase the server base
+	 * @return the http client
+	 */
+	protected abstract IHttpClient getHttpClient(String theServerBase);
+	
+	/**
+	 * Reset the http client. This method is used when parameters have been set and a
+	 * new http client needs to be created
+	 */
+	protected abstract void resetHttpClient();
 
 }

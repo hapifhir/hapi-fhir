@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.client.api;
 
 /*
  * #%L
@@ -20,26 +20,35 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
+/**
+ * Represents an HTTP header field.
+ */
+public class Header {
+	
+	public final String myName;
+	public final String myValue;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-
-public class DeleteTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
-
-	public DeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, DeleteTags theDeleteTags) {
-		super(theMethod, theContext, theProvider, theDeleteTags.type());
+    public Header(String myName, String myValue) {
+		this.myName = myName;
+		this.myValue = myValue;
 	}
 
-	@Override
-	protected boolean isDelete() {
-		return true;
-	}
+	/**
+     * Get the name of the Header.
+     *
+     * @return the name of the Header,  never {@code null}
+     */
+    public String getName() {
+    	return myName;
+    }
 
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.DELETE_TAGS;
-	}
+    /**
+     * Get the value of the Header.
+     *
+     * @return the value of the Header,  may be {@code null}
+     */
+    public String getValue() {
+    	return myValue;
+    }
 
 }

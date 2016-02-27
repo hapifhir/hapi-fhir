@@ -28,8 +28,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 
-	public AddTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, AddTags theAnnotation) {
-		super(theMethod, theConetxt, theProvider, theAnnotation.type());
+	public AddTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, AddTags theAnnotation) {
+		super(theMethod, theContext, theProvider, theAnnotation.type());
 	}
 
 	@Override

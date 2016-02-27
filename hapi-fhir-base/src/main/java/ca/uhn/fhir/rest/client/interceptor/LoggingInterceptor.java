@@ -20,22 +20,19 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.HttpEntityWrapper;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class LoggingInterceptor implements IClientInterceptor {
@@ -74,59 +71,39 @@ public class LoggingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequest) {
 		if (myLogRequestSummary) {
 			myLog.info("Client request: {}", theRequest);
 		}
 
 		if (myLogRequestHeaders) {
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < theRequest.getAllHeaders().length; i++) {
-				Header next = theRequest.getAllHeaders()[i];
-				b.append(next.getName() + ": " + next.getValue());
-				if (i + 1 < theRequest.getAllHeaders().length) {
-					b.append('\n');
-				}
-			}
+			StringBuilder b = headersToString(theRequest.getAllHeaders());
 			myLog.info("Client request headers:\n{}", b.toString());
 		}
 
 		if (myLogRequestBody) {
-			if (theRequest instanceof HttpEntityEnclosingRequest) {
-				HttpEntity entity = ((HttpEntityEnclosingRequest) theRequest).getEntity();
-				if (entity.isRepeatable()) {
-					try {
-						String content = IOUtils.toString(entity.getContent());
-						myLog.info("Client request body:\n{}", content);
-					} catch (IllegalStateException e) {
-						myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
-					} catch (IOException e) {
-						myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
-					}
+			try {
+				String content = theRequest.getRequestBodyFromStream();
+				if (content != null) {
+					myLog.info("Client request body:\n{}", content);
 				}
+			} catch (IllegalStateException e) {
+				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
+			} catch (IOException e) {
+				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
-
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) throws IOException {
+	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
-			String message = "HTTP " + theResponse.getStatusLine().getStatusCode() + " " + theResponse.getStatusLine().getReasonPhrase();
+			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
 			myLog.info("Client response: {}", message);
 		}
 
 		if (myLogResponseHeaders) {
-			StringBuilder b = new StringBuilder();
-			if (theResponse.getAllHeaders() != null) {
-				for (int i = 0; i < theResponse.getAllHeaders().length; i++) {
-					Header next = theResponse.getAllHeaders()[i];
-					b.append(next.getName() + ": " + next.getValue());
-					if (i + 1 < theResponse.getAllHeaders().length) {
-						b.append('\n');
-					}
-				}
-			}
+			StringBuilder b = headersToString(theResponse.getAllHeaders());
 			// if (theResponse.getEntity() != null && theResponse.getEntity().getContentEncoding() != null) {
 			// Header next = theResponse.getEntity().getContentEncoding();
 			// b.append(next.getName() + ": " + next.getValue());
@@ -143,21 +120,44 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogResponseBody) {
-			HttpEntity respEntity = theResponse.getEntity();
-			if (respEntity != null) {
-			final byte[] bytes;
-			try {
-				bytes = IOUtils.toByteArray(respEntity.getContent());
-			} catch (IllegalStateException e) {
-				throw new InternalErrorException(e);
-			}
-
-			myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
-			theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
-			} else {
-				myLog.info("Client response body: (none)");
+			theResponse.bufferEntitity();
+			InputStream respEntity = null;
+			try  {
+				respEntity = theResponse.readEntity();
+				if (respEntity != null) {
+					final byte[] bytes;
+					try {
+						bytes = IOUtils.toByteArray(respEntity);
+					} catch (IllegalStateException e) {
+						throw new InternalErrorException(e);
+					}
+					myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
+				} else {
+					myLog.info("Client response body: (none)");
+				}
+			} finally {
+				IOUtils.closeQuietly(respEntity);
 			}
 		}
+	}
+
+	private StringBuilder headersToString(Map<String, List<String>> theHeaders) {
+		StringBuilder b = new StringBuilder();
+		if (theHeaders != null && !theHeaders.isEmpty()) {
+			Iterator<String> nameEntries = theHeaders.keySet().iterator();
+			while(nameEntries.hasNext()) {
+				String key = nameEntries.next();
+				Iterator<String> values = theHeaders.get(key).iterator();
+				while(values.hasNext()) {
+					String value = values.next();
+						b.append(key + ": " + value);
+						if (nameEntries.hasNext() || values.hasNext()) {
+							b.append('\n');
+						}
+					}
+			}
+		}
+		return b;
 	}
 
 	/**
@@ -212,27 +212,6 @@ public class LoggingInterceptor implements IClientInterceptor {
 	 */
 	public void setLogResponseSummary(boolean theValue) {
 		myLogResponseSummary = theValue;
-	}
-
-	private static class MyEntityWrapper extends HttpEntityWrapper {
-
-		private byte[] myBytes;
-
-		public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
-			super(theWrappedEntity);
-			myBytes = theBytes;
-		}
-
-		@Override
-		public InputStream getContent() throws IOException {
-			return new ByteArrayInputStream(myBytes);
-		}
-
-		@Override
-		public void writeTo(OutputStream theOutstream) throws IOException {
-			theOutstream.write(myBytes);
-		}
-
 	}
 
 }

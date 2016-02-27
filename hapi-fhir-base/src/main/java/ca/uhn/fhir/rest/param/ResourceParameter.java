@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,7 +34,6 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -130,13 +128,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	public static Charset determineRequestCharset(RequestDetails theRequest) {
-		String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-
-		Charset charset = null;
-		if (isNotBlank(ct)) {
-			ContentType parsedCt = ContentType.parse(ct);
-			charset = parsedCt.getCharset();
-		}
+		Charset charset =  theRequest.getCharset();
 		if (charset == null) {
 			charset = Charset.forName("UTF-8");
 		}

@@ -38,6 +38,7 @@ import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPageProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
+import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -104,6 +105,7 @@ public class AbstractJaxRsResourceProviderTest {
 		
 		jettyServer.start();
 
+		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
         serverBase = "http://localhost:" + ourPort + "/";

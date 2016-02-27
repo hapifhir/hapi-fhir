@@ -38,8 +38,6 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -72,6 +70,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -157,13 +157,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private static final String I18N_NO_VERSION_ID_FOR_VREAD = "ca.uhn.fhir.rest.client.GenericClient.noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
 	private FhirContext myContext;
-	private HttpRequestBase myLastRequest;
+	private IHttpRequest myLastRequest;
 	private boolean myLogRequestAndResponse;
 
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
-	public GenericClient(FhirContext theContext, HttpClient theHttpClient, String theServerBase, RestfulClientFactory theFactory) {
+	public GenericClient(FhirContext theContext, IHttpClient theHttpClient, String theServerBase, RestfulClientFactory theFactory) {
 		super(theHttpClient, theServerBase, theFactory);
 		myContext = theContext;
 	}
@@ -174,7 +174,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			throw new IllegalArgumentException("Must call conformance(" + IBaseConformance.class.getSimpleName() + ") instead of conformance() for HL7.org structures");
 		}
 
-		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
+		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
@@ -216,7 +216,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public MethodOutcome delete(final Class<? extends IBaseResource> theType, IdDt theId) {
-		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(theId.withResourceType(toResourceName(theType)));
+		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), theId.withResourceType(toResourceName(theType)));
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
@@ -243,15 +243,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		HttpGetClientInvocation invocation;
 		if (id.hasBaseUrl()) {
 			if (theVRead) {
-				invocation = ReadMethodBinding.createAbsoluteVReadInvocation(id);
+				invocation = ReadMethodBinding.createAbsoluteVReadInvocation(getFhirContext(), id);
 			} else {
-				invocation = ReadMethodBinding.createAbsoluteReadInvocation(id);
+				invocation = ReadMethodBinding.createAbsoluteReadInvocation(getFhirContext(), id);
 			}
 		} else {
 			if (theVRead) {
-				invocation = ReadMethodBinding.createVReadInvocation(id, resName);
+				invocation = ReadMethodBinding.createVReadInvocation(getFhirContext(), id, resName);
 			} else {
-				invocation = ReadMethodBinding.createReadInvocation(id, resName);
+				invocation = ReadMethodBinding.createReadInvocation(getFhirContext(), id, resName);
 			}
 		}
 		if (isKeepResponses()) {
@@ -305,7 +305,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return myContext;
 	}
 
-	public HttpRequestBase getLastRequest() {
+	public IHttpRequest getLastRequest() {
 		return myLastRequest;
 	}
 
@@ -330,7 +330,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public <T extends IBaseResource> Bundle history(final Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit) {
 		String resourceName = theType != null ? toResourceName(theType) : null;
 		String id = theIdDt != null && theIdDt.isEmpty() == false ? theIdDt.getValue() : null;
-		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(resourceName, id, theSince, theLimit);
+		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, theSince, theLimit);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
@@ -468,7 +468,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public <T extends IBaseResource> Bundle search(final Class<T> theType, UriDt theUrl) {
-		BaseHttpClientInvocation invocation = new HttpGetClientInvocation(theUrl.getValueAsString());
+		BaseHttpClientInvocation invocation = new HttpGetClientInvocation(getFhirContext(), theUrl.getValueAsString());
 		return invokeClient(myContext, new BundleResponseHandler(theType), invocation);
 	}
 
@@ -480,7 +480,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
-	public void setLastRequest(HttpRequestBase theLastRequest) {
+	public void setLastRequest(IHttpRequest theLastRequest) {
 		myLastRequest = theLastRequest;
 	}
 
@@ -839,12 +839,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public BaseOperationOutcome execute() {
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
-				invocation = DeleteMethodBinding.createDeleteInvocation(myId);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
 			} else if (myCriterionList != null) {
 				Map<String, List<String>> params = myCriterionList.toParamList();
-				invocation = DeleteMethodBinding.createDeleteInvocation(myResourceType, params);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, params);
 			} else {
-				invocation = DeleteMethodBinding.createDeleteInvocation(mySearchUrl);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl);
 			}
 			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
@@ -926,7 +926,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {
 			ResourceResponseHandler binding = new ResourceResponseHandler(myType.getImplementingClass(), null);
-			HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
+			HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
 			return super.invoke(null, binding, invocation);
 		}
 
@@ -965,7 +965,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else {
 				binding = new ResourceResponseHandler(myBundleType, null);
 			}
-			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myUrl);
+			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myContext, myUrl);
 
 			Map<String, List<String>> params = null;
 			return invoke(params, binding, invocation);
@@ -1002,7 +1002,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			urlFragments.add(Constants.PARAM_TAGS);
 
-			HttpGetClientInvocation invocation = new HttpGetClientInvocation(params, urlFragments);
+			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, params, urlFragments);
 
 			return invoke(params, binding, invocation);
 
@@ -1083,7 +1083,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(resourceName, id, mySince, myCount);
+			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount);
 
 			IClientResponseHandler handler;
 			if (myReturnType != null) {
@@ -1813,7 +1813,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BaseHttpClientInvocation invocation;
 			if (mySearchUrl != null) {
-				invocation = SearchMethodBinding.createSearchInvocation(mySearchUrl, params);
+				invocation = SearchMethodBinding.createSearchInvocation(myContext, mySearchUrl, params);
 			} else {
 				invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
 			}

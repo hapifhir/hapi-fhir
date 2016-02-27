@@ -24,20 +24,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.apache.http.client.HttpClient;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.ClientInvocationHandlerFactory.ILambda;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 
-class ClientInvocationHandler extends BaseClient implements InvocationHandler {
+public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
 	private final Map<Method, BaseMethodBinding<?>> myBindings;
 	private final Map<Method, Object> myMethodToReturnValue;
 	private FhirContext myContext;
 	private Map<Method, ILambda> myMethodToLambda;
 
-	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda, RestfulClientFactory theFactory) {
+	public ClientInvocationHandler(IHttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda, RestfulClientFactory theFactory) {
 		super(theClient, theUrlBase, theFactory);
 
 		myContext = theContext;

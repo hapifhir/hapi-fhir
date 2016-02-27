@@ -53,8 +53,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	private int myTransactionParamIndex;
 	private ParamStyle myTransactionParamStyle;
 
-	public TransactionMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
-		super(null, theMethod, theConetxt, theProvider);
+	public TransactionMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(null, theMethod, theContext, theProvider);
 
 		myTransactionParamIndex = -1;
 		int index = 0;

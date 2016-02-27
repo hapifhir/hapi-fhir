@@ -60,7 +60,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation();
+		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation(getContext());
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {

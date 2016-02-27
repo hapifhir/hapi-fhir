@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.client.interceptor;
+package ca.uhn.fhir.rest.client.apache;
 
 /*
  * #%L
@@ -26,11 +26,12 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ByteArrayEntity;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
@@ -42,7 +43,8 @@ public class GZipContentInterceptor implements IClientInterceptor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GZipContentInterceptor.class);
 	
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequestInterface) {
+		HttpRequestBase theRequest = ((ApacheHttpRequest) theRequestInterface).getApacheRequest();
 		if (theRequest instanceof HttpEntityEnclosingRequest) {
 			Header[] encodingHeaders = theRequest.getHeaders(Constants.HEADER_CONTENT_ENCODING);
 			if (encodingHeaders == null || encodingHeaders.length == 0) {
@@ -69,7 +71,7 @@ public class GZipContentInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) throws IOException {
+	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		// nothing
 	}
 

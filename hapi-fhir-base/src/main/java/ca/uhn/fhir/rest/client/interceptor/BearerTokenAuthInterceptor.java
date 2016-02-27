@@ -21,10 +21,10 @@ package ca.uhn.fhir.rest.client.interceptor;
  */
 
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
@@ -71,12 +71,12 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequest) {
 		theRequest.addHeader(Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) {
+	public void interceptResponse(IHttpResponse theResponse) {
 		// nothing
 	}
 

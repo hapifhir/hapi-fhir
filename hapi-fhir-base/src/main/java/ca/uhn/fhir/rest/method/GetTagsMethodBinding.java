@@ -54,8 +54,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	private Class<? extends IBaseResource> myType;
 	private Integer myVersionIdParamIndex;
 
-	public GetTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, GetTags theAnnotation) {
-		super(theMethod, theConetxt, theProvider);
+	public GetTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, GetTags theAnnotation) {
+		super(theMethod, theContext, theProvider);
 
 		if (theProvider instanceof IResourceProvider) {
 			myType = ((IResourceProvider) theProvider).getResourceType();
@@ -64,7 +64,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		}
 
 		if (!Modifier.isInterface(myType.getModifiers())) {
-			myResourceName = theConetxt.getResourceDefinition(myType).getName();
+			myResourceName = theContext.getResourceDefinition(myType).getName();
 		}
 
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
@@ -127,17 +127,17 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		if (myType != IResource.class) {
 			if (id != null) {
 				if (versionId != null) {
-					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
 				} else if (id.hasVersionIdPart()) {
-					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
 				} else {
-					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
+					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
 				}
 			} else {
-				retVal = new HttpGetClientInvocation(getResourceName(), Constants.PARAM_TAGS);
+				retVal = new HttpGetClientInvocation(getContext(), getResourceName(), Constants.PARAM_TAGS);
 			}
 		} else {
-			retVal = new HttpGetClientInvocation(Constants.PARAM_TAGS);
+			retVal = new HttpGetClientInvocation(getContext(), Constants.PARAM_TAGS);
 		}
 
 		if (theArgs != null) {

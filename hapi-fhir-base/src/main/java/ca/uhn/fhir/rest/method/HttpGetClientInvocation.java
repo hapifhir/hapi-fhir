@@ -28,10 +28,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpGet;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
@@ -43,28 +45,33 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	private final Map<String, List<String>> myParameters;
 	private final String myUrlPath;
 
-	public HttpGetClientInvocation(Map<String, List<String>> theParameters, String... theUrlFragments) {
+	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, String... theUrlFragments) {
+		super(theContext);
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
-	public HttpGetClientInvocation(Map<String, List<String>> theParameters, List<String> theUrlFragments) {
+	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, List<String> theUrlFragments) {
+		super(theContext);
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
-	public HttpGetClientInvocation(String theUrlPath) {
+	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
+		super(theContext);
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = theUrlPath;
 	}
 
-	public HttpGetClientInvocation(String... theUrlFragments) {
+	public HttpGetClientInvocation(FhirContext theContext, String... theUrlFragments) {
+		super(theContext);
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
 
 
-	public HttpGetClientInvocation(List<String> theUrlFragments) {
+	public HttpGetClientInvocation(FhirContext theContext, List<String> theUrlFragments) {
+		super(theContext);
 		myParameters = new HashMap<String, List<String>>();
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 	}
@@ -78,7 +85,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	@Override
-	public HttpGet asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
+	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 		
 		if (!myUrlPath.contains("://")) {
@@ -102,10 +109,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-		HttpGet retVal = new HttpGet(b.toString());
-		super.addHeadersToRequest(retVal, theEncoding);
-
-		return retVal;
+		return super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
 	}
 
 	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
