@@ -322,7 +322,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IIdType id = myPatientDao.update(p).getId();
+		IIdType id = myPatientDao.update(p, mySrd).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		Observation o = new Observation();
@@ -339,7 +339,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
 		assertEquals("1", respEntry.getResponse().getEtag());
 
-		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()));
+		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
@@ -354,11 +354,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p).getId();
+		myPatientDao.create(p, mySrd).getId();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p).getId();
+		myPatientDao.create(p, mySrd).getId();
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -382,11 +382,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p).getId();
+		myPatientDao.create(p, mySrd).getId();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p).getId();
+		myPatientDao.create(p, mySrd).getId();
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");

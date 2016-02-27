@@ -796,6 +796,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation, IResource res) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
@@ -866,6 +867,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
+	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation, IAnyResource res) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
@@ -936,6 +938,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @return Returns <code>true</code> if the tag should be removed
 	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 */
+	@SuppressWarnings("unused")
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing
 	}
@@ -968,6 +971,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return ids;
 	}
 
+	@SuppressWarnings("unused")
+	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId) {
 		throw new NotImplementedException("");
 	}
@@ -1194,7 +1199,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 			String resourceText = null;
 			switch (theEntity.getEncoding()) {
@@ -1561,10 +1565,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		return theEntity;
-	}
-
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime) {
-		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
 	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {

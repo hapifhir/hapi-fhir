@@ -173,8 +173,8 @@ public class DynamicSearchTest {
 		@Override
 		public List<RuntimeSearchParam> getSearchParameters() {
 			ArrayList<RuntimeSearchParam> retVal = new ArrayList<RuntimeSearchParam>();
-			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", RestSearchParameterTypeEnum.STRING));
-			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", RestSearchParameterTypeEnum.DATE));
+			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", RestSearchParameterTypeEnum.STRING, null));
+			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", RestSearchParameterTypeEnum.DATE, null));
 			return retVal;
 		}
 
