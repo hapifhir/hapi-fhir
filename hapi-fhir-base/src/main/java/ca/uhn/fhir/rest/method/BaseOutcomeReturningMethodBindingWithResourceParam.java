@@ -117,7 +117,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IResource resource = (IResource) theArgs[myResourceParameterIndex];
+		IResource resource = (IResource) theArgs[myResourceParameterIndex]; // TODO: use IBaseResource
 		if (resource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}

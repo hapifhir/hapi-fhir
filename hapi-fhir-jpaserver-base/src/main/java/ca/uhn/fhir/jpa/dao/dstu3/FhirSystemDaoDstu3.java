@@ -462,7 +462,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		FhirTerser terser = getContext().newTerser();
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
-			IBaseResource nextResource = (IBaseResource) nextOutcome.getResource();
+			IBaseResource nextResource = nextOutcome.getResource();
 			if (nextResource == null) {
 				continue;
 			}

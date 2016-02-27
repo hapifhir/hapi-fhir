@@ -115,8 +115,9 @@
 				Update methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Update.html">@Update</a>
 				annotation, and have a parameter annotated with the
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@ResourceParam</a>
 				annotation. This parameter contains the resource instance to be created.
+				See the <a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@ResourceParam</a> for information on the types allowed for this parameter (resource types, String, byte[]).
 			</p>
 			<p>
 				In addition, the method may optionally have a parameter annotated with the
@@ -316,8 +317,9 @@
 				Create methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Create.html">@Create</a>
 				annotation, and have a single parameter annotated with the
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@ResourceParam</a>
 				annotation. This parameter contains the resource instance to be created.
+				See the <a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@ResourceParam</a> for information on the types allowed for this parameter (resource types, String, byte[]).
 			</p>
 			<p>
 				Create methods must return an object of type
@@ -1104,7 +1106,7 @@
 				Validate methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Validate.html">@Validate</a>
 				annotation, and have a parameter annotated with the
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@Resource</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ResourceParam.html">@ResourceParam</a>
 				annotation. This parameter contains the resource instance to be created.
 			</p>
 			<p>

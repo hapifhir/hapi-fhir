@@ -22,7 +22,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 
 	@Override
-	protected void postProcess(BaseElement theTarget) {
+	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		super.postProcess(theTarget);
 
 		/*

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -46,6 +49,7 @@ import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
  * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
  */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHttpClientInvocationWithContents.class);
 
 	private final Bundle myBundle;
 	private final BundleTypeEnum myBundleType;

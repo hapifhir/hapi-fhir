@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +13,29 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+	protected ServletRequestDetails mySrd;
 
 	@SuppressWarnings({ "rawtypes" })
 	protected List toList(IBundleProvider theSearch) {
 		return theSearch.getResources(0, theSearch.size());
 	}
 
+	@Before
+	public void beforeCreateSrd() {
+		mySrd = mock(ServletRequestDetails.class);
+	}
+	
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (Entry next : theFound.getEntry()) {

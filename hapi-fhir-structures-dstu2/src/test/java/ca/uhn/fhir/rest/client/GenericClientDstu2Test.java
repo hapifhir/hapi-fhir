@@ -143,7 +143,7 @@ public class GenericClientDstu2Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
 		idx++;
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
@@ -192,12 +192,12 @@ public class GenericClientDstu2Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("http://" + methodName + ".example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(0).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
 		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
 		assertEquals("http://" + methodName + ".example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(1).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
 		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
 	}

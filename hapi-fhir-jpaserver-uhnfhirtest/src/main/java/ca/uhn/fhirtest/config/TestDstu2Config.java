@@ -50,6 +50,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setSubscriptionPollDelay(5000);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
+		retVal.setAllowInlineMatchUrlReferences(true);
 		return retVal;
 	}
 

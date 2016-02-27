@@ -35,7 +35,8 @@ import javax.persistence.UniqueConstraint;
 //@formatter:off
 @Entity()
 @Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
-		@UniqueConstraint(name = "IDX_FORCEDID", columnNames = {"FORCED_ID"})
+	@UniqueConstraint(name = "IDX_FORCEDID", columnNames = {"FORCED_ID"}),
+	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"})
 })
 @NamedQueries(value = {
 		@NamedQuery(name = "Q_GET_FORCED_ID", query = "SELECT f FROM ForcedId f WHERE myForcedId = :ID")

@@ -451,10 +451,20 @@ public class MethodUtil {
 							mode = Mode.RESOURCE;
 						} else if (String.class.equals(parameterType)) {
 							mode = ResourceParameter.Mode.BODY;
+						} else if (byte[].class.equals(parameterType)) {
+							mode = ResourceParameter.Mode.BODY_BYTE_ARRAY;
 						} else if (EncodingEnum.class.equals(parameterType)) {
 							mode = Mode.ENCODING;
 						} else {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+							StringBuilder b = new StringBuilder();
+							b.append("Method '");
+							b.append(theMethod.getName());
+							b.append("' is annotated with @");
+							b.append(ResourceParam.class.getSimpleName());
+							b.append(" but has a type that is not an implemtation of ");
+							b.append(IBaseResource.class.getCanonicalName());
+							b.append(" or String or byte[]");
+							throw new ConfigurationException(b.toString());
 						}
 						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider, mode);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {

@@ -60,6 +60,50 @@
 				JPA server now supports :above and :below qualifiers on URI search params
 			</action>
 			<action type="add">
+				Add optional support (disabled by default for now) to JPA server to support
+				inline references containing search URLs. These URLs will be resolved when
+				a resource is being created/updated and replaced with the single matching
+				resource. This is being used as a part of the May 2016 Connectathon for
+				a testing scenario.
+			</action>
+			<action type="add">
+				The server no longer adds a 
+				<![CDATA[<code>WWW-Authenticate</code>]]>
+				header to the response if any resource provider code throws an
+				<![CDATA[<code>AuthenticationException</code>]]>. This header is 
+				used for interactive authentication, which isn't generally 
+				appropriate for FHIR. We added code to add this header a long time
+				ago for testing purposes and it never got removed. Please let us
+				know if you need the ability to add this header automatically. Thanks
+				to Lars Kristian Roland for pointing this out.
+			</action>
+			<action type="fix">
+				In the client, the create/update operations on a Binary resource 
+				(which use the raw binary's content type as opposed to the FHIR
+				content type) were not including any request headers (Content-Type, 
+				User-Agent, etc.) Thanks to Peter Van Houte of Agfa Healthcare for
+				reporting!
+			</action>
+			<action type="fix">
+				Handling of Binary resources containing embedded FHIR resources for
+				create/update/etc operations has been corrected per the FHIR rules
+				outlined at
+				<a href="http://hl7.org/fhir/binary.html">Binary Resource</a> in both
+				the client and server. 
+				<![CDATA[<br/><br/>]]>
+				Essentially, if the Binary contains something
+				that isn't FHIR (e.g. an image with an image content-type) the
+				client will send the raw data with the image content type to the server. The
+				server will place the content type and raw data into a Binary resource instance
+				and pass those to the resource provider. This part was already correct previous
+				to 1.5. 
+				<![CDATA[<br/><br/>]]>
+				On the other hand, if the Binary contains a FHIR content type, the Binary
+				is now sent by the client to the server as a Binary resource with a FHIR content-type,
+				and the embedded FHIR content is contained in the appropriate fields. The server
+				will pass this "outer" Binary resource to the resource provider code. 
+			</action>
+			<action type="add">
 				The RequestDetails and ActionRequestDetails objects which are passed to 
 				server interceptor methods and may also be used as server provider method
 				arguments now has a new method 

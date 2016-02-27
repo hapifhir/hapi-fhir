@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 
@@ -17,11 +19,9 @@ import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -48,7 +48,7 @@ public class BinaryClientTest {
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
-		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -59,7 +59,7 @@ public class BinaryClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "foo/bar"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {1,2,3,4}));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		Binary resp = client.read(new IdDt("http://foo/Patient/123"));
@@ -67,24 +67,17 @@ public class BinaryClientTest {
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Binary/123", get.getURI().toString());
-		
+
 		assertEquals("foo/bar", resp.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, resp.getContent());
 	}
 
-	public static void main(String[] args) {
-		
-		IClient c = Mockito.mock(IClient.class, new ReturnsDeepStubs());
-		
-	}
-	
-	
 	@Test
 	public void testCreate() throws Exception {
 		Binary res = new Binary();
 		res.setContent(new byte[] { 1, 2, 3, 4 });
 		res.setContentType("text/plain");
-		
+
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
@@ -92,29 +85,23 @@ public class BinaryClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {}));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
-		MethodOutcome resp = client.create(res);
+		client.create(res);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertEquals("http://foo/Binary", post.getURI().toString());
-		
-		assertEquals("text/plain", post.getEntity().getContentType().getValue());
+
+		assertEquals("text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, IOUtils.toByteArray(post.getEntity().getContent()));
 
 	}
 
-
-	private String createBundle() {
-		return ctx.newXmlParser().encodeBundleToString(new Bundle());
-	}
-
-
 	private interface IClient extends IBasicClient {
 
-		@Read(type=Binary.class)
+		@Read(type = Binary.class)
 		public Binary read(@IdParam IdDt theBinary);
 
-		@Create(type=Binary.class)
+		@Create(type = Binary.class)
 		public MethodOutcome create(@ResourceParam Binary theBinary);
 
 	}

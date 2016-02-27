@@ -42,8 +42,10 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -112,7 +114,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		// Try making the resource unparseable
 
 		TransactionTemplate template = new TransactionTemplate(myTxManager);
-		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		template.execute(new TransactionCallback<ResourceTable>() {
 			@Override
 			public ResourceTable doInTransaction(TransactionStatus theStatus) {
@@ -303,6 +305,100 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
+	}
+
+	@After
+	public void after() {
+		myDaoConfig.setAllowInlineMatchUrlReferences(false);
+	}
+	
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
+		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
+		Bundle request = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(myRequestDetails, request);
+		assertEquals(1, resp.getEntry().size());
+
+		BundleEntryComponent respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+		assertEquals("1", o.getIdElement().getVersionIdPart());
+
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithNoMatches() {
+		String methodName = "testTransactionCreateInlineMatchUrlWithNoMatches";
+		Bundle request = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		myPatientDao.create(p, mySrd).getId();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		myPatientDao.create(p, mySrd).getId();
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		try {
+			mySystemDao.transaction(myRequestDetails, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - Multiple resources match this search", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithTwoMatches() {
+		String methodName = "testTransactionCreateInlineMatchUrlWithTwoMatches";
+		Bundle request = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		myPatientDao.create(p, mySrd).getId();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		myPatientDao.create(p, mySrd).getId();
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		try {
+			mySystemDao.transaction(myRequestDetails, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
+		}
 	}
 
 	@Test

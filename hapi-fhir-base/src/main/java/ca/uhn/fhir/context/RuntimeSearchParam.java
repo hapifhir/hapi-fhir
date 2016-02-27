@@ -3,6 +3,7 @@ package ca.uhn.fhir.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
@@ -29,23 +30,30 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class RuntimeSearchParam {
 
+	private List<RuntimeSearchParam> myCompositeOf;
 	private String myDescription;
 	private String myName;
 	private RestSearchParameterTypeEnum myParamType;
 	private String myPath;
-	private List<RuntimeSearchParam> myCompositeOf;
+	private Set<String> myProvidesMembershipInCompartments;
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType) {
-		this(theName, theDescription, thePath, theParamType, null);
-	}
-
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf) {
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+			Set<String> theProvidesMembershipInCompartments) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
 		myCompositeOf = theCompositeOf;
+		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
+			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
+		} else {
+			myProvidesMembershipInCompartments = null;
+		}
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments) {
+		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {
@@ -70,10 +78,10 @@ public class RuntimeSearchParam {
 
 	public List<String> getPathsSplit() {
 		String path = getPath();
-		if (path.indexOf('|')==-1) {
+		if (path.indexOf('|') == -1) {
 			return Collections.singletonList(path);
 		}
-		
+
 		List<String> retVal = new ArrayList<String>();
 		StringTokenizer tok = new StringTokenizer(path, "|");
 		while (tok.hasMoreElements()) {
@@ -81,6 +89,13 @@ public class RuntimeSearchParam {
 			retVal.add(nextPath.trim());
 		}
 		return retVal;
+	}
+
+	/**
+	 * Can return null
+	 */
+	public Set<String> getProvidesMembershipInCompartments() {
+		return myProvidesMembershipInCompartments;
 	}
 
 }
