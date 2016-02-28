@@ -45,6 +45,9 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.FhirTerser;
 
+/**
+ * Base class for a REST client factory implementation
+ */
 public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
@@ -268,6 +271,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				theBindings, theMethodToLambda, this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, BaseClient theClient) {
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);

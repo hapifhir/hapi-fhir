@@ -83,7 +83,10 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 
 	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
-	 * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>)
+	 * <a href="http://www.hl7.org/fhir/search.html">FHIR Search Specification</a>)
+	 * <p>
+	 * This can be used to force the use of an HTTP POST instead of an HTTP GET
+	 * </p>
 	 * 
 	 * @see SearchStyleEnum
 	 * @since 0.6

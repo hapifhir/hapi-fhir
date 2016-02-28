@@ -106,12 +106,14 @@
 				skip this section.
 			</p>
 			<p>
+				<b>Maven Import</b><br/>
 				Import the HAPI projects as Maven Modules by selecing
 				<code>File -&gt; Import...</code> from the File menu. Then select
 				<code>Existing Module Projects</code> as shown below.
 			</p>
 			<img src="./images/hacking_import.png"/><br/><br/>
 			<p>
+				<b>Select the Projects</b><br/>
 				Next, browse to the directory where you checked out the HAPI FHIR sources. 
 				You might want to select only the projects you are interested in editing,
 				in order to keep Eclipse's memory use down. You can always come back and 

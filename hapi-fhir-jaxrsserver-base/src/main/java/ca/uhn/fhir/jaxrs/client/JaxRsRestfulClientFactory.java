@@ -72,7 +72,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
-		throw new UnsupportedOperationException("Proxies are not supported yet");
+		throw new UnsupportedOperationException("Proxies are not supported yet in JAX-RS client");
 	}
 
 	/**

@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<version>1.5-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+	<url>https://github.com/jamesagnew/hapi-fhir</url>
 
 	<organization>
 		<name>University Health Network</name>
@@ -240,20 +240,19 @@
 
 		<!-- Dependency Versions -->
 		<derby_version>10.12.1.1</derby_version>
-		<jersey_version>2.22.1</jersey_version>
+		<jersey_version>2.22.2</jersey_version>
 		<jetty_version>9.3.7.v20160115 </jetty_version>
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
 		<hibernate_version>5.1.0.Final</hibernate_version>
-		<hibernate_validator_version>5.2.3.Final</hibernate_validator_version>
+		<hibernate_validator_version>5.2.4.Final</hibernate_validator_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.4</phloc_commons_version>
-		<spring_version>4.2.4.RELEASE</spring_version>
+		<spring_version>4.2.5.RELEASE</spring_version>
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
@@ -274,7 +273,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.3</version>
+				<version>1.1.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -744,7 +743,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
@@ -819,7 +818,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.4</version>
+					<version>3.5</version>
 					<configuration>
 						<skip>false</skip>
 						<skipDeploy>true</skipDeploy>
@@ -1299,6 +1298,25 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- 
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.12</version>
+				<configuration>
+					<message>Building site for ${project.version}</message>
+					<server>github</server>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site-deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+			-->
 		</plugins>
 	</build>
 

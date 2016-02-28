@@ -149,6 +149,10 @@
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="Checkstyle" href="checkstyle.html" />
 		</menu>
+		
+		<menu name="Contribute" inherit="bottom">
+			<item name="Guide to Hacking HAPI" href="./hacking_hapi_fhir.html"/>
+		</menu>
 
 	</body>
 
@@ -193,7 +197,7 @@
 			<topNav>Documentation|Get Help|Test Server</topNav>
 			<bottomNav maxSpan="9" >
 				<column>HAPI FHIR|Test Server</column>
-				<column>Using HAPI</column>
+				<column>Using HAPI|Contribute</column>
 				<column>JavaDocs|JXR</column>
 				<column>Get Help|Maven Reports</column>
 			</bottomNav>

@@ -193,13 +193,13 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			encoding = MethodUtil.detectEncoding(myContents);
 		}
 
-		if (encoding == null) {
-			encoding = EncodingEnum.XML;
-		}
 
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		} else {
+			if (encoding == null) {
+				encoding = EncodingEnum.XML;
+			}
 			String contents = parseContents(thePrettyPrint, encoding);
 			String contentType = getContentType(encoding);
 			return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
