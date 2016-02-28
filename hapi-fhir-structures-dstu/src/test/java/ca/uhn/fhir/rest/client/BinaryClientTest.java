@@ -44,7 +44,7 @@ public class BinaryClientTest {
 
 	@Before
 	public void before() {
-		ctx = new FhirContext(Patient.class, Conformance.class);
+		ctx = FhirContext.forDstu1();
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);

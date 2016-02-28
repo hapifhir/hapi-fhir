@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -37,10 +36,10 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 
@@ -49,7 +48,6 @@ import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
  * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
  */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHttpClientInvocationWithContents.class);
 
 	private final Bundle myBundle;
 	private final BundleTypeEnum myBundleType;
@@ -75,8 +73,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource,
-			Map<String, List<String>> theParams, String... theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = theResource;
 		myTagList = null;
@@ -100,8 +97,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources,
-			BundleTypeEnum theBundleType) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext);
 		myResource = null;
 		myTagList = null;
@@ -112,8 +108,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = theBundleType;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams,
-			String... theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = null;
 		myTagList = null;
@@ -126,8 +121,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle,
-			String theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
 		super(theContext);
 		myResource = null;
 		myTagList = null;
@@ -139,8 +133,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents,
-			Map<String, List<String>> theParams, String... theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = null;
 		myTagList = null;
@@ -189,30 +182,32 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
-			return httpClient.createBinaryRequest((IBaseBinary) myResource);
+			IBaseBinary binary = (IBaseBinary) myResource;
+			if (isNotBlank(binary.getContentType()) && EncodingEnum.forContentTypeStrict(binary.getContentType()) == null) {
+				return httpClient.createBinaryRequest(getContext(), binary);
+			}
+		}
+
+		EncodingEnum encoding = theEncoding;
+		if (myContents != null) {
+			encoding = MethodUtil.detectEncoding(myContents);
+		}
+
+		if (encoding == null) {
+			encoding = EncodingEnum.XML;
+		}
+
+		if (myParams != null) {
+			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		} else {
-			EncodingEnum encoding = theEncoding;
-			if (myContents != null) {
-				encoding = MethodUtil.detectEncoding(myContents);
-			}
-
-			if (encoding == null) {
-				encoding = EncodingEnum.XML;
-			}
-
-			if (myParams != null) {
-				return httpClient.createParamRequest(myParams, encoding);
-			} else {
-				String contents = parseContents(thePrettyPrint, encoding);
-				String contentType = getContentType(encoding);
-				return httpClient.createByteRequest(contents, contentType, encoding);
-			}
+			String contents = parseContents(thePrettyPrint, encoding);
+			String contentType = getContentType(encoding);
+			return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 		}
 	}
 
 	private String getContentType(EncodingEnum encoding) {
-		if (myBundle != null || (getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1
-				&& ((myContents != null && myContentsIsBundle) || myResources != null))) {
+		if (myBundle != null || (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1 && ((myContents != null && myContentsIsBundle) || myResources != null))) {
 			return encoding.getBundleContentType();
 		} else {
 			return encoding.getResourceContentType();
@@ -223,22 +218,22 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		IParser parser;
 
 		if (encoding == EncodingEnum.JSON) {
-			parser = getFhirContext().newJsonParser();
+			parser = getContext().newJsonParser();
 		} else {
-			parser = getFhirContext().newXmlParser();
+			parser = getContext().newXmlParser();
 		}
-		
+
 		if (thePrettyPrint != null) {
 			parser.setPrettyPrint(thePrettyPrint);
 		}
-		
+
 		parser.setOmitResourceId(myOmitResourceId);
 		if (myTagList != null) {
 			return parser.encodeTagListToString(myTagList);
 		} else if (myBundle != null) {
 			return parser.encodeBundleToString(myBundle);
 		} else if (myResources != null) {
-			IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
+			IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
 			bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
 			Bundle bundle = bundleFactory.getDstu1Bundle();
 			if (bundle != null) {

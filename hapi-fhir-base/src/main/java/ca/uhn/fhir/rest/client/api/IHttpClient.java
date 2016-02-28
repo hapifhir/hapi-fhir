@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
@@ -34,33 +35,37 @@ public interface IHttpClient {
 
     /**
      * Create a byte request
-     * @param theContents the contents
-     * @param theContentType the contentType 
-     * @param theEncoding the encoding
+    * @param theContext TODO
+    * @param theContents the contents
+    * @param theContentType the contentType 
+    * @param theEncoding the encoding
      * @return the http request to be executed
      */
-    IHttpRequest createByteRequest(String theContents, String theContentType, EncodingEnum theEncoding);
+    IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding);
 
     /**
      * Create a parameter request
-     * @param theParams the parameters
-     * @param theEncoding the encoding
+    * @param theContext TODO
+    * @param theParams the parameters
+    * @param theEncoding the encoding
      * @return the http request to be executed
      */
-    IHttpRequest createParamRequest(Map<String, List<String>> theParams, EncodingEnum theEncoding);
+    IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding);
 
     /**
      * Create a binary request
-     * @param theBinary the binary
+    * @param theContext TODO
+    * @param theBinary the binary
      * @return the http request to be executed
      */
-    IHttpRequest createBinaryRequest(IBaseBinary theBinary);
+    IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
 
     /**
      * Create a normal http get request
-     * @param theEncoding the request encoding
+    * @param theContext TODO
+    * @param theEncoding the request encoding
      * @return the http request to be executed
      */
-    IHttpRequest createGetRequest(EncodingEnum theEncoding);
+    IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
 
 }

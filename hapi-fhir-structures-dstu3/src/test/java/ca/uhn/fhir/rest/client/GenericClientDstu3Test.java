@@ -208,7 +208,7 @@ public class GenericClientDstu3Test {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR DSTU3; apache)";
 	}
 
 	@BeforeClass

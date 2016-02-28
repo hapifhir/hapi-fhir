@@ -32,14 +32,15 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.util.VersionUtil;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -67,16 +68,16 @@ public class JaxRsHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public IHttpRequest createByteRequest(String theContents, String theContentType, EncodingEnum theEncoding) {
+	public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
 		Entity<String> entity = Entity.entity(theContents, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
-		addHeadersToRequest(retVal, theEncoding);
+		addHeadersToRequest(retVal, theEncoding, theContext);
 		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return retVal;
 	}
 
 	@Override
-	public IHttpRequest createParamRequest(Map<String, List<String>> theParams, EncodingEnum theEncoding) {
+	public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
 		MultivaluedMap<String, String> map = new MultivaluedHashMap<String, String>();
 		for (Map.Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
@@ -86,39 +87,40 @@ public class JaxRsHttpClient implements IHttpClient {
 		}
 		Entity<Form> entity = Entity.form(map);
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
-		// addHeadersToRequest(retVal, encoding);
+		 addHeadersToRequest(retVal, null, theContext);
 		return retVal;
 	}
 
 	@Override
-	public IHttpRequest createBinaryRequest(IBaseBinary theBinary) {
+	public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
 		Entity<String> entity = Entity.entity(theBinary.getContentAsBase64(), theBinary.getContentType());
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
+		addHeadersToRequest(retVal, null, theContext);
 		return retVal;
 	}
 
 	@Override
-	public IHttpRequest createGetRequest(EncodingEnum theEncoding) {
+	public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
 		JaxRsHttpRequest result = createHttpRequest(null);
-		addHeadersToRequest(result, theEncoding);
+		addHeadersToRequest(result, theEncoding, theContext);
 		return result;
 	}
 
-	public void addHeadersToRequest(JaxRsHttpRequest theHttpRequest, EncodingEnum theEncoding) {
+	public void addHeadersToRequest(JaxRsHttpRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
 		if (myHeaders != null) {
 			for (Header next : myHeaders) {
 				theHttpRequest.addHeader(next.getName(), next.getValue());
 			}
 		}
 
-		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)");
+		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "jax-rs"));
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		
 		Builder request = theHttpRequest.getRequest();
 		request.acceptEncoding("gzip");
 
 		if (theEncoding == null) {
-			request.accept(Constants.HEADER_ACCEPT_VALUE_ALL);
+			request.accept(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
 		} else if (theEncoding == EncodingEnum.JSON) {
 			request.accept(Constants.CT_FHIR_JSON);
 		} else if (theEncoding == EncodingEnum.XML) {

@@ -64,15 +64,7 @@ class BaseBinder<T> {
 			
 			T dt = myConstructor.newInstance(args);
 			return dt;
-		} catch (final InstantiationException e) {
-			throw new InternalErrorException(e);
-		} catch (final IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (final SecurityException e) {
-			throw new InternalErrorException(e);
-		} catch (final IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (final InvocationTargetException e) {
+		} catch (final Exception e) {
 			throw new InternalErrorException(e);
 		}
 	}

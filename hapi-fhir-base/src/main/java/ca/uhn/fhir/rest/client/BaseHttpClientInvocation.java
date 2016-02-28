@@ -36,8 +36,8 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public abstract class BaseHttpClientInvocation {
 
-	private final List<Header> myHeaders;
 	private final FhirContext myContext;
+	private final List<Header> myHeaders;
 
 	public BaseHttpClientInvocation(FhirContext myContext) {
 		this.myContext = myContext;
@@ -60,6 +60,44 @@ public abstract class BaseHttpClientInvocation {
 	 *            server
 	 */
 	public abstract IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint);
+
+	/**
+	 * Create an HTTP request for the given url, encoding and request-type
+	 * 
+	 * @param theUrl
+	 *            The complete FHIR url to which the http request will be sent
+	 * @param theEncoding
+	 *            The encoding to use for any serialized content sent to the
+	 *            server
+	 * @param theRequestType
+	 *            the type of HTTP request (GET, DELETE, ..) 
+	 */	
+	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
+		return httpClient.createGetRequest(getContext(), theEncoding);
+	}
+
+	/**
+	 * Returns the FHIR context associated with this client
+	 * @return the myContext
+	 */
+	public FhirContext getContext() {
+		return myContext;
+	}
+
+	/**
+	 * Returns the http headers to be sent with the request
+	 */
+	public List<Header> getHeaders() {
+		return myHeaders;
+	}
+
+	/**
+	 * Get the restfull client factory
+	 */
+	public IRestfulClientFactory getRestfulClientFactory() {
+		return myContext.getRestfulClientFactory();
+	}
 
 	public static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		if (theExtraParams == null) {
@@ -86,45 +124,6 @@ public abstract class BaseHttpClientInvocation {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get the restfull client factory
-	 * @return
-	 */
-	public IRestfulClientFactory getRestfulClientFactory() {
-		return myContext.getRestfulClientFactory();
-	}
-
-	/**
-	 * Create an HTTP request for the given url, encoding and request-type
-	 * 
-	 * @param theUrl
-	 *            The complete FHIR url to which the http request will be sent
-	 * @param theEncoding
-	 *            The encoding to use for any serialized content sent to the
-	 *            server
-	 * @param theRequestType
-	 *            the type of HTTP request (GET, DELETE, ..) 
-	 */	
-	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
-		return httpClient.createGetRequest(theEncoding);
-	}
-
-	/**
-	 * Returns the http headers to be sent with the request
-	 */
-	public List<Header> getHeaders() {
-		return myHeaders;
-	}
-
-	/**
-	 * Returns the FHIR context associated with this client
-	 * @return the myContext
-	 */
-	public FhirContext getFhirContext() {
-		return myContext;
 	}
 
 }

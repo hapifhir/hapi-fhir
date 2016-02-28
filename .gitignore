@@ -2,8 +2,6 @@
 /target
 target/
 .idea/
-.project
-.settings/
 .metadata/
 RemoteSystemsTempFiles/
 Servers/
@@ -124,11 +122,7 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
-
-# Eclipse Core
-.project
 
 # External tool builders
 .externalToolBuilders/
@@ -140,7 +134,9 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-.classpath
+#.project
+#.settings/
+#.classpath
 
 # PDT-specific
 .buildpath

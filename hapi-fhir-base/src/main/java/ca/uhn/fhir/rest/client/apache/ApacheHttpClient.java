@@ -40,14 +40,17 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.VersionUtil;
 
 /**
@@ -65,8 +68,7 @@ public class ApacheHttpClient implements IHttpClient {
 	private String myIfNoneExistString;
 	private RequestTypeEnum myRequestType;
 
-	public ApacheHttpClient(HttpClient theClient, StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public ApacheHttpClient(HttpClient theClient, StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		this.myClient = theClient;
 		this.myUrl = theUrl;
 		this.myIfNoneExistParams = theIfNoneExistParams;
@@ -76,7 +78,7 @@ public class ApacheHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public IHttpRequest createByteRequest(String theContents, String theContentType, EncodingEnum theEncoding) {
+	public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
 		/*
 		 * We aren't using a StringEntity here because the constructors
 		 * supported by Android aren't available in non-Android, and vice versa.
@@ -85,13 +87,13 @@ public class ApacheHttpClient implements IHttpClient {
 		 */
 		ByteArrayEntity entity = new ByteArrayEntity(theContents.getBytes(Constants.CHARSET_UTF8));
 		ApacheHttpRequest retVal = createHttpRequest(entity);
-		addHeadersToRequest(retVal, theEncoding);
+		addHeadersToRequest(retVal, theEncoding, theContext);
 		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return retVal;
 	}
 
 	@Override
-	public IHttpRequest createParamRequest(Map<String, List<String>> theParams, EncodingEnum theEncoding) {
+	public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
@@ -99,46 +101,55 @@ public class ApacheHttpClient implements IHttpClient {
 				parameters.add(new BasicNameValuePair(nextParam.getKey(), s));
 			}
 		}
+		UrlEncodedFormEntity entity = createFormEntity(parameters);
+		ApacheHttpRequest retVal = createHttpRequest(entity);
+		addHeadersToRequest(retVal, theEncoding, theContext);
+		return retVal;
+	}
+
+	@CoverageIgnore
+	private UrlEncodedFormEntity createFormEntity(List<NameValuePair> parameters) {
 		try {
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8");
-			return createHttpRequest(entity);
+			return new UrlEncodedFormEntity(parameters, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new InternalErrorException("Server does not support UTF-8 (should not happen)", e);
 		}
 	}
 
 	@Override
-	public IHttpRequest createBinaryRequest(IBaseBinary theBinary) {
+	public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
 		/*
 		 * Note: Be careful about changing which constructor we use for
 		 * ByteArrayEntity, as Android's version of HTTPClient doesn't support
 		 * the newer ones for whatever reason.
 		 */
 		ByteArrayEntity entity = new ByteArrayEntity(theBinary.getContent());
-		entity.setContentType(theBinary.getContentType());
-		return createHttpRequest(entity);
-	}
-
-	@Override
-	public IHttpRequest createGetRequest(EncodingEnum theEncoding) {
-		ApacheHttpRequest retVal = createHttpRequest(null);
-		addHeadersToRequest(retVal, theEncoding);
+		ApacheHttpRequest retVal = createHttpRequest(entity);
+		addHeadersToRequest(retVal, null, theContext);
+		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theBinary.getContentType());
 		return retVal;
 	}
 
-	public void addHeadersToRequest(ApacheHttpRequest theHttpRequest, EncodingEnum theEncoding) {
+	@Override
+	public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
+		ApacheHttpRequest retVal = createHttpRequest(null);
+		addHeadersToRequest(retVal, theEncoding, theContext);
+		return retVal;
+	}
+
+	public void addHeadersToRequest(ApacheHttpRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
 		if (myHeaders != null) {
 			for (Header next : myHeaders) {
 				theHttpRequest.addHeader(next.getName(), next.getValue());
 			}
 		}
 
-		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)");
+		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "apache"));
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 
 		if (theEncoding == null) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_ALL);
+			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
 		} else if (theEncoding == EncodingEnum.JSON) {
 			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 		} else if (theEncoding == EncodingEnum.XML) {
@@ -176,7 +187,7 @@ public class ApacheHttpClient implements IHttpClient {
 		}
 		return b;
 	}
-	
+
 	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
 		String url = myUrl.toString();
 		switch (myRequestType) {
@@ -196,7 +207,6 @@ public class ApacheHttpClient implements IHttpClient {
 		default:
 			return new HttpGet(url);
 		}
-	}	
-
+	}
 
 }
