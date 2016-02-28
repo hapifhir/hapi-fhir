@@ -170,7 +170,7 @@
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 		List&lt;IQueryParameterOr&lt;?&gt;&gt; val = myParamBinder.encode(theContext, theObject);
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 		<strong class="jxr_keyword">for</strong> (IQueryParameterOr&lt;?&gt; nextOr : val) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			retVal.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QualifiedParamList.html">QualifiedParamList</a>(nextOr));
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			retVal.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QualifiedParamList.html">QualifiedParamList</a>(nextOr, theContext));
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 		}
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 		<strong class="jxr_keyword">return</strong> retVal;

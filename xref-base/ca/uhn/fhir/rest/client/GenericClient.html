@@ -457,7 +457,7 @@
 <a class="jxr_linenumber" name="L449" href="#L449">449</a> 			ArrayList&lt;String&gt; valueList = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> 			String qualifier = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L451" href="#L451">451</a> 			<strong class="jxr_keyword">for</strong> (IQueryParameterType nextValue : nextEntry.getValue()) {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				valueList.add(nextValue.getValueAsQueryToken());
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				valueList.add(nextValue.getValueAsQueryToken(myContext));
 <a class="jxr_linenumber" name="L453" href="#L453">453</a> 				qualifier = nextValue.getQueryParameterQualifier();
 <a class="jxr_linenumber" name="L454" href="#L454">454</a> 			}
 <a class="jxr_linenumber" name="L455" href="#L455">455</a> 			qualifier = StringUtils.defaultString(qualifier);
@@ -810,14 +810,14 @@
 <a class="jxr_linenumber" name="L802" href="#L802">802</a> 
 <a class="jxr_linenumber" name="L803" href="#L803">803</a> 	}
 <a class="jxr_linenumber" name="L804" href="#L804">804</a> 
-<a class="jxr_linenumber" name="L805" href="#L805">805</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> <strong class="jxr_keyword">extends</strong> ArrayList&lt;ICriterionInternal&gt; {
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> <strong class="jxr_keyword">extends</strong> ArrayList&lt;ICriterionInternal&gt; {
 <a class="jxr_linenumber" name="L806" href="#L806">806</a> 
 <a class="jxr_linenumber" name="L807" href="#L807">807</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 1L;
 <a class="jxr_linenumber" name="L808" href="#L808">808</a> 
 <a class="jxr_linenumber" name="L809" href="#L809">809</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> populateParamList(Map&lt;String, List&lt;String&gt;&gt; theParams) {
 <a class="jxr_linenumber" name="L810" href="#L810">810</a> 			<strong class="jxr_keyword">for</strong> (ICriterionInternal next : <strong class="jxr_keyword">this</strong>) {
 <a class="jxr_linenumber" name="L811" href="#L811">811</a> 				String parameterName = next.getParameterName();
-<a class="jxr_linenumber" name="L812" href="#L812">812</a> 				String parameterValue = next.getParameterValue();
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> 				String parameterValue = next.getParameterValue(myContext);
 <a class="jxr_linenumber" name="L813" href="#L813">813</a> 				addParam(theParams, parameterName, parameterValue);
 <a class="jxr_linenumber" name="L814" href="#L814">814</a> 			}
 <a class="jxr_linenumber" name="L815" href="#L815">815</a> 		}
@@ -1768,11 +1768,11 @@
 <a class="jxr_linenumber" name="L1760" href="#L1760">1760</a> 			myCriterion.populateParamList(params);
 <a class="jxr_linenumber" name="L1761" href="#L1761">1761</a> 
 <a class="jxr_linenumber" name="L1762" href="#L1762">1762</a> 			<strong class="jxr_keyword">for</strong> (TokenParam next : myTags) {
-<a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> 				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
+<a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> 				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken(myContext));
 <a class="jxr_linenumber" name="L1764" href="#L1764">1764</a> 			}
 <a class="jxr_linenumber" name="L1765" href="#L1765">1765</a> 
 <a class="jxr_linenumber" name="L1766" href="#L1766">1766</a> 			<strong class="jxr_keyword">for</strong> (TokenParam next : mySecurity) {
-<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
+<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
 <a class="jxr_linenumber" name="L1768" href="#L1768">1768</a> 			}
 <a class="jxr_linenumber" name="L1769" href="#L1769">1769</a> 
 <a class="jxr_linenumber" name="L1770" href="#L1770">1770</a> 			<strong class="jxr_keyword">for</strong> (String next : myProfile) {
@@ -1801,7 +1801,7 @@
 <a class="jxr_linenumber" name="L1793" href="#L1793">1793</a> 
 <a class="jxr_linenumber" name="L1794" href="#L1794">1794</a> 			<strong class="jxr_keyword">if</strong> (myLastUpdated != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L1795" href="#L1795">1795</a> 				<strong class="jxr_keyword">for</strong> (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
-<a class="jxr_linenumber" name="L1796" href="#L1796">1796</a> 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
+<a class="jxr_linenumber" name="L1796" href="#L1796">1796</a> 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
 <a class="jxr_linenumber" name="L1797" href="#L1797">1797</a> 				}
 <a class="jxr_linenumber" name="L1798" href="#L1798">1798</a> 			}
 <a class="jxr_linenumber" name="L1799" href="#L1799">1799</a> 

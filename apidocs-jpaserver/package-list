@@ -12,5 +12,6 @@ ca.uhn.fhir.jpa.rp.dstu2
 ca.uhn.fhir.jpa.rp.dstu3
 ca.uhn.fhir.jpa.search
 ca.uhn.fhir.jpa.subscription
+ca.uhn.fhir.jpa.term
 ca.uhn.fhir.jpa.util
 ca.uhn.fhir.jpa.validation
