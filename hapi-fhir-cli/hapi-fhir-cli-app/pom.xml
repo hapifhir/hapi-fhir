@@ -208,7 +208,7 @@
 								<artifactItem>
 									<groupId>ca.uhn.hapi.fhir</groupId>
 									<artifactId>hapi-fhir-cli-jpaserver</artifactId>
-									<version>1.5-SNAPSHOT</version>
+									<!--<version>1.5-SNAPSHOT</version>-->
 									<type>war</type>
 									<overWrite>true</overWrite>
 									<outputDirectory>target/classes</outputDirectory>
