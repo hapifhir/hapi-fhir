@@ -747,7 +747,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0</version>
+					<version>3.0.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
