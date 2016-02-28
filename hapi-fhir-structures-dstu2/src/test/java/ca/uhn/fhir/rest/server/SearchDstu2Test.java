@@ -43,6 +43,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PatternMatcher;
@@ -59,12 +61,14 @@ public class SearchDstu2Test {
 	private static String ourLastMethod;
 	private static DateAndListParam ourLastDateAndList;
 	private static ReferenceParam ourLastRef;
+	private static QuantityParam ourLastQuantity;
 
 	@Before
 	public void before() {
 		ourLastMethod = null;
 		ourLastDateAndList = null;
 		ourLastRef = null;
+		ourLastQuantity = null;
 	}
 
 	@Test
@@ -75,6 +79,36 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	/**
+	 * See #296
+	 */
+	@Test
+	public void testSearchQuantityMissingTrue() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?quantity:missing=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Boolean.TRUE, ourLastQuantity.getMissing());
+	}
+
+	/**
+	 * See #296
+	 */
+	@Test
+	public void testSearchQuantityValue() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?quantity=gt100");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastQuantity.getPrefix());
+		assertEquals(100, ourLastQuantity.getValue().intValue());
 	}
 
 	@Test
@@ -379,6 +413,16 @@ public class SearchDstu2Test {
 		public List<Patient> searchWhitelist01(
 				@RequiredParam(chainWhitelist="white1", name = "ref") ReferenceParam theParam) {
 			ourLastMethod = "searchWhitelist01";
+			return Collections.emptyList();
+		}
+		//@formatter:on
+
+		//@formatter:off
+		@Search()
+		public List<Patient> searchQuantity(
+				@RequiredParam(name="quantity") QuantityParam theParam) {
+			ourLastMethod = "searchQuantity";
+			ourLastQuantity = theParam;
 			return Collections.emptyList();
 		}
 		//@formatter:on

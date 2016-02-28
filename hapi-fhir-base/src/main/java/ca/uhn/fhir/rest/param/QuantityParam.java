@@ -193,7 +193,6 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	}
 
 	private void clear() {
-		setMissing(null);
 		setPrefix(null);
 		setSystem((String)null);
 		setUnits(null);

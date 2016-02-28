@@ -134,6 +134,12 @@
 				to a resource which already has one or more profiles set. Thanks to
 				Magnus Vinther for reporting!
 			</action>
+			<action type="fix" issue="296">
+				QuantityParam parameters being used in the RESTful server were ignoring
+				the 
+				<![CDATA[<code>:missing</code>]]> 
+				qualifier. Thanks to Alexander Takacs for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
