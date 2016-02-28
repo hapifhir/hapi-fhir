@@ -216,6 +216,9 @@
 			<id>adam-carbone</id>
 			<name>Adam Carbone</name>
 		</developer>
+		<developer>
+			<id>joelsch</id>
+			<name>joelsch</name>
 	</developers>
 
 	<licenses>
