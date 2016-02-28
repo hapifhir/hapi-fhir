@@ -80,16 +80,16 @@ public class RestfulServerUtils {
 	public static void addProfileToBundleEntry(FhirContext theContext, IBaseResource theResource, String theServerBase) {
 		if (theResource instanceof IResource) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get((IResource) theResource);
-				if (tl == null) {
-					tl = new ArrayList<IdDt>();
-					ResourceMetadataKeyEnum.PROFILES.put((IResource) theResource, tl);
-				}
-
 				RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
 				String profile = nextDef.getResourceProfile(theServerBase);
 				if (isNotBlank(profile)) {
-					tl.add(new IdDt(profile));
+					List<IdDt> newList = new ArrayList<IdDt>();
+					List<IdDt> existingList = ResourceMetadataKeyEnum.PROFILES.get((IResource) theResource);
+					if (existingList != null) {
+						newList.addAll(existingList);
+					}
+					newList.add(new IdDt(profile));
+					ResourceMetadataKeyEnum.PROFILES.put((IResource) theResource, newList);
 				}
 			} else {
 				TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) theResource);

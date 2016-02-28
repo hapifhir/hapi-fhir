@@ -129,6 +129,11 @@
 					Michael Lawley for reporting! 
 				]]>
 			</action>
+			<action type="fix" issue="302">
+				Fix a server exception when trying to automatically add the profile tag
+				to a resource which already has one or more profiles set. Thanks to
+				Magnus Vinther for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

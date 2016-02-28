@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -16,11 +18,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -36,12 +40,16 @@ public class ReadDstu2Test {
 	private static int ourPort;
 
 	private static Server ourServer;
+	private static RestfulServer ourServlet;
+	private static boolean ourInitializeProfileList;
 
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
 	@Test
 	public void testReadJson() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -71,6 +79,54 @@ public class ReadDstu2Test {
 		ourLog.info(responseContent);
 	}
 
+	
+	@Before
+	public void before() {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
+		ourInitializeProfileList = false;
+	}
+	
+	/**
+	 * See #302
+	 */
+	@Test
+	public void testAddProfile() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+	}
+
+	/**
+	 * See #302
+	 */
+	@Test
+	public void testAddProfileToExistingList() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourInitializeProfileList = true;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -85,10 +141,10 @@ public class ReadDstu2Test {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setFhirContext(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -100,9 +156,6 @@ public class ReadDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -115,6 +168,11 @@ public class ReadDstu2Test {
 			Patient p1 = new MyPatient();
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("p1ReadValue");
+			if (ourInitializeProfileList) {
+				List<IdDt> profiles = new ArrayList<IdDt>();
+				profiles.add(new IdDt("http://foo"));
+				ResourceMetadataKeyEnum.PROFILES.put(p1, profiles);
+			}
 			return p1;
 		}
 
