@@ -36,13 +36,60 @@ public class ReadDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static boolean ourInitializeProfileList;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
 	private static int ourPort;
-
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
-	private static boolean ourInitializeProfileList;
 
+	@Before
+	public void before() {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
+		ourInitializeProfileList = false;
+	}
+
+	/**
+	 * See #302
+	 */
+	@Test
+	public void testAddProfile() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+	}
+
+	
+	/**
+	 * See #302
+	 */
+	@Test
+	public void testAddProfileToExistingList() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourInitializeProfileList = true;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+	}
+	
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -75,54 +122,6 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		
-		ourLog.info(responseContent);
-	}
-
-	
-	@Before
-	public void before() {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
-		ourInitializeProfileList = false;
-	}
-	
-	/**
-	 * See #302
-	 */
-	@Test
-	public void testAddProfile() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
-		
-		ourLog.info(responseContent);
-	}
-
-	/**
-	 * See #302
-	 */
-	@Test
-	public void testAddProfileToExistingList() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
-		ourInitializeProfileList = true;
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 		
 		ourLog.info(responseContent);
 	}

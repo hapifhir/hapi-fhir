@@ -286,7 +286,6 @@ public class RestfulServerUtils {
 
 					float q = 1.0f;
 					EncodingEnum encoding;
-					boolean pretty = false;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
 							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken);
@@ -684,6 +683,19 @@ public class RestfulServerUtils {
 	// return count;
 	// }
 
+	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
+		String[] retVal = theRequest.getParameters().get(theParamName);
+		if (retVal == null) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(retVal[0]);
+		} catch (NumberFormatException e) {
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] { theParamName, retVal[0], e });
+			return null;
+		}
+	}
+
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
 			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
@@ -695,19 +707,6 @@ public class RestfulServerUtils {
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
-		}
-	}
-
-	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
-		String[] retVal = theRequest.getParameters().get(theParamName);
-		if (retVal == null) {
-			return null;
-		}
-		try {
-			return Integer.parseInt(retVal[0]);
-		} catch (NumberFormatException e) {
-			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] { theParamName, retVal[0], e });
-			return null;
 		}
 	}
 

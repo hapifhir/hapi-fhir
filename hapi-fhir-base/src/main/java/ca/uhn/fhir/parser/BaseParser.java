@@ -547,7 +547,6 @@ public abstract class BaseParser implements IParser {
 		return parseTagList(new StringReader(theString));
 	}
 
-	@SuppressWarnings("cast")
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
 		if (myContext.getVersion().getVersion().isRi()) {
 			
