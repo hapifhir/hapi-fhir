@@ -140,6 +140,11 @@
 				<![CDATA[<code>:missing</code>]]> 
 				qualifier. Thanks to Alexander Takacs for reporting!
 			</action>
+			<action type="fix" issue="299">
+				Annotation client failed with an exception if the response contained
+				extensions on fields in the resonse Bundle (e.g. Bundle.entry.search).
+				Thanks to GitHub user am202 for reporting! 
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
