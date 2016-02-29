@@ -163,13 +163,14 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			
 			Bundle dstu1bundle = null;
 			IBaseBundle dstu2bundle = null;
-			List<IBaseResource> listOfResources = null;
+			List<? extends IBaseResource> listOfResources = null;
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE || getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				if (myResourceType != null) {
 					dstu1bundle = parser.parseBundle(myResourceType, theResponseReader);
 				} else {
 					dstu1bundle = parser.parseBundle(theResponseReader);
 				}
+				listOfResources = dstu1bundle.toListOfResources();
 			} else {
 				Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
 				dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
@@ -183,7 +184,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				return dstu2bundle;
 			case LIST_OF_RESOURCES:
 				if (myResourceListCollectionType != null) {
-					for (Iterator<IBaseResource> iter = listOfResources.iterator(); iter.hasNext(); ) {
+					for (Iterator<? extends IBaseResource> iter = listOfResources.iterator(); iter.hasNext(); ) {
 						IBaseResource next = iter.next();
 						if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
 							ourLog.debug("Not returning resource of type {} because it is not a subclass or instance of {}", next.getClass(), myResourceListCollectionType);
