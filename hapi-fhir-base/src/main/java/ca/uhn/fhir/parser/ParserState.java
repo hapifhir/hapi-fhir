@@ -2117,16 +2117,19 @@ class ParserState<T> {
 		public PreResourceStateHapi(BundleEntry theEntry, Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			myEntry = theEntry;
+			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
 		public PreResourceStateHapi(Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
+			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
 		public PreResourceStateHapi(Object theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			myTarget = theTarget;
 			myMutator = theMutator;
+			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
 		@Override

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,10 +26,8 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -39,7 +36,6 @@ public class ClientWithProfileDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientWithProfileDstu2Test.class);
 	private FhirContext ourCtx;
 	private HttpClient ourHttpClient;
-
 	private HttpResponse ourHttpResponse;
 
 	@Before

@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -130,7 +131,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.BUNDLE;
+//		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+			return ReturnTypeEnum.BUNDLE;
+//		} else {
+//			return ReturnTypeEnum.RESOURCE;
+//		}
 	}
 
 	@Override

@@ -25,21 +25,23 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -62,6 +64,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -157,32 +160,40 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		switch (getReturnType()) {
 		case BUNDLE: {
-			Bundle bundle;
-			if (myResourceType != null) {
-				bundle = parser.parseBundle(myResourceType, theResponseReader);
+			
+			Bundle dstu1bundle = null;
+			IBaseBundle dstu2bundle = null;
+			List<IBaseResource> listOfResources = null;
+			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE || getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				if (myResourceType != null) {
+					dstu1bundle = parser.parseBundle(myResourceType, theResponseReader);
+				} else {
+					dstu1bundle = parser.parseBundle(theResponseReader);
+				}
 			} else {
-				bundle = parser.parseBundle(theResponseReader);
+				Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
+				dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
+				listOfResources = BundleUtil.toListOfResources(getContext(), dstu2bundle);
 			}
+			
 			switch (getMethodReturnType()) {
 			case BUNDLE:
-				return bundle;
+				return dstu1bundle;
+			case BUNDLE_RESOURCE:
+				return dstu2bundle;
 			case LIST_OF_RESOURCES:
-				List<IResource> listOfResources;
 				if (myResourceListCollectionType != null) {
-					listOfResources = new ArrayList<IResource>();
-					for (IResource next : bundle.toListOfResources()) {
+					for (Iterator<IBaseResource> iter = listOfResources.iterator(); iter.hasNext(); ) {
+						IBaseResource next = iter.next();
 						if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
 							ourLog.debug("Not returning resource of type {} because it is not a subclass or instance of {}", next.getClass(), myResourceListCollectionType);
-							continue;
+							iter.remove();
 						}
-						listOfResources.add(next);
 					}
-				} else {
-					listOfResources = bundle.toListOfResources();
 				}
 				return listOfResources;
 			case RESOURCE:
-				List<IResource> list = bundle.toListOfResources();
+				List<IResource> list = dstu1bundle.toListOfResources();
 				if (list.size() == 0) {
 					return null;
 				} else if (list.size() == 1) {
