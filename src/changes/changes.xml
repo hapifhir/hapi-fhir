@@ -145,6 +145,11 @@
 				extensions on fields in the resonse Bundle (e.g. Bundle.entry.search).
 				Thanks to GitHub user am202 for reporting! 
 			</action>
+			<action type="fix" issue="274">
+				Primitive elements with no value but an extension were sometimes not
+				encoded correctly in XML, and sometimes not parsed correctly in JSON.
+				Thanks to Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

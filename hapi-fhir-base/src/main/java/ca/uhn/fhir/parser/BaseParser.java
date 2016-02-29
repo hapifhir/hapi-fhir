@@ -42,6 +42,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,6 +66,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
@@ -549,7 +552,7 @@ public abstract class BaseParser implements IParser {
 
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
 		if (myContext.getVersion().getVersion().isRi()) {
-			
+
 			/*
 			 * If we're encoding the meta tag, we do some massaging of the meta values before
 			 * encoding. Buf if there is no meta element at all, we create one since we're possibly going to be
@@ -562,36 +565,36 @@ public abstract class BaseParser implements IParser {
 					theValues = Collections.singletonList(newType);
 				}
 			}
-			
+
 			if (theValues.size() == 1 && theValues.get(0) instanceof IBaseMetaType) {
-				
+
 				IBaseMetaType metaValue = (IBaseMetaType) theValues.get(0);
 				try {
 					metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
 				} catch (Exception e) {
 					throw new InternalErrorException("Failed to duplicate meta", e);
 				}
-				
+
 				if (isBlank(metaValue.getVersionId())) {
 					if (theResource.getIdElement().hasVersionIdPart()) {
 						metaValue.setVersionId(theResource.getIdElement().getVersionIdPart());
 					}
 				}
-				
+
 				filterCodingsWithNoCodeOrSystem(metaValue.getTag());
 				filterCodingsWithNoCodeOrSystem(metaValue.getSecurity());
-				
+
 				if (shouldAddSubsettedTag()) {
 					IBaseCoding coding = metaValue.addTag();
 					coding.setCode(Constants.TAG_SUBSETTED_CODE);
 					coding.setSystem(Constants.TAG_SUBSETTED_SYSTEM);
 					coding.setDisplay(subsetDescription());
 				}
-				
+
 				return Collections.singletonList(metaValue);
 			}
 		}
-		
+
 		return theValues;
 	}
 
@@ -688,6 +691,28 @@ public abstract class BaseParser implements IParser {
 		return securityLabels;
 	}
 
+	static boolean hasExtensions(IBase theElement) {
+		if (theElement instanceof ISupportsUndeclaredExtensions) {
+			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
+			if (res.getUndeclaredExtensions().size() > 0 || res.getUndeclaredModifierExtensions().size() > 0) {
+				return true;
+			}
+		}
+		if (theElement instanceof IBaseHasExtensions) {
+			IBaseHasExtensions res = (IBaseHasExtensions) theElement;
+			if (res.hasExtension()) {
+				return true;
+			}
+		}
+		if (theElement instanceof IBaseHasModifierExtensions) {
+			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
+			if (res.hasModifierExtension()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	protected class CompositeChildElement {
 		private final BaseRuntimeChildDefinition myDef;
 		private final CompositeChildElement myParent;
@@ -710,7 +735,6 @@ public abstract class BaseParser implements IParser {
 			}
 
 		}
-
 
 		public CompositeChildElement(RuntimeResourceDefinition theResDef) {
 			myResDef = theResDef;
