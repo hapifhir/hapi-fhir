@@ -1,15 +1,13 @@
 package ca.uhn.fhir.jpa.test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -39,7 +37,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class OverlayTestApp {
 
-	private static ClassPathXmlApplicationContext ourAppCtx;
+	private static AnnotationConfigApplicationContext ourAppCtx;
 
 	@SuppressWarnings({ "unchecked" })
 	public static void main(String[] args) throws Exception {
@@ -50,7 +48,7 @@ public class OverlayTestApp {
 			WebAppContext root = new WebAppContext();
 
 			root.setContextPath("/");
-			root.setDescriptor("src/main/webapp/WEB-INF/web.xml");
+			root.setDescriptor("src/test/resources/web.xml");
 			root.setResourceBase("src/main/webapp");
 
 			root.setParentLoaderPriority(true);
@@ -61,10 +59,9 @@ public class OverlayTestApp {
 
 		}
 
-		ourAppCtx = new ClassPathXmlApplicationContext(
-				"hapi-fhir-server-resourceproviders-dstu2.xml", 
-				"hapi-fhir-server-resourceproviders-dstu1.xml", 
-				"fhir-jpabase-spring-test-config.xml");
+		if (true) {return;}
+		
+		ourAppCtx = new AnnotationConfigApplicationContext(FhirServerConfig.class);
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
@@ -72,37 +69,37 @@ public class OverlayTestApp {
 		 * DSTU2 resources
 		 */
 
-		RestfulServer restServerDev = new RestfulServer();
-		restServerDev.setPagingProvider(new FifoMemoryPagingProvider(10));
-		restServerDev.setImplementationDescription("This is a great server!!!!");
-		restServerDev.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
+		RestfulServer restServerDstu2 = new RestfulServer();
+		restServerDstu2.setPagingProvider(new FifoMemoryPagingProvider(10));
+		restServerDstu2.setImplementationDescription("This is a great server!!!!");
+		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
-		restServerDev.setResourceProviders(rpsDev);
+		restServerDstu2.setResourceProviders(rpsDev);
 
 		JpaSystemProviderDstu2 systemProvDev = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
-		restServerDev.setPlainProviders(systemProvDev);
+		restServerDstu2.setPlainProviders(systemProvDev);
 
 		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(restServerDev);
+		servletHolder.setServlet(restServerDstu2);
 		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu2/*");
 
 		/*
 		 * DSTU resources
 		 */
 
-		RestfulServer restServerDstu1 = new RestfulServer();
-		restServerDstu1.setPagingProvider(new FifoMemoryPagingProvider(10));
-		restServerDstu1.setImplementationDescription("This is a great server!!!!");
-		restServerDstu1.setFhirContext(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
-		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
-		restServerDstu1.setResourceProviders(rpsDstu1);
-
-		JpaSystemProviderDstu1 systemProvDstu1 = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
-		restServerDstu1.setPlainProviders(systemProvDstu1);
-
-		servletHolder = new ServletHolder();
-		servletHolder.setServlet(restServerDstu1);
-		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu1/*");
+//		RestfulServer restServerDstu1 = new RestfulServer();
+//		restServerDstu1.setPagingProvider(new FifoMemoryPagingProvider(10));
+//		restServerDstu1.setImplementationDescription("This is a great server!!!!");
+//		restServerDstu1.setFhirContext(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
+//		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
+//		restServerDstu1.setResourceProviders(rpsDstu1);
+//
+//		JpaSystemProviderDstu1 systemProvDstu1 = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+//		restServerDstu1.setPlainProviders(systemProvDstu1);
+//
+//		servletHolder = new ServletHolder();
+//		servletHolder.setServlet(restServerDstu1);
+//		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu1/*");
 
 		int port = 8887;
 		Server server = new Server(port);
@@ -115,7 +112,7 @@ public class OverlayTestApp {
 
 		if (true) {
 			String base = "http://localhost:" + port + "/fhir/contextDstu1";
-			IGenericClient client = restServerDstu1.getFhirContext().newRestfulGenericClient(base);
+			IGenericClient client = restServerDstu2.getFhirContext().newRestfulGenericClient(base);
 			client.setLogRequestAndResponse(true);
 
 			Organization o1 = new Organization();

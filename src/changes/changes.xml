@@ -150,6 +150,14 @@
 				encoded correctly in XML, and sometimes not parsed correctly in JSON.
 				Thanks to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix" issue="280">
+				The Web Testing UI has long had an issue where if you click on a button which 
+				navigates to a new page (e.g. search, read, etc) and then click the back button
+				to return to the original page, the button you clicked remains disabled and can't
+				be clicked again (on Firefox and Safari). This is now fixed. Unfortunately the fix means that the
+				buttom will no longer show a "loading" spinner, but there doesn't seem to 
+				be another way of fixing this. Thanks to Mark Scrimshire for reporting! 
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

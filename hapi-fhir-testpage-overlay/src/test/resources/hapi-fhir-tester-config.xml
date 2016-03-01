@@ -1,0 +1,27 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context" xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<bean class="ca.uhn.fhir.to.TesterConfig">
+		<property name="servers">
+			<list>
+				<value>uhn  , DSTU2 , UHN          , http://fhirtest.uhn.ca/baseDstu2</value>
+				<value>home_d2  , DSTU2 , Localhost Server DSTU2          , http://localhost:8887/fhir/contextDstu2</value>
+				<value>hi       , DSTU1 , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
+				<value>furore   , DSTU1 , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
+				<value>blaze    , DSTU1 , Blaze (Orion Health)            , https://fhir.orionhealth.com/blaze/fhir</value>
+				<value>oridashi , DSTU1 , Oridashi                        , http://demo.oridashi.com.au:8190</value>
+				<value>fhirbase , DSTU1 , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext">
+	</bean>
+</beans>

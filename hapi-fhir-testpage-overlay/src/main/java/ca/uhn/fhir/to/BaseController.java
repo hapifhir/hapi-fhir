@@ -28,11 +28,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.HttpEntityWrapper;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Extension;
+import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,15 +43,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
+import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -79,7 +79,7 @@ public class BaseController {
 		if (myConfig.getDebugTemplatesMode()) {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
-	
+
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
 		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);
@@ -91,7 +91,7 @@ public class BaseController {
 		theModel.put("pretty", theRequest.getPretty());
 		theModel.put("_summary", theRequest.get_summary());
 		theModel.put("serverEntries", myConfig.getIdToServerName());
-	
+
 		return loadAndAddConf(theServletRequest, theRequest, theModel);
 	}
 
@@ -108,16 +108,28 @@ public class BaseController {
 		return retVal.toArray(new Header[retVal.size()]);
 	}
 
+	private Header[] applyHeaderFilters(Map<String, List<String>> theAllHeaders) {
+		ArrayList<Header> retVal = new ArrayList<Header>();
+		for (String nextKey : theAllHeaders.keySet()) {
+			for (String nextValue : theAllHeaders.get(nextKey)) {
+				if (myFilterHeaders == null || !myFilterHeaders.contains(nextKey.toLowerCase())) {
+					retVal.add(new BasicHeader(nextKey, nextValue));
+				}
+			}
+		}
+		return retVal.toArray(new Header[retVal.size()]);
+	}
+
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
 			return str;
 		}
-	
+
 		StringBuilder b = new StringBuilder();
-	
+
 		if (theEncodingEnum == EncodingEnum.JSON) {
-	
+
 			boolean inValue = false;
 			boolean inQuote = false;
 			for (int i = 0; i < str.length(); i++) {
@@ -171,7 +183,7 @@ public class BaseController {
 					}
 				}
 			}
-	
+
 		} else {
 			boolean inQuote = false;
 			boolean inTag = false;
@@ -215,7 +227,7 @@ public class BaseController {
 				}
 			}
 		}
-	
+
 		return b.toString();
 	}
 
@@ -224,16 +236,16 @@ public class BaseController {
 		if (str == null) {
 			return str;
 		}
-	
+
 		try {
 			str = URLDecoder.decode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			ourLog.error("Should not happen", e);
 		}
-	
+
 		StringBuilder b = new StringBuilder();
 		b.append("<span class='hlUrlBase'>");
-	
+
 		boolean inParams = false;
 		for (int i = 0; i < str.length(); i++) {
 			char nextChar = str.charAt(i);
@@ -261,7 +273,7 @@ public class BaseController {
 				}
 			}
 		}
-	
+
 		if (inParams) {
 			b.append("</span>");
 		}
@@ -291,11 +303,11 @@ public class BaseController {
 		ResultType returnsResource;
 		returnsResource = ResultType.NONE;
 		ourLog.warn("Failed to invoke server", e);
-	
+
 		if (e != null) {
 			theModel.put("errorMsg", "Error: " + e.getMessage());
 		}
-	
+
 		return returnsResource;
 	}
 
@@ -314,7 +326,7 @@ public class BaseController {
 	private Conformance loadAndAddConfDstu1(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-	
+
 		Conformance conformance;
 		try {
 			conformance = (Conformance) client.conformance();
@@ -323,9 +335,9 @@ public class BaseController {
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
 			conformance = new Conformance();
 		}
-	
+
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
-	
+
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
 		for (Rest nextRest : conformance.getRest()) {
@@ -339,7 +351,7 @@ public class BaseController {
 			}
 		}
 		theModel.put("resourceCounts", resourceCounts);
-	
+
 		if (total > 0) {
 			for (Rest nextRest : conformance.getRest()) {
 				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dstu.resource.Conformance.RestResource>() {
@@ -364,17 +376,17 @@ public class BaseController {
 				});
 			}
 		}
-	
+
 		theModel.put("conf", conformance);
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-	
+
 		return conformance;
 	}
 
 	private IResource loadAndAddConfDstu2(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-	
+
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {
 			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
@@ -383,9 +395,9 @@ public class BaseController {
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
 			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
 		}
-	
+
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
-	
+
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
@@ -399,7 +411,7 @@ public class BaseController {
 			}
 		}
 		theModel.put("resourceCounts", resourceCounts);
-	
+
 		if (total > 0) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource>() {
@@ -424,17 +436,17 @@ public class BaseController {
 				});
 			}
 		}
-	
+
 		theModel.put("conf", conformance);
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-	
+
 		return conformance;
 	}
 
 	private IBaseResource loadAndAddConfDstu3(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-	
+
 		org.hl7.fhir.dstu3.model.Conformance conformance;
 		try {
 			conformance = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.Conformance.class).execute();
@@ -443,9 +455,9 @@ public class BaseController {
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
 			conformance = new org.hl7.fhir.dstu3.model.Conformance();
 		}
-	
+
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
-	
+
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
 		for (ConformanceRestComponent nextRest : conformance.getRest()) {
@@ -459,7 +471,7 @@ public class BaseController {
 			}
 		}
 		theModel.put("resourceCounts", resourceCounts);
-	
+
 		if (total > 0) {
 			for (ConformanceRestComponent nextRest : conformance.getRest()) {
 				Collections.sort(nextRest.getResource(), new Comparator<ConformanceRestResourceComponent>() {
@@ -484,12 +496,13 @@ public class BaseController {
 				});
 			}
 		}
-	
+
 		theModel.put("conf", conformance);
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-	
+
 		return conformance;
 	}
+
 	protected String logPrefix(ModelMap theModel) {
 		return "[server=" + theModel.get("serverId") + "] - ";
 	}
@@ -502,7 +515,7 @@ public class BaseController {
 				IResource resource = (IResource) par;
 				retVal = resource.getText().getDiv().getValueAsString();
 			} else if (par instanceof IDomainResource) {
-				retVal = ((IDomainResource)par).getText().getDivAsString();
+				retVal = ((IDomainResource) par).getText().getDivAsString();
 			} else {
 				retVal = null;
 			}
@@ -518,7 +531,7 @@ public class BaseController {
 			return "";
 		}
 		String retVal = theBody.trim();
-	
+
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < retVal.length(); i++) {
 			char nextChar = retVal.charAt(i);
@@ -543,30 +556,30 @@ public class BaseController {
 
 	protected void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription, CaptureInterceptor theInterceptor, HomeRequest theRequest) {
 		try {
-			HttpRequestBase lastRequest = theInterceptor.getLastRequest();
+			ApacheHttpRequest lastRequest = theInterceptor.getLastRequest();
 			HttpResponse lastResponse = theInterceptor.getLastResponse();
 			String requestBody = null;
-			String requestUrl = lastRequest != null ? lastRequest.getURI().toASCIIString() : null;
-			String action = lastRequest != null ? lastRequest.getMethod() : null;
+			String requestUrl = lastRequest != null ? lastRequest.getApacheRequest().getURI().toASCIIString() : null;
+			String action = lastRequest != null ? lastRequest.getApacheRequest().getMethod() : null;
 			String resultStatus = lastResponse != null ? lastResponse.getStatusLine().toString() : null;
 			String resultBody = StringUtils.defaultString(theInterceptor.getLastResponseBody());
-	
+
 			if (lastRequest instanceof HttpEntityEnclosingRequest) {
 				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
 				if (entity.isRepeatable()) {
 					requestBody = IOUtils.toString(entity.getContent());
 				}
 			}
-	
+
 			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
 			String mimeType = ct != null ? ct.getMimeType() : null;
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
-	
+
 			StringBuilder resultDescription = new StringBuilder();
 			Bundle bundle = null;
 			IBaseResource riBundle = null;
-	
+
 			FhirContext context = getContext(theRequest);
 			if (ctEnum == null) {
 				resultDescription.append("Non-FHIR response");
@@ -601,70 +614,70 @@ public class BaseController {
 					break;
 				}
 			}
-	
+
 			resultDescription.append(" (").append(resultBody.length() + " bytes)");
-	
+
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
-	
+
 			theModelMap.put("outcomeDescription", outcomeDescription);
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
 			theModelMap.put("bundle", bundle);
 			theModelMap.put("riBundle", riBundle);
 			theModelMap.put("resultStatus", resultStatus);
-	
+
 			theModelMap.put("requestUrl", requestUrl);
 			theModelMap.put("requestUrlText", formatUrl(theClient.getUrlBase(), requestUrl));
-	
+
 			String requestBodyText = format(requestBody, ctEnum);
 			theModelMap.put("requestBody", requestBodyText);
-	
+
 			String resultBodyText = format(resultBody, ctEnum);
 			theModelMap.put("resultBody", resultBodyText);
-	
+
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
 			theModelMap.put("narrative", narrativeString);
 			theModelMap.put("latencyMs", theLatency);
-	
+
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
 			theModelMap.put("errorMsg", "Error during processing: " + e.getMessage());
 		}
-	
+
 	}
 
 	public static class CaptureInterceptor implements IClientInterceptor {
-	
-		private HttpRequestBase myLastRequest;
+
+		private ApacheHttpRequest myLastRequest;
 		private HttpResponse myLastResponse;
 		private String myResponseBody;
-	
-		public HttpRequestBase getLastRequest() {
+
+		public ApacheHttpRequest getLastRequest() {
 			return myLastRequest;
 		}
-	
+
 		public HttpResponse getLastResponse() {
 			return myLastResponse;
 		}
-	
+
 		public String getLastResponseBody() {
 			return myResponseBody;
 		}
-	
+
 		@Override
 		public void interceptRequest(IHttpRequest theRequest) {
 			assert myLastRequest == null;
-			myLastRequest = (HttpRequestBase) theRequest;
+			myLastRequest = (ApacheHttpRequest) theRequest;
 		}
-	
+
 		@Override
 		public void interceptResponse(IHttpResponse theResponse) throws IOException {
 			assert myLastResponse == null;
-			myLastResponse = (HttpResponse) theResponse;
-	
+			myLastResponse = ((ApacheHttpResponse) theResponse).getResponse();
+
 			HttpEntity respEntity = myLastResponse.getEntity();
 			if (respEntity != null) {
 				final byte[] bytes;
@@ -673,37 +686,37 @@ public class BaseController {
 				} catch (IllegalStateException e) {
 					throw new InternalErrorException(e);
 				}
-	
+
 				myResponseBody = new String(bytes, "UTF-8");
 				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
 			}
 		}
-	
+
 		private static class MyEntityWrapper extends HttpEntityWrapper {
-	
+
 			private byte[] myBytes;
-	
+
 			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
 				super(theWrappedEntity);
 				myBytes = theBytes;
 			}
-	
+
 			@Override
 			public InputStream getContent() throws IOException {
 				return new ByteArrayInputStream(myBytes);
 			}
-	
+
 			@Override
 			public void writeTo(OutputStream theOutstream) throws IOException {
 				theOutstream.write(myBytes);
 			}
-	
+
 		}
-	
+
 	}
 
 	protected enum ResultType {
-			BUNDLE, NONE, RESOURCE, TAGLIST
-		}
+		BUNDLE, NONE, RESOURCE, TAGLIST
+	}
 
 }
