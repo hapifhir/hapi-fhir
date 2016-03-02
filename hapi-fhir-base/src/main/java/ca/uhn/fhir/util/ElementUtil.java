@@ -99,7 +99,14 @@ public class ElementUtil {
 			return true;
 		}
 		for (int i = 0; i < theElements.size(); i++) {
-			IBase next = theElements.get(i);
+			IBase next;
+			try {
+				next = theElements.get(i);
+			} catch (ClassCastException e) {
+				List<?> elements = theElements;
+				String s = "Found instance of " + elements.get(i).getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
+				throw new ClassCastException(s);
+			}
 			if (next != null && !next.isEmpty()) {
 				return false;
 			}

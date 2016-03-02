@@ -164,6 +164,12 @@
 				other similar errors are handled. This allows the parser to be more lenient
 				when needed.
 			</action>
+			<action type="add" issue="304">
+				Improve error message if incorrect type is placed in a list field in the data model. Java
+				uses generics to prevent this at compile time, but if someone is in an environment without 
+				generics this helps improve the error message at runtime. Thanks to Hugo Soares for
+				suggesting.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

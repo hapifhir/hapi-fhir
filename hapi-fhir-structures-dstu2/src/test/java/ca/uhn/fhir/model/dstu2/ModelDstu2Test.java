@@ -1,7 +1,6 @@
 package ca.uhn.fhir.model.dstu2;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,21 +17,17 @@ public class ModelDstu2Test {
 	/**
 	 * See #304
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testPopulateWrongGenericType() {
 		Patient p = new Patient();
 		List names = Arrays.asList("name");
+		p.setName(names);
 
-		p.setName(null);
-
-		ourCtx.newXmlParser().encodeResourceToString(p);
-		
 		try {
-			p.setName(names);
-			fail();
+			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals("Failed to set invalid value, found element in list of type String but expected ca.uhn.fhir.model.dstu2.composite.HumanNameDt", e.getMessage());
+			assertEquals("Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
 
