@@ -300,9 +300,16 @@ public class FhirTerser {
 		case COMPOSITE_DATATYPE: {
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
-				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
+				List<?> values = nextChild.getAccessor().getValues(theElement);
 				if (values != null) {
-					for (IBase nextValue : values) {
+					for (Object nextValueObject : values) {
+						IBase nextValue;
+						try {
+							nextValue = (IBase) nextValueObject;
+						} catch (ClassCastException e) {
+							String s = "Found instance of " + nextValueObject.getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
+							throw new ClassCastException(s);
+						}
 						if (nextValue == null) {
 							continue;
 						}
