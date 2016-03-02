@@ -867,7 +867,7 @@ class ParserState<T> {
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
 					} else {
-						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
+						logAndSwallowUnexpectedElement("extension");
 					}
 				} else {
 					if (getCurrentElement() instanceof IBaseHasModifierExtensions) {
@@ -876,7 +876,7 @@ class ParserState<T> {
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
 					} else {
-						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
+						logAndSwallowUnexpectedElement("modifierExtension");
 					}
 				}
 			}

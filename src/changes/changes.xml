@@ -158,6 +158,12 @@
 				buttom will no longer show a "loading" spinner, but there doesn't seem to 
 				be another way of fixing this. Thanks to Mark Scrimshire for reporting! 
 			</action>
+			<action type="fix">
+				Extensions found while parsing an object that doesn't support extensions are now
+				reported using the IParserErrorHandler framework in the same way that
+				other similar errors are handled. This allows the parser to be more lenient
+				when needed.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

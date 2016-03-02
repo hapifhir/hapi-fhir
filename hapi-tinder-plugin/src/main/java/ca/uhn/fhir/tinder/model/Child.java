@@ -123,7 +123,9 @@ public abstract class Child extends BaseElement {
 	public String getSingleType() {
 		String retVal;
 		String elemName = this.getType().get(0);
-		elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
+		if (elemName.startsWith("ca.") == false) {
+			elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
+		}
 		// if (this instanceof ResourceBlock) {
 		retVal = (elemName);
 		// } else {
