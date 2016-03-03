@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.internal.stubbing.answers.ThrowsException;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -69,6 +70,24 @@ import net.sf.json.JsonConfig;
 public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
+
+	/**
+	 * See #308
+	 */
+	@Test
+	public void testDeclaredExtensionsDontProduceWarning() {
+		ReportObservation obs = new ReportObservation();
+		obs.setReadOnly(true);
+		
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
+		
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+		
+		obs = p.parseResource(ReportObservation.class, encoded);
+		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
+	}
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -1124,7 +1143,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
 	}
-
+	
 	/**
 	 * See #144 and #146
 	 */

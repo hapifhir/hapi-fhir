@@ -170,6 +170,10 @@
 				generics this helps improve the error message at runtime. Thanks to Hugo Soares for
 				suggesting.
 			</action>
+			<action type="fix" issue="308">
+				Prevent an unneeded warning when parsing a resource containing
+				a declared extension. Thanks to Matt Blanchette for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

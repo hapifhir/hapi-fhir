@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.internal.stubbing.answers.ThrowsException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -97,7 +98,6 @@ public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
-	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
@@ -130,6 +130,7 @@ public class XmlParserDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testChoiceTypeWithProfiledType() {
 		//@formatter:off
@@ -150,7 +151,6 @@ public class XmlParserDstu2Test {
 		assertThat(encoded, containsString("<valueMarkdown value=\"THIS IS MARKDOWN\"/>"));
 	}
 
-	
 	@Test
 	public void testChoiceTypeWithProfiledType2() {
 		Parameters par = new Parameters();
@@ -168,6 +168,7 @@ public class XmlParserDstu2Test {
 		assertEquals(MarkdownDt.class, par.getParameter().get(1).getValue().getClass());
 	}
 
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -188,6 +189,24 @@ public class XmlParserDstu2Test {
 		ResourceReferenceDt rr = (ResourceReferenceDt) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
+	}
+
+	/**
+	 * See #308
+	 */
+	@Test
+	public void testDeclaredExtensionsDontProduceWarning() {
+		ReportObservation obs = new ReportObservation();
+		obs.setReadOnly(true);
+		
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
+		
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+		
+		obs = p.parseResource(ReportObservation.class, encoded);
+		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
 
 	@Test

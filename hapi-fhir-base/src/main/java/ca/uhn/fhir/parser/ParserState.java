@@ -1481,6 +1481,15 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if (theName.equals("url")) {
+				// This can be ignored
+				return;
+			}
+			super.attributeValue(theName, theValue);
+		}
+
+		@Override
 		public void endingElement() throws DataFormatException {
 			pop();
 		}

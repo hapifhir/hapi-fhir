@@ -12,6 +12,8 @@ import ca.uhn.fhir.util.ElementUtil;
 @ResourceDef(name = "Observation", id = "reportobservation")
 public class ReportObservation extends Observation {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Each extension is defined in a field. Any valid HAPI Data Type can be used for the field type. Note that the
 	 * [name=""] attribute in the @Child annotation needs to match the name for the bean accessor and mutator methods.
