@@ -285,7 +285,11 @@ public class Controller extends BaseController {
 		try {
 			IdDt resid = new IdDt(def.getName(), id, versionId);
 			ourLog.info(logPrefix(theModel) + "Reading resource: {}", resid);
-			client.read(def.getImplementingClass(), resid);
+			if (resid.hasVersionIdPart()) {
+				client.vread(def.getImplementingClass(), resid);
+			} else {
+				client.read(def.getImplementingClass(), resid);
+			}
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
