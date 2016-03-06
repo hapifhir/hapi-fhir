@@ -178,6 +178,11 @@
 				Web Tester UI did not invoke VRead even if a version ID was specified. Thanks
 				to Poseidon for reporting!
 			</action>
+			<action type="add">
+				Per discussion on the FHIR implementer chat, the JPA server no
+				longer includes _revinclude matches in the Bundle.total count, or the
+				page size limit.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
