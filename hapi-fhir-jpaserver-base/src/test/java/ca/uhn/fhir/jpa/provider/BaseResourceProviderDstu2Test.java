@@ -42,6 +42,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static int ourPort;
 	private static Server ourServer;
 	protected static String ourServerBase;
+	private static GenericWebApplicationContext ourWebApplicationContext;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
@@ -73,6 +74,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
+		ourWebApplicationContext.close();
+		ourWebApplicationContext = null;
 	}
 
 	@After
@@ -114,11 +117,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 	
-			GenericWebApplicationContext webApplicationContext = new GenericWebApplicationContext();
-			webApplicationContext.setParent(myAppCtx);
-			webApplicationContext.refresh();
+			ourWebApplicationContext = new GenericWebApplicationContext();
+			ourWebApplicationContext.setParent(myAppCtx);
+			ourWebApplicationContext.refresh();
 
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext); 
+			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext); 
 			
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);

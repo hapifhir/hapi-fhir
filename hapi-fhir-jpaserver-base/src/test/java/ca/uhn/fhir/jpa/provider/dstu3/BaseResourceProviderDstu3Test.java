@@ -47,6 +47,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static String ourServerBase;
 	protected static RestfulServer ourRestServer;
 	private static JpaValidationSupportChainDstu3 myValidationSupport;
+	private static GenericWebApplicationContext ourWebApplicationContext;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -71,6 +72,9 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		ourServer = null;
 		ourHttpClient = null;
 		myValidationSupport.flush();
+		myValidationSupport = null;
+		ourWebApplicationContext.close();
+		ourWebApplicationContext = null;
 	}
 
 	@After
@@ -112,13 +116,13 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			servletHolder.setServlet(ourRestServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 	
-			GenericWebApplicationContext webApplicationContext = new GenericWebApplicationContext();
-			webApplicationContext.setParent(myAppCtx);
-			webApplicationContext.refresh();
+			ourWebApplicationContext = new GenericWebApplicationContext();
+			ourWebApplicationContext.setParent(myAppCtx);
+			ourWebApplicationContext.refresh();
 //			ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
 //			loaderListener.initWebApplicationContext(mock(ServletContext.class));
 //	
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext); 
+			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext); 
 			
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 //			dispatcherServlet.setApplicationContext(webApplicationContext);

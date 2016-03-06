@@ -60,6 +60,24 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void sleepUntilPingCount(BaseSocket socket, int wantPingCount) throws InterruptedException {
+		/*
+		 * In a separate thread, start a polling for new resources. Normally the scheduler would
+		 * take care of this, but that can take longer which makes the unit tests run much slower
+		 * so we simulate that part.. 
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					ourLog.warn("Interrupted", e);
+				}
+				ourLog.info("About to poll in separate thread");
+				mySubscriptionDao.pollForNewUndeliveredResources();
+				ourLog.info("Done poll in separate thread");
+			}}.start();
+
 		ourLog.info("Entering loop");
 		for (long start = System.currentTimeMillis(), now = System.currentTimeMillis(); now - start <= 20000; now = System.currentTimeMillis()) {
 			ourLog.debug("Starting");

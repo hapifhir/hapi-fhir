@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
+
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -34,7 +36,9 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		if (ourValidatingInterceptor == null) {
 			ourValidatingInterceptor = new RequestValidatingInterceptor();
 			ourValidatingInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
-			for (IValidatorModule next : myAppCtx.getBeansOfType(IValidatorModule.class).values()) {
+
+			Collection<IValidatorModule> validators = myAppCtx.getBeansOfType(IValidatorModule.class).values();
+			for (IValidatorModule next : validators) {
 				ourValidatingInterceptor.addValidatorModule(next);
 			}
 			ourRestServer.registerInterceptor(ourValidatingInterceptor);
@@ -44,6 +48,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	@AfterClass
 	public static void afterClass() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
+		ourValidatingInterceptor = null;
 	}
 	
 	

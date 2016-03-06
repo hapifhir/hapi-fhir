@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class FhirInstanceValidatorTest {
 
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorTest.class);
-  private DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
+  private static DefaultProfileValidationSupport ourDefaultValidationSupport = new DefaultProfileValidationSupport();
   private FhirInstanceValidator myInstanceVal;
   private IValidationSupport myMockSupport;
 
@@ -55,6 +56,12 @@ public class FhirInstanceValidatorTest {
   private void addValidConcept(String theSystem, String theCode) {
     myValidConcepts.add(theSystem + "___" + theCode);
   }
+  
+  @AfterClass
+  public static void afterClass() {
+    ourDefaultValidationSupport.flush();
+    ourDefaultValidationSupport = null;
+  }
 
   @SuppressWarnings("unchecked")
   @Before
@@ -63,7 +70,7 @@ public class FhirInstanceValidatorTest {
     myVal.setValidateAgainstStandardSchema(false);
     myVal.setValidateAgainstStandardSchematron(false);
 
-    myInstanceVal = new FhirInstanceValidator();
+    myInstanceVal = new FhirInstanceValidator(ourDefaultValidationSupport);
     myVal.registerValidatorModule(myInstanceVal);
 
     mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
@@ -77,7 +84,7 @@ public class FhirInstanceValidatorTest {
         ConceptSetComponent arg = (ConceptSetComponent)theInvocation.getArguments()[0];
         ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
         if (retVal == null) {
-          retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
+          retVal = ourDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
         }
         ourLog.info("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
         return retVal;
@@ -95,7 +102,7 @@ public class FhirInstanceValidatorTest {
         .thenAnswer(new Answer<IBaseResource>() {
           @Override
           public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-            IBaseResource retVal = myDefaultValidationSupport.fetchResource(
+            IBaseResource retVal = ourDefaultValidationSupport.fetchResource(
                 (FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
                 (String) theInvocation.getArguments()[2]);
             ourLog.info("fetchResource({}, {}) : {}",
@@ -114,7 +121,7 @@ public class FhirInstanceValidatorTest {
             if (myValidConcepts.contains(system + "___" + code)) {
               retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
             } else {
-              retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
+              retVal = ourDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
             }
             ourLog.info("validateCode({}, {}, {}) : {}",
                 new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
@@ -124,7 +131,7 @@ public class FhirInstanceValidatorTest {
     when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<ValueSet>() {
       @Override
       public ValueSet answer(InvocationOnMock theInvocation) throws Throwable {
-        ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
+        ValueSet retVal = ourDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
         ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
         return retVal;
       }

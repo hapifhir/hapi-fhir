@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -96,7 +97,7 @@ public class BaseJpaTest {
 
 	@AfterClass
 	public static void afterClassShutdownDerby() throws SQLException {
-//		DriverManager.getConnection("jdbc:derby:;shutdown=true");
+		//		DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
 		// } catch (SQLNonTransientConnectionException e) {

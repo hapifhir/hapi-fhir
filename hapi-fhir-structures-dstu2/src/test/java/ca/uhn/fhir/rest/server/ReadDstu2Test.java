@@ -41,11 +41,13 @@ public class ReadDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
+	private static IdDt ourLastId;
 
 	@Before
 	public void before() {
 		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
 		ourInitializeProfileList = false;
+		ourLastId = null;
 	}
 
 	/**
@@ -55,7 +57,7 @@ public class ReadDstu2Test {
 	public void testAddProfile() throws Exception {
 		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
 		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -66,8 +68,30 @@ public class ReadDstu2Test {
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 		
 		ourLog.info(responseContent);
+		
+		assertEquals("Patient/123", ourLastId.getValue());
 	}
 
+	@Test
+	public void testVread() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals("Patient/123/_history/1", ourLastId.getValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("1", ourLastId.getVersionIdPart());
+	}
 	
 	/**
 	 * See #302
@@ -162,8 +186,9 @@ public class ReadDstu2Test {
 			return Patient.class;
 		}
 
-		@Read
+		@Read(version=true)
 		public Patient read(@IdParam IdDt theId) {
+			ourLastId = theId;
 			Patient p1 = new MyPatient();
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("p1ReadValue");

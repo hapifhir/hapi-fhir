@@ -29,6 +29,19 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
     return false;
   }
+  
+  /**
+   * Constructor
+   */
+  public DefaultProfileValidationSupport() {
+    super();
+  }
+  
+  public void flush() {
+    myDefaultValueSets = null;
+    myCodeSystems = null;
+  }
+  
 
   @SuppressWarnings("unchecked")
   @Override

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
@@ -48,4 +49,11 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupportDstu3);
 	}
+	
+	@PreDestroy
+	public void preDestroy() {
+		flush();
+	}
+	
+	
 }
