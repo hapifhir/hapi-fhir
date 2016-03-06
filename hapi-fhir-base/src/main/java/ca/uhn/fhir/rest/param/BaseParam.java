@@ -61,11 +61,16 @@ abstract class BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
+	 * If set to non-null value, indicates that this parameter has been populated 
+	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a 
+	 * normal value
+	 * 
+	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
 	@Override
-	public void setMissing(Boolean theMissing) {
+	public BaseParam setMissing(Boolean theMissing) {
 		myMissing = theMissing;
+		return this;
 	}
 
 	@Override

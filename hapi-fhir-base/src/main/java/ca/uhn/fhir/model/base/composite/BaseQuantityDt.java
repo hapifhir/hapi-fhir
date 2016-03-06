@@ -231,7 +231,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 	 */
 	@Deprecated
 	@Override
-	public void setMissing(Boolean theMissing) {
+	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 

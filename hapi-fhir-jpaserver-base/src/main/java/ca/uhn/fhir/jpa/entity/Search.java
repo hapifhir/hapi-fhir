@@ -53,13 +53,13 @@ public class Search implements Serializable {
 
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SEARCH")
 	@SequenceGenerator(name="SEQ_SEARCH", sequenceName="SEQ_SEARCH")
-	@Id
 	@Column(name = "PID")
 	private Long myId;
 
 	@Column(name="TOTAL_COUNT")
 	private int myTotalCount;
 	
+	@Id
 	@Column(name="SEARCH_UUID", length=40, nullable=false)
 	private String myUuid;
 

@@ -2250,7 +2250,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = myOrganizationDao.search(map);
-		assertEquals(2, resultsP.size());
+		assertEquals(1, resultsP.size());
 
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());

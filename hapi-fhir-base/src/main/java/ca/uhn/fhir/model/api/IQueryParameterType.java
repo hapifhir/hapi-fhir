@@ -69,8 +69,10 @@ public interface IQueryParameterType {
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
-	 * instead of a normal value 
+	 * instead of a normal value
+	 *  
+	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
-	void setMissing(Boolean theMissing);
+	IQueryParameterType setMissing(Boolean theMissing);
 
 }

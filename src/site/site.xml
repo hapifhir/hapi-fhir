@@ -32,14 +32,13 @@
 	<body>
 	
 		<head>
+			<![CDATA[
 			<!-- Syntax Highlighter -->
-			<!--
-			-->
-			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js"></script>
-			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shCore.js" />
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js" />
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js" />
+			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js" />
+			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js" />
 			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
 			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
 			
@@ -47,12 +46,11 @@
 			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
 			   font size
 			 -->
-			<!--
-			-->
 			<link rel="shortcut icon" href="http://jamesagnew.github.io/hapi-fhir/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 			
 			<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+			]]>
 		</head>
 		
 		<breadcrumbs>

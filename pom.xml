@@ -847,6 +847,10 @@
 							<artifactId>maven-scm-api</artifactId>
 						</dependency>
 						<dependency>
+						    <groupId>org.apache.maven.doxia</groupId>
+						    <artifactId>doxia-core</artifactId>
+						</dependency>						
+						<dependency>
 							<groupId>org.apache.maven.doxia</groupId>
 							<artifactId>doxia-module-markdown</artifactId>
 						</dependency>
@@ -1263,6 +1267,11 @@
 						<artifactId>maven-scm-api</artifactId>
 						<version>1.9.4</version>
 					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.doxia</groupId>
+						<artifactId>doxia-core</artifactId>
+						<version>1.7</version>
+					</dependency>						
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>

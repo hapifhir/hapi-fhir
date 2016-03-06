@@ -932,7 +932,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
 			map.add(nextEntry.getKey(), (nextEntry.getValue()));
 		}
-		return searchForIdsWithAndOr(map, null, null);
+		return searchForIdsWithAndOr(map, null);
 	}
 
 	@Override
@@ -941,10 +941,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids, DateRangeParam theLastUpdated) {
+	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
 		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao);
 		builder.setType(getResourceType(), getResourceName());
-		return builder.searchForIdsWithAndOr(theParams, theInitialPids, theLastUpdated);
+		builder.searchForIdsWithAndOr(theParams, theLastUpdated);
+		return builder.doGetPids();
 	}
 
 	@SuppressWarnings("unchecked")

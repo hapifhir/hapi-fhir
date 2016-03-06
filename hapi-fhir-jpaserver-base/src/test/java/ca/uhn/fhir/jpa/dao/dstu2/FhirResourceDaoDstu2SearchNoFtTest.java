@@ -395,6 +395,60 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	}
 
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchResourceReferenceMissing() {
+		IIdType oid1;
+		{
+			Organization org = new Organization();
+			org.setName("ORG1");
+			oid1 = myOrganizationDao.create(org, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("FAMILY1");
+			pid1 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+		IIdType pid2;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("FAMILY1");
+			patient.getManagingOrganization().setReference(oid1);
+			pid2 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+		IIdType pid3;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("FAMILY2");
+			pid3 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+		IIdType pid4;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("FAMILY2");
+			patient.getManagingOrganization().setReference(oid1);
+			pid4 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params;
+		
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam("FAMILY1"));
+		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1));
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1, pid3));
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam("FAMILY9999"));
+		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+	}
+	
 	@Test
 	public void testSearchByIdParamOr() {
 		IIdType id1;
@@ -1292,6 +1346,23 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 		{
 			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
+			assertEquals(0, myPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			assertEquals(0, myPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamComText", true));
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			assertEquals(1, myPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
 			IBundleProvider retrieved = myPatientDao.search(map);
 			assertEquals(1, retrieved.size());
@@ -1306,11 +1377,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new IdentifierDt("testSearchTokenParamSystem", "testSearchTokenParamCode"));
 			assertEquals(1, myPatientDao.search(map).size());
-		}
-		{
-			SearchParameterMap map = new SearchParameterMap();
-			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
-			assertEquals(0, myPatientDao.search(map).size());
 		}
 		{
 			// Complete match
@@ -1897,15 +1963,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		}
 		// String Param
 		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			StringParam param = new StringParam();
-			param.setMissing(false);
-			params.put(Patient.SP_FAMILY, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
 			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 			StringParam param = new StringParam();
 			param.setMissing(true);
@@ -1914,8 +1971,47 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			StringParam param = new StringParam();
+			param.setMissing(false);
+			params.put(Patient.SP_FAMILY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
 	}
 
+	/**
+	 * See #310
+	 */
+	@Test
+	@Ignore
+	public void testSearchMultiMatches() {
+		
+		for (int i = 0; i < 100; i++) {
+			Practitioner p = new Practitioner();
+			p.addAddress().addLine("FOO");
+			IIdType pid = myPractitionerDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			
+			Patient pt = new Patient();
+			pt.addCareProvider().setReference(pid);
+			IIdType ptid = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
+			
+			Observation obs = new Observation();
+			obs.setSubject(new ResourceReferenceDt(ptid));
+			myObservationDao.create(obs, mySrd);
+		}
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(new Include("Patient:careprovider"));
+		map.addRevInclude(new Include("Observation:patient"));
+
+		myPatientDao.search(map);
+		
+	}
+	
+	
 	@Test
 	public void testSearchWithNoResults() {
 		Device dev = new Device();

@@ -24,6 +24,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -297,7 +298,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	}
 
 	@Override
-	public void setMissing(Boolean theMissing) {
+	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException();
 	}
 

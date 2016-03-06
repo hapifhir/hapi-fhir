@@ -936,7 +936,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param theTag
 	 *           The tag
 	 * @return Returns <code>true</code> if the tag should be removed
-	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 */
 	@SuppressWarnings("unused")
 	protected void postPersist(ResourceTable theEntity, T theResource) {
@@ -966,7 +965,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
-		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, new HashSet<Long>(), paramMap.getLastUpdated());
+		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, paramMap.getLastUpdated());
 
 		return ids;
 	}
@@ -1168,14 +1167,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * The default implementation removes any profile declarations, but leaves tags and security labels in place.
 	 * Subclasses may choose to override and change this behaviour.
 	 * </p>
+	 * <p>
+	 * See <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
+	 *      Labels</a> for a description of the logic that the default behaviour folows.
+	 * </p>
 	 * 
 	 * @param theEntity
 	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
 	 *           The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
-	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
-	 *      Labels</a> for a description of the logic that the default behaviour folows.
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
 		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {

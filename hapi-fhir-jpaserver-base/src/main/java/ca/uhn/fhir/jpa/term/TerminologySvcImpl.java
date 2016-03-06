@@ -4,10 +4,9 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ValidationUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -44,7 +43,7 @@ public class TerminologySvcImpl implements ITerminologySvc {
 	
 	
 	@Override
-	@Transactional(value=TxType.REQUIRED)
+	@Transactional(propagation=Propagation.REQUIRED)
 	public void storeNewCodeSystemVersion(String theSystemUri, TermCodeSystemVersion theCodeSystem) {
 		ourLog.info("Storing code system");
 		
@@ -108,7 +107,7 @@ public class TerminologySvcImpl implements ITerminologySvc {
 		theConceptsStack.remove(theConcept);
 	}
 
-	@Transactional(value=TxType.REQUIRED)
+	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findByCodeSystemResourceAndVersion(theCodeSystemResourcePid, theCodeSystemVersionPid);
