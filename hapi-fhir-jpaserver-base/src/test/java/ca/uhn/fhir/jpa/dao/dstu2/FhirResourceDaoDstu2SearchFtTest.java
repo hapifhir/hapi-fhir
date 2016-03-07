@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.Media;

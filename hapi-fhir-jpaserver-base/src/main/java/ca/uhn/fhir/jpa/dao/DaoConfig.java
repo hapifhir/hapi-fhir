@@ -40,21 +40,37 @@ public class DaoConfig {
 	private boolean myAllowInlineMatchUrlReferences = false; 
 
 	private boolean myAllowMultipleDelete; 
-	private int myHardSearchLimit = 1000;
-	private int myHardTagListLimit = 1000;
-	private int myIncludeLimit = 2000;
 
 	// ***
 	// update setter javadoc if default changes
 	// ***
+	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
+	private int myHardSearchLimit = 1000;
+	private int myHardTagListLimit = 1000;
+	private int myIncludeLimit = 2000;
+	
+	// ***
+	// update setter javadoc if default changes
+	// ***
 	private boolean myIndexContainedResources = true;
-
+	
 	private List<IServerInterceptor> myInterceptors;
+
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
+	/**
+	 * Search results are stored in the database so that they can be paged through. After this
+	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * 
+	 * @since 1.5
+	 */
+	public long getExpireSearchResultsAfterMillis() {
+		return myExpireSearchResultsAfterMillis;
+	}
 	/**
 	 * See {@link #setIncludeLimit(int)}
 	 */
@@ -78,7 +94,6 @@ public class DaoConfig {
 		}
 		return myInterceptors;
 	}
-
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
@@ -137,6 +152,16 @@ public class DaoConfig {
 
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
+	}
+
+	/**
+	 * Search results are stored in the database so that they can be paged through. After this
+	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * 
+	 * @since 1.5
+	 */
+	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
+		myExpireSearchResultsAfterMillis = theExpireSearchResultsAfterMillis;
 	}
 
 	public void setHardSearchLimit(int theHardSearchLimit) {

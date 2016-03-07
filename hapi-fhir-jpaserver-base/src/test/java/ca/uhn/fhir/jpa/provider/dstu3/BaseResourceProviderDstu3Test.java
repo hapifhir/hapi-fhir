@@ -29,6 +29,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -78,7 +79,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@After
-	public void after() {
+	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
@@ -105,7 +106,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 	
-			ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			ourRestServer.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 	
 			Server server = new Server(ourPort);
 	

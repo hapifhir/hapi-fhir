@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import java.util.Collection;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.Date;
 
 /*
  * #%L
@@ -26,22 +24,14 @@ import org.springframework.data.domain.Pageable;
  */
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
 
-public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
-	
-	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search")
-	Collection<SearchResult> findWithSearchUuid(@Param("search") Search theSearch);
-	
-	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
-	Page<SearchResult> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
+public interface ISearchDao  extends JpaRepository<Search, Long> {
 
-	@Modifying
-	@Query(value="DELETE FROM SearchResult r WHERE r.mySearchPid = :search")
-	void deleteForSearch(@Param("search") Long theSearchPid);
+	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
+	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
+	
 }

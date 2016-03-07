@@ -38,6 +38,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.term.ITerminologySvc;
 import ca.uhn.fhir.jpa.term.TerminologySvcImpl;
 
@@ -60,6 +62,11 @@ public class BaseConfig implements SchedulingConfigurer {
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar theTaskRegistrar) {
 		theTaskRegistrar.setTaskScheduler(taskScheduler());
+	}
+
+	@Bean(autowire = Autowire.BY_TYPE)
+	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+		return new DatabaseBackedPagingProvider(10);
 	}
 
 	@Bean(name = "myFhirContextDstu1")
@@ -99,10 +106,10 @@ public class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean(autowire=Autowire.BY_TYPE)
-	public ITerminologySvc terminologyService() {
-		return new TerminologySvcImpl();
+	public StaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvc();
 	}
-	
+
 	@Bean
 	public TaskScheduler taskScheduler() {
 		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
@@ -110,14 +117,11 @@ public class BaseConfig implements SchedulingConfigurer {
 		return retVal;
 	}
 
-	/**
-	 * This lets the "@Value" fields reference properties from the properties file
-	 */
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		return new PropertySourcesPlaceholderConfigurer();
+	@Bean(autowire = Autowire.BY_TYPE)
+	public ITerminologySvc terminologyService() {
+		return new TerminologySvcImpl();
 	}
-
+	
 	// @PostConstruct
 	// public void wireResourceDaos() {
 	// Map<String, IDao> daoBeans = myAppCtx.getBeansOfType(IDao.class);
@@ -126,5 +130,13 @@ public class BaseConfig implements SchedulingConfigurer {
 	// next.setResourceDaos(bean);
 	// }
 	// }
+
+	/**
+	 * This lets the "@Value" fields reference properties from the properties file
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
 
 }

@@ -32,81 +32,80 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 //@formatter:off
 @Entity
-@Table(name = "HFJ_SEARCH_RESULT", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_SEARCHRES_ORDER", columnNames= {"SEARCH_PID", "SEARCH_ORDER"})
-})
+@Table(name = "HFJ_SEARCH_INCLUDE")
 //@formatter:on
-public class SearchResult implements Serializable {
+public class SearchInclude implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SEARCH_RES")
-	@SequenceGenerator(name="SEQ_SEARCH_RES", sequenceName="SEQ_SEARCH_RES")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_INC")
+	@SequenceGenerator(name = "SEQ_SEARCH_INC", sequenceName = "SEQ_SEARCH_INC")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name="SEARCH_ORDER", nullable=false)
-	private int myOrder;
-	
-	@ManyToOne
-	@JoinColumn(name="RESOURCE_PID", referencedColumnName="RES_ID", foreignKey=@ForeignKey(name="FK_SEARCHRES_RES"), insertable=false, updatable=false, nullable=false)
-	private ResourceTable myResource;
+	@Column(name = "REVINCLUDE", insertable = true, updatable = false, nullable = false)
+	private boolean myReverse;
 
-	@Column(name="RESOURCE_PID", insertable=true, updatable=false, nullable=false)
-	private Long myResourcePid;
+	public boolean isReverse() {
+		return myReverse;
+	}
+
+	@Column(name = "SEARCH_INCLUDE", length = 200, insertable = true, updatable = false, nullable = false)
+	private String myInclude;
 
 	@ManyToOne
-	@JoinColumn(name="SEARCH_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_SEARCHRES_SEARCH"))
+	@JoinColumn(name = "SEARCH_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_SEARCHINC_SEARCH"), insertable = true, updatable = false, nullable = false)
 	private Search mySearch;
 
 	@Column(name="SEARCH_PID", insertable=false, updatable=false, nullable=false)
 	private Long mySearchPid;
 
+	@Column(name = "INC_RECURSE", insertable = true, updatable = false, nullable = false)
+	private boolean myRecurse;
+
 	/**
 	 * Constructor
 	 */
-	public SearchResult() {
+	public SearchInclude() {
 		// nothing
 	}
 
 	/**
 	 * Constructor
 	 */
-	public SearchResult(Search theSearch) {
+	public SearchInclude(Search theSearch, String theInclude, boolean theReverse, boolean theRecurse) {
 		mySearch = theSearch;
+		myInclude = theInclude;
+		myReverse = theReverse;
+		myRecurse = theRecurse;
 	}
 
 	@Override
 	public boolean equals(Object theObj) {
-		if (!(theObj instanceof SearchResult)) {
+		if (!(theObj instanceof SearchInclude)) {
 			return false;
 		}
-		return myResourcePid.equals(((SearchResult)theObj).myResourcePid);
+		if (myId == null) {
+			return false;
+		}
+		return myId.equals(((SearchInclude) theObj).myId);
 	}
 
-	public int getOrder() {
-		return myOrder;
+	public String getInclude() {
+		return myInclude;
 	}
-	
-	public Long getResourcePid() {
-		return myResourcePid;
-	}
-	
+
 	@Override
 	public int hashCode() {
-		return myResourcePid.hashCode();
+		return myId == null ? 0 : myId.hashCode();
 	}
 
-	public void setOrder(int theOrder) {
-		myOrder = theOrder;
+	public boolean isRecurse() {
+		return myRecurse;
 	}
 
-	public void setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
-	}
 }

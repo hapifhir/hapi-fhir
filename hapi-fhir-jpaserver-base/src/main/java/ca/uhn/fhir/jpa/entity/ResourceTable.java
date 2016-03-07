@@ -35,7 +35,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -150,6 +152,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
+	@OneToOne(fetch=FetchType.LAZY, optional=true)
+	@JoinColumn(name="HISTORY_VERSION_PID", referencedColumnName="PID", nullable=true)
+	private ResourceHistoryTable myHistory;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "RES_ID")

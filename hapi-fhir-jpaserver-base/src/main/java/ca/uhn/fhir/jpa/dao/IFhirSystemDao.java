@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.Date;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -40,6 +42,8 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	void deleteAllTagsOnServer(RequestDetails theRequestDetails);
 
 	TagList getAllTags(RequestDetails theRequestDetails);
+
+	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
 
 	Map<String, Long> getResourceCounts();
 

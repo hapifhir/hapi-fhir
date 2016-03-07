@@ -21,19 +21,31 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+
+import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
 //@formatter:off
 @Entity
@@ -48,23 +60,71 @@ public class Search implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="CREATED", nullable=false)
+	@Column(name="CREATED", nullable=false, updatable=false)
 	private Date myCreated;
 
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="EVERYTHING_MODE", nullable=true)
+	private EverythingModeEnum myEverythingMode;
+
+	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SEARCH")
 	@SequenceGenerator(name="SEQ_SEARCH", sequenceName="SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
+	
+	@OneToMany(mappedBy="mySearch")
+	private Collection<SearchInclude> myIncludes;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="LAST_UPDATED_HIGH", nullable=true, insertable=true, updatable=false)
+	private Date myLastUpdatedHigh;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="LAST_UPDATED_LOW", nullable=true, insertable=true, updatable=false)
+	private Date myLastUpdatedLow;
+
+	@Column(name="PREFERRED_PAGE_SIZE", nullable=true)
+	private Integer myPreferredPageSize;
+	
+	@OneToMany(mappedBy="mySearch")
+	private Collection<SearchResult> myResults;
 
 	@Column(name="TOTAL_COUNT")
 	private int myTotalCount;
-	
-	@Id
-	@Column(name="SEARCH_UUID", length=40, nullable=false)
-	private String myUuid;
 
+	@Column(name="SEARCH_UUID", length=40, nullable=false, updatable=false)
+	private String myUuid;
+	
 	public Date getCreated() {
 		return myCreated;
+	}
+
+	public EverythingModeEnum getEverythingMode() {
+		return myEverythingMode;
+	}
+
+	public Long getId() {
+		return myId;
+	}
+
+	public Collection<SearchInclude> getIncludes() {
+		if (myIncludes == null) {
+			myIncludes = new ArrayList<SearchInclude>();
+		}
+		return myIncludes;
+	}
+
+	public DateRangeParam getLastUpdated() {
+		if (myLastUpdatedLow == null && myLastUpdatedHigh == null) {
+			return null;
+		} else {
+			return new DateRangeParam(myLastUpdatedLow, myLastUpdatedHigh);
+		}
+	}
+
+	public Integer getPreferredPageSize() {
+		return myPreferredPageSize;
 	}
 
 	public int getTotalCount() {
@@ -74,17 +134,53 @@ public class Search implements Serializable {
 	public String getUuid() {
 		return myUuid;
 	}
-
+	
 	public void setCreated(Date theCreated) {
 		myCreated = theCreated;
+	}
+
+	public void setEverythingMode(EverythingModeEnum theEverythingMode) {
+		myEverythingMode = theEverythingMode;
+	}
+
+	public void setLastUpdated(DateRangeParam theLastUpdated) {
+		if (theLastUpdated == null) {
+			myLastUpdatedLow = null;
+			myLastUpdatedHigh = null;
+		} else {
+			myLastUpdatedLow = theLastUpdated.getLowerBoundAsInstant();
+			myLastUpdatedHigh = theLastUpdated.getUpperBoundAsInstant();
+		}
+	}
+
+	public void setPreferredPageSize(Integer thePreferredPageSize) {
+		myPreferredPageSize = thePreferredPageSize;
 	}
 
 	public void setTotalCount(int theTotalCount) {
 		myTotalCount = theTotalCount;
 	}
-	
+
 	public void setUuid(String theUuid) {
 		myUuid = theUuid;
+	}
+
+	private Set<Include> toIncList(boolean theWantReverse) {
+		HashSet<Include> retVal = new HashSet<Include>();
+		for (SearchInclude next : getIncludes()) {
+			if (theWantReverse == next.isReverse()) {
+				retVal.add(new Include(next.getInclude(), next.isRecurse()));
+			}
+		}
+		return Collections.unmodifiableSet(retVal);
+	}
+
+	public Set<Include> toIncludesList() {
+		return toIncList(false);
+	}
+
+	public Set<Include> toRevIncludesList() {
+		return toIncList(true);
 	}
 	
 }

@@ -518,7 +518,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
+	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		if (myResourceTypeToDao == null) {
 			myResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
@@ -959,6 +959,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
+		paramMap.setPersistResults(false);
 
 		if (paramMap.isEmpty()) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");

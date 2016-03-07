@@ -61,8 +61,8 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISearchDao {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSearchDao.class);
+public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implements IFulltextSearchSvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;

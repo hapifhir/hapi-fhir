@@ -1,10 +1,5 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -30,18 +25,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
+import ca.uhn.fhir.jpa.entity.SearchInclude;
 
-public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
+public interface ISearchIncludeDao  extends JpaRepository<SearchInclude, Long> {
 	
-	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search")
-	Collection<SearchResult> findWithSearchUuid(@Param("search") Search theSearch);
-	
-	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
-	Page<SearchResult> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
-
 	@Modifying
-	@Query(value="DELETE FROM SearchResult r WHERE r.mySearchPid = :search")
+	@Query(value="DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
 	void deleteForSearch(@Param("search") Long theSearchPid);
 }

@@ -46,6 +46,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private boolean myPersistResults = true;
 	private RequestDetails myRequestDetails;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
@@ -133,6 +134,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return mySort;
 	}
 
+	public boolean isPersistResults() {
+		return myPersistResults;
+	}
+
 	public void setCount(Integer theCount) {
 		myCount = theCount;
 	}
@@ -147,6 +152,13 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	/**
+	 * Should results be persisted into a table for paging
+	 */
+	public void setPersistResults(boolean thePersistResults) {
+		myPersistResults = thePersistResults;
 	}
 
 	public void setRequestDetails(RequestDetails theRequestDetails) {
@@ -174,12 +186,13 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	public enum EverythingModeEnum {
+		/*
+		 * Don't reorder! We rely on the ordinals
+		 */
 		ENCOUNTER_INSTANCE(false, true, true), 
 		ENCOUNTER_TYPE(false, true, false), 
 		PATIENT_INSTANCE(true, false, true), 
-		//@formatter:off
 		PATIENT_TYPE(true, false, false);
-		//@formatter:on
 
 		private final boolean myEncounter;
 

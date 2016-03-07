@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,6 +62,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -87,6 +91,8 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchInclude;
+import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -129,20 +135,18 @@ public class SearchBuilder {
 	private BaseHapiFhirDao<?> myCallingDao;
 	private FhirContext myContext;
 	private EntityManager myEntityManager;
+	private SearchParameterMap myParams;
+	private Collection<Long> myPids;
 	private PlatformTransactionManager myPlatformTransactionManager;
+	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	private Class<? extends IBaseResource> myResourceType;
-	private ISearchDao mySearchDao;
-	private ISearchResultDao mySearchResultDao;
-	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
-
+	private IFulltextSearchSvc mySearchDao;
 	private Search mySearchEntity;
+	private ISearchResultDao mySearchResultDao;
 
-	private boolean myHaveFlushedSearch;
-
-	private SearchParameterMap myParams;
-
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, ISearchDao theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao) {
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
+			ISearchResultDao theSearchResultDao, BaseHapiFhirDao theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
@@ -177,11 +181,11 @@ public class SearchBuilder {
 		IQueryParameterType rightValue = cp.getRightValue();
 		predicates.add(createCompositeParamPart(builder, from, right, rightValue));
 
-		doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		doSetPids(new HashSet<Long>(q.getResultList()));
+		doSetPids(q.getResultList());
 
 	}
 
@@ -213,13 +217,13 @@ public class SearchBuilder {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
 		predicates.add(masterCodePredicate);
-		
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		doSetPids(new HashSet<Long>(q.getResultList()));
+		doSetPids(q.getResultList());
 	}
 
 	private void addPredicateId(Set<Long> thePids, DateRangeParam theLastUpdated) {
@@ -235,20 +239,13 @@ public class SearchBuilder {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(from.get("myId").in(thePids));
-		doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
 		predicates.addAll(createLastUpdatedPredicates(theLastUpdated, builder, from));
-		
+
 		cq.where(toArray(predicates));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		HashSet<Long> found = new HashSet<Long>(q.getResultList());
-		doSetPids(found);
-	}
-
-	private void doCreateIdPredicate(List<Predicate> thePredicates, Expression<Long> theExpression) {
-		if (myPids != null) {
-			thePredicates.add(theExpression.in(myPids));
-		}
+		doSetPids(q.getResultList());
 	}
 
 	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList, DateRangeParam theLastUpdated) {
@@ -279,15 +276,14 @@ public class SearchBuilder {
 			List<Predicate> predicates = new ArrayList<Predicate>();
 			predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 			predicates.add(from.get("myLanguage").as(String.class).in(values));
-			doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
+			doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
 
 			predicates.add(builder.isNull(from.get("myDeleted")));
 
 			cq.where(toArray(predicates));
 
 			TypedQuery<Long> q = myEntityManager.createQuery(cq);
-			HashSet<Long> pids = new HashSet<Long>(q.getResultList());
-			doSetPids(pids);
+			doSetPids(q.getResultList());
 			if (doHaveNoResults()) {
 				return;
 			}
@@ -296,7 +292,8 @@ public class SearchBuilder {
 		return;
 	}
 
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -310,7 +307,8 @@ public class SearchBuilder {
 		return missingFalse;
 	}
 
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -325,10 +323,10 @@ public class SearchBuilder {
 	}
 
 	private void addPredicateNumber(String theParamName, List<? extends IQueryParameterType> theList) {
-		
+
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissing("myParamsNumber", theParamName, ResourceIndexedSearchParamNumber.class);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -370,12 +368,12 @@ public class SearchBuilder {
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
-		
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		doSetPids(new HashSet<Long>(q.getResultList()));
+		doSetPids(q.getResultList());
 	}
 
 	private void addPredicateParamMissing(String joinName, String theParamName, Class<? extends BaseResourceIndexedSearchParam> theParamTable) {
@@ -395,17 +393,14 @@ public class SearchBuilder {
 		predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.isNull(from.get("myDeleted")));
-		doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
-		
+		doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
+
 		cq.where(builder.and(toArray(predicates)));
 
 		ourLog.info("Adding :missing qualifier for parameter '{}'", theParamName);
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		List<Long> resultList = q.getResultList();
-		
-		HashSet<Long> retVal = new HashSet<Long>(resultList);
-		doSetPids(retVal);
+		doSetPids(q.getResultList());
 	}
 
 	private void addPredicateParamMissingResourceLink(String joinName, String theParamName) {
@@ -423,7 +418,7 @@ public class SearchBuilder {
 		subQ.where(path);
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
-		doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
 		predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 
@@ -437,7 +432,7 @@ public class SearchBuilder {
 	private void addPredicateQuantity(String theParamName, List<? extends IQueryParameterType> theList) {
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissing("myParamsQuantity", theParamName, ResourceIndexedSearchParamQuantity.class);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -511,7 +506,7 @@ public class SearchBuilder {
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
 
 		cq.where(builder.and(toArray(predicates)));
 
@@ -524,7 +519,7 @@ public class SearchBuilder {
 
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissingResourceLink("myResourceLinks", theParamName);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -657,7 +652,7 @@ public class SearchBuilder {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(createResourceLinkPathPredicate(theParamName, builder, from));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("mySourceResourcePid").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("mySourceResourcePid").as(Long.class));
 
 		cq.where(builder.and(toArray(predicates)));
 
@@ -668,7 +663,7 @@ public class SearchBuilder {
 	private void addPredicateString(String theParamName, List<? extends IQueryParameterType> theList) {
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissing("myParamsString", theParamName, ResourceIndexedSearchParamString.class);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -691,8 +686,8 @@ public class SearchBuilder {
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
-		
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -778,7 +773,7 @@ public class SearchBuilder {
 				andPredicates.addAll(createLastUpdatedPredicates(theLastUpdated, builder, defJoin));
 			}
 
-			doCreateIdPredicate(andPredicates, from.get("myResourceId").as(Long.class));
+			doCreateIdPredicate(builder, cq, andPredicates, from.get("myResourceId").as(Long.class));
 			Predicate masterCodePredicate = builder.and(toArray(andPredicates));
 
 			cq.where(masterCodePredicate);
@@ -794,7 +789,7 @@ public class SearchBuilder {
 
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissing("myParamsToken", theParamName, ResourceIndexedSearchParamToken.class);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -823,12 +818,12 @@ public class SearchBuilder {
 		if (codePredicates.isEmpty()) {
 			return;
 		}
-		
+
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
 
 		cq.where(builder.and(toArray(predicates)));
 
@@ -839,7 +834,7 @@ public class SearchBuilder {
 	private void addPredicateUri(String theParamName, List<? extends IQueryParameterType> theList) {
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			addPredicateParamMissing("myParamsUri", theParamName, ResourceIndexedSearchParamUri.class);
-			return; 
+			return;
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -868,17 +863,12 @@ public class SearchBuilder {
 				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
 
 					/*
-					 * :above is an inefficient query- It means that the user is supplying a more specific URL
-					 * (say http://example.com/foo/bar/baz) and that we should match on any URLs that are
-					 * less specific but otherwise the same. For example http://example.com and http://example.com/foo
-					 * would both match.
+					 * :above is an inefficient query- It means that the user is supplying a more specific URL (say http://example.com/foo/bar/baz) and that we should match on any URLs that are less
+					 * specific but otherwise the same. For example http://example.com and http://example.com/foo would both match.
 					 * 
-					 * We do this by querying the DB for all candidate URIs and then manually checking
-					 * each one. This isn't very efficient, but this is also probably not a very common
-					 * type of query to do.
+					 * We do this by querying the DB for all candidate URIs and then manually checking each one. This isn't very efficient, but this is also probably not a very common type of query to do.
 					 * 
-					 * If we ever need to make this more efficient, lucene could certainly be used
-					 * as an optimization.
+					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
 					 */
 					ourLog.info("Searching for candidate URI:above parameters for Resource[{}] param[{}]", myResourceName, theParamName);
 					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(myResourceName, theParamName);
@@ -918,8 +908,8 @@ public class SearchBuilder {
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		doCreateIdPredicate(predicates, from.get("myResourcePid").as(Long.class));
-		
+		doCreateIdPredicate(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -953,7 +943,7 @@ public class SearchBuilder {
 		return retVal;
 	}
 
-	private List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
@@ -1023,7 +1013,8 @@ public class SearchBuilder {
 		}
 	}
 
-	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path, String invalidMessageName, String theValueString) {
+	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path,
+			String invalidMessageName, String theValueString) {
 		Predicate num;
 		switch (cmpValue) {
 		case GREATERTHAN:
@@ -1065,7 +1056,8 @@ public class SearchBuilder {
 		return num;
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1084,7 +1076,8 @@ public class SearchBuilder {
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
@@ -1098,11 +1091,8 @@ public class SearchBuilder {
 		return singleCode;
 	}
 
-	private static String createLeftMatchLikeExpression(String likeExpression) {
-		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		if (theParameter instanceof TokenParam) {
@@ -1122,10 +1112,12 @@ public class SearchBuilder {
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 		}
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 		}
 
 		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
@@ -1153,11 +1145,11 @@ public class SearchBuilder {
 		return type;
 	}
 
-	private TypedQuery<Tuple> createSearchAllByTypeQuery(DateRangeParam theLastUpdated) {
+	private TypedQuery<Long> createSearchAllByTypeQuery(DateRangeParam theLastUpdated) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myId").as(Long.class));
+		cq.select(from.get("myId").as(Long.class));
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.isNull(from.get("myDeleted")));
@@ -1168,7 +1160,7 @@ public class SearchBuilder {
 
 		cq.where(toArray(predicates));
 
-		TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+		TypedQuery<Long> query = myEntityManager.createQuery(cq);
 		return query;
 	}
 
@@ -1267,6 +1259,112 @@ public class SearchBuilder {
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
+	private void doCreateIdPredicate(CriteriaBuilder builder, CriteriaQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {
+		if (myParams.isPersistResults()) {
+			if (mySearchEntity.getTotalCount() > -1) {
+				Subquery<Long> subQ = cq.subquery(Long.class);
+				Root<SearchResult> subQfrom = subQ.from(SearchResult.class);
+				subQ.select(subQfrom.get("myResourcePid").as(Long.class));
+				Predicate subQname = builder.equal(subQfrom.get("mySearch"), mySearchEntity);
+				subQ.where(subQname);
+
+				thePredicates.add(theExpression.in(subQ));
+			}
+		} else {
+			if (myPids != null) {
+				thePredicates.add(theExpression.in(myPids));
+			}
+		}
+	}
+
+	public Set<Long> doGetPids() {
+		if (myParams.isPersistResults()) {
+			HashSet<Long> retVal = new HashSet<Long>();
+
+			for (SearchResult next : mySearchResultDao.findWithSearchUuid(mySearchEntity)) {
+				retVal.add(next.getResourcePid());
+			}
+			return retVal;
+
+		} else {
+			return new HashSet<Long>(myPids);
+		}
+	}
+
+	private boolean doHaveNoResults() {
+		if (myParams.isPersistResults()) {
+			return mySearchEntity.getTotalCount() == 0;
+		} else {
+			return myPids != null && myPids.isEmpty();
+		}
+	}
+
+	private void doInitializeSearch() {
+		if (mySearchEntity == null) {
+
+			mySearchEntity = new Search();
+			mySearchEntity.setUuid(UUID.randomUUID().toString());
+			mySearchEntity.setCreated(new Date());
+			mySearchEntity.setTotalCount(-1);
+			mySearchEntity.setPreferredPageSize(myParams.getCount());
+			mySearchEntity.setEverythingMode(myParams.getEverythingMode());
+			mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+
+			for (Include next : myParams.getIncludes()) {
+				mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+			}
+			for (Include next : myParams.getRevIncludes()) {
+				mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
+			}
+			
+			if (myParams.isPersistResults()) {
+				myEntityManager.persist(mySearchEntity);
+				for (SearchInclude next : mySearchEntity.getIncludes()) {
+					myEntityManager.persist(next);
+				}
+			}
+
+		}
+	}
+
+	private IBundleProvider doReturnProvider() {
+		if (myParams.isPersistResults()) {
+			return new BundleProviderPersisted(mySearchEntity.getUuid(), myPlatformTransactionManager, mySearchResultDao, myEntityManager, myContext, myCallingDao);
+		} else {
+			if (myPids == null) {
+				return new SimpleBundleProvider();
+			} else {
+				return new BundleProviderInMemory(myPids);
+			}
+		}
+	}
+
+	private void doSetPids(Collection<Long> thePids) {
+		if (myParams.isPersistResults()) {
+			mySearchResultDao.deleteForSearch(mySearchEntity.getId());
+			mySearchResultDao.flush();
+
+			LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
+			int index = 0;
+			for (Long next : thePids) {
+				SearchResult nextResult = new SearchResult(mySearchEntity);
+				nextResult.setResourcePid(next);
+				nextResult.setOrder(index);
+				results.add(nextResult);
+				index++;
+			}
+			mySearchResultDao.save(results);
+
+			mySearchEntity.setTotalCount(results.size());
+			mySearchEntity = myEntityManager.merge(mySearchEntity);
+
+			myEntityManager.flush();
+
+		} else {
+			myPids = thePids;
+		}
+	}
+
 	private void filterResourceIdsByLastUpdated(final DateRangeParam theLastUpdated) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
@@ -1274,32 +1372,41 @@ public class SearchBuilder {
 		cq.select(from.get("myId").as(Long.class));
 
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		doCreateIdPredicate(lastUpdatedPredicates, from.get("myId").as(Long.class));
-		
+		doCreateIdPredicate(builder, cq, lastUpdatedPredicates, from.get("myId").as(Long.class));
+
 		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
 		TypedQuery<Long> query = myEntityManager.createQuery(cq);
-		
+
 		List<Long> resultList = query.getResultList();
 		doSetPids(resultList);
 	}
 
-	private List<Long> filterResourceIdsByLastUpdated(final DateRangeParam theLastUpdated, Collection<Long> thePids) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
+		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.select(from.get("myId").as(Long.class));
 
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
 		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
-		
+
 		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = myEntityManager.createQuery(cq);
-		
+		TypedQuery<Long> query = theEntityManager.createQuery(cq);
+
 		List<Long> resultList = query.getResultList();
 		return resultList;
 	}
 
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
+		EntityManager entityManager = myEntityManager;
+		FhirContext context = myContext;
+		BaseHapiFhirDao<?> dao = myCallingDao;
+
+		loadResourcesByPid(theIncludePids, theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, dao);
+	}
+
+	private static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
+			EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1310,15 +1417,15 @@ public class SearchBuilder {
 			theResourceListToPopulate.add(null);
 		}
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.where(from.get("myId").in(theIncludePids));
-		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
+		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
 		for (ResourceTable next : q.getResultList()) {
-			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = (IBaseResource) myCallingDao.toResource(resourceType, next, theForHistoryOperation);
+			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
+			IBaseResource resource = (IBaseResource) theDao.toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1348,7 +1455,8 @@ public class SearchBuilder {
 	 * 
 	 * @param theLastUpdated
 	 */
-	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, DateRangeParam theLastUpdated) {
+	private static HashSet<Long> loadReverseIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
+			DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1382,7 +1490,7 @@ public class SearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids)";
-					TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 					q.setParameter("target_pids", nextRoundMatches);
 					List<ResourceLink> results = q.getResultList();
 					for (ResourceLink resourceLink : results) {
@@ -1401,14 +1509,14 @@ public class SearchBuilder {
 				} else {
 
 					List<String> paths;
-					if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+					if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						paths = Collections.singletonList(nextInclude.getValue());
 					} else {
 						String resType = nextInclude.getParamType();
 						if (isBlank(resType)) {
 							continue;
 						}
-						RuntimeResourceDefinition def = myContext.getResourceDefinition(resType);
+						RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
 						if (def == null) {
 							ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
 							continue;
@@ -1432,7 +1540,7 @@ public class SearchBuilder {
 						} else {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
-						TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("src_path", nextPath);
 						q.setParameter("target_pids", nextRoundMatches);
 						if (targetResourceType != null) {
@@ -1451,7 +1559,7 @@ public class SearchBuilder {
 			}
 
 			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(theLastUpdated, pidsToInclude));
+				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 			}
 			for (Long next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
@@ -1479,16 +1587,16 @@ public class SearchBuilder {
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			
-			doCreateIdPredicate(predicates, from.get("myId").as(Long.class));
-			
+
+			doCreateIdPredicate(builder, cq, predicates, from.get("myId").as(Long.class));
+
 			createSort(builder, from, theParams.getSort(), orders, predicates);
-			
+
 			if (orders.size() > 0) {
-				
+
 				// TODO: why do we need the existing list for this join to work?
-				Collection<Long> originalPids = myPids;
-				
+				Collection<Long> originalPids = doGetPids();
+
 				LinkedHashSet<Long> loadPids = new LinkedHashSet<Long>();
 				cq.multiselect(from.get("myId").as(Long.class));
 				cq.where(toArray(predicates));
@@ -1512,9 +1620,9 @@ public class SearchBuilder {
 				}
 
 				doSetPids(pids);
-			} 
+			}
 		}
-		
+
 	}
 
 	public IBundleProvider search(final SearchParameterMap theParams) {
@@ -1522,13 +1630,13 @@ public class SearchBuilder {
 		StopWatch w = new StopWatch();
 
 		doInitializeSearch();
-		
+
 		DateRangeParam lu = theParams.getLastUpdated();
 		if (lu != null && lu.isEmpty()) {
 			lu = null;
 		}
 
-//		Collection<Long> loadPids;
+		// Collection<Long> loadPids;
 		if (theParams.getEverythingMode() != null) {
 
 			Long pid = null;
@@ -1542,9 +1650,9 @@ public class SearchBuilder {
 				if (pids.isEmpty()) {
 					return doReturnProvider();
 				}
-				
+
 				doSetPids(pids);
-				
+
 			} else {
 				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 				CriteriaQuery<Tuple> cq = builder.createTupleQuery();
@@ -1570,23 +1678,13 @@ public class SearchBuilder {
 					}
 				}
 				doSetPids(pids);
-				
+
 			}
 
 		} else if (theParams.isEmpty()) {
 
-			TypedQuery<Tuple> query = createSearchAllByTypeQuery(lu);
-			lu = null;
-			List<Tuple> resultList = query.getResultList();
-			if (resultList.isEmpty()) {
-				return doReturnProvider();
-			}
-			
-			Set<Long> loadPids = new HashSet<Long>();
-			for (Tuple next : resultList) {
-				loadPids.add(next.get(0, Long.class));
-			}
-			doSetPids(loadPids);
+			TypedQuery<Long> query = createSearchAllByTypeQuery(lu);
+			doSetPids(query.getResultList());
 
 		} else {
 
@@ -1605,11 +1703,11 @@ public class SearchBuilder {
 					doSetPids(searchResultPids);
 				}
 			}
-			
+
 			if (!theParams.isEmpty()) {
 				searchForIdsWithAndOr(theParams, lu);
 			}
-			
+
 		}
 
 		// // Load _include and _revinclude before filter and sort in everything mode
@@ -1634,7 +1732,6 @@ public class SearchBuilder {
 			}
 		}
 
-		
 		// Handle sorting if any was provided
 		processSort(theParams);
 
@@ -1642,101 +1739,14 @@ public class SearchBuilder {
 		return doReturnProvider();
 	}
 
-	private IBundleProvider doReturnProvider() {
-		if (myPids == null) {
-			return new SimpleBundleProvider();
-		} else {
-			final ArrayList<Long> pids;
-			if (!(myPids instanceof List)) {
-				pids = new ArrayList<Long>(myPids);
-			} else {
-				pids = (ArrayList<Long>) myPids;
-			}
-
-//			// Load _revinclude resources
-//			final Set<Long> revIncludedPids;
-//			if (myParams.getEverythingMode() == null) {
-//				if (myParams.getRevIncludes() != null && myParams.getRevIncludes().isEmpty() == false) {
-//					revIncludedPids = loadReverseIncludes(pids, myParams.getRevIncludes(), true, myParams.getLastUpdated());
-//				} else {
-//					revIncludedPids = new HashSet<Long>();
-//				}
-//			} else {
-//				revIncludedPids = new HashSet<Long>();
-//			}
-			
-			return new IBundleProvider() {
-				@Override
-				public InstantDt getPublished() {
-					return mySearchStarted;
-				}
-
-				@Override
-				public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-					TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-					return template.execute(new TransactionCallback<List<IBaseResource>>() {
-						@Override
-						public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-							List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
-
-							// Load includes
-							pidsSubList = new ArrayList<Long>(pidsSubList);
-							
-							Set<Long> revIncludedPids = new HashSet<Long>();
-							if (myParams.getEverythingMode() == null) {
-								revIncludedPids.addAll(loadReverseIncludes(pidsSubList, myParams.getRevIncludes(), true, myParams.getLastUpdated()));
-							}
-							revIncludedPids.addAll(loadReverseIncludes(pidsSubList, myParams.getIncludes(), false, myParams.getLastUpdated()));
-
-							// Execute the query and make sure we return distinct results
-							List<IBaseResource> resources = new ArrayList<IBaseResource>();
-							loadResourcesByPid(pidsSubList, resources, revIncludedPids, false);
-
-							return resources;
-						}
-
-					});
-				}
-
-				@Override
-				public Integer preferredPageSize() {
-					return myParams.getCount();
-				}
-
-				@Override
-				public int size() {
-					return pids.size();
-				}
-			};
-
-		}
-	}
-
-	private Collection<Long> myPids;
-
-	private InstantDt mySearchStarted;
-	
-	private void doSetPids(Collection<Long> thePids) {
-		myPids = thePids;
-	}
-
-	private void doInitializeSearch() {
-		assert mySearchEntity == null;
-		
-		mySearchStarted = InstantDt.withCurrentTime();
-
-//		mySearchEntity = new Search();
-//		mySearchEntity.setUuid(UUID.randomUUID().toString());
-//		myEntityManager.persist(mySearchEntity);
-//		
-//		myHaveFlushedSearch = false;
-	}
-
 	public void searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
 		SearchParameterMap params = theParams;
 		if (params == null) {
 			params = new SearchParameterMap();
 		}
+		myParams = theParams;
+
+		doInitializeSearch();
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
 
@@ -1859,17 +1869,13 @@ public class SearchBuilder {
 					}
 				}
 			}
-			
+
 			if (doHaveNoResults()) {
 				return;
 			}
 
 		}
 
-	}
-
-	private boolean doHaveNoResults() {
-		return myPids != null && myPids.isEmpty();
 	}
 
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
@@ -1931,9 +1937,8 @@ public class SearchBuilder {
 	}
 
 	/**
-	 * Figures out the tolerance for a search. For example, if the user is searching for
-	 * <code>4.00</code>, this method returns <code>0.005</code> because we shold actually
-	 * match values which are <code>4 (+/-) 0.005</code> according to the FHIR specs.
+	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method returns <code>0.005</code> because we shold actually match values which are
+	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
 	 */
 	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
 		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
@@ -1952,12 +1957,181 @@ public class SearchBuilder {
 		}
 	}
 
+	private static String createLeftMatchLikeExpression(String likeExpression) {
+		return likeExpression.replace("%", "[%]") + "%";
+	}
+
 	static Predicate[] toArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[thePredicates.size()]);
 	}
 
-	public Set<Long> doGetPids() {
-		return new HashSet<Long>(myPids);
+	private final class BundleProviderInMemory implements IBundleProvider {
+		private final ArrayList<Long> myPids;
+
+		private BundleProviderInMemory(Collection<Long> thePids) {
+			final ArrayList<Long> pids;
+			if (!(thePids instanceof List)) {
+				pids = new ArrayList<Long>(thePids);
+			} else {
+				pids = (ArrayList<Long>) thePids;
+			}
+			myPids = pids;
+		}
+
+		@Override
+		public InstantDt getPublished() {
+			return new InstantDt(mySearchEntity.getCreated());
+		}
+
+		@Override
+		public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
+			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+			return template.execute(new TransactionCallback<List<IBaseResource>>() {
+				@Override
+				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+					List<Long> pidsSubList = myPids.subList(theFromIndex, theToIndex);
+
+					// Load includes
+					pidsSubList = new ArrayList<Long>(pidsSubList);
+
+					Set<Long> revIncludedPids = new HashSet<Long>();
+					if (myParams.getEverythingMode() == null) {
+						revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getRevIncludes(), true, myParams.getLastUpdated()));
+					}
+					revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getIncludes(), false, myParams.getLastUpdated()));
+
+					// Execute the query and make sure we return distinct results
+					List<IBaseResource> resources = new ArrayList<IBaseResource>();
+					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false);
+
+					return resources;
+				}
+
+			});
+		}
+
+		@Override
+		public Integer preferredPageSize() {
+			return myParams.getCount();
+		}
+
+		@Override
+		public int size() {
+			return myPids.size();
+		}
+	}
+
+	public final static class BundleProviderPersisted implements IBundleProvider {
+
+		private String myUuid;
+		private PlatformTransactionManager myPlatformTransactionManager;
+		private ISearchResultDao mySearchResultDao;
+		private Search mySearchEntity;
+		private EntityManager myEntityManager;
+		private FhirContext myContext;
+		private IDao myDao;
+
+		public BundleProviderPersisted(String theSearchUuid, PlatformTransactionManager thePlatformTransactionManager, ISearchResultDao theSearchResultDao, EntityManager theEntityManager,
+				FhirContext theContext, IDao theDao) {
+			myUuid = theSearchUuid;
+			myPlatformTransactionManager = thePlatformTransactionManager;
+			mySearchResultDao = theSearchResultDao;
+			myEntityManager = theEntityManager;
+			myContext = theContext;
+			myDao = theDao;
+		}
+
+		@Override
+		public InstantDt getPublished() {
+			ensureSearchEntityLoaded();
+			return new InstantDt(mySearchEntity.getCreated());
+		}
+
+		@Override
+		public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
+			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+
+			return template.execute(new TransactionCallback<List<IBaseResource>>() {
+				@Override
+				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+					ensureSearchEntityLoaded();
+
+					int pageSize = theToIndex - theFromIndex;
+					if (pageSize < 1) {
+						return Collections.emptyList();
+					}
+
+					int pageIndex = theFromIndex / pageSize;
+
+					Pageable page = new PageRequest(pageIndex, pageSize);
+					Page<SearchResult> search = mySearchResultDao.findWithSearchUuid(mySearchEntity, page);
+
+					List<Long> pidsSubList = new ArrayList<Long>();
+					for (SearchResult next : search) {
+						pidsSubList.add(next.getResourcePid());
+					}
+
+					// Load includes
+					pidsSubList = new ArrayList<Long>(pidsSubList);
+
+					Set<Long> revIncludedPids = new HashSet<Long>();
+					if (mySearchEntity.getEverythingMode() == null) {
+						revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+					}
+					revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+
+					// Execute the query and make sure we return distinct results
+					List<IBaseResource> resources = new ArrayList<IBaseResource>();
+					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false, myEntityManager, myContext, myDao);
+
+					return resources;
+				}
+
+			});
+		}
+
+		@Override
+		public Integer preferredPageSize() {
+			ensureSearchEntityLoaded();
+			return mySearchEntity.getPreferredPageSize();
+		}
+
+		@Override
+		public int size() {
+			ensureSearchEntityLoaded();
+			return mySearchEntity.getTotalCount();
+		}
+
+		public String getSearchUuid() {
+			return myUuid;
+		}
+
+		/**
+		 * Returns false if the entity can't be found
+		 */
+		public boolean ensureSearchEntityLoaded() {
+			if (mySearchEntity == null) {
+				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+				template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+				return template.execute(new TransactionCallback<Boolean>() {
+					@Override
+					public Boolean doInTransaction(TransactionStatus theStatus) {
+						TypedQuery<Search> q = myEntityManager.createQuery("SELECT s FROM Search s WHERE s.myUuid = :uuid", Search.class);
+						q.setParameter("uuid", myUuid);
+						try {
+							mySearchEntity = q.getSingleResult();
+							
+							// Ensure includes are loaded
+							mySearchEntity.getIncludes().size();
+							return true;
+						} catch (NoResultException e) {
+							return false;
+						}
+					}
+				});
+			}
+			return true;
+		}
 	}
 
 }

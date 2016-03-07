@@ -31,7 +31,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -66,6 +68,13 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
+	/**
+	 * This field is only populated if this specific histor entry corresponds to 
+	 * the most recent version of a resource
+	 */
+	@OneToOne(fetch=FetchType.LAZY, optional=true, mappedBy="myHistory")
+	private ResourceTable myCorrespondsToVersion;
+	
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
 			if (next.getTag().equals(theTag)) {

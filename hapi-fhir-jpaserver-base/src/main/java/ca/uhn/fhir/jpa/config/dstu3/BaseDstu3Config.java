@@ -34,9 +34,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FhirSearchDao;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -50,6 +50,35 @@ public class BaseDstu3Config extends BaseConfig {
 		return fhirContextDstu3();
 	}
 
+	@Bean(name="myInstanceValidatorDstu3")
+	@Lazy
+	public IValidatorModule instanceValidatorDstu3() {
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		val.setValidationSupport(validationSupportChainDstu3());
+		return val;
+	}
+
+	@Bean(name = "myJpaValidationSupportDstu3", autowire = Autowire.BY_NAME)
+	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
+		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
+		return retVal;
+	}
+
+	@Bean(name="myQuestionnaireResponseValidatorDstu3")
+	@Lazy
+	public IValidatorModule questionnaireResponseValidatorDstu3() {
+		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
+		module.setValidationSupport(validationSupportChainDstu3());
+		return module;
+	}
+	
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IFulltextSearchSvc searchDaoDstu3() {
+		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
+		return searchDao;
+	}
+
 	@Bean(name = "mySystemDaoDstu3", autowire = Autowire.BY_NAME)
 	public IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDaoDstu3() {
 		ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3();
@@ -61,35 +90,6 @@ public class BaseDstu3Config extends BaseConfig {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = new ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
 		retVal.setDao(systemDaoDstu3());
 		return retVal;
-	}
-
-	@Bean(name = "myJpaValidationSupportDstu3", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
-		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
-		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public ISearchDao searchDaoDstu3() {
-		FhirSearchDao searchDao = new FhirSearchDao();
-		return searchDao;
-	}
-	
-	@Bean(name="myInstanceValidatorDstu3")
-	@Lazy
-	public IValidatorModule instanceValidatorDstu3() {
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(validationSupportChainDstu3());
-		return val;
-	}
-
-	@Bean(name="myQuestionnaireResponseValidatorDstu3")
-	@Lazy
-	public IValidatorModule questionnaireResponseValidatorDstu3() {
-		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		module.setValidationSupport(validationSupportChainDstu3());
-		return module;
 	}
 
 	@Bean(autowire=Autowire.BY_NAME, name="myJpaValidationSupportChainDstu3")

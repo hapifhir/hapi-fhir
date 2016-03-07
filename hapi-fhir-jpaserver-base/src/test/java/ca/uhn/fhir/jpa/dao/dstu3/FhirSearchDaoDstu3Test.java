@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -22,7 +22,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 	
 	@Autowired
-	private ISearchDao mySearchDao;
+	private IFulltextSearchSvc mySearchDao;
 	
 	@Test
 	public void testContentSearch() {

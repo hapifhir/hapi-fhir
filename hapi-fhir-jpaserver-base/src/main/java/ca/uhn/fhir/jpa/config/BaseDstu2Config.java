@@ -27,9 +27,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.FhirSearchDao;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
@@ -40,6 +40,18 @@ public class BaseDstu2Config extends BaseConfig {
 	@Primary
 	public FhirContext defaultFhirContext() {
 		return fhirContextDstu2();
+	}
+
+	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
+		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
+		return retVal;
+	}
+
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IFulltextSearchSvc searchDao() {
+		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
+		return searchDao;
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
@@ -54,17 +66,4 @@ public class BaseDstu2Config extends BaseConfig {
 		retVal.setDao(systemDaoDstu2());
 		return retVal;
 	}
-
-	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
-		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
-		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public ISearchDao searchDao() {
-		FhirSearchDao searchDao = new FhirSearchDao();
-		return searchDao;
-	}
-
 }

@@ -183,6 +183,14 @@
 				longer includes _revinclude matches in the Bundle.total count, or the
 				page size limit.
 			</action>
+			<action type="add">
+				JPA server now persists search results to the database in a new table where they 
+				can be temporaily preserved. This makes the JPA server much more scalable, since it
+				no longer needs to store large lists of pages in memory between search invocations.
+				<![CDATA[<br/><br/>]]>
+				Old searches are deleted after an hour by default, but this can be changed
+				via a setting in the DaoConfig.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

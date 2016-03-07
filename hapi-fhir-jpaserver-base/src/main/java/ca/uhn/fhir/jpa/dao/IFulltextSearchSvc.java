@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
-import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 
-public interface ISearchDao {
+public interface IFulltextSearchSvc {
 
 	List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText);
 	

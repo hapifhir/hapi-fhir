@@ -105,7 +105,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private Class<T> myResourceType;
 	@Autowired(required = false)
-	protected ISearchDao mySearchDao;
+	protected IFulltextSearchSvc mySearchDao;
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired()
