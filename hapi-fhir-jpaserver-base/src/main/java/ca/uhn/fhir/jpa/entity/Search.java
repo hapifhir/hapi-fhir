@@ -43,7 +43,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
@@ -63,16 +62,12 @@ public class Search implements Serializable {
 	@Column(name="CREATED", nullable=false, updatable=false)
 	private Date myCreated;
 
-	@Enumerated(EnumType.ORDINAL)
-	@Column(name="EVERYTHING_MODE", nullable=true)
-	private EverythingModeEnum myEverythingMode;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SEARCH")
 	@SequenceGenerator(name="SEQ_SEARCH", sequenceName="SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	
+
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchInclude> myIncludes;
 
@@ -87,21 +82,27 @@ public class Search implements Serializable {
 	@Column(name="PREFERRED_PAGE_SIZE", nullable=true)
 	private Integer myPreferredPageSize;
 	
+	@Column(name="RESOURCE_ID", nullable=true)
+	private Long myResourceId;
+	
+	@Column(name="RESOURCE_TYPE", length=200, nullable=true)
+	private String myResourceType;
+
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="SEARCH_TYPE", nullable=false)
+	private SearchTypeEnum mySearchType;
 
 	@Column(name="TOTAL_COUNT")
 	private int myTotalCount;
 
 	@Column(name="SEARCH_UUID", length=40, nullable=false, updatable=false)
 	private String myUuid;
-	
+
 	public Date getCreated() {
 		return myCreated;
-	}
-
-	public EverythingModeEnum getEverythingMode() {
-		return myEverythingMode;
 	}
 
 	public Long getId() {
@@ -113,6 +114,10 @@ public class Search implements Serializable {
 			myIncludes = new ArrayList<SearchInclude>();
 		}
 		return myIncludes;
+	}
+	
+	public Date getLastUpdatedHigh() {
+		return myLastUpdatedHigh;
 	}
 
 	public DateRangeParam getLastUpdated() {
@@ -127,6 +132,19 @@ public class Search implements Serializable {
 		return myPreferredPageSize;
 	}
 
+	public Long getResourceId() {
+		return myResourceId;
+	}
+	
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public SearchTypeEnum getSearchType() {
+		return mySearchType;
+	}
+
+
 	public int getTotalCount() {
 		return myTotalCount;
 	}
@@ -134,15 +152,15 @@ public class Search implements Serializable {
 	public String getUuid() {
 		return myUuid;
 	}
-	
+
 	public void setCreated(Date theCreated) {
 		myCreated = theCreated;
 	}
-
-	public void setEverythingMode(EverythingModeEnum theEverythingMode) {
-		myEverythingMode = theEverythingMode;
+	public void setLastUpdated(Date theLowerBound, Date theUpperBound) {
+		myLastUpdatedLow = theLowerBound;
+		myLastUpdatedHigh = theUpperBound;
 	}
-
+	
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		if (theLastUpdated == null) {
 			myLastUpdatedLow = null;
@@ -155,6 +173,19 @@ public class Search implements Serializable {
 
 	public void setPreferredPageSize(Integer thePreferredPageSize) {
 		myPreferredPageSize = thePreferredPageSize;
+	}
+	
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
+
+	public void setSearchType(SearchTypeEnum theSearchType) {
+		mySearchType = theSearchType;
 	}
 
 	public void setTotalCount(int theTotalCount) {

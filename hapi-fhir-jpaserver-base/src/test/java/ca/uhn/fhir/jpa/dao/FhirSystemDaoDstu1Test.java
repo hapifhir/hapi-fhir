@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -26,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
@@ -59,6 +62,14 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
 	private RequestDetails myRequestDetails;
+	private static EntityManager ourEntityManager;
+	private static PlatformTransactionManager ourTxManager;
+
+	@Before
+	public void before() {
+		myRequestDetails = mock(RequestDetails.class);
+		super.purgeDatabase(ourEntityManager, ourTxManager);
+	}
 
 	@Test
 	public void testGetResourceCounts() {
@@ -133,7 +144,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		assertEquals(1, values.size());
 
 	}
-
+	
 	@Test
 	public void testPersistWithSimpleLink() {
 		Patient patient = new Patient();
@@ -186,11 +197,6 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		assertEquals(obsId, obsId2);
 		assertEquals(obsVersion2, "2");
 
-	}
-	
-	@Before
-	public void before() {
-		myRequestDetails = mock(RequestDetails.class);
 	}
 
 	@Test
@@ -484,6 +490,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
+		ourEntityManager = ourCtx.getBean(EntityManager.class);
+		ourTxManager = ourCtx.getBean(PlatformTransactionManager.class);
 	}
 
 }

@@ -852,9 +852,9 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IBundleProvider history = myPatientDao.history(id, null, new ServletRequestDetails());
 		assertEquals(2, history.size());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 0).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 0).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(1, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(1, 2).get(0)));
 
 	}
 

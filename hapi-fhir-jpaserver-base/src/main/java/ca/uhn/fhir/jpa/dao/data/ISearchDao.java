@@ -29,9 +29,12 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.Search;
 
-public interface ISearchDao  extends JpaRepository<Search, Long> {
+public interface ISearchDao extends JpaRepository<Search, Long> {
+
+	@Query("SELECT s FROM Search s WHERE s.myUuid = :uuid")
+	public Search findByUuid(@Param("uuid") String theUuid);
 
 	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
-	
+
 }

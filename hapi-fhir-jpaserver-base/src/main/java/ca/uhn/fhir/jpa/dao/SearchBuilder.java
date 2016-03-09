@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -62,9 +61,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -93,8 +89,10 @@ import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -943,21 +941,6 @@ public class SearchBuilder {
 		return retVal;
 	}
 
-	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
-		if (theLastUpdated != null) {
-			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
-				lastUpdatedPredicates.add(predicateLower);
-			}
-			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
-				lastUpdatedPredicates.add(predicateUpper);
-			}
-		}
-		return lastUpdatedPredicates;
-	}
-
 	private Predicate createPredicateDate(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, IQueryParameterType theParam) {
 		Predicate p;
 		if (theParam instanceof DateParam) {
@@ -1307,7 +1290,7 @@ public class SearchBuilder {
 			mySearchEntity.setCreated(new Date());
 			mySearchEntity.setTotalCount(-1);
 			mySearchEntity.setPreferredPageSize(myParams.getCount());
-			mySearchEntity.setEverythingMode(myParams.getEverythingMode());
+			mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
 			mySearchEntity.setLastUpdated(myParams.getLastUpdated());
 
 			for (Include next : myParams.getIncludes()) {
@@ -1329,7 +1312,7 @@ public class SearchBuilder {
 
 	private IBundleProvider doReturnProvider() {
 		if (myParams.isPersistResults()) {
-			return new BundleProviderPersisted(mySearchEntity.getUuid(), myPlatformTransactionManager, mySearchResultDao, myEntityManager, myContext, myCallingDao);
+			return new PersistedJpaBundleProvider(mySearchEntity.getUuid(), myCallingDao);
 		} else {
 			if (myPids == null) {
 				return new SimpleBundleProvider();
@@ -1381,201 +1364,12 @@ public class SearchBuilder {
 		doSetPids(resultList);
 	}
 
-	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
-		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
-
-		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = theEntityManager.createQuery(cq);
-
-		List<Long> resultList = query.getResultList();
-		return resultList;
-	}
-
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
 		EntityManager entityManager = myEntityManager;
 		FhirContext context = myContext;
 		BaseHapiFhirDao<?> dao = myCallingDao;
 
 		loadResourcesByPid(theIncludePids, theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, dao);
-	}
-
-	private static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
-			EntityManager entityManager, FhirContext context, IDao theDao) {
-		if (theIncludePids.isEmpty()) {
-			return;
-		}
-
-		Map<Long, Integer> position = new HashMap<Long, Integer>();
-		for (Long next : theIncludePids) {
-			position.put(next, theResourceListToPopulate.size());
-			theResourceListToPopulate.add(null);
-		}
-
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(from.get("myId").in(theIncludePids));
-		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
-
-		for (ResourceTable next : q.getResultList()) {
-			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = (IBaseResource) theDao.toResource(resourceType, next, theForHistoryOperation);
-			Integer index = position.get(next.getId());
-			if (index == null) {
-				ourLog.warn("Got back unexpected resource PID {}", next.getId());
-				continue;
-			}
-
-			if (resource instanceof IResource) {
-				if (theRevIncludedPids.contains(next.getId())) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
-				}
-			} else {
-				if (theRevIncludedPids.contains(next.getId())) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
-				}
-			}
-
-			theResourceListToPopulate.set(index, resource);
-		}
-	}
-
-	/**
-	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
-	 * 
-	 * @param theLastUpdated
-	 */
-	private static HashSet<Long> loadReverseIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-			DateRangeParam theLastUpdated) {
-		if (theMatches.size() == 0) {
-			return new HashSet<Long>();
-		}
-		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
-			return new HashSet<Long>();
-		}
-		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-
-		Collection<Long> nextRoundMatches = theMatches;
-		HashSet<Long> allAdded = new HashSet<Long>();
-		HashSet<Long> original = new HashSet<Long>(theMatches);
-		ArrayList<Include> includes = new ArrayList<Include>(theRevIncludes);
-
-		int roundCounts = 0;
-		StopWatch w = new StopWatch();
-
-		boolean addedSomeThisRound;
-		do {
-			roundCounts++;
-
-			HashSet<Long> pidsToInclude = new HashSet<Long>();
-			Set<Long> nextRoundOmit = new HashSet<Long>();
-
-			for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) {
-				Include nextInclude = iter.next();
-				if (nextInclude.isRecurse() == false) {
-					iter.remove();
-				}
-
-				boolean matchAll = "*".equals(nextInclude.getValue());
-				if (matchAll) {
-					String sql;
-					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids)";
-					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-					q.setParameter("target_pids", nextRoundMatches);
-					List<ResourceLink> results = q.getResultList();
-					for (ResourceLink resourceLink : results) {
-						if (theReverseMode) {
-							// if (theEverythingModeEnum.isEncounter()) {
-							// if (resourceLink.getSourcePath().equals("Encounter.subject") ||
-							// resourceLink.getSourcePath().equals("Encounter.patient")) {
-							// nextRoundOmit.add(resourceLink.getSourceResourcePid());
-							// }
-							// }
-							pidsToInclude.add(resourceLink.getSourceResourcePid());
-						} else {
-							pidsToInclude.add(resourceLink.getTargetResourcePid());
-						}
-					}
-				} else {
-
-					List<String> paths;
-					if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-						paths = Collections.singletonList(nextInclude.getValue());
-					} else {
-						String resType = nextInclude.getParamType();
-						if (isBlank(resType)) {
-							continue;
-						}
-						RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
-						if (def == null) {
-							ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
-							continue;
-						}
-
-						String paramName = nextInclude.getParamName();
-						RuntimeSearchParam param = isNotBlank(paramName) ? def.getSearchParam(paramName) : null;
-						if (param == null) {
-							ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
-							continue;
-						}
-
-						paths = param.getPathsSplit();
-					}
-
-					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
-					for (String nextPath : paths) {
-						String sql;
-						if (targetResourceType != null) {
-							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
-						} else {
-							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
-						}
-						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-						q.setParameter("src_path", nextPath);
-						q.setParameter("target_pids", nextRoundMatches);
-						if (targetResourceType != null) {
-							q.setParameter("target_resource_type", targetResourceType);
-						}
-						List<ResourceLink> results = q.getResultList();
-						for (ResourceLink resourceLink : results) {
-							if (theReverseMode) {
-								pidsToInclude.add(resourceLink.getSourceResourcePid());
-							} else {
-								pidsToInclude.add(resourceLink.getTargetResourcePid());
-							}
-						}
-					}
-				}
-			}
-
-			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
-			}
-			for (Long next : pidsToInclude) {
-				if (original.contains(next) == false && allAdded.contains(next) == false) {
-					theMatches.add(next);
-				}
-			}
-
-			pidsToInclude.removeAll(nextRoundOmit);
-
-			addedSomeThisRound = allAdded.addAll(pidsToInclude);
-			nextRoundMatches = pidsToInclude;
-		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
-
-		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] { allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart() });
-
-		return allAdded;
 	}
 
 	private void processSort(final SearchParameterMap theParams) {
@@ -1957,8 +1751,212 @@ public class SearchBuilder {
 		}
 	}
 
+	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
+	}
+
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
+		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
+
+		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
+		TypedQuery<Long> query = theEntityManager.createQuery(cq);
+
+		List<Long> resultList = query.getResultList();
+		return resultList;
+	}
+
+	public static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
+			EntityManager entityManager, FhirContext context, IDao theDao) {
+		if (theIncludePids.isEmpty()) {
+			return;
+		}
+
+		Map<Long, Integer> position = new HashMap<Long, Integer>();
+		for (Long next : theIncludePids) {
+			position.put(next, theResourceListToPopulate.size());
+			theResourceListToPopulate.add(null);
+		}
+
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(from.get("myId").in(theIncludePids));
+		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
+
+		for (ResourceTable next : q.getResultList()) {
+			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
+			IBaseResource resource = (IBaseResource) theDao.toResource(resourceType, next, theForHistoryOperation);
+			Integer index = position.get(next.getId());
+			if (index == null) {
+				ourLog.warn("Got back unexpected resource PID {}", next.getId());
+				continue;
+			}
+
+			if (resource instanceof IResource) {
+				if (theRevIncludedPids.contains(next.getId())) {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
+				} else {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
+				}
+			} else {
+				if (theRevIncludedPids.contains(next.getId())) {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
+				} else {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
+				}
+			}
+
+			theResourceListToPopulate.set(index, resource);
+		}
+	}
+
+	/**
+	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
+	 * 
+	 * @param theLastUpdated
+	 */
+	public static HashSet<Long> loadReverseIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
+			DateRangeParam theLastUpdated) {
+		if (theMatches.size() == 0) {
+			return new HashSet<Long>();
+		}
+		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
+			return new HashSet<Long>();
+		}
+		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+
+		Collection<Long> nextRoundMatches = theMatches;
+		HashSet<Long> allAdded = new HashSet<Long>();
+		HashSet<Long> original = new HashSet<Long>(theMatches);
+		ArrayList<Include> includes = new ArrayList<Include>(theRevIncludes);
+
+		int roundCounts = 0;
+		StopWatch w = new StopWatch();
+
+		boolean addedSomeThisRound;
+		do {
+			roundCounts++;
+
+			HashSet<Long> pidsToInclude = new HashSet<Long>();
+			Set<Long> nextRoundOmit = new HashSet<Long>();
+
+			for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) {
+				Include nextInclude = iter.next();
+				if (nextInclude.isRecurse() == false) {
+					iter.remove();
+				}
+
+				boolean matchAll = "*".equals(nextInclude.getValue());
+				if (matchAll) {
+					String sql;
+					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids)";
+					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+					q.setParameter("target_pids", nextRoundMatches);
+					List<ResourceLink> results = q.getResultList();
+					for (ResourceLink resourceLink : results) {
+						if (theReverseMode) {
+							// if (theEverythingModeEnum.isEncounter()) {
+							// if (resourceLink.getSourcePath().equals("Encounter.subject") ||
+							// resourceLink.getSourcePath().equals("Encounter.patient")) {
+							// nextRoundOmit.add(resourceLink.getSourceResourcePid());
+							// }
+							// }
+							pidsToInclude.add(resourceLink.getSourceResourcePid());
+						} else {
+							pidsToInclude.add(resourceLink.getTargetResourcePid());
+						}
+					}
+				} else {
+
+					List<String> paths;
+					if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+						paths = Collections.singletonList(nextInclude.getValue());
+					} else {
+						String resType = nextInclude.getParamType();
+						if (isBlank(resType)) {
+							continue;
+						}
+						RuntimeResourceDefinition def = theContext.getResourceDefinition(resType);
+						if (def == null) {
+							ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
+							continue;
+						}
+
+						String paramName = nextInclude.getParamName();
+						RuntimeSearchParam param = isNotBlank(paramName) ? def.getSearchParam(paramName) : null;
+						if (param == null) {
+							ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
+							continue;
+						}
+
+						paths = param.getPathsSplit();
+					}
+
+					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+					for (String nextPath : paths) {
+						String sql;
+						if (targetResourceType != null) {
+							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+						} else {
+							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
+						}
+						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+						q.setParameter("src_path", nextPath);
+						q.setParameter("target_pids", nextRoundMatches);
+						if (targetResourceType != null) {
+							q.setParameter("target_resource_type", targetResourceType);
+						}
+						List<ResourceLink> results = q.getResultList();
+						for (ResourceLink resourceLink : results) {
+							if (theReverseMode) {
+								pidsToInclude.add(resourceLink.getSourceResourcePid());
+							} else {
+								pidsToInclude.add(resourceLink.getTargetResourcePid());
+							}
+						}
+					}
+				}
+			}
+
+			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
+				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+			}
+			for (Long next : pidsToInclude) {
+				if (original.contains(next) == false && allAdded.contains(next) == false) {
+					theMatches.add(next);
+				}
+			}
+
+			pidsToInclude.removeAll(nextRoundOmit);
+
+			addedSomeThisRound = allAdded.addAll(pidsToInclude);
+			nextRoundMatches = pidsToInclude;
+		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
+
+		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] { allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart() });
+
+		return allAdded;
 	}
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {
@@ -2018,119 +2016,6 @@ public class SearchBuilder {
 		@Override
 		public int size() {
 			return myPids.size();
-		}
-	}
-
-	public final static class BundleProviderPersisted implements IBundleProvider {
-
-		private String myUuid;
-		private PlatformTransactionManager myPlatformTransactionManager;
-		private ISearchResultDao mySearchResultDao;
-		private Search mySearchEntity;
-		private EntityManager myEntityManager;
-		private FhirContext myContext;
-		private IDao myDao;
-
-		public BundleProviderPersisted(String theSearchUuid, PlatformTransactionManager thePlatformTransactionManager, ISearchResultDao theSearchResultDao, EntityManager theEntityManager,
-				FhirContext theContext, IDao theDao) {
-			myUuid = theSearchUuid;
-			myPlatformTransactionManager = thePlatformTransactionManager;
-			mySearchResultDao = theSearchResultDao;
-			myEntityManager = theEntityManager;
-			myContext = theContext;
-			myDao = theDao;
-		}
-
-		@Override
-		public InstantDt getPublished() {
-			ensureSearchEntityLoaded();
-			return new InstantDt(mySearchEntity.getCreated());
-		}
-
-		@Override
-		public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-
-			return template.execute(new TransactionCallback<List<IBaseResource>>() {
-				@Override
-				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-					ensureSearchEntityLoaded();
-
-					int pageSize = theToIndex - theFromIndex;
-					if (pageSize < 1) {
-						return Collections.emptyList();
-					}
-
-					int pageIndex = theFromIndex / pageSize;
-
-					Pageable page = new PageRequest(pageIndex, pageSize);
-					Page<SearchResult> search = mySearchResultDao.findWithSearchUuid(mySearchEntity, page);
-
-					List<Long> pidsSubList = new ArrayList<Long>();
-					for (SearchResult next : search) {
-						pidsSubList.add(next.getResourcePid());
-					}
-
-					// Load includes
-					pidsSubList = new ArrayList<Long>(pidsSubList);
-
-					Set<Long> revIncludedPids = new HashSet<Long>();
-					if (mySearchEntity.getEverythingMode() == null) {
-						revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
-					}
-					revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
-
-					// Execute the query and make sure we return distinct results
-					List<IBaseResource> resources = new ArrayList<IBaseResource>();
-					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false, myEntityManager, myContext, myDao);
-
-					return resources;
-				}
-
-			});
-		}
-
-		@Override
-		public Integer preferredPageSize() {
-			ensureSearchEntityLoaded();
-			return mySearchEntity.getPreferredPageSize();
-		}
-
-		@Override
-		public int size() {
-			ensureSearchEntityLoaded();
-			return mySearchEntity.getTotalCount();
-		}
-
-		public String getSearchUuid() {
-			return myUuid;
-		}
-
-		/**
-		 * Returns false if the entity can't be found
-		 */
-		public boolean ensureSearchEntityLoaded() {
-			if (mySearchEntity == null) {
-				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-				template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-				return template.execute(new TransactionCallback<Boolean>() {
-					@Override
-					public Boolean doInTransaction(TransactionStatus theStatus) {
-						TypedQuery<Search> q = myEntityManager.createQuery("SELECT s FROM Search s WHERE s.myUuid = :uuid", Search.class);
-						q.setParameter("uuid", myUuid);
-						try {
-							mySearchEntity = q.getSingleResult();
-							
-							// Ensure includes are loaded
-							mySearchEntity.getIncludes().size();
-							return true;
-						} catch (NoResultException e) {
-							return false;
-						}
-					}
-				});
-			}
-			return true;
 		}
 	}
 

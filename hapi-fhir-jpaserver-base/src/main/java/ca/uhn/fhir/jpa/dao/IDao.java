@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.dao;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
 
@@ -34,29 +36,34 @@ public interface IDao {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Long get(IResource theResource) {
-			return (Long) theResource.getResourceMetadata().get(RESOURCE_PID);
-		}
-
-		@Override
-		public void put(IResource theResource, Long theObject) {
-			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
-		}
-
-		@Override
 		public Long get(IAnyResource theResource) {
 			return (Long) theResource.getUserData(RESOURCE_PID.name());
+		}
+
+		@Override
+		public Long get(IResource theResource) {
+			return (Long) theResource.getResourceMetadata().get(RESOURCE_PID);
 		}
 
 		@Override
 		public void put(IAnyResource theResource, Long theObject) {
 			theResource.setUserData(RESOURCE_PID.name(), theObject);
 		}
+
+		@Override
+		public void put(IResource theResource, Long theObject) {
+			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
+		}
 	};
 
+	FhirContext getContext();
+
+	/**
+	 * Populate all of the runtime dependencies that a bundle provider requires in order to work
+	 */
+	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
+
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
-
-	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation);
-
 	
+	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation);
 }

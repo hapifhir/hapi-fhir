@@ -9,8 +9,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilder.BundleProviderPersisted;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -36,8 +34,7 @@ public class DatabaseBackedPagingProvider extends FifoMemoryPagingProvider {
 	public synchronized IBundleProvider retrieveResultList(String theId) {
 		IBundleProvider retVal = super.retrieveResultList(theId);
 		if (retVal == null) {
-			BundleProviderPersisted provider = new SearchBuilder.BundleProviderPersisted(theId, thePlatformTransactionManager, theSearchResultDao, theEntityManager,
-					theContext, theDao);
+			PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, theDao);
 			if (!provider.ensureSearchEntityLoaded()) {
 				return null;
 			}
@@ -48,8 +45,8 @@ public class DatabaseBackedPagingProvider extends FifoMemoryPagingProvider {
 
 	@Override
 	public synchronized String storeResultList(IBundleProvider theList) {
-		if (theList instanceof SearchBuilder.BundleProviderPersisted) {
-			return ((BundleProviderPersisted)theList).getSearchUuid();
+		if (theList instanceof PersistedJpaBundleProvider) {
+			return ((PersistedJpaBundleProvider)theList).getSearchUuid();
 		}
 		return super.storeResultList(theList);
 	}

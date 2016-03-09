@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -27,7 +28,6 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -66,14 +67,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -83,6 +78,9 @@ import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
@@ -101,10 +99,12 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -151,10 +151,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
 	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
-
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
-
 	public static final String OO_SEVERITY_WARN = "warning";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
@@ -204,9 +202,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
+	@Autowired
+	private ISearchDao mySearchDao;
+
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	@Autowired
+	private ISearchResultDao mySearchResultDao;
 
 	protected void createForcedIdIfNeeded(ResourceTable entity, IIdType id) {
 		if (id.isEmpty() == false && id.hasIdPart()) {
@@ -269,19 +276,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 						String typeString = nextValue.getReferenceElement().getResourceType();
 						if (isBlank(typeString)) {
-							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReferenceElement().getValue());
+							throw new InvalidRequestException(
+									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReferenceElement().getValue());
 						}
 						RuntimeResourceDefinition resourceDefinition;
 						try {
 							resourceDefinition = getContext().getResourceDefinition(typeString);
 						} catch (DataFormatException e) {
-							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReferenceElement().getValue());
+							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - "
+									+ nextValue.getReferenceElement().getValue());
 						}
 
 						Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 						String id = nextValue.getReferenceElement().getIdPart();
 						if (StringUtils.isBlank(id)) {
-							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReferenceElement().getValue());
+							throw new InvalidRequestException(
+									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReferenceElement().getValue());
 						}
 
 						IFhirResourceDao<?> dao = getDao(type);
@@ -311,7 +321,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						}
 
 						if (!typeString.equals(target.getResourceType())) {
-							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReferenceElement().getValue() + " but resource with ID " + nextValue.getReferenceElement().getIdPart() + " is actually of type " + target.getResourceType());
+							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReferenceElement().getValue() + " but resource with ID "
+									+ nextValue.getReferenceElement().getIdPart() + " is actually of type " + target.getResourceType());
 						}
 
 						/*
@@ -364,14 +375,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
-	}
-
 	// @Override
 	// public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
 	// myResourceDaos = theResourceDaos;
 	// }
+
+	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
+	}
 
 	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
@@ -501,6 +512,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return myConfig;
 	}
 
+	@Override
 	public FhirContext getContext() {
 		return myContext;
 	}
@@ -608,90 +620,48 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
-		final List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
 
-		final InstantDt end = createHistoryToTimestamp();
+		String resourceName = defaultIfBlank(theResourceName, null);
 
-		StopWatch timer = new StopWatch();
+		Search search = new Search();
+		search.setCreated(new Date());
+		search.setLastUpdated(null, theSince);
+		search.setUuid(UUID.randomUUID().toString());
+		search.setResourceType(resourceName);
+		search.setResourceId(theId);
+		search.setSearchType(SearchTypeEnum.HISTORY);
 
-		int limit = 10000;
-
-		// Get list of IDs
-		searchHistoryCurrentVersion(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
-
-		searchHistoryHistory(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
-
-		// Sort merged list
-		Collections.sort(tuples, Collections.reverseOrder());
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated()) : tuples.toString();
-
-		return new IBundleProvider() {
-
-			@Override
-			public InstantDt getPublished() {
-				return end;
+		if (theSince != null) {
+			if (resourceName == null) {
+				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes(theSince));
+			} else if (theId == null) {
+				search.setTotalCount(myResourceHistoryTableDao.countForResourceType(resourceName, theSince));
+			} else {
+				search.setTotalCount(myResourceHistoryTableDao.countForResourceInstance(theId, theSince));
 			}
-
-			@Override
-			public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-				final StopWatch grTimer = new StopWatch();
-				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-				return template.execute(new TransactionCallback<List<IBaseResource>>() {
-					@Override
-					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-						List<BaseHasResource> resEntities = Lists.newArrayList();
-
-						List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
-						searchHistoryCurrentVersion(tupleSubList, resEntities);
-						ourLog.info("Loaded history from current versions in {} ms", grTimer.getMillisAndRestart());
-
-						searchHistoryHistory(tupleSubList, resEntities);
-						ourLog.info("Loaded history from previous versions in {} ms", grTimer.getMillisAndRestart());
-
-						Collections.sort(resEntities, new Comparator<BaseHasResource>() {
-							@Override
-							public int compare(BaseHasResource theO1, BaseHasResource theO2) {
-								return theO2.getUpdated().getValue().compareTo(theO1.getUpdated().getValue());
-							}
-						});
-
-						int grLimit = theToIndex - theFromIndex;
-						if (resEntities.size() > grLimit) {
-							resEntities = resEntities.subList(0, grLimit);
-						}
-
-						ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
-						for (BaseHasResource next : resEntities) {
-							RuntimeResourceDefinition type;
-							try {
-								type = myContext.getResourceDefinition(next.getResourceType());
-							} catch (DataFormatException e) {
-								if (next.getFhirVersion() != getContext().getVersion().getVersion()) {
-									ourLog.info("Ignoring history resource of type[{}] because it is not compatible with version[{}]", next.getResourceType(), getContext().getVersion().getVersion());
-									continue;
-								}
-								throw e;
-							}
-							IBaseResource resource = toResource(type.getImplementingClass(), next, true);
-							retVal.add(resource);
-						}
-						return retVal;
-					}
-				});
+		} else {
+			if (resourceName == null) {
+				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes());
+			} else if (theId == null) {
+				search.setTotalCount(myResourceHistoryTableDao.countForResourceType(resourceName));
+			} else {
+				search.setTotalCount(myResourceHistoryTableDao.countForResourceInstance(theId));
 			}
+		}
+		
+		search = mySearchDao.save(search);
 
-			@Override
-			public Integer preferredPageSize() {
-				return null;
-			}
+		return new PersistedJpaBundleProvider(search.getUuid(), this);
+	}
 
-			@Override
-			public int size() {
-				return tuples.size();
-			}
-		};
+	@Override
+	public void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider) {
+		theProvider.setContext(getContext());
+		theProvider.setEntityManager(myEntityManager);
+		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
+		theProvider.setResourceHistoryTableDao(myResourceHistoryTableDao);
+		theProvider.setSearchDao(mySearchDao);
+		theProvider.setSearchResultDao(mySearchResultDao);
 	}
 
 	protected void notifyInterceptors(RestOperationTypeEnum operationType, ActionRequestDetails requestDetails) {
@@ -808,8 +778,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		} else if (theForHistoryOperation) {
 			/*
-			 * If the create and update times match, this was when the resource was created so we should mark it as a POST.
-			 * Otherwise, it's a PUT.
+			 * If the create and update times match, this was when the resource was created so we should mark it as a POST. Otherwise, it's a PUT.
 			 */
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
@@ -863,7 +832,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				ResourceMetadataKeyEnum.PROFILES.put(res, profiles);
 			}
 		}
-		
+
 		return retVal;
 	}
 
@@ -879,8 +848,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		} else if (theForHistoryOperation) {
 			/*
-			 * If the create and update times match, this was when the resource was created so we should mark it as a POST.
-			 * Otherwise, it's a PUT.
+			 * If the create and update times match, this was when the resource was created so we should mark it as a POST. Otherwise, it's a PUT.
 			 */
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
@@ -896,13 +864,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		res.getMeta().getSecurity().clear();
 		res.getMeta().setLastUpdated(null);
 		res.getMeta().setVersionId(null);
-		
+
 		populateResourceId(res, theEntity);
 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
+		
 		if (theEntity.isHasTags()) {
 			for (BaseTag next : tags) {
 				switch (next.getTag().getTagType()) {
@@ -928,8 +897,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
-	 * first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
 	 * 
 	 * @param theEntity
 	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
@@ -943,8 +911,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
-	 * first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
 	 * 
 	 * @param theEntity
 	 *           The resource
@@ -977,146 +944,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		throw new NotImplementedException("");
 	}
 
-	private void searchHistoryCurrentVersion(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {
-		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
-			@Override
-			public boolean apply(HistoryTuple theInput) {
-				return theInput.isHistory() == false;
-			}
-		});
-		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
-			@Override
-			public Long apply(HistoryTuple theInput) {
-				return theInput.getId();
-			}
-		});
-		if (ids.isEmpty()) {
-			return;
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(from.get("myId").in(ids));
-
-		cq.orderBy(builder.desc(from.get("myUpdated")));
-		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
-		for (ResourceTable next : q.getResultList()) {
-			theRetVal.add(next);
-		}
-	}
-
-	private void searchHistoryCurrentVersion(String theResourceName, Long theId, Date theSince, Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-		Root<?> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
-
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		if (theSince != null) {
-			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
-			predicates.add(low);
-		}
-
-		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
-		predicates.add(high);
-
-		if (theResourceName != null) {
-			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
-		}
-		if (theId != null) {
-			predicates.add(builder.equal(from.get("myId"), theId));
-		}
-
-		cq.where(builder.and(predicates.toArray(new Predicate[0])));
-
-		cq.orderBy(builder.desc(from.get("myUpdated")));
-		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
-			q.setMaxResults(theLimit);
-		} else {
-			q.setMaxResults(myConfig.getHardSearchLimit());
-		}
-		for (Tuple next : q.getResultList()) {
-			long id = next.get(0, Long.class);
-			Date updated = next.get(1, Date.class);
-			tuples.add(new HistoryTuple(false, updated, id));
-		}
-	}
-
-	private void searchHistoryHistory(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {
-		Collection<HistoryTuple> tuples = Collections2.filter(theTuples, new com.google.common.base.Predicate<HistoryTuple>() {
-			@Override
-			public boolean apply(HistoryTuple theInput) {
-				return theInput.isHistory() == true;
-			}
-		});
-		Collection<Long> ids = Collections2.transform(tuples, new Function<HistoryTuple, Long>() {
-			@Override
-			public Long apply(HistoryTuple theInput) {
-				return (Long) theInput.getId();
-			}
-		});
-		if (ids.isEmpty()) {
-			return;
-		}
-
-		ourLog.info("Retrieving {} history elements from ResourceHistoryTable", ids.size());
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceHistoryTable> cq = builder.createQuery(ResourceHistoryTable.class);
-		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
-		cq.where(from.get("myId").in(ids));
-
-		cq.orderBy(builder.desc(from.get("myUpdated")));
-		TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(cq);
-		for (ResourceHistoryTable next : q.getResultList()) {
-			theRetVal.add(next);
-		}
-	}
-
-	private void searchHistoryHistory(String theResourceName, Long theResourceId, Date theSince, Date theEnd, Integer theLimit, List<HistoryTuple> tuples) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-		Root<?> from = cq.from(ResourceHistoryTable.class);
-		cq.multiselect(from.get("myId").as(Long.class), from.get("myUpdated").as(Date.class));
-
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		if (theSince != null) {
-			Predicate low = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theSince);
-			predicates.add(low);
-		}
-
-		Predicate high = builder.lessThan(from.<Date> get("myUpdated"), theEnd);
-		predicates.add(high);
-
-		if (theResourceName != null) {
-			predicates.add(builder.equal(from.get("myResourceType"), theResourceName));
-		}
-		if (theResourceId != null) {
-			predicates.add(builder.equal(from.get("myResourceId"), theResourceId));
-		}
-
-		cq.where(builder.and(predicates.toArray(new Predicate[0])));
-
-		cq.orderBy(builder.desc(from.get("myUpdated")));
-		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-		if (theLimit != null && theLimit < myConfig.getHardSearchLimit()) {
-			q.setMaxResults(theLimit);
-		} else {
-			q.setMaxResults(myConfig.getHardSearchLimit());
-		}
-		for (Tuple next : q.getResultList()) {
-			Long id = next.get(0, Long.class);
-			Date updated = (Date) next.get(1);
-			tuples.add(new HistoryTuple(true, updated, id));
-		}
-	}
-
-	public void setConfig(DaoConfig theConfig) {
-		myConfig = theConfig;
-	}
-
 	// protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
 	// MetaDt retVal = new MetaDt();
 	// for (TagDefinition next : tagDefinitions) {
@@ -1134,6 +961,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	// }
 	// return retVal;
 	// }
+
+	public void setConfig(DaoConfig theConfig) {
+		myConfig = theConfig;
+	}
 
 	@Autowired
 	public void setContext(FhirContext theContext) {
@@ -1162,15 +993,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * This method is called when an update to an existing resource detects that the resource supplied for update is
-	 * missing a tag/profile/security label that the currently persisted resource holds.
+	 * This method is called when an update to an existing resource detects that the resource supplied for update is missing a tag/profile/security label that the currently persisted resource holds.
 	 * <p>
-	 * The default implementation removes any profile declarations, but leaves tags and security labels in place.
-	 * Subclasses may choose to override and change this behaviour.
+	 * The default implementation removes any profile declarations, but leaves tags and security labels in place. Subclasses may choose to override and change this behaviour.
 	 * </p>
 	 * <p>
-	 * See <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
-	 *      Labels</a> for a description of the logic that the default behaviour folows.
+	 * See <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 * </p>
 	 * 
 	 * @param theEntity
@@ -1200,52 +1028,52 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toResource(type.getImplementingClass(), theEntity, theForHistoryOperation);
 	}
 
-		@Override
-		public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
-			String resourceText = null;
-			switch (theEntity.getEncoding()) {
-			case JSON:
-				try {
-					resourceText = new String(theEntity.getResource(), "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					throw new Error("Should not happen", e);
-				}
-				break;
-			case JSONC:
-				resourceText = GZipUtil.decompress(theEntity.getResource());
-				break;
-			}
-
-			IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
-			R retVal;
+	@Override
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
+		String resourceText = null;
+		switch (theEntity.getEncoding()) {
+		case JSON:
 			try {
-				retVal = parser.parseResource(theResourceType, resourceText);
-			} catch (Exception e) {
-				StringBuilder b = new StringBuilder();
-				b.append("Failed to parse database resource[");
-				b.append(theResourceType);
-				b.append("/");
-				b.append(theEntity.getIdDt().getIdPart());
-				b.append(" (pid ");
-				b.append(theEntity.getId());
-				b.append(", version ");
-				b.append(myContext.getVersion().getVersion());
-				b.append("): ");
-				b.append(e.getMessage());
-				String msg = b.toString();
-				ourLog.error(msg, e);
-				throw new DataFormatException(msg, e);
+				resourceText = new String(theEntity.getResource(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new Error("Should not happen", e);
 			}
-
-			if (retVal instanceof IResource) {
-				IResource res = (IResource) retVal;
-				retVal = populateResourceMetadataHapi(theResourceType, theEntity, theForHistoryOperation, res);
-			} else {
-				IAnyResource res = (IAnyResource) retVal;
-				retVal = populateResourceMetadataRi(theResourceType, theEntity, theForHistoryOperation, res);
-			}
-			return retVal;
+			break;
+		case JSONC:
+			resourceText = GZipUtil.decompress(theEntity.getResource());
+			break;
 		}
+
+		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
+		R retVal;
+		try {
+			retVal = parser.parseResource(theResourceType, resourceText);
+		} catch (Exception e) {
+			StringBuilder b = new StringBuilder();
+			b.append("Failed to parse database resource[");
+			b.append(theResourceType);
+			b.append("/");
+			b.append(theEntity.getIdDt().getIdPart());
+			b.append(" (pid ");
+			b.append(theEntity.getId());
+			b.append(", version ");
+			b.append(myContext.getVersion().getVersion());
+			b.append("): ");
+			b.append(e.getMessage());
+			String msg = b.toString();
+			ourLog.error(msg, e);
+			throw new DataFormatException(msg, e);
+		}
+
+		if (retVal instanceof IResource) {
+			IResource res = (IResource) retVal;
+			retVal = populateResourceMetadataHapi(theResourceType, theEntity, theForHistoryOperation, res);
+		} else {
+			IAnyResource res = (IAnyResource) retVal;
+			retVal = populateResourceMetadataRi(theResourceType, theEntity, theForHistoryOperation, res);
+		}
+		return retVal;
+	}
 
 	protected String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceDefinition(theResourceType).getName();
@@ -1268,12 +1096,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime, RequestDetails theRequestDetails) {
-		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime, theRequestDetails);
-	}
-
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime, RequestDetails theRequestDetails) {
+	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+			boolean theUpdateVersion, Date theUpdateTime, RequestDetails theRequestDetails) {
+		ourLog.info("Starting entity update");
 
 		/*
 		 * This should be the very first thing..
@@ -1284,7 +1110,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+				throw new UnprocessableEntityException(
+						"Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
@@ -1292,10 +1119,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setPublished(theUpdateTime);
 		}
 
-		if (theUpdateHistory) {
-			final ResourceHistoryTable historyEntry = theEntity.toHistory();
-			myEntityManager.persist(historyEntry);
-		}
+//		if (theUpdateHistory) {
+//			Long existingId = theEntity.getId();
+//			ResourceHistoryTable existingHistory = existingId != null ? myResourceHistoryTableDao.findForIdAndVersion(existingId, theEntity.getVersion()) : null;
+//			final ResourceHistoryTable historyEntry = theEntity.toHistory(existingHistory);
+//
+//			ourLog.info("Saving history entry for update {}", historyEntry.getIdDt());
+//			myResourceHistoryTableDao.save(historyEntry);
+//
+//		}
 
 		if (theUpdateVersion) {
 			theEntity.setVersion(theEntity.getVersion() + 1);
@@ -1384,9 +1216,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 
 				/*
-				 *	Handle references within the resource that are match URLs, for example
-				 * references like "Patient?identifier=foo". These match URLs are resolved
-				 * and replaced with the ID of the matching resource. 
+				 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the matching
+				 * resource.
 				 */
 				if (myConfig.isAllowInlineMatchUrlReferences()) {
 					FhirTerser terser = getContext().newTerser();
@@ -1425,12 +1256,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						}
 					}
 				}
-				
+
 				links = extractResourceLinks(theEntity, theResource);
 
 				/*
-				 * If the existing resource already has links and those match links we still want, use them instead of
-				 * removing them and re adding them
+				 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 				 */
 				for (Iterator<ResourceLink> existingLinkIter = existingResourceLinks.iterator(); existingLinkIter.hasNext();) {
 					ResourceLink nextExisting = existingLinkIter.next();
@@ -1479,6 +1309,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		}
 
+		/*
+		 * Save the resource itself
+		 */
 		if (theEntity.getId() == null) {
 			myEntityManager.persist(theEntity);
 
@@ -1494,6 +1327,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			postUpdate(theEntity, (T) theResource);
 		}
 
+		/*
+		 * Create history entry
+		 */
+		if (theUpdateVersion) {
+			final ResourceHistoryTable historyEntry = theEntity.toHistory(null);
+
+			ourLog.info("Saving history entry {}", historyEntry.getIdDt());
+			myResourceHistoryTableDao.save(historyEntry);
+		}
+
+		/*
+		 * Indexing
+		 */
 		if (thePerformIndexing) {
 
 			for (ResourceIndexedSearchParamString next : paramsString) {
@@ -1569,6 +1415,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return theEntity;
 	}
 
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime,
+			RequestDetails theRequestDetails) {
+		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime, theRequestDetails);
+	}
+
 	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
@@ -1576,24 +1427,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		for (DeleteConflict next : theDeleteConflicts) {
-			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue() + " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path "
+			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue()
+					+ " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path "
 					+ next.getSourcePath();
 			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
 		}
 
 		throw new ResourceVersionConflictException("Delete failed because of constraint failure", oo);
 	}
-	
+
 	/**
-	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow
-	 * the DAO to ensure that it is valid for persistence. By default, checks for the "subsetted" tag and rejects
-	 * resources which have it. Subclasses should call the superclass implementation to preserve this check.
+	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow the DAO to ensure that it is valid for persistence. By default, checks for the
+	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
 	 * @param theEntityToSave
 	 *           TODO
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
 		Object tag = null;
@@ -1604,10 +1456,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
 			}
 		} else {
-			IAnyResource res = (IAnyResource)theResource;
+			IAnyResource res = (IAnyResource) theResource;
 			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
 		}
-		
+
 		if (tag != null) {
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
@@ -1691,22 +1543,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 							b.append(characters.getData()).append(" ");
 						}
 					}
-				}				
+				}
 			} catch (Exception e) {
 				throw new DataFormatException("Unable to convert DIV to string", e);
 			}
-			
+
 		}
 		return b.toString();
 	}
 
 	private static List<BaseCodingDt> toBaseCodingList(List<IBaseCoding> theSecurityLabels) {
-	ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>(theSecurityLabels.size());
-	for (IBaseCoding next : theSecurityLabels) {
-		retVal.add((BaseCodingDt) next);
+		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>(theSecurityLabels.size());
+		for (IBaseCoding next : theSecurityLabels) {
+			retVal.add((BaseCodingDt) next);
+		}
+		return retVal;
 	}
-	return retVal;
-}
 
 	static Long translateForcedIdToPid(IIdType theId, EntityManager entityManager) {
 		if (isValidPid(theId)) {
@@ -1820,7 +1672,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
-			throw new ResourceNotFoundException("Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+			throw new ResourceNotFoundException(
+					"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
 	}
 

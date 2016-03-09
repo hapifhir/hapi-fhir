@@ -191,6 +191,17 @@
 				Old searches are deleted after an hour by default, but this can be changed
 				via a setting in the DaoConfig.
 			</action>
+			<action type="add">
+				JPA servers' resource version history mechanism 
+				has been adjusted so that the history table
+				keeps a record of all versions including the
+				current version. This has the very helpful
+				side effect that history no longer needs to be
+				paged into memory as a complete set. Previously
+				history had a hard limit of only being able to 
+				page the most recent 20000 entries. Now it has
+				no limit.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

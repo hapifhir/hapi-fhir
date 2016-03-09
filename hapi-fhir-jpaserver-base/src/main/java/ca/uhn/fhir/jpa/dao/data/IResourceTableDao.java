@@ -25,5 +25,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 
 public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
-	
+	// nothing yet
 }

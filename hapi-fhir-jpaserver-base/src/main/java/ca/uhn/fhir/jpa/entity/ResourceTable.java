@@ -35,9 +35,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -152,10 +150,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
-	@OneToOne(fetch=FetchType.LAZY, optional=true)
-	@JoinColumn(name="HISTORY_VERSION_PID", referencedColumnName="PID", nullable=true)
-	private ResourceHistoryTable myHistory;
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "RES_ID")
@@ -191,10 +185,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "SP_DATE_PRESENT")
 	private boolean myParamsDatePopulated;
-	
+
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
-
+	
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
 
@@ -534,8 +528,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myVersion = theVersion;
 	}
 
-	public ResourceHistoryTable toHistory() {
-		ResourceHistoryTable retVal = new ResourceHistoryTable();
+	public ResourceHistoryTable toHistory(ResourceHistoryTable theResourceHistoryTable) {
+		ResourceHistoryTable retVal = theResourceHistoryTable != null ? theResourceHistoryTable : new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
@@ -550,6 +544,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 
+		retVal.getTags().clear();
+		
+		retVal.setHasTags(isHasTags());
 		if (isHasTags()) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);

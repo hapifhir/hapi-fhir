@@ -34,7 +34,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
-import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
 import org.hl7.fhir.dstu3.model.IdType;
@@ -55,6 +54,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -73,7 +73,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
@@ -387,113 +386,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, getResourceName(), getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_INSTANCE, requestDetails);
 
-		final InstantDt end = createHistoryToTimestamp();
-		final String resourceType = getContext().getResourceDefinition(myResourceType).getName();
+		StopWatch w = new StopWatch();
 
-		T currentTmp;
-		try {
-			BaseHasResource entity = readEntity(theId.toVersionless(), false);
-			validateResourceType(entity);
-			currentTmp = toResource(myResourceType, entity, true);
-			Date lastUpdated;
-			if (currentTmp instanceof IResource) {
-				lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) currentTmp).getValue();
-			} else {
-				lastUpdated = ((IAnyResource) currentTmp).getMeta().getLastUpdated();
-			}
-			if (lastUpdated.after(end.getValue())) {
-				currentTmp = null;
-			}
-		} catch (ResourceNotFoundException e) {
-			currentTmp = null;
-		}
+		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
+		BaseHasResource entity = readEntity(id);
+		
+		IBundleProvider retVal = super.history(myResourceName, entity.getId(), theSince);
 
-		final T current = currentTmp;
-
-		StringBuilder B = new StringBuilder();
-		B.append("SELECT count(h) FROM ResourceHistoryTable h ");
-		B.append("WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE");
-		B.append(" AND h.myUpdated < :END");
-		B.append((theSince != null ? " AND h.myUpdated >= :SINCE" : ""));
-		String querySring = B.toString();
-
-		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
-		countQuery.setParameter("PID", translateForcedIdToPid(theId));
-		countQuery.setParameter("RESTYPE", resourceType);
-		countQuery.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
-		if (theSince != null) {
-			countQuery.setParameter("SINCE", theSince, TemporalType.TIMESTAMP);
-		}
-		int historyCount = countQuery.getSingleResult().intValue();
-
-		final int offset;
-		final int count;
-		if (current != null) {
-			count = historyCount + 1;
-			offset = 1;
-		} else {
-			offset = 0;
-			count = historyCount;
-		}
-
-		if (count == 0) {
-			throw new ResourceNotFoundException(theId);
-		}
-
-		return new IBundleProvider() {
-
-			@Override
-			public InstantDt getPublished() {
-				return end;
-			}
-
-			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-				if (theFromIndex == 0 && current != null) {
-					retVal.add(current);
-				}
-
-				StringBuilder b = new StringBuilder();
-				b.append("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END ");
-				b.append((theSince != null ? " AND h.myUpdated >= :SINCE" : ""));
-				b.append(" ORDER BY h.myUpdated DESC");
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(b.toString(), ResourceHistoryTable.class);
-				q.setParameter("PID", translateForcedIdToPid(theId));
-				q.setParameter("RESTYPE", resourceType);
-				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
-				if (theSince != null) {
-					q.setParameter("SINCE", theSince, TemporalType.TIMESTAMP);
-				}
-
-				int firstResult = Math.max(0, theFromIndex - offset);
-				q.setFirstResult(firstResult);
-
-				int maxResults = (theToIndex - theFromIndex) + 1;
-				q.setMaxResults(maxResults);
-
-				List<ResourceHistoryTable> results = q.getResultList();
-				for (ResourceHistoryTable next : results) {
-					if (retVal.size() == maxResults) {
-						break;
-					}
-					retVal.add(toResource(myResourceType, next, true));
-				}
-
-				return retVal;
-			}
-
-			@Override
-			public Integer preferredPageSize() {
-				return null;
-			}
-
-			@Override
-			public int size() {
-				return count;
-			}
-		};
-
+		ourLog.info("Processed history on {} in {}ms", id, w.getMillisAndRestart());
+		return retVal;
 	}
 
 	@Override
@@ -508,6 +409,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -520,6 +424,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theResourceId);
 		}
 
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId);
+		if (latestVersion.getVersion() != entity.getVersion()) {
+			doMetaAdd(theMetaAdd, entity);
+		} else {
+			doMetaAdd(theMetaAdd, latestVersion);
+			
+			// Also update history entry
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
+			doMetaAdd(theMetaAdd, history);
+		}
+		
+		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
+
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
+		return retVal;
+	}
+
+	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
 		//@formatter:off
@@ -546,11 +469,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		//@formatter:on
 
 		myEntityManager.merge(entity);
-		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
-		return retVal;
 	}
 
 	// @Override
@@ -647,6 +565,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theResourceId);
 		}
 
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId);
+		if (latestVersion.getVersion() != entity.getVersion()) {
+			doMetaDelete(theMetaDel, entity);
+		} else {
+			doMetaDelete(theMetaDel, latestVersion);
+			
+			// Also update history entry
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
+			doMetaDelete(theMetaDel, history);
+		}
+		
+		myEntityManager.flush();
+
+		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
+
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
+		return retVal;
+	}
+
+	private <MT extends IBaseMetaType> void doMetaDelete(MT theMetaDel, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaDel);
 
 		//@formatter:off
@@ -667,13 +606,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		myEntityManager.merge(entity);
-		myEntityManager.flush();
-
-		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
-		return retVal;
 	}
 
 	@Override
