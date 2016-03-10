@@ -1400,6 +1400,45 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 	}
+
+	@Test
+	public void testHistoryWithFutureSinceDate() throws Exception {
+		
+		Date before = new Date();
+		Thread.sleep(10);
+		
+		Patient inPatient = new Patient();
+		inPatient.addName().addFamily("version1");
+		inPatient.getMeta().addProfile("http://example.com/1");
+		myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
+
+		Thread.sleep(10);
+		Date after = new Date();
+		
+		// No since
+		
+		IBundleProvider history = myPatientDao.history(null, mySrd);
+		assertEquals(1, history.size());
+		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
+		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
+		assertThat(profiles, contains("http://example.com/1"));
+		
+		// Before since
+		
+		history = myPatientDao.history(before, mySrd);
+		assertEquals(1, history.size());
+		outPatient = (Patient) history.getResources(0, 1).get(0);
+		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		profiles = toStringList(outPatient.getMeta().getProfile());
+		assertThat(profiles, contains("http://example.com/1"));
+
+		// After since
+		
+		history = myPatientDao.history(after, mySrd);
+		assertEquals(0, history.size());
+
+	}
 	
 	@Test
 	public void testHistoryReflectsMetaOperations() throws Exception {
