@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -40,7 +41,7 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 	 * Encounter/123/$everything
 	 */
 	//@formatter:off
-	@Operation(name = "everything", idempotent = true)
+	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public ca.uhn.fhir.rest.server.IBundleProvider EncounterInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
@@ -72,7 +73,7 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 		 * /Encounter/$everything
 		 */
 		//@formatter:off
-		@Operation(name = "everything", idempotent = true)
+		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 		public ca.uhn.fhir.rest.server.IBundleProvider EncounterTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,

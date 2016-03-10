@@ -233,7 +233,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 			
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleType.COLLECTION, responseBundle.getTypeElement().getValue());
+			assertEquals(BundleType.SEARCHSET, responseBundle.getTypeElement().getValue());
 			
 		} finally {
 			http.close();

@@ -73,11 +73,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
+	private BundleTypeEnum myBundleType;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
-			OperationParam[] theReturnParams) {
+			OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
+		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
@@ -168,7 +170,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, Operation theAnnotation) {
-		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.returnParameters());
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.returnParameters(), theAnnotation.bundleType());
 	}
 
 	public String getDescription() {
@@ -184,7 +186,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
-		return BundleTypeEnum.COLLECTION;
+		return myBundleType;
 	}
 
 	@Override

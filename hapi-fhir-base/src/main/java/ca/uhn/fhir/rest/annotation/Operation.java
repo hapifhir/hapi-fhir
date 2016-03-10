@@ -27,6 +27,8 @@ import java.lang.annotation.Target;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+
 /**
  * RESTful method annotation used for a method which provides FHIR "operations".
  */
@@ -71,4 +73,11 @@ public @interface Operation {
 	 * response to this operation.
 	 */
 	OperationParam[] returnParameters() default {};
+	
+	/**
+	 * If this operation returns a bundle, this parameter can be used to specify the 
+	 * bundle type to set in the bundle.
+	 */
+	BundleTypeEnum bundleType() default BundleTypeEnum.COLLECTION;
+	
 }

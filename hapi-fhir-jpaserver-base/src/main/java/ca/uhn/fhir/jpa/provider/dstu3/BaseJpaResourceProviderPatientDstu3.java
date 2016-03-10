@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -50,7 +51,7 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 	 * @param theRequestDetails 
 	 */
 	//@formatter:off
-	@Operation(name = "everything", idempotent = true)
+	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public ca.uhn.fhir.rest.server.IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
@@ -94,7 +95,7 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 	 * @param theRequestDetails 
 	 */
 	//@formatter:off
-		@Operation(name = "everything", idempotent = true)
+		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 		public ca.uhn.fhir.rest.server.IBundleProvider patientTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,

@@ -165,7 +165,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 			
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleTypeEnum.COLLECTION, responseBundle.getTypeElement().getValueAsEnum());
+			assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
 			
 		} finally {
 			http.close();

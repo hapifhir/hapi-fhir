@@ -202,6 +202,10 @@
 				page the most recent 20000 entries. Now it has
 				no limit.
 			</action>
+			<action type="fix">
+				JPA server returned the wrong Bundle.type value (COLLECTION, should be SEARCHSET)
+				for $everything operation responses. Thanks to Sonali Somase for reporting!				
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
