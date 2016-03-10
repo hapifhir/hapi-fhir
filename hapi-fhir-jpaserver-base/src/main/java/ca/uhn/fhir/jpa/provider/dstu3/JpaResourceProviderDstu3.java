@@ -146,7 +146,6 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 			if (theConditional != null) {
 				return getDao().update(theResource, theConditional, theRequestDetails);
 			} else {
-				theResource.setId(theId);
 				return getDao().update(theResource, theRequestDetails);
 			}
 		} finally {

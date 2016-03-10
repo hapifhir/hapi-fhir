@@ -186,10 +186,6 @@ public class ResourceParameter implements IParameter {
 			retVal = (T) parser.parseResource(requestReader);
 		}
 
-		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
-			retVal.setId(theRequest.getId());
-		}
-
 		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			TagList tagList = new TagList();
 			for (String nextTagComplete : theRequest.getHeaders(Constants.HEADER_CATEGORY)) {

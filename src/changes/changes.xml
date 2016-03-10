@@ -206,6 +206,12 @@
 				JPA server returned the wrong Bundle.type value (COLLECTION, should be SEARCHSET)
 				for $everything operation responses. Thanks to Sonali Somase for reporting!				
 			</action>
+			<action type="fix" issue="305">
+				JPA server should reject update requests where the resource body does not
+				contain an ID, or contains an ID which does not match the URL. Previously these
+				were accepted (the URL ID was trusted) which is incorrect according to the
+				FHIR specification. Thanks to GitHub user ametke for reporting!				
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

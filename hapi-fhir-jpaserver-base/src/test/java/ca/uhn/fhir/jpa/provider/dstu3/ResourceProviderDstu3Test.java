@@ -66,6 +66,7 @@ import org.hl7.fhir.dstu3.model.MedicationOrder;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -1996,7 +1997,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
 			.sort().ascending(Patient.FAMILY)
 			.sort().ascending(Patient.GIVEN)
-			.limitTo(100)
+			.count(100)
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
@@ -2132,6 +2133,65 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+	@Test
+	public void testUpdateRejectsIncorrectIds() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
+		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
+
+		// Try to update with the wrong ID in the resource body
+		p1.setId("FOO");
+		p1.addAddress().addLine("NEWLINE");
+		
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
+		ourLog.info(encoded);
+		
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		put.addHeader("Accept", Constants.CT_FHIR_JSON);
+		CloseableHttpResponse response = ourHttpClient.execute(put);
+		try {
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
+			assertEquals("Update failed: resource body ID of \"FOO\" does not match URL ID of \"" + p1id.getIdPart() + "\"", oo.getIssue().get(0).getDiagnostics());
+		} finally {
+			response.close();
+		}
+		
+		// Try to update with the no ID in the resource body
+		p1.setId((String)null);
+		
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
+		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		put.addHeader("Accept", Constants.CT_FHIR_JSON);
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
+			assertEquals("Update failed: resource body does not have an ID", oo.getIssue().get(0).getDiagnostics());
+		} finally {
+			response.close();
+		}
+
+		// Try to update with the to correct ID in the resource body
+		p1.setId(p1id.getIdPart());
+		
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
+		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+
+	}
+
+	
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
 		String methodName = "testUpdateResourceConditional";

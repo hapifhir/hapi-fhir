@@ -954,6 +954,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		preProcessResourceForStorage(theResource);
 
+		
 		final ResourceTable entity;
 
 		IIdType resourceId;
@@ -972,8 +973,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			resourceId = theResource.getIdElement();
 			if (resourceId == null || isBlank(resourceId.getIdPart())) {
-				throw new InvalidRequestException("Can not update a resource with no ID");
+				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingIdForUpdate");
+				throw new InvalidRequestException(msg);
 			}
+			if (!theResource.getIdElement().getIdPart().equals(theRequestDetails.getId().getIdPart())) {
+				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "incorrectIdForUpdate", theResource.getIdElement().getIdPart(), theRequestDetails.getId().getIdPart());
+				throw new InvalidRequestException(msg);
+			}
+
 			try {
 				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {
