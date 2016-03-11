@@ -32,6 +32,12 @@ public class IdDtTest {
 	}
 	
 	@Test
+	public void testConstructorsWithNullArguments() {
+		IdDt id = new IdDt(null, null, null);
+		assertEquals(null, id.getValue());
+	}
+	
+	@Test
 	public void testDetectLocal() {
 		IdDt id;
 		

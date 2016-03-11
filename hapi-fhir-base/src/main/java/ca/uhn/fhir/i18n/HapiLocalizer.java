@@ -53,7 +53,7 @@ public class HapiLocalizer {
 				formatString = "!MESSAGE!";
 			}
 			
-			format = new MessageFormat(formatString);
+			format = new MessageFormat(formatString.trim());
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters).toString();
 		} else {

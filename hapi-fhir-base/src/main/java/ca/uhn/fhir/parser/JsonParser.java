@@ -93,7 +93,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -800,8 +799,12 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		if (isOmitResourceId() && !theContainedResource) {
-			resourceId = null;
+		if (!theContainedResource) {
+			if (isOmitResourceId()) {
+				resourceId = null;
+			} else if (getEncodeForceResourceId() != null) {
+				resourceId = getEncodeForceResourceId();
+			}
 		}
 
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);

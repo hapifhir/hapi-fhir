@@ -260,6 +260,8 @@ public class MethodUtil {
 		} else {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
 		}
+		
+		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {

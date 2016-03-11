@@ -78,13 +78,13 @@ public class JsonParserDstu2Test {
 	public void testDeclaredExtensionsDontProduceWarning() {
 		ReportObservation obs = new ReportObservation();
 		obs.setReadOnly(true);
-		
+
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
-		
+
 		String encoded = p.encodeResourceToString(obs);
 		ourLog.info(encoded);
-		
+
 		obs = p.parseResource(ReportObservation.class, encoded);
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
@@ -398,6 +398,22 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeForceResourceId() {
+		Patient p = new Patient();
+		p.setId("111");
+		p.addName().addGiven("GIVEN");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setEncodeForceResourceId(new IdDt("222"));
+		String encoded = parser.encodeResourceToString(p);
+
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("222"));
+		assertThat(encoded, not(containsString("111")));
 	}
 
 	@Test

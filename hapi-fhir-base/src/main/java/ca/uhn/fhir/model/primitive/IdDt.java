@@ -170,6 +170,9 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
 		myHaveComponentParts = true;
+		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
+			myHaveComponentParts = false;
+		}
 	}
 
 	/**

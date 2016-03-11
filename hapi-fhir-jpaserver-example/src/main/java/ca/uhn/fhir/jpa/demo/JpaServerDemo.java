@@ -55,7 +55,7 @@ public class JpaServerDemo extends RestfulServer {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
 		/* 
-		 * The hapi-fhir-server-resourceproviders-dev.xml file is a spring configuration
+		 * The BaseJavaConfigDstu2.java class is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */

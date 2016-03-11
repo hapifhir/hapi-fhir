@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,6 +19,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,34 +29,28 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
-public class UpdateConditionalTest {
+public class CreateDstu3Test {
 	private static CloseableHttpClient ourClient;
+
 	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateDstu3Test.class);
 	private static int ourPort;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Server ourServer;
-	private static IdDt ourLastId;
-	private static IdDt ourLastIdParam;
+	private static IdType ourLastId;
+	private static IdType ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
-	
-	
-	
+	private static FhirContext ourCtx = FhirContext.forDstu3();
+
 	@Before
 	public void before() {
 		ourLastId = null;
@@ -64,39 +60,14 @@ public class UpdateConditionalTest {
 	}
 
 	@Test
-	public void testUpdateWithConditionalUrl() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertNull(ourLastId.getValue());
-		assertNull(ourLastIdParam);
-		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
-
-	}
-
-	@Test
-	public void testUpdateWithoutConditionalUrl() throws Exception {
+	public void testCreateWithIdInBody() throws Exception {
 
 		Patient patient = new Patient();
 		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -106,45 +77,60 @@ public class UpdateConditionalTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
-		assertNull(ourLastConditionalUrl);
-
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("Can not create resource with ID \"2\", an ID element must not be supplied in the resource body on a create (POST) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
-	public void testSearchStillWorks() throws Exception {
+	public void testCreateWithIdInUrl() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2");
+//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpGet);
+		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertTrue(ourLastRequestWasSearch);
-		assertNull(ourLastId);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastConditionalUrl);
-
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
-	
+	@Test
+	public void testCreateWithIdInUrlForConditional() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2");
+		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 	}
-		
-	
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -166,26 +152,26 @@ public class UpdateConditionalTest {
 		ourClient = builder.build();
 
 	}
-	
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
 		@Search
-		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
+		public List<IResource> search(@OptionalParam(name = "foo") StringDt theString) {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<IResource>();
 		}
-		
-		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+
+		@Create()
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
 			ourLastConditionalUrl = theConditional;
-			ourLastId = thePatient.getId();
+			ourLastId = thePatient.getIdElement();
 			ourLastIdParam = theIdParam;
-			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
 
 	}

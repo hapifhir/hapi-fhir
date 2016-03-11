@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -200,6 +202,44 @@ public class GenericClientDstu3Test {
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), "UTF-8"));
 		assertEquals("<div>A PATIENT</div>", outputPt.getText().getDivAsString());
+	}
+
+	@Test
+	public void testUpdateById() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+
+		final String respString = p.encodeResourceToString(conf);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient pt = new Patient();
+		pt.setId("222");
+		pt.getText().setDivAsString("A PATIENT");
+
+		client.update().resource(pt).withId("111").execute();
+
+		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
+
+		assertEquals("http://example.com/fhir/Patient/111", capt.getAllValues().get(0).getURI().toASCIIString());
+		validateUserAgent(capt);
+
+		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		String body = extractBodyAsString(capt);
+		assertThat(body, containsString("<id value=\"111\"/>"));
 	}
 
 	private void validateUserAgent(ArgumentCaptor<HttpUriRequest> capt) {

@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -61,6 +62,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final List<? extends IBaseResource> myResources;
 	private final TagList myTagList;
 	private final String myUrlPath;
+	private IIdType myForceResourceId;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
 		super(theContext);
@@ -73,6 +75,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
+	
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = theResource;
@@ -200,7 +203,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			if (encoding == null) {
 				encoding = EncodingEnum.XML;
 			}
-			String contents = parseContents(thePrettyPrint, encoding);
+			String contents = encodeContents(thePrettyPrint, encoding);
 			String contentType = getContentType(encoding);
 			return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 		}
@@ -214,7 +217,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 	}
 
-	private String parseContents(Boolean thePrettyPrint, EncodingEnum encoding) {
+	/**
+	 * Get the HTTP request type.
+	 */
+	protected abstract RequestTypeEnum getRequestType();
+
+	private String encodeContents(Boolean thePrettyPrint, EncodingEnum encoding) {
 		IParser parser;
 
 		if (encoding == EncodingEnum.JSON) {
@@ -227,6 +235,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			parser.setPrettyPrint(thePrettyPrint);
 		}
 
+		if (myForceResourceId != null) {
+			parser.setEncodeForceResourceId(myForceResourceId);
+		}
+		
 		parser.setOmitResourceId(myOmitResourceId);
 		if (myTagList != null) {
 			return parser.encodeTagListToString(myTagList);
@@ -249,6 +261,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 	}
 
+	public void setForceResourceId(IIdType theId) {
+		myForceResourceId = theId;
+	}
+
 	public void setIfNoneExistParams(Map<String, List<String>> theIfNoneExist) {
 		myIfNoneExistParams = theIfNoneExist;
 	}
@@ -260,10 +276,5 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public void setOmitResourceId(boolean theOmitResourceId) {
 		myOmitResourceId = theOmitResourceId;
 	}
-
-	/**
-	 * Get the HTTP request type.
-	 */
-	protected abstract RequestTypeEnum getRequestType();
 
 }

@@ -39,9 +39,6 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class UpdateConditionalHl7OrgDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
@@ -93,6 +90,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 	public void testUpdateWithoutConditionalUrl() throws Exception {
 
 		Patient patient = new Patient();
+		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");

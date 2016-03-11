@@ -971,16 +971,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				return create(theResource, null, thePerformIndexing, theRequestDetails);
 			}
 		} else {
+			/* Note: resourcdeId will not be null or empty here, because
+			 * we check it and reject requests in BaseOutcomeReturningMethodBindingWithResourceParam
+			 */
+			// 
 			resourceId = theResource.getIdElement();
-			if (resourceId == null || isBlank(resourceId.getIdPart())) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingIdForUpdate");
-				throw new InvalidRequestException(msg);
-			}
-			if (!theResource.getIdElement().getIdPart().equals(theRequestDetails.getId().getIdPart())) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "incorrectIdForUpdate", theResource.getIdElement().getIdPart(), theRequestDetails.getId().getIdPart());
-				throw new InvalidRequestException(msg);
-			}
-
+			
 			try {
 				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {

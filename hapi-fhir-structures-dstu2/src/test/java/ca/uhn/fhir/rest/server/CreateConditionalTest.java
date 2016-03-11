@@ -97,7 +97,7 @@ public class CreateConditionalTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2?_format=true&_pretty=true");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient?_format=true&_pretty=true");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -111,8 +111,8 @@ public class CreateConditionalTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
-		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
+		assertEquals(null, ourLastId.toUnqualified().getValue());
+		assertEquals(null, ourLastIdParam);
 		assertNull(ourLastConditionalUrl);
 
 	}

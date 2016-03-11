@@ -80,7 +80,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -787,8 +786,12 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		}
 
-		if (isOmitResourceId() && !theIncludedResource) {
-			resourceId = null;
+		if (!theIncludedResource) {
+			if (isOmitResourceId()) {
+				resourceId = null;
+			} else if (getEncodeForceResourceId() != null) {
+				resourceId = getEncodeForceResourceId();
+			}
 		}
 
 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);

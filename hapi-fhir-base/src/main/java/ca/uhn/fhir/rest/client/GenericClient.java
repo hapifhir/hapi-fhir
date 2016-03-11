@@ -2170,6 +2170,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				if (myId == null) {
 					myId = myResource.getIdElement();
 				}
+
 				if (myId == null || myId.hasIdPart() == false) {
 					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
 				}
@@ -2215,7 +2216,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IUpdateExecutable withId(IdDt theId) {
+		public IUpdateExecutable withId(IIdType theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}

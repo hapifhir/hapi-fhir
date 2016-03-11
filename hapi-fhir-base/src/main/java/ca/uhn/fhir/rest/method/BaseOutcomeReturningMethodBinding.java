@@ -49,13 +49,11 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
@@ -107,6 +105,17 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
 			return false;
 		}
+		
+		/*
+		 * Note: Technically this will match an update (PUT) method even if
+		 * there is no ID in the URL - We allow this here because there is no
+		 * better match for that, and this allows the update/PUT method to give
+		 * a helpful error if the client has forgotten to include the 
+		 * ID in the URL.
+		 * 
+		 * It's also needed for conditional update..
+		 */
+		
 		return true;
 	}
 

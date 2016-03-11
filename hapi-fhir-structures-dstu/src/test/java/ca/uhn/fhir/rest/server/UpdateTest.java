@@ -73,8 +73,7 @@ public class UpdateTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 	}
-	
-	
+
 	@Test
 	public void testUpdateWhichReturnsCreate() throws Exception {
 
@@ -98,7 +97,7 @@ public class UpdateTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001CREATE/_history/002", status.getFirstHeader("location").getValue());
 
 	}
-	
+
 	@Test
 	public void testUpdateMethodReturnsInvalidId() throws Exception {
 
@@ -123,23 +122,30 @@ public class UpdateTest {
 	public void testUpdateNoResponse() throws Exception {
 
 		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(dr);
+		ourLog.info("OUT: {}", encoded);
+		
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("location").getValue());
-
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try {
+			ourLog.info(IOUtils.toString(status.getEntity().getContent()));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("location").getValue());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
 	}
 
 	@Test
 	public void testUpdateWithTagMultiple() throws Exception {
 
 		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
@@ -147,7 +153,7 @@ public class UpdateTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(2, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("urn:animals", "Dog"), ourReportProvider.getLastTags().get(0));
 		assertEquals(new Tag("urn:animals", "Cat"), ourReportProvider.getLastTags().get(1));
@@ -159,8 +165,8 @@ public class UpdateTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("urn:animals",  "Dog", "aa"), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag("urn:animals",  "Cat", "bb"), ourReportProvider.getLastTags().get(1));
+		assertEquals(new Tag("urn:animals", "Dog", "aa"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("urn:animals", "Cat", "bb"), ourReportProvider.getLastTags().get(1));
 
 	}
 
@@ -168,6 +174,7 @@ public class UpdateTest {
 	public void testUpdateWithTagSimple() throws Exception {
 
 		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
@@ -185,6 +192,7 @@ public class UpdateTest {
 	public void testUpdateWithTagWithScheme() throws Exception {
 
 		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
@@ -192,7 +200,7 @@ public class UpdateTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
 
@@ -201,7 +209,7 @@ public class UpdateTest {
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
 
@@ -211,6 +219,7 @@ public class UpdateTest {
 	public void testUpdateWithTagWithSchemeAndLabel() throws Exception {
 
 		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
@@ -224,9 +233,9 @@ public class UpdateTest {
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\";   ");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		status=ourClient.execute(httpPost);
+		status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
 
@@ -235,12 +244,13 @@ public class UpdateTest {
 	@Test
 	public void testUpdateWithVersion() throws Exception {
 
-		DiagnosticReport patient = new DiagnosticReport();
-		patient.getIdentifier().setValue("001");
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
+		dr.getIdentifier().setValue("001");
 
 		HttpPut httpPut = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPut.addHeader("Content-Location", "/DiagnosticReport/001/_history/004");
-		httpPut.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPut.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPut);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -257,17 +267,18 @@ public class UpdateTest {
 	@Test()
 	public void testUpdateWithVersionBadContentLocationHeader() throws Exception {
 
-		DiagnosticReport patient = new DiagnosticReport();
-		patient.getIdentifier().setValue("001");
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("001");
+		dr.getIdentifier().setValue("001");
 
 		HttpPut httpPut = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPut.addHeader("Content-Location", "/Patient/001/_history/002");
-		httpPut.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPut.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPut);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -289,23 +300,23 @@ public class UpdateTest {
 		fail();
 	}
 
-@Test	
+	@Test
 	public void testUpdateWithNoReturn() throws Exception {
 
-		Organization patient = new Organization();
-		patient.addIdentifier().setValue("002");
+		Organization dr = new Organization();
+		dr.setId("001");
+		dr.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Organization/001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		status.close();
 	}
 
-	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -335,23 +346,21 @@ public class UpdateTest {
 
 	}
 
-	
-	public static class OrganizationResourceProvider implements IResourceProvider
-	{
+	public static class OrganizationResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Organization.class;
 		}
-		
+
 		@SuppressWarnings("unused")
 		@Update
 		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Organization theOrganization) {
 			return new MethodOutcome();
 		}
-		
+
 	}
-	
+
 	public static class DiagnosticReportProvider implements IResourceProvider {
 		private TagList myLastTags;
 
@@ -364,41 +373,40 @@ public class UpdateTest {
 			return DiagnosticReport.class;
 		}
 
-	
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport theDr) {
 			IdDt id = theId;
-			
+
 			if (theId.getValue().contains("AAAAAA")) {
 				IdDt id2 = new IdDt(id.getIdPart(), "002");
 				return new MethodOutcome(id2); // this is invalid
 			}
-			
+
 			myLastTags = (TagList) theDr.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 			return new MethodOutcome(new IdDt("DiagnosticReport", id.getIdPart(), "002"));
 		}
 
 	}
 
-	public static class ObservationProvider implements IResourceProvider{
+	public static class ObservationProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Observation.class;
 		}
-		
+
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @ResourceParam DiagnosticOrder thePatient) {
 			/*
-			 * TODO: THIS METHOD IS NOT USED. It's the wrong type (DiagnosticOrder), so it should cause an exception on startup. Also we should detect if there are multiple resource params on an
+			 * TODO: THIS METHOD IS NOT USED. It's the wrong type (DiagnosticOrder), so it should cause an exception on
+			 * startup. Also we should detect if there are multiple resource params on an
 			 * update/create/etc method
 			 */
 			IdDt id = theId;
 			return new MethodOutcome(id);
 		}
 	}
-	
-	
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -406,18 +414,16 @@ public class UpdateTest {
 			return Patient.class;
 		}
 
-		
-
 		@Update()
 		public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
 			IdDt id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue().getValue());
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDetails("OODETAILS");
 			if (theId.getValueAsString().contains("CREATE")) {
-				return new MethodOutcome(id,oo, true);
+				return new MethodOutcome(id, oo, true);
 			}
-			
-			return new MethodOutcome(id,oo);
+
+			return new MethodOutcome(id, oo);
 		}
 
 	}

@@ -77,6 +77,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 public abstract class BaseParser implements IParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
+
+	private IIdType myEncodeForceResourceId;
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
 	private Set<String> myEncodeElements;
@@ -414,6 +416,11 @@ public abstract class BaseParser implements IParser {
 		return myEncodeElementsAppliesToResourceTypes;
 	}
 
+	@Override
+	public IIdType getEncodeForceResourceId() {
+		return myEncodeForceResourceId;
+	}
+
 	protected IParserErrorHandler getErrorHandler() {
 		return myErrorHandler;
 	}
@@ -620,6 +627,12 @@ public abstract class BaseParser implements IParser {
 		} else {
 			myEncodeElementsAppliesToResourceTypes = theEncodeElementsAppliesToResourceTypes;
 		}
+	}
+
+	@Override
+	public BaseParser setEncodeForceResourceId(IIdType theEncodeForceResourceId) {
+		myEncodeForceResourceId = theEncodeForceResourceId;
+		return this;
 	}
 
 	@Override

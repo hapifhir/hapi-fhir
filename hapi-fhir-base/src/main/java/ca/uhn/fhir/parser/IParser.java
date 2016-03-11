@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
@@ -82,6 +83,17 @@ public interface IParser {
 	 * See {@link #setEncodeElementsAppliesToResourceTypes(Set)}
 	 */
 	Set<String> getEncodeElementsAppliesToResourceTypes();
+
+	/**
+	 * If not set to null (as is the default) this ID will be used as the ID in any
+	 * resources encoded by this parser
+	 */
+	IIdType getEncodeForceResourceId();
+
+	/**
+	 * Which encoding does this parser instance produce?
+	 */
+	EncodingEnum getEncoding();
 
 	/**
 	 * Returns true if resource IDs should be omitted
@@ -227,6 +239,11 @@ public interface IParser {
 	void setEncodeElementsAppliesToResourceTypes(Set<String> theEncodeElementsAppliesToResourceTypes);
 
 	/**
+	 * When encoding, force this resource ID to be encoded as the resource ID
+	 */
+	IParser setEncodeForceResourceId(IIdType theForceResourceId);
+
+	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the ID of any resources being encoded will not be
 	 * included in the output. Note that this does not apply to contained resources, only to root resources. In other
 	 * words, if this is set to <code>true</code>, contained resources will still have local IDs but the outer/containing
@@ -294,10 +311,4 @@ public interface IParser {
 	 * values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
-
-	/**
-	 * Which encoding does this parser instance produce?
-	 */
-	EncodingEnum getEncoding();
-
 }

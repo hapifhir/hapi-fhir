@@ -7,19 +7,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class IdTypeTest {
+public class IdTypeDstu3Test {
 
 	private static FhirContext ourCtx;
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IdTypeTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IdTypeDstu3Test.class);
 
 	@Test
 	public void testDetectLocal() {
@@ -226,7 +226,7 @@ public class IdTypeTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu2Hl7Org();
+		ourCtx = FhirContext.forDstu3();
 	}
 
 }

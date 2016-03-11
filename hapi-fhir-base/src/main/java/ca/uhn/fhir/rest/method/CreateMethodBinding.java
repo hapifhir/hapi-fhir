@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -30,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -37,16 +40,6 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		super(theMethod, theContext, Create.class, theProvider);
 	}
 
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.CREATE;
-	}
-
-	@Override
-	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestTypeEnum.POST);
-	}
-	
 	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
@@ -66,6 +59,28 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	@Override
 	protected String getMatchingOperation() {
 		return null;
+	}
+
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.CREATE;
+	}
+
+	@Override
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestTypeEnum.POST);
+	}
+
+	@Override
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+		if (isNotBlank(theUrlId)) {
+			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
+			throw new InvalidRequestException(msg);
+		}
+		if (isNotBlank(theResourceId)) {
+			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
+			throw new InvalidRequestException(msg);
+		}
 	}
 
 }

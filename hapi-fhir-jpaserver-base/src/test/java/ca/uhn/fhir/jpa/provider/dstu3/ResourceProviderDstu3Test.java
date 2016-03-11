@@ -483,18 +483,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCreateResourceWithNumericId() throws IOException {
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"2\"/></Patient>";
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/2");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(respString);
-			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
-			assertThat(respString, containsString("Can not create resource with ID[2], ID must not be supplied on a create (POST) operation"));
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+			
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -2099,9 +2100,77 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(responseString);
-			assertThat(responseString, containsString("Can not update a resource with no ID"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, resource body must contain an ID element for update (PUT) operation"));
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
+	public void testUpdateInvalidReference2() throws IOException, Exception {
+		String methodName = "testUpdateInvalidReference2";
+
+		Patient pt = new Patient();
+		pt.setId("2");
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut post = new HttpPut(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
+			assertThat(responseString, containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
 			assertThat(responseString, containsString("<OperationOutcome"));
 			assertEquals(400, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
+	public void testUpdateNoIdInBody() throws IOException, Exception {
+		String methodName = "testUpdateNoIdInBody";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut post = new HttpPut(ourServerBase + "/Patient/2");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
+			assertThat(responseString, containsString("Can not update resource, resource body must contain an ID element for update (PUT) operation"));
+			assertThat(responseString, containsString("<OperationOutcome"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
+	public void testUpdateWrongIdInBody() throws IOException, Exception {
+		String methodName = "testUpdateWrongIdInBody";
+
+		Patient pt = new Patient();
+		pt.setId("333");
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut post = new HttpPut(ourServerBase + "/Patient/2");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"2\""));
 		} finally {
 			response.close();
 		}
@@ -2116,6 +2185,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
 
 		Organization p2 = new Organization();
+		p2.setId(p1id.getIdPart());
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
 			ourClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
@@ -2155,7 +2225,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals("Update failed: resource body ID of \"FOO\" does not match URL ID of \"" + p1id.getIdPart() + "\"", oo.getIssue().get(0).getDiagnostics());
+			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""+p1id.getIdPart()+"\"", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
@@ -2171,7 +2241,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals("Update failed: resource body does not have an ID", oo.getIssue().get(0).getDiagnostics());
+			assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
@@ -2251,6 +2321,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Date before = new Date();
 		Thread.sleep(100);
 
+		pt = new Patient();
+		pt.setId(id.getIdPart());
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -2276,6 +2350,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
+
 		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
 		assertEquals(true, outcome.getCreated().booleanValue());
 		IdType p1Id = (IdType) outcome.getId();

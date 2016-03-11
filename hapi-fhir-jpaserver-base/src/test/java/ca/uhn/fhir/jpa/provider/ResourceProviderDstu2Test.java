@@ -38,6 +38,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
@@ -486,11 +487,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(respString);
-			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
-			assertThat(respString, containsString("Can not create resource with ID[2], ID must not be supplied on a create (POST) operation"));
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -2017,9 +2018,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(responseString);
-			assertThat(responseString, containsString("<pre>Can not update a resource with no ID</pre>"));
-			assertThat(responseString, containsString("<OperationOutcome"));
 			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, resource body must contain an ID element for update (PUT) operation"));
 		} finally {
 			response.close();
 		}
@@ -2110,6 +2111,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Date before = new Date();
 		Thread.sleep(100);
 
+		pt.setId(id);
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));

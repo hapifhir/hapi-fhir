@@ -39,9 +39,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ETagServerHl7OrgTest {
 
   private static CloseableHttpClient ourClient;
@@ -107,6 +104,7 @@ public class ETagServerHl7OrgTest {
   @Test
   public void testUpdateWithNoVersion() throws Exception {
     Patient p = new Patient();
+    p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -122,6 +120,7 @@ public class ETagServerHl7OrgTest {
   @Test
   public void testUpdateWithIfMatch() throws Exception {
     Patient p = new Patient();
+    p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -139,6 +138,7 @@ public class ETagServerHl7OrgTest {
   @Test
   public void testUpdateWithIfMatchPreconditionFailed() throws Exception {
     Patient p = new Patient();
+    p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 

@@ -112,6 +112,7 @@ public class ETagServerTest {
 	@Test
 	public void testUpdateWithNoVersion() throws Exception {
 		Patient p = new Patient();
+		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 		
@@ -127,6 +128,7 @@ public class ETagServerTest {
 	@Test
 	public void testUpdateWithIfMatch() throws Exception {
 		Patient p = new Patient();
+		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 		
@@ -144,6 +146,7 @@ public class ETagServerTest {
 	@Test
 	public void testUpdateWithIfMatchPreconditionFailed() throws Exception {
 		Patient p = new Patient();
+		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 		

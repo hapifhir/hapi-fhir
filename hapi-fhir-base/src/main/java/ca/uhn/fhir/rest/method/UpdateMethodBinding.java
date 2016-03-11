@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -49,11 +50,6 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.UPDATE;
-	}
-
-	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		/*
 		 * We are being a bit lenient here, since technically the client is supposed to include the version in the
@@ -77,7 +73,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				id = id.withVersion(ifMatchValue);
 			}
 		}
-		
+
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
 				theRequest.getId().setValue(id.getValue());
@@ -92,9 +88,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
-		if (myIdParameterIndex != null) {
-			theParams[myIdParameterIndex] = theRequest.getId();
-		}
+		super.addParametersForServerRequest(theRequest, theParams);
+	}
+
+	@Override
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		// TODO Auto-generated method stub
+		return super.incomingServerRequestMatchesMethod(theRequest);
 	}
 
 	@Override
@@ -116,6 +116,16 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
+	@Override
+	protected String getMatchingOperation() {
+		return null;
+	}
+
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.UPDATE;
+	}
+
 	/*
 	 * @Override public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) { if
 	 * (super.incomingServerRequestMatchesMethod(theRequest)) { if (myVersionIdParameterIndex != null) { if
@@ -129,8 +139,21 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected String getMatchingOperation() {
-		return null;
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+		if (isBlank(theMatchUrl)) {
+			if (isBlank(theResourceId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
+				throw new InvalidRequestException(msg);
+			}
+			if (isBlank(theUrlId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
+				throw new InvalidRequestException(msg);
+			}
+			if (!theResourceId.equals(theUrlId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+				throw new InvalidRequestException(msg);
+			}
+		}
 	}
 
 }
