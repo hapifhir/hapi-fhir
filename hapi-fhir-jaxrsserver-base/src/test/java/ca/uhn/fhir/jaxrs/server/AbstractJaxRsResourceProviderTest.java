@@ -350,13 +350,17 @@ public class AbstractJaxRsResourceProviderTest {
 		compareResultId(1, patientCaptor.getValue());
 	}
 	
-	@Test
+	@SuppressWarnings("unchecked")
 	@Ignore
-	public void testUpdateByWrongId() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture())).thenReturn(new MethodOutcome());
-		client.update("1", createPatient(2));
-		assertEquals("1", idCaptor.getValue().getIdPart());
-		compareResultId(1, patientCaptor.getValue());
+	@Test
+	public void testResourceNotFound() throws Exception {
+		when(mock.update(idCaptor.capture(), patientCaptor.capture())).thenThrow(ResourceNotFoundException.class);
+		try {
+			client.update("1", createPatient(2));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
 	}
 
 	@Test

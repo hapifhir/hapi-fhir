@@ -3,6 +3,7 @@ package ca.uhn.fhir.jaxrs.server.test;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.Response;
 import org.mockito.Mockito;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -45,6 +47,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 @Path(TestJaxRsMockPatientRestProvider.PATH)
 @Stateless
 @Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+@Interceptors(JaxRsExceptionInterceptor.class)
 public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> {
 
 	static final String PATH = "/Patient";
