@@ -224,6 +224,12 @@
 				field in the deserialized object could not be
 				modified. Thanks to Thomas Andersen for reporting!
 			</action>
+			<action type="fix" issue="313">
+				REST Server responded to HTTP OPTIONS requests with 
+				any URI as being a request for the server's
+				Conformance statement. This is incorrect, as only
+				a request for <![CDATA[<code>OPTIONS [base url]</code>]]> should be treated as such. Thanks to Michael Lawley for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
