@@ -216,6 +216,14 @@
 				requests where the URL does not contain an ID but needs to (e.g. for
 				an update) or contains an ID but shouldn't (e.g. for a create)				
 			</action>
+			<action type="fix">
+				When fields of type BoundCodeDt (e.g. Patient.gender)
+				are serialized and deserialized using Java's native
+				object serialization, the enum binder was not
+				serialized too. This meant that values for the
+				field in the deserialized object could not be
+				modified. Thanks to Thomas Andersen for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

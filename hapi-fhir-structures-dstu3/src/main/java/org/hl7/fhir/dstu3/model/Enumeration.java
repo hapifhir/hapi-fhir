@@ -1,5 +1,10 @@
 package org.hl7.fhir.dstu3.model;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -38,11 +43,20 @@ POSSIBILITY OF SUCH DAMAGE.
  * 
  */
 @DatatypeDef(name = "code", isSpecialization = true)
-public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T> {
+public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T>, Externalizable {
 
 	private static final long serialVersionUID = 1L;
-	private final EnumFactory<T> myEnumFactory;
+	private EnumFactory<T> myEnumFactory;
 
+	/**
+	 * Constructor
+	 * @deprecated This no-arg constructor is provided for serialization only - Do not use
+	 */
+	@Deprecated
+	public Enumeration() {
+		// nothing
+	}
+	
 	/**
 	 * Constructor
 	 */
@@ -100,4 +114,18 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		}
 		return null;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void readExternal(ObjectInput theIn) throws IOException, ClassNotFoundException {
+		myEnumFactory = (EnumFactory<T>) theIn.readObject();
+		super.readExternal(theIn);
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput theOut) throws IOException {
+		theOut.writeObject(myEnumFactory);
+		super.writeExternal(theOut);
+	}
+
 }

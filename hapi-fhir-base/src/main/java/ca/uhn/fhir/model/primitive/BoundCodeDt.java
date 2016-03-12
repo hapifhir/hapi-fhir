@@ -1,5 +1,9 @@
 package ca.uhn.fhir.model.primitive;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -42,7 +46,7 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 	}
-	
+
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder, T theValue) {
 		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
@@ -52,7 +56,7 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	public IValueSetEnumBinder<T> getBinder() {
 		return myBinder;
 	}
-
+	
 	public T getValueAsEnum() {
 		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
 		T retVal = myBinder.fromCodeString(getValue());
@@ -62,6 +66,13 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 		return retVal;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void readExternal(ObjectInput theIn) throws IOException, ClassNotFoundException {
+		super.readExternal(theIn);
+		myBinder = (IValueSetEnumBinder<T>) theIn.readObject();
+	}
+
 	public void setValueAsEnum(T theValue) {
 		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
 		if (theValue==null) {
@@ -69,5 +80,11 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 		} else {
 			setValue(myBinder.toCodeString(theValue));
 		}
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput theOut) throws IOException {
+		super.writeExternal(theOut);
+		theOut.writeObject(myBinder);
 	}
 }

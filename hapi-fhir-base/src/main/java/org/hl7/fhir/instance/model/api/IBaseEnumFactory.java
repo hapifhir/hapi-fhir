@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,7 +22,7 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-public interface IBaseEnumFactory<T extends Enum<?>> {
+public interface IBaseEnumFactory<T extends Enum<?>> extends Serializable {
 
     /**
      * Read an enumeration value from the string that represents it on the XML or JSON
