@@ -556,7 +556,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			
 			if (method instanceof BaseResourceReturningMethodBinding) {
 				try {
-					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).invokeServer(theRequestDetails.getServer(), requestDetails, new byte[0]);
+					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
 					IBaseResource resource = responseData.getResource();
 					if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 						resource = filterNestedBundle(requestDetails, resource);

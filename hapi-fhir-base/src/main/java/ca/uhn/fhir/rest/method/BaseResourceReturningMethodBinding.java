@@ -229,8 +229,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			case BUNDLE_PROVIDER:
 				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
 			case BUNDLE_RESOURCE:
-				// TODO: we should support this
-				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not yet supported in clients");
+				return resource;
 			case METHOD_OUTCOME:
 				MethodOutcome retVal = new MethodOutcome();
 				retVal.setOperationOutcome((BaseOperationOutcome) resource);
@@ -246,10 +245,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
-//		byte[] requestContents = loadRequestContents(theRequest);
-		byte[] requestContents = null;
-
-		final ResourceOrDstu1Bundle responseObject = invokeServer(theServer, theRequest, requestContents);
+		final ResourceOrDstu1Bundle responseObject = doInvokeServer(theServer, theRequest);
 
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		if (responseObject.getResource() != null) {
@@ -288,7 +284,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 	}
 
-	public ResourceOrDstu1Bundle invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, byte[] requestContents) {
+	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {

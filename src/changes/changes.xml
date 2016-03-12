@@ -230,6 +230,11 @@
 				Conformance statement. This is incorrect, as only
 				a request for <![CDATA[<code>OPTIONS [base url]</code>]]> should be treated as such. Thanks to Michael Lawley for reporting!
 			</action>
+			<action type="fix">
+				REST annotation style client was not able to handle extended operations
+				($foo) where the response from the server was a raw resource instead
+				of a Parameters resource. Thanks to Andrew Michael Martin for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

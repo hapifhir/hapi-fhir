@@ -78,7 +78,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public ResourceOrDstu1Bundle invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, byte[] requestContents) {
+	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		IBase bundle = handlePagingRequest(theServer, theRequest, null, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 		if (bundle instanceof Bundle) {
 			return new ResourceOrDstu1Bundle((Bundle) bundle);
