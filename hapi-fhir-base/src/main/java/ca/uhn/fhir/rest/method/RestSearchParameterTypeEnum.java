@@ -132,7 +132,7 @@ public enum RestSearchParameterTypeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public RestSearchParameterTypeEnum forCode(String theCode) {
+	public static RestSearchParameterTypeEnum forCode(String theCode) {
 		RestSearchParameterTypeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
@@ -141,6 +141,8 @@ public enum RestSearchParameterTypeEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<RestSearchParameterTypeEnum> VALUESET_BINDER = new IValueSetEnumBinder<RestSearchParameterTypeEnum>() {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public String toCodeString(RestSearchParameterTypeEnum theEnum) {
 			return theEnum.getCode();

@@ -235,6 +235,12 @@
 				($foo) where the response from the server was a raw resource instead
 				of a Parameters resource. Thanks to Andrew Michael Martin for reporting!
 			</action>
+			<action type="add">
+				JPA server applies _lastUpdated filter inline with other searches wherever possible
+				instead of applying this filter as a second query against the results of the 
+				first query. This should improve performance when searching against large
+				datasets.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

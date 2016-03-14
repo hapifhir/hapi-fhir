@@ -71,7 +71,6 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Compartment;
-import ca.uhn.fhir.model.api.annotation.Compartments;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -708,23 +707,24 @@ class ModelScanner {
 		for (Field nextField : theClass.getFields()) {
 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.class);
 			if (searchParam != null) {
-				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.valueOf(searchParam.type().toUpperCase());
+				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
 				if (paramType == null) {
 					throw new ConfigurationException("Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
+				Set<String> providesMembershipInCompartments = null;
+				providesMembershipInCompartments = new HashSet<String>();
+				for (Compartment next : searchParam.providesMembershipIn()) {
+					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
+						throw new ConfigurationException("Search param " + searchParam.name() + " provides compartment membershit but is not of type 'reference'");
+					}
+					providesMembershipInCompartments.add(next.name());
+				}
+				
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 					compositeFields.put(nextField, searchParam);
 					continue;
 				}
 
-				Set<String> providesMembershipInCompartments = null;
-				Compartments compartmentsAnnotation = pullAnnotation(nextField, Compartments.class);
-				if (compartmentsAnnotation != null) {
-					providesMembershipInCompartments = new HashSet<String>();
-					for (Compartment next : compartmentsAnnotation.providesMembershipIn()) {
-						providesMembershipInCompartments.add(next.name());
-					}
-				}
 
 				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments);
 				theResourceDef.addSearchParam(param);

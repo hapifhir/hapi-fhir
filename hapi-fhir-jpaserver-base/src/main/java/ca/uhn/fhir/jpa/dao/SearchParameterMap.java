@@ -115,8 +115,26 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myIncludes;
 	}
 
+	/**
+	 * Returns null if there is no last updated value
+	 */
 	public DateRangeParam getLastUpdated() {
+		if (myLastUpdated != null) {
+			if (myLastUpdated.isEmpty()) {
+				myLastUpdated = null;
+			}
+		}
 		return myLastUpdated;
+	}
+
+	/**
+	 * Returns null if there is no last updated value, and removes the lastupdated
+	 * value from this map
+	 */
+	public DateRangeParam getLastUpdatedAndRemove() {
+		DateRangeParam retVal = getLastUpdated();
+		myLastUpdated = null;
+		return retVal;
 	}
 
 	public RequestDetails getRequestDetails() {

@@ -66,4 +66,10 @@ public @interface SearchParamDefinition {
 	 */
 	Class<? extends IBaseResource>[] target() default {};
 	
+	/**
+	 * Indicates that this field indicates that resources linked to by this parameter
+	 * (must be a reference parameter) place the resource in the given compartment.
+	 */
+	Compartment[] providesMembershipIn() default {};
+
 }

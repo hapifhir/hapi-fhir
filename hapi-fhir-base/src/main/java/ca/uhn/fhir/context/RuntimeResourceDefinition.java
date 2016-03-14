@@ -23,6 +23,7 @@ package ca.uhn.fhir.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.util.UrlUtil;
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
+	private Map<String, List<RuntimeSearchParam>> myCompartmentNameToSearchParams;
 	private FhirContext myContext;
 	private String myId;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
@@ -44,13 +46,13 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
 	private final FhirVersionEnum myStructureVersion;
-
+	
 	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType) {
 		super(theResourceName, theClass, theStandardType);
-		myContext= theContext;
+		myContext = theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
-		
+
 		try {
 			IBaseResource instance = theClass.newInstance();
 			myStructureVersion = instance.getStructureFhirVersionEnum();
@@ -58,7 +60,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		} catch (Exception e) {
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}
-		
+
 	}
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
@@ -134,6 +136,17 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return mySearchParams;
 	}
 
+	/**
+	 * Will not return null
+	 */
+	public List<RuntimeSearchParam> getSearchParamsForCompartmentName(String theCompartmentName) {
+		List<RuntimeSearchParam> retVal = myCompartmentNameToSearchParams.get(theCompartmentName);
+		if (retVal == null) {
+			return Collections.emptyList();
+		}
+		return retVal;
+	}
+
 	public FhirVersionEnum getStructureVersion() {
 		return myStructureVersion;
 	}
@@ -160,15 +173,28 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			}
 		});
 		mySearchParams = Collections.unmodifiableList(searchParams);
-		
+
+		Map<String, List<RuntimeSearchParam>> compartmentNameToSearchParams = new HashMap<String, List<RuntimeSearchParam>>();
+		for (RuntimeSearchParam next : searchParams) {
+			if (next.getProvidesMembershipInCompartments() != null) {
+				for (String nextCompartment : next.getProvidesMembershipInCompartments()) {
+					if (!compartmentNameToSearchParams.containsKey(nextCompartment)) {
+						compartmentNameToSearchParams.put(nextCompartment, new ArrayList<RuntimeSearchParam>());
+					}
+					compartmentNameToSearchParams.get(nextCompartment).add(next);
+				}
+			}
+		}
+		myCompartmentNameToSearchParams = Collections.unmodifiableMap(compartmentNameToSearchParams);
+
 		Class<?> target = getImplementingClass();
 		myBaseDefinition = this;
 		do {
 			target = target.getSuperclass();
-			if (IResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class)!=null) {
+			if (IResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class) != null) {
 				myBaseDefinition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(target);
 			}
-		} while (target.equals(Object.class)==false);
+		} while (target.equals(Object.class) == false);
 	}
 
 	@Deprecated
