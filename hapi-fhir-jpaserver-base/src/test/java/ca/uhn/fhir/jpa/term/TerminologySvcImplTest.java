@@ -56,7 +56,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testFetchIsA() {
+	public void testFindCodesBelowA() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://example.com/my_code_system");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -98,6 +98,51 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+	}
+
+	@Test
+	public void testFindCodesAbove() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/my_code_system");
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAA.addChild(childAAA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAA.addChild(childAAB);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion("http://foo", cs);
+
+		Set<TermConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "ChildAA");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA"));
+
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAAB");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAB"));
 	}
 
 	@Test

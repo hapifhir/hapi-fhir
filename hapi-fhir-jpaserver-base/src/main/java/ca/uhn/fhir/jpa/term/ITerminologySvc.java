@@ -9,6 +9,8 @@ public interface ITerminologySvc {
 
 	void storeNewCodeSystemVersion(String theSystemUri, TermCodeSystemVersion theCodeSytem);
 
-	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersion, String theCode);
+	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
+
+	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 	
 }
