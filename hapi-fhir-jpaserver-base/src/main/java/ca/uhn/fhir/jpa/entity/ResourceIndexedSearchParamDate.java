@@ -25,6 +25,10 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -46,6 +50,12 @@ import org.hibernate.search.annotations.Field;
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_DATE", sequenceName = "SEQ_SPIDX_DATE")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -90,6 +100,11 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append(getValueHigh(), obj.getValueHigh());
 		b.append(getValueLow(), obj.getValueLow());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public Date getValueHigh() {

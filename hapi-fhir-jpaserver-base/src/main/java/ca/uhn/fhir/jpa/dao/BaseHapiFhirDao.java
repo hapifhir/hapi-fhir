@@ -1225,15 +1225,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					for (IBaseReference nextRef : allRefs) {
 						IIdType nextId = nextRef.getReferenceElement();
 						String nextIdText = nextId.getValue();
+						if (nextIdText == null) {
+							continue;
+						}
 						int qmIndex = nextIdText.indexOf('?');
 						if (qmIndex != -1) {
 							for (int i = qmIndex - 1; i >= 0; i--) {
 								if (nextIdText.charAt(i) == '/') {
+									if (i < nextIdText.length() - 1 && nextIdText.charAt(i + 1) == '?') {
+										// Just in case the URL is in the form Patient/?foo=bar
+										continue;
+									}
 									nextIdText = nextIdText.substring(i + 1);
 									break;
 								}
 							}
-							String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?'));
+							String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
 							RuntimeResourceDefinition matchResourceDef = getContext().getResourceDefinition(resourceTypeString);
 							if (matchResourceDef == null) {
 								String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);

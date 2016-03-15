@@ -136,7 +136,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		Set<TermConcept> concepts;
 		Set<String> codes;
 
-		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "ChildAA");
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("ParentA", "childAA"));
 

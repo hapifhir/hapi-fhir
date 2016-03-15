@@ -23,6 +23,10 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +46,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Field()
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
@@ -78,6 +88,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getSystem(), obj.getSystem());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public String getSystem() {

@@ -25,6 +25,10 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -50,6 +54,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	private static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	@Field
@@ -95,6 +105,11 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public String getSystem() {

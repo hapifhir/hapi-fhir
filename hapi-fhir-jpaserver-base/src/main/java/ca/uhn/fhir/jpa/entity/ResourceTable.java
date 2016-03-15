@@ -36,6 +36,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -144,14 +145,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	//@formatter:on
 	private String myContentText;
 
-	@Column(name = "HAS_CONTAINED", nullable = true)
-	private boolean myHasContainedResource;
-
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name="SEQ_RESOURCE_ID", sequenceName="SEQ_RESOURCE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	private Long myId;
 
@@ -346,10 +345,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return false;
 	}
 
-	public boolean isHasContainedResource() {
-		return myHasContainedResource;
-	}
-
 	public boolean isHasLinks() {
 		return myHasLinks;
 	}
@@ -388,10 +383,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setContentTextParsedIntoWords(String theContentText) {
 		myContentText = theContentText;
-	}
-
-	public void setHasContainedResource(boolean theHasContainedResource) {
-		myHasContainedResource = theHasContainedResource;
 	}
 
 	public void setHasLinks(boolean theHasLinks) {

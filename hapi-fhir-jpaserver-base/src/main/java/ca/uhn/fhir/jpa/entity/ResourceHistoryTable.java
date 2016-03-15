@@ -55,8 +55,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@SequenceGenerator(name = "RES_HISTORY_PID", sequenceName = "RES_HISTORY_PID")
+	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
 
@@ -86,7 +86,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		tag.setResourceType(theTag.getResourceType());
 		getTags().add(tag);
 	}
-	
+
 	@Override
 	public BaseTag addTag(TagDefinition theDef) {
 		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theDef);

@@ -40,11 +40,6 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "SP_ID")
-	private Long myId;
-
 	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
 	private String myParamName;
@@ -61,9 +56,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Column(name = "RES_TYPE", nullable = false)
 	private String myResourceType;
 
-	protected Long getId() {
-		return myId;
-	}
+	protected abstract Long getId();
 
 	public String getParamName() {
 		return myParamName;

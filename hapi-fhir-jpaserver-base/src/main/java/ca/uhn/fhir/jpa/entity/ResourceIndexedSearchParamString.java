@@ -23,8 +23,12 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +105,17 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@SequenceGenerator(name="SEQ_SPIDX_STRING", sequenceName="SEQ_SPIDX_STRING")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
+	@Column(name = "SP_ID")
+	private Long myId;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false)
+	@ContainedIn
+	private ResourceTable myResourceTable;
+
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	@Fields({
 		@Field(name = "myValueText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
@@ -113,14 +128,9 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
 	private String myValueNormalized;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false)
-	@ContainedIn
-	private ResourceTable myResourceTable;
-
-
 	public ResourceIndexedSearchParamString() {
 	}
+
 
 	public ResourceIndexedSearchParamString(String theName, String theValueNormalized, String theValueExact) {
 		setParamName(theName);
@@ -145,6 +155,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public String getValueExact() {

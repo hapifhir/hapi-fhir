@@ -241,6 +241,12 @@
 				first query. This should improve performance when searching against large
 				datasets.
 			</action>
+			<action type="add">
+				JPA server database design has been adjusted
+				so that different tables use different sequences
+				to generate their indexes, resulting in more sequential
+				resource IDs being assigned by the server
+			<action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

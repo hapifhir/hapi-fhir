@@ -116,6 +116,32 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
+	
+	@Test
+	public void testCreateConditional() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().addFamily("Tester").addGiven("Raghad");
+		
+		MethodOutcome output1 = ourClient
+			.update()
+			.resource(patient)
+			.conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100")
+			.execute();
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().addFamily("Tester").addGiven("Raghad");
+
+		MethodOutcome output2 = ourClient
+				.update()
+				.resource(patient)
+				.conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100")
+				.execute();
+
+		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+	}
+	
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);

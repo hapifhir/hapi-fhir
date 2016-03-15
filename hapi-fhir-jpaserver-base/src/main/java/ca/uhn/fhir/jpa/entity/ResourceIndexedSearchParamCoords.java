@@ -23,7 +23,11 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -44,6 +48,12 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public static final int MAX_LENGTH = 100;
 
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Column(name = "SP_LATITUDE")
 	@Field
@@ -82,6 +92,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return b.isEquals();
 	}
 
+	@Override
+	protected Long getId() {
+		return myId;
+	}
+
 	public double getLatitude() {
 		return myLatitude;
 	}
@@ -107,7 +122,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public void setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
 	}
-	
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);

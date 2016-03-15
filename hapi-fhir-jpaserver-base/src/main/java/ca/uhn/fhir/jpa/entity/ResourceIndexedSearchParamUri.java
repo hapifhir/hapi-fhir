@@ -23,7 +23,11 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +52,12 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	public static final int MAX_LENGTH = 255;
 
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@SequenceGenerator(name="SEQ_SPIDX_URI", sequenceName="SEQ_SPIDX_URI")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SPIDX_URI")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@Field()
@@ -78,6 +88,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public String getUri() {

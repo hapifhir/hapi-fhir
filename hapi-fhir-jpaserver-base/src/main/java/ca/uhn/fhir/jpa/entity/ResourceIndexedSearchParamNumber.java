@@ -25,6 +25,10 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -48,6 +52,12 @@ import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	@Column(name = "SP_VALUE", nullable = true)
 	@Field
@@ -80,6 +90,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResource(), obj.getResource());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public BigDecimal getValue() {
