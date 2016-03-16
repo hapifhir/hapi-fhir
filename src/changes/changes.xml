@@ -37,7 +37,7 @@
 				supports both styles.
 				<![CDATA[<br/><br/>]]>
 				As a part of this change, a new enum called
-				<![CDATA[<a href="./apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html">ParamPrefixEnum</a>]]
+				<![CDATA[<a href="./apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html">ParamPrefixEnum</a>]]>
 				has been introduced. This enum replaces the old 
 				<![CDATA[<a href="./apidocs/ca/uhn/fhir/model/dstu/valueset/QuantityCompararatorEnum.html">QuantityCompararatorEnum</a>]]>
 				which has a typo in its name and can not represent several new prefixes added since 
