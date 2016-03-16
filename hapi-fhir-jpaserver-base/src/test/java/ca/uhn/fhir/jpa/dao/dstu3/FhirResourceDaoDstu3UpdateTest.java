@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -275,6 +276,25 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			ourLog.error("Good", e);
 		}
 
+	}
+
+	@Test
+	@Ignore
+	public void testUpdateIgnoresIdenticalVersions() throws InterruptedException {
+		String methodName = "testUpdateIgnoresIdenticalVersions";
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p1.addName().addFamily("Tester").addGiven(methodName);
+		IIdType p1id = myPatientDao.create(p1, new ServletRequestDetails()).getId();
+
+		IIdType p1id2 = myPatientDao.update(p1, mySrd).getId();
+		assertEquals(p1id.getValue(), p1id2.getValue());
+		
+		p1.addName().addGiven("NewGiven");
+		IIdType p1id3 = myPatientDao.update(p1, mySrd).getId();
+		assertNotEquals(p1id.getValue(), p1id3.getValue());
+		
 	}
 
 	@Test

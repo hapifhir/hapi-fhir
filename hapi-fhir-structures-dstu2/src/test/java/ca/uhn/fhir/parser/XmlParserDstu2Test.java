@@ -38,6 +38,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 
+import com.google.common.collect.Sets;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -1156,6 +1158,78 @@ public class XmlParserDstu2Test {
 		assertThat(out, (containsString("address")));
 		}
 		
+	}
+
+	
+	@Test
+	public void testEncodeWithDontEncodeElements() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("123");
+		
+		ArrayList<IdDt> list = new ArrayList<IdDt>();
+		list.add(new IdDt("http://profile"));
+		ResourceMetadataKeyEnum.PROFILES.put(patient, list);
+		patient.addName().addFamily("FAMILY").addGiven("GIVEN");
+		patient.addAddress().addLine("LINE1");
+		
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta", "Patient.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.name.family"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("GIVEN"));
+			assertThat(out, not(containsString("FAMILY")));
+		}
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
+			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("id"));
+			assertThat(out, not(containsString("address")));
+			assertThat(out, not(containsString("meta")));
+		}
 	}
 
 
