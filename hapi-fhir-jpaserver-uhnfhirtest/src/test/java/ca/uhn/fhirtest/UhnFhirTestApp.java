@@ -2,16 +2,14 @@ package ca.uhn.fhirtest;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
@@ -20,7 +18,7 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8888;
-		String base = "http://localhost:" + myPort + "/baseDstu2";
+		String base = "http://localhost:" + myPort + "/baseDstu3";
 		
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
@@ -50,28 +48,24 @@ public class UhnFhirTestApp {
 		// base = "http://spark.furore.com/fhir";
 
 		if (true) {
-			FhirContext ctx = FhirContext.forDstu2();
+			FhirContext ctx = FhirContext.forDstu3();
 			IGenericClient client = ctx.newRestfulGenericClient(base);
 //			client.setLogRequestAndResponse(true);
 
 			Organization o1 = new Organization();
-			o1.getName().setValue("Some Org");
+			o1.getNameElement().setValue("Some Org");
 			MethodOutcome create = client.create().resource(o1).execute();
-			IdDt orgId = (IdDt) create.getId();
+			IIdType orgId = (IIdType) create.getId();
 
 			Patient p1 = new Patient();
-			p1.addIdentifier("foo:bar", "12345");
+			p1.getMeta().addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
+			p1.addIdentifier().setSystem("foo:bar").setValue("12345");
 			p1.addName().addFamily("Smith").addGiven("John");
-			p1.getManagingOrganization().setReference(orgId);
-
-			TagList list = new TagList();
-			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
-			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
-			client.create().resource(p1).execute();
+			p1.getManagingOrganization().setReferenceElement(orgId);
 
 			Subscription subs = new Subscription();
-			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-			subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+			subs.setStatus(SubscriptionStatus.ACTIVE);
+			subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 			subs.setCriteria("Observation?");
 			client.create().resource(subs).execute();
 			

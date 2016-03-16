@@ -64,14 +64,6 @@ public class BaseDstu3Config extends BaseConfig {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
 		return retVal;
 	}
-
-	@Bean(name="myQuestionnaireResponseValidatorDstu3")
-	@Lazy
-	public IValidatorModule questionnaireResponseValidatorDstu3() {
-		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		module.setValidationSupport(validationSupportChainDstu3());
-		return module;
-	}
 	
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IFulltextSearchSvc searchDaoDstu3() {

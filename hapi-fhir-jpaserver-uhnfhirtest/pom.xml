@@ -157,14 +157,12 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
-			<version>2.0.1</version>
 		</dependency>
 
 		<!-- Only required for CORS support -->
 		<dependency>
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
-			<version>${ebay_cors_filter_version}</version>
 		</dependency>
 
 	</dependencies>

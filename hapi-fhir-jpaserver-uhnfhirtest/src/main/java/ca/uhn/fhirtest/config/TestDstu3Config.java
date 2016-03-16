@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -93,12 +94,12 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	 * Bean which validates incoming requests
 	 */
 	@Bean
+	@Lazy
 	public RequestValidatingInterceptor requestValidatingInterceptor() {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(questionnaireResponseValidatorDstu3());
 		requestValidator.addValidatorModule(instanceValidatorDstu3());
 
 		return requestValidator;
@@ -108,6 +109,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	 * Bean which validates outgoing responses
 	 */
 	@Bean
+	@Lazy
 	public ResponseValidatingInterceptor responseValidatingInterceptor() {
 		ResponseValidatingInterceptor responseValidator = new ResponseValidatingInterceptor();
 		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
@@ -124,7 +126,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_TYPE);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
-		responseValidator.addValidatorModule(questionnaireResponseValidatorDstu3());
 		responseValidator.addValidatorModule(instanceValidatorDstu3());
 		return responseValidator;
 	}

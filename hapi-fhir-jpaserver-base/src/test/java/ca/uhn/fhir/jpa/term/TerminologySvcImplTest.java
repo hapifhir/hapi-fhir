@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -100,9 +101,15 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAA");
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
-	}
+		
+		// Try an unknown code
+		concepts = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
 
-	@Test@Ignore
+	}
+	
+	@Test
 	public void testFindCodesAbove() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://example.com/my_code_system");
@@ -145,6 +152,11 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "childAAB");
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAB"));
+		
+		// Try an unknown code
+		concepts = myTermSvc.findCodesAbove(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "FOO_BAD_CODE");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
 	}
 
 	@Test

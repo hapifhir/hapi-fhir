@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import static java.util.stream.Collectors.collectingAndThen;
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Set;
@@ -71,15 +74,18 @@ public class TerminologySvcImpl implements ITerminologySvc {
 	@Override
 	public Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		
+
 		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCodeSystemVersionPid, theCode);
+		if (concept == null) {
+			return Collections.emptySet();
+		}
 
 		Set<TermConcept> retVal = new HashSet<TermConcept>();
 		retVal.add(concept);
 
 		fetchParents(concept, retVal);
 
-		ourLog.info("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+		ourLog.info("Fetched {} codes above code {} in {}ms", new Object[] { retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS) });
 		return retVal;
 	}
 
@@ -87,15 +93,18 @@ public class TerminologySvcImpl implements ITerminologySvc {
 	@Override
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		
+
 		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCodeSystemVersionPid, theCode);
+		if (concept == null) {
+			return Collections.emptySet();
+		}
 
 		Set<TermConcept> retVal = new HashSet<TermConcept>();
 		retVal.add(concept);
 
 		fetchChildren(concept, retVal);
 
-		ourLog.info("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+		ourLog.info("Fetched {} codes below code {} in {}ms", new Object[] { retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS) });
 		return retVal;
 	}
 
@@ -131,7 +140,8 @@ public class TerminologySvcImpl implements ITerminologySvc {
 			myCodeSystemDao.save(newCodeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystem.getResource().getId())) {
-				throw new InvalidRequestException(myContext.getLocalizer().getMessage(TerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().getValue()));
+				throw new InvalidRequestException(
+						myContext.getLocalizer().getMessage(TerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().getValue()));
 			}
 		}
 
