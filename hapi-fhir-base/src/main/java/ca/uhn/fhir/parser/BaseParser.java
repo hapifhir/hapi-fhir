@@ -91,6 +91,10 @@ public abstract class BaseParser implements IParser {
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 
+	private Set<String> myDontEncodeElements;
+
+	private boolean myDontEncodeElementsIncludesStars;
+
 	/**
 	 * Constructor
 	 * 
@@ -606,6 +610,21 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
+		myDontEncodeElementsIncludesStars = false;
+		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
+			myDontEncodeElements = null;
+		} else {
+			myDontEncodeElements = theDontEncodeElements;
+			for (String next : theDontEncodeElements) {
+				if (next.startsWith("*.")) {
+					myDontEncodeElementsIncludesStars = true;
+				}
+			}
+		}
+	}
+
+	@Override
 	public void setEncodeElements(Set<String> theEncodeElements) {
 		myEncodeElementsIncludesStars = false;
 		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
@@ -674,6 +693,38 @@ public abstract class BaseParser implements IParser {
 
 	protected boolean shouldAddSubsettedTag() {
 		return isSummaryMode() || isSuppressNarratives();
+	}
+
+	protected boolean shouldEncodeResourceId(IBaseResource theResource) {
+		boolean retVal = true;
+		if (isOmitResourceId()) {
+			retVal = false;
+		} else {
+			if (myDontEncodeElements != null) {
+				String resourceName = myContext.getResourceDefinition(theResource).getName();
+				if (myDontEncodeElements.contains(resourceName + ".id")) {
+					retVal = false;
+				} else if (myDontEncodeElements.contains("*.id")) {
+					retVal = false;
+				}
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Used for DSTU2 only
+	 */
+	protected boolean shouldEncodeResourceMeta(IResource theResource) {
+		if (myDontEncodeElements != null) {
+			String resourceName = myContext.getResourceDefinition(theResource).getName();
+			if (myDontEncodeElements.contains(resourceName + ".meta")) {
+				return false;
+			} else if (myDontEncodeElements.contains("*.meta")) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private String subsetDescription() {
@@ -770,32 +821,46 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		private boolean checkIfParentShouldBeEncodedAndBuildPath(StringBuilder theB, boolean theStarPass) {
+		private boolean checkIfParentShouldBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
+			return checkIfPathMatches(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, myEncodeElements, true);
+		}
+
+		private boolean checkIfParentShouldNotBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
+			return checkIfPathMatches(thePathBuilder, theStarPass, null, myDontEncodeElements, false);
+		}
+
+		private boolean checkIfPathMatches(StringBuilder thePathBuilder, boolean theStarPass, Set<String> theResourceTypes, Set<String> theElements, boolean theCheckingForWhitelist) {
 			if (myResDef != null) {
-				if (myEncodeElementsAppliesToResourceTypes != null) {
-					if (!myEncodeElementsAppliesToResourceTypes.contains(myResDef.getName())) {
+				if (theResourceTypes != null) {
+					if (!theResourceTypes.contains(myResDef.getName())) {
 						return true;
 					}
 				}
 				if (theStarPass) {
-					theB.append('*');
+					thePathBuilder.append('*');
 				} else {
-					theB.append(myResDef.getName());
+					thePathBuilder.append(myResDef.getName());
 				}
-				if (myEncodeElements.contains(theB.toString())) {
+				if (theElements.contains(thePathBuilder.toString())) {
 					return true;
 				} else {
 					return false;
 				}
 			} else if (myParent != null) {
-				if (myParent.checkIfParentShouldBeEncodedAndBuildPath(theB, theStarPass)) {
+				boolean parentCheck;
+				if (theCheckingForWhitelist) {
+					parentCheck = myParent.checkIfParentShouldBeEncodedAndBuildPath(thePathBuilder, theStarPass);
+				} else {
+					parentCheck = myParent.checkIfParentShouldNotBeEncodedAndBuildPath(thePathBuilder, theStarPass);
+				}
+				if (parentCheck) {
 					return true;
 				}
 
 				if (myDef != null) {
-					theB.append('.');
-					theB.append(myDef.getElementName());
-					return myEncodeElements.contains(theB.toString());
+					thePathBuilder.append('.');
+					thePathBuilder.append(myDef.getElementName());
+					return theElements.contains(thePathBuilder.toString());
 				}
 			}
 
@@ -815,12 +880,18 @@ public abstract class BaseParser implements IParser {
 		}
 
 		public boolean shouldBeEncoded() {
-			if (myEncodeElements == null) {
-				return true;
+			boolean retVal = true;
+			if (myEncodeElements != null) {
+				retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), false);
+				if (retVal == false && myEncodeElementsIncludesStars) {
+					retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), true);
+				}
 			}
-			boolean retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), false);
-			if (retVal == false && myEncodeElementsIncludesStars) {
-				retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), true);
+			if (retVal && myDontEncodeElements != null) {
+				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), false);
+				if (retVal && myDontEncodeElementsIncludesStars) {
+					retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), true);
+				}
 			}
 			return retVal;
 		}

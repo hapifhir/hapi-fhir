@@ -787,7 +787,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 
 		if (!theIncludedResource) {
-			if (isOmitResourceId()) {
+			if (super.shouldEncodeResourceId(theResource) == false) {
 				resourceId = null;
 			} else if (getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
@@ -844,7 +844,7 @@ public class XmlParser extends BaseParser implements IParser {
 				List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
 				TagList tags = getMetaTagsForEncoding((resource));
 
-				if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
+				if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 					theEventWriter.writeStartElement("meta");
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 					if (updated != null) {

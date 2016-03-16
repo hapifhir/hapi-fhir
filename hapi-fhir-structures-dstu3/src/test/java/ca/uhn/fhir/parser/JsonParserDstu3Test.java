@@ -14,6 +14,8 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +56,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.google.common.collect.Sets;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
@@ -70,15 +74,6 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
-	@Test
-	public void testLinkage() {
-		Linkage l = new Linkage();
-		l.addItem().getResource().setDisplay("FOO");
-		String out = ourCtx.newXmlParser().encodeResourceToString(l);
-		ourLog.info(out);
-		assertEquals("<Linkage xmlns=\"http://hl7.org/fhir\"><item><resource><display value=\"FOO\"/></resource></item></Linkage>", out);
-	}
-	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -241,6 +236,7 @@ public class JsonParserDstu3Test {
 		assertEquals("sec_label2", tagList.get(1).getDisplay());
 	}
 
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -300,7 +296,7 @@ public class JsonParserDstu3Test {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals("VERSION2", label.getVersion());
 	}
-
+	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -475,6 +471,75 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeWithDontEncodeElements() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("123");
+		
+		patient.getMeta().addProfile(("http://profile"));
+		patient.addName().addFamily("FAMILY").addGiven("GIVEN");
+		patient.addAddress().addLine("LINE1");
+		
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta", "Patient.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.name.family"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("GIVEN"));
+			assertThat(out, not(containsString("FAMILY")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
+			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("id"));
+			assertThat(out, not(containsString("address")));
+			assertThat(out, not(containsString("meta")));
+		}
+	}
+
+	@Test
 	public void testEncodeWithNarrative() {
 		Patient p = new Patient();
 		p.addName().addFamily("Smith").addGiven("John");
@@ -545,6 +610,15 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
 
+	}
+
+	@Test
+	public void testLinkage() {
+		Linkage l = new Linkage();
+		l.addItem().getResource().setDisplay("FOO");
+		String out = ourCtx.newXmlParser().encodeResourceToString(l);
+		ourLog.info(out);
+		assertEquals("<Linkage xmlns=\"http://hl7.org/fhir\"><item><resource><display value=\"FOO\"/></resource></item></Linkage>", out);
 	}
 
 	// FIXME: this should pass

@@ -216,17 +216,40 @@ public interface IParser {
 	TagList parseTagList(String theString);
 
 	/**
+	 * If provided, specifies the elements which should NOT be encoded. Valid values for this
+	 * field would include:
+	 * <ul>
+	 * <li><b>Patient</b> - Don't encode patient and all its children</li>
+	 * <li><b>Patient.name</b> - Don't encode the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Don't encode the patient's family name</li>
+	 * <li><b>*.text</b> - Don't encode the text element on any resource (only the very first position may contain a wildcard)</li>
+	 * </ul>
+	 * <p>
+	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
+	 * will work for DSTU2 parsers, but values with subelements on meta such
+	 * as <code>Patient.meta.lastUpdated</code> will only work in 
+	 * DSTU3+ mode.
+	 * </p>
+	 * 
+	 * @param theDontEncodeElements
+	 *           The elements to encode
+	 * @see #setEncodeElements(Set)
+	 */
+	void setDontEncodeElements(Set<String> theDontEncodeElements);
+
+	/**
 	 * If provided, specifies the elements which should be encoded, to the exclusion of all others. Valid values for this
 	 * field would include:
 	 * <ul>
 	 * <li><b>Patient</b> - Encode patient and all its children</li>
-	 * <li><b>Patient.name</b> - Encoding only the patient's name</li>
+	 * <li><b>Patient.name</b> - Encode only the patient's name</li>
 	 * <li><b>Patient.name.family</b> - Encode only the patient's family name</li>
 	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a wildcard)</li>
 	 * </ul>
 	 * 
 	 * @param theEncodeElements
 	 *           The elements to encode
+	 * @see #setDontEncodeElements(Set)
 	 */
 	void setEncodeElements(Set<String> theEncodeElements);
 

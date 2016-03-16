@@ -68,6 +68,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -720,17 +721,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		ResourceEncodingEnum encoding = myConfig.getResourceEncoding();
 		theEntity.setEncoding(encoding);
 		theEntity.setFhirVersion(myContext.getVersion().getVersion());
-		try {
-			switch (encoding) {
-			case JSON:
-				theEntity.setResource(encoded.getBytes("UTF-8"));
-				break;
-			case JSONC:
-				theEntity.setResource(GZipUtil.compress(encoded));
-				break;
-			}
-		} catch (UnsupportedEncodingException e) {
-			throw new InternalErrorException(e);
+		switch (encoding) {
+		case JSON:
+			theEntity.setResource(encoded.getBytes(Charsets.UTF_8));
+			break;
+		case JSONC:
+			theEntity.setResource(GZipUtil.compress(encoded));
+			break;
 		}
 
 		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
@@ -1118,16 +1115,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (theEntity.getPublished() == null) {
 			theEntity.setPublished(theUpdateTime);
 		}
-
-//		if (theUpdateHistory) {
-//			Long existingId = theEntity.getId();
-//			ResourceHistoryTable existingHistory = existingId != null ? myResourceHistoryTableDao.findForIdAndVersion(existingId, theEntity.getVersion()) : null;
-//			final ResourceHistoryTable historyEntry = theEntity.toHistory(existingHistory);
-//
-//			ourLog.info("Saving history entry for update {}", historyEntry.getIdDt());
-//			myResourceHistoryTableDao.save(historyEntry);
-//
-//		}
 
 		if (theUpdateVersion) {
 			theEntity.setVersion(theEntity.getVersion() + 1);

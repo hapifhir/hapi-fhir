@@ -241,6 +241,13 @@
 				first query. This should improve performance when searching against large
 				datasets.
 			</action>
+			<action type="add">
+				Parsers have new method 
+				<![CDATA[<code>setDontEncodeElements</code>]]>
+				which can be used to force the parser to not encode certain elements
+				in a resource when serializing. For example this can be used to omit
+				sensitive data or skip the resource metadata.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

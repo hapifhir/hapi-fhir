@@ -16,6 +16,8 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +28,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.answers.ThrowsException;
+
+import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -71,6 +75,7 @@ public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
+	
 	/**
 	 * See #308
 	 */
@@ -508,6 +513,77 @@ public class JsonParserDstu2Test {
 		ourLog.info(json);
 		bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) parser.parseResource(json);
 		assertThat(json, not(containsString("\"id\"")));
+	}
+
+	@Test
+	public void testEncodeWithDontEncodeElements() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("123");
+		
+		ArrayList<IdDt> list = new ArrayList<IdDt>();
+		list.add(new IdDt("http://profile"));
+		ResourceMetadataKeyEnum.PROFILES.put(patient, list);
+		patient.addName().addFamily("FAMILY").addGiven("GIVEN");
+		patient.addAddress().addLine("LINE1");
+		
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta", "Patient.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.name.family"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("GIVEN"));
+			assertThat(out, not(containsString("FAMILY")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("*.meta", "*.id"));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("address"));
+			assertThat(out, not(containsString("id")));
+			assertThat(out, not(containsString("meta")));
+		}
+		{
+			IParser p = ourCtx.newJsonParser();
+			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
+			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(patient);
+			ourLog.info(out);
+			assertThat(out, containsString("Patient"));
+			assertThat(out, containsString("name"));
+			assertThat(out, containsString("id"));
+			assertThat(out, not(containsString("address")));
+			assertThat(out, not(containsString("meta")));
+		}
 	}
 
 	@Test

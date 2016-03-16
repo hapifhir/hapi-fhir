@@ -800,7 +800,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		if (!theContainedResource) {
-			if (isOmitResourceId()) {
+			if (super.shouldEncodeResourceId(theResource) == false) {
 				resourceId = null;
 			} else if (getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
@@ -847,7 +847,7 @@ public class JsonParser extends BaseParser implements IParser {
 				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
 			}
 
-			if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
+			if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
