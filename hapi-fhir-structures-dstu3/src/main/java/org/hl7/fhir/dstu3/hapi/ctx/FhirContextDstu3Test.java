@@ -25,5 +25,14 @@ public class FhirContextDstu3Test {
 		assertEquals(AdministrativeGender.class, genderChild.getBoundEnumType());
 	}
 	
+	@Test
+	public void testQueryNonBoundCode() {
+		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);
+		String childName = "name";
+		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
+		ourLog.trace(genderChild.getClass().getName());
+		
+		assertEquals(null, genderChild.getBoundEnumType());
+	}
 
 }
