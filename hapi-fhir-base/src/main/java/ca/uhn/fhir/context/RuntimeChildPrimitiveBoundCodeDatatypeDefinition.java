@@ -30,11 +30,18 @@ import ca.uhn.fhir.model.api.annotation.Description;
 public class RuntimeChildPrimitiveBoundCodeDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
 
 	private Object myBinder;
+	private Class<? extends Enum<?>> myEnumType;
 
-	public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Object theBinder) {
+	public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Object theBinder, Class<? extends Enum<?>> theEnumType) {
 		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
 		myBinder = theBinder;
+		myEnumType = theEnumType;
+	}
+
+	@Override
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return myEnumType;
 	}
 
 	@Override

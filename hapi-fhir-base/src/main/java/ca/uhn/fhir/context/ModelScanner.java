@@ -576,9 +576,10 @@ class ModelScanner {
 				if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {
 					if (nextElementType.equals(BoundCodeDt.class)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
-						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+						Class<? extends Enum<?>> enumType = determineEnumTypeForBoundField(next);
+						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
 					} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
+						Class<? extends Enum<?>> binderType = determineEnumTypeForBoundField(next);
 						def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
 					} else {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
@@ -588,7 +589,8 @@ class ModelScanner {
 				} else {
 					if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
-						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+						Class<? extends Enum<?>> enumType = determineEnumTypeForBoundField(next);
+						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
 					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.isAssignableFrom(nextElementType)) {
 						def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					} else {
@@ -616,6 +618,12 @@ class ModelScanner {
 
 			elementNames.add(elementName);
 		}
+	}
+
+	private Class<? extends Enum<?>> determineEnumTypeForBoundField(Field next) {
+		@SuppressWarnings("unchecked")
+		Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
+		return enumType;
 	}
 
 	private String scanPrimitiveDatatype(Class<? extends IPrimitiveType<?>> theClass, DatatypeDef theDatatypeDefinition) {
