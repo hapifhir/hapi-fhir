@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -27,15 +29,19 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -280,6 +286,49 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
 	}
 
+	@Test
+	public void testProviderForSmart() throws ServletException {
+		
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.createConfiguration();
+		rs.setProviders(new ProviderWithRequiredAndOptional());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
+			@Override
+			public Conformance getServerConformance(HttpServletRequest theRequest) {	 	 
+				Conformance conformance = super.getServerConformance(theRequest); 
+				 ExtensionDt extensionDt = new ExtensionDt();
+				 ExtensionDt extensionDtToken = new ExtensionDt();
+				 ExtensionDt extensionDtAuthorize = new ExtensionDt();
+				 Rest rest = conformance.getRestFirstRep();
+				 RestSecurity restSecurity = rest.getSecurity();
+				 
+				 conformance.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_ELEMENTS_AND_EXTENSIONS);  
+				 restSecurity.addService(RestfulSecurityServiceEnum.SMART_ON_FHIR);
+				 restSecurity.getServiceFirstRep().setText("OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org)");	 
+				 extensionDt.setUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+				 extensionDtToken.setUrl("token");
+				 extensionDtToken.setValue(new UriDt("https://SERVERNAME/token"));
+				 extensionDtAuthorize.setUrl("authorize");
+				 extensionDtAuthorize.setValue(new UriDt("https://SERVERNAME/authorize"));
+				 extensionDt.addUndeclaredExtension(extensionDtToken);
+				extensionDt.addUndeclaredExtension(extensionDtAuthorize);
+				restSecurity.addUndeclaredExtension(extensionDt);
+				
+				return conformance;
+			}
+		};
+	
+		rs.init(createServletConfig());
+
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		Conformance parsed = ourCtx.newJsonParser().parseResource(Conformance.class, conf);
+	}
+	
+	
 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
@@ -635,9 +684,6 @@ public class ServerConformanceProviderDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)

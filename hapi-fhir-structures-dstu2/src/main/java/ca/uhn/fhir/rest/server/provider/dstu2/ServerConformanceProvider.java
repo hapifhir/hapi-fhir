@@ -102,22 +102,19 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
 		this.myServerConfiguration = theRestfulServer.createConfiguration();
 	}
-	
+
 	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
-	    this.myServerConfiguration = theServerConfiguration;
+		this.myServerConfiguration = theServerConfiguration;
 	}
-	
+
 	/*
-	 * Add a no-arg constructor and seetter so that the
-	 * ServerConfirmanceProvider can be Spring-wired with
-	 * the RestfulService avoiding the potential reference
-	 * cycle that would happen.
+	 * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
 	 */
-	public ServerConformanceProvider () {
+	public ServerConformanceProvider() {
 		super();
 	}
-	
-	public void setRestfulServer (RestfulServer theRestfulServer) {
+
+	public void setRestfulServer(RestfulServer theRestfulServer) {
 		myServerConfiguration = theRestfulServer.createConfiguration();
 	}
 
@@ -207,8 +204,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-				ServletContext servletContext  = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-	            String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
 				TreeSet<String> includes = new TreeSet<String>();
@@ -424,7 +421,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				if (StringUtils.isNotBlank(chain)) {
 					param.addChain(chain);
 				}
-				
+
 				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
 						if (nextWhitelist.startsWith(".")) {
@@ -432,7 +429,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						}
 					}
 				}
-				
+
 				param.setDocumentation(nextParamDescription);
 				if (nextParameter.getParamType() != null) {
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
