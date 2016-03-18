@@ -1,4 +1,4 @@
-package org.hl7.fhir.dstu3.hapi.ctx;
+package ca.uhn.fhir.context;
 
 import static org.junit.Assert.assertEquals;
 
