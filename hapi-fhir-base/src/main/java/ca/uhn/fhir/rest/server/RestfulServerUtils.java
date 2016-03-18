@@ -252,6 +252,20 @@ public class RestfulServerUtils {
 		}
 
 		/*
+		 * Some browsers (e.g. FF) request "application/xml" in their Accept header,
+		 * and we generally want to treat this as a preference for FHIR XML even if
+		 * it's not the FHIR version of the CT, which should be "application/xml+fhir".
+		 * 
+		 * When we're serving up Binary resources though, we are a bit more strict,
+		 * since Binary is supposed to use native content types unless the client has
+		 * explicitly requested FHIR.
+		 */
+		Map<String, EncodingEnum> contentTypeToEncoding = Constants.FORMAT_VAL_TO_ENCODING;
+		if ("Binary".equals(theReq.getResourceName())) {
+			contentTypeToEncoding = EncodingEnum.getContentTypeToEncodingStrict();
+		}
+		
+		/*
 		 * The Accept header is kind of ridiculous, e.g.
 		 */
 		// text/xml, application/xml, application/xhtml+xml, text/html;q=0.9, text/plain;q=0.8, image/png, */*;q=0.5
@@ -288,12 +302,12 @@ public class RestfulServerUtils {
 					EncodingEnum encoding;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
-							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken);
+							encoding = contentTypeToEncoding.get(nextToken);
 						} else {
-							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex));
+							encoding = contentTypeToEncoding.get(nextToken.substring(startSpaceIndex));
 						}
 					} else {
-						encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex, endSpaceIndex));
+						encoding = contentTypeToEncoding.get(nextToken.substring(startSpaceIndex, endSpaceIndex));
 						String remaining = nextToken.substring(endSpaceIndex + 1);
 						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
 						while (qualifierTok.hasMoreTokens()) {

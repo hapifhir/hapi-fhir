@@ -3,8 +3,10 @@ package ca.uhn.fhir.rest.server.interceptor;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
@@ -343,6 +347,51 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(responseContent, not(containsString("entry")));
 	}
 
+	@Test
+	public void testBinaryReadAcceptMissing() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+
+	}
+
+	@Test
+	public void testBinaryReadAcceptBrowser() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+		httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+	}
+	
+	@Test
+	public void testBinaryReadAcceptFhirJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertNull(status.getFirstHeader("Content-Disposition"));
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
+
+	}
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -353,7 +402,7 @@ public class ResponseHighlightingInterceptorTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
-		ourServlet.setResourceProviders(patientProvider);
+		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -366,6 +415,34 @@ public class ResponseHighlightingInterceptorTest {
 		ourClient = builder.build();
 
 	}
+	
+	public static class DummyBinaryResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Binary.class;
+		}
+
+		@Read
+		public Binary read(@IdParam IdDt theId) {
+			Binary retVal = new Binary();
+			retVal.setId("1");
+			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContentType(theId.getIdPart());
+			return retVal;
+		}
+
+		@Search
+		public List<Binary> search() {
+			Binary retVal = new Binary();
+			retVal.setId("1");
+			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContentType("text/plain");
+			return Collections.singletonList(retVal);
+		}
+
+	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.

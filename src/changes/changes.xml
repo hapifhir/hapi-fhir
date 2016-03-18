@@ -253,7 +253,14 @@
 				so that different tables use different sequences
 				to generate their indexes, resulting in more sequential
 				resource IDs being assigned by the server
-			<action>
+			</action>
+			<action type="fix">
+				Server now correctly serves up Binary resources
+				using their native content type (instead of as a
+				FHIR resource) if the request contains an accept
+				header containing "application/xml" as some browsers
+				do.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

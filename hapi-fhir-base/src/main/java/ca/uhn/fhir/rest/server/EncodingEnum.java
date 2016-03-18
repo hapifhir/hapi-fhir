@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import java.util.Collections;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +23,7 @@ package ca.uhn.fhir.rest.server;
  */
 
 import java.util.HashMap;
+import java.util.Map;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -43,8 +46,8 @@ public enum EncodingEnum {
 
 	;
 
-	private static HashMap<String, EncodingEnum> ourContentTypeToEncoding;
-	private static HashMap<String, EncodingEnum> ourContentTypeToEncodingStrict;
+	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
+	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
 
 	static {
 		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
@@ -54,7 +57,7 @@ public enum EncodingEnum {
 		}
 		
 		// Add before we add the lenient ones
-		ourContentTypeToEncodingStrict = new HashMap<String, EncodingEnum>(ourContentTypeToEncoding);
+		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<String, EncodingEnum>(ourContentTypeToEncoding));
 
 		/*
 		 * These are wrong, but we add them just to be tolerant of other
@@ -114,6 +117,18 @@ public enum EncodingEnum {
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
 		return ourContentTypeToEncodingStrict.get(theContentType);
+	}
+
+	/**
+	 * Returns a map containing the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is NOT lenient!</b> Things like "application/xml" will return <code>null</code>
+	 * </p>
+	 * @see #forContentType(String)
+	 */
+	public static Map<String, EncodingEnum> getContentTypeToEncodingStrict() {
+		return ourContentTypeToEncodingStrict;
 	}
 
 	public String getFormatContentType() {

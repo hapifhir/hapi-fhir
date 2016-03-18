@@ -207,6 +207,16 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
+		/*
+		 * Not binary
+		 */
+		if ("Binary".equals(theRequestDetails.getResourceName())) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+
+		/*
+		 * Request for _raw
+		 */
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
 		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
