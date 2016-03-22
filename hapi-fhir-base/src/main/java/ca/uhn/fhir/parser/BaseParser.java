@@ -78,22 +78,20 @@ public abstract class BaseParser implements IParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
-	private IIdType myEncodeForceResourceId;
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
+	private Set<String> myDontEncodeElements;
+	private boolean myDontEncodeElementsIncludesStars;
 	private Set<String> myEncodeElements;
 	private Set<String> myEncodeElementsAppliesToResourceTypes;
 	private boolean myEncodeElementsIncludesStars;
+	private IIdType myEncodeForceResourceId;
 	private IParserErrorHandler myErrorHandler;
 	private boolean myOmitResourceId;
 	private String myServerBaseUrl;
 	private boolean myStripVersionsFromReferences = true;
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
-
-	private Set<String> myDontEncodeElements;
-
-	private boolean myDontEncodeElementsIncludesStars;
 
 	/**
 	 * Constructor
@@ -439,6 +437,47 @@ public abstract class BaseParser implements IParser {
 		return tags;
 	}
 
+	@SuppressWarnings("deprecation")
+	protected <T extends IPrimitiveType<String>> List<T> getProfileTagsForEncoding(IBaseResource theResource, List<T> theProfiles) {
+		switch (myContext.getAddProfileTagWhenEncoding()) {
+		case NEVER:
+			return theProfiles;
+		case ONLY_FOR_CUSTOM:
+			RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+			if (resDef.isStandardType()) {
+				return theProfiles;
+			}
+			break;
+		case ALWAYS:
+			break;
+		}
+
+		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(theResource);
+			String profile = nextDef.getResourceProfile(myServerBaseUrl);
+			if (isNotBlank(profile)) {
+				for (T next : theProfiles) {
+					if (profile.equals(next.getValue())) {
+						return theProfiles;
+					}
+				}
+
+				List<T> newList = new ArrayList<T>();
+				newList.addAll(theProfiles);
+
+				BaseRuntimeElementDefinition<?> idElement = myContext.getElementDefinition("id");
+				@SuppressWarnings("unchecked")
+				T newId = (T) idElement.newInstance();
+				newId.setValue(profile);
+
+				newList.add(newId);
+				return newList;
+			}
+		}
+
+		return theProfiles;
+	}
+
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded
 	 * values.
@@ -595,6 +634,17 @@ public abstract class BaseParser implements IParser {
 				filterCodingsWithNoCodeOrSystem(metaValue.getTag());
 				filterCodingsWithNoCodeOrSystem(metaValue.getSecurity());
 
+				List<? extends IPrimitiveType<String>> newProfileList = getProfileTagsForEncoding(theResource, metaValue.getProfile());
+				List<? extends IPrimitiveType<String>> oldProfileList = metaValue.getProfile();
+				if (oldProfileList != newProfileList) {
+					oldProfileList.clear();
+					for (IPrimitiveType<String> next : newProfileList) {
+						if (isNotBlank(next.getValue())) {
+							metaValue.addProfile(next.getValue());
+						}
+					}
+				}
+
 				if (shouldAddSubsettedTag()) {
 					IBaseCoding coding = metaValue.addTag();
 					coding.setCode(Constants.TAG_SUBSETTED_CODE);
@@ -748,11 +798,11 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected static <T> List<T> extractMetadataListNotNull(IResource resource, ResourceMetadataKeyEnum<List<T>> key) {
-		List<T> securityLabels = key.get(resource);
+		List<? extends T> securityLabels = key.get(resource);
 		if (securityLabels == null) {
 			securityLabels = Collections.emptyList();
 		}
-		return securityLabels;
+		return new ArrayList<T>(securityLabels);
 	}
 
 	static boolean hasExtensions(IBase theElement) {

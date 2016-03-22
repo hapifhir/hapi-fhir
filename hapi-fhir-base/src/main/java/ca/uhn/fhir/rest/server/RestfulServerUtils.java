@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -49,15 +48,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -76,36 +72,6 @@ public class RestfulServerUtils {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text"));
-
-	public static void addProfileToBundleEntry(FhirContext theContext, IBaseResource theResource, String theServerBase) {
-		if (theResource instanceof IResource) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-				String profile = nextDef.getResourceProfile(theServerBase);
-				if (isNotBlank(profile)) {
-					List<IdDt> newList = new ArrayList<IdDt>();
-					List<IdDt> existingList = ResourceMetadataKeyEnum.PROFILES.get((IResource) theResource);
-					if (existingList != null) {
-						newList.addAll(existingList);
-					}
-					newList.add(new IdDt(profile));
-					ResourceMetadataKeyEnum.PROFILES.put((IResource) theResource, newList);
-				}
-			} else {
-				TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) theResource);
-				if (tl == null) {
-					tl = new TagList();
-					ResourceMetadataKeyEnum.TAG_LIST.put((IResource) theResource, tl);
-				}
-
-				RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-				String profile = nextDef.getResourceProfile(theServerBase);
-				if (isNotBlank(profile)) {
-					tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
-				}
-			}
-		}
-	}
 
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
@@ -605,13 +571,6 @@ public class RestfulServerUtils {
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (theResource.getIdElement().hasVersionIdPart()) {
 				restUtil.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getIdElement().getVersionIdPart() + '"');
-			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(theResource);
-			if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-				addProfileToBundleEntry(theServer.getFhirContext(), theResource, serverBase);
 			}
 		}
 

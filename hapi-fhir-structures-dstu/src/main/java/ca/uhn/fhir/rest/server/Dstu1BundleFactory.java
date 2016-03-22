@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,6 +41,8 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -53,7 +53,6 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu1BundleFactory.class);
 	private Bundle myBundle;
 	private FhirContext myContext;
 
@@ -186,7 +185,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
+	public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
@@ -224,16 +223,11 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (IBaseResource nextRes : resourceList) {
-				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					RestfulServerUtils.addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
-				}
+			if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
+				addProfileIfNeeded(theServer, theServerBase, next);
 			}
 		}
+
 
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
@@ -252,6 +246,23 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 					int start = Math.max(0, theOffset - limit);
 					myBundle.getLinkPrevious().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
+			}
+		}
+	}
+
+	private void addProfileIfNeeded(IRestfulServer<?> theServer, String theServerBase, IBaseResource nextRes) {
+		RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
+		if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardType()) {
+			TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) nextRes);
+			if (tl == null) {
+				tl = new TagList();
+				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) nextRes, tl);
+			}
+
+			RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(nextRes);
+			String profile = nextDef.getResourceProfile(theServerBase);
+			if (isNotBlank(profile)) {
+				tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
 			}
 		}
 	}

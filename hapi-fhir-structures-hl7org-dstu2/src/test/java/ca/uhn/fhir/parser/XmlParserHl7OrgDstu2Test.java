@@ -60,6 +60,7 @@ import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -67,11 +68,11 @@ import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserHl7OrgTest.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgTest.MyPatientWithOneDeclaredEnumerationExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgTest.MyPatientWithOneDeclaredExtension;
+import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
@@ -81,32 +82,18 @@ public class XmlParserHl7OrgDstu2Test {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserHl7OrgDstu2Test.class);
 
+	@After
+	public void after() {
+	   ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+	}
+
 	private String fixDivNodeText(String htmlNoNs) {
 		return htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">");
 	}
 
-	private String fixDivNodeTextJson(String htmlNoNs) {
+	 private String fixDivNodeTextJson(String htmlNoNs) {
 		return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
 	}
-
-	 /**
-   * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
-   * 
-   * Disabled after conversation with Grahame 
-   */
-  @Test
-  @Ignore
-  public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
-    IParser xmlParser = ourCtx.newXmlParser();
-
-    String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
-    MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
-    SimpleQuantity q = (SimpleQuantity) ms.getDosage().get(0).getQuantity();
-    assertEquals("1", q.getValueElement().getValueAsString());
-    
-    String output = xmlParser.encodeResourceToString(ms);
-    assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
-  }
 
 	
 	@Test
@@ -575,6 +562,26 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
+	/**
+   * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+   * 
+   * Disabled after conversation with Grahame 
+   */
+  @Test
+  @Ignore
+  public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
+    IParser xmlParser = ourCtx.newXmlParser();
+
+    String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+    MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
+    SimpleQuantity q = (SimpleQuantity) ms.getDosage().get(0).getQuantity();
+    assertEquals("1", q.getValueElement().getValueAsString());
+    
+    String output = xmlParser.encodeResourceToString(ms);
+    assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+  }
+
+	
 	@Test
 	public void testEncodeBinaryResource() {
 
@@ -587,7 +594,6 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeBinaryWithNoContentType() {
 		Binary b = new Binary();
@@ -613,7 +619,6 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(val, containsString("home"));
 		assertThat(val, containsString("male"));
 	}
-
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
 		Bundle b = new Bundle();
@@ -650,6 +655,7 @@ public class XmlParserHl7OrgDstu2Test {
 				
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
 	}
+	
 	@Test
 	public void testEncodeBundleCategory() {
 
@@ -676,7 +682,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertEquals("term", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getCode());
 		assertEquals("label", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getDisplay());
 	}
-	
+
 	@Test
 	public void testEncodeContainedAndIncludedResources() {
 
@@ -718,6 +724,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -745,7 +752,6 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
 		IParser parser = ourCtx.newXmlParser();
@@ -1110,6 +1116,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testExtensionOnComposite() throws Exception {
 
@@ -1133,7 +1140,6 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testExtensionOnPrimitive() throws Exception {
 
@@ -1215,10 +1221,11 @@ public class XmlParserHl7OrgDstu2Test {
 		assertTrue(d.toString(), d.identical());
 
 	}
-
+	
 	@Test
 	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		IParser p = ourCtx.newXmlParser();
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 

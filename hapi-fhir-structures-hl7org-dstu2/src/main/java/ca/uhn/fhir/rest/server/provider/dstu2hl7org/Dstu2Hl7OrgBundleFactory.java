@@ -48,10 +48,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -59,7 +57,6 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -298,7 +295,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult,
+  public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult,
       EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
       int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
     myBase = theServerBase;
@@ -340,15 +337,6 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
         if (!(next instanceof OperationOutcome)) {
           throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName()
               + "] with no ID specified (IBaseResource#setId(IdDt) must be called)");
-        }
-      }
-    }
-
-    if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-      for (IBaseResource nextRes : resourceList) {
-        RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-        if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-          RestfulServerUtils.addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
         }
       }
     }

@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class Extensions {
+public class ExtensionsDstu2 {
 
 @SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {

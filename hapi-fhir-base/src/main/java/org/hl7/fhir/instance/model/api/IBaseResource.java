@@ -39,6 +39,8 @@ import ca.uhn.fhir.model.api.Include;
  */
 public interface IBaseResource extends IBase, IElement {
 
+	IBaseMetaType getMeta();
+
 	/**
 	 * Include constant for <code>*</code> (return all includes)
 	 */

@@ -94,6 +94,24 @@ public class JsonParserDstu2Test {
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
 
+	
+	@Test
+	public void testParseBundleWithCustomObservationType() {
+		ReportObservation obs = new ReportObservation();
+		obs.setReadOnly(true);
+
+		IParser p = ourCtx.newJsonParser();
+//		p.set
+		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
+
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		obs = p.parseResource(ReportObservation.class, encoded);
+		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
+	}
+
+	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 

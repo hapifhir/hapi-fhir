@@ -9,11 +9,23 @@ import org.junit.Test;
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 
 public class FhirContextDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContextDstu3Test.class);
 
 	private FhirContext ourCtx = FhirContext.forDstu3();
+	
+	@Test
+	public void testCustomTypeDoesntBecomeDefault() {
+		FhirContext ctx = FhirContext.forDstu3();
+		
+		MyPatientWithExtensions pt = new MyPatientWithExtensions();
+		pt.addName().addGiven("FOO");
+		ctx.newXmlParser().encodeResourceToString(pt);
+		
+		assertEquals(Patient.class, ctx.getResourceDefinition("Patient").getImplementingClass());
+	}
 	
 	@Test
 	public void testQueryBoundCode() {

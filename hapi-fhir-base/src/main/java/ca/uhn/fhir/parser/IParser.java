@@ -104,7 +104,7 @@ public interface IParser {
 	boolean isOmitResourceId();
 
 	/**
-	 * If set to <code>true<code> (which is the default), resource references containing a version 
+	 * If set to <code>true<code> (which is the default), resource references containing a version
 	 * will have the version removed when the resource is encoded. This is generally good behaviour because
 	 * in most situations, references from one resource to another should be to the resource by ID, not
 	 * by ID and version. In some cases though, it may be desirable to preserve the version in resource
@@ -222,12 +222,13 @@ public interface IParser {
 	 * <li><b>Patient</b> - Don't encode patient and all its children</li>
 	 * <li><b>Patient.name</b> - Don't encode the patient's name</li>
 	 * <li><b>Patient.name.family</b> - Don't encode the patient's family name</li>
-	 * <li><b>*.text</b> - Don't encode the text element on any resource (only the very first position may contain a wildcard)</li>
+	 * <li><b>*.text</b> - Don't encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
 	 * </ul>
 	 * <p>
 	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
 	 * will work for DSTU2 parsers, but values with subelements on meta such
-	 * as <code>Patient.meta.lastUpdated</code> will only work in 
+	 * as <code>Patient.meta.lastUpdated</code> will only work in
 	 * DSTU3+ mode.
 	 * </p>
 	 * 
@@ -244,7 +245,8 @@ public interface IParser {
 	 * <li><b>Patient</b> - Encode patient and all its children</li>
 	 * <li><b>Patient.name</b> - Encode only the patient's name</li>
 	 * <li><b>Patient.name.family</b> - Encode only the patient's family name</li>
-	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a wildcard)</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
 	 * </ul>
 	 * 
 	 * @param theEncodeElements
@@ -308,7 +310,7 @@ public interface IParser {
 	IParser setServerBaseUrl(String theUrl);
 
 	/**
-	 * If set to <code>true<code> (which is the default), resource references containing a version 
+	 * If set to <code>true<code> (which is the default), resource references containing a version
 	 * will have the version removed when the resource is encoded. This is generally good behaviour because
 	 * in most situations, references from one resource to another should be to the resource by ID, not
 	 * by ID and version. In some cases though, it may be desirable to preserve the version in resource
@@ -316,7 +318,7 @@ public interface IParser {
 	 * 
 	 * @param theStripVersionsFromReferences
 	 *           Set this to <code>false<code> to prevent the parser from removing
-	 * resource versions from references.
+	 *           resource versions from references.
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences);

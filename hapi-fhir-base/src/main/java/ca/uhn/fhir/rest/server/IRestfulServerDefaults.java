@@ -48,7 +48,9 @@ public interface IRestfulServerDefaults {
 
 	/**
 	 * @return Returns the setting for automatically adding profile tags
+	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to {@link FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)}
 	 */
+	@Deprecated
 	AddProfileTagEnum getAddProfileTag();
 
 	/**

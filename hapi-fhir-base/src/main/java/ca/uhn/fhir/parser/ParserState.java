@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
@@ -1433,6 +1434,11 @@ class ParserState<T> {
 
 		}
 
+		@Override
+		protected void populateTarget() {
+			// nothing
+		}
+
 	}
 
 	private class ContainedResourcesStateHl7Org extends PreResourceState {
@@ -1462,6 +1468,11 @@ class ParserState<T> {
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(preResCurrentElement);
 			def.getChildByName("contained").getMutator().addValue(preResCurrentElement, res);
+		}
+
+		@Override
+		protected void populateTarget() {
+			// nothing
 		}
 
 	}
@@ -1969,6 +1980,8 @@ class ParserState<T> {
 			}
 		}
 
+		protected abstract void populateTarget();
+
 		public PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
 			Validate.notNull(theParentVersion);
@@ -2045,6 +2058,40 @@ class ParserState<T> {
 		public void wereBack() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 
+			if (myContext.hasDefaultTypeForProfile()) {
+				IBaseMetaType meta = myInstance.getMeta();
+				Class<? extends IBaseResource> wantedProfileType = null;
+				String usedProfile = null;
+				for (IPrimitiveType<String> next : meta.getProfile()) {
+					if (isNotBlank(next.getValue())) {
+						wantedProfileType = myContext.getDefaultTypeForProfile(next.getValue());
+						if (wantedProfileType != null) {
+							usedProfile = next.getValue();
+							break;
+						}
+					}
+				}
+	
+				if (wantedProfileType != null && !wantedProfileType.equals(myInstance.getClass())) {
+					if (myResourceType == null || myResourceType.isAssignableFrom(wantedProfileType)) {
+						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[] {myInstance.getClass().getName(), usedProfile, wantedProfileType});
+						
+						/*
+						 * This isn't the most efficient thing really.. If we want a specific
+						 * type we just re-parse into that type. The problem is that we don't know
+						 * until we've parsed the resource which type we want to use because the
+						 * profile declarations are in the text of the resource itself.
+						 * 
+						 * At some point it would be good to write code which can present a view
+						 * of one type backed by another type and use that.
+						 */
+						IParser parser = myContext.newJsonParser();
+						String asString = parser.encodeResourceToString(myInstance);
+						myInstance = parser.parseResource(wantedProfileType, asString);
+					}
+				}
+			}
+			
 			FhirTerser terser = myContext.newTerser();
 			terser.visit(myInstance, new IModelVisitor() {
 
@@ -2114,6 +2161,7 @@ class ParserState<T> {
 
 			}
 
+			populateTarget();
 		}
 
 	}
@@ -2141,14 +2189,19 @@ class ParserState<T> {
 			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
+//		@Override
+//		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
+//			super.enteringNewElement(theNamespaceUri, theLocalPart);
+//			populateTarget();
+//		}
+
 		@Override
-		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			super.enteringNewElement(theNamespaceUri, theLocalPart);
+		protected void populateTarget() {
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
 			if (myMutator != null) {
-				myMutator.addValue(myTarget, getCurrentElement());
+				myMutator.setValue(myTarget, getCurrentElement());
 			}
 		}
 
@@ -2192,10 +2245,9 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			super.enteringNewElement(theNamespaceUri, theLocalPart);
+		protected void populateTarget() {
 			if (myMutator != null) {
-				myMutator.addValue(myTarget, getCurrentElement());
+				myMutator.setValue(myTarget, getCurrentElement());
 			}
 		}
 

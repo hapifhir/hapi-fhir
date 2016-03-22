@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -63,6 +65,15 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	CodeDt getLanguage();
 
 	/**
+	 * Returns a view of the {@link #getResourceMetadata() resource metadata} map.
+	 * Note that getters from this map return immutable objects, but the <code>addFoo()</code>
+	 * and <code>setFoo()</code> methods may be used to modify metadata. 
+	 * 
+	 * @since 1.5
+	 */
+	IBaseMetaType getMeta();
+
+	/**
 	 * Returns the metadata map for this object, creating it if neccesary. Metadata entries are used to get/set feed bundle entries, such as the resource version, or the last updated timestamp.
 	 * <p>
 	 * Keys in this map are enumerated in the {@link ResourceMetadataKeyEnum}, and each key has a specific value type that it must use.
@@ -73,9 +84,22 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	ResourceMetadataMap getResourceMetadata();
 
 	/**
+	 * Returns a String representing the name of this Resource. This return value is not used for anything by HAPI itself, but is provided as a convenience to developers using the API.
+	 * 
+	 * @return the name of this resource, e.g. "Patient", or "Observation"
+	 */
+	String getResourceName();
+
+	/**
+	 * Returns the FHIR version represented by this structure
+	 */
+	@Override
+	public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum();
+
+	/**
 	 * Returns the narrative block for this resource
 	 */
-	BaseNarrativeDt getText();
+	BaseNarrativeDt<?> getText();
 
 	/**
 	 * Sets the ID of this resource. Note that this identifier is the URL (or a portion of the URL) used to access this resource, and is not the same thing as any business identifiers stored within the
@@ -98,17 +122,5 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 *            The map must not be null
 	 */
 	void setResourceMetadata(ResourceMetadataMap theMap);
-
-	/**
-	 * Returns a String representing the name of this Resource. This return value is not used for anything by HAPI itself, but is provided as a convenience to developers using the API.
-	 * 
-	 * @return the name of this resource, e.g. "Patient", or "Observation"
-	 */
-	String getResourceName();
-
-	/**
-	 * Returns the FHIR version represented by this structure
-	 */
-	public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum();
 
 }

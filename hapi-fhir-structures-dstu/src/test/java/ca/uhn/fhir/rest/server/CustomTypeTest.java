@@ -214,9 +214,6 @@ public class CustomTypeTest {
 	
 	private static boolean ourReturnExtended = false;
 	
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 		
 		@Search

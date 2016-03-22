@@ -838,7 +838,9 @@ public class JsonParser extends BaseParser implements IParser {
 			// Object securityLabelRawObj =
 
 			List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
-			List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+			List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+			profiles = super.getProfileTagsForEncoding(resource, profiles);
+			
 			TagList tags = getMetaTagsForEncoding(resource);
 			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 			IdDt resourceId = resource.getId();
@@ -854,7 +856,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 				if (profiles != null && profiles.isEmpty() == false) {
 					theEventWriter.writeStartArray("profile");
-					for (IdDt profile : profiles) {
+					for (IIdType profile : profiles) {
 						if (profile != null && isNotBlank(profile.getValue())) {
 							theEventWriter.write(profile.getValue());
 						}

@@ -51,6 +51,7 @@
 	}
 
 #foreach ( $child in $childElements )
+#if (${child.methodName} != 'Meta')
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does
@@ -73,7 +74,7 @@
 #end
 		return ${child.variableName};
 	}
-
+#end
 
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).

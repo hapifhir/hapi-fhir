@@ -683,6 +683,14 @@ class ModelScanner {
 			}
 		}
 
+		Class<? extends IBaseResource> builtInType = myNameToResourceType.get(resourceName.toLowerCase());
+		boolean standardType = builtInType != null && builtInType.equals(theClass) == true;
+		if (primaryNameProvider) {
+			if (builtInType != null && builtInType.equals(theClass) == false) {
+				primaryNameProvider = false;
+			}
+		}
+		
 		String resourceId = resourceDefinition.id();
 		if (!isBlank(resourceId)) {
 			if (myIdToResourceDefinition.containsKey(resourceId)) {
@@ -691,7 +699,7 @@ class ModelScanner {
 			}
 		}
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition, isStandardType(theClass));
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition, standardType);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			if (resourceDef.getStructureVersion() == myVersion) {

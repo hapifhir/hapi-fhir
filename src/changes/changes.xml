@@ -8,15 +8,15 @@
 	<body>
 		<release version="1.5" date="TBD">
 			<action type="add">
-            Bump the version of a few dependencies to the
-            latest versions (dependent HAPI modules listed in brackets):
-            <![CDATA[
-               <ul>
-                  <li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
-                  <li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li>
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
+						<li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li>
 						<li>SLF4j (All): 1.7.14 -&gt; 1.7.16</li>
-               </ul>
-            ]]>
+					</ul>
+				]]>
 			</action>
 			<action type="add">
 				Support comments when parsing and encoding both JSON and XML. Comments are retrieved
@@ -119,7 +119,7 @@
 			<action type="fix" issue="297">
 				<![CDATA[When <code>IServerInterceptor#incomingRequestPreHandled()</code> is called 
 				for a <code>@Validate</code> method, the resource was not populated in the
-				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!  
+				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!	
 				]]>
 			</action>
 			<action type="fix" issue="298">
@@ -261,21 +261,59 @@
 				header containing "application/xml" as some browsers
 				do.
 			</action>
+			<action type="add">
+				DSTU2 resources now have a 
+				<![CDATA[<code>getMeta()</code>]]> method which returns a
+				modifiable view of the resource metadata for convenience. This
+				matches the equivalent method in the DSTU3 structures.
+			</action>
+			<action type="add" issue="315">
+				Add a new method to FhirContext called
+				<![CDATA[
+				<code><a href="./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-">setDefaultTypeForProfile</a></code>
+				]]>
+				which can be used to specify that when recources are received which declare
+				support for specific profiles, a specific custom structures should be used 
+				instead of the default. For example, if you have created a custom Observation
+				class for a specific profile, you could use this method to cause your custom
+				type to be used by the parser for resources in a search bundle you receive.
+				<![CDATA[
+				<br/><br/>
+				See the documentation page on
+				<a href="./doc_extensions.html">Profiles and Extensions</a>
+				for more information.
+				]]>
+			</action>
+			<action type="fix" issue="315">
+				Parsing/Encoding a custom resource type which extends a
+				base type sometimes caused the FhirContext to treat all future
+				parses of the same resource as using the custom type even when
+				this was not wanted.
+				<![CDATA[<br/><br/>]]>
+				Custom structures may now be explicitly declared by profile
+				using the
+				<![CDATA[
+				<code><a href="./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-">setDefaultTypeForProfile</a></code>
+				]]>
+				method.
+				<![CDATA[<br/><br/>]]>
+				This issue was discovered and fixed as a part of the implementation of issue #315.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
-            Bump the version of a few dependencies to the
-            latest versions (dependent HAPI modules listed in brackets):
-            <![CDATA[
-               <ul>
-                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li>
-                  <li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li>
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li>
+						<li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li>
 						<li>Phloc-Commons (Schematron Validator): 4.3.6 -&gt; 4.4.4</li>
 						<li>Apache httpclient (Client): 4.4 -&gt; 4.5.1</li>
 						<li>Apache httpcore (Client): 4.4 -&gt; 4.4.4</li>
 						<li>SLF4j (All): 1.7.13 -&gt; 1.7.14</li>
-               </ul>
-            ]]>
+					</ul>
+				]]>
 			</action>
 			<action type="fix">
 				Remove a dependency on a Java 1.7 class 
@@ -430,20 +468,20 @@
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">
-            Bump the version of a few dependencies to the
-            latest versions (dependent HAPI modules listed in brackets):
-            <![CDATA[
-               <ul>
-                  <li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
-                  <li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
-                  <li>SLF4j (Core): 1.7.102 -&gt; 1.7.12</li>
-                  <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
-                  <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5."</li>
-                  <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
-                  <li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
-                  <li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
-               </ul>
-            ]]>
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
+						<li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
+						<li>SLF4j (Core): 1.7.102 -&gt; 1.7.12</li>
+						<li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
+						<li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5."</li>
+						<li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
+						<li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
+						<li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
+					</ul>
+				]]>
 			</action>
 			<action type="add">
 				JPA and Tester Overlay now use Spring Java config files instead
@@ -500,7 +538,7 @@
 			</action>
 			<action type="fix">
 				In server, if a client request is received and it has an Accept header indicating
-			       	that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list.
+					 	that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list.
 			</action>
 			<action type="add">
 				JPA server now supports searching with sort by token, quantity,
@@ -780,7 +818,7 @@
 			</action>
 			<action type="add">
 				Resource references using resource instance objects instead of resource IDs 
-				will correctly qualify the IDs with the resource type if they aren't already qualified   
+				will correctly qualify the IDs with the resource type if they aren't already qualified	
 			</action>
 			<action type="add" issue="211">
 				Testpage Overlay project now properly allows a custom client
@@ -1314,7 +1352,7 @@
 				RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!
 			</action>
 			<action type="add">
-			    JPA module now supports deleting resource via transaction
+				 JPA module now supports deleting resource via transaction
 			</action>
 			<action type="fix" issue="97" due-to="twilson650">
 				DateClientParam#second() incorrectly used DAY precision instead
@@ -1359,15 +1397,15 @@
 			<action type="add">
 				Add support for FHIR "extended operations" as defined in the FHIR DSTU2
 				specification, for the Generic Client, Annotation Client, and
-				Server.  
+				Server.	
 			</action>
 			<action type="fix">
 				Observation.applies[x] and other similar search fields with multiple allowable 
-				value types were not being correctly indexed in the JPA server.    
+				value types were not being correctly indexed in the JPA server.	 
 			</action>
 			<action type="fix" issue="122">
 				DateClientParam.before() incorrectly placed "&lt;=" instead of 
-				"&lt;" in the request URL. Thanks to Ryan for reporting!    
+				"&lt;" in the request URL. Thanks to Ryan for reporting!	 
 			</action>
 			<action type="add" issue="77" dev="wdebeau1">
 				Server now only automatically adds _include resources which are provided
@@ -1396,7 +1434,7 @@
 				own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast
 				version is finalized. See the
 				<![CDATA[<a href="./doc_dstu2.html">DSTU2 page</a>]]> 
-				for more information.  
+				for more information.	
 			</action>
 			<action type="fix">
 				<![CDATA[
@@ -1435,7 +1473,7 @@
 			</action>			
 			<action type="add" issue="44" dev="petromykhailysyn">
 				Remove unnecessary IOException from narrative generator API. Thanks to
-				Petro Mykhailysyn for the pull request!  
+				Petro Mykhailysyn for the pull request!	
 			</action>			
 			<action type="add" issue="48" dev="wdebeau1">
 				Introduced a new 
@@ -1709,7 +1747,7 @@
 			</action>			
 			<action type="add" issue="31" dev="preston">
 				Add a 
-				<![CDATA[<a href="https://www.vagrantup.com/">Vagrant</a>]]>  
+				<![CDATA[<a href="https://www.vagrantup.com/">Vagrant</a>]]>	
 				based environment (basically a fully built, self contained development environment) for
 				trying out the HAPI server modules. Thanks to Preston Lee for the pull request, and for 
 				offering to maintain this! 
@@ -1726,19 +1764,19 @@
 		<release version="0.6" date="2014-09-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
 			<action type="add">
-				Allow generic client  ... OAUTH
+				Allow generic client	... OAUTH
 			</action>
 			-->
 			<action type="add">
 				Add server interceptor framework, and new interceptor for logging incoming
-				requests.   
+				requests.	
 			</action>
 			<action type="add">
 				Add server validation framework for validating resources against the FHIR schemas and schematrons
 			</action>
 			<action type="fix">
 				Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University
-				Health Network for reporting!   
+				Health Network for reporting!	
 			</action>
 			<action type="fix" issue="4">
 				Create method was incorrectly returning an HTTP 204 on sucessful completion, but
@@ -1939,7 +1977,7 @@
 				space (e.g. a WAR file with a space in the name) failed to work correctly.
 				Thanks to David Hay of Orion for reporting this!
 			</action>
-        </release>			
+			</release>			
 		<release version="0.4" date="2014-07-13">
 			<action type="add">
 				<![CDATA[<b>BREAKING CHANGE:</b>]]>: IdDt has been modified so that it 

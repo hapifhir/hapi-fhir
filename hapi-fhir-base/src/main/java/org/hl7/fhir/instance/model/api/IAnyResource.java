@@ -55,8 +55,6 @@ public interface IAnyResource extends IBaseResource {
 
 	IPrimitiveType<String> getLanguageElement();
 
-	IBaseMetaType getMeta();
-
 	public Object getUserData(String name);
 
 	@Override

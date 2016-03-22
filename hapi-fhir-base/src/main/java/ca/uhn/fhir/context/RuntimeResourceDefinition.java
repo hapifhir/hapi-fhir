@@ -155,10 +155,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return "Bundle".equals(getName());
 	}
 
-	public boolean isStandardProfile() {
-		return myResourceProfile.startsWith("http://hl7.org/fhir/profiles");
-	}
-
 	@Override
 	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);

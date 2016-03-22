@@ -46,13 +46,17 @@ public @interface ResourceDef {
 	 * for the generated profile exported by the server. For example, if you set this value to
 	 * "hello" on a custom resource class, your server will automatically export a profile with the
 	 * identity: <code>http://localhost:8080/fhir/Profile/hello</code> (the base URL will be whatever
-	 * your server uses, not necessarily "http://localhost:8080/fhir")    
+	 * your server uses, not necessarily "http://localhost:8080/fhir")
 	 */
 	String id() default "";
 	
 	/**
 	 * The URL indicating the profile for this resource definition. If specified, this URL will be
 	 * automatically added to the meta tag when the resource is serialized.
+	 * <p>
+	 * This URL should be fully qualified to indicate the complete URL of
+	 * the profile being used, e.g. <code>http://example.com/fhir/StructureDefiniton/some_profile</code>
+	 * </p>
 	 */
 	String profile() default "";
 	

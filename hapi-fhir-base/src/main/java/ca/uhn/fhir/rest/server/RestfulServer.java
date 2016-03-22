@@ -74,6 +74,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -93,7 +94,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
-	private AddProfileTagEnum myAddProfileTag;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
@@ -367,11 +367,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		return count;
-	}
-
-	@Override
-	public AddProfileTagEnum getAddProfileTag() {
-		return myAddProfileTag;
 	}
 
 	@Override
@@ -1117,10 +1112,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theAddProfileTag
 	 *           The behaviour enum (must not be null)
+	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to {@link FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)}
 	 */
+	@Deprecated
+	@CoverageIgnore
 	public void setAddProfileTag(AddProfileTagEnum theAddProfileTag) {
 		Validate.notNull(theAddProfileTag, "theAddProfileTag must not be null");
-		myAddProfileTag = theAddProfileTag;
+		myFhirContext.setAddProfileTagWhenEncoding(theAddProfileTag);
 	}
 
 	/**
@@ -1392,6 +1390,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	private static boolean partIsOperation(String nextString) {
 		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$' || nextString.equals(Constants.URL_TOKEN_METADATA));
+	}
+
+	/**
+	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to {@link FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)}
+	 */
+	@Override
+	@Deprecated
+	public AddProfileTagEnum getAddProfileTag() {
+		return myFhirContext.getAddProfileTagWhenEncoding();
 	}
 
 }

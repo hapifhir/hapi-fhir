@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertThat;
 
 import org.hamcrest.core.StringContains;
@@ -22,7 +23,10 @@ public class MultiVersionJsonParserTest {
 		String str = FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
 		ourLog.info(str);
 
-		assertThat(str, StringContains.containsString("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}],\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]}"));
+		assertThat(str, stringContainsInOrder(
+			"{\"resourceType\":\"Patient\"",
+			"\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}]",
+			"\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]"));
 	}
 
 }

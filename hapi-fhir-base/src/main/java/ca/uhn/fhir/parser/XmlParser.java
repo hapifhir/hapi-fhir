@@ -132,16 +132,6 @@ public class XmlParser extends BaseParser implements IParser {
 		} catch (XMLStreamException e1) {
 			throw new DataFormatException(e1);
 		}
-
-		// XMLEventReader streamReader;
-		// try {
-		// streamReader = myXmlInputFactory.createXMLEventReader(theReader);
-		// } catch (XMLStreamException e) {
-		// throw new DataFormatException(e);
-		// } catch (FactoryConfigurationError e) {
-		// throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		// }
-		// return streamReader;
 	}
 
 	private XMLStreamWriter createXmlWriter(Writer theWriter) throws XMLStreamException {
@@ -432,8 +422,6 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			theEventWriter.writeEndElement();
 		}
-
-		String bundleBaseUrl = theBundle.getLinkBase().getValue();
 
 		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
 		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
@@ -841,7 +829,9 @@ public class XmlParser extends BaseParser implements IParser {
 					versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
 				}
 				List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
-				List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+				List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+				profiles = super.getProfileTagsForEncoding(resource, profiles);
+				
 				TagList tags = getMetaTagsForEncoding((resource));
 
 				if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
@@ -851,7 +841,7 @@ public class XmlParser extends BaseParser implements IParser {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 					}
 
-					for (IdDt profile : profiles) {
+					for (IIdType profile : profiles) {
 						theEventWriter.writeStartElement("profile");
 						theEventWriter.writeAttribute("value", profile.getValue());
 						theEventWriter.writeEndElement();

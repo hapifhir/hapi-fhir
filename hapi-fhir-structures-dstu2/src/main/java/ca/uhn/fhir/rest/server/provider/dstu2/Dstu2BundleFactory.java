@@ -35,7 +35,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -51,7 +50,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -65,7 +63,6 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu2BundleFactory.class);
 	private Bundle myBundle;
 	private FhirContext myContext;
 	private String myBase;
@@ -302,7 +299,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
+	public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		myBase = theServerBase;
 		
@@ -348,15 +345,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-				}
-			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (IBaseResource nextRes : resourceList) {
-				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					RestfulServerUtils.addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
 				}
 			}
 		}

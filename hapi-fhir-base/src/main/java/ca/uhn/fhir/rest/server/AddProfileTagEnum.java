@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,9 +23,9 @@ package ca.uhn.fhir.rest.server;
  */
 
 /**
- * RESTful server behaviour for automatically adding profile tags
+ * RESTful server behaviour for automatically adding profile tags when serializing resources
  * 
- * @see RestfulServer#setAddProfileTag(AddProfileTagEnum)
+ * @see FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)
  */
 public enum AddProfileTagEnum {
 	/**
@@ -33,7 +35,13 @@ public enum AddProfileTagEnum {
 
 	/**
 	 * Add any profile tags that returned resources appear to conform to
+	 * 
+	 * @deprecated This mode causes even FHIR's default profiles to be exported in the
+	 * resource metadata section. This is not generally expected behaviour from other
+	 * systems and it offers no real benefit, so it will be removed at some point. This
+	 * option was deprecated in HAPI 1.5
 	 */
+	@Deprecated
 	ALWAYS,
 
 	/**
