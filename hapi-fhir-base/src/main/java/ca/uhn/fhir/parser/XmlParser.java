@@ -1080,12 +1080,12 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private Bundle parseBundle(XMLEventReader theStreamReader, Class<? extends IBaseResource> theResourceType) {
-		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext, theResourceType, false, getErrorHandler());
+		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(this, myContext, theResourceType, false, getErrorHandler());
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
 	private <T extends IBaseResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
-		ParserState<T> parserState = ParserState.getPreResourceInstance(theResourceType, myContext, false, getErrorHandler());
+		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType, myContext, false, getErrorHandler());
 		return doXmlLoop(theStreamReader, parserState);
 	}
 
@@ -1093,7 +1093,7 @@ public class XmlParser extends BaseParser implements IParser {
 	public TagList parseTagList(Reader theReader) {
 		XMLEventReader streamReader = createStreamReader(theReader);
 
-		ParserState<TagList> parserState = ParserState.getPreTagListInstance(myContext, false, getErrorHandler());
+		ParserState<TagList> parserState = ParserState.getPreTagListInstance(this, myContext, false, getErrorHandler());
 		return doXmlLoop(streamReader, parserState);
 	}
 

@@ -88,6 +88,7 @@ public abstract class BaseParser implements IParser {
 	private IIdType myEncodeForceResourceId;
 	private IParserErrorHandler myErrorHandler;
 	private boolean myOmitResourceId;
+	private List<Class<? extends IBaseResource>> myPreferTypes;
 	private String myServerBaseUrl;
 	private boolean myStripVersionsFromReferences = true;
 	private boolean mySummaryMode;
@@ -437,6 +438,11 @@ public abstract class BaseParser implements IParser {
 		return tags;
 	}
 
+	@Override
+	public List<Class<? extends IBaseResource>> getPreferTypes() {
+		return myPreferTypes;
+	}
+
 	@SuppressWarnings("deprecation")
 	protected <T extends IPrimitiveType<String>> List<T> getProfileTagsForEncoding(IBaseResource theResource, List<T> theProfiles) {
 		switch (myContext.getAddProfileTagWhenEncoding()) {
@@ -715,6 +721,11 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theErrorHandler, "theErrorHandler must not be null");
 		myErrorHandler = theErrorHandler;
 		return this;
+	}
+
+	@Override
+	public void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes) {
+		myPreferTypes = thePreferTypes;
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class CustomTypeDstu3Test {
 	}
 	
 	
-	private String createBundle(String... theResources) {
+	public static String createBundle(String... theResources) {
 		StringBuilder b = new StringBuilder();
 		b.append("<Bundle xmlns=\"http://hl7.org/fhir\">\n");
 		for (String next : theResources) {
@@ -52,7 +52,7 @@ public class CustomTypeDstu3Test {
 		return b.toString();
 	}
 	
-	private String createResource(boolean theWithProfile) {
+	public static String createResource(boolean theWithProfile) {
 		StringBuilder b = new StringBuilder();
 		b.append("<Patient xmlns=\"http://hl7.org/fhir\">\n");
 		if (theWithProfile) {
@@ -120,7 +120,6 @@ public class CustomTypeDstu3Test {
 
 	@Test
 	public void parseBundleWithResourceDirective() {
-		
 		String input = createBundle(createResource(false), createResource(true));
 		
 		FhirContext ctx = FhirContext.forDstu3();

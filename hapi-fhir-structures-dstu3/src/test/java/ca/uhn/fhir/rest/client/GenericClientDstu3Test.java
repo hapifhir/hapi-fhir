@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -22,9 +24,12 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +39,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.CustomTypeDstu3Test;
+import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.VersionUtil;
@@ -86,6 +93,163 @@ public class GenericClientDstu3Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
+	}
+
+	@Test
+	public void testExplicitCustomTypeSearch() throws Exception {
+		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle resp = client
+			.search()
+			.forResource(CustomTypeDstu3Test.MyCustomPatient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+	
+	@Test
+	public void testExplicitCustomTypeHistoryType() throws Exception {
+		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle resp = client
+			.history()
+			.onType(CustomTypeDstu3Test.MyCustomPatient.class)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+	
+	@Test
+	public void testExplicitCustomTypeLoadPage() throws Exception {
+		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		Bundle bundle = new Bundle();
+		bundle.addLink().setRelation("next").setUrl("http://foo/next");
+
+		//@formatter:off
+		Bundle resp = client
+			.loadPage()
+			.next(bundle)
+			.preferResponseType(MyCustomPatient.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
+
+		//@formatter:off
+		resp = client
+			.loadPage()
+			.next(bundle)
+			.preferResponseTypes(toTypeList(MyCustomPatient.class))
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+	
+	@Test
+	public void testExplicitCustomTypeOperation() throws Exception {
+		
+		Parameters param = new Parameters();
+		Patient patient = new Patient();
+		patient.addName().addFamily("FOO");
+		param.addParameter().setName("foo").setResource(patient);
+		final String respString = ourCtx.newXmlParser().encodeResourceToString(param);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Parameters resp = client
+			.operation()
+			.onServer()
+			.named("foo")
+			.withNoParameters(Parameters.class)
+			.preferResponseType(MyCustomPatient.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getParameter().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
+		assertEquals("http://example.com/fhir/$foo", capt.getAllValues().get(0).getURI().toASCIIString());
+
+		//@formatter:off
+		resp = client
+			.operation()
+			.onType(MyCustomPatient.class)
+			.named("foo")
+			.withNoParameters(Parameters.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getParameter().size());
+		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
+		assertEquals("http://example.com/fhir/Patient/$foo", capt.getAllValues().get(1).getURI().toASCIIString());
+	}
+
+	private List<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> theClass) {
+		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>();
+		retVal.add(theClass);
+		return retVal;
 	}
 
 	@Test

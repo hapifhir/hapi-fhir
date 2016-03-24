@@ -91,14 +91,16 @@ class ParserState<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
 	private List<String> myComments = new ArrayList<String>(2);
-	private FhirContext myContext;
-	private IParserErrorHandler myErrorHandler;
-	private boolean myJsonMode;
+	private final FhirContext myContext;
+	private final IParserErrorHandler myErrorHandler;
+	private final boolean myJsonMode;
 	private T myObject;
 	private BaseState myState;
 	private IBase myPreviousElement;
+	private final IParser myParser;
 
-	private ParserState(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
+	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
+		myParser = theParser;
 		myContext = theContext;
 		myJsonMode = theJsonMode;
 		myErrorHandler = theErrorHandler;
@@ -247,8 +249,8 @@ class ParserState<T> {
 		myState.xmlEvent(theNextEvent);
 	}
 
-	static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
-		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode, theErrorHandler);
+	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+		ParserState<Bundle> retVal = new ParserState<Bundle>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			retVal.push(retVal.new PreAtomState(theResourceType));
 		} else {
@@ -261,8 +263,8 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *           May be null
 	 */
-	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
-		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode, theErrorHandler);
+	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(IParser theParser, Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+		ParserState<T> retVal = new ParserState<T>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
 			if (theContext.getVersion().getVersion().isRi()) {
 				retVal.push(retVal.new PreResourceStateHl7Org(theResourceType));
@@ -279,8 +281,8 @@ class ParserState<T> {
 		return retVal;
 	}
 
-	static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
-		ParserState<TagList> retVal = new ParserState<TagList>(theContext, theJsonMode, theErrorHandler);
+	static ParserState<TagList> getPreTagListInstance(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
+		ParserState<TagList> retVal = new ParserState<TagList>(theParser, theContext, theJsonMode, theErrorHandler);
 		retVal.push(retVal.new PreTagListState());
 		return retVal;
 	}
@@ -1997,7 +1999,18 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
 			if (myResourceType == null) {
-				definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
+				definition = null;
+				if (myParser.getPreferTypes() != null) {
+					for (Class<? extends IBaseResource> next : myParser.getPreferTypes()) {
+						RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(next);
+						if (nextDef.getName().equals(theLocalPart)) {
+							definition = nextDef;
+						}
+					}
+				}
+				if (definition == null) {
+					definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
+				}
 				if ((definition == null)) {
 					throw new DataFormatException("Element '" + theLocalPart + "' is not a known resource type, expected a resource at this position");
 				}

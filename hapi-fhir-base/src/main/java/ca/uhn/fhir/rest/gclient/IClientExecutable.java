@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.api.SummaryEnum;
 
 /*
@@ -48,6 +52,27 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	Y execute();
 
 	T prettyPrint();
+
+	/**
+	 * Explicitly specify a custom structure type to attempt to use when parsing the response. This
+	 * is useful for invocations where the response is a Bundle/Parameters containing nested resources,
+	 * and you want to use specific custom structures for those nested resources.
+	 * <p>
+	 * See <a href="https://jamesagnew.github.io/hapi-fhir/doc_extensions.html">Profiles and Extensions</a> for more information on using custom structures
+	 * </p>
+	 */
+	T preferResponseType(Class<? extends IBaseResource> theType);
+
+	/**
+	 * Explicitly specify a list of custom structure types to attempt to use (in order from most to
+	 * least preferred) when parsing the response. This
+	 * is useful for invocations where the response is a Bundle/Parameters containing nested resources,
+	 * and you want to use specific custom structures for those nested resources.
+	 * <p>
+	 * See <a href="https://jamesagnew.github.io/hapi-fhir/doc_extensions.html">Profiles and Extensions</a> for more information on using custom structures
+	 * </p>
+	 */
+	T preferResponseTypes(List<Class<? extends IBaseResource>> theTypes);
 
 	/**
 	 * Request that the server modify the response using the <code>_summary</code> param 

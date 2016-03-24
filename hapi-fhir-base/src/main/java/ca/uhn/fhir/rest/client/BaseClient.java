@@ -107,6 +107,13 @@ public abstract class BaseClient implements IRestfulClient {
 		return retVal;
 	}
 
+	@Override
+	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
+		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType);
+		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null);
+	}
+
 	void forceConformanceCheck() {
 		myFactory.validateServerBase(myUrlBase, myClient, this);
 	}
@@ -189,39 +196,39 @@ public abstract class BaseClient implements IRestfulClient {
 		IHttpRequest httpRequest;
 		IHttpResponse response = null;
 		try {
-		Map<String, List<String>> params = createExtraParams();
+			Map<String, List<String>> params = createExtraParams();
 
-		if (theEncoding == EncodingEnum.XML) {
-			params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
-		} else if (theEncoding == EncodingEnum.JSON) {
-			params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
-		}
+			if (theEncoding == EncodingEnum.XML) {
+				params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+			} else if (theEncoding == EncodingEnum.JSON) {
+				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+			}
 
-		if (theSummaryMode != null) {
-			params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
-		} else if (mySummary != null) {
-			params.put(Constants.PARAM_SUMMARY, Collections.singletonList(mySummary.getCode()));
-		}
+			if (theSummaryMode != null) {
+				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
+			} else if (mySummary != null) {
+				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(mySummary.getCode()));
+			}
 
-		if (thePrettyPrint == Boolean.TRUE) {
-			params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
-		}
+			if (thePrettyPrint == Boolean.TRUE) {
+				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
+			}
 
-		if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
-			params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
-		}
+			if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
+				params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
+			}
 
-		EncodingEnum encoding = getEncoding();
-		if (theEncoding != null) {
-			encoding = theEncoding;
-		}
+			EncodingEnum encoding = getEncoding();
+			if (theEncoding != null) {
+				encoding = theEncoding;
+			}
 
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
 				String body = httpRequest.getRequestBodyFromStream();
-				if(body != null) {
+				if (body != null) {
 					ourLog.info("Client request body: {}", body);
 				}
 			}
@@ -337,7 +344,7 @@ public abstract class BaseClient implements IRestfulClient {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
 			throw new FhirClientConnectionException(e);
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new FhirClientConnectionException(e);
@@ -449,28 +456,47 @@ public abstract class BaseClient implements IRestfulClient {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.remove(theInterceptor);
 	}
-
-	@Override
-	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
-		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType, null, false);
-		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null);
+	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
+		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
+		if (thePreferResponseType != null) {
+			preferResponseTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferResponseTypes.add(thePreferResponseType);
+		}
+		return preferResponseTypes;
 	}
 
 	protected final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 
 		private boolean myAllowHtmlResponse;
 		private IIdType myId;
-		private Class<T> myType;
+		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
+		private Class<T> myReturnType;
 
-		public ResourceResponseHandler(Class<T> theType, IIdType theId) {
-			myType = theType;
-			myId = theId;
+		public ResourceResponseHandler() {
+			this(null);
 		}
 
-		public ResourceResponseHandler(Class<T> theType, IIdType theId, boolean theAllowHtmlResponse) {
-			myType = theType;
+		public ResourceResponseHandler(Class<T> theReturnType) {
+			this(theReturnType, null, null);
+		}
+
+		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId) {
+			this(theReturnType, thePreferResponseType, theId, false);
+		}
+
+		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId, boolean theAllowHtmlResponse) {
+			this(theReturnType, toTypeList(thePreferResponseType), theId, theAllowHtmlResponse);
+		}
+
+		public ResourceResponseHandler(Class<T> theClass, List<Class<? extends IBaseResource>> thePreferResponseTypes) {
+			this(theClass, thePreferResponseTypes, null, false);
+		}
+
+		
+		public ResourceResponseHandler(Class<T> theReturnType, List<Class<? extends IBaseResource>> thePreferResponseTypes, IIdType theId, boolean theAllowHtmlResponse) {
+			myReturnType = theReturnType;
 			myId = theId;
+			myPreferResponseTypes = thePreferResponseTypes;
 			myAllowHtmlResponse = theAllowHtmlResponse;
 		}
 
@@ -478,13 +504,16 @@ public abstract class BaseClient implements IRestfulClient {
 		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
-				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myType != null) {
+				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myReturnType != null) {
 					return readHtmlResponse(theResponseReader);
 				}
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(getFhirContext());
-			T retVal = parser.parseResource(myType, theResponseReader);
+			if (myPreferResponseTypes != null) {
+				parser.setPreferTypes(myPreferResponseTypes);
+			}
+			T retVal = parser.parseResource(myReturnType, theResponseReader);
 
 			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
 
@@ -493,7 +522,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 		@SuppressWarnings("unchecked")
 		private T readHtmlResponse(Reader theResponseReader) {
-			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myType);
+			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myReturnType);
 			IBaseResource instance = resDef.newInstance();
 			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
 			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
@@ -510,6 +539,10 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 			divChild.getMutator().addValue(textInstance, divInstance);
 			return (T) instance;
+		}
+
+		public void setPreferResponseTypes(List<Class<? extends IBaseResource>> thePreferResponseTypes) {
+			myPreferResponseTypes = thePreferResponseTypes;
 		}
 	}
 

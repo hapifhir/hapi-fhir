@@ -23,6 +23,7 @@ package ca.uhn.fhir.parser;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -30,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
@@ -62,7 +64,7 @@ public interface IParser {
 	 * @return An encoded tag list
 	 */
 	String encodeTagListToString(TagList theTagList);
-
+	
 	/**
 	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
 	 * Specification</a>.
@@ -73,7 +75,7 @@ public interface IParser {
 	 *           The writer to encode to
 	 */
 	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
-
+	
 	/**
 	 * See {@link #setEncodeElements(Set)}
 	 */
@@ -94,6 +96,14 @@ public interface IParser {
 	 * Which encoding does this parser instance produce?
 	 */
 	EncodingEnum getEncoding();
+
+	/**
+	 * Gets the preferred types, as set using {@link #setPreferTypes(List)}
+	 * 
+	 * @return Returns the preferred types, or <code>null</code>
+	 * @see #setPreferTypes(List)
+	 */
+	List<Class<? extends IBaseResource>> getPreferTypes();
 
 	/**
 	 * Returns true if resource IDs should be omitted
@@ -288,6 +298,25 @@ public interface IParser {
 	 *           The error handler to set. Must not be null.
 	 */
 	IParser setParserErrorHandler(IParserErrorHandler theErrorHandler);
+
+	/**
+	 * If set, when parsing resources the parser will try to use the given types when possible, in 
+	 * the order that they are provided (from highest to lowest priority). For example, if a custom
+	 * type which declares to implement the Patient resource is passed in here, and the 
+	 * parser is parsing a Bundle containing a Patient resource, the parser will use the given
+	 * custom type.
+	 * <p>
+	 * This feature is related to, but not the same as the 
+	 * {@link FhirContext#setDefaultTypeForProfile(String, Class)} feature.
+	 * <code>setDefaultTypeForProfile</code> is used to specify a type to be used
+	 * when a resource explicitly declares support for a given profile. This
+	 * feature specifies a type to be used irrespective of the profile declaration
+	 * in the metadata statement. 
+	 * </p> 
+	 * 
+	 * @param thePreferTypes The preferred types, or <code>null</code>
+	 */
+	void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes);
 
 	/**
 	 * Sets the "pretty print" flag, meaning that the parser will encode resources with human-readable spacing and

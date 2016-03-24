@@ -3,14 +3,17 @@ package example;
 import java.io.IOException;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
@@ -33,7 +36,31 @@ client.create().resource(custPatient).execute();
 custPatient = client.read().resource(MyPatient.class).withId("123").execute();
 //END SNIPPET: customTypeClientSimple
 
+//START SNIPPET: customTypeClientSearch
+// Perform the search using the custom type
+Bundle bundle = client
+   .search()
+   .forResource(MyPatient.class)
+   .returnBundle(Bundle.class)
+   .execute();
+
+// Entries in the return bundle will use the given type
+MyPatient pat0 = (MyPatient) bundle.getEntry().get(0).getResource();
+//END SNIPPET: customTypeClientSearch
       
+//START SNIPPET: customTypeClientSearch2
+//Perform the search using the custom type
+bundle = client
+   .history()
+   .onInstance(new IdType("Patient/123"))
+   .andReturnBundle(Bundle.class)
+   .preferResponseType(MyPatient.class)
+   .execute();
+
+//Entries in the return bundle will use the given type
+MyPatient historyPatient0 = (MyPatient) bundle.getEntry().get(0).getResource();
+//END SNIPPET: customTypeClientSearch2
+
    }
 
    public void customTypeDeclared() {

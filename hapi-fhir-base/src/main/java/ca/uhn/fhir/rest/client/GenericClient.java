@@ -182,7 +182,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		Class<BaseConformance> conformance = (Class<BaseConformance>) myContext.getResourceDefinition("Conformance").getImplementingClass();
 
-		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance, null);
+		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance);
 		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -263,7 +263,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		boolean allowHtmlResponse = (theSummary == SummaryEnum.TEXT) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id, allowHtmlResponse);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, (Class<? extends IBaseResource>)null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
 			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
@@ -596,6 +596,39 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
+		
+		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
+
+		public List<Class<? extends IBaseResource>> getPreferResponseTypes() {
+			return myPreferResponseTypes;
+		}
+
+		public List<Class<? extends IBaseResource>> getPreferResponseTypes(Class<? extends IBaseResource> theDefault) {
+			if (myPreferResponseTypes != null) {
+			return myPreferResponseTypes;
+			} else {
+				return toTypeList(theDefault);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T preferResponseType(Class<? extends IBaseResource> theClass) {
+			myPreferResponseTypes = null;
+			if (theClass != null) {
+				myPreferResponseTypes = new ArrayList<Class<? extends IBaseResource>>();
+				myPreferResponseTypes.add(theClass);
+			}
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T preferResponseTypes(List<Class<? extends IBaseResource>> theClass) {
+			myPreferResponseTypes = theClass;
+			return (T) this;
+		}
+
 		protected EncodingEnum myParamEncoding;
 		protected Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
@@ -925,7 +958,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public Object execute() {
-			ResourceResponseHandler binding = new ResourceResponseHandler(myType.getImplementingClass(), null);
+			ResourceResponseHandler binding = new ResourceResponseHandler(myType.getImplementingClass());
 			HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
 			return super.invoke(null, binding, invocation);
 		}
@@ -963,7 +996,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myBundleType == null) {
 				binding = new BundleResponseHandler(null);
 			} else {
-				binding = new ResourceResponseHandler(myBundleType, null);
+				binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
 			}
 			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myContext, myUrl);
 
@@ -1087,7 +1120,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			IClientResponseHandler handler;
 			if (myReturnType != null) {
-				handler = new ResourceResponseHandler(myReturnType, null);
+				handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
 			} else {
 				handler = new BundleResponseHandler(null);
 			}
@@ -1391,9 +1424,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
-			IClientResponseHandler handler;
-			handler = new ResourceResponseHandler(null, null);
-
+			ResourceResponseHandler handler = new ResourceResponseHandler();
+			handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+			
 			Object retVal = invoke(null, handler, invocation);
 			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
 				return retVal;
@@ -1705,7 +1738,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throws BaseServerResponseException {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
-				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType, null);
+				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType);
 				IBaseResource response = handler.invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders);
 				IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
 				bundleFactory.initializeWithBundleResource(response);
@@ -1804,7 +1837,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			IClientResponseHandler<? extends IBase> binding;
 			if (myReturnBundleType != null) {
-				binding = new ResourceResponseHandler(myReturnBundleType, null);
+				binding = new ResourceResponseHandler(myReturnBundleType, getPreferResponseTypes(myResourceType));
 			} else {
 				binding = new BundleResponseHandler(myResourceType);
 			}
@@ -2070,13 +2103,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
 				return (T) invoke(params, binding, invocation);
 			} else if (myBaseBundle != null) {
-				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(), null);
+				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(), getPreferResponseTypes());
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
 				return (T) invoke(params, binding, invocation);
 			} else if (myRawBundle != null) {
 				StringResponseHandler binding = new StringResponseHandler();
 				/*
-				 * If the user has explicitly requested a given encoding, we may need to reencode the raw string
+				 * If the user has explicitly requested a given encoding, we may need to re-encode the raw string
 				 */
 				if (getParamEncoding() != null) {
 					if (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {

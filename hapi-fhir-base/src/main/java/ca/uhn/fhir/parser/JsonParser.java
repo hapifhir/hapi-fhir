@@ -220,7 +220,7 @@ public class JsonParser extends BaseParser implements IParser {
 			assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 			String resourceType = ((JsonString) resourceTypeObj).getString();
 
-			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(theResourceType, myContext, true, getErrorHandler());
+			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(this, theResourceType, myContext, true, getErrorHandler());
 			state.enteringNewElement(null, resourceType);
 
 			parseChildren(object, state);
@@ -1097,7 +1097,7 @@ public class JsonParser extends BaseParser implements IParser {
 			throw new DataFormatException("Trying to parse bundle but found resourceType other than 'Bundle'. Found: '" + resourceType + "'");
 		}
 
-		ParserState<Bundle> state = ParserState.getPreAtomInstance(myContext, theResourceType, true, getErrorHandler());
+		ParserState<Bundle> state = ParserState.getPreAtomInstance(this, myContext, theResourceType, true, getErrorHandler());
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			state.enteringNewElement(null, "Bundle");
 		} else {
@@ -1420,7 +1420,7 @@ public class JsonParser extends BaseParser implements IParser {
 		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 		String resourceType = ((JsonString) resourceTypeObj).getString();
 
-		ParserState<TagList> state = ParserState.getPreTagListInstance(myContext, true, getErrorHandler());
+		ParserState<TagList> state = ParserState.getPreTagListInstance(this, myContext, true, getErrorHandler());
 		state.enteringNewElement(null, resourceType);
 
 		parseChildren(object, state);
