@@ -62,6 +62,11 @@ public class ProfileParser extends BaseStructureParser {
 	protected String getTemplate() {
 		return "dstu".equals(getVersion()) ? "/vm/resource_dstu.vm" : "/vm/resource.vm";
 	}
+	
+	@Override
+	protected File getTemplateFile() {
+		return null;
+	}
 
 	public void parseSingleProfile(File theProfile, String theHttpUrl) throws MojoFailureException {
 		String profileString;

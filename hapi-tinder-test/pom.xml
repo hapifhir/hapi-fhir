@@ -97,7 +97,42 @@
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>
 					</execution>
-					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
+					<execution>
+						<id>generic_multi</id>
+						<goals>
+							<goal>generate-multi-files</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
+							<packageBase>ca.uhn.test.generic.multi</packageBase>
+							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<filenameSuffix>ResourceTest.java</filenameSuffix>
+							<baseResourceNames>
+								<baseResourceName>patient</baseResourceName>
+								<baseResourceName>organization</baseResourceName>
+							</baseResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_single</id>
+						<goals>
+							<goal>generate-single-file</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm</templateFile>
+							<packageBase>ca.uhn.test.generic.multi</packageBase>
+							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<targetPackage>ca.uhn.test.generic.single</targetPackage>
+							<targetFile>TestConfigDstu1.java</targetFile>
+							<baseResourceNames>
+								<baseResourceName>patient</baseResourceName>
+								<baseResourceName>organization</baseResourceName>
+							</baseResourceNames>
+						</configuration>
+					</execution>
+ 					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
 						<generateSearchForAllParams>true</generateSearchForAllParams> </configuration> </execution> -->
 				</executions>
 				<dependencies>
@@ -133,6 +168,32 @@
 										<versionRange>[0.4-SNAPSHOT,)</versionRange>
 										<goals>
 											<goal>generate-structures</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>ca.uhn.hapi.fhir</groupId>
+										<artifactId>hapi-tinder-plugin</artifactId>
+										<versionRange>[0.4-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-multi-files</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>ca.uhn.hapi.fhir</groupId>
+										<artifactId>hapi-tinder-plugin</artifactId>
+										<versionRange>[0.4-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-single-file</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
