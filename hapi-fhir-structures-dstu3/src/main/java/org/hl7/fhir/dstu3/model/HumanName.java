@@ -36,6 +36,7 @@ import java.util.*;
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 
@@ -806,9 +807,7 @@ public class HumanName extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (use == null || use.isEmpty()) && (text == null || text.isEmpty())
-           && (family == null || family.isEmpty()) && (given == null || given.isEmpty()) && (prefix == null || prefix.isEmpty())
-           && (suffix == null || suffix.isEmpty()) && (period == null || period.isEmpty());
+        return super.isEmpty() && ElementUtil.isEmpty(use, text, family, given, prefix, suffix, period);
       }
 
 
