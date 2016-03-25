@@ -1,0 +1,26 @@
+package ${targetPackage};
+
+import java.util.ArrayList;
+import java.util.List;
+import test.ResourceTest;
+
+public class TestConfig${versionCapitalized} {
+
+	public List<ResourceTest> testProviders${versionCapitalized}() {
+		List<ResourceTest> result = new ArrayList<test.ResourceTest>();
+#foreach ( $res in $resources )
+		result.add(test${res.declaringClassNameComplete}${versionCapitalized}());
+#end
+		return result;
+	}
+
+#foreach ( $res in $resources )
+
+	public ${packageBase}.${res.declaringClassNameComplete}ResourceTest test${res.declaringClassNameComplete}${versionCapitalized}() {
+		${packageBase}.${res.declaringClassNameComplete}ResourceTest result;
+		result = new ${packageBase}.${res.declaringClassNameComplete}ResourceTest();
+		return result;
+	}
+#end
+	
+}

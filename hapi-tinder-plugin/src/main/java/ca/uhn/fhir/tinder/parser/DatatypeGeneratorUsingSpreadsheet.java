@@ -40,6 +40,11 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected String getTemplate() {
 		return "dstu".equals(getVersion()) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
 	}
+	
+	@Override
+	protected File getTemplateFile() {
+		return null;
+	}
 
 	@Override
 	protected String getFilenameSuffix() {
