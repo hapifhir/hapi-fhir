@@ -41,14 +41,17 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	private Client myNativeClient;
 
 	/**
-	 * Constructor
+	 * Constructor. Note that you must set the {@link FhirContext} manually using {@link #setFhirContext(FhirContext)} if this constructor is used!
 	 */
 	public JaxRsRestfulClientFactory() {
+		super();
 	}
 
 	/**
 	 * Constructor
-	 * @param theFhirContext The context
+	 * 
+	 * @param theFhirContext
+	 *           The context
 	 */
 	public JaxRsRestfulClientFactory(FhirContext theFhirContext) {
 		super(theFhirContext);
@@ -64,10 +67,9 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return new JaxRsHttpClient(getNativeClientClient(), url, theIfNoneExistParams, theIfNoneExistString, theRequestType,
-				theHeaders);
+	public IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		Client client = getNativeClientClient();
+		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
@@ -77,6 +79,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	/**
 	 * Only accept clients of type javax.ws.rs.client.Client
+	 * 
 	 * @param theHttpClient
 	 */
 	@Override

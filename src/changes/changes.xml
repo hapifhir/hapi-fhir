@@ -304,7 +304,7 @@
 				as well as a Maven plugin, and to use external
 				sources. Thanks to Bill Denton for the pull
 				request!
-			</actiom>
+			</action>
 			<action type="fix">
 				JPA server now allows searching by token
 				parameter using a system only and no code,
@@ -313,6 +313,19 @@
 				expected behaviour for this search 
 				was not clear in the spec and HAPI had different
 				behaviour from the other reference servers.
+			</action>
+			<action type="add">
+				Introduce a JAX-RS client provider which can be used instead of the
+				default Apache HTTP Client provider to provide low level HTTP
+				services to HAPI's REST client. See
+				<![CDATA[<a href="./doc_rest_client_alternate_provider.html">JAX-RS &amp; Alternate HTTP Client Providers</a>]]>
+				for more information.
+				<![CDATA[<br/><br/>]]>
+				This is useful in cases where you have other non-FHIR REST clients
+				using a JAX-RS provider and want to take advantage of the
+				rest of the framework. 
+				<![CDATA[<br/><br/>]]>
+				Thanks to Peter Van Houte from Agfa for the amazing work!
 			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
@@ -362,7 +375,7 @@
 			<action type="add" issue="251">
 				Introduce a JAX-RS version of the REST server, which can be used
 				to deploy the same resource provider implementations which work
-				on the existing REST server into a JAX-RS (Jersey) environment.
+				on the existing REST server into a JAX-RS (e.g. Jersey) environment.
 				Thanks to Peter Van Houte from Agfa for the amazing work!
 			</action>
 			<action type="add">

@@ -91,6 +91,7 @@
 				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
 				<item name="Client HTTP Configuration" href="./doc_rest_client_http_config.html"/>
 				<item name="Client Examples" href="./doc_rest_client_examples.html"/>
+				<item name="JAX-RS Client &amp; Alternate HTTP Providers" href="./doc_rest_client_alternate_provider.html"/>
 			</item>
 			<item name="RESTful Server" href="./doc_rest_server.html" >
 				<item name="Using RESTful Server" href="./doc_rest_server.html" />

@@ -96,7 +96,7 @@ public interface IRestfulClientFactory {
 	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
-	 * @deprecated Use {@link #getServerValidationMode()} instead
+	 * @deprecated Use {@link #getServerValidationMode()} instead (this method is a synonym for that method, but this method is poorly named and will be removed at some point)
 	 */
 	@Deprecated
 	ServerValidationModeEnum getServerValidationModeEnum();

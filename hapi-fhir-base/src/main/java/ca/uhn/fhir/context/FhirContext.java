@@ -570,6 +570,7 @@ public class FhirContext {
 	 * @param theRestfulClientFactory
 	 */
 	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		Validate.notNull(theRestfulClientFactory, "theRestfulClientFactory must not be null");
 		this.myRestfulClientFactory = theRestfulClientFactory;
 	}
 

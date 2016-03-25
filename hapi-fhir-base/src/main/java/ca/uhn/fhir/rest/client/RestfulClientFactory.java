@@ -150,10 +150,11 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 */
 	@Override
 	public synchronized <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase) {
+		validateConfigured();
+		
 		if (!theClientType.isInterface()) {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
-
 		
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
@@ -171,8 +172,20 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		return proxy;
 	}
 
+	/**
+	 * Called automatically before the first use of this factory to ensure that
+	 * the configuration is sane. Subclasses may override, but should also call 
+	 * <code>super.validateConfigured()</code>
+	 */
+	protected void validateConfigured() {
+		if (getFhirContext() == null) {
+			throw new IllegalStateException(getClass().getSimpleName() + " does not have FhirContext defined. This must be set via " + getClass().getSimpleName() + "#setFhirContext(FhirContext)");
+		}
+	}
+
 	@Override
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
+		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase);
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}

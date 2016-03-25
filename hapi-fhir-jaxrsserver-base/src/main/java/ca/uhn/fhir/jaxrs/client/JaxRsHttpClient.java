@@ -87,7 +87,7 @@ public class JaxRsHttpClient implements IHttpClient {
 		}
 		Entity<Form> entity = Entity.form(map);
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
-		 addHeadersToRequest(retVal, null, theContext);
+		 addHeadersToRequest(retVal, theEncoding, theContext);
 		return retVal;
 	}
 
