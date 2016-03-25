@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +30,6 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ClientWithProfileDstu2Test {
@@ -70,13 +71,13 @@ public class ClientWithProfileDstu2Test {
 
 		int idx = 0;
 
-		MethodOutcome response = client.create().resource(new MyPatient()).execute();
+		client.create().resource(new MyPatient()).execute();
 
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
-
+		assertThat(requestBody, containsString("<meta><profile value=\"http://foo_profile\"/></meta>"));
 	}
 
 	@ResourceDef(name = "Patient", profile = "http://foo_profile")

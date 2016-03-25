@@ -94,11 +94,10 @@ public class ReadDstu2Test {
 	}
 	
 	/**
-	 * See #302
+	 * See #302 and #268
 	 */
 	@Test
 	public void testAddProfileToExistingList() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
 		ourInitializeProfileList = true;
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
