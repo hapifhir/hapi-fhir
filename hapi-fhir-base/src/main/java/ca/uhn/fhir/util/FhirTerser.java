@@ -78,6 +78,9 @@ public class FhirTerser {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
 			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
+				if (nextExt == null) {
+					continue;
+				}
 				theCallback.acceptUndeclaredExtension(containingElement, null, theChildDefinition, theDefinition, nextExt);
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
@@ -85,6 +88,9 @@ public class FhirTerser {
 		
 		if (theElement instanceof IBaseHasExtensions) {
 			for (IBaseExtension<?, ?> nextExt : ((IBaseHasExtensions)theElement).getExtension()) {
+				if (nextExt == null) {
+					continue;
+				}
 				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
@@ -92,6 +98,9 @@ public class FhirTerser {
 		
 		if (theElement instanceof IBaseHasModifierExtensions) {
 			for (IBaseExtension<?, ?> nextExt : ((IBaseHasModifierExtensions)theElement).getModifierExtension()) {
+				if (nextExt == null) {
+					continue;
+				}
 				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}

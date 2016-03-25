@@ -327,6 +327,11 @@
 				<![CDATA[<br/><br/>]]>
 				Thanks to Peter Van Houte from Agfa for the amazing work!
 			</action>
+			<action type="fix" issue="312">
+				Parser failed with a NPE while encoding resources if the
+				resource contained a null extension. Thanks to 
+				steve1medix for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

@@ -100,6 +100,25 @@ public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
+	/**
+	 * See #312
+	 */
+	@Test
+	public void testEncodeNullExtension() {
+		Patient patient = new Patient();
+		patient.getUndeclaredExtensions().add(null); // Purposely add null
+		patient.getUndeclaredModifierExtensions().add(null); // Purposely add null
+		patient.getUndeclaredExtensions().add(new ExtensionDt(false, "http://hello.world", new StringDt("Hello World")));
+		patient.getName().add(null);
+		patient.addName().getFamily().add(null);
+
+		IParser parser = ourCtx.newXmlParser();
+		String xml = parser.encodeResourceToString(patient);
+		
+		ourLog.info(xml);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://hello.world\"><valueString value=\"Hello World\"/></extension></Patient>", xml);
+	}
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off

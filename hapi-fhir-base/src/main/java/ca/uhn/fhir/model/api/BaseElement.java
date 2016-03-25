@@ -142,6 +142,9 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {
 			for (ExtensionDt next : myUndeclaredExtensions) {
+				if (next == null) {
+					continue;
+				}
 				if (!next.isEmpty()) {
 					return false;
 				}
@@ -149,6 +152,9 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		}
 		if (myUndeclaredModifierExtensions != null) {
 			for (ExtensionDt next : myUndeclaredModifierExtensions) {
+				if (next == null) {
+					continue;
+				}
 				if (!next.isEmpty()) {
 					return false;
 				}
