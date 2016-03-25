@@ -205,7 +205,7 @@ public class JaxRsRequest extends RequestDetails {
 
 	@Override
 	protected byte[] getByteStreamRequestContents() {
-		return StringUtils.defaultIfEmpty(myResourceString, "")
+		return StringUtils.defaultString(myResourceString, "")
 				.getBytes(ResourceParameter.determineRequestCharset(this));
 	}
 
