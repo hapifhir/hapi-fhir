@@ -731,17 +731,24 @@ public class GenericClientTest {
 	@Test
 	public void testSearchByDate() throws Exception {
 
-		String msg = getPatientFeedWithOneResult();
+		final String msg = getPatientFeedWithOneResult();
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
+		int idx = 0;
+		
 		//@formatter:off
+		@SuppressWarnings("deprecation")
 		Bundle response = client.search()
 				.forResource(Patient.class)
 				.encodedJson()
@@ -755,7 +762,23 @@ public class GenericClientTest {
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+
+		//@formatter:off
+		response = client.search()
+				.forResource(Patient.class)
+				.encodedJson()
+				.where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
+				.and(Patient.BIRTHDATE.after().day("2011-01-01"))
+				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.sort().ascending(Patient.BIRTHDATE)
+				.sort().descending(Patient.NAME)
+				.sort().defaultOrder(Patient.ADDRESS)
+				.count(123)
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
 
 	}
 
@@ -1041,6 +1064,52 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient?identifier=" + URLEncoder.encode("A|B,C|D", "UTF-8"), capt.getAllValues().get(2).getURI().toString());
 
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchByTokenWithSystemAndNoCode() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+		
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource("Patient")
+				.where(Patient.IDENTIFIER.hasSystemWithAnyCode("urn:foo"))
+				.execute();
+		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		//@formatter:on
+
+		//@formatter:off
+		response = client.search()
+				.forResource("Patient")
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:foo", null))
+				.execute();
+		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		//@formatter:on
+
+		//@formatter:off
+		response = client.search()
+				.forResource("Patient")
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:foo", ""))
+				.execute();
+		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		//@formatter:on
 	}
 
 	/**

@@ -1374,6 +1374,38 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchTokenParamNoValue() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
+			IBundleProvider retrieved = myPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
+			IBundleProvider retrieved = myPatientDao.search(map);
+			assertEquals(2, retrieved.size());
+		}
+	}
+
+	@Test
 	@Ignore
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();

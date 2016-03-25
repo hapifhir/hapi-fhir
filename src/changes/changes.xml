@@ -305,6 +305,15 @@
 				sources. Thanks to Bill Denton for the pull
 				request!
 			</actiom>
+			<action type="fix">
+				JPA server now allows searching by token
+				parameter using a system only and no code,
+				giving a search for any tokens which match
+				the given token with any code. Previously the
+				expected behaviour for this search 
+				was not clear in the spec and HAPI had different
+				behaviour from the other reference servers.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

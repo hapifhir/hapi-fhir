@@ -88,6 +88,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -97,7 +98,9 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -116,6 +119,35 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
+	@Test
+	public void testSearchTokenParamNoValue() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
+		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		//@formatter:off
+		Bundle response = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.hasSystemWithAnyCode("urn:system"))
+				.returnBundle(Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		assertEquals(2, response.getEntry().size());
+	}
 	
 	@Test
 	public void testCreateConditional() {

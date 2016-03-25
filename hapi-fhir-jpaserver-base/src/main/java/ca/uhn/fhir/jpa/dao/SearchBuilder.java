@@ -1164,7 +1164,14 @@ public class SearchBuilder {
 		if (StringUtils.isNotBlank(code)) {
 			singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
 		} else {
-			singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
+			/*
+			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but
+			 * no specified value this means to match all tokens with the given value.
+			 * 
+			 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was 
+			 * the result :)
+			 */
+			//singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
 		}
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
 		return singleCode;
