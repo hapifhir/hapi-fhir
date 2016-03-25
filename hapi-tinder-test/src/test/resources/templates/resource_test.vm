@@ -1,0 +1,13 @@
+
+package ${packageBase};
+
+import java.util.*;
+import test.ResourceTest;
+
+public class ${className}ResourceTest implements ResourceTest {
+
+	public String getResourceName() {
+		return "${className}";
+	}
+
+}

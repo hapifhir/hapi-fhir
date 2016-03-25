@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,6 +173,8 @@ public abstract class BaseStructureParser {
 	}
 
 	protected abstract String getTemplate();
+	
+	protected abstract File getTemplateFile();
 
 	protected boolean isSpreadsheet(String theFileName) {
 		return true;
@@ -480,7 +483,10 @@ public abstract class BaseStructureParser {
 		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
-		InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
+		InputStream templateIs =
+			getTemplateFile() != null
+				? new FileInputStream(getTemplateFile())
+				: ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
 
@@ -524,7 +530,14 @@ public abstract class BaseStructureParser {
 			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
 			// ".java");
 			String elementName = Resource.correctName(next.getElementName());
-			File f = new File(theOutputDirectory, elementName + getFilenameSuffix() + ".java");
+			String fwork = getFilenameSuffix();
+			// TODO -- how to generate multiple non-Java files??
+			if (fwork.endsWith(".java")) {
+				fwork = elementName + fwork;
+			} else {
+				fwork = elementName + fwork + ".java";
+			}
+			File f = new File(theOutputDirectory, fwork);
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {

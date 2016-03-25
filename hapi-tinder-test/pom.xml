@@ -97,7 +97,42 @@
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>
 					</execution>
-					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
+					<execution>
+						<id>generic_multi</id>
+						<goals>
+							<goal>generate-multi-files</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
+							<packageBase>ca.uhn.test.generic.multi</packageBase>
+							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<filenameSuffix>ResourceTest.java</filenameSuffix>
+							<baseResourceNames>
+								<baseResourceName>patient</baseResourceName>
+								<baseResourceName>organization</baseResourceName>
+							</baseResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_single</id>
+						<goals>
+							<goal>generate-single-file</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm</templateFile>
+							<packageBase>ca.uhn.test.generic.multi</packageBase>
+							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<targetPackage>ca.uhn.test.generic.single</targetPackage>
+							<targetFile>TestConfigDstu1.java</targetFile>
+							<baseResourceNames>
+								<baseResourceName>patient</baseResourceName>
+								<baseResourceName>organization</baseResourceName>
+							</baseResourceNames>
+						</configuration>
+					</execution>
+ 					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
 						<generateSearchForAllParams>true</generateSearchForAllParams> </configuration> </execution> -->
 				</executions>
 				<dependencies>
@@ -108,6 +143,101 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+		    <plugin>
+		        <artifactId>maven-antrun-plugin</artifactId>
+		        <executions>
+		          <execution>
+					<id>testTinderTask</id>
+					<phase>generate-sources</phase>
+					<goals>
+						<goal>run</goal>
+					</goals>
+		            <configuration>
+		              <target>
+						<taskdef name="hapi-tinder" classname="ca.uhn.fhir.tinder.ant.TinderGeneratorTask" classpathref="maven.plugin.classpath"/>
+		
+						<hapi-tinder templateFile="${project.basedir}/src/test/resources/templates/resource_test.vm"
+						             targetDir="${project.build.directory}/generated-sources/tinder"
+									 packageBase="ca.uhn.test.ant.multi"
+						             targetclassSuffix="ResourceTest.java"
+				                     projectHome="${project.basedir}/.."
+						             version="dstu2"
+							         baseResourceNames="patient,organization"
+						/>
+		
+						<hapi-tinder templateFile="${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm"
+						             targetDir="${project.build.directory}/generated-sources/tinder"
+						             targetFile="TestConfigDstu2.java"
+									 targetPackage="ca.uhn.test.ant.single"
+									 packageBase="ca.uhn.test.ant.multi"
+				                     projectHome="${project.basedir}/.."
+						             version="dstu2"
+							         baseResourceNames="patient,organization"
+						/>
+		
+		              </target>
+		            </configuration>
+		          </execution>
+		        </executions>
+		        <dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-base</artifactId>
+						<version>1.5-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-tinder-plugin</artifactId>
+						<version>1.5-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu2</artifactId>
+						<version>1.5-SNAPSHOT</version>
+					</dependency>
+<!-- 
+					<dependency>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</dependency>
+					<dependency>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+						<version>3.2</version>
+					</dependency>
+					<dependency>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+						<version>1.2</version>
+					</dependency>
+					<dependency>
+						<groupId>commons-lang</groupId>
+						<artifactId>commons-lang</artifactId>
+						<version>2.6</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-lang3</artifactId>
+						<version>3.3</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven</groupId>
+						<artifactId>maven-plugin-api</artifactId>
+						<version>3.2</version>
+					</dependency>
+					<dependency>
+						<groupId>velocity</groupId>
+						<artifactId>velocity</artifactId>
+						<version>1.7</version>
+					</dependency>
+					<dependency>
+						<groupId>velocity-tools</groupId>
+						<artifactId>velocity-tools</artifactId>
+						<version>2.0</version>
+					</dependency>
+-->					
+		        </dependencies>
+		    </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -133,6 +263,32 @@
 										<versionRange>[0.4-SNAPSHOT,)</versionRange>
 										<goals>
 											<goal>generate-structures</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>ca.uhn.hapi.fhir</groupId>
+										<artifactId>hapi-tinder-plugin</artifactId>
+										<versionRange>[0.4-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-multi-files</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>ca.uhn.hapi.fhir</groupId>
+										<artifactId>hapi-tinder-plugin</artifactId>
+										<versionRange>[0.4-SNAPSHOT,)</versionRange>
+										<goals>
+											<goal>generate-single-file</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

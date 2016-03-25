@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
 	private String myTemplate = null;
+	private File myTemplateFile = null;
 
 	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
@@ -74,6 +76,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		myTemplate = theTemplate;
 	}
 
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
+	}
+
 	@Override
 	protected BaseRootType createRootType() {
 		return new Resource();
@@ -98,6 +104,11 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		} else {
 			return "/vm/resource.vm";
 		}
+	}
+
+	@Override
+	protected File getTemplateFile() {
+		return myTemplateFile;
 	}
 
 	@Override
