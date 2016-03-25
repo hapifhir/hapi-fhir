@@ -1,6 +1,7 @@
 package ca.uhn.fhir.tinder.parser;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	private int myColShortName=-1;
 	private int myColType=-1;
 	private int myColV2Mapping=-1;
+	private HashMap<String, String> myBindingStrengths;
 
 	public void parse() throws Exception {
 		int index = 0;
@@ -75,6 +77,15 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				throw new Exception("Failed to find worksheet with name 'Data Elements' in spreadsheet: " + spreadsheetName);
 			}
 
+			myBindingStrengths = new HashMap<String, String>();
+			for (int i = 0; i < file.getElementsByTagName("Worksheet").getLength(); i++) {
+				Element bindingsSheet = (Element) file.getElementsByTagName("Worksheet").item(i);
+				if ("Bindings".equals(bindingsSheet.getAttributeNS("urn:schemas-microsoft-com:office:spreadsheet", "Name"))) {
+					processBindingsSheet(bindingsSheet, myBindingStrengths);
+				}
+			}
+
+			
 			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
 			Element table = (Element) tableList.item(0);
 
@@ -181,6 +192,38 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
 
+	}
+
+	private void processBindingsSheet(Element theBindingsSheet, Map<String, String> theBindingStrengths) {
+		NodeList tableList = theBindingsSheet.getElementsByTagName("Table");
+		Element table = (Element) tableList.item(0);
+		NodeList rows = table.getElementsByTagName("Row");
+		Element defRow = (Element) rows.item(0);
+
+		int colName = 0;
+		int colStrength = 0;
+		for (int j = 0; j < 20; j++) {
+			String nextName = cellValue(defRow, j);
+			if (nextName == null) {
+				continue;
+			}
+			nextName = nextName.toLowerCase().trim().replace(".", "");
+			if ("name".equals(nextName)) {
+				colName = j;
+			} else if ("conformance".equals(nextName)) {
+				colStrength = j;
+			}
+		}
+
+		for (int j = 1; j < rows.getLength(); j++) {
+			Element nextRow = (Element) rows.item(j);
+			
+			String name = cellValue(nextRow, colName);
+			String strength = cellValue(nextRow, colStrength);
+			if (isNotBlank(name) && isNotBlank(strength)) {
+				theBindingStrengths.put(name, strength);
+			}
+		}
 	}
 
 	protected abstract BaseRootType createRootType();
@@ -400,6 +443,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		theTarget.setSummary(cellValue(theRowXml,myColSummary));
 		theTarget.setModifier(cellValue(theRowXml,myColModifier));
 		
+		// Per #320
+		if ("example".equals(myBindingStrengths.get(theTarget.getBinding()))) {
+			theTarget.setBinding(null);
+		}
 	}
 
 	/**

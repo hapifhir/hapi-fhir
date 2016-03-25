@@ -8,11 +8,27 @@ import java.util.List;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner.PractitionerRole;
+import ca.uhn.fhir.model.dstu2.valueset.PractitionerRoleEnum;
 
 public class ModelDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
+	
+	/**
+	 * See #320
+	 */
+	@Test
+	public void testDontUseBoundCodeForExampleBinding() {
+		Practitioner p = new Practitioner();
+		PractitionerRole role = p.addPractitionerRole();
+		CodeableConceptDt roleField = role.getRole();
+		assertEquals(CodeableConceptDt.class, roleField.getClass());
+	}
 	
 	/**
 	 * See #304

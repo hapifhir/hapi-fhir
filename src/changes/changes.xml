@@ -332,6 +332,12 @@
 				resource contained a null extension. Thanks to 
 				steve1medix for reporting!
 			</action>
+			<action type="fix" issue="320">
+				In generated model classes (DSTU1/2) don't
+				use BoundCodeDt and BoundCodeableConceptDt for
+				coded fields which use example bindings. Thanks
+				to GitHub user Ricq for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
