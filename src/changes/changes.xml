@@ -299,6 +299,12 @@
 				<![CDATA[<br/><br/>]]>
 				This issue was discovered and fixed as a part of the implementation of issue #315.
 			</action>
+			<action type="add" issue="321">
+				Set up the tinder plugin to work as an ant task
+				as well as a Maven plugin, and to use external
+				sources. Thanks to Bill Denton for the pull
+				request!
+			</actiom>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
