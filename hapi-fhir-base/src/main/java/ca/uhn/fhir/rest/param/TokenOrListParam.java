@@ -31,7 +31,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * This class represents a restful search operation parameter for an "OR list" of tokens (in other words, a 
  * list which can contain one-or-more tokens, where the server should return results matching any of the tokens)
  */
-public class TokenOrListParam extends BaseOrListParam<TokenParam> {
+public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenParam> {
 
 	/**
 	 * Create a new empty token "OR list"

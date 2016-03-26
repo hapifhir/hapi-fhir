@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 
 
-public class DateOrListParam  extends BaseOrListParam<DateParam> {
+public class DateOrListParam  extends BaseOrListParam<DateOrListParam, DateParam> {
 
 	@Override
 	DateParam newInstance() {

@@ -45,7 +45,7 @@ public class ReadDstu2Test {
 
 	@Before
 	public void before() {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
 		ourInitializeProfileList = false;
 		ourLastId = null;
 	}
@@ -55,7 +55,7 @@ public class ReadDstu2Test {
 	 */
 	@Test
 	public void testAddProfile() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ALWAYS);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -74,7 +74,7 @@ public class ReadDstu2Test {
 
 	@Test
 	public void testVread() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ALWAYS);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -99,18 +99,19 @@ public class ReadDstu2Test {
 	@Test
 	public void testAddProfileToExistingList() throws Exception {
 		ourInitializeProfileList = true;
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
-		
-		ourLog.info(responseContent);
 	}
 	
 	/**
@@ -118,7 +119,7 @@ public class ReadDstu2Test {
 	 */
 	@Test
 	public void testReadJson() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ALWAYS);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);

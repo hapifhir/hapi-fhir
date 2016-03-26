@@ -1553,6 +1553,33 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IOperationUntypedWithInputAndPartialOutput andSearchParameter(String theName, IQueryParameterType theValue) {
+			addParam(theName, theValue);
+
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withSearchParameter(Class<T> theParameterType, String theName, IQueryParameterType theValue) {
+			Validate.notNull(theParameterType, "theParameterType must not be null");
+			Validate.notEmpty(theName, "theName must not be null");
+			Validate.notNull(theValue, "theValue must not be null");
+
+			myParametersDef = myContext.getResourceDefinition(theParameterType);
+			myParameters = (IBaseParameters) myParametersDef.newInstance();
+
+			addParam(theName, theValue);
+
+			return this;
+		}
+
+		private void addParam(String theName, IQueryParameterType theValue) {
+			IPrimitiveType<?> stringType = ParametersUtil.createString(myContext, theValue.getValueAsQueryToken(myContext));
+			addParam(theName, stringType);
+		}
+
 	}
 
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {

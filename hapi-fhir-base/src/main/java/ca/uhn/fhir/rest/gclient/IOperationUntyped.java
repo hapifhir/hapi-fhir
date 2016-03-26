@@ -24,6 +24,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
 public interface IOperationUntyped {
 
 	/**
@@ -53,5 +55,17 @@ public interface IOperationUntyped {
 	 * @param theValue The first parameter value
 	 */
 	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameter(Class<T> theParameterType, String theName, IBase theValue);
+
+	/**
+	 * Use chained method calls to construct a Parameters input. This form is a convenience
+	 * in order to allow simple method chaining to be used to build up a parameters
+	 * resource for the input of an operation without needing to manually construct one.
+	 * 
+	 * @param theParameterType The type to use for the output parameters (this should be set to
+	 * <code>Parameters.class</code> drawn from the version of the FHIR structures you are using)
+	 * @param theName The first parameter name
+	 * @param theValue The first parameter value
+	 */
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withSearchParameter(Class<T> theParameterType, String theName, IQueryParameterType theValue);
 
 }

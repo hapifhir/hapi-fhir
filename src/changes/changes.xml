@@ -338,6 +338,29 @@
 				coded fields which use example bindings. Thanks
 				to GitHub user Ricq for reporting!
 			</action>
+			<action type="add">
+				<![CDATA[
+				Operations methods defined using 
+				<code>@Operation</code> will now infer the maximum number of repetitions
+				of their parameters by the type of the parameter. Previously if
+				a default <code>max()</code> value was not specified in the
+				<code>@OperationParam</code> annotation on a parameter, the maximum
+				was assumed to be 1. Now, if a max value is not explicitly specified 
+				and the type of the parameter is a basic type (e.g. <code>StringDt</code>) the
+				max will be 1. If the parameter is a collection type (e.g. <code>List&lt;StringDt&gt;</code>)
+				the max will be *
+				]]>
+			</action>
+			<action type="add" issue="317">
+				<![CDATA[
+				Operation methods defined using
+				<code>@Operation</code>
+				may now use search parameter types, such as 
+				<code>TokenParam</code> and
+				<code>TokenAndListParam</code> as values. Thanks to 
+				Christian Ohr for reporting!
+				]]>
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

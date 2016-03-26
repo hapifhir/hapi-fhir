@@ -77,7 +77,6 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		enc.addIdentifier().setSystem("urn:visits").setValue("1234567");
 		enc.setClassElement(EncounterClassEnum.AMBULATORY);
 		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
-		enc.setType(ca.uhn.fhir.model.dstu2.valueset.EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
 
 		NarrativeDt narrative = new NarrativeDt();
 		myGen.generateNarrative(ourCtx, enc, narrative);

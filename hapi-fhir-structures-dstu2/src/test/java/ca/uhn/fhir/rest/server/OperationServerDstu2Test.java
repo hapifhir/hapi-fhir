@@ -49,13 +49,13 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
 
-public class OperationServerTest {
+public class OperationServerDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 
 	private static StringDt ourLastParam1;
 	private static Patient ourLastParam2;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu2Test.class);
 	private static int ourPort;
 	private static IdDt ourLastId;
 	private static Server ourServer;

@@ -112,20 +112,24 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		if (theQualifier != null) {
 			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
 			setModifier(modifier);
-			setSystem(null);
-			setValue(ParameterUtil.unescape(theParameter));
+			
+			if (modifier == TokenParamModifier.TEXT) {
+				setSystem(null);
+				setValue(ParameterUtil.unescape(theParameter));
+				return;
+			}
+		}
+
+		setSystem(null);
+		if (theParameter == null) {
+			setValue(null);
 		} else {
-			setSystem(null);
-			if (theParameter == null) {
-				setValue(null);
+			int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
+			if (barIndex != -1) {
+				setSystem(theParameter.substring(0, barIndex));
+				setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
 			} else {
-				int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
-				if (barIndex != -1) {
-					setSystem(theParameter.substring(0, barIndex));
-					setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
-				} else {
-					setValue(ParameterUtil.unescape(theParameter));
-				}
+				setValue(ParameterUtil.unescape(theParameter));
 			}
 		}
 	}

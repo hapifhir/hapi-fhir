@@ -68,13 +68,19 @@ public class ParametersUtil {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
 		IPrimitiveType<?> value;
-		if (theContext.getVersion().getVersion().isRi()) {
-			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theName);
-		} else {
-			value = new StringDt(theName);
-		}
+		value = createString(theContext, theName);
 		paramChildElem.getChildByName("name").getMutator().addValue(parameter, value);
 		return parameter;
+	}
+
+	public static IPrimitiveType<?> createString(FhirContext theContext, String theValue) {
+		IPrimitiveType<?> value;
+		if (theContext.getVersion().getVersion().isRi()) {
+			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theValue);
+		} else {
+			value = new StringDt(theValue);
+		}
+		return value;
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {

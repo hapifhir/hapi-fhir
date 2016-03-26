@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 
 
-public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeParam<A,B>> {
+public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeOrListParam<?,?>, CompositeParam<A,B>> {
 
 	private Class<A> myLeftType;
 	private Class<B> myRightType;

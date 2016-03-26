@@ -538,6 +538,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					if (nextParam.getParamType() != null) {
 						param.setType(nextParam.getParamType());
 					}
+					if (nextParam.getSearchParamType() != null) {
+						param.getSearchTypeElement().setValueAsString(nextParam.getSearchParamType());
+					}
 					param.setMin(nextParam.getMin());
 					param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
 					param.setName(nextParam.getName());

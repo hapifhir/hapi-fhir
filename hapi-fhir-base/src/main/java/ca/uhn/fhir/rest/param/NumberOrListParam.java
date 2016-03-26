@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 
 
-public class NumberOrListParam extends BaseOrListParam<NumberParam> {
+public class NumberOrListParam extends BaseOrListParam<NumberOrListParam, NumberParam> {
 
 	@Override
 	NumberParam newInstance() {

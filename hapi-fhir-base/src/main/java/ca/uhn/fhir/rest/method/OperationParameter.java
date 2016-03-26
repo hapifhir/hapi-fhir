@@ -25,9 +25,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,9 +47,13 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.param.BaseAndListParam;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -58,8 +64,14 @@ import ca.uhn.fhir.util.ParametersUtil;
 
 public class OperationParameter implements IParameter {
 
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
+
 	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
-	
+
+	private boolean myAllowGet;
+
+	private final FhirContext myContext;
 	private IConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
@@ -69,8 +81,7 @@ public class OperationParameter implements IParameter {
 	private final String myOperationName;
 	private Class<?> myParameterType;
 	private String myParamType;
-	private final FhirContext myContext;
-	private boolean myAllowGet;
+	private SearchParameter mySearchParameterBinding;
 
 	public OperationParameter(FhirContext theCtx, String theOperationName, OperationParam theOperationParam) {
 		this(theCtx, theOperationName, theOperationParam.name(), theOperationParam.min(), theOperationParam.max());
@@ -82,6 +93,21 @@ public class OperationParameter implements IParameter {
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void addValueToList(List<Object> matchingParamValues, Object values) {
+		if (values != null) {
+			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
+				BaseAndListParam existing = (BaseAndListParam<?>) matchingParamValues.get(0);
+				BaseAndListParam<?> newAndList = (BaseAndListParam<?>) values;
+				for (IQueryParameterOr nextAnd : newAndList.getValuesAsQueryTokens()) {
+					existing.addAnd(nextAnd);
+				}
+			} else {
+				matchingParamValues.add(values);
+			}
+		}
 	}
 
 	protected FhirContext getContext() {
@@ -104,27 +130,60 @@ public class OperationParameter implements IParameter {
 		return myParamType;
 	}
 
+	public String getSearchParamType() {
+		if (mySearchParameterBinding != null) {
+			return mySearchParameterBinding.getParamType().getCode();
+		} else {
+			return null;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (getContext().getVersion().getVersion().isRi()) {
 			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version "
-						+ getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
 			}
 		}
 
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
 			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);
+			if (myMax == OperationParam.MAX_DEFAULT) {
+				myMax = OperationParam.MAX_UNLIMITED;
+			}
+		} else if (IQueryParameterAnd.class.isAssignableFrom(myParameterType)) {
+			if (myMax == OperationParam.MAX_DEFAULT) {
+				myMax = OperationParam.MAX_UNLIMITED;
+			}
 		} else {
-			myMax = 1;
+			if (myMax == OperationParam.MAX_DEFAULT) {
+				myMax = 1;
+			}
 		}
 
-		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType);
+		boolean typeIsConcrete = !myParameterType.isInterface() && !Modifier.isAbstract(myParameterType.getModifiers());
+
+		//@formatter:off
+		boolean isSearchParam = 
+			IQueryParameterType.class.isAssignableFrom(myParameterType) || 
+			IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
+			IQueryParameterAnd.class.isAssignableFrom(myParameterType); 
+		//@formatter:off
 
 		/*
-		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We should probably clean this up..
+		 * Note: We say here !IBase.class.isAssignableFrom because a bunch of DSTU1/2 datatypes also
+		 * extend this interface. I'm not sure if they should in the end.. but they do, so we
+		 * exclude them.
+		 */
+		isSearchParam &= typeIsConcrete && !IBase.class.isAssignableFrom(myParameterType);
+
+		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType) || isSearchParam;
+
+		/*
+		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
+		 * should probably clean this up..
 		 */
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
@@ -135,13 +194,20 @@ public class OperationParameter implements IParameter {
 				myAllowGet = true;
 			} else if (myParameterType.equals(ValidationModeEnum.class)) {
 				// this is ok
-			} else if (!IBase.class.isAssignableFrom(myParameterType) || myParameterType.isInterface() || Modifier.isAbstract(myParameterType.getModifiers())) {
-				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
 			} else if (myParameterType.equals(ValidationModeEnum.class)) {
 				myParamType = "code";
-			} else {
+			} else if (IBase.class.isAssignableFrom(myParameterType) && typeIsConcrete) {
 				myParamType = myContext.getElementDefinition((Class<? extends IBase>) myParameterType).getName();
+			} else if (isSearchParam) {
+				myParamType = "string";
+				mySearchParameterBinding = new SearchParameter(myName, myMin > 0);
+				mySearchParameterBinding.setCompositeTypes(COMPOSITE_TYPES);
+				mySearchParameterBinding.setType(theParameterType, theInnerCollectionType, theOuterCollectionType);
+				myConverter = new QueryParameterConverter();
+			} else {
+				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
 			}
+
 		}
 
 	}
@@ -151,9 +217,12 @@ public class OperationParameter implements IParameter {
 		return this;
 	}
 
+	private void throwWrongParamType(Object nextValue) {
+		throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
+	}
+
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
-			throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		assert theTargetResource != null;
 		Object sourceClientArgument = theSourceClientArgument;
 		if (sourceClientArgument == null) {
@@ -173,46 +242,77 @@ public class OperationParameter implements IParameter {
 		List<Object> matchingParamValues = new ArrayList<Object>();
 
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-			String[] paramValues = theRequest.getParameters().get(myName);
-			if (paramValues != null && paramValues.length > 0) {
-				if (myAllowGet) {
+			if (mySearchParameterBinding != null) {
 
-					if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
-						List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
-						parameters.add(QualifiedParamList.singleton(paramValues[0]));
-						if (paramValues.length > 1) {
-							parameters.add(QualifiedParamList.singleton(paramValues[1]));
-						}
-						DateRangeParam dateRangeParam = new DateRangeParam();
-						dateRangeParam.setValuesAsQueryTokens(parameters);
-						matchingParamValues.add(dateRangeParam);
-					} else if (String.class.isAssignableFrom(myParameterType)) {
+				List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
+				String nameWithQualifierColon = myName + ":";
 
-						for (String next : paramValues) {
-							matchingParamValues.add(next);
-						}
-
+				for (String nextParamName : theRequest.getParameters().keySet()) {
+					String qualifier;
+					if (nextParamName.equals(myName)) {
+						qualifier = null;
+					} else if (nextParamName.startsWith(nameWithQualifierColon)) {
+						qualifier = nextParamName.substring(nextParamName.indexOf(':'));
 					} else {
-						for (String nextValue : paramValues) {
-							FhirContext ctx = theRequest.getServer().getFhirContext();
-							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class<? extends IBase>) myParameterType);
-							IPrimitiveType<?> instance = def.newInstance();
-							instance.setValueAsString(nextValue);
-							matchingParamValues.add(instance);
+						// This is some other parameter, not the one bound by this instance
+						continue;
+					}
+					String[] values = theRequest.getParameters().get(nextParamName);
+					if (values != null) {
+						for (String nextValue : values) {
+							params.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, nextValue));
 						}
 					}
-				} else {
-					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
-					String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
-					throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
+				}
+				if (!params.isEmpty()) {
+					for (QualifiedParamList next : params) {
+						Object values = mySearchParameterBinding.parse(myContext, Collections.singletonList(next));
+						addValueToList(matchingParamValues, values);
+					}
+					
+				}
+
+			} else {
+				String[] paramValues = theRequest.getParameters().get(myName);
+				if (paramValues != null && paramValues.length > 0) {
+					if (myAllowGet) {
+
+						if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
+							List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
+							parameters.add(QualifiedParamList.singleton(paramValues[0]));
+							if (paramValues.length > 1) {
+								parameters.add(QualifiedParamList.singleton(paramValues[1]));
+							}
+							DateRangeParam dateRangeParam = new DateRangeParam();
+							dateRangeParam.setValuesAsQueryTokens(parameters);
+							matchingParamValues.add(dateRangeParam);
+						} else if (String.class.isAssignableFrom(myParameterType)) {
+
+							for (String next : paramValues) {
+								matchingParamValues.add(next);
+							}
+
+						} else {
+							for (String nextValue : paramValues) {
+								FhirContext ctx = theRequest.getServer().getFhirContext();
+								RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class<? extends IBase>) myParameterType);
+								IPrimitiveType<?> instance = def.newInstance();
+								instance.setValueAsString(nextValue);
+								matchingParamValues.add(instance);
+							}
+						}
+					} else {
+						HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
+						String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
+						throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
+					}
 				}
 			}
+			
 		} else {
 
-			FhirContext ctx = theRequest.getServer().getFhirContext();
-
 			IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
-			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
 			if (def.getName().equals("Parameters")) {
 
 				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
@@ -247,7 +347,7 @@ public class OperationParameter implements IParameter {
 				}
 
 			} else {
-				
+
 				if (myParameterType.isAssignableFrom(requestContents.getClass())) {
 					tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
 				}
@@ -264,8 +364,7 @@ public class OperationParameter implements IParameter {
 		}
 
 		try {
-			@SuppressWarnings("rawtypes")
-			Collection retVal = myInnerCollectionType.newInstance();
+			Collection<Object> retVal = myInnerCollectionType.newInstance();
 			retVal.addAll(matchingParamValues);
 			return retVal;
 		} catch (InstantiationException e) {
@@ -301,12 +400,9 @@ public class OperationParameter implements IParameter {
 				}
 				throwWrongParamType(nextValue);
 			}
-			theMatchingParamValues.add(nextValue);
+			
+			addValueToList(theMatchingParamValues, nextValue);
 		}
-	}
-
-	private void throwWrongParamType(Object nextValue) {
-		throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
 	}
 
 	public interface IConverter {
@@ -314,6 +410,29 @@ public class OperationParameter implements IParameter {
 		Object incomingServer(Object theObject);
 
 		Object outgoingClient(Object theObject);
+
+	}
+
+	private class QueryParameterConverter implements IConverter {
+
+		public QueryParameterConverter() {
+			Validate.isTrue(mySearchParameterBinding != null);
+		}
+
+		@Override
+		public Object incomingServer(Object theObject) {
+			IPrimitiveType<?> obj = (IPrimitiveType<?>) theObject;
+			List<QualifiedParamList> paramList = Collections.singletonList(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, obj.getValueAsString()));
+			return mySearchParameterBinding.parse(myContext, paramList);
+		}
+
+		@Override
+		public Object outgoingClient(Object theObject) {
+			IQueryParameterType obj = (IQueryParameterType) theObject;
+			IPrimitiveType<?> retVal = (IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
+			retVal.setValueAsString(obj.getValueAsQueryToken(myContext));
+			return retVal;
+		}
 
 	}
 
