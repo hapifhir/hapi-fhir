@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -44,10 +45,10 @@ import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_NUMBER" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_NUMBER", indexes= {
-		@org.hibernate.annotations.Index(name="IDX_SP_NUMBER", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE"}
-	)})
+@Table(name = "HFJ_SPIDX_NUMBER", indexes= {
+	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID") 
+})
 //@formatter:on
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 

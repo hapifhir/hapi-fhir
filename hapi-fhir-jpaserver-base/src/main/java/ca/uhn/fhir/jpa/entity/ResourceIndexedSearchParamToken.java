@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -36,11 +37,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 
+//@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_TOKEN" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_TOKEN", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_TOKEN", columnNames = { "RES_TYPE", "SP_NAME", "SP_SYSTEM", "SP_VALUE" }),
-		@org.hibernate.annotations.Index(name = "IDX_SP_TOKEN_UNQUAL", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE" }) })
+@Table(name = "HFJ_SPIDX_TOKEN", indexes = {
+	@Index(name = "IDX_SP_TOKEN", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_VALUE"),
+	@Index(name = "IDX_SP_TOKEN_UNQUAL", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_TOKEN_RESID", columnList = "RES_ID") 
+})
+//@formatter:on
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;

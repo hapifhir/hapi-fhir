@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -47,9 +48,9 @@ import org.hibernate.search.annotations.Store;
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
-		@org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) 
+@Table(name = "HFJ_SPIDX_STRING", indexes = { 
+	@Index(name = "IDX_SP_STRING", columnList = "RES_TYPE,SP_NAME,SP_VALUE_NORMALIZED"), 
+	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID") 
 })
 @Indexed()
 //@AnalyzerDefs({

@@ -361,6 +361,12 @@
 				Christian Ohr for reporting!
 				]]>
 			</action>
+			<action type="add">
+				Add databases indexes to JPA module search index tables
+				for the RES_ID column on each. This should help
+				performance when searching over large datasets.
+				Thanks to Emmanuel Duviviers for the suggestion!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -42,9 +43,9 @@ import org.hibernate.search.annotations.Field;
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {
-	@org.hibernate.annotations.Index(name="IDX_SP_DATE", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE_LOW","SP_VALUE_HIGH"})
+@Table(name = "HFJ_SPIDX_DATE", indexes= {
+	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
+	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID") 
 })
 //@formatter:on
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
