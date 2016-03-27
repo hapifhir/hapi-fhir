@@ -1322,29 +1322,31 @@ public class SearchBuilder {
 
 	private void doInitializeSearch() {
 		if (mySearchEntity == null) {
+			reinitializeSearch();
+		}
+	}
 
-			mySearchEntity = new Search();
-			mySearchEntity.setUuid(UUID.randomUUID().toString());
-			mySearchEntity.setCreated(new Date());
-			mySearchEntity.setTotalCount(-1);
-			mySearchEntity.setPreferredPageSize(myParams.getCount());
-			mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-			mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+	private void reinitializeSearch() {
+		mySearchEntity = new Search();
+		mySearchEntity.setUuid(UUID.randomUUID().toString());
+		mySearchEntity.setCreated(new Date());
+		mySearchEntity.setTotalCount(-1);
+		mySearchEntity.setPreferredPageSize(myParams.getCount());
+		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
 
-			for (Include next : myParams.getIncludes()) {
-				mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+		for (Include next : myParams.getIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+		}
+		for (Include next : myParams.getRevIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
+		}
+		
+		if (myParams.isPersistResults()) {
+			myEntityManager.persist(mySearchEntity);
+			for (SearchInclude next : mySearchEntity.getIncludes()) {
+				myEntityManager.persist(next);
 			}
-			for (Include next : myParams.getRevIncludes()) {
-				mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
-			}
-			
-			if (myParams.isPersistResults()) {
-				myEntityManager.persist(mySearchEntity);
-				for (SearchInclude next : mySearchEntity.getIncludes()) {
-					myEntityManager.persist(next);
-				}
-			}
-
 		}
 	}
 
@@ -1362,8 +1364,9 @@ public class SearchBuilder {
 
 	private void doSetPids(Collection<Long> thePids) {
 		if (myParams.isPersistResults()) {
-			mySearchResultDao.deleteForSearch(mySearchEntity.getId());
-			mySearchResultDao.flush();
+			if (mySearchEntity.getTotalCount() != null) {
+				reinitializeSearch();
+			}
 
 			LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
 			int index = 0;
