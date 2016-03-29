@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import java.util.Collections;
+
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -41,6 +43,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -106,6 +109,17 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     public String getBaseForRequest() {
         return getBaseForServer();
     }    
+
+ 	/**
+ 	 * Default: an empty list of interceptors (Interceptors are not yet supported 
+ 	 * in the JAX-RS server). Please get in touch if you'd like to help!
+ 	 * 
+ 	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+ 	 */
+ 	@Override
+ 	public List<IServerInterceptor> getInterceptors() {
+ 		return Collections.emptyList();
+ 	}
 
     /**
 	 * Get the uriInfo
