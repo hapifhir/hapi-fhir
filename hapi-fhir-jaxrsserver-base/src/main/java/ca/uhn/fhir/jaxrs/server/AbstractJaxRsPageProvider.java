@@ -89,16 +89,6 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	}
 
 	/**
-	 * Default: an empty list of interceptors
-	 * 
-	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
-	 */
-	@Override
-	public List<IServerInterceptor> getInterceptors() {
-		return Collections.emptyList();
-	}
-
-	/**
 	 * Default: no paging provider
 	 */
 	@Override

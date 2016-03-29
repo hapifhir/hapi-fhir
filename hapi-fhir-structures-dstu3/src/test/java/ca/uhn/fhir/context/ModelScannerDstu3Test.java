@@ -68,7 +68,7 @@ public class ModelScannerDstu3Test {
 	public void testScanExtensionTypes() throws DataFormatException {
 
 		FhirContext ctx = FhirContext.forDstu3();
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsA.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsDstu3A.class);
 
 		assertEquals(RuntimeChildCompositeDatatypeDefinition.class, def.getChildByNameOrThrowDataFormatException("identifier").getClass());
 

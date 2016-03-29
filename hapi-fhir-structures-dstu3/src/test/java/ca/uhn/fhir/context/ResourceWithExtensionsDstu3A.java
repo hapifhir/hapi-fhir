@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
-public class ResourceWithExtensionsA extends BaseResource {
+public class ResourceWithExtensionsDstu3A extends BaseResource {
 
 	/*
 	 * NB: several unit tests depend on the structure here
