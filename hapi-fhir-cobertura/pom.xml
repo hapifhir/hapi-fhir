@@ -297,6 +297,7 @@
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 					<argLine>-Xmx1824m</argLine>
+					<redirectTestOutputToFile>false</redirectTestOutputToFile>
 					<!--<reportFormat>plain</reportFormat>-->
 					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>-->
 				</configuration>
