@@ -12,17 +12,18 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
+import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
-	protected ServletRequestDetails myRequestDetails;
 	private RestfulServer myServer;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() throws ServletException {
-		myRequestDetails = mock(ServletRequestDetails.class);
+		mySrd = mock(ServletRequestDetails.class);
+		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 
 		if (myServer == null) {
 			myServer = new RestfulServer(myFhirCtx);
@@ -33,10 +34,10 @@ public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
 			myServer.init(mock(ServletConfig.class));
 		}
 
-		when(myRequestDetails.getServer()).thenReturn(myServer);
+		when(mySrd.getServer()).thenReturn(myServer);
 		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-		when(myRequestDetails.getServletRequest()).thenReturn(servletRequest);
-		when(myRequestDetails.getFhirServerBase()).thenReturn("http://example.com/base");
+		when(mySrd.getServletRequest()).thenReturn(servletRequest);
+		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");
 		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
 		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}

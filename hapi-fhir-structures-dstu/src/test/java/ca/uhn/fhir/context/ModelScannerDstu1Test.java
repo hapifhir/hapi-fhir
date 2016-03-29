@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.MyPatient;
 
-public class ModelScannerTest {
+public class ModelScannerDstu1Test {
 
 	/** This failed at one point */
 	@Test
@@ -39,7 +39,7 @@ public class ModelScannerTest {
 			FhirContext.forDstu1().getResourceDefinition(NoResourceDef.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Resource class[ca.uhn.fhir.context.ModelScannerTest$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+			assertEquals("Resource class[ca.uhn.fhir.context.ModelScannerDstu1Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
 		}
 	}
 

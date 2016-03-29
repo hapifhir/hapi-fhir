@@ -191,6 +191,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime, theRequestDetails);
 
 		// Notify JPA interceptors
+		T resourceToDelete = toResource(myResourceType, entity, false);
+		theRequestDetails.getRequestOperationCallback().resourceDeleted(resourceToDelete);
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IJpaServerInterceptor) {
 				((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
@@ -242,6 +244,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			updateEntity(null, entity, true, updateTime, updateTime, theRequestDetails);
 
 			// Notify JPA interceptors
+			T resourceToDelete = toResource(myResourceType, entity, false);
+			theRequestDetails.getRequestOperationCallback().resourceDeleted(resourceToDelete);
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
@@ -296,8 +300,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Perform actual DB update
 		updateEntity(theResource, entity, false, null, thePerformIndexing, true, theUpdateTime, theRequestDetails);
+		theResource.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
+		theRequestDetails.getRequestOperationCallback().resourceCreated(theResource);
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IJpaServerInterceptor) {
 				((IJpaServerInterceptor) next).resourceCreated(requestDetails, entity);
@@ -982,7 +988,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true, new Date(), theRequestDetails);
 
-		// Notify JPA interceptors
+		// Notify interceptors
+		theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IJpaServerInterceptor) {
 				((IJpaServerInterceptor) next).resourceUpdated(requestDetails, entity);

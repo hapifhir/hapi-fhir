@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
@@ -63,6 +65,7 @@ public class BaseJpaTest {
 	@Before
 	public void beforeCreateSrd() {
 		mySrd = mock(ServletRequestDetails.class);
+		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 	}
 	
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {

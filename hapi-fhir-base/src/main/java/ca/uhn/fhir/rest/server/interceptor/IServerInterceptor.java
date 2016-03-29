@@ -400,6 +400,13 @@ public interface IServerInterceptor {
 		}
 
 		/**
+		 * Returns the request details associated with this request
+		 */
+		public RequestDetails getRequestDetails() {
+			return myRequestDetails;
+		}
+
+		/**
 		 * For requests where a resource is passed from the client to the server (e.g. create, update, etc.) this method
 		 * will return the resource which was provided by the client. Otherwise, this method will return <code>null</code>
 		 * .

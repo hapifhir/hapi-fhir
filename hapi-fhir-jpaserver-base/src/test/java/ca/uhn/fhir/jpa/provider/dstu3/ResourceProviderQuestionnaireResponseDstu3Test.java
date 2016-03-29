@@ -56,11 +56,11 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testCreateWithLocalReference() {
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();
 		q1.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-		IIdType qId = myQuestionnaireDao.create(q1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType qId = myQuestionnaireDao.create(q1, mySrd).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
 		qr1.getQuestionnaire().setReferenceElement(qId);
@@ -78,11 +78,11 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testCreateWithAbsoluteReference() {
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();
 		q1.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-		IIdType qId = myQuestionnaireDao.create(q1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType qId = myQuestionnaireDao.create(q1, mySrd).getId().toUnqualifiedVersionless();
 		
 		QuestionnaireResponse qr1 = new QuestionnaireResponse();
 		qr1.getQuestionnaire().setReferenceElement(qId.withServerBase("http://example.com", "Questionnaire"));

@@ -49,7 +49,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IIdType id = ourPatientDao.create(p, new ServletRequestDetails()).getId();
+		IIdType id = ourPatientDao.create(p, mySrd).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -57,7 +57,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
 		try {
-			ourPatientDao.create(p, new ServletRequestDetails());
+			ourPatientDao.create(p, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Can not create entity with ID[" + methodName + "], a resource with this ID already exists"));
@@ -71,7 +71,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/123");
 		try {
-			ourPatientDao.create(p, new ServletRequestDetails());
+			ourPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
@@ -84,7 +84,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
 		patient.setManagingOrganization(new ResourceReferenceDt("Patient/99999999"));
 		try {
-			ourPatientDao.create(patient, new ServletRequestDetails());
+			ourPatientDao.create(patient, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), StringContains.containsString("99999 not found"));
@@ -98,17 +98,17 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.setId("ABABA");
-		IIdType p1id = ourPatientDao.create(p1, new ServletRequestDetails()).getId();
+		IIdType p1id = ourPatientDao.create(p1, mySrd).getId();
 		assertEquals("ABABA", p1id.getIdPart());
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId02");
 		p2.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId02");
-		IIdType p2id = ourPatientDao.create(p2, new ServletRequestDetails()).getId();
+		IIdType p2id = ourPatientDao.create(p2, mySrd).getId();
 		long p1longId = p2id.getIdPartAsLong() - 1;
 
 		try {
-			ourPatientDao.read(new IdDt("Patient/" + p1longId), new ServletRequestDetails());
+			ourPatientDao.read(new IdDt("Patient/" + p1longId), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -116,7 +116,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 		try {
 			p1.setId(new IdDt("Patient/" + p1longId));
-			ourPatientDao.update(p1, new ServletRequestDetails());
+			ourPatientDao.update(p1, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));

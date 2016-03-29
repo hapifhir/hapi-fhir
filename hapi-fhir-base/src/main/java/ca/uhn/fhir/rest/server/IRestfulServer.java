@@ -26,10 +26,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  */
 public interface IRestfulServer<T extends RequestDetails> extends IRestfulServerDefaults {
 
-    List<IServerInterceptor> getInterceptors();
+	IPagingProvider getPagingProvider();
 
-    IPagingProvider getPagingProvider();
-    
-    BundleInclusionRule getBundleInclusionRule();
-    
+	BundleInclusionRule getBundleInclusionRule();
+
 }

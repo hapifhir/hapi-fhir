@@ -422,7 +422,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		// Read back directly from the DAO
 		{
-			Organization returned = ourOrganizationDao.read(orgId, new ServletRequestDetails());
+			Organization returned = ourOrganizationDao.read(orgId, mySrd);
 			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -35,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -350,19 +353,26 @@ public class FhirTerser {
 	 * 
 	 * @param theCompartmentName The name of the compartment
 	 * @param theSource The potential member of the compartment
-	 * @param theTarget The owner of the compartment
+	 * @param theTarget The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
 	 * @return <code>true</code> if <code>theSource</code> is in the compartment
+	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
 	 */
-	public boolean isSourceInCompartmentForTarget(String theCompartmentName, IBaseResource theSource, IBaseResource theTarget) {
+	public boolean isSourceInCompartmentForTarget(String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
-		Validate.notBlank(theTarget.getIdElement().getIdPart(), "theTarget must have a populated ID (theTarget.getIdElement().getIdPart() does not return a value)");
+		Validate.notBlank(defaultString(theTarget.getResourceType()), "theTarget must have a populated resource type (theTarget.getResourceType() does not return a value)");
+		Validate.notBlank(defaultString(theTarget.getIdPart()), "theTarget must have a populated ID (theTarget.getIdPart() does not return a value)");
 		
-		RuntimeResourceDefinition targetDef = myContext.getResourceDefinition(theTarget);
-		String wantRef = targetDef.getName() + '/' + theTarget.getIdElement().getIdPart();
+		String wantRef = theTarget.toUnqualifiedVersionless().getValue();
 		
 		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
+		if (theSource.getIdElement().hasIdPart()) {
+			if (wantRef.equals(sourceDef.getName() + '/' + theSource.getIdElement().getIdPart())) {
+				return true;
+			}
+		}
+		
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
 		for (RuntimeSearchParam nextParam : params) {
 			for (String nextPath : nextParam.getPathsSplit()) {

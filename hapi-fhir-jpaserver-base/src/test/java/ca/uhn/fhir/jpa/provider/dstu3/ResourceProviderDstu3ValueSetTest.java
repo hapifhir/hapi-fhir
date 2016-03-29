@@ -35,7 +35,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.1.xml");
 		upload.setId("");
-		myExtensionalVsId = myValueSetDao.create(upload, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 	
 	@Test

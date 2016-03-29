@@ -31,7 +31,6 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -187,7 +186,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		myBaseDefinition = this;
 		do {
 			target = target.getSuperclass();
-			if (IResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class) != null) {
+			if (IBaseResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class) != null) {
 				myBaseDefinition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(target);
 			}
 		} while (target.equals(Object.class) == false);

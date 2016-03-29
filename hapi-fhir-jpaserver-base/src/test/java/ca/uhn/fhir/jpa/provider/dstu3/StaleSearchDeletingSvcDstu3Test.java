@@ -34,7 +34,7 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 		for (int i = 0; i < 20; i++) {
 			Patient pt1 = new Patient();
 			pt1.addName().addFamily("Everything").addGiven("Arthur");
-			myPatientDao.create(pt1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+			myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 		}
 
 		//@formatter:off

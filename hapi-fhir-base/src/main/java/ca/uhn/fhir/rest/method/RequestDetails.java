@@ -27,11 +27,13 @@ import java.nio.charset.Charset;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 
 public abstract class RequestDetails {
 
@@ -56,10 +59,15 @@ public abstract class RequestDetails {
 	private IRestfulResponse myResponse;
 	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
+	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
 	protected abstract byte[] getByteStreamRequestContents();
-
+	
+	/**
+	 * Return the charset as defined by the header contenttype. Return null if it is not set.
+	 */
+	public abstract Charset getCharset();
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
@@ -163,6 +171,15 @@ public abstract class RequestDetails {
 	 * Returns the server base URL (with no trailing '/') for a given request
 	 */
 	public abstract String getServerBaseForRequest();
+
+	/**
+	 * Returns an invoker that can be called from user code to advise the server interceptors
+	 * of any nested operations being invoked within operations. This invoker acts as a proxy for
+	 * all interceptors  
+	 */
+	public IRequestOperationCallback getRequestOperationCallback() {
+		return myRequestOperationCallback;
+	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
 		return myUnqualifiedToQualifiedNames;
@@ -274,10 +291,64 @@ public abstract class RequestDetails {
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
 	}
+	
+	private class RequestOperationCallback implements IRequestOperationCallback {
 
-	/**
-	 * Return the charset as defined by the header contenttype. Return null if it is not set.
-	 */
-	public abstract Charset getCharset();
+		@Override
+		public void resourceCreated(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceCreated(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		private List<IServerInterceptor> getInterceptors() {
+			if (getServer() == null) {
+				return Collections.emptyList();
+			}
+			return getServer().getInterceptors();
+		}
+
+		@Override
+		public void resourceDeleted(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceCreated(next);
+			}
+		}
+
+		@Override
+		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceDeleted(next);
+			}
+		}
+
+		@Override
+		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceUpdated(next);
+			}
+		}
+
+	}
 
 }

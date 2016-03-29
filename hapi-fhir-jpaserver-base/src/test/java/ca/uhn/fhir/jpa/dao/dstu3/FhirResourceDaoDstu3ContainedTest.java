@@ -31,16 +31,16 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 		Observation o1 = new Observation();
 		o1.getCode().setText("Some Observation");
 		o1.setSubject(new Reference(p));
-		IIdType oid1 = myObservationDao.create(o1, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType oid1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 		
 		Observation o2 = new Observation();
 		o2.getCode().setText("Some Observation");
 		o2.setSubject(new Reference(p));
-		IIdType oid2 = myObservationDao.create(o2, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient p2 = new Patient();
 		p2.addName().addFamily("MYFAMILY").addGiven("MYGIVEN");
-		IIdType pid2 = myPatientDao.create(p2, new ServletRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType pid2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));
 		

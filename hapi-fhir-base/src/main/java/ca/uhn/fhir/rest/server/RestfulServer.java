@@ -82,18 +82,19 @@ import ca.uhn.fhir.util.VersionUtil;
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
 	/**
+	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
+	 */
+	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
+
+	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
+	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	private static final long serialVersionUID = 1L;
+	/**
 	 * Requests will have an HttpServletRequest attribute set with this name, containing the servlet
 	 * context, in order to avoid a dependency on Servlet-API 3.0+ 
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
-	
-	/**
-	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
-	 */
-	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
-	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
-	private static final long serialVersionUID = 1L;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
@@ -117,7 +118,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<String, IResourceProvider>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
-
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or through {@link #setFhirContext(FhirContext)}) the server will determine which
 	 * version of FHIR to support through classpath scanning. This is brittle, and it is highly recommended to explicitly specify a FHIR version.
@@ -367,6 +367,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		return count;
+	}
+
+	/**
+	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to {@link FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)}
+	 */
+	@Override
+	@Deprecated
+	public AddProfileTagEnum getAddProfileTag() {
+		return myFhirContext.getAddProfileTagWhenEncoding();
 	}
 
 	@Override
@@ -1390,15 +1399,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	private static boolean partIsOperation(String nextString) {
 		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$' || nextString.equals(Constants.URL_TOKEN_METADATA));
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to {@link FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)}
-	 */
-	@Override
-	@Deprecated
-	public AddProfileTagEnum getAddProfileTag() {
-		return myFhirContext.getAddProfileTagWhenEncoding();
 	}
 
 }

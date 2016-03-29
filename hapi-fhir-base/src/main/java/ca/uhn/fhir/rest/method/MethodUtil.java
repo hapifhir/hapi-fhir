@@ -404,6 +404,8 @@ public class MethodUtil {
 				param = new ServletRequestParameter();
 			} else if (parameterType.equals(RequestDetails.class)) {
 				param = new RequestDetailsParameter();
+			} else if (parameterType.equals(IRequestOperationCallback.class)) {
+				param = new RequestOperationCallbackParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {

@@ -33,7 +33,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_h\u00F6ra");
 			patient.addName().addFamily("AAAS");
 			patient.addName().addFamily("CCC");
-			id1 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
 		{
@@ -42,13 +42,13 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_HORA");
 			patient.addName().addFamily("AAAB");
 			patient.addName().addFamily("CCC");
-			id2 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id3;
 		{
 			Organization org = new Organization();
 			org.setName("DDD");
-			id3 = myOrganizationDao.create(org, new ServletRequestDetails()).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			id3 = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -110,13 +110,13 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.getText().setDiv("<div>AAAS<p>FOO</p> CCC    </div>");
-			id1 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
 		{
 			Patient patient = new Patient();
 			patient.getText().setDiv("<div>AAAB<p>FOO</p> CCC    </div>");
-			id2 = myPatientDao.create(patient, new ServletRequestDetails()).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 
 		SearchParameterMap map = new SearchParameterMap();

@@ -27,10 +27,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
@@ -484,6 +486,15 @@ public class FhirContext {
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
+		for (BaseRuntimeElementDefinition<?> next : classToElementDefinition.values()) {
+			if (next instanceof RuntimeResourceDefinition) {
+				if ("Bundle".equals(next.getName())) {
+					if (!IBaseBundle.class.isAssignableFrom(next.getImplementingClass())) {
+						throw new ConfigurationException("Resource type declares resource name Bundle but does not implement IBaseBundle");
+					}
+				}
+			}
+		}
 
 		Map<String, RuntimeResourceDefinition> idToElementDefinition = new HashMap<String, RuntimeResourceDefinition>();
 		idToElementDefinition.putAll(myIdToResourceDefinition);

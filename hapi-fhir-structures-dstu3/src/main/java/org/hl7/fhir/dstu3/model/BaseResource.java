@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.model;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
 
 public abstract class BaseResource extends Base implements IAnyResource, IElement {
@@ -22,6 +23,11 @@ public abstract class BaseResource extends Base implements IAnyResource, IElemen
         }
         return this;
     }
+
+	@Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU3;
+	}
 
 	public abstract BaseResource setIdElement(IdType theIdType);
     
