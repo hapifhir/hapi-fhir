@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationOrder;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -38,86 +40,6 @@ public class CustomTypeDstu3Test {
 	}
 	
 	
-	public static String createBundle(String... theResources) {
-		StringBuilder b = new StringBuilder();
-		b.append("<Bundle xmlns=\"http://hl7.org/fhir\">\n");
-		for (String next : theResources) {
-			b.append("	<entry>\n");
-			b.append("		<resource>\n");
-			b.append(next);
-			b.append("		</resource>\n");
-			b.append("	</entry>\n");
-		}
-		b.append("</Bundle>");
-		return b.toString();
-	}
-	
-	public static String createResource(boolean theWithProfile) {
-		StringBuilder b = new StringBuilder();
-		b.append("<Patient xmlns=\"http://hl7.org/fhir\">\n");
-		if (theWithProfile) {
-			b.append("   <meta>\n");
-			b.append("      <profile value=\"http://example.com/foo\"/>\n");
-			b.append("   </meta>\n");
-		}
-		b.append("   <extension url=\"http://example.com/BloodPressure\">\n");
-		b.append("      <valueQuantity>\n");
-		b.append("         <value value=\"110\"/>\n");
-		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
-		b.append("         <code value=\"mmHg\"/>\n");
-		b.append("      </valueQuantity>\n");
-		b.append("   </extension>\n");
-		b.append("   <modifierExtension url=\"http://example.com/diabetes2\">\n");
-		b.append("      <valueDateTime value=\"2010-01-02\"/>\n");
-		b.append("   </modifierExtension>\n");
-		b.append("   <modifierExtension url=\"http://example.com/diabetes2\">\n");
-		b.append("      <valueDateTime value=\"2014-01-26T11:11:11\"/>\n");
-		b.append("   </modifierExtension>\n");
-		b.append("   <extension url=\"http://example.com/Cholesterol\">\n");
-		b.append("      <valueQuantity>\n");
-		b.append("         <value value=\"2\"/>\n");
-		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
-		b.append("         <code value=\"mmol/l\"/>\n");
-		b.append("      </valueQuantity>\n");
-		b.append("   </extension>\n");
-		b.append("   <extension url=\"http://example.com/Glucose\">\n");
-		b.append("      <valueQuantity>\n");
-		b.append("         <value value=\"95\"/>\n");
-		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
-		b.append("         <code value=\"mg/dl\"/>\n");
-		b.append("      </valueQuantity>\n");
-		b.append("   </extension>\n");
-		b.append("   <extension url=\"http://example.com/HbA1c\">\n");
-		b.append("      <valueQuantity>\n");
-		b.append("         <value value=\"48\"/>\n");
-		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
-		b.append("         <code value=\"mmol/mol\"/>\n");
-		b.append("      </valueQuantity>\n");
-		b.append("   </extension>\n");
-		b.append("   <extension url=\"http://example.com/Insuline\">\n");
-		b.append("      <valueQuantity>\n");
-		b.append("         <value value=\"125\"/>\n");
-		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
-		b.append("         <code value=\"pmol/l\"/>\n");
-		b.append("      </valueQuantity>\n");
-		b.append("   </extension>\n");
-		b.append("   <extension url=\"http://example.com/Weight\">\n");
-		b.append("      <valueString value=\"185 cm\"/>\n");
-		b.append("   </extension>\n");
-		b.append("   <identifier>\n");
-		b.append("      <system value=\"urn:system\"/>\n");
-		b.append("      <value value=\"1234\"/>\n");
-		b.append("   </identifier>\n");
-		b.append("   <name>\n");
-		b.append("      <family value=\"Rossi\"/>\n");
-		b.append("      <given value=\"Mario\"/>\n");
-		b.append("   </name>\n");
-		b.append("</Patient>");
-		String input =
-			b.toString();
-		return input;
-	}
-
 	@Test
 	public void parseBundleWithResourceDirective() {
 		String input = createBundle(createResource(false), createResource(true));
@@ -158,6 +80,7 @@ public class CustomTypeDstu3Test {
 		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
 
+	
 	@Test
 	public void parseResourceWithNoDirective() {
 		String input = createResource(true);
@@ -171,7 +94,7 @@ public class CustomTypeDstu3Test {
 		assertEquals(1, exts.size());
 		assertEquals("185 cm", ((StringType)exts.get(0).getValue()).getValue());
 	}
-
+	
 	@Test
 	public void testAccessEmptyMetaLists() {
 		Patient p = new Patient();
@@ -227,7 +150,7 @@ public class CustomTypeDstu3Test {
 		//@formatter:on
 		
 	}
-
+	
 	@Test
 	public void testEncodeWithCustomType() {
 
@@ -309,8 +232,122 @@ public class CustomTypeDstu3Test {
 			"</meta>")));
 		//@formatter:on
 	}
-	
-	
+
+	/**
+	 * See #318
+	 */
+	@Test
+	public void testParseResourceWithContainedResourcesWithProfile() {
+		//@formatter:off
+		String input = "<MedicationOrder xmlns=\"http://hl7.org/fhir\">"
+				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
+				+ "<meta> "
+				+ "<profile value=\"http://fhir.something.com/StructureDefinition/our-medication-order\"/> "
+				+ "</meta> "
+				+ "<contained> "
+				+ "<Medication xmlns=\"http://hl7.org/fhir\"> "
+				+ "<id value=\"1\"/>"
+				+ "<meta> "
+				+ "<profile value=\"http://fhir.something.com/StructureDefinition/our-medication\"/> "
+				+ "</meta> "
+				+ "<code> "
+				+ "<text value=\"medication\"/> "
+				+ "</code> "
+				+ "</Medication> "
+				+ "</contained> "
+				+ "<medication> "
+				+ "<reference value=\"#1\"/> "
+				+ "</medication> "
+				+ "</MedicationOrder>";
+		//@formatter:on
+		
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
+		
+		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
+		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
+	}
+
+	public static String createBundle(String... theResources) {
+		StringBuilder b = new StringBuilder();
+		b.append("<Bundle xmlns=\"http://hl7.org/fhir\">\n");
+		for (String next : theResources) {
+			b.append("	<entry>\n");
+			b.append("		<resource>\n");
+			b.append(next);
+			b.append("		</resource>\n");
+			b.append("	</entry>\n");
+		}
+		b.append("</Bundle>");
+		return b.toString();
+	}
+
+	public static String createResource(boolean theWithProfile) {
+		StringBuilder b = new StringBuilder();
+		b.append("<Patient xmlns=\"http://hl7.org/fhir\">\n");
+		if (theWithProfile) {
+			b.append("   <meta>\n");
+			b.append("      <profile value=\"http://example.com/foo\"/>\n");
+			b.append("   </meta>\n");
+		}
+		b.append("   <extension url=\"http://example.com/BloodPressure\">\n");
+		b.append("      <valueQuantity>\n");
+		b.append("         <value value=\"110\"/>\n");
+		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
+		b.append("         <code value=\"mmHg\"/>\n");
+		b.append("      </valueQuantity>\n");
+		b.append("   </extension>\n");
+		b.append("   <modifierExtension url=\"http://example.com/diabetes2\">\n");
+		b.append("      <valueDateTime value=\"2010-01-02\"/>\n");
+		b.append("   </modifierExtension>\n");
+		b.append("   <modifierExtension url=\"http://example.com/diabetes2\">\n");
+		b.append("      <valueDateTime value=\"2014-01-26T11:11:11\"/>\n");
+		b.append("   </modifierExtension>\n");
+		b.append("   <extension url=\"http://example.com/Cholesterol\">\n");
+		b.append("      <valueQuantity>\n");
+		b.append("         <value value=\"2\"/>\n");
+		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
+		b.append("         <code value=\"mmol/l\"/>\n");
+		b.append("      </valueQuantity>\n");
+		b.append("   </extension>\n");
+		b.append("   <extension url=\"http://example.com/Glucose\">\n");
+		b.append("      <valueQuantity>\n");
+		b.append("         <value value=\"95\"/>\n");
+		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
+		b.append("         <code value=\"mg/dl\"/>\n");
+		b.append("      </valueQuantity>\n");
+		b.append("   </extension>\n");
+		b.append("   <extension url=\"http://example.com/HbA1c\">\n");
+		b.append("      <valueQuantity>\n");
+		b.append("         <value value=\"48\"/>\n");
+		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
+		b.append("         <code value=\"mmol/mol\"/>\n");
+		b.append("      </valueQuantity>\n");
+		b.append("   </extension>\n");
+		b.append("   <extension url=\"http://example.com/Insuline\">\n");
+		b.append("      <valueQuantity>\n");
+		b.append("         <value value=\"125\"/>\n");
+		b.append("         <system value=\"http://unitsofmeasure.org\"/>\n");
+		b.append("         <code value=\"pmol/l\"/>\n");
+		b.append("      </valueQuantity>\n");
+		b.append("   </extension>\n");
+		b.append("   <extension url=\"http://example.com/Weight\">\n");
+		b.append("      <valueString value=\"185 cm\"/>\n");
+		b.append("   </extension>\n");
+		b.append("   <identifier>\n");
+		b.append("      <system value=\"urn:system\"/>\n");
+		b.append("      <value value=\"1234\"/>\n");
+		b.append("   </identifier>\n");
+		b.append("   <name>\n");
+		b.append("      <family value=\"Rossi\"/>\n");
+		b.append("      <given value=\"Mario\"/>\n");
+		b.append("   </name>\n");
+		b.append("</Patient>");
+		String input =
+			b.toString();
+		return input;
+	}
+
 	@ResourceDef(name = "Patient", profile = "http://example.com/foo")
 	public static class MyCustomPatient extends Patient {
 
@@ -489,5 +526,14 @@ public class CustomTypeDstu3Test {
 			myWeight = weight;
 		}
 
+	}
+	
+	
+	@ResourceDef()
+	public static class MyMedication extends Medication
+	{
+
+		private static final long serialVersionUID = 1L;
+		
 	}
 }
