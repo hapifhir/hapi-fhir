@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -477,8 +475,8 @@ public class DeviceComponent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (specType == null || specType.isEmpty()) && (componentId == null || componentId.isEmpty())
-           && (productionSpec == null || productionSpec.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( specType,  componentId,  productionSpec
+          );
       }
 
   public String fhirType() {
@@ -1086,12 +1084,9 @@ public class DeviceComponent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (lastSystemChange == null || lastSystemChange.isEmpty()) && (source == null || source.isEmpty())
-           && (parent == null || parent.isEmpty()) && (operationalStatus == null || operationalStatus.isEmpty())
-           && (parameterGroup == null || parameterGroup.isEmpty()) && (measurementPrinciple == null || measurementPrinciple.isEmpty())
-           && (productionSpecification == null || productionSpecification.isEmpty()) && (languageCode == null || languageCode.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  identifier,  lastSystemChange
+          ,  source,  parent,  operationalStatus,  parameterGroup,  measurementPrinciple,  productionSpecification
+          ,  languageCode);
       }
 
   @Override
@@ -1133,7 +1128,7 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference" )
+  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

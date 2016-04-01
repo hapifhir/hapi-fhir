@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
@@ -1292,12 +1291,9 @@ public class DeviceUseRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (bodySite == null || bodySite.isEmpty()) && (status == null || status.isEmpty())
-           && (device == null || device.isEmpty()) && (encounter == null || encounter.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (indication == null || indication.isEmpty()) && (notes == null || notes.isEmpty()) && (prnReason == null || prnReason.isEmpty())
-           && (orderedOn == null || orderedOn.isEmpty()) && (recordedOn == null || recordedOn.isEmpty())
-           && (subject == null || subject.isEmpty()) && (timing == null || timing.isEmpty()) && (priority == null || priority.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( bodySite,  status,  device,  encounter
+          ,  identifier,  indication,  notes,  prnReason,  orderedOn,  recordedOn,  subject,  timing,  priority
+          );
       }
 
   @Override
@@ -1313,7 +1309,7 @@ public class DeviceUseRequest extends DomainResource {
    * Path: <b>DeviceUseRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference" )
+  @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1365,7 +1361,7 @@ public class DeviceUseRequest extends DomainResource {
    * Path: <b>DeviceUseRequest.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference" )
+  @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

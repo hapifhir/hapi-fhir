@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
  */
@@ -680,11 +679,8 @@ public class EnrollmentRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ruleset == null || ruleset.isEmpty())
-           && (originalRuleset == null || originalRuleset.isEmpty()) && (created == null || created.isEmpty())
-           && (target == null || target.isEmpty()) && (provider == null || provider.isEmpty()) && (organization == null || organization.isEmpty())
-           && (subject == null || subject.isEmpty()) && (coverage == null || coverage.isEmpty()) && (relationship == null || relationship.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  ruleset,  originalRuleset
+          ,  created,  target,  provider,  organization,  subject,  coverage,  relationship);
       }
 
   @Override
@@ -720,7 +716,7 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference" )
+  @SearchParamDefinition(name="subject", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

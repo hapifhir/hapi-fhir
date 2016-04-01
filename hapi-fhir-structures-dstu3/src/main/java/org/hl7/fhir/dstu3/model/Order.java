@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,9 +38,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A request to perform an action.
  */
@@ -179,8 +178,7 @@ public class Order extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (schedule == null || schedule.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  schedule);
       }
 
   public String fhirType() {
@@ -726,10 +724,8 @@ public class Order extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (date == null || date.isEmpty())
-           && (subject == null || subject.isEmpty()) && (source == null || source.isEmpty()) && (target == null || target.isEmpty())
-           && (reason == null || reason.isEmpty()) && (when == null || when.isEmpty()) && (detail == null || detail.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  date,  subject,  source
+          ,  target,  reason,  when,  detail);
       }
 
   @Override
@@ -785,7 +781,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
+  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -837,7 +833,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -909,7 +905,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
+  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>

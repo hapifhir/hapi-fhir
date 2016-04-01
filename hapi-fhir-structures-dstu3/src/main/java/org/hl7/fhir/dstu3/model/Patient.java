@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -569,10 +567,8 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (relationship == null || relationship.isEmpty()) && (name == null || name.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty()) && (gender == null || gender.isEmpty())
-           && (organization == null || organization.isEmpty()) && (period == null || period.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( relationship,  name,  telecom,  address
+          ,  gender,  organization,  period);
       }
 
   public String fhirType() {
@@ -762,8 +758,8 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (species == null || species.isEmpty()) && (breed == null || breed.isEmpty())
-           && (genderStatus == null || genderStatus.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( species,  breed,  genderStatus
+          );
       }
 
   public String fhirType() {
@@ -933,8 +929,7 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (language == null || language.isEmpty()) && (preferred == null || preferred.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( language,  preferred);
       }
 
   public String fhirType() {
@@ -1130,8 +1125,7 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (other == null || other.isEmpty()) && (type == null || type.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( other,  type);
       }
 
   public String fhirType() {
@@ -1205,10 +1199,10 @@ public class Patient extends DomainResource {
     protected CodeableConcept maritalStatus;
 
     /**
-     * Indicates whether the patient is part of a multiple or indicates the actual birth order.
+     * Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).
      */
     @Child(name = "multipleBirth", type = {BooleanType.class, IntegerType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Whether patient is part of a multiple birth", formalDefinition="Indicates whether the patient is part of a multiple or indicates the actual birth order." )
+    @Description(shortDefinition="Whether patient is part of a multiple birth", formalDefinition="Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer)." )
     protected Type multipleBirth;
 
     /**
@@ -1652,14 +1646,14 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public Type getMultipleBirth() { 
       return this.multipleBirth;
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
       if (!(this.multipleBirth instanceof BooleanType))
@@ -1672,7 +1666,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
       if (!(this.multipleBirth instanceof IntegerType))
@@ -1689,7 +1683,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
+     * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public Patient setMultipleBirth(Type value) { 
       this.multipleBirth = value;
@@ -1984,7 +1978,7 @@ public class Patient extends DomainResource {
         childrenList.add(new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, java.lang.Integer.MAX_VALUE, deceased));
         childrenList.add(new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, java.lang.Integer.MAX_VALUE, maritalStatus));
-        childrenList.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple or indicates the actual birth order.", 0, java.lang.Integer.MAX_VALUE, multipleBirth));
+        childrenList.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, java.lang.Integer.MAX_VALUE, multipleBirth));
         childrenList.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
         childrenList.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("animal", "", "This patient is known to be an animal.", 0, java.lang.Integer.MAX_VALUE, animal));
@@ -2200,14 +2194,9 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (active == null || active.isEmpty())
-           && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty()) && (gender == null || gender.isEmpty())
-           && (birthDate == null || birthDate.isEmpty()) && (deceased == null || deceased.isEmpty())
-           && (address == null || address.isEmpty()) && (maritalStatus == null || maritalStatus.isEmpty())
-           && (multipleBirth == null || multipleBirth.isEmpty()) && (photo == null || photo.isEmpty())
-           && (contact == null || contact.isEmpty()) && (animal == null || animal.isEmpty()) && (communication == null || communication.isEmpty())
-           && (careProvider == null || careProvider.isEmpty()) && (managingOrganization == null || managingOrganization.isEmpty())
-           && (link == null || link.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  active,  name,  telecom
+          ,  gender,  birthDate,  deceased,  address,  maritalStatus,  multipleBirth,  photo,  contact
+          ,  animal,  communication,  careProvider,  managingOrganization,  link);
       }
 
   @Override
@@ -2323,7 +2312,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.link.other</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference" )
+  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_LINK = "link";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>link</b>
@@ -2360,26 +2349,6 @@ public class Patient extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam LANGUAGE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_LANGUAGE);
-
- /**
-   * Search parameter: <b>deathdate</b>
-   * <p>
-   * Description: <b>The date of death has been provided and satisfies this search value</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Patient.deceasedDateTime</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="deathdate", path="Patient.deceasedDateTime", description="The date of death has been provided and satisfies this search value", type="date" )
-  public static final String SP_DEATHDATE = "deathdate";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>deathdate</b>
-   * <p>
-   * Description: <b>The date of death has been provided and satisfies this search value</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Patient.deceasedDateTime</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam DEATHDATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DEATHDATE);
 
  /**
    * Search parameter: <b>animal-breed</b>
@@ -2420,6 +2389,26 @@ public class Patient extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_COUNTRY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_COUNTRY);
+
+ /**
+   * Search parameter: <b>death-date</b>
+   * <p>
+   * Description: <b>The date of death has been provided and satisfies this search value</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Patient.deceasedDateTime</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="death-date", path="Patient.deceasedDateTime", description="The date of death has been provided and satisfies this search value", type="date" )
+  public static final String SP_DEATH_DATE = "death-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
+   * <p>
+   * Description: <b>The date of death has been provided and satisfies this search value</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Patient.deceasedDateTime</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DEATH_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DEATH_DATE);
 
  /**
    * Search parameter: <b>phonetic</b>
@@ -2609,7 +2598,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.careProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference" )
+  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_CAREPROVIDER = "careprovider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careprovider</b>

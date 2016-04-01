@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
  */
@@ -324,8 +323,7 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (item == null || item.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  item);
       }
 
   public String fhirType() {
@@ -499,8 +497,7 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (item == null || item.isEmpty()) && (cause == null || cause.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  cause);
       }
 
   public String fhirType() {
@@ -674,8 +671,7 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (item == null || item.isEmpty()) && (reason == null || reason.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  reason);
       }
 
   public String fhirType() {
@@ -1840,13 +1836,9 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (patient == null || patient.isEmpty()) && (assessor == null || assessor.isEmpty())
-           && (status == null || status.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
-           && (previous == null || previous.isEmpty()) && (problem == null || problem.isEmpty()) && (trigger == null || trigger.isEmpty())
-           && (investigations == null || investigations.isEmpty()) && (protocol == null || protocol.isEmpty())
-           && (summary == null || summary.isEmpty()) && (finding == null || finding.isEmpty()) && (resolved == null || resolved.isEmpty())
-           && (ruledOut == null || ruledOut.isEmpty()) && (prognosis == null || prognosis.isEmpty())
-           && (plan == null || plan.isEmpty()) && (action == null || action.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( patient,  assessor,  status,  date
+          ,  description,  previous,  problem,  trigger,  investigations,  protocol,  summary,  finding
+          ,  resolved,  ruledOut,  prognosis,  plan,  action);
       }
 
   @Override
@@ -1908,7 +1900,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.assessor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference" )
+  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ASSESSOR = "assessor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>assessor</b>
@@ -2026,7 +2018,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference" )
+  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

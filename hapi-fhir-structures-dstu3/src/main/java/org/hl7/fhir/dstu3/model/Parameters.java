@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
@@ -78,7 +77,7 @@ public class Parameters extends Resource implements IBaseParameters {
         @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\"." )
         protected List<ParametersParameterComponent> part;
 
-        private static final long serialVersionUID = -1484269842L;
+        private static final long serialVersionUID = -839605058L;
 
     /**
      * Constructor
@@ -423,8 +422,8 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-           && (resource == null || resource.isEmpty()) && (part == null || part.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value,  resource,  part
+          );
       }
 
   public String fhirType() {
@@ -553,7 +552,7 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (parameter == null || parameter.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( parameter);
       }
 
   @Override

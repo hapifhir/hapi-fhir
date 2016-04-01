@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,9 +38,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A resource that includes narrative, extensions, and contained resources.
  */
@@ -128,6 +127,16 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
     /**
      * @return {@link #contained} (These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.)
      */
+    // syntactic sugar
+    public DomainResource addContained(Resource t) { //3
+      if (t == null)
+        return this;
+      if (this.contained == null)
+        this.contained = new ArrayList<Resource>();
+      this.contained.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #extension} (May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.)
      */
@@ -326,9 +335,8 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (text == null || text.isEmpty()) && (contained == null || contained.isEmpty())
-           && (extension == null || extension.isEmpty()) && (modifierExtension == null || modifierExtension.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( text,  contained,  extension,  modifierExtension
+          );
       }
 
 

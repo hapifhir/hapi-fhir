@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
@@ -739,8 +738,8 @@ public class Appointment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (actor == null || actor.isEmpty())
-           && (required == null || required.isEmpty()) && (status == null || status.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  actor,  required,  status
+          );
       }
 
   public String fhirType() {
@@ -765,58 +764,79 @@ public class Appointment extends DomainResource {
     protected Enumeration<AppointmentStatus> status;
 
     /**
-     * The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).
+     * A broad categorisation of the service that is to be performed during this appointment.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The type of appointment that is being booked", formalDefinition="The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService)." )
-    protected CodeableConcept type;
+    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    protected CodeableConcept serviceCategory;
+
+    /**
+     * The specific service that is to be performed during this appointment.
+     */
+    @Child(name = "serviceType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The specific service that is to be performed during this appointment", formalDefinition="The specific service that is to be performed during this appointment." )
+    protected List<CodeableConcept> serviceType;
+
+    /**
+     * The specialty of a practitioner that would be required to perform the service requested in this appointment.
+     */
+    @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
+    protected List<CodeableConcept> specialty;
+
+    /**
+     * The style of appointment or patient that has been booked in the slot (not service type).
+     */
+    @Child(name = "appointmentType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The style of appointment or patient that has been booked in the slot (not service type)", formalDefinition="The style of appointment or patient that has been booked in the slot (not service type)." )
+    protected CodeableConcept appointmentType;
 
     /**
      * The reason that this appointment is being scheduled. This is more clinical than administrative.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reason this appointment is scheduled", formalDefinition="The reason that this appointment is being scheduled. This is more clinical than administrative." )
     protected CodeableConcept reason;
 
     /**
      * The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).
      */
-    @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "priority", type = {UnsignedIntType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Used to make informed decisions if needing to re-prioritize", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)." )
     protected UnsignedIntType priority;
 
     /**
      * The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.
      */
-    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Shown on a subject line in a meeting request, or appointment list", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
     protected StringType description;
 
     /**
      * Date/Time that the appointment is to take place.
      */
-    @Child(name = "start", type = {InstantType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "start", type = {InstantType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
-    @Child(name = "end", type = {InstantType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "end", type = {InstantType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
      * Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).
      */
-    @Child(name = "minutesDuration", type = {PositiveIntType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "minutesDuration", type = {PositiveIntType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Can be less than start/end (e.g. estimate)", formalDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)." )
     protected PositiveIntType minutesDuration;
 
     /**
      * The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.
      */
-    @Child(name = "slot", type = {Slot.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "slot", type = {Slot.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="If provided, then no schedule and start/end values MUST match slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
     protected List<Reference> slot;
     /**
@@ -826,20 +846,27 @@ public class Appointment extends DomainResource {
 
 
     /**
+     * The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.
+     */
+    @Child(name = "created", type = {DateTimeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="The date that this appointment was initially created", formalDefinition="The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment." )
+    protected DateTimeType created;
+
+    /**
      * Additional comments about the appointment.
      */
-    @Child(name = "comment", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "comment", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional comments", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
      * List of participants involved in the appointment.
      */
-    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "participant", type = {}, order=15, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Participants involved in appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
-    private static final long serialVersionUID = -1403944125L;
+    private static final long serialVersionUID = 552749730L;
 
   /**
    * Constructor
@@ -942,26 +969,130 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).)
+     * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
      */
-    public CodeableConcept getType() { 
-      if (this.type == null)
+    public CodeableConcept getServiceCategory() { 
+      if (this.serviceCategory == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Appointment.type");
+          throw new Error("Attempt to auto-create Appointment.serviceCategory");
         else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
+          this.serviceCategory = new CodeableConcept(); // cc
+      return this.serviceCategory;
     }
 
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
+    public boolean hasServiceCategory() { 
+      return this.serviceCategory != null && !this.serviceCategory.isEmpty();
     }
 
     /**
-     * @param value {@link #type} (The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).)
+     * @param value {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
      */
-    public Appointment setType(CodeableConcept value) { 
-      this.type = value;
+    public Appointment setServiceCategory(CodeableConcept value) { 
+      this.serviceCategory = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #serviceType} (The specific service that is to be performed during this appointment.)
+     */
+    public List<CodeableConcept> getServiceType() { 
+      if (this.serviceType == null)
+        this.serviceType = new ArrayList<CodeableConcept>();
+      return this.serviceType;
+    }
+
+    public boolean hasServiceType() { 
+      if (this.serviceType == null)
+        return false;
+      for (CodeableConcept item : this.serviceType)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #serviceType} (The specific service that is to be performed during this appointment.)
+     */
+    // syntactic sugar
+    public CodeableConcept addServiceType() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.serviceType == null)
+        this.serviceType = new ArrayList<CodeableConcept>();
+      this.serviceType.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Appointment addServiceType(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.serviceType == null)
+        this.serviceType = new ArrayList<CodeableConcept>();
+      this.serviceType.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #specialty} (The specialty of a practitioner that would be required to perform the service requested in this appointment.)
+     */
+    public List<CodeableConcept> getSpecialty() { 
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      return this.specialty;
+    }
+
+    public boolean hasSpecialty() { 
+      if (this.specialty == null)
+        return false;
+      for (CodeableConcept item : this.specialty)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #specialty} (The specialty of a practitioner that would be required to perform the service requested in this appointment.)
+     */
+    // syntactic sugar
+    public CodeableConcept addSpecialty() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      this.specialty.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Appointment addSpecialty(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      this.specialty.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #appointmentType} (The style of appointment or patient that has been booked in the slot (not service type).)
+     */
+    public CodeableConcept getAppointmentType() { 
+      if (this.appointmentType == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Appointment.appointmentType");
+        else if (Configuration.doAutoCreate())
+          this.appointmentType = new CodeableConcept(); // cc
+      return this.appointmentType;
+    }
+
+    public boolean hasAppointmentType() { 
+      return this.appointmentType != null && !this.appointmentType.isEmpty();
+    }
+
+    /**
+     * @param value {@link #appointmentType} (The style of appointment or patient that has been booked in the slot (not service type).)
+     */
+    public Appointment setAppointmentType(CodeableConcept value) { 
+      this.appointmentType = value;
       return this;
     }
 
@@ -1288,6 +1419,55 @@ public class Appointment extends DomainResource {
     }
 
     /**
+     * @return {@link #created} (The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     */
+    public DateTimeType getCreatedElement() { 
+      if (this.created == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Appointment.created");
+        else if (Configuration.doAutoCreate())
+          this.created = new DateTimeType(); // bb
+      return this.created;
+    }
+
+    public boolean hasCreatedElement() { 
+      return this.created != null && !this.created.isEmpty();
+    }
+
+    public boolean hasCreated() { 
+      return this.created != null && !this.created.isEmpty();
+    }
+
+    /**
+     * @param value {@link #created} (The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     */
+    public Appointment setCreatedElement(DateTimeType value) { 
+      this.created = value;
+      return this;
+    }
+
+    /**
+     * @return The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.
+     */
+    public Date getCreated() { 
+      return this.created == null ? null : this.created.getValue();
+    }
+
+    /**
+     * @param value The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.
+     */
+    public Appointment setCreated(Date value) { 
+      if (value == null)
+        this.created = null;
+      else {
+        if (this.created == null)
+          this.created = new DateTimeType();
+        this.created.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #comment} (Additional comments about the appointment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
     public StringType getCommentElement() { 
@@ -1380,7 +1560,10 @@ public class Appointment extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "CodeableConcept", "The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
+        childrenList.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
+        childrenList.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
+        childrenList.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that has been booked in the slot (not service type).", 0, java.lang.Integer.MAX_VALUE, appointmentType));
         childrenList.add(new Property("reason", "CodeableConcept", "The reason that this appointment is being scheduled. This is more clinical than administrative.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("priority", "unsignedInt", "The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("description", "string", "The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.", 0, java.lang.Integer.MAX_VALUE, description));
@@ -1388,6 +1571,7 @@ public class Appointment extends DomainResource {
         childrenList.add(new Property("end", "instant", "Date/Time that the appointment is to conclude.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("minutesDuration", "positiveInt", "Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).", 0, java.lang.Integer.MAX_VALUE, minutesDuration));
         childrenList.add(new Property("slot", "Reference(Slot)", "The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.", 0, java.lang.Integer.MAX_VALUE, slot));
+        childrenList.add(new Property("created", "dateTime", "The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
       }
@@ -1398,8 +1582,14 @@ public class Appointment extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = new AppointmentStatusEnumFactory().fromType(value); // Enumeration<AppointmentStatus>
-        else if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("serviceCategory"))
+          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("serviceType"))
+          this.getServiceType().add(castToCodeableConcept(value));
+        else if (name.equals("specialty"))
+          this.getSpecialty().add(castToCodeableConcept(value));
+        else if (name.equals("appointmentType"))
+          this.appointmentType = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("reason"))
           this.reason = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("priority"))
@@ -1414,6 +1604,8 @@ public class Appointment extends DomainResource {
           this.minutesDuration = castToPositiveInt(value); // PositiveIntType
         else if (name.equals("slot"))
           this.getSlot().add(castToReference(value));
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("comment"))
           this.comment = castToString(value); // StringType
         else if (name.equals("participant"))
@@ -1430,9 +1622,19 @@ public class Appointment extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Appointment.status");
         }
-        else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+        else if (name.equals("serviceCategory")) {
+          this.serviceCategory = new CodeableConcept();
+          return this.serviceCategory;
+        }
+        else if (name.equals("serviceType")) {
+          return addServiceType();
+        }
+        else if (name.equals("specialty")) {
+          return addSpecialty();
+        }
+        else if (name.equals("appointmentType")) {
+          this.appointmentType = new CodeableConcept();
+          return this.appointmentType;
         }
         else if (name.equals("reason")) {
           this.reason = new CodeableConcept();
@@ -1455,6 +1657,9 @@ public class Appointment extends DomainResource {
         }
         else if (name.equals("slot")) {
           return addSlot();
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Appointment.created");
         }
         else if (name.equals("comment")) {
           throw new FHIRException("Cannot call addChild on a primitive type Appointment.comment");
@@ -1480,7 +1685,18 @@ public class Appointment extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
-        dst.type = type == null ? null : type.copy();
+        dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
+        if (serviceType != null) {
+          dst.serviceType = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : serviceType)
+            dst.serviceType.add(i.copy());
+        };
+        if (specialty != null) {
+          dst.specialty = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : specialty)
+            dst.specialty.add(i.copy());
+        };
+        dst.appointmentType = appointmentType == null ? null : appointmentType.copy();
         dst.reason = reason == null ? null : reason.copy();
         dst.priority = priority == null ? null : priority.copy();
         dst.description = description == null ? null : description.copy();
@@ -1492,6 +1708,7 @@ public class Appointment extends DomainResource {
           for (Reference i : slot)
             dst.slot.add(i.copy());
         };
+        dst.created = created == null ? null : created.copy();
         dst.comment = comment == null ? null : comment.copy();
         if (participant != null) {
           dst.participant = new ArrayList<AppointmentParticipantComponent>();
@@ -1512,11 +1729,12 @@ public class Appointment extends DomainResource {
         if (!(other instanceof Appointment))
           return false;
         Appointment o = (Appointment) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(serviceCategory, o.serviceCategory, true)
+           && compareDeep(serviceType, o.serviceType, true) && compareDeep(specialty, o.specialty, true) && compareDeep(appointmentType, o.appointmentType, true)
            && compareDeep(reason, o.reason, true) && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(minutesDuration, o.minutesDuration, true)
-           && compareDeep(slot, o.slot, true) && compareDeep(comment, o.comment, true) && compareDeep(participant, o.participant, true)
-          ;
+           && compareDeep(slot, o.slot, true) && compareDeep(created, o.created, true) && compareDeep(comment, o.comment, true)
+           && compareDeep(participant, o.participant, true);
       }
 
       @Override
@@ -1528,16 +1746,13 @@ public class Appointment extends DomainResource {
         Appointment o = (Appointment) other;
         return compareValues(status, o.status, true) && compareValues(priority, o.priority, true) && compareValues(description, o.description, true)
            && compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(minutesDuration, o.minutesDuration, true)
-           && compareValues(comment, o.comment, true);
+           && compareValues(created, o.created, true) && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (type == null || type.isEmpty()) && (reason == null || reason.isEmpty()) && (priority == null || priority.isEmpty())
-           && (description == null || description.isEmpty()) && (start == null || start.isEmpty()) && (end == null || end.isEmpty())
-           && (minutesDuration == null || minutesDuration.isEmpty()) && (slot == null || slot.isEmpty())
-           && (comment == null || comment.isEmpty()) && (participant == null || participant.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  serviceCategory
+          ,  serviceType,  specialty,  appointmentType,  reason,  priority,  description,  start,  end
+          ,  minutesDuration,  slot,  created,  comment,  participant);
       }
 
   @Override
@@ -1573,7 +1788,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
+  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -1682,6 +1897,46 @@ public class Appointment extends DomainResource {
    * the path value of "<b>Appointment:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Appointment:patient").toLocked();
+
+ /**
+   * Search parameter: <b>appointment-type</b>
+   * <p>
+   * Description: <b>The style of appointment or patient that has been booked in the slot (not service type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Appointment.appointmentType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token" )
+  public static final String SP_APPOINTMENT_TYPE = "appointment-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>appointment-type</b>
+   * <p>
+   * Description: <b>The style of appointment or patient that has been booked in the slot (not service type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Appointment.appointmentType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam APPOINTMENT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_APPOINTMENT_TYPE);
+
+ /**
+   * Search parameter: <b>service-type</b>
+   * <p>
+   * Description: <b>The specific service that is to be performed during this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Appointment.serviceType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token" )
+  public static final String SP_SERVICE_TYPE = "service-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
+   * <p>
+   * Description: <b>The specific service that is to be performed during this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Appointment.serviceType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_TYPE);
 
  /**
    * Search parameter: <b>location</b>

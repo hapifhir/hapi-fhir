@@ -68,19 +68,16 @@ private Map<String, Object> userData;
     return (Integer) getUserData(name);
   }
 
-  @Override
   public boolean hasFormatComment() {
   	return (formatCommentsPre != null && !formatCommentsPre.isEmpty()) || (formatCommentsPost != null && !formatCommentsPost.isEmpty());
   }
   
-  @Override
   public List<String> getFormatCommentsPre() {
     if (formatCommentsPre == null)
       formatCommentsPre = new ArrayList<String>();
     return formatCommentsPre;
   }
-
-  @Override
+  
   public List<String> getFormatCommentsPost() {
     if (formatCommentsPost == null)
       formatCommentsPost = new ArrayList<String>();
@@ -489,7 +486,7 @@ private Map<String, Object> userData;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Meta");
 	}
-	
+		
 	public Extension castToExtension(Base b) throws FHIRException {
 		if (b instanceof Extension)
 			return (Extension) b;
@@ -518,7 +515,42 @@ private Map<String, Object> userData;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ElementDefinition");
 	}
-	
+
+	public ModuleMetadata castToModuleMetadata(Base b) throws FHIRException {
+		if (b instanceof ModuleMetadata)
+			return (ModuleMetadata) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ModuleMetadata");
+	}
+
+	public ActionDefinition castToActionDefinition(Base b) throws FHIRException {
+		if (b instanceof ActionDefinition)
+			return (ActionDefinition) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ActionDefinition");
+	}
+
+	public DataRequirement castToDataRequirement(Base b) throws FHIRException {
+		if (b instanceof DataRequirement)
+			return (DataRequirement) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a DataRequirement");
+	}
+
+	public ParameterDefinition castToParameterDefinition(Base b) throws FHIRException {
+		if (b instanceof ParameterDefinition)
+			return (ParameterDefinition) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ParameterDefinition");
+	}
+
+	public TriggerDefinition castToTriggerDefinition(Base b) throws FHIRException {
+		if (b instanceof TriggerDefinition)
+			return (TriggerDefinition) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a TriggerDefinition");
+	}
+
 	protected boolean isMetadataBased() {
   	return false;
 	}

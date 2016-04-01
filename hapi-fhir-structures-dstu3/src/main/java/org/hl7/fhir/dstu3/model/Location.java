@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -40,9 +40,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
  */
@@ -539,8 +538,8 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (longitude == null || longitude.isEmpty()) && (latitude == null || latitude.isEmpty())
-           && (altitude == null || altitude.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( longitude,  latitude,  altitude
+          );
       }
 
   public String fhirType() {
@@ -575,7 +574,7 @@ public class Location extends DomainResource {
      * Description of the Location, which helps in finding or referencing the place.
      */
     @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Description of the location", formalDefinition="Description of the Location, which helps in finding or referencing the place." )
+    @Description(shortDefinition="Additional details about the location that could be displayed as further information to identify the location beyond its name", formalDefinition="Description of the Location, which helps in finding or referencing the place." )
     protected StringType description;
 
     /**
@@ -1268,12 +1267,9 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (name == null || name.isEmpty()) && (description == null || description.isEmpty()) && (mode == null || mode.isEmpty())
-           && (type == null || type.isEmpty()) && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty())
-           && (physicalType == null || physicalType.isEmpty()) && (position == null || position.isEmpty())
-           && (managingOrganization == null || managingOrganization.isEmpty()) && (partOf == null || partOf.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  name,  description
+          ,  mode,  type,  telecom,  address,  physicalType,  position,  managingOrganization,  partOf
+          );
       }
 
   @Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -40,9 +40,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A container for a collection of resources.
  */
@@ -651,8 +650,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (relation == null || relation.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( relation,  url);
       }
 
   public String fhirType() {
@@ -672,10 +670,12 @@ public class Bundle extends Resource implements IBaseBundle {
         protected List<BundleLinkComponent> link;
 
         /**
-         * The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.
+         * The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
+* Results from operations might involve resources that are not identified.
          */
         @Child(name = "fullUrl", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Absolute URL for resource (server address, or UUID/OID)", formalDefinition="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource." )
+        @Description(shortDefinition="Absolute URL for resource (server address, or UUID/OID)", formalDefinition="The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified." )
         protected UriType fullUrl;
 
         /**
@@ -756,7 +756,9 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #fullUrl} (The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
+         * @return {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
+* Results from operations might involve resources that are not identified.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
          */
         public UriType getFullUrlElement() { 
           if (this.fullUrl == null)
@@ -776,7 +778,9 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #fullUrl} (The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
+         * @param value {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
+* Results from operations might involve resources that are not identified.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
          */
         public BundleEntryComponent setFullUrlElement(UriType value) { 
           this.fullUrl = value;
@@ -784,14 +788,18 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.
+         * @return The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
+* Results from operations might involve resources that are not identified.
          */
         public String getFullUrl() { 
           return this.fullUrl == null ? null : this.fullUrl.getValue();
         }
 
         /**
-         * @param value The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.
+         * @param value The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
+* Results from operations might involve resources that are not identified.
          */
         public BundleEntryComponent setFullUrl(String value) { 
           if (Utilities.noString(value))
@@ -945,7 +953,7 @@ public class Bundle extends Resource implements IBaseBundle {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("link", "@Bundle.link", "A series of links that provide context to this entry.", 0, java.lang.Integer.MAX_VALUE, link));
-          childrenList.add(new Property("fullUrl", "uri", "The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.", 0, java.lang.Integer.MAX_VALUE, fullUrl));
+          childrenList.add(new Property("fullUrl", "uri", "The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified.", 0, java.lang.Integer.MAX_VALUE, fullUrl));
           childrenList.add(new Property("resource", "Resource", "The Resources for the entry.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("search", "", "Information about the search process that lead to the creation of this entry.", 0, java.lang.Integer.MAX_VALUE, search));
           childrenList.add(new Property("request", "", "Additional information about how this entry should be processed as part of a transaction.", 0, java.lang.Integer.MAX_VALUE, request));
@@ -1036,9 +1044,8 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (link == null || link.isEmpty()) && (fullUrl == null || fullUrl.isEmpty())
-           && (resource == null || resource.isEmpty()) && (search == null || search.isEmpty()) && (request == null || request.isEmpty())
-           && (response == null || response.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( link,  fullUrl,  resource,  search
+          ,  request,  response);
       }
 
   public String fhirType() {
@@ -1246,8 +1253,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (mode == null || mode.isEmpty()) && (score == null || score.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( mode,  score);
       }
 
   public String fhirType() {
@@ -1260,10 +1266,10 @@ public class Bundle extends Resource implements IBaseBundle {
     @Block()
     public static class BundleEntryRequestComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
+         * The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
          */
         @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a update history, or a transaction/ transaction response." )
+        @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a change history, or a transaction/ transaction response." )
         protected Enumeration<HTTPVerb> method;
 
         /**
@@ -1320,7 +1326,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
         /**
-         * @return {@link #method} (The HTTP verb for this entry in either a update history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @return {@link #method} (The HTTP verb for this entry in either a change history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
         public Enumeration<HTTPVerb> getMethodElement() { 
           if (this.method == null)
@@ -1340,7 +1346,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #method} (The HTTP verb for this entry in either a update history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @param value {@link #method} (The HTTP verb for this entry in either a change history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
         public BundleEntryRequestComponent setMethodElement(Enumeration<HTTPVerb> value) { 
           this.method = value;
@@ -1348,14 +1354,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
+         * @return The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
          */
         public HTTPVerb getMethod() { 
           return this.method == null ? null : this.method.getValue();
         }
 
         /**
-         * @param value The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
+         * @param value The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
          */
         public BundleEntryRequestComponent setMethod(HTTPVerb value) { 
             if (this.method == null)
@@ -1607,7 +1613,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a update history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
+          childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a change history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
           childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
@@ -1694,10 +1700,8 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (method == null || method.isEmpty()) && (url == null || url.isEmpty())
-           && (ifNoneMatch == null || ifNoneMatch.isEmpty()) && (ifModifiedSince == null || ifModifiedSince.isEmpty())
-           && (ifMatch == null || ifMatch.isEmpty()) && (ifNoneExist == null || ifNoneExist.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( method,  url,  ifNoneMatch,  ifModifiedSince
+          ,  ifMatch,  ifNoneExist);
       }
 
   public String fhirType() {
@@ -1710,10 +1714,10 @@ public class Bundle extends Resource implements IBaseBundle {
     @Block()
     public static class BundleEntryResponseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The status code returned by processing this entry.
+         * The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.
          */
         @Child(name = "status", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Status return code for entry", formalDefinition="The status code returned by processing this entry." )
+        @Description(shortDefinition="Status response code (text optional)", formalDefinition="The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code." )
         protected StringType status;
 
         /**
@@ -1755,7 +1759,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
         /**
-         * @return {@link #status} (The status code returned by processing this entry.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @return {@link #status} (The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public StringType getStatusElement() { 
           if (this.status == null)
@@ -1775,7 +1779,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #status} (The status code returned by processing this entry.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @param value {@link #status} (The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public BundleEntryResponseComponent setStatusElement(StringType value) { 
           this.status = value;
@@ -1783,14 +1787,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The status code returned by processing this entry.
+         * @return The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.
          */
         public String getStatus() { 
           return this.status == null ? null : this.status.getValue();
         }
 
         /**
-         * @param value The status code returned by processing this entry.
+         * @param value The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.
          */
         public BundleEntryResponseComponent setStatus(String value) { 
             if (this.status == null)
@@ -1948,7 +1952,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("status", "string", "The status code returned by processing this entry.", 0, java.lang.Integer.MAX_VALUE, status));
+          childrenList.add(new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, java.lang.Integer.MAX_VALUE, status));
           childrenList.add(new Property("location", "uri", "The location header created by processing this operation.", 0, java.lang.Integer.MAX_VALUE, location));
           childrenList.add(new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource.", 0, java.lang.Integer.MAX_VALUE, etag));
           childrenList.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, java.lang.Integer.MAX_VALUE, lastModified));
@@ -2019,8 +2023,8 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (status == null || status.isEmpty()) && (location == null || location.isEmpty())
-           && (etag == null || etag.isEmpty()) && (lastModified == null || lastModified.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( status,  location,  etag,  lastModified
+          );
       }
 
   public String fhirType() {
@@ -2420,9 +2424,8 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (total == null || total.isEmpty())
-           && (link == null || link.isEmpty()) && (entry == null || entry.isEmpty()) && (signature == null || signature.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  total,  link,  entry,  signature
+          );
       }
 
   @Override
@@ -2438,7 +2441,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource.item(0)", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
+  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
@@ -2484,7 +2487,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource.item(0)", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
+  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
   public static final String SP_MESSAGE = "message";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>message</b>

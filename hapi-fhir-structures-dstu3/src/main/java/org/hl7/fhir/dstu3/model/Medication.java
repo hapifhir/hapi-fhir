@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
@@ -258,8 +257,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (form == null || form.isEmpty()) && (ingredient == null || ingredient.isEmpty())
-           && (batch == null || batch.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( form,  ingredient,  batch);
       }
 
   public String fhirType() {
@@ -274,14 +272,9 @@ public class Medication extends DomainResource {
         /**
          * The actual ingredient - either a substance (simple ingredient) or another medication.
          */
-        @Child(name = "item", type = {Substance.class, Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "item", type = {CodeableConcept.class, Substance.class, Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The product contained", formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication." )
-        protected Reference item;
-
-        /**
-         * The actual object that is the target of the reference (The actual ingredient - either a substance (simple ingredient) or another medication.)
-         */
-        protected Resource itemTarget;
+        protected Type item;
 
         /**
          * Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.
@@ -290,7 +283,7 @@ public class Medication extends DomainResource {
         @Description(shortDefinition="Quantity of ingredient present", formalDefinition="Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet." )
         protected Ratio amount;
 
-        private static final long serialVersionUID = -1217232889L;
+        private static final long serialVersionUID = -651644952L;
 
     /**
      * Constructor
@@ -302,7 +295,7 @@ public class Medication extends DomainResource {
     /**
      * Constructor
      */
-      public MedicationProductIngredientComponent(Reference item) {
+      public MedicationProductIngredientComponent(Type item) {
         super();
         this.item = item;
       }
@@ -310,13 +303,34 @@ public class Medication extends DomainResource {
         /**
          * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
-        public Reference getItem() { 
-          if (this.item == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationProductIngredientComponent.item");
-            else if (Configuration.doAutoCreate())
-              this.item = new Reference(); // cc
+        public Type getItem() { 
           return this.item;
+        }
+
+        /**
+         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         */
+        public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (!(this.item instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.item;
+        }
+
+        public boolean hasItemCodeableConcept() { 
+          return this.item instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         */
+        public Reference getItemReference() throws FHIRException { 
+          if (!(this.item instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (Reference) this.item;
+        }
+
+        public boolean hasItemReference() { 
+          return this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -326,23 +340,8 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
-        public MedicationProductIngredientComponent setItem(Reference value) { 
+        public MedicationProductIngredientComponent setItem(Type value) { 
           this.item = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #item} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The actual ingredient - either a substance (simple ingredient) or another medication.)
-         */
-        public Resource getItemTarget() { 
-          return this.itemTarget;
-        }
-
-        /**
-         * @param value {@link #item} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The actual ingredient - either a substance (simple ingredient) or another medication.)
-         */
-        public MedicationProductIngredientComponent setItemTarget(Resource value) { 
-          this.itemTarget = value;
           return this;
         }
 
@@ -372,14 +371,14 @@ public class Medication extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("item", "Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, java.lang.Integer.MAX_VALUE, item));
+          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, java.lang.Integer.MAX_VALUE, item));
           childrenList.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("item"))
-          this.item = castToReference(value); // Reference
+        if (name.equals("item[x]"))
+          this.item = (Type) value; // Type
         else if (name.equals("amount"))
           this.amount = castToRatio(value); // Ratio
         else
@@ -388,7 +387,11 @@ public class Medication extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("item")) {
+        if (name.equals("itemCodeableConcept")) {
+          this.item = new CodeableConcept();
+          return this.item;
+        }
+        else if (name.equals("itemReference")) {
           this.item = new Reference();
           return this.item;
         }
@@ -429,8 +432,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (item == null || item.isEmpty()) && (amount == null || amount.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  amount);
       }
 
   public String fhirType() {
@@ -622,8 +624,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (lotNumber == null || lotNumber.isEmpty()) && (expirationDate == null || expirationDate.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( lotNumber,  expirationDate);
       }
 
   public String fhirType() {
@@ -784,8 +785,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (container == null || container.isEmpty()) && (content == null || content.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( container,  content);
       }
 
   public String fhirType() {
@@ -800,14 +800,9 @@ public class Medication extends DomainResource {
         /**
          * Identifies one of the items in the package.
          */
-        @Child(name = "item", type = {Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "item", type = {CodeableConcept.class, Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The item in the package", formalDefinition="Identifies one of the items in the package." )
-        protected Reference item;
-
-        /**
-         * The actual object that is the target of the reference (Identifies one of the items in the package.)
-         */
-        protected Medication itemTarget;
+        protected Type item;
 
         /**
          * The amount of the product that is in the package.
@@ -816,7 +811,7 @@ public class Medication extends DomainResource {
         @Description(shortDefinition="Quantity present in the package", formalDefinition="The amount of the product that is in the package." )
         protected SimpleQuantity amount;
 
-        private static final long serialVersionUID = -1150048030L;
+        private static final long serialVersionUID = 1669610080L;
 
     /**
      * Constructor
@@ -828,7 +823,7 @@ public class Medication extends DomainResource {
     /**
      * Constructor
      */
-      public MedicationPackageContentComponent(Reference item) {
+      public MedicationPackageContentComponent(Type item) {
         super();
         this.item = item;
       }
@@ -836,13 +831,34 @@ public class Medication extends DomainResource {
         /**
          * @return {@link #item} (Identifies one of the items in the package.)
          */
-        public Reference getItem() { 
-          if (this.item == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPackageContentComponent.item");
-            else if (Configuration.doAutoCreate())
-              this.item = new Reference(); // cc
+        public Type getItem() { 
           return this.item;
+        }
+
+        /**
+         * @return {@link #item} (Identifies one of the items in the package.)
+         */
+        public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (!(this.item instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.item;
+        }
+
+        public boolean hasItemCodeableConcept() { 
+          return this.item instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #item} (Identifies one of the items in the package.)
+         */
+        public Reference getItemReference() throws FHIRException { 
+          if (!(this.item instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (Reference) this.item;
+        }
+
+        public boolean hasItemReference() { 
+          return this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -852,28 +868,8 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #item} (Identifies one of the items in the package.)
          */
-        public MedicationPackageContentComponent setItem(Reference value) { 
+        public MedicationPackageContentComponent setItem(Type value) { 
           this.item = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #item} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies one of the items in the package.)
-         */
-        public Medication getItemTarget() { 
-          if (this.itemTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPackageContentComponent.item");
-            else if (Configuration.doAutoCreate())
-              this.itemTarget = new Medication(); // aa
-          return this.itemTarget;
-        }
-
-        /**
-         * @param value {@link #item} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies one of the items in the package.)
-         */
-        public MedicationPackageContentComponent setItemTarget(Medication value) { 
-          this.itemTarget = value;
           return this;
         }
 
@@ -903,14 +899,14 @@ public class Medication extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("item", "Reference(Medication)", "Identifies one of the items in the package.", 0, java.lang.Integer.MAX_VALUE, item));
+          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, java.lang.Integer.MAX_VALUE, item));
           childrenList.add(new Property("amount", "SimpleQuantity", "The amount of the product that is in the package.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("item"))
-          this.item = castToReference(value); // Reference
+        if (name.equals("item[x]"))
+          this.item = (Type) value; // Type
         else if (name.equals("amount"))
           this.amount = castToSimpleQuantity(value); // SimpleQuantity
         else
@@ -919,7 +915,11 @@ public class Medication extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("item")) {
+        if (name.equals("itemCodeableConcept")) {
+          this.item = new CodeableConcept();
+          return this.item;
+        }
+        else if (name.equals("itemReference")) {
           this.item = new Reference();
           return this.item;
         }
@@ -960,8 +960,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (item == null || item.isEmpty()) && (amount == null || amount.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  amount);
       }
 
   public String fhirType() {
@@ -1273,15 +1272,34 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (isBrand == null || isBrand.isEmpty())
-           && (manufacturer == null || manufacturer.isEmpty()) && (product == null || product.isEmpty())
-           && (package_ == null || package_.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  isBrand,  manufacturer,  product
+          ,  package_);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.Medication;
    }
+
+ /**
+   * Search parameter: <b>ingredient-code</b>
+   * <p>
+   * Description: <b>The product contained</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.product.ingredient.itemCodeableConcept</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.itemCodeableConcept", description="The product contained", type="token" )
+  public static final String SP_INGREDIENT_CODE = "ingredient-code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>ingredient-code</b>
+   * <p>
+   * Description: <b>The product contained</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.product.ingredient.itemCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INGREDIENT_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INGREDIENT_CODE);
 
  /**
    * Search parameter: <b>container</b>
@@ -1302,6 +1320,32 @@ public class Medication extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTAINER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTAINER);
+
+ /**
+   * Search parameter: <b>package-item</b>
+   * <p>
+   * Description: <b>The item in the package</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Medication.package.content.itemReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="package-item", path="Medication.package.content.itemReference", description="The item in the package", type="reference" )
+  public static final String SP_PACKAGE_ITEM = "package-item";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>package-item</b>
+   * <p>
+   * Description: <b>The item in the package</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Medication.package.content.itemReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PACKAGE_ITEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PACKAGE_ITEM);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Medication:package-item</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PACKAGE_ITEM = new ca.uhn.fhir.model.api.Include("Medication:package-item").toLocked();
 
  /**
    * Search parameter: <b>code</b>
@@ -1328,17 +1372,17 @@ public class Medication extends DomainResource {
    * <p>
    * Description: <b>The product contained</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Medication.product.ingredient.item</b><br>
+   * Path: <b>Medication.product.ingredient.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="The product contained", type="reference" )
+  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.itemReference", description="The product contained", type="reference" )
   public static final String SP_INGREDIENT = "ingredient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
    * <p>
    * Description: <b>The product contained</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Medication.product.ingredient.item</b><br>
+   * Path: <b>Medication.product.ingredient.itemReference</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INGREDIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INGREDIENT);
@@ -1370,30 +1414,24 @@ public class Medication extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam FORM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FORM);
 
  /**
-   * Search parameter: <b>packageitem</b>
+   * Search parameter: <b>package-item-code</b>
    * <p>
    * Description: <b>The item in the package</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Medication.package.content.item</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.package.content.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="packageitem", path="Medication.package.content.item", description="The item in the package", type="reference" )
-  public static final String SP_PACKAGEITEM = "packageitem";
+  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.itemCodeableConcept", description="The item in the package", type="token" )
+  public static final String SP_PACKAGE_ITEM_CODE = "package-item-code";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>packageitem</b>
+   * <b>Fluent Client</b> search parameter constant for <b>package-item-code</b>
    * <p>
    * Description: <b>The item in the package</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Medication.package.content.item</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Medication.package.content.itemCodeableConcept</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PACKAGEITEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PACKAGEITEM);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Medication:packageitem</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PACKAGEITEM = new ca.uhn.fhir.model.api.Include("Medication:packageitem").toLocked();
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PACKAGE_ITEM_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PACKAGE_ITEM_CODE);
 
  /**
    * Search parameter: <b>manufacturer</b>

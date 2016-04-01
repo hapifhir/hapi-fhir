@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A reference to a document .
  */
@@ -355,8 +353,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (target == null || target.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  target);
       }
 
   public String fhirType() {
@@ -525,8 +522,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (attachment == null || attachment.isEmpty()) && (format == null || format.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( attachment,  format);
       }
 
   public String fhirType() {
@@ -954,10 +950,8 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (encounter == null || encounter.isEmpty()) && (event == null || event.isEmpty())
-           && (period == null || period.isEmpty()) && (facilityType == null || facilityType.isEmpty())
-           && (practiceSetting == null || practiceSetting.isEmpty()) && (sourcePatientInfo == null || sourcePatientInfo.isEmpty())
-           && (related == null || related.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( encounter,  event,  period,  facilityType
+          ,  practiceSetting,  sourcePatientInfo,  related);
       }
 
   public String fhirType() {
@@ -1119,8 +1113,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ref == null || ref.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  ref);
       }
 
   public String fhirType() {
@@ -2133,13 +2126,9 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (masterIdentifier == null || masterIdentifier.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (subject == null || subject.isEmpty()) && (type == null || type.isEmpty()) && (class_ == null || class_.isEmpty())
-           && (author == null || author.isEmpty()) && (custodian == null || custodian.isEmpty()) && (authenticator == null || authenticator.isEmpty())
-           && (created == null || created.isEmpty()) && (indexed == null || indexed.isEmpty()) && (status == null || status.isEmpty())
-           && (docStatus == null || docStatus.isEmpty()) && (relatesTo == null || relatesTo.isEmpty())
-           && (description == null || description.isEmpty()) && (securityLabel == null || securityLabel.isEmpty())
-           && (content == null || content.isEmpty()) && (context == null || context.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( masterIdentifier,  identifier,  subject
+          ,  type,  class_,  author,  custodian,  authenticator,  created,  indexed,  status,  docStatus
+          ,  relatesTo,  description,  securityLabel,  content,  context);
       }
 
   @Override
@@ -2175,7 +2164,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
+  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2387,7 +2376,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.authenticator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference" )
+  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHENTICATOR = "authenticator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authenticator</b>
@@ -2519,7 +2508,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference" )
+  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

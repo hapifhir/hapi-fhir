@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * The details of a healthcare service available at a location.
  */
@@ -214,176 +213,6 @@ public class HealthcareService extends DomainResource {
       return code.getSystem();
       }
     }
-
-    @Block()
-    public static class ServiceTypeComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The specific type of service being delivered or performed.
-         */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type of service delivered or performed", formalDefinition="The specific type of service being delivered or performed." )
-        protected CodeableConcept type;
-
-        /**
-         * Collection of specialties handled by the service site. This is more of a medical term.
-         */
-        @Child(name = "specialty", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Specialties handled by the Service Site", formalDefinition="Collection of specialties handled by the service site. This is more of a medical term." )
-        protected List<CodeableConcept> specialty;
-
-        private static final long serialVersionUID = 1703986174L;
-
-    /**
-     * Constructor
-     */
-      public ServiceTypeComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ServiceTypeComponent(CodeableConcept type) {
-        super();
-        this.type = type;
-      }
-
-        /**
-         * @return {@link #type} (The specific type of service being delivered or performed.)
-         */
-        public CodeableConcept getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ServiceTypeComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The specific type of service being delivered or performed.)
-         */
-        public ServiceTypeComponent setType(CodeableConcept value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
-         */
-        public List<CodeableConcept> getSpecialty() { 
-          if (this.specialty == null)
-            this.specialty = new ArrayList<CodeableConcept>();
-          return this.specialty;
-        }
-
-        public boolean hasSpecialty() { 
-          if (this.specialty == null)
-            return false;
-          for (CodeableConcept item : this.specialty)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
-         */
-    // syntactic sugar
-        public CodeableConcept addSpecialty() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.specialty == null)
-            this.specialty = new ArrayList<CodeableConcept>();
-          this.specialty.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ServiceTypeComponent addSpecialty(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.specialty == null)
-            this.specialty = new ArrayList<CodeableConcept>();
-          this.specialty.add(t);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "The specific type of service being delivered or performed.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("specialty", "CodeableConcept", "Collection of specialties handled by the service site. This is more of a medical term.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("specialty"))
-          this.getSpecialty().add(castToCodeableConcept(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
-        else if (name.equals("specialty")) {
-          return addSpecialty();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ServiceTypeComponent copy() {
-        ServiceTypeComponent dst = new ServiceTypeComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        if (specialty != null) {
-          dst.specialty = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : specialty)
-            dst.specialty.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ServiceTypeComponent))
-          return false;
-        ServiceTypeComponent o = (ServiceTypeComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(specialty, o.specialty, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ServiceTypeComponent))
-          return false;
-        ServiceTypeComponent o = (ServiceTypeComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (specialty == null || specialty.isEmpty())
-          ;
-      }
-
-  public String fhirType() {
-    return "HealthcareService.serviceType";
-
-  }
-
-  }
 
     @Block()
     public static class HealthcareServiceAvailableTimeComponent extends BackboneElement implements IBaseBackboneElement {
@@ -698,9 +527,8 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (daysOfWeek == null || daysOfWeek.isEmpty()) && (allDay == null || allDay.isEmpty())
-           && (availableStartTime == null || availableStartTime.isEmpty()) && (availableEndTime == null || availableEndTime.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( daysOfWeek,  allDay,  availableStartTime
+          ,  availableEndTime);
       }
 
   public String fhirType() {
@@ -870,8 +698,7 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (during == null || during.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( description,  during);
       }
 
   public String fhirType() {
@@ -908,63 +735,70 @@ public class HealthcareService extends DomainResource {
     protected CodeableConcept serviceCategory;
 
     /**
-     * A specific type of service that may be delivered or performed.
+     * The specific type of service that may be delivered or performed.
      */
-    @Child(name = "serviceType", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Specific service delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
-    protected List<ServiceTypeComponent> serviceType;
+    @Child(name = "serviceType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Type of service that may be delivered or performed", formalDefinition="The specific type of service that may be delivered or performed." )
+    protected List<CodeableConcept> serviceType;
 
     /**
-     * The location where this healthcare service may be provided.
+     * Collection of specialties handled by the service site. This is more of a medical term.
      */
-    @Child(name = "location", type = {Location.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Location where service may be provided", formalDefinition="The location where this healthcare service may be provided." )
-    protected Reference location;
+    @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Specialties handled by the HealthcareService", formalDefinition="Collection of specialties handled by the service site. This is more of a medical term." )
+    protected List<CodeableConcept> specialty;
 
     /**
-     * The actual object that is the target of the reference (The location where this healthcare service may be provided.)
+     * The location(s) where this healthcare service may be provided.
      */
-    protected Location locationTarget;
+    @Child(name = "location", type = {Location.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Location(s) where service may be provided", formalDefinition="The location(s) where this healthcare service may be provided." )
+    protected List<Reference> location;
+    /**
+     * The actual objects that are the target of the reference (The location(s) where this healthcare service may be provided.)
+     */
+    protected List<Location> locationTarget;
+
 
     /**
      * Further description of the service as it would be presented to a consumer while searching.
      */
-    @Child(name = "serviceName", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "serviceName", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Description of service as presented to a consumer while searching", formalDefinition="Further description of the service as it would be presented to a consumer while searching." )
     protected StringType serviceName;
 
     /**
      * Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.
      */
-    @Child(name = "comment", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional description and/or any specific issues not covered elsewhere", formalDefinition="Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName." )
     protected StringType comment;
 
     /**
      * Extra details about the service that can't be placed in the other fields.
      */
-    @Child(name = "extraDetails", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "extraDetails", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Extra details about the service that can't be placed in the other fields", formalDefinition="Extra details about the service that can't be placed in the other fields." )
     protected StringType extraDetails;
 
     /**
      * If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "photo", type = {Attachment.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Facilitates quick identification of the service", formalDefinition="If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list." )
     protected Attachment photo;
 
     /**
      * List of contacts related to this specific healthcare service.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contacts related to the healthcare service", formalDefinition="List of contacts related to this specific healthcare service." )
     protected List<ContactPoint> telecom;
 
     /**
      * The location(s) that this service is available to (not where the service is provided).
      */
-    @Child(name = "coverageArea", type = {Location.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "coverageArea", type = {Location.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Location(s) service is inteded for/available to", formalDefinition="The location(s) that this service is available to (not where the service is provided)." )
     protected List<Reference> coverageArea;
     /**
@@ -976,95 +810,87 @@ public class HealthcareService extends DomainResource {
     /**
      * The code(s) that detail the conditions under which the healthcare service is available/offered.
      */
-    @Child(name = "serviceProvisionCode", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "serviceProvisionCode", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Conditions under which service is available/offered", formalDefinition="The code(s) that detail the conditions under which the healthcare service is available/offered." )
     protected List<CodeableConcept> serviceProvisionCode;
 
     /**
      * Does this service have specific eligibility requirements that need to be met in order to use the service?
      */
-    @Child(name = "eligibility", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "eligibility", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Specific eligibility requirements required to use the service", formalDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service?" )
     protected CodeableConcept eligibility;
 
     /**
      * Describes the eligibility conditions for the service.
      */
-    @Child(name = "eligibilityNote", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "eligibilityNote", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="Describes the eligibility conditions for the service." )
     protected StringType eligibilityNote;
 
     /**
      * Program Names that can be used to categorize the service.
      */
-    @Child(name = "programName", type = {StringType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "programName", type = {StringType.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Program Names that categorize the service", formalDefinition="Program Names that can be used to categorize the service." )
     protected List<StringType> programName;
 
     /**
      * Collection of characteristics (attributes).
      */
-    @Child(name = "characteristic", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "characteristic", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Collection of characteristics (attributes)", formalDefinition="Collection of characteristics (attributes)." )
     protected List<CodeableConcept> characteristic;
 
     /**
      * Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required.
      */
-    @Child(name = "referralMethod", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "referralMethod", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Ways that the service accepts referrals", formalDefinition="Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required." )
     protected List<CodeableConcept> referralMethod;
 
     /**
      * The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available.
      */
-    @Child(name = "publicKey", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "publicKey", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="PKI Public keys to support secure communications", formalDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available." )
     protected StringType publicKey;
 
     /**
      * Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.
      */
-    @Child(name = "appointmentRequired", type = {BooleanType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "appointmentRequired", type = {BooleanType.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="If an appointment is required for access to this service", formalDefinition="Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service." )
     protected BooleanType appointmentRequired;
 
     /**
      * A collection of times that the Service Site is available.
      */
-    @Child(name = "availableTime", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "availableTime", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Times the Service Site is available", formalDefinition="A collection of times that the Service Site is available." )
     protected List<HealthcareServiceAvailableTimeComponent> availableTime;
 
     /**
      * The HealthcareService is not available during this period of time due to the provided reason.
      */
-    @Child(name = "notAvailable", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "notAvailable", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Not available during this time due to provided reason", formalDefinition="The HealthcareService is not available during this period of time due to the provided reason." )
     protected List<HealthcareServiceNotAvailableComponent> notAvailable;
 
     /**
      * A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.
      */
-    @Child(name = "availabilityExceptions", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "availabilityExceptions", type = {StringType.class}, order=22, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Description of availability exceptions", formalDefinition="A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times." )
     protected StringType availabilityExceptions;
 
-    private static final long serialVersionUID = 683771126L;
+    private static final long serialVersionUID = -874217100L;
 
   /**
    * Constructor
    */
     public HealthcareService() {
       super();
-    }
-
-  /**
-   * Constructor
-   */
-    public HealthcareService(Reference location) {
-      super();
-      this.location = location;
     }
 
     /**
@@ -1176,87 +1002,144 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceType} (A specific type of service that may be delivered or performed.)
+     * @return {@link #serviceType} (The specific type of service that may be delivered or performed.)
      */
-    public List<ServiceTypeComponent> getServiceType() { 
+    public List<CodeableConcept> getServiceType() { 
       if (this.serviceType == null)
-        this.serviceType = new ArrayList<ServiceTypeComponent>();
+        this.serviceType = new ArrayList<CodeableConcept>();
       return this.serviceType;
     }
 
     public boolean hasServiceType() { 
       if (this.serviceType == null)
         return false;
-      for (ServiceTypeComponent item : this.serviceType)
+      for (CodeableConcept item : this.serviceType)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #serviceType} (A specific type of service that may be delivered or performed.)
+     * @return {@link #serviceType} (The specific type of service that may be delivered or performed.)
      */
     // syntactic sugar
-    public ServiceTypeComponent addServiceType() { //3
-      ServiceTypeComponent t = new ServiceTypeComponent();
+    public CodeableConcept addServiceType() { //3
+      CodeableConcept t = new CodeableConcept();
       if (this.serviceType == null)
-        this.serviceType = new ArrayList<ServiceTypeComponent>();
+        this.serviceType = new ArrayList<CodeableConcept>();
       this.serviceType.add(t);
       return t;
     }
 
     // syntactic sugar
-    public HealthcareService addServiceType(ServiceTypeComponent t) { //3
+    public HealthcareService addServiceType(CodeableConcept t) { //3
       if (t == null)
         return this;
       if (this.serviceType == null)
-        this.serviceType = new ArrayList<ServiceTypeComponent>();
+        this.serviceType = new ArrayList<CodeableConcept>();
       this.serviceType.add(t);
       return this;
     }
 
     /**
-     * @return {@link #location} (The location where this healthcare service may be provided.)
+     * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
      */
-    public Reference getLocation() { 
+    public List<CodeableConcept> getSpecialty() { 
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      return this.specialty;
+    }
+
+    public boolean hasSpecialty() { 
+      if (this.specialty == null)
+        return false;
+      for (CodeableConcept item : this.specialty)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
+     */
+    // syntactic sugar
+    public CodeableConcept addSpecialty() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      this.specialty.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public HealthcareService addSpecialty(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.specialty == null)
+        this.specialty = new ArrayList<CodeableConcept>();
+      this.specialty.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #location} (The location(s) where this healthcare service may be provided.)
+     */
+    public List<Reference> getLocation() { 
       if (this.location == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.location");
-        else if (Configuration.doAutoCreate())
-          this.location = new Reference(); // cc
+        this.location = new ArrayList<Reference>();
       return this.location;
     }
 
     public boolean hasLocation() { 
-      return this.location != null && !this.location.isEmpty();
+      if (this.location == null)
+        return false;
+      for (Reference item : this.location)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #location} (The location where this healthcare service may be provided.)
+     * @return {@link #location} (The location(s) where this healthcare service may be provided.)
      */
-    public HealthcareService setLocation(Reference value) { 
-      this.location = value;
+    // syntactic sugar
+    public Reference addLocation() { //3
+      Reference t = new Reference();
+      if (this.location == null)
+        this.location = new ArrayList<Reference>();
+      this.location.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public HealthcareService addLocation(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.location == null)
+        this.location = new ArrayList<Reference>();
+      this.location.add(t);
       return this;
     }
 
     /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
+     * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The location(s) where this healthcare service may be provided.)
      */
-    public Location getLocationTarget() { 
+    public List<Location> getLocationTarget() { 
       if (this.locationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.location");
-        else if (Configuration.doAutoCreate())
-          this.locationTarget = new Location(); // aa
+        this.locationTarget = new ArrayList<Location>();
       return this.locationTarget;
     }
 
+    // syntactic sugar
     /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
+     * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The location(s) where this healthcare service may be provided.)
      */
-    public HealthcareService setLocationTarget(Location value) { 
-      this.locationTarget = value;
-      return this;
+    public Location addLocationTarget() { 
+      Location r = new Location();
+      if (this.locationTarget == null)
+        this.locationTarget = new ArrayList<Location>();
+      this.locationTarget.add(r);
+      return r;
     }
 
     /**
@@ -2006,8 +1889,9 @@ public class HealthcareService extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "External identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("providedBy", "Reference(Organization)", "The organization that provides this healthcare service.", 0, java.lang.Integer.MAX_VALUE, providedBy));
         childrenList.add(new Property("serviceCategory", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
-        childrenList.add(new Property("serviceType", "", "A specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, serviceType));
-        childrenList.add(new Property("location", "Reference(Location)", "The location where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("serviceType", "CodeableConcept", "The specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, serviceType));
+        childrenList.add(new Property("specialty", "CodeableConcept", "Collection of specialties handled by the service site. This is more of a medical term.", 0, java.lang.Integer.MAX_VALUE, specialty));
+        childrenList.add(new Property("location", "Reference(Location)", "The location(s) where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("serviceName", "string", "Further description of the service as it would be presented to a consumer while searching.", 0, java.lang.Integer.MAX_VALUE, serviceName));
         childrenList.add(new Property("comment", "string", "Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("extraDetails", "string", "Extra details about the service that can't be placed in the other fields.", 0, java.lang.Integer.MAX_VALUE, extraDetails));
@@ -2036,9 +1920,11 @@ public class HealthcareService extends DomainResource {
         else if (name.equals("serviceCategory"))
           this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("serviceType"))
-          this.getServiceType().add((ServiceTypeComponent) value);
+          this.getServiceType().add(castToCodeableConcept(value));
+        else if (name.equals("specialty"))
+          this.getSpecialty().add(castToCodeableConcept(value));
         else if (name.equals("location"))
-          this.location = castToReference(value); // Reference
+          this.getLocation().add(castToReference(value));
         else if (name.equals("serviceName"))
           this.serviceName = castToString(value); // StringType
         else if (name.equals("comment"))
@@ -2093,9 +1979,11 @@ public class HealthcareService extends DomainResource {
         else if (name.equals("serviceType")) {
           return addServiceType();
         }
+        else if (name.equals("specialty")) {
+          return addSpecialty();
+        }
         else if (name.equals("location")) {
-          this.location = new Reference();
-          return this.location;
+          return addLocation();
         }
         else if (name.equals("serviceName")) {
           throw new FHIRException("Cannot call addChild on a primitive type HealthcareService.serviceName");
@@ -2170,11 +2058,20 @@ public class HealthcareService extends DomainResource {
         dst.providedBy = providedBy == null ? null : providedBy.copy();
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
         if (serviceType != null) {
-          dst.serviceType = new ArrayList<ServiceTypeComponent>();
-          for (ServiceTypeComponent i : serviceType)
+          dst.serviceType = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : serviceType)
             dst.serviceType.add(i.copy());
         };
-        dst.location = location == null ? null : location.copy();
+        if (specialty != null) {
+          dst.specialty = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : specialty)
+            dst.specialty.add(i.copy());
+        };
+        if (location != null) {
+          dst.location = new ArrayList<Reference>();
+          for (Reference i : location)
+            dst.location.add(i.copy());
+        };
         dst.serviceName = serviceName == null ? null : serviceName.copy();
         dst.comment = comment == null ? null : comment.copy();
         dst.extraDetails = extraDetails == null ? null : extraDetails.copy();
@@ -2240,9 +2137,9 @@ public class HealthcareService extends DomainResource {
         HealthcareService o = (HealthcareService) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(providedBy, o.providedBy, true)
            && compareDeep(serviceCategory, o.serviceCategory, true) && compareDeep(serviceType, o.serviceType, true)
-           && compareDeep(location, o.location, true) && compareDeep(serviceName, o.serviceName, true) && compareDeep(comment, o.comment, true)
-           && compareDeep(extraDetails, o.extraDetails, true) && compareDeep(photo, o.photo, true) && compareDeep(telecom, o.telecom, true)
-           && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(serviceProvisionCode, o.serviceProvisionCode, true)
+           && compareDeep(specialty, o.specialty, true) && compareDeep(location, o.location, true) && compareDeep(serviceName, o.serviceName, true)
+           && compareDeep(comment, o.comment, true) && compareDeep(extraDetails, o.extraDetails, true) && compareDeep(photo, o.photo, true)
+           && compareDeep(telecom, o.telecom, true) && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(serviceProvisionCode, o.serviceProvisionCode, true)
            && compareDeep(eligibility, o.eligibility, true) && compareDeep(eligibilityNote, o.eligibilityNote, true)
            && compareDeep(programName, o.programName, true) && compareDeep(characteristic, o.characteristic, true)
            && compareDeep(referralMethod, o.referralMethod, true) && compareDeep(publicKey, o.publicKey, true)
@@ -2265,17 +2162,11 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (providedBy == null || providedBy.isEmpty())
-           && (serviceCategory == null || serviceCategory.isEmpty()) && (serviceType == null || serviceType.isEmpty())
-           && (location == null || location.isEmpty()) && (serviceName == null || serviceName.isEmpty())
-           && (comment == null || comment.isEmpty()) && (extraDetails == null || extraDetails.isEmpty())
-           && (photo == null || photo.isEmpty()) && (telecom == null || telecom.isEmpty()) && (coverageArea == null || coverageArea.isEmpty())
-           && (serviceProvisionCode == null || serviceProvisionCode.isEmpty()) && (eligibility == null || eligibility.isEmpty())
-           && (eligibilityNote == null || eligibilityNote.isEmpty()) && (programName == null || programName.isEmpty())
-           && (characteristic == null || characteristic.isEmpty()) && (referralMethod == null || referralMethod.isEmpty())
-           && (publicKey == null || publicKey.isEmpty()) && (appointmentRequired == null || appointmentRequired.isEmpty())
-           && (availableTime == null || availableTime.isEmpty()) && (notAvailable == null || notAvailable.isEmpty())
-           && (availabilityExceptions == null || availabilityExceptions.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  providedBy,  serviceCategory
+          ,  serviceType,  specialty,  location,  serviceName,  comment,  extraDetails,  photo,  telecom
+          ,  coverageArea,  serviceProvisionCode,  eligibility,  eligibilityNote,  programName,  characteristic
+          ,  referralMethod,  publicKey,  appointmentRequired,  availableTime,  notAvailable,  availabilityExceptions
+          );
       }
 
   @Override
@@ -2328,17 +2219,17 @@ public class HealthcareService extends DomainResource {
    * <p>
    * Description: <b>The type of service provided by this healthcare service</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.serviceType.type</b><br>
+   * Path: <b>HealthcareService.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType.type", description="The type of service provided by this healthcare service", type="token" )
+  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token" )
   public static final String SP_SERVICETYPE = "servicetype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>servicetype</b>
    * <p>
    * Description: <b>The type of service provided by this healthcare service</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.serviceType.type</b><br>
+   * Path: <b>HealthcareService.serviceType</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICETYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICETYPE);

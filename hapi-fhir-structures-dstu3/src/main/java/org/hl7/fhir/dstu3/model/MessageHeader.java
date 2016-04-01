@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
  */
@@ -399,8 +397,7 @@ public class MessageHeader extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (code == null || code.isEmpty())
-           && (details == null || details.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  code,  details);
       }
 
   public String fhirType() {
@@ -761,9 +758,8 @@ public class MessageHeader extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (software == null || software.isEmpty())
-           && (version == null || version.isEmpty()) && (contact == null || contact.isEmpty()) && (endpoint == null || endpoint.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  software,  version,  contact
+          ,  endpoint);
       }
 
   public String fhirType() {
@@ -1022,8 +1018,7 @@ public class MessageHeader extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (target == null || target.isEmpty())
-           && (endpoint == null || endpoint.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  target,  endpoint);
       }
 
   public String fhirType() {
@@ -1698,11 +1693,8 @@ public class MessageHeader extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (timestamp == null || timestamp.isEmpty()) && (event == null || event.isEmpty())
-           && (response == null || response.isEmpty()) && (source == null || source.isEmpty()) && (destination == null || destination.isEmpty())
-           && (enterer == null || enterer.isEmpty()) && (author == null || author.isEmpty()) && (receiver == null || receiver.isEmpty())
-           && (responsible == null || responsible.isEmpty()) && (reason == null || reason.isEmpty())
-           && (data == null || data.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( timestamp,  event,  response,  source
+          ,  destination,  enterer,  author,  receiver,  responsible,  reason,  data);
       }
 
   @Override
@@ -1764,7 +1756,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference" )
+  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -1790,7 +1782,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference" )
+  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1856,7 +1848,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference" )
+  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -1922,7 +1914,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.responsible</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference" )
+  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
@@ -1968,7 +1960,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.enterer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference" )
+  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ENTERER = "enterer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>enterer</b>

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A technical identifier - identifies some entity uniquely and unambiguously.
  */
@@ -190,10 +188,10 @@ public class Identifier extends Type implements ICompositeType {
     protected UriType system;
 
     /**
-     * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+     * The portion of the identifier typically relevant to the user and which is unique within the context of the system.
      */
     @Child(name = "value", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The value that is unique", formalDefinition="The portion of the identifier typically displayed to the user and which is unique within the context of the system." )
+    @Description(shortDefinition="The value that is unique", formalDefinition="The portion of the identifier typically relevant to the user and which is unique within the context of the system." )
     protected StringType value;
 
     /**
@@ -347,7 +345,7 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #value} (The portion of the identifier typically displayed to the user and which is unique within the context of the system.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+     * @return {@link #value} (The portion of the identifier typically relevant to the user and which is unique within the context of the system.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
      */
     public StringType getValueElement() { 
       if (this.value == null)
@@ -367,7 +365,7 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #value} (The portion of the identifier typically displayed to the user and which is unique within the context of the system.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+     * @param value {@link #value} (The portion of the identifier typically relevant to the user and which is unique within the context of the system.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
      */
     public Identifier setValueElement(StringType value) { 
       this.value = value;
@@ -375,14 +373,14 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @return The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+     * @return The portion of the identifier typically relevant to the user and which is unique within the context of the system.
      */
     public String getValue() { 
       return this.value == null ? null : this.value.getValue();
     }
 
     /**
-     * @param value The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+     * @param value The portion of the identifier typically relevant to the user and which is unique within the context of the system.
      */
     public Identifier setValue(String value) { 
       if (Utilities.noString(value))
@@ -468,7 +466,7 @@ public class Identifier extends Type implements ICompositeType {
         childrenList.add(new Property("use", "code", "The purpose of this identifier.", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("system", "uri", "Establishes the namespace in which set of possible id values is unique.", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("value", "string", "The portion of the identifier typically displayed to the user and which is unique within the context of the system.", 0, java.lang.Integer.MAX_VALUE, value));
+        childrenList.add(new Property("value", "string", "The portion of the identifier typically relevant to the user and which is unique within the context of the system.", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("assigner", "Reference(Organization)", "Organization that issued/manages the identifier.", 0, java.lang.Integer.MAX_VALUE, assigner));
       }
@@ -563,9 +561,8 @@ public class Identifier extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (use == null || use.isEmpty()) && (type == null || type.isEmpty())
-           && (system == null || system.isEmpty()) && (value == null || value.isEmpty()) && (period == null || period.isEmpty())
-           && (assigner == null || assigner.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( use,  type,  system,  value,  period
+          ,  assigner);
       }
 
 

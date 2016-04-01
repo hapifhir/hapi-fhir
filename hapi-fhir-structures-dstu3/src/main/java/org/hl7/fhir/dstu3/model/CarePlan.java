@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
@@ -626,8 +625,7 @@ public class CarePlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (plan == null || plan.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  plan);
       }
 
   public String fhirType() {
@@ -789,8 +787,7 @@ public class CarePlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (role == null || role.isEmpty()) && (member == null || member.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( role,  member);
       }
 
   public String fhirType() {
@@ -1083,8 +1080,8 @@ public class CarePlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (actionResulting == null || actionResulting.isEmpty()) && (progress == null || progress.isEmpty())
-           && (reference == null || reference.isEmpty()) && (detail == null || detail.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( actionResulting,  progress,  reference
+          ,  detail);
       }
 
   public String fhirType() {
@@ -2049,14 +2046,9 @@ public class CarePlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (category == null || category.isEmpty()) && (code == null || code.isEmpty())
-           && (reasonCode == null || reasonCode.isEmpty()) && (reasonReference == null || reasonReference.isEmpty())
-           && (goal == null || goal.isEmpty()) && (status == null || status.isEmpty()) && (statusReason == null || statusReason.isEmpty())
-           && (prohibited == null || prohibited.isEmpty()) && (scheduled == null || scheduled.isEmpty())
-           && (location == null || location.isEmpty()) && (performer == null || performer.isEmpty())
-           && (product == null || product.isEmpty()) && (dailyAmount == null || dailyAmount.isEmpty())
-           && (quantity == null || quantity.isEmpty()) && (description == null || description.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( category,  code,  reasonCode,  reasonReference
+          ,  goal,  status,  statusReason,  prohibited,  scheduled,  location,  performer,  product,  dailyAmount
+          ,  quantity,  description);
       }
 
   public String fhirType() {
@@ -3124,13 +3116,9 @@ public class CarePlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
-           && (status == null || status.isEmpty()) && (context == null || context.isEmpty()) && (period == null || period.isEmpty())
-           && (author == null || author.isEmpty()) && (modified == null || modified.isEmpty()) && (category == null || category.isEmpty())
-           && (description == null || description.isEmpty()) && (addresses == null || addresses.isEmpty())
-           && (support == null || support.isEmpty()) && (relatedPlan == null || relatedPlan.isEmpty())
-           && (participant == null || participant.isEmpty()) && (goal == null || goal.isEmpty()) && (activity == null || activity.isEmpty())
-           && (note == null || note.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  subject,  status,  context
+          ,  period,  author,  modified,  category,  description,  addresses,  support,  relatedPlan,  participant
+          ,  goal,  activity,  note);
       }
 
   @Override
@@ -3232,7 +3220,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference" )
+  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -3330,7 +3318,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.participant.member</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
+  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -3428,7 +3416,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference" )
+  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

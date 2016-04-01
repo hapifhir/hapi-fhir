@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
  */
@@ -726,8 +725,8 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (status == null || status.isEmpty()) && (description == null || description.isEmpty())
-           && (dateTime == null || dateTime.isEmpty()) && (actor == null || actor.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( status,  description,  dateTime
+          ,  actor);
       }
 
   public String fhirType() {
@@ -1083,9 +1082,8 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (specimen == null || specimen.isEmpty())
-           && (bodySite == null || bodySite.isEmpty()) && (status == null || status.isEmpty()) && (event == null || event.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  specimen,  bodySite,  status
+          ,  event);
       }
 
   public String fhirType() {
@@ -1096,40 +1094,42 @@ public class DiagnosticOrder extends DomainResource {
   }
 
     /**
-     * Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).
-     */
-    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what test is about", formalDefinition="Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
-    protected Reference subject;
-
-    /**
-     * The actual object that is the target of the reference (Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
-     */
-    protected Resource subjectTarget;
-
-    /**
-     * The practitioner that holds legal responsibility for ordering the investigation.
-     */
-    @Child(name = "orderer", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who ordered the test", formalDefinition="The practitioner that holds legal responsibility for ordering the investigation." )
-    protected Reference orderer;
-
-    /**
-     * The actual object that is the target of the reference (The practitioner that holds legal responsibility for ordering the investigation.)
-     */
-    protected Practitioner ordererTarget;
-
-    /**
      * Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifiers assigned to this order", formalDefinition="Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller." )
     protected List<Identifier> identifier;
 
     /**
+     * The status of the order.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", formalDefinition="The status of the order." )
+    protected Enumeration<DiagnosticOrderStatus> status;
+
+    /**
+     * The clinical priority associated with this order.
+     */
+    @Child(name = "priority", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
+    protected Enumeration<DiagnosticOrderPriority> priority;
+
+    /**
+     * On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).
+     */
+    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who and/or what test is about", formalDefinition="On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
+    protected Reference subject;
+
+    /**
+     * The actual object that is the target of the reference (On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
+     */
+    protected Resource subjectTarget;
+
+    /**
      * An encounter that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "encounter", type = {Encounter.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The encounter that this diagnostic order is associated with", formalDefinition="An encounter that provides additional information about the healthcare context in which this request is made." )
     protected Reference encounter;
 
@@ -1139,16 +1139,28 @@ public class DiagnosticOrder extends DomainResource {
     protected Encounter encounterTarget;
 
     /**
+     * The practitioner that holds legal responsibility for ordering the investigation.
+     */
+    @Child(name = "orderer", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who ordered the test", formalDefinition="The practitioner that holds legal responsibility for ordering the investigation." )
+    protected Reference orderer;
+
+    /**
+     * The actual object that is the target of the reference (The practitioner that holds legal responsibility for ordering the investigation.)
+     */
+    protected Practitioner ordererTarget;
+
+    /**
      * An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Explanation/Justification for test", formalDefinition="An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation." )
     protected List<CodeableConcept> reason;
 
     /**
      * Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order.
      */
-    @Child(name = "supportingInformation", type = {Observation.class, Condition.class, DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInformation", type = {Observation.class, Condition.class, DocumentReference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order." )
     protected List<Reference> supportingInformation;
     /**
@@ -1160,7 +1172,7 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * One or more specimens that the diagnostic investigation is about.
      */
-    @Child(name = "specimen", type = {Specimen.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "specimen", type = {Specimen.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="If the whole order relates to specific specimens", formalDefinition="One or more specimens that the diagnostic investigation is about." )
     protected List<Reference> specimen;
     /**
@@ -1168,20 +1180,6 @@ public class DiagnosticOrder extends DomainResource {
      */
     protected List<Specimen> specimenTarget;
 
-
-    /**
-     * The status of the order.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", formalDefinition="The status of the order." )
-    protected Enumeration<DiagnosticOrderStatus> status;
-
-    /**
-     * The clinical priority associated with this order.
-     */
-    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
-    protected Enumeration<DiagnosticOrderPriority> priority;
 
     /**
      * A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.
@@ -1204,7 +1202,7 @@ public class DiagnosticOrder extends DomainResource {
     @Description(shortDefinition="Other notes and comments", formalDefinition="Any other notes associated with this patient, specimen or order (e.g. \"patient hates needles\")." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 700891227L;
+    private static final long serialVersionUID = 1170289657L;
 
   /**
    * Constructor
@@ -1219,89 +1217,6 @@ public class DiagnosticOrder extends DomainResource {
     public DiagnosticOrder(Reference subject) {
       super();
       this.subject = subject;
-    }
-
-    /**
-     * @return {@link #subject} (Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
-     */
-    public Reference getSubject() { 
-      if (this.subject == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticOrder.subject");
-        else if (Configuration.doAutoCreate())
-          this.subject = new Reference(); // cc
-      return this.subject;
-    }
-
-    public boolean hasSubject() { 
-      return this.subject != null && !this.subject.isEmpty();
-    }
-
-    /**
-     * @param value {@link #subject} (Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
-     */
-    public DiagnosticOrder setSubject(Reference value) { 
-      this.subject = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
-     */
-    public Resource getSubjectTarget() { 
-      return this.subjectTarget;
-    }
-
-    /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
-     */
-    public DiagnosticOrder setSubjectTarget(Resource value) { 
-      this.subjectTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #orderer} (The practitioner that holds legal responsibility for ordering the investigation.)
-     */
-    public Reference getOrderer() { 
-      if (this.orderer == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticOrder.orderer");
-        else if (Configuration.doAutoCreate())
-          this.orderer = new Reference(); // cc
-      return this.orderer;
-    }
-
-    public boolean hasOrderer() { 
-      return this.orderer != null && !this.orderer.isEmpty();
-    }
-
-    /**
-     * @param value {@link #orderer} (The practitioner that holds legal responsibility for ordering the investigation.)
-     */
-    public DiagnosticOrder setOrderer(Reference value) { 
-      this.orderer = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #orderer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the investigation.)
-     */
-    public Practitioner getOrdererTarget() { 
-      if (this.ordererTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticOrder.orderer");
-        else if (Configuration.doAutoCreate())
-          this.ordererTarget = new Practitioner(); // aa
-      return this.ordererTarget;
-    }
-
-    /**
-     * @param value {@link #orderer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the investigation.)
-     */
-    public DiagnosticOrder setOrdererTarget(Practitioner value) { 
-      this.ordererTarget = value;
-      return this;
     }
 
     /**
@@ -1341,6 +1256,143 @@ public class DiagnosticOrder extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of the order.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<DiagnosticOrderStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticOrder.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<DiagnosticOrderStatus>(new DiagnosticOrderStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the order.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public DiagnosticOrder setStatusElement(Enumeration<DiagnosticOrderStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the order.
+     */
+    public DiagnosticOrderStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the order.
+     */
+    public DiagnosticOrder setStatus(DiagnosticOrderStatus value) { 
+      if (value == null)
+        this.status = null;
+      else {
+        if (this.status == null)
+          this.status = new Enumeration<DiagnosticOrderStatus>(new DiagnosticOrderStatusEnumFactory());
+        this.status.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #priority} (The clinical priority associated with this order.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public Enumeration<DiagnosticOrderPriority> getPriorityElement() { 
+      if (this.priority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticOrder.priority");
+        else if (Configuration.doAutoCreate())
+          this.priority = new Enumeration<DiagnosticOrderPriority>(new DiagnosticOrderPriorityEnumFactory()); // bb
+      return this.priority;
+    }
+
+    public boolean hasPriorityElement() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    public boolean hasPriority() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priority} (The clinical priority associated with this order.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public DiagnosticOrder setPriorityElement(Enumeration<DiagnosticOrderPriority> value) { 
+      this.priority = value;
+      return this;
+    }
+
+    /**
+     * @return The clinical priority associated with this order.
+     */
+    public DiagnosticOrderPriority getPriority() { 
+      return this.priority == null ? null : this.priority.getValue();
+    }
+
+    /**
+     * @param value The clinical priority associated with this order.
+     */
+    public DiagnosticOrder setPriority(DiagnosticOrderPriority value) { 
+      if (value == null)
+        this.priority = null;
+      else {
+        if (this.priority == null)
+          this.priority = new Enumeration<DiagnosticOrderPriority>(new DiagnosticOrderPriorityEnumFactory());
+        this.priority.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} (On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
+     */
+    public Reference getSubject() { 
+      if (this.subject == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticOrder.subject");
+        else if (Configuration.doAutoCreate())
+          this.subject = new Reference(); // cc
+      return this.subject;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
+     */
+    public DiagnosticOrder setSubject(Reference value) { 
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
+     */
+    public Resource getSubjectTarget() { 
+      return this.subjectTarget;
+    }
+
+    /**
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
+     */
+    public DiagnosticOrder setSubjectTarget(Resource value) { 
+      this.subjectTarget = value;
       return this;
     }
 
@@ -1385,6 +1437,50 @@ public class DiagnosticOrder extends DomainResource {
      */
     public DiagnosticOrder setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #orderer} (The practitioner that holds legal responsibility for ordering the investigation.)
+     */
+    public Reference getOrderer() { 
+      if (this.orderer == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticOrder.orderer");
+        else if (Configuration.doAutoCreate())
+          this.orderer = new Reference(); // cc
+      return this.orderer;
+    }
+
+    public boolean hasOrderer() { 
+      return this.orderer != null && !this.orderer.isEmpty();
+    }
+
+    /**
+     * @param value {@link #orderer} (The practitioner that holds legal responsibility for ordering the investigation.)
+     */
+    public DiagnosticOrder setOrderer(Reference value) { 
+      this.orderer = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #orderer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the investigation.)
+     */
+    public Practitioner getOrdererTarget() { 
+      if (this.ordererTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticOrder.orderer");
+        else if (Configuration.doAutoCreate())
+          this.ordererTarget = new Practitioner(); // aa
+      return this.ordererTarget;
+    }
+
+    /**
+     * @param value {@link #orderer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that holds legal responsibility for ordering the investigation.)
+     */
+    public DiagnosticOrder setOrdererTarget(Practitioner value) { 
+      this.ordererTarget = value;
       return this;
     }
 
@@ -1539,104 +1635,6 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The status of the order.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public Enumeration<DiagnosticOrderStatus> getStatusElement() { 
-      if (this.status == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticOrder.status");
-        else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<DiagnosticOrderStatus>(new DiagnosticOrderStatusEnumFactory()); // bb
-      return this.status;
-    }
-
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    /**
-     * @param value {@link #status} (The status of the order.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public DiagnosticOrder setStatusElement(Enumeration<DiagnosticOrderStatus> value) { 
-      this.status = value;
-      return this;
-    }
-
-    /**
-     * @return The status of the order.
-     */
-    public DiagnosticOrderStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
-    }
-
-    /**
-     * @param value The status of the order.
-     */
-    public DiagnosticOrder setStatus(DiagnosticOrderStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
-        if (this.status == null)
-          this.status = new Enumeration<DiagnosticOrderStatus>(new DiagnosticOrderStatusEnumFactory());
-        this.status.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #priority} (The clinical priority associated with this order.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
-     */
-    public Enumeration<DiagnosticOrderPriority> getPriorityElement() { 
-      if (this.priority == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticOrder.priority");
-        else if (Configuration.doAutoCreate())
-          this.priority = new Enumeration<DiagnosticOrderPriority>(new DiagnosticOrderPriorityEnumFactory()); // bb
-      return this.priority;
-    }
-
-    public boolean hasPriorityElement() { 
-      return this.priority != null && !this.priority.isEmpty();
-    }
-
-    public boolean hasPriority() { 
-      return this.priority != null && !this.priority.isEmpty();
-    }
-
-    /**
-     * @param value {@link #priority} (The clinical priority associated with this order.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
-     */
-    public DiagnosticOrder setPriorityElement(Enumeration<DiagnosticOrderPriority> value) { 
-      this.priority = value;
-      return this;
-    }
-
-    /**
-     * @return The clinical priority associated with this order.
-     */
-    public DiagnosticOrderPriority getPriority() { 
-      return this.priority == null ? null : this.priority.getValue();
-    }
-
-    /**
-     * @param value The clinical priority associated with this order.
-     */
-    public DiagnosticOrder setPriority(DiagnosticOrderPriority value) { 
-      if (value == null)
-        this.priority = null;
-      else {
-        if (this.priority == null)
-          this.priority = new Enumeration<DiagnosticOrderPriority>(new DiagnosticOrderPriorityEnumFactory());
-        this.priority.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #event} (A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.)
      */
     public List<DiagnosticOrderEventComponent> getEvent() { 
@@ -1758,15 +1756,15 @@ public class DiagnosticOrder extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("orderer", "Reference(Practitioner)", "The practitioner that holds legal responsibility for ordering the investigation.", 0, java.lang.Integer.MAX_VALUE, orderer));
         childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "The status of the order.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("priority", "code", "The clinical priority associated with this order.", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the investigation is to be performed. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, java.lang.Integer.MAX_VALUE, encounter));
+        childrenList.add(new Property("orderer", "Reference(Practitioner)", "The practitioner that holds legal responsibility for ordering the investigation.", 0, java.lang.Integer.MAX_VALUE, orderer));
         childrenList.add(new Property("reason", "CodeableConcept", "An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("supportingInformation", "Reference(Observation|Condition|DocumentReference)", "Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "One or more specimens that the diagnostic investigation is about.", 0, java.lang.Integer.MAX_VALUE, specimen));
-        childrenList.add(new Property("status", "code", "The status of the order.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("priority", "code", "The clinical priority associated with this order.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("event", "", "A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.", 0, java.lang.Integer.MAX_VALUE, event));
         childrenList.add(new Property("item", "", "The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested.", 0, java.lang.Integer.MAX_VALUE, item));
         childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient, specimen or order (e.g. \"patient hates needles\").", 0, java.lang.Integer.MAX_VALUE, note));
@@ -1774,24 +1772,24 @@ public class DiagnosticOrder extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("subject"))
-          this.subject = castToReference(value); // Reference
-        else if (name.equals("orderer"))
-          this.orderer = castToReference(value); // Reference
-        else if (name.equals("identifier"))
+        if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+        else if (name.equals("priority"))
+          this.priority = new DiagnosticOrderPriorityEnumFactory().fromType(value); // Enumeration<DiagnosticOrderPriority>
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
         else if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
+        else if (name.equals("orderer"))
+          this.orderer = castToReference(value); // Reference
         else if (name.equals("reason"))
           this.getReason().add(castToCodeableConcept(value));
         else if (name.equals("supportingInformation"))
           this.getSupportingInformation().add(castToReference(value));
         else if (name.equals("specimen"))
           this.getSpecimen().add(castToReference(value));
-        else if (name.equals("status"))
-          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
-        else if (name.equals("priority"))
-          this.priority = new DiagnosticOrderPriorityEnumFactory().fromType(value); // Enumeration<DiagnosticOrderPriority>
         else if (name.equals("event"))
           this.getEvent().add((DiagnosticOrderEventComponent) value);
         else if (name.equals("item"))
@@ -1804,20 +1802,26 @@ public class DiagnosticOrder extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("subject")) {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.status");
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.priority");
+        }
+        else if (name.equals("subject")) {
           this.subject = new Reference();
           return this.subject;
-        }
-        else if (name.equals("orderer")) {
-          this.orderer = new Reference();
-          return this.orderer;
-        }
-        else if (name.equals("identifier")) {
-          return addIdentifier();
         }
         else if (name.equals("encounter")) {
           this.encounter = new Reference();
           return this.encounter;
+        }
+        else if (name.equals("orderer")) {
+          this.orderer = new Reference();
+          return this.orderer;
         }
         else if (name.equals("reason")) {
           return addReason();
@@ -1827,12 +1831,6 @@ public class DiagnosticOrder extends DomainResource {
         }
         else if (name.equals("specimen")) {
           return addSpecimen();
-        }
-        else if (name.equals("status")) {
-          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.status");
-        }
-        else if (name.equals("priority")) {
-          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.priority");
         }
         else if (name.equals("event")) {
           return addEvent();
@@ -1855,14 +1853,16 @@ public class DiagnosticOrder extends DomainResource {
       public DiagnosticOrder copy() {
         DiagnosticOrder dst = new DiagnosticOrder();
         copyValues(dst);
-        dst.subject = subject == null ? null : subject.copy();
-        dst.orderer = orderer == null ? null : orderer.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.status = status == null ? null : status.copy();
+        dst.priority = priority == null ? null : priority.copy();
+        dst.subject = subject == null ? null : subject.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
+        dst.orderer = orderer == null ? null : orderer.copy();
         if (reason != null) {
           dst.reason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reason)
@@ -1878,8 +1878,6 @@ public class DiagnosticOrder extends DomainResource {
           for (Reference i : specimen)
             dst.specimen.add(i.copy());
         };
-        dst.status = status == null ? null : status.copy();
-        dst.priority = priority == null ? null : priority.copy();
         if (event != null) {
           dst.event = new ArrayList<DiagnosticOrderEventComponent>();
           for (DiagnosticOrderEventComponent i : event)
@@ -1909,11 +1907,11 @@ public class DiagnosticOrder extends DomainResource {
         if (!(other instanceof DiagnosticOrder))
           return false;
         DiagnosticOrder o = (DiagnosticOrder) other;
-        return compareDeep(subject, o.subject, true) && compareDeep(orderer, o.orderer, true) && compareDeep(identifier, o.identifier, true)
-           && compareDeep(encounter, o.encounter, true) && compareDeep(reason, o.reason, true) && compareDeep(supportingInformation, o.supportingInformation, true)
-           && compareDeep(specimen, o.specimen, true) && compareDeep(status, o.status, true) && compareDeep(priority, o.priority, true)
-           && compareDeep(event, o.event, true) && compareDeep(item, o.item, true) && compareDeep(note, o.note, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(priority, o.priority, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true) && compareDeep(orderer, o.orderer, true)
+           && compareDeep(reason, o.reason, true) && compareDeep(supportingInformation, o.supportingInformation, true)
+           && compareDeep(specimen, o.specimen, true) && compareDeep(event, o.event, true) && compareDeep(item, o.item, true)
+           && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -1927,12 +1925,9 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (subject == null || subject.isEmpty()) && (orderer == null || orderer.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (encounter == null || encounter.isEmpty())
-           && (reason == null || reason.isEmpty()) && (supportingInformation == null || supportingInformation.isEmpty())
-           && (specimen == null || specimen.isEmpty()) && (status == null || status.isEmpty()) && (priority == null || priority.isEmpty())
-           && (event == null || event.isEmpty()) && (item == null || item.isEmpty()) && (note == null || note.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  priority
+          ,  subject,  encounter,  orderer,  reason,  supportingInformation,  specimen,  event,  item
+          ,  note);
       }
 
   @Override
@@ -2068,7 +2063,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
+  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2094,7 +2089,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
+  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2120,7 +2115,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2252,7 +2247,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
+  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ORDERER = "orderer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>orderer</b>

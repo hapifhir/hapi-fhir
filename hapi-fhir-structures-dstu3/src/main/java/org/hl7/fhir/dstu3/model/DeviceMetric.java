@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
@@ -936,8 +935,7 @@ public class DeviceMetric extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (state == null || state.isEmpty())
-           && (time == null || time.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  state,  time);
       }
 
   public String fhirType() {
@@ -1549,11 +1547,8 @@ public class DeviceMetric extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (unit == null || unit.isEmpty()) && (source == null || source.isEmpty()) && (parent == null || parent.isEmpty())
-           && (operationalStatus == null || operationalStatus.isEmpty()) && (color == null || color.isEmpty())
-           && (category == null || category.isEmpty()) && (measurementPeriod == null || measurementPeriod.isEmpty())
-           && (calibration == null || calibration.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  identifier,  unit,  source
+          ,  parent,  operationalStatus,  color,  category,  measurementPeriod,  calibration);
       }
 
   @Override
@@ -1615,7 +1610,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference" )
+  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

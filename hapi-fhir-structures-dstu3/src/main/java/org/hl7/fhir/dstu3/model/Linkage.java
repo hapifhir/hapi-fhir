@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Identifies two or more records (resource instances) that are referring to the same real-world "occurrence".
  */
@@ -312,8 +311,7 @@ public class Linkage extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (resource == null || resource.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  resource);
       }
 
   public String fhirType() {
@@ -501,8 +499,7 @@ public class Linkage extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (author == null || author.isEmpty()) && (item == null || item.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( author,  item);
       }
 
   @Override
@@ -544,7 +541,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference" )
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

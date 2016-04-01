@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A value set specifies a set of codes drawn from one or more code systems.
  */
@@ -376,1000 +374,11 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
       }
 
   public String fhirType() {
     return "ValueSet.contact";
-
-  }
-
-  }
-
-    @Block()
-    public static class ValueSetCodeSystemComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
-         */
-        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="URI to identify the code system (e.g. in Coding.system)", formalDefinition="An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system." )
-        protected UriType system;
-
-        /**
-         * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
-         */
-        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Version (for use in Coding.version)", formalDefinition="The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked." )
-        protected StringType version;
-
-        /**
-         * If code comparison is case sensitive when codes within this system are compared to each other.
-         */
-        @Child(name = "caseSensitive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="If code comparison is case sensitive", formalDefinition="If code comparison is case sensitive when codes within this system are compared to each other." )
-        protected BooleanType caseSensitive;
-
-        /**
-         * Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.
-         */
-        @Child(name = "concept", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are." )
-        protected List<ConceptDefinitionComponent> concept;
-
-        private static final long serialVersionUID = -1109401192L;
-
-    /**
-     * Constructor
-     */
-      public ValueSetCodeSystemComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ValueSetCodeSystemComponent(UriType system) {
-        super();
-        this.system = system;
-      }
-
-        /**
-         * @return {@link #system} (An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
-         */
-        public UriType getSystemElement() { 
-          if (this.system == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.system");
-            else if (Configuration.doAutoCreate())
-              this.system = new UriType(); // bb
-          return this.system;
-        }
-
-        public boolean hasSystemElement() { 
-          return this.system != null && !this.system.isEmpty();
-        }
-
-        public boolean hasSystem() { 
-          return this.system != null && !this.system.isEmpty();
-        }
-
-        /**
-         * @param value {@link #system} (An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
-         */
-        public ValueSetCodeSystemComponent setSystemElement(UriType value) { 
-          this.system = value;
-          return this;
-        }
-
-        /**
-         * @return An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
-         */
-        public String getSystem() { 
-          return this.system == null ? null : this.system.getValue();
-        }
-
-        /**
-         * @param value An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
-         */
-        public ValueSetCodeSystemComponent setSystem(String value) { 
-            if (this.system == null)
-              this.system = new UriType();
-            this.system.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #version} (The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-         */
-        public StringType getVersionElement() { 
-          if (this.version == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.version");
-            else if (Configuration.doAutoCreate())
-              this.version = new StringType(); // bb
-          return this.version;
-        }
-
-        public boolean hasVersionElement() { 
-          return this.version != null && !this.version.isEmpty();
-        }
-
-        public boolean hasVersion() { 
-          return this.version != null && !this.version.isEmpty();
-        }
-
-        /**
-         * @param value {@link #version} (The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-         */
-        public ValueSetCodeSystemComponent setVersionElement(StringType value) { 
-          this.version = value;
-          return this;
-        }
-
-        /**
-         * @return The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
-         */
-        public String getVersion() { 
-          return this.version == null ? null : this.version.getValue();
-        }
-
-        /**
-         * @param value The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
-         */
-        public ValueSetCodeSystemComponent setVersion(String value) { 
-          if (Utilities.noString(value))
-            this.version = null;
-          else {
-            if (this.version == null)
-              this.version = new StringType();
-            this.version.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #caseSensitive} (If code comparison is case sensitive when codes within this system are compared to each other.). This is the underlying object with id, value and extensions. The accessor "getCaseSensitive" gives direct access to the value
-         */
-        public BooleanType getCaseSensitiveElement() { 
-          if (this.caseSensitive == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.caseSensitive");
-            else if (Configuration.doAutoCreate())
-              this.caseSensitive = new BooleanType(); // bb
-          return this.caseSensitive;
-        }
-
-        public boolean hasCaseSensitiveElement() { 
-          return this.caseSensitive != null && !this.caseSensitive.isEmpty();
-        }
-
-        public boolean hasCaseSensitive() { 
-          return this.caseSensitive != null && !this.caseSensitive.isEmpty();
-        }
-
-        /**
-         * @param value {@link #caseSensitive} (If code comparison is case sensitive when codes within this system are compared to each other.). This is the underlying object with id, value and extensions. The accessor "getCaseSensitive" gives direct access to the value
-         */
-        public ValueSetCodeSystemComponent setCaseSensitiveElement(BooleanType value) { 
-          this.caseSensitive = value;
-          return this;
-        }
-
-        /**
-         * @return If code comparison is case sensitive when codes within this system are compared to each other.
-         */
-        public boolean getCaseSensitive() { 
-          return this.caseSensitive == null || this.caseSensitive.isEmpty() ? false : this.caseSensitive.getValue();
-        }
-
-        /**
-         * @param value If code comparison is case sensitive when codes within this system are compared to each other.
-         */
-        public ValueSetCodeSystemComponent setCaseSensitive(boolean value) { 
-            if (this.caseSensitive == null)
-              this.caseSensitive = new BooleanType();
-            this.caseSensitive.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #concept} (Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.)
-         */
-        public List<ConceptDefinitionComponent> getConcept() { 
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          return this.concept;
-        }
-
-        public boolean hasConcept() { 
-          if (this.concept == null)
-            return false;
-          for (ConceptDefinitionComponent item : this.concept)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #concept} (Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.)
-         */
-    // syntactic sugar
-        public ConceptDefinitionComponent addConcept() { //3
-          ConceptDefinitionComponent t = new ConceptDefinitionComponent();
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          this.concept.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ValueSetCodeSystemComponent addConcept(ConceptDefinitionComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          this.concept.add(t);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("system", "uri", "An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.", 0, java.lang.Integer.MAX_VALUE, system));
-          childrenList.add(new Property("version", "string", "The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.", 0, java.lang.Integer.MAX_VALUE, version));
-          childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
-          childrenList.add(new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("system"))
-          this.system = castToUri(value); // UriType
-        else if (name.equals("version"))
-          this.version = castToString(value); // StringType
-        else if (name.equals("caseSensitive"))
-          this.caseSensitive = castToBoolean(value); // BooleanType
-        else if (name.equals("concept"))
-          this.getConcept().add((ConceptDefinitionComponent) value);
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("system")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.system");
-        }
-        else if (name.equals("version")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.version");
-        }
-        else if (name.equals("caseSensitive")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.caseSensitive");
-        }
-        else if (name.equals("concept")) {
-          return addConcept();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ValueSetCodeSystemComponent copy() {
-        ValueSetCodeSystemComponent dst = new ValueSetCodeSystemComponent();
-        copyValues(dst);
-        dst.system = system == null ? null : system.copy();
-        dst.version = version == null ? null : version.copy();
-        dst.caseSensitive = caseSensitive == null ? null : caseSensitive.copy();
-        if (concept != null) {
-          dst.concept = new ArrayList<ConceptDefinitionComponent>();
-          for (ConceptDefinitionComponent i : concept)
-            dst.concept.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ValueSetCodeSystemComponent))
-          return false;
-        ValueSetCodeSystemComponent o = (ValueSetCodeSystemComponent) other;
-        return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(caseSensitive, o.caseSensitive, true)
-           && compareDeep(concept, o.concept, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ValueSetCodeSystemComponent))
-          return false;
-        ValueSetCodeSystemComponent o = (ValueSetCodeSystemComponent) other;
-        return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(caseSensitive, o.caseSensitive, true)
-          ;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (system == null || system.isEmpty()) && (version == null || version.isEmpty())
-           && (caseSensitive == null || caseSensitive.isEmpty()) && (concept == null || concept.isEmpty())
-          ;
-      }
-
-  public String fhirType() {
-    return "ValueSet.codeSystem";
-
-  }
-
-  }
-
-    @Block()
-    public static class ConceptDefinitionComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * A code - a text symbol - that uniquely identifies the concept within the code system.
-         */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Code that identifies concept", formalDefinition="A code - a text symbol - that uniquely identifies the concept within the code system." )
-        protected CodeType code;
-
-        /**
-         * If this code is not for use as a real concept.
-         */
-        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="If this code is not for use as a real concept", formalDefinition="If this code is not for use as a real concept." )
-        protected BooleanType abstract_;
-
-        /**
-         * A human readable string that is the recommended default way to present this concept to a user.
-         */
-        @Child(name = "display", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Text to display to the user", formalDefinition="A human readable string that is the recommended default way to present this concept to a user." )
-        protected StringType display;
-
-        /**
-         * The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.
-         */
-        @Child(name = "definition", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Formal definition", formalDefinition="The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept." )
-        protected StringType definition;
-
-        /**
-         * Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.
-         */
-        @Child(name = "designation", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Additional representations for the concept", formalDefinition="Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc." )
-        protected List<ConceptDefinitionDesignationComponent> designation;
-
-        /**
-         * Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.
-         */
-        @Child(name = "concept", type = {ConceptDefinitionComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Child Concepts (is-a/contains/categorizes)", formalDefinition="Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts." )
-        protected List<ConceptDefinitionComponent> concept;
-
-        private static final long serialVersionUID = -318560292L;
-
-    /**
-     * Constructor
-     */
-      public ConceptDefinitionComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ConceptDefinitionComponent(CodeType code) {
-        super();
-        this.code = code;
-      }
-
-        /**
-         * @return {@link #code} (A code - a text symbol - that uniquely identifies the concept within the code system.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
-         */
-        public CodeType getCodeElement() { 
-          if (this.code == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionComponent.code");
-            else if (Configuration.doAutoCreate())
-              this.code = new CodeType(); // bb
-          return this.code;
-        }
-
-        public boolean hasCodeElement() { 
-          return this.code != null && !this.code.isEmpty();
-        }
-
-        public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
-        }
-
-        /**
-         * @param value {@link #code} (A code - a text symbol - that uniquely identifies the concept within the code system.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
-         */
-        public ConceptDefinitionComponent setCodeElement(CodeType value) { 
-          this.code = value;
-          return this;
-        }
-
-        /**
-         * @return A code - a text symbol - that uniquely identifies the concept within the code system.
-         */
-        public String getCode() { 
-          return this.code == null ? null : this.code.getValue();
-        }
-
-        /**
-         * @param value A code - a text symbol - that uniquely identifies the concept within the code system.
-         */
-        public ConceptDefinitionComponent setCode(String value) { 
-            if (this.code == null)
-              this.code = new CodeType();
-            this.code.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #abstract_} (If this code is not for use as a real concept.). This is the underlying object with id, value and extensions. The accessor "getAbstract" gives direct access to the value
-         */
-        public BooleanType getAbstractElement() { 
-          if (this.abstract_ == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionComponent.abstract_");
-            else if (Configuration.doAutoCreate())
-              this.abstract_ = new BooleanType(); // bb
-          return this.abstract_;
-        }
-
-        public boolean hasAbstractElement() { 
-          return this.abstract_ != null && !this.abstract_.isEmpty();
-        }
-
-        public boolean hasAbstract() { 
-          return this.abstract_ != null && !this.abstract_.isEmpty();
-        }
-
-        /**
-         * @param value {@link #abstract_} (If this code is not for use as a real concept.). This is the underlying object with id, value and extensions. The accessor "getAbstract" gives direct access to the value
-         */
-        public ConceptDefinitionComponent setAbstractElement(BooleanType value) { 
-          this.abstract_ = value;
-          return this;
-        }
-
-        /**
-         * @return If this code is not for use as a real concept.
-         */
-        public boolean getAbstract() { 
-          return this.abstract_ == null || this.abstract_.isEmpty() ? false : this.abstract_.getValue();
-        }
-
-        /**
-         * @param value If this code is not for use as a real concept.
-         */
-        public ConceptDefinitionComponent setAbstract(boolean value) { 
-            if (this.abstract_ == null)
-              this.abstract_ = new BooleanType();
-            this.abstract_.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #display} (A human readable string that is the recommended default way to present this concept to a user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
-         */
-        public StringType getDisplayElement() { 
-          if (this.display == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionComponent.display");
-            else if (Configuration.doAutoCreate())
-              this.display = new StringType(); // bb
-          return this.display;
-        }
-
-        public boolean hasDisplayElement() { 
-          return this.display != null && !this.display.isEmpty();
-        }
-
-        public boolean hasDisplay() { 
-          return this.display != null && !this.display.isEmpty();
-        }
-
-        /**
-         * @param value {@link #display} (A human readable string that is the recommended default way to present this concept to a user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
-         */
-        public ConceptDefinitionComponent setDisplayElement(StringType value) { 
-          this.display = value;
-          return this;
-        }
-
-        /**
-         * @return A human readable string that is the recommended default way to present this concept to a user.
-         */
-        public String getDisplay() { 
-          return this.display == null ? null : this.display.getValue();
-        }
-
-        /**
-         * @param value A human readable string that is the recommended default way to present this concept to a user.
-         */
-        public ConceptDefinitionComponent setDisplay(String value) { 
-          if (Utilities.noString(value))
-            this.display = null;
-          else {
-            if (this.display == null)
-              this.display = new StringType();
-            this.display.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #definition} (The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
-         */
-        public StringType getDefinitionElement() { 
-          if (this.definition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionComponent.definition");
-            else if (Configuration.doAutoCreate())
-              this.definition = new StringType(); // bb
-          return this.definition;
-        }
-
-        public boolean hasDefinitionElement() { 
-          return this.definition != null && !this.definition.isEmpty();
-        }
-
-        public boolean hasDefinition() { 
-          return this.definition != null && !this.definition.isEmpty();
-        }
-
-        /**
-         * @param value {@link #definition} (The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
-         */
-        public ConceptDefinitionComponent setDefinitionElement(StringType value) { 
-          this.definition = value;
-          return this;
-        }
-
-        /**
-         * @return The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.
-         */
-        public String getDefinition() { 
-          return this.definition == null ? null : this.definition.getValue();
-        }
-
-        /**
-         * @param value The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.
-         */
-        public ConceptDefinitionComponent setDefinition(String value) { 
-          if (Utilities.noString(value))
-            this.definition = null;
-          else {
-            if (this.definition == null)
-              this.definition = new StringType();
-            this.definition.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.)
-         */
-        public List<ConceptDefinitionDesignationComponent> getDesignation() { 
-          if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
-          return this.designation;
-        }
-
-        public boolean hasDesignation() { 
-          if (this.designation == null)
-            return false;
-          for (ConceptDefinitionDesignationComponent item : this.designation)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.)
-         */
-    // syntactic sugar
-        public ConceptDefinitionDesignationComponent addDesignation() { //3
-          ConceptDefinitionDesignationComponent t = new ConceptDefinitionDesignationComponent();
-          if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
-          this.designation.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ConceptDefinitionComponent addDesignation(ConceptDefinitionDesignationComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
-          this.designation.add(t);
-          return this;
-        }
-
-        /**
-         * @return {@link #concept} (Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.)
-         */
-        public List<ConceptDefinitionComponent> getConcept() { 
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          return this.concept;
-        }
-
-        public boolean hasConcept() { 
-          if (this.concept == null)
-            return false;
-          for (ConceptDefinitionComponent item : this.concept)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #concept} (Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.)
-         */
-    // syntactic sugar
-        public ConceptDefinitionComponent addConcept() { //3
-          ConceptDefinitionComponent t = new ConceptDefinitionComponent();
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          this.concept.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ConceptDefinitionComponent addConcept(ConceptDefinitionComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.concept == null)
-            this.concept = new ArrayList<ConceptDefinitionComponent>();
-          this.concept.add(t);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "A code - a text symbol - that uniquely identifies the concept within the code system.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("abstract", "boolean", "If this code is not for use as a real concept.", 0, java.lang.Integer.MAX_VALUE, abstract_));
-          childrenList.add(new Property("display", "string", "A human readable string that is the recommended default way to present this concept to a user.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("definition", "string", "The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
-          childrenList.add(new Property("concept", "@ValueSet.codeSystem.concept", "Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.", 0, java.lang.Integer.MAX_VALUE, concept));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
-          this.code = castToCode(value); // CodeType
-        else if (name.equals("abstract"))
-          this.abstract_ = castToBoolean(value); // BooleanType
-        else if (name.equals("display"))
-          this.display = castToString(value); // StringType
-        else if (name.equals("definition"))
-          this.definition = castToString(value); // StringType
-        else if (name.equals("designation"))
-          this.getDesignation().add((ConceptDefinitionDesignationComponent) value);
-        else if (name.equals("concept"))
-          this.getConcept().add((ConceptDefinitionComponent) value);
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("code")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.code");
-        }
-        else if (name.equals("abstract")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.abstract");
-        }
-        else if (name.equals("display")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.display");
-        }
-        else if (name.equals("definition")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.definition");
-        }
-        else if (name.equals("designation")) {
-          return addDesignation();
-        }
-        else if (name.equals("concept")) {
-          return addConcept();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ConceptDefinitionComponent copy() {
-        ConceptDefinitionComponent dst = new ConceptDefinitionComponent();
-        copyValues(dst);
-        dst.code = code == null ? null : code.copy();
-        dst.abstract_ = abstract_ == null ? null : abstract_.copy();
-        dst.display = display == null ? null : display.copy();
-        dst.definition = definition == null ? null : definition.copy();
-        if (designation != null) {
-          dst.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
-          for (ConceptDefinitionDesignationComponent i : designation)
-            dst.designation.add(i.copy());
-        };
-        if (concept != null) {
-          dst.concept = new ArrayList<ConceptDefinitionComponent>();
-          for (ConceptDefinitionComponent i : concept)
-            dst.concept.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ConceptDefinitionComponent))
-          return false;
-        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other;
-        return compareDeep(code, o.code, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(display, o.display, true)
-           && compareDeep(definition, o.definition, true) && compareDeep(designation, o.designation, true)
-           && compareDeep(concept, o.concept, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ConceptDefinitionComponent))
-          return false;
-        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other;
-        return compareValues(code, o.code, true) && compareValues(abstract_, o.abstract_, true) && compareValues(display, o.display, true)
-           && compareValues(definition, o.definition, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (abstract_ == null || abstract_.isEmpty())
-           && (display == null || display.isEmpty()) && (definition == null || definition.isEmpty())
-           && (designation == null || designation.isEmpty()) && (concept == null || concept.isEmpty())
-          ;
-      }
-
-  public String fhirType() {
-    return "ValueSet.codeSystem.concept";
-
-  }
-
-  }
-
-    @Block()
-    public static class ConceptDefinitionDesignationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The language this designation is defined for.
-         */
-        @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Human language of the designation", formalDefinition="The language this designation is defined for." )
-        protected CodeType language;
-
-        /**
-         * A code that details how this designation would be used.
-         */
-        @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Details how this designation would be used", formalDefinition="A code that details how this designation would be used." )
-        protected Coding use;
-
-        /**
-         * The text value for this designation.
-         */
-        @Child(name = "value", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The text value for this designation", formalDefinition="The text value for this designation." )
-        protected StringType value;
-
-        private static final long serialVersionUID = 1515662414L;
-
-    /**
-     * Constructor
-     */
-      public ConceptDefinitionDesignationComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ConceptDefinitionDesignationComponent(StringType value) {
-        super();
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #language} (The language this designation is defined for.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
-         */
-        public CodeType getLanguageElement() { 
-          if (this.language == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionDesignationComponent.language");
-            else if (Configuration.doAutoCreate())
-              this.language = new CodeType(); // bb
-          return this.language;
-        }
-
-        public boolean hasLanguageElement() { 
-          return this.language != null && !this.language.isEmpty();
-        }
-
-        public boolean hasLanguage() { 
-          return this.language != null && !this.language.isEmpty();
-        }
-
-        /**
-         * @param value {@link #language} (The language this designation is defined for.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
-         */
-        public ConceptDefinitionDesignationComponent setLanguageElement(CodeType value) { 
-          this.language = value;
-          return this;
-        }
-
-        /**
-         * @return The language this designation is defined for.
-         */
-        public String getLanguage() { 
-          return this.language == null ? null : this.language.getValue();
-        }
-
-        /**
-         * @param value The language this designation is defined for.
-         */
-        public ConceptDefinitionDesignationComponent setLanguage(String value) { 
-          if (Utilities.noString(value))
-            this.language = null;
-          else {
-            if (this.language == null)
-              this.language = new CodeType();
-            this.language.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #use} (A code that details how this designation would be used.)
-         */
-        public Coding getUse() { 
-          if (this.use == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionDesignationComponent.use");
-            else if (Configuration.doAutoCreate())
-              this.use = new Coding(); // cc
-          return this.use;
-        }
-
-        public boolean hasUse() { 
-          return this.use != null && !this.use.isEmpty();
-        }
-
-        /**
-         * @param value {@link #use} (A code that details how this designation would be used.)
-         */
-        public ConceptDefinitionDesignationComponent setUse(Coding value) { 
-          this.use = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The text value for this designation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public StringType getValueElement() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionDesignationComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new StringType(); // bb
-          return this.value;
-        }
-
-        public boolean hasValueElement() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The text value for this designation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public ConceptDefinitionDesignationComponent setValueElement(StringType value) { 
-          this.value = value;
-          return this;
-        }
-
-        /**
-         * @return The text value for this designation.
-         */
-        public String getValue() { 
-          return this.value == null ? null : this.value.getValue();
-        }
-
-        /**
-         * @param value The text value for this designation.
-         */
-        public ConceptDefinitionDesignationComponent setValue(String value) { 
-            if (this.value == null)
-              this.value = new StringType();
-            this.value.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "A code that details how this designation would be used.", 0, java.lang.Integer.MAX_VALUE, use));
-          childrenList.add(new Property("value", "string", "The text value for this designation.", 0, java.lang.Integer.MAX_VALUE, value));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("language"))
-          this.language = castToCode(value); // CodeType
-        else if (name.equals("use"))
-          this.use = castToCoding(value); // Coding
-        else if (name.equals("value"))
-          this.value = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("language")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.language");
-        }
-        else if (name.equals("use")) {
-          this.use = new Coding();
-          return this.use;
-        }
-        else if (name.equals("value")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.value");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ConceptDefinitionDesignationComponent copy() {
-        ConceptDefinitionDesignationComponent dst = new ConceptDefinitionDesignationComponent();
-        copyValues(dst);
-        dst.language = language == null ? null : language.copy();
-        dst.use = use == null ? null : use.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ConceptDefinitionDesignationComponent))
-          return false;
-        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other;
-        return compareDeep(language, o.language, true) && compareDeep(use, o.use, true) && compareDeep(value, o.value, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ConceptDefinitionDesignationComponent))
-          return false;
-        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other;
-        return compareValues(language, o.language, true) && compareValues(value, o.value, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (language == null || language.isEmpty()) && (use == null || use.isEmpty())
-           && (value == null || value.isEmpty());
-      }
-
-  public String fhirType() {
-    return "ValueSet.codeSystem.concept.designation";
 
   }
 
@@ -1618,8 +627,7 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (import_ == null || import_.isEmpty()) && (include == null || include.isEmpty())
-           && (exclude == null || exclude.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( import_,  include,  exclude);
       }
 
   public String fhirType() {
@@ -1930,8 +938,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (system == null || system.isEmpty()) && (version == null || version.isEmpty())
-           && (concept == null || concept.isEmpty()) && (filter == null || filter.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( system,  version,  concept,  filter
+          );
       }
 
   public String fhirType() {
@@ -1960,11 +968,11 @@ public class ValueSet extends DomainResource {
         /**
          * Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.
          */
-        @Child(name = "designation", type = {ConceptDefinitionDesignationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "designation", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Additional representations for this valueset", formalDefinition="Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc." )
-        protected List<ConceptDefinitionDesignationComponent> designation;
+        protected List<ConceptReferenceDesignationComponent> designation;
 
-        private static final long serialVersionUID = -1513912691L;
+        private static final long serialVersionUID = 260579971L;
 
     /**
      * Constructor
@@ -2078,16 +1086,16 @@ public class ValueSet extends DomainResource {
         /**
          * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
-        public List<ConceptDefinitionDesignationComponent> getDesignation() { 
+        public List<ConceptReferenceDesignationComponent> getDesignation() { 
           if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
+            this.designation = new ArrayList<ConceptReferenceDesignationComponent>();
           return this.designation;
         }
 
         public boolean hasDesignation() { 
           if (this.designation == null)
             return false;
-          for (ConceptDefinitionDesignationComponent item : this.designation)
+          for (ConceptReferenceDesignationComponent item : this.designation)
             if (!item.isEmpty())
               return true;
           return false;
@@ -2097,20 +1105,20 @@ public class ValueSet extends DomainResource {
          * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
     // syntactic sugar
-        public ConceptDefinitionDesignationComponent addDesignation() { //3
-          ConceptDefinitionDesignationComponent t = new ConceptDefinitionDesignationComponent();
+        public ConceptReferenceDesignationComponent addDesignation() { //3
+          ConceptReferenceDesignationComponent t = new ConceptReferenceDesignationComponent();
           if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
+            this.designation = new ArrayList<ConceptReferenceDesignationComponent>();
           this.designation.add(t);
           return t;
         }
 
     // syntactic sugar
-        public ConceptReferenceComponent addDesignation(ConceptDefinitionDesignationComponent t) { //3
+        public ConceptReferenceComponent addDesignation(ConceptReferenceDesignationComponent t) { //3
           if (t == null)
             return this;
           if (this.designation == null)
-            this.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
+            this.designation = new ArrayList<ConceptReferenceDesignationComponent>();
           this.designation.add(t);
           return this;
         }
@@ -2119,7 +1127,7 @@ public class ValueSet extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Specifies a code for the concept to be included or excluded.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("display", "string", "The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("designation", "@ValueSet.codeSystem.concept.designation", "Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
+          childrenList.add(new Property("designation", "", "Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
         }
 
       @Override
@@ -2129,7 +1137,7 @@ public class ValueSet extends DomainResource {
         else if (name.equals("display"))
           this.display = castToString(value); // StringType
         else if (name.equals("designation"))
-          this.getDesignation().add((ConceptDefinitionDesignationComponent) value);
+          this.getDesignation().add((ConceptReferenceDesignationComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -2155,8 +1163,8 @@ public class ValueSet extends DomainResource {
         dst.code = code == null ? null : code.copy();
         dst.display = display == null ? null : display.copy();
         if (designation != null) {
-          dst.designation = new ArrayList<ConceptDefinitionDesignationComponent>();
-          for (ConceptDefinitionDesignationComponent i : designation)
+          dst.designation = new ArrayList<ConceptReferenceDesignationComponent>();
+          for (ConceptReferenceDesignationComponent i : designation)
             dst.designation.add(i.copy());
         };
         return dst;
@@ -2184,12 +1192,245 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (display == null || display.isEmpty())
-           && (designation == null || designation.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  display,  designation);
       }
 
   public String fhirType() {
     return "ValueSet.compose.include.concept";
+
+  }
+
+  }
+
+    @Block()
+    public static class ConceptReferenceDesignationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The language this designation is defined for.
+         */
+        @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Human language of the designation", formalDefinition="The language this designation is defined for." )
+        protected CodeType language;
+
+        /**
+         * A code that details how this designation would be used.
+         */
+        @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Details how this designation would be used", formalDefinition="A code that details how this designation would be used." )
+        protected Coding use;
+
+        /**
+         * The text value for this designation.
+         */
+        @Child(name = "value", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The text value for this designation", formalDefinition="The text value for this designation." )
+        protected StringType value;
+
+        private static final long serialVersionUID = 1515662414L;
+
+    /**
+     * Constructor
+     */
+      public ConceptReferenceDesignationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ConceptReferenceDesignationComponent(StringType value) {
+        super();
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #language} (The language this designation is defined for.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public CodeType getLanguageElement() { 
+          if (this.language == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptReferenceDesignationComponent.language");
+            else if (Configuration.doAutoCreate())
+              this.language = new CodeType(); // bb
+          return this.language;
+        }
+
+        public boolean hasLanguageElement() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        public boolean hasLanguage() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        /**
+         * @param value {@link #language} (The language this designation is defined for.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public ConceptReferenceDesignationComponent setLanguageElement(CodeType value) { 
+          this.language = value;
+          return this;
+        }
+
+        /**
+         * @return The language this designation is defined for.
+         */
+        public String getLanguage() { 
+          return this.language == null ? null : this.language.getValue();
+        }
+
+        /**
+         * @param value The language this designation is defined for.
+         */
+        public ConceptReferenceDesignationComponent setLanguage(String value) { 
+          if (Utilities.noString(value))
+            this.language = null;
+          else {
+            if (this.language == null)
+              this.language = new CodeType();
+            this.language.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #use} (A code that details how this designation would be used.)
+         */
+        public Coding getUse() { 
+          if (this.use == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptReferenceDesignationComponent.use");
+            else if (Configuration.doAutoCreate())
+              this.use = new Coding(); // cc
+          return this.use;
+        }
+
+        public boolean hasUse() { 
+          return this.use != null && !this.use.isEmpty();
+        }
+
+        /**
+         * @param value {@link #use} (A code that details how this designation would be used.)
+         */
+        public ConceptReferenceDesignationComponent setUse(Coding value) { 
+          this.use = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The text value for this designation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptReferenceDesignationComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The text value for this designation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public ConceptReferenceDesignationComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return The text value for this designation.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value The text value for this designation.
+         */
+        public ConceptReferenceDesignationComponent setValue(String value) { 
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
+          childrenList.add(new Property("use", "Coding", "A code that details how this designation would be used.", 0, java.lang.Integer.MAX_VALUE, use));
+          childrenList.add(new Property("value", "string", "The text value for this designation.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language"))
+          this.language = castToCode(value); // CodeType
+        else if (name.equals("use"))
+          this.use = castToCoding(value); // Coding
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.language");
+        }
+        else if (name.equals("use")) {
+          this.use = new Coding();
+          return this.use;
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ConceptReferenceDesignationComponent copy() {
+        ConceptReferenceDesignationComponent dst = new ConceptReferenceDesignationComponent();
+        copyValues(dst);
+        dst.language = language == null ? null : language.copy();
+        dst.use = use == null ? null : use.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ConceptReferenceDesignationComponent))
+          return false;
+        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other;
+        return compareDeep(language, o.language, true) && compareDeep(use, o.use, true) && compareDeep(value, o.value, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ConceptReferenceDesignationComponent))
+          return false;
+        ConceptReferenceDesignationComponent o = (ConceptReferenceDesignationComponent) other;
+        return compareValues(language, o.language, true) && compareValues(value, o.value, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( language,  use,  value);
+      }
+
+  public String fhirType() {
+    return "ValueSet.compose.include.concept.designation";
 
   }
 
@@ -2438,8 +1679,7 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (property == null || property.isEmpty()) && (op == null || op.isEmpty())
-           && (value == null || value.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( property,  op,  value);
       }
 
   public String fhirType() {
@@ -2867,9 +2107,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (timestamp == null || timestamp.isEmpty())
-           && (total == null || total.isEmpty()) && (offset == null || offset.isEmpty()) && (parameter == null || parameter.isEmpty())
-           && (contains == null || contains.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  timestamp,  total
+          ,  offset,  parameter,  contains);
       }
 
   public String fhirType() {
@@ -3132,8 +2371,7 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
       }
 
   public String fhirType() {
@@ -3569,9 +2807,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (system == null || system.isEmpty()) && (abstract_ == null || abstract_.isEmpty())
-           && (version == null || version.isEmpty()) && (code == null || code.isEmpty()) && (display == null || display.isEmpty())
-           && (contains == null || contains.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( system,  abstract_,  version,  code
+          ,  display,  contains);
       }
 
   public String fhirType() {
@@ -3694,27 +2931,20 @@ public class ValueSet extends DomainResource {
     protected BooleanType extensible;
 
     /**
-     * A definition of a code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to its (codeSystem.system) directly.
-     */
-    @Child(name = "codeSystem", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="An inline code system, which is part of this value set", formalDefinition="A definition of a code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to its (codeSystem.system) directly." )
-    protected ValueSetCodeSystemComponent codeSystem;
-
-    /**
      * A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.
      */
-    @Child(name = "compose", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "compose", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When value set includes codes from elsewhere", formalDefinition="A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set." )
     protected ValueSetComposeComponent compose;
 
     /**
      * A value set can also be "expanded", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.
      */
-    @Child(name = "expansion", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expansion", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Used when the value set is \"expanded\"", formalDefinition="A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
-    private static final long serialVersionUID = -467533312L;
+    private static final long serialVersionUID = 1847545818L;
 
   /**
    * Constructor
@@ -4457,30 +3687,6 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #codeSystem} (A definition of a code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to its (codeSystem.system) directly.)
-     */
-    public ValueSetCodeSystemComponent getCodeSystem() { 
-      if (this.codeSystem == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.codeSystem");
-        else if (Configuration.doAutoCreate())
-          this.codeSystem = new ValueSetCodeSystemComponent(); // cc
-      return this.codeSystem;
-    }
-
-    public boolean hasCodeSystem() { 
-      return this.codeSystem != null && !this.codeSystem.isEmpty();
-    }
-
-    /**
-     * @param value {@link #codeSystem} (A definition of a code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to its (codeSystem.system) directly.)
-     */
-    public ValueSet setCodeSystem(ValueSetCodeSystemComponent value) { 
-      this.codeSystem = value;
-      return this;
-    }
-
-    /**
      * @return {@link #compose} (A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.)
      */
     public ValueSetComposeComponent getCompose() { 
@@ -4546,7 +3752,6 @@ public class ValueSet extends DomainResource {
         childrenList.add(new Property("requirements", "string", "Explains why this value set is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("extensible", "boolean", "Whether this is intended to be used with an extensible binding or not.", 0, java.lang.Integer.MAX_VALUE, extensible));
-        childrenList.add(new Property("codeSystem", "", "A definition of a code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to its (codeSystem.system) directly.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
         childrenList.add(new Property("compose", "", "A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.", 0, java.lang.Integer.MAX_VALUE, compose));
         childrenList.add(new Property("expansion", "", "A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.", 0, java.lang.Integer.MAX_VALUE, expansion));
       }
@@ -4585,8 +3790,6 @@ public class ValueSet extends DomainResource {
           this.copyright = castToString(value); // StringType
         else if (name.equals("extensible"))
           this.extensible = castToBoolean(value); // BooleanType
-        else if (name.equals("codeSystem"))
-          this.codeSystem = (ValueSetCodeSystemComponent) value; // ValueSetCodeSystemComponent
         else if (name.equals("compose"))
           this.compose = (ValueSetComposeComponent) value; // ValueSetComposeComponent
         else if (name.equals("expansion"))
@@ -4646,10 +3849,6 @@ public class ValueSet extends DomainResource {
         else if (name.equals("extensible")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.extensible");
         }
-        else if (name.equals("codeSystem")) {
-          this.codeSystem = new ValueSetCodeSystemComponent();
-          return this.codeSystem;
-        }
         else if (name.equals("compose")) {
           this.compose = new ValueSetComposeComponent();
           return this.compose;
@@ -4694,7 +3893,6 @@ public class ValueSet extends DomainResource {
         dst.requirements = requirements == null ? null : requirements.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.extensible = extensible == null ? null : extensible.copy();
-        dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
         dst.compose = compose == null ? null : compose.copy();
         dst.expansion = expansion == null ? null : expansion.copy();
         return dst;
@@ -4716,8 +3914,8 @@ public class ValueSet extends DomainResource {
            && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
            && compareDeep(lockedDate, o.lockedDate, true) && compareDeep(description, o.description, true)
            && compareDeep(useContext, o.useContext, true) && compareDeep(immutable, o.immutable, true) && compareDeep(requirements, o.requirements, true)
-           && compareDeep(copyright, o.copyright, true) && compareDeep(extensible, o.extensible, true) && compareDeep(codeSystem, o.codeSystem, true)
-           && compareDeep(compose, o.compose, true) && compareDeep(expansion, o.expansion, true);
+           && compareDeep(copyright, o.copyright, true) && compareDeep(extensible, o.extensible, true) && compareDeep(compose, o.compose, true)
+           && compareDeep(expansion, o.expansion, true);
       }
 
       @Override
@@ -4735,15 +3933,9 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (version == null || version.isEmpty()) && (name == null || name.isEmpty()) && (status == null || status.isEmpty())
-           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
-           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (lockedDate == null || lockedDate.isEmpty())
-           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
-           && (immutable == null || immutable.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (copyright == null || copyright.isEmpty()) && (extensible == null || extensible.isEmpty())
-           && (codeSystem == null || codeSystem.isEmpty()) && (compose == null || compose.isEmpty())
-           && (expansion == null || expansion.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  name
+          ,  status,  experimental,  publisher,  contact,  date,  lockedDate,  description,  useContext
+          ,  immutable,  requirements,  copyright,  extensible,  compose,  expansion);
       }
 
   @Override
@@ -4772,126 +3964,6 @@ public class ValueSet extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
-   * Search parameter: <b>identifier</b>
-   * <p>
-   * Description: <b>The identifier for the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.identifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
-   * <p>
-   * Description: <b>The identifier for the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.identifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>code</b>
-   * <p>
-   * Description: <b>A code defined in the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.codeSystem.concept.code</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="code", path="ValueSet.codeSystem.concept.code", description="A code defined in the value set", type="token" )
-  public static final String SP_CODE = "code";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>code</b>
-   * <p>
-   * Description: <b>A code defined in the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.codeSystem.concept.code</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
-
- /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>Text search in the description of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.description</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
-  public static final String SP_DESCRIPTION = "description";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
-   * <p>
-   * Description: <b>Text search in the description of the value set</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ValueSet.description</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
-   * Search parameter: <b>version</b>
-   * <p>
-   * Description: <b>The version identifier of the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.version</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
-  public static final String SP_VERSION = "version";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>version</b>
-   * <p>
-   * Description: <b>The version identifier of the value set</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ValueSet.version</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
-
- /**
-   * Search parameter: <b>url</b>
-   * <p>
-   * Description: <b>The logical URL for the value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.url</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri" )
-  public static final String SP_URL = "url";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>url</b>
-   * <p>
-   * Description: <b>The logical URL for the value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.url</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
-
- /**
-   * Search parameter: <b>expansion</b>
-   * <p>
-   * Description: <b>Uniquely identifies this expansion</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.expansion.identifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
-  public static final String SP_EXPANSION = "expansion";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>expansion</b>
-   * <p>
-   * Description: <b>Uniquely identifies this expansion</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.expansion.identifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam EXPANSION = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_EXPANSION);
-
- /**
    * Search parameter: <b>reference</b>
    * <p>
    * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
@@ -4912,24 +3984,24 @@ public class ValueSet extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam REFERENCE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_REFERENCE);
 
  /**
-   * Search parameter: <b>system</b>
+   * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>The system for any codes defined by this value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.codeSystem.system</b><br>
+   * Description: <b>The identifier for the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="system", path="ValueSet.codeSystem.system", description="The system for any codes defined by this value set", type="uri" )
-  public static final String SP_SYSTEM = "system";
+  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>system</b>
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>The system for any codes defined by this value set</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ValueSet.codeSystem.system</b><br>
+   * Description: <b>The identifier for the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam SYSTEM = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SYSTEM);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
    * Search parameter: <b>name</b>
@@ -4992,6 +4064,66 @@ public class ValueSet extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the value set</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ValueSet.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.version</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
+  public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the value set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ValueSet.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The logical URL for the value set</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri" )
+  public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The logical URL for the value set</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
    * Search parameter: <b>status</b>
    * <p>
    * Description: <b>The status of the value set</b><br>
@@ -5010,6 +4142,26 @@ public class ValueSet extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
+ /**
+   * Search parameter: <b>expansion</b>
+   * <p>
+   * Description: <b>Uniquely identifies this expansion</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.expansion.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
+  public static final String SP_EXPANSION = "expansion";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>expansion</b>
+   * <p>
+   * Description: <b>Uniquely identifies this expansion</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ValueSet.expansion.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam EXPANSION = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_EXPANSION);
 
 
 }

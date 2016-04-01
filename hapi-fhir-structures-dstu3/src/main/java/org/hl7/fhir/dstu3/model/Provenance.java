@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
  */
@@ -66,6 +65,10 @@ public class Provenance extends DomainResource {
          */
         SOURCE, 
         /**
+         * A derivation for which the entity is removed from accessibility usually through the use of the Delete operation.
+         */
+        REMOVAL, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -80,6 +83,8 @@ public class Provenance extends DomainResource {
           return QUOTATION;
         if ("source".equals(codeString))
           return SOURCE;
+        if ("removal".equals(codeString))
+          return REMOVAL;
         throw new FHIRException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
         public String toCode() {
@@ -88,6 +93,7 @@ public class Provenance extends DomainResource {
             case REVISION: return "revision";
             case QUOTATION: return "quotation";
             case SOURCE: return "source";
+            case REMOVAL: return "removal";
             default: return "?";
           }
         }
@@ -97,6 +103,7 @@ public class Provenance extends DomainResource {
             case REVISION: return "http://hl7.org/fhir/provenance-entity-role";
             case QUOTATION: return "http://hl7.org/fhir/provenance-entity-role";
             case SOURCE: return "http://hl7.org/fhir/provenance-entity-role";
+            case REMOVAL: return "http://hl7.org/fhir/provenance-entity-role";
             default: return "?";
           }
         }
@@ -106,6 +113,7 @@ public class Provenance extends DomainResource {
             case REVISION: return "A derivation for which the resulting entity is a revised version of some original.";
             case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.";
             case SOURCE: return "A primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic's study, without benefit from hindsight.";
+            case REMOVAL: return "A derivation for which the entity is removed from accessibility usually through the use of the Delete operation.";
             default: return "?";
           }
         }
@@ -115,6 +123,7 @@ public class Provenance extends DomainResource {
             case REVISION: return "Revision";
             case QUOTATION: return "Quotation";
             case SOURCE: return "Source";
+            case REMOVAL: return "Removal";
             default: return "?";
           }
         }
@@ -133,6 +142,8 @@ public class Provenance extends DomainResource {
           return ProvenanceEntityRole.QUOTATION;
         if ("source".equals(codeString))
           return ProvenanceEntityRole.SOURCE;
+        if ("removal".equals(codeString))
+          return ProvenanceEntityRole.REMOVAL;
         throw new IllegalArgumentException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
         public Enumeration<ProvenanceEntityRole> fromType(Base code) throws FHIRException {
@@ -149,6 +160,8 @@ public class Provenance extends DomainResource {
           return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.QUOTATION);
         if ("source".equals(codeString))
           return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.SOURCE);
+        if ("removal".equals(codeString))
+          return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.REMOVAL);
         throw new FHIRException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
     public String toCode(ProvenanceEntityRole code) {
@@ -160,6 +173,8 @@ public class Provenance extends DomainResource {
         return "quotation";
       if (code == ProvenanceEntityRole.SOURCE)
         return "source";
+      if (code == ProvenanceEntityRole.REMOVAL)
+        return "removal";
       return "?";
       }
     public String toSystem(ProvenanceEntityRole code) {
@@ -425,9 +440,8 @@ public class Provenance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (role == null || role.isEmpty()) && (actor == null || actor.isEmpty())
-           && (userId == null || userId.isEmpty()) && (relatedAgent == null || relatedAgent.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( role,  actor,  userId,  relatedAgent
+          );
       }
 
   public String fhirType() {
@@ -598,8 +612,7 @@ public class Provenance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  target);
       }
 
   public String fhirType() {
@@ -615,7 +628,7 @@ public class Provenance extends DomainResource {
          * How the entity was used during the activity.
          */
         @Child(name = "role", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="derivation | revision | quotation | source", formalDefinition="How the entity was used during the activity." )
+        @Description(shortDefinition="derivation | revision | quotation | source | removal", formalDefinition="How the entity was used during the activity." )
         protected Enumeration<ProvenanceEntityRole> role;
 
         /**
@@ -934,9 +947,8 @@ public class Provenance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (role == null || role.isEmpty()) && (type == null || type.isEmpty())
-           && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty()) && (agent == null || agent.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( role,  type,  reference,  display
+          ,  agent);
       }
 
   public String fhirType() {
@@ -1006,10 +1018,10 @@ public class Provenance extends DomainResource {
     protected List<UriType> policy;
 
     /**
-     * An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.
+     * An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.
      */
     @Child(name = "agent", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Agents involved in creating resource", formalDefinition="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility." )
+    @Description(shortDefinition="Actor involved", formalDefinition="An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place." )
     protected List<ProvenanceAgentComponent> agent;
 
     /**
@@ -1324,7 +1336,7 @@ public class Provenance extends DomainResource {
     }
 
     /**
-     * @return {@link #agent} (An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.)
+     * @return {@link #agent} (An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.)
      */
     public List<ProvenanceAgentComponent> getAgent() { 
       if (this.agent == null)
@@ -1342,7 +1354,7 @@ public class Provenance extends DomainResource {
     }
 
     /**
-     * @return {@link #agent} (An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.)
+     * @return {@link #agent} (An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.)
      */
     // syntactic sugar
     public ProvenanceAgentComponent addAgent() { //3
@@ -1452,7 +1464,7 @@ public class Provenance extends DomainResource {
         childrenList.add(new Property("activity", "Coding", "An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.", 0, java.lang.Integer.MAX_VALUE, activity));
         childrenList.add(new Property("location", "Reference(Location)", "Where the activity occurred, if relevant.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("policy", "uri", "Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.", 0, java.lang.Integer.MAX_VALUE, policy));
-        childrenList.add(new Property("agent", "", "An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.", 0, java.lang.Integer.MAX_VALUE, agent));
+        childrenList.add(new Property("agent", "", "An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
         childrenList.add(new Property("entity", "", "An entity used in this activity.", 0, java.lang.Integer.MAX_VALUE, entity));
         childrenList.add(new Property("signature", "Signature", "A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.", 0, java.lang.Integer.MAX_VALUE, signature));
       }
@@ -1595,10 +1607,8 @@ public class Provenance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (target == null || target.isEmpty()) && (period == null || period.isEmpty())
-           && (recorded == null || recorded.isEmpty()) && (reason == null || reason.isEmpty()) && (activity == null || activity.isEmpty())
-           && (location == null || location.isEmpty()) && (policy == null || policy.isEmpty()) && (agent == null || agent.isEmpty())
-           && (entity == null || entity.isEmpty()) && (signature == null || signature.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( target,  period,  recorded,  reason
+          ,  activity,  location,  policy,  agent,  entity,  signature);
       }
 
   @Override
@@ -1607,24 +1617,44 @@ public class Provenance extends DomainResource {
    }
 
  /**
-   * Search parameter: <b>sigtype</b>
+   * Search parameter: <b>sig</b>
    * <p>
    * Description: <b>Indication of the reason the entity signed the object(s)</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Provenance.signature.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sigtype", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token" )
-  public static final String SP_SIGTYPE = "sigtype";
+  @SearchParamDefinition(name="sig", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token" )
+  public static final String SP_SIG = "sig";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>sigtype</b>
+   * <b>Fluent Client</b> search parameter constant for <b>sig</b>
    * <p>
    * Description: <b>Indication of the reason the entity signed the object(s)</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Provenance.signature.type</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SIGTYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SIGTYPE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SIG = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SIG);
+
+ /**
+   * Search parameter: <b>entity-type</b>
+   * <p>
+   * Description: <b>The type of resource in this entity</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Provenance.entity.type</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="entity-type", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
+  public static final String SP_ENTITY_TYPE = "entity-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>entity-type</b>
+   * <p>
+   * Description: <b>The type of resource in this entity</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Provenance.entity.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ENTITY_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ENTITY_TYPE);
 
  /**
    * Search parameter: <b>agent</b>
@@ -1634,7 +1664,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.agent.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference" )
+  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -1653,26 +1683,6 @@ public class Provenance extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AGENT = new ca.uhn.fhir.model.api.Include("Provenance:agent").toLocked();
 
  /**
-   * Search parameter: <b>entitytype</b>
-   * <p>
-   * Description: <b>The type of resource in this entity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.entity.type</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="entitytype", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
-  public static final String SP_ENTITYTYPE = "entitytype";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>entitytype</b>
-   * <p>
-   * Description: <b>The type of resource in this entity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.entity.type</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ENTITYTYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ENTITYTYPE);
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Target Reference(s) (usually version specific)</b><br>
@@ -1680,7 +1690,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
+  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

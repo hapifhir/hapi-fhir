@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -219,8 +218,7 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (reason == null || reason.isEmpty()) && (reasonNotGiven == null || reasonNotGiven.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( reason,  reasonNotGiven);
       }
 
   public String fhirType() {
@@ -471,8 +469,7 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (date == null || date.isEmpty()) && (detail == null || detail.isEmpty())
-           && (reported == null || reported.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( date,  detail,  reported);
       }
 
   public String fhirType() {
@@ -993,10 +990,8 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (doseSequence == null || doseSequence.isEmpty()) && (description == null || description.isEmpty())
-           && (authority == null || authority.isEmpty()) && (series == null || series.isEmpty()) && (seriesDoses == null || seriesDoses.isEmpty())
-           && (targetDisease == null || targetDisease.isEmpty()) && (doseStatus == null || doseStatus.isEmpty())
-           && (doseStatusReason == null || doseStatusReason.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( doseSequence,  description,  authority
+          ,  series,  seriesDoses,  targetDisease,  doseStatus,  doseStatusReason);
       }
 
   public String fhirType() {
@@ -2265,16 +2260,10 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (date == null || date.isEmpty()) && (vaccineCode == null || vaccineCode.isEmpty()) && (patient == null || patient.isEmpty())
-           && (wasNotGiven == null || wasNotGiven.isEmpty()) && (reported == null || reported.isEmpty())
-           && (performer == null || performer.isEmpty()) && (requester == null || requester.isEmpty())
-           && (encounter == null || encounter.isEmpty()) && (manufacturer == null || manufacturer.isEmpty())
-           && (location == null || location.isEmpty()) && (lotNumber == null || lotNumber.isEmpty())
-           && (expirationDate == null || expirationDate.isEmpty()) && (site == null || site.isEmpty())
-           && (route == null || route.isEmpty()) && (doseQuantity == null || doseQuantity.isEmpty())
-           && (note == null || note.isEmpty()) && (explanation == null || explanation.isEmpty()) && (reaction == null || reaction.isEmpty())
-           && (vaccinationProtocol == null || vaccinationProtocol.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  date,  vaccineCode
+          ,  patient,  wasNotGiven,  reported,  performer,  requester,  encounter,  manufacturer,  location
+          ,  lotNumber,  expirationDate,  site,  route,  doseQuantity,  note,  explanation,  reaction
+          ,  vaccinationProtocol);
       }
 
   @Override
@@ -2310,7 +2299,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference" )
+  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -2376,7 +2365,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference" )
+  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2514,7 +2503,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference" )
+  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

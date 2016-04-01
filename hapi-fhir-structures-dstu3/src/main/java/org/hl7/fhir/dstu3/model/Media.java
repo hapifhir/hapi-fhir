@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
@@ -883,11 +882,8 @@ public class Media extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (subtype == null || subtype.isEmpty()) && (view == null || view.isEmpty()) && (subject == null || subject.isEmpty())
-           && (operator == null || operator.isEmpty()) && (deviceName == null || deviceName.isEmpty())
-           && (height == null || height.isEmpty()) && (width == null || width.isEmpty()) && (frames == null || frames.isEmpty())
-           && (duration == null || duration.isEmpty()) && (content == null || content.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  type,  subtype,  view
+          ,  subject,  operator,  deviceName,  height,  width,  frames,  duration,  content);
       }
 
   @Override
@@ -983,7 +979,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
+  @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1055,7 +1051,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.operator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference" )
+  @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_OPERATOR = "operator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>operator</b>

@@ -29,23 +29,21 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
- * A code system specifies a set of codes drawn from one or more code systems.
+ * A code system resource specifies a set of codes drawn from one or more code systems.
  */
 @ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/Profile/CodeSystem")
 public class CodeSystem extends DomainResource {
@@ -187,6 +185,14 @@ public class CodeSystem extends DomainResource {
          */
         INTEGER, 
         /**
+         * The property value is a boolean true | false
+         */
+        BOOLEAN, 
+        /**
+         * The property is a date or a date + time
+         */
+        DATETIME, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -201,6 +207,10 @@ public class CodeSystem extends DomainResource {
           return STRING;
         if ("integer".equals(codeString))
           return INTEGER;
+        if ("boolean".equals(codeString))
+          return BOOLEAN;
+        if ("dateTime".equals(codeString))
+          return DATETIME;
         throw new FHIRException("Unknown PropertyType code '"+codeString+"'");
         }
         public String toCode() {
@@ -209,6 +219,8 @@ public class CodeSystem extends DomainResource {
             case CODING: return "Coding";
             case STRING: return "string";
             case INTEGER: return "integer";
+            case BOOLEAN: return "boolean";
+            case DATETIME: return "dateTime";
             default: return "?";
           }
         }
@@ -218,6 +230,8 @@ public class CodeSystem extends DomainResource {
             case CODING: return "http://hl7.org/fhir/concept-property-type";
             case STRING: return "http://hl7.org/fhir/concept-property-type";
             case INTEGER: return "http://hl7.org/fhir/concept-property-type";
+            case BOOLEAN: return "http://hl7.org/fhir/concept-property-type";
+            case DATETIME: return "http://hl7.org/fhir/concept-property-type";
             default: return "?";
           }
         }
@@ -227,6 +241,8 @@ public class CodeSystem extends DomainResource {
             case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent";
             case STRING: return "The property value is a string";
             case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments)";
+            case BOOLEAN: return "The property value is a boolean true | false";
+            case DATETIME: return "The property is a date or a date + time";
             default: return "?";
           }
         }
@@ -236,6 +252,8 @@ public class CodeSystem extends DomainResource {
             case CODING: return "Coding (external reference)";
             case STRING: return "string";
             case INTEGER: return "integer";
+            case BOOLEAN: return "boolean";
+            case DATETIME: return "dateTime";
             default: return "?";
           }
         }
@@ -254,6 +272,10 @@ public class CodeSystem extends DomainResource {
           return PropertyType.STRING;
         if ("integer".equals(codeString))
           return PropertyType.INTEGER;
+        if ("boolean".equals(codeString))
+          return PropertyType.BOOLEAN;
+        if ("dateTime".equals(codeString))
+          return PropertyType.DATETIME;
         throw new IllegalArgumentException("Unknown PropertyType code '"+codeString+"'");
         }
         public Enumeration<PropertyType> fromType(Base code) throws FHIRException {
@@ -270,6 +292,10 @@ public class CodeSystem extends DomainResource {
           return new Enumeration<PropertyType>(this, PropertyType.STRING);
         if ("integer".equals(codeString))
           return new Enumeration<PropertyType>(this, PropertyType.INTEGER);
+        if ("boolean".equals(codeString))
+          return new Enumeration<PropertyType>(this, PropertyType.BOOLEAN);
+        if ("dateTime".equals(codeString))
+          return new Enumeration<PropertyType>(this, PropertyType.DATETIME);
         throw new FHIRException("Unknown PropertyType code '"+codeString+"'");
         }
     public String toCode(PropertyType code) {
@@ -281,6 +307,10 @@ public class CodeSystem extends DomainResource {
         return "string";
       if (code == PropertyType.INTEGER)
         return "integer";
+      if (code == PropertyType.BOOLEAN)
+        return "boolean";
+      if (code == PropertyType.DATETIME)
+        return "dateTime";
       return "?";
       }
     public String toSystem(PropertyType code) {
@@ -463,8 +493,7 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
       }
 
   public String fhirType() {
@@ -792,8 +821,8 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (description == null || description.isEmpty())
-           && (operator == null || operator.isEmpty()) && (value == null || value.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  description,  operator,  value
+          );
       }
 
   public String fhirType() {
@@ -823,7 +852,7 @@ public class CodeSystem extends DomainResource {
          * The type of the property value.
          */
         @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="code | Coding | string | integer", formalDefinition="The type of the property value." )
+        @Description(shortDefinition="code | Coding | string | integer | boolean | dateTime", formalDefinition="The type of the property value." )
         protected Enumeration<PropertyType> type;
 
         private static final long serialVersionUID = -1346176181L;
@@ -1049,8 +1078,7 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (description == null || description.isEmpty())
-           && (type == null || type.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  description,  type);
       }
 
   public String fhirType() {
@@ -1484,9 +1512,8 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (display == null || display.isEmpty())
-           && (definition == null || definition.isEmpty()) && (designation == null || designation.isEmpty())
-           && (property == null || property.isEmpty()) && (concept == null || concept.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  display,  definition,  designation
+          ,  property,  concept);
       }
 
   public String fhirType() {
@@ -1720,8 +1747,7 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (language == null || language.isEmpty()) && (use == null || use.isEmpty())
-           && (value == null || value.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( language,  use,  value);
       }
 
   public String fhirType() {
@@ -1743,7 +1769,7 @@ public class CodeSystem extends DomainResource {
         /**
          * The value of this property.
          */
-        @Child(name = "value", type = {CodeType.class, Coding.class, StringType.class, IntegerType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {CodeType.class, Coding.class, StringType.class, IntegerType.class, BooleanType.class, DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value of the property for this concept", formalDefinition="The value of this property." )
         protected Type value;
 
@@ -1869,6 +1895,32 @@ public class CodeSystem extends DomainResource {
           return this.value instanceof IntegerType;
         }
 
+        /**
+         * @return {@link #value} (The value of this property.)
+         */
+        public BooleanType getValueBooleanType() throws FHIRException { 
+          if (!(this.value instanceof BooleanType))
+            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
+          return (BooleanType) this.value;
+        }
+
+        public boolean hasValueBooleanType() { 
+          return this.value instanceof BooleanType;
+        }
+
+        /**
+         * @return {@link #value} (The value of this property.)
+         */
+        public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (!(this.value instanceof DateTimeType))
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+          return (DateTimeType) this.value;
+        }
+
+        public boolean hasValueDateTimeType() { 
+          return this.value instanceof DateTimeType;
+        }
+
         public boolean hasValue() { 
           return this.value != null && !this.value.isEmpty();
         }
@@ -1884,7 +1936,7 @@ public class CodeSystem extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "A code that is a reference to CodeSystem.property.code.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("value[x]", "code|Coding|string|integer", "The value of this property.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
@@ -1916,6 +1968,14 @@ public class CodeSystem extends DomainResource {
         }
         else if (name.equals("valueInteger")) {
           this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
           return this.value;
         }
         else
@@ -1951,8 +2011,7 @@ public class CodeSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  value);
       }
 
   public String fhirType() {
@@ -2061,55 +2120,62 @@ public class CodeSystem extends DomainResource {
     protected BooleanType caseSensitive;
 
     /**
+     * Canonical URL of value set that contains the entire code system.
+     */
+    @Child(name = "valueSet", type = {UriType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Canonical URL for value set with entire code system", formalDefinition="Canonical URL of value set that contains the entire code system." )
+    protected UriType valueSet;
+
+    /**
      * True If code system defines a post-composition grammar.
      */
-    @Child(name = "compositional", type = {BooleanType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "compositional", type = {BooleanType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If code system defines a post-composition grammar", formalDefinition="True If code system defines a post-composition grammar." )
     protected BooleanType compositional;
 
     /**
      * This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.
      */
-    @Child(name = "versionNeeded", type = {BooleanType.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "versionNeeded", type = {BooleanType.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If definitions are not stable", formalDefinition="This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system." )
     protected BooleanType versionNeeded;
 
     /**
      * How much of the content of the code system - the concepts and codes it defines - are represented in this resource.
      */
-    @Child(name = "content", type = {CodeType.class}, order=16, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "content", type = {CodeType.class}, order=17, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="not-present | examplar | fragment | complete", formalDefinition="How much of the content of the code system - the concepts and codes it defines - are represented in this resource." )
     protected Enumeration<CodeSystemContentMode> content;
 
     /**
      * The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.
      */
-    @Child(name = "count", type = {UnsignedIntType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "count", type = {UnsignedIntType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Total concepts in the code system", formalDefinition="The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts." )
     protected UnsignedIntType count;
 
     /**
      * A filter that can be used in a value set compose statement when selecting concepts using a filter.
      */
-    @Child(name = "filter", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "filter", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Filter that can be used in a value set", formalDefinition="A filter that can be used in a value set compose statement when selecting concepts using a filter." )
     protected List<CodeSystemFilterComponent> filter;
 
     /**
      * A property defines an additional slot through which additional information can be provided about a concept.
      */
-    @Child(name = "property", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "property", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Additional information supplied about each concept", formalDefinition="A property defines an additional slot through which additional information can be provided about a concept." )
     protected List<CodeSystemPropertyComponent> property;
 
     /**
      * Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.
      */
-    @Child(name = "concept", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "concept", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are." )
     protected List<ConceptDefinitionComponent> concept;
 
-    private static final long serialVersionUID = 331143159L;
+    private static final long serialVersionUID = 1466696062L;
 
   /**
    * Constructor
@@ -2759,6 +2825,55 @@ public class CodeSystem extends DomainResource {
     }
 
     /**
+     * @return {@link #valueSet} (Canonical URL of value set that contains the entire code system.). This is the underlying object with id, value and extensions. The accessor "getValueSet" gives direct access to the value
+     */
+    public UriType getValueSetElement() { 
+      if (this.valueSet == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CodeSystem.valueSet");
+        else if (Configuration.doAutoCreate())
+          this.valueSet = new UriType(); // bb
+      return this.valueSet;
+    }
+
+    public boolean hasValueSetElement() { 
+      return this.valueSet != null && !this.valueSet.isEmpty();
+    }
+
+    public boolean hasValueSet() { 
+      return this.valueSet != null && !this.valueSet.isEmpty();
+    }
+
+    /**
+     * @param value {@link #valueSet} (Canonical URL of value set that contains the entire code system.). This is the underlying object with id, value and extensions. The accessor "getValueSet" gives direct access to the value
+     */
+    public CodeSystem setValueSetElement(UriType value) { 
+      this.valueSet = value;
+      return this;
+    }
+
+    /**
+     * @return Canonical URL of value set that contains the entire code system.
+     */
+    public String getValueSet() { 
+      return this.valueSet == null ? null : this.valueSet.getValue();
+    }
+
+    /**
+     * @param value Canonical URL of value set that contains the entire code system.
+     */
+    public CodeSystem setValueSet(String value) { 
+      if (Utilities.noString(value))
+        this.valueSet = null;
+      else {
+        if (this.valueSet == null)
+          this.valueSet = new UriType();
+        this.valueSet.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #compositional} (True If code system defines a post-composition grammar.). This is the underlying object with id, value and extensions. The accessor "getCompositional" gives direct access to the value
      */
     public BooleanType getCompositionalElement() { 
@@ -3074,6 +3189,7 @@ public class CodeSystem extends DomainResource {
         childrenList.add(new Property("requirements", "string", "Explains why this code system is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
+        childrenList.add(new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, java.lang.Integer.MAX_VALUE, valueSet));
         childrenList.add(new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, java.lang.Integer.MAX_VALUE, compositional));
         childrenList.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, java.lang.Integer.MAX_VALUE, versionNeeded));
         childrenList.add(new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, java.lang.Integer.MAX_VALUE, content));
@@ -3113,6 +3229,8 @@ public class CodeSystem extends DomainResource {
           this.copyright = castToString(value); // StringType
         else if (name.equals("caseSensitive"))
           this.caseSensitive = castToBoolean(value); // BooleanType
+        else if (name.equals("valueSet"))
+          this.valueSet = castToUri(value); // UriType
         else if (name.equals("compositional"))
           this.compositional = castToBoolean(value); // BooleanType
         else if (name.equals("versionNeeded"))
@@ -3176,6 +3294,9 @@ public class CodeSystem extends DomainResource {
         else if (name.equals("caseSensitive")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.caseSensitive");
         }
+        else if (name.equals("valueSet")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.valueSet");
+        }
         else if (name.equals("compositional")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.compositional");
         }
@@ -3231,6 +3352,7 @@ public class CodeSystem extends DomainResource {
         dst.requirements = requirements == null ? null : requirements.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.caseSensitive = caseSensitive == null ? null : caseSensitive.copy();
+        dst.valueSet = valueSet == null ? null : valueSet.copy();
         dst.compositional = compositional == null ? null : compositional.copy();
         dst.versionNeeded = versionNeeded == null ? null : versionNeeded.copy();
         dst.content = content == null ? null : content.copy();
@@ -3269,10 +3391,10 @@ public class CodeSystem extends DomainResource {
            && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
            && compareDeep(description, o.description, true) && compareDeep(useContext, o.useContext, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
-           && compareDeep(caseSensitive, o.caseSensitive, true) && compareDeep(compositional, o.compositional, true)
-           && compareDeep(versionNeeded, o.versionNeeded, true) && compareDeep(content, o.content, true) && compareDeep(count, o.count, true)
-           && compareDeep(filter, o.filter, true) && compareDeep(property, o.property, true) && compareDeep(concept, o.concept, true)
-          ;
+           && compareDeep(caseSensitive, o.caseSensitive, true) && compareDeep(valueSet, o.valueSet, true)
+           && compareDeep(compositional, o.compositional, true) && compareDeep(versionNeeded, o.versionNeeded, true)
+           && compareDeep(content, o.content, true) && compareDeep(count, o.count, true) && compareDeep(filter, o.filter, true)
+           && compareDeep(property, o.property, true) && compareDeep(concept, o.concept, true);
       }
 
       @Override
@@ -3286,20 +3408,16 @@ public class CodeSystem extends DomainResource {
            && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
            && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
            && compareValues(copyright, o.copyright, true) && compareValues(caseSensitive, o.caseSensitive, true)
-           && compareValues(compositional, o.compositional, true) && compareValues(versionNeeded, o.versionNeeded, true)
-           && compareValues(content, o.content, true) && compareValues(count, o.count, true);
+           && compareValues(valueSet, o.valueSet, true) && compareValues(compositional, o.compositional, true)
+           && compareValues(versionNeeded, o.versionNeeded, true) && compareValues(content, o.content, true) && compareValues(count, o.count, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (version == null || version.isEmpty()) && (name == null || name.isEmpty()) && (status == null || status.isEmpty())
-           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
-           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
-           && (useContext == null || useContext.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (copyright == null || copyright.isEmpty()) && (caseSensitive == null || caseSensitive.isEmpty())
-           && (compositional == null || compositional.isEmpty()) && (versionNeeded == null || versionNeeded.isEmpty())
-           && (content == null || content.isEmpty()) && (count == null || count.isEmpty()) && (filter == null || filter.isEmpty())
-           && (property == null || property.isEmpty()) && (concept == null || concept.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  name
+          ,  status,  experimental,  publisher,  contact,  date,  description,  useContext,  requirements
+          ,  copyright,  caseSensitive,  valueSet,  compositional,  versionNeeded,  content,  count,  filter
+          ,  property,  concept);
       }
 
   @Override
@@ -3466,6 +3584,26 @@ public class CodeSystem extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>language</b>
+   * <p>
+   * Description: <b>A language in which a designation is provided</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.concept.designation.language</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="language", path="CodeSystem.concept.designation.language", description="A language in which a designation is provided", type="token" )
+  public static final String SP_LANGUAGE = "language";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>language</b>
+   * <p>
+   * Description: <b>A language in which a designation is provided</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.concept.designation.language</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam LANGUAGE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_LANGUAGE);
 
  /**
    * Search parameter: <b>version</b>

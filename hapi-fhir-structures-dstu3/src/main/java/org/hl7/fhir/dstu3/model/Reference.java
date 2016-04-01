@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,9 +38,8 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A reference from one resource to another.
  */
@@ -100,6 +99,15 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
     /**
      * @return {@link #reference} (A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
      */
+    public StringType getReferenceElement_() { 
+      if (this.reference == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Reference.reference");
+        else if (Configuration.doAutoCreate())
+          this.reference = new StringType(); // bb
+      return this.reference;
+    }
+
     public boolean hasReferenceElement() { 
       return this.reference != null && !this.reference.isEmpty();
     }
@@ -268,8 +276,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( reference,  display);
       }
 
 

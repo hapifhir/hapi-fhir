@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
  */
@@ -93,7 +92,7 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value.
      */
-    @Child(name = "data", type = {StringType.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "data", type = {StringType.class}, order=6, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Decimal values with spaces, or \"E\" | \"U\" | \"L\"", formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value." )
     protected StringType data;
 
@@ -601,9 +600,8 @@ public class SampledData extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (origin == null || origin.isEmpty()) && (period == null || period.isEmpty())
-           && (factor == null || factor.isEmpty()) && (lowerLimit == null || lowerLimit.isEmpty()) && (upperLimit == null || upperLimit.isEmpty())
-           && (dimensions == null || dimensions.isEmpty()) && (data == null || data.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( origin,  period,  factor,  lowerLimit
+          ,  upperLimit,  dimensions,  data);
       }
 
 

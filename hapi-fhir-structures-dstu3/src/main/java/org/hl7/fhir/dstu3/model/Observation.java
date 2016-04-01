@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
@@ -58,7 +57,7 @@ public class Observation extends DomainResource {
          */
         PRELIMINARY, 
         /**
-         * The observation is complete and verified by an authorized person.
+         * The observation is complete and verified by an authorized person  (who may be the same person who entered the observation based on policy).
          */
         FINAL, 
         /**
@@ -128,7 +127,7 @@ public class Observation extends DomainResource {
           switch (this) {
             case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
             case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
-            case FINAL: return "The observation is complete and verified by an authorized person.";
+            case FINAL: return "The observation is complete and verified by an authorized person  (who may be the same person who entered the observation based on policy).";
             case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.";
@@ -640,9 +639,8 @@ public class Observation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (low == null || low.isEmpty()) && (high == null || high.isEmpty())
-           && (meaning == null || meaning.isEmpty()) && (age == null || age.isEmpty()) && (text == null || text.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( low,  high,  meaning,  age,  text
+          );
       }
 
   public String fhirType() {
@@ -836,8 +834,7 @@ public class Observation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  target);
       }
 
   public String fhirType() {
@@ -1246,9 +1243,8 @@ public class Observation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
-           && (dataAbsentReason == null || dataAbsentReason.isEmpty()) && (referenceRange == null || referenceRange.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  value,  dataAbsentReason
+          ,  referenceRange);
       }
 
   public String fhirType() {
@@ -1360,9 +1356,9 @@ public class Observation extends DomainResource {
     /**
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      */
-    @Child(name = "comments", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "comment", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Comments about result", formalDefinition="May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result." )
-    protected StringType comments;
+    protected StringType comment;
 
     /**
      * Indicates the site on the subject's body where the observation was made (i.e. the target site).
@@ -1423,7 +1419,7 @@ public class Observation extends DomainResource {
     @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations." )
     protected List<ObservationComponentComponent> component;
 
-    private static final long serialVersionUID = -931593572L;
+    private static final long serialVersionUID = -1812700333L;
 
   /**
    * Constructor
@@ -1998,50 +1994,50 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #comments} (May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+     * @return {@link #comment} (May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public StringType getCommentsElement() { 
-      if (this.comments == null)
+    public StringType getCommentElement() { 
+      if (this.comment == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Observation.comments");
+          throw new Error("Attempt to auto-create Observation.comment");
         else if (Configuration.doAutoCreate())
-          this.comments = new StringType(); // bb
-      return this.comments;
+          this.comment = new StringType(); // bb
+      return this.comment;
     }
 
-    public boolean hasCommentsElement() { 
-      return this.comments != null && !this.comments.isEmpty();
+    public boolean hasCommentElement() { 
+      return this.comment != null && !this.comment.isEmpty();
     }
 
-    public boolean hasComments() { 
-      return this.comments != null && !this.comments.isEmpty();
+    public boolean hasComment() { 
+      return this.comment != null && !this.comment.isEmpty();
     }
 
     /**
-     * @param value {@link #comments} (May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+     * @param value {@link #comment} (May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public Observation setCommentsElement(StringType value) { 
-      this.comments = value;
+    public Observation setCommentElement(StringType value) { 
+      this.comment = value;
       return this;
     }
 
     /**
      * @return May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      */
-    public String getComments() { 
-      return this.comments == null ? null : this.comments.getValue();
+    public String getComment() { 
+      return this.comment == null ? null : this.comment.getValue();
     }
 
     /**
      * @param value May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      */
-    public Observation setComments(String value) { 
+    public Observation setComment(String value) { 
       if (Utilities.noString(value))
-        this.comments = null;
+        this.comment = null;
       else {
-        if (this.comments == null)
-          this.comments = new StringType();
-        this.comments.setValue(value);
+        if (this.comment == null)
+          this.comment = new StringType();
+        this.comment.setValue(value);
       }
       return this;
     }
@@ -2311,7 +2307,7 @@ public class Observation extends DomainResource {
         childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
         childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, java.lang.Integer.MAX_VALUE, interpretation));
-        childrenList.add(new Property("comments", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comments));
+        childrenList.add(new Property("comment", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, java.lang.Integer.MAX_VALUE, specimen));
@@ -2347,8 +2343,8 @@ public class Observation extends DomainResource {
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("interpretation"))
           this.interpretation = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("comments"))
-          this.comments = castToString(value); // StringType
+        else if (name.equals("comment"))
+          this.comment = castToString(value); // StringType
         else if (name.equals("bodySite"))
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("method"))
@@ -2453,8 +2449,8 @@ public class Observation extends DomainResource {
           this.interpretation = new CodeableConcept();
           return this.interpretation;
         }
-        else if (name.equals("comments")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Observation.comments");
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.comment");
         }
         else if (name.equals("bodySite")) {
           this.bodySite = new CodeableConcept();
@@ -2513,7 +2509,7 @@ public class Observation extends DomainResource {
         dst.value = value == null ? null : value.copy();
         dst.dataAbsentReason = dataAbsentReason == null ? null : dataAbsentReason.copy();
         dst.interpretation = interpretation == null ? null : interpretation.copy();
-        dst.comments = comments == null ? null : comments.copy();
+        dst.comment = comment == null ? null : comment.copy();
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         dst.method = method == null ? null : method.copy();
         dst.specimen = specimen == null ? null : specimen.copy();
@@ -2551,7 +2547,7 @@ public class Observation extends DomainResource {
            && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true) && compareDeep(performer, o.performer, true)
            && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
-           && compareDeep(interpretation, o.interpretation, true) && compareDeep(comments, o.comments, true)
+           && compareDeep(interpretation, o.interpretation, true) && compareDeep(comment, o.comment, true)
            && compareDeep(bodySite, o.bodySite, true) && compareDeep(method, o.method, true) && compareDeep(specimen, o.specimen, true)
            && compareDeep(device, o.device, true) && compareDeep(referenceRange, o.referenceRange, true) && compareDeep(related, o.related, true)
            && compareDeep(component, o.component, true);
@@ -2564,19 +2560,14 @@ public class Observation extends DomainResource {
         if (!(other instanceof Observation))
           return false;
         Observation o = (Observation) other;
-        return compareValues(status, o.status, true) && compareValues(issued, o.issued, true) && compareValues(comments, o.comments, true)
+        return compareValues(status, o.status, true) && compareValues(issued, o.issued, true) && compareValues(comment, o.comment, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (category == null || category.isEmpty()) && (code == null || code.isEmpty()) && (subject == null || subject.isEmpty())
-           && (encounter == null || encounter.isEmpty()) && (effective == null || effective.isEmpty())
-           && (issued == null || issued.isEmpty()) && (performer == null || performer.isEmpty()) && (value == null || value.isEmpty())
-           && (dataAbsentReason == null || dataAbsentReason.isEmpty()) && (interpretation == null || interpretation.isEmpty())
-           && (comments == null || comments.isEmpty()) && (bodySite == null || bodySite.isEmpty()) && (method == null || method.isEmpty())
-           && (specimen == null || specimen.isEmpty()) && (device == null || device.isEmpty()) && (referenceRange == null || referenceRange.isEmpty())
-           && (related == null || related.isEmpty()) && (component == null || component.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  category
+          ,  code,  subject,  encounter,  effective,  issued,  performer,  value,  dataAbsentReason,  interpretation
+          ,  comment,  bodySite,  method,  specimen,  device,  referenceRange,  related,  component);
       }
 
   @Override
@@ -2632,7 +2623,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference" )
+  @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -3010,7 +3001,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference" )
+  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -3096,7 +3087,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference" )
+  @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -3228,7 +3219,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference" )
+  @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

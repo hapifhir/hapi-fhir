@@ -1,5 +1,36 @@
 package org.hl7.fhir.dstu3.model;
 
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 
 public class ResourceFactory extends Factory {
@@ -29,6 +60,10 @@ public class ResourceFactory extends Factory {
             return new Parameters();
         if ("Conformance".equals(name))
             return new Conformance();
+        if ("MeasureReport".equals(name))
+            return new MeasureReport();
+        if ("PractitionerRole".equals(name))
+            return new PractitionerRole();
         if ("RelatedPerson".equals(name))
             return new RelatedPerson();
         if ("SupplyRequest".equals(name))
@@ -53,6 +88,8 @@ public class ResourceFactory extends Factory {
             return new PaymentNotice();
         if ("Organization".equals(name))
             return new Organization();
+        if ("CareTeam".equals(name))
+            return new CareTeam();
         if ("ImplementationGuide".equals(name))
             return new ImplementationGuide();
         if ("ImagingStudy".equals(name))
@@ -85,6 +122,8 @@ public class ResourceFactory extends Factory {
             return new BodySite();
         if ("Provenance".equals(name))
             return new Provenance();
+        if ("Task".equals(name))
+            return new Task();
         if ("Questionnaire".equals(name))
             return new Questionnaire();
         if ("ExplanationOfBenefit".equals(name))
@@ -121,8 +160,6 @@ public class ResourceFactory extends Factory {
             return new VisionPrescription();
         if ("Media".equals(name))
             return new Media();
-        if ("ModuleMetadata".equals(name))
-            return new ModuleMetadata();
         if ("ProcedureRequest".equals(name))
             return new ProcedureRequest();
         if ("EligibilityResponse".equals(name))
@@ -139,6 +176,8 @@ public class ResourceFactory extends Factory {
             return new CodeSystem();
         if ("AppointmentResponse".equals(name))
             return new AppointmentResponse();
+        if ("StructureMap".equals(name))
+            return new StructureMap();
         if ("GuidanceResponse".equals(name))
             return new GuidanceResponse();
         if ("Observation".equals(name))
@@ -179,6 +218,8 @@ public class ResourceFactory extends Factory {
             return new NutritionOrder();
         if ("AuditEvent".equals(name))
             return new AuditEvent();
+        if ("ImagingExcerpt".equals(name))
+            return new ImagingExcerpt();
         if ("MedicationOrder".equals(name))
             return new MedicationOrder();
         if ("DecisionSupportRule".equals(name))
@@ -193,6 +234,8 @@ public class ResourceFactory extends Factory {
             return new DetectedIssue();
         if ("Bundle".equals(name))
             return new Bundle();
+        if ("CompartmentDefinition".equals(name))
+            return new CompartmentDefinition();
         if ("DiagnosticOrder".equals(name))
             return new DiagnosticOrder();
         if ("Patient".equals(name))
@@ -232,6 +275,10 @@ public class ResourceFactory extends Factory {
             return new Attachment();
         if ("Count".equals(name))
             return new Count();
+        if ("DataRequirement".equals(name))
+            return new DataRequirement();
+        if ("ActionDefinition".equals(name))
+            return new ActionDefinition();
         if ("Money".equals(name))
             return new Money();
         if ("HumanName".equals(name))
@@ -256,8 +303,12 @@ public class ResourceFactory extends Factory {
             return new Age();
         if ("Reference".equals(name))
             return new Reference();
+        if ("TriggerDefinition".equals(name))
+            return new TriggerDefinition();
         if ("SimpleQuantity".equals(name))
             return new SimpleQuantity();
+        if ("ModuleMetadata".equals(name))
+            return new ModuleMetadata();
         if ("Quantity".equals(name))
             return new Quantity();
         if ("Period".equals(name))
@@ -276,6 +327,8 @@ public class ResourceFactory extends Factory {
             return new Timing();
         if ("CodeableConcept".equals(name))
             return new CodeableConcept();
+        if ("ParameterDefinition".equals(name))
+            return new ParameterDefinition();
         else
             throw new FHIRException("Unknown Type Name '"+name+"'");
     }
