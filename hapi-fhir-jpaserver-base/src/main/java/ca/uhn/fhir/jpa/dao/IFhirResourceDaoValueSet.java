@@ -36,6 +36,8 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
 
+	void purgeCaches();
+
 	ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept);
 
 	public class LookupCodeResult {

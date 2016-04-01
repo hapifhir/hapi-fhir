@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Substance;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.term.ITerminologySvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -77,6 +79,16 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @ContextConfiguration(classes= {TestDstu3Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
+	
+	@After()
+	public void afterFlushCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainDstu3.flush();
+	}
+	
+	@Autowired
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired

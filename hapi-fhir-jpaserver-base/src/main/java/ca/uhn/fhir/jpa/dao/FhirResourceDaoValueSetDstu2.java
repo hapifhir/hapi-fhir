@@ -352,4 +352,9 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return null;
 	}
 
+	@Override
+	public void purgeCaches() {
+		// nothing
+	}
+
 }
