@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2016 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.util.Collection;
 import java.util.Set;
 
@@ -18,7 +38,7 @@ class Rule implements IAuthRule {
 	private String myClassifierCompartmentName;
 	private Collection<? extends IIdType> myClassifierCompartmentOwners;
 	private ClassifierTypeEnum myClassifierType;
-	private RuleModeEnum myMode;
+	private RuleVerdictEnum myMode;
 	private String myName;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
@@ -28,7 +48,7 @@ class Rule implements IAuthRule {
 	}
 
 	@Override
-	public RuleModeEnum applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	public RuleVerdictEnum applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		IBaseResource appliesTo;
@@ -42,9 +62,15 @@ class Rule implements IAuthRule {
 		case TRANSACTION:
 			return myMode;
 		case ALLOW_ALL:
-			return RuleModeEnum.ALLOW;
+			return RuleVerdictEnum.ALLOW;
 		case DENY_ALL:
-			return RuleModeEnum.DENY;
+			return RuleVerdictEnum.DENY;
+		case METADATA:
+			if (theOperation == RestOperationTypeEnum.METADATA) {
+				return myMode;
+			} else {
+				return RuleVerdictEnum.NO_DECISION;
+			}
 		default:
 			// Should not happen
 			throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
@@ -55,7 +81,7 @@ class Rule implements IAuthRule {
 			break;
 		case TYPES:
 			if (myAppliesToTypes.contains(appliesTo.getClass()) == false) {
-				return RuleModeEnum.NO_DECISION;
+				return RuleVerdictEnum.NO_DECISION;
 			}
 			break;
 		default:
@@ -75,7 +101,7 @@ class Rule implements IAuthRule {
 				}
 			}
 			if (!foundMatch) {
-				return RuleModeEnum.NO_DECISION;
+				return RuleVerdictEnum.NO_DECISION;
 			}
 			break;
 		default:
@@ -114,7 +140,7 @@ class Rule implements IAuthRule {
 		myClassifierType = theClassifierType;
 	}
 
-	public void setMode(RuleModeEnum theRuleMode) {
+	public void setMode(RuleVerdictEnum theRuleMode) {
 		myMode = theRuleMode;
 	}
 

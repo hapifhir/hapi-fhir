@@ -110,6 +110,74 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testMetadataAllow() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
+				theRuleBuilder.allow("Rule 1").metadata();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+	
+	@Test
+	public void testTransactionWriteGood() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
+				theRuleBuilder
+					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen();
+			}
+		});
+
+		
+		
+//		HttpGet httpGet;
+//		HttpResponse status;
+//		String response;
+//
+//		ourReturn = Arrays.asList(createPatient(2));
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+//		status = ourClient.execute(httpGet);
+//		extractResponseAndClose(status);
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testMetadataDeny() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+			@Override
+			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
+				theRuleBuilder.deny("Rule 1").metadata();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(401, status.getStatusLine().getStatusCode());
+	}
+	
+	@Test
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
