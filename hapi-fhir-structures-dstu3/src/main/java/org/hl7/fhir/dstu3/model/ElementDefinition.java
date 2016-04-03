@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Captures constraints on each element within the resource, profile, or extension.
  */
@@ -55,6 +53,18 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         XMLATTR, 
         /**
+         * This element is represented using the XML text attribute (primitives only)
+         */
+        XMLTEXT, 
+        /**
+         * The type of this element is indicated using xsi:type
+         */
+        TYPEATTR, 
+        /**
+         * Use CDA narrative instead of XHTML
+         */
+        CDATEXT, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -63,29 +73,47 @@ public class ElementDefinition extends Type implements ICompositeType {
                 return null;
         if ("xmlAttr".equals(codeString))
           return XMLATTR;
+        if ("xmlText".equals(codeString))
+          return XMLTEXT;
+        if ("typeAttr".equals(codeString))
+          return TYPEATTR;
+        if ("cdaText".equals(codeString))
+          return CDATEXT;
         throw new FHIRException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case XMLATTR: return "xmlAttr";
+            case XMLTEXT: return "xmlText";
+            case TYPEATTR: return "typeAttr";
+            case CDATEXT: return "cdaText";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
             case XMLATTR: return "http://hl7.org/fhir/property-representation";
+            case XMLTEXT: return "http://hl7.org/fhir/property-representation";
+            case TYPEATTR: return "http://hl7.org/fhir/property-representation";
+            case CDATEXT: return "http://hl7.org/fhir/property-representation";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case XMLATTR: return "In XML, this property is represented as an attribute not an element.";
+            case XMLTEXT: return "This element is represented using the XML text attribute (primitives only)";
+            case TYPEATTR: return "The type of this element is indicated using xsi:type";
+            case CDATEXT: return "Use CDA narrative instead of XHTML";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case XMLATTR: return "XML Attribute";
+            case XMLTEXT: return "XML Text";
+            case TYPEATTR: return "Type Attribute";
+            case CDATEXT: return "CDA Text Format";
             default: return "?";
           }
         }
@@ -98,6 +126,12 @@ public class ElementDefinition extends Type implements ICompositeType {
                 return null;
         if ("xmlAttr".equals(codeString))
           return PropertyRepresentation.XMLATTR;
+        if ("xmlText".equals(codeString))
+          return PropertyRepresentation.XMLTEXT;
+        if ("typeAttr".equals(codeString))
+          return PropertyRepresentation.TYPEATTR;
+        if ("cdaText".equals(codeString))
+          return PropertyRepresentation.CDATEXT;
         throw new IllegalArgumentException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
         public Enumeration<PropertyRepresentation> fromType(Base code) throws FHIRException {
@@ -108,11 +142,23 @@ public class ElementDefinition extends Type implements ICompositeType {
             return null;
         if ("xmlAttr".equals(codeString))
           return new Enumeration<PropertyRepresentation>(this, PropertyRepresentation.XMLATTR);
+        if ("xmlText".equals(codeString))
+          return new Enumeration<PropertyRepresentation>(this, PropertyRepresentation.XMLTEXT);
+        if ("typeAttr".equals(codeString))
+          return new Enumeration<PropertyRepresentation>(this, PropertyRepresentation.TYPEATTR);
+        if ("cdaText".equals(codeString))
+          return new Enumeration<PropertyRepresentation>(this, PropertyRepresentation.CDATEXT);
         throw new FHIRException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
     public String toCode(PropertyRepresentation code) {
       if (code == PropertyRepresentation.XMLATTR)
         return "xmlAttr";
+      if (code == PropertyRepresentation.XMLTEXT)
+        return "xmlText";
+      if (code == PropertyRepresentation.TYPEATTR)
+        return "typeAttr";
+      if (code == PropertyRepresentation.CDATEXT)
+        return "cdaText";
       return "?";
       }
     public String toSystem(PropertyRepresentation code) {
@@ -326,6 +372,109 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
     }
 
+    public enum ReferenceVersionRules {
+        /**
+         * The reference may be either version independent or version specific
+         */
+        EITHER, 
+        /**
+         * The reference must be version independent
+         */
+        INDEPENDENT, 
+        /**
+         * The reference must be version specific
+         */
+        SPECIFIC, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static ReferenceVersionRules fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("either".equals(codeString))
+          return EITHER;
+        if ("independent".equals(codeString))
+          return INDEPENDENT;
+        if ("specific".equals(codeString))
+          return SPECIFIC;
+        throw new FHIRException("Unknown ReferenceVersionRules code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case EITHER: return "either";
+            case INDEPENDENT: return "independent";
+            case SPECIFIC: return "specific";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case EITHER: return "http://hl7.org/fhir/reference-version-rules";
+            case INDEPENDENT: return "http://hl7.org/fhir/reference-version-rules";
+            case SPECIFIC: return "http://hl7.org/fhir/reference-version-rules";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case EITHER: return "The reference may be either version independent or version specific";
+            case INDEPENDENT: return "The reference must be version independent";
+            case SPECIFIC: return "The reference must be version specific";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case EITHER: return "Either Specific or independent";
+            case INDEPENDENT: return "Version independent";
+            case SPECIFIC: return "Version Specific";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ReferenceVersionRulesEnumFactory implements EnumFactory<ReferenceVersionRules> {
+    public ReferenceVersionRules fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("either".equals(codeString))
+          return ReferenceVersionRules.EITHER;
+        if ("independent".equals(codeString))
+          return ReferenceVersionRules.INDEPENDENT;
+        if ("specific".equals(codeString))
+          return ReferenceVersionRules.SPECIFIC;
+        throw new IllegalArgumentException("Unknown ReferenceVersionRules code '"+codeString+"'");
+        }
+        public Enumeration<ReferenceVersionRules> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("either".equals(codeString))
+          return new Enumeration<ReferenceVersionRules>(this, ReferenceVersionRules.EITHER);
+        if ("independent".equals(codeString))
+          return new Enumeration<ReferenceVersionRules>(this, ReferenceVersionRules.INDEPENDENT);
+        if ("specific".equals(codeString))
+          return new Enumeration<ReferenceVersionRules>(this, ReferenceVersionRules.SPECIFIC);
+        throw new FHIRException("Unknown ReferenceVersionRules code '"+codeString+"'");
+        }
+    public String toCode(ReferenceVersionRules code) {
+      if (code == ReferenceVersionRules.EITHER)
+        return "either";
+      if (code == ReferenceVersionRules.INDEPENDENT)
+        return "independent";
+      if (code == ReferenceVersionRules.SPECIFIC)
+        return "specific";
+      return "?";
+      }
+    public String toSystem(ReferenceVersionRules code) {
+      return code.getSystem();
+      }
+    }
+
     public enum ConstraintSeverity {
         /**
          * If the constraint is violated, the resource is not conformant.
@@ -419,7 +568,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          * Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.
          */
         @Child(name = "discriminator", type = {StringType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Element values that used to distinguish the slices", formalDefinition="Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices." )
+        @Description(shortDefinition="Element values that are used to distinguish the slices", formalDefinition="Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices." )
         protected List<StringType> discriminator;
 
         /**
@@ -730,8 +879,8 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (discriminator == null || discriminator.isEmpty()) && (description == null || description.isEmpty())
-           && (ordered == null || ordered.isEmpty()) && (rules == null || rules.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( discriminator,  description,  ordered
+          ,  rules);
       }
 
   public String fhirType() {
@@ -984,8 +1133,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (path == null || path.isEmpty()) && (min == null || min.isEmpty())
-           && (max == null || max.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( path,  min,  max);
       }
 
   public String fhirType() {
@@ -1018,7 +1166,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         @Description(shortDefinition="contained | referenced | bundled - how aggregated", formalDefinition="If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle." )
         protected List<Enumeration<AggregationMode>> aggregation;
 
-        private static final long serialVersionUID = -988693373L;
+        /**
+         * Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         */
+        @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="either | independent | specific", formalDefinition="Whether this reference needs to be version specific or version independent, or whetehr either can be used." )
+        protected Enumeration<ReferenceVersionRules> versioning;
+
+        private static final long serialVersionUID = -829583924L;
 
     /**
      * Constructor
@@ -1188,11 +1343,61 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         }
 
+        /**
+         * @return {@link #versioning} (Whether this reference needs to be version specific or version independent, or whetehr either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         */
+        public Enumeration<ReferenceVersionRules> getVersioningElement() { 
+          if (this.versioning == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TypeRefComponent.versioning");
+            else if (Configuration.doAutoCreate())
+              this.versioning = new Enumeration<ReferenceVersionRules>(new ReferenceVersionRulesEnumFactory()); // bb
+          return this.versioning;
+        }
+
+        public boolean hasVersioningElement() { 
+          return this.versioning != null && !this.versioning.isEmpty();
+        }
+
+        public boolean hasVersioning() { 
+          return this.versioning != null && !this.versioning.isEmpty();
+        }
+
+        /**
+         * @param value {@link #versioning} (Whether this reference needs to be version specific or version independent, or whetehr either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         */
+        public TypeRefComponent setVersioningElement(Enumeration<ReferenceVersionRules> value) { 
+          this.versioning = value;
+          return this;
+        }
+
+        /**
+         * @return Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         */
+        public ReferenceVersionRules getVersioning() { 
+          return this.versioning == null ? null : this.versioning.getValue();
+        }
+
+        /**
+         * @param value Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         */
+        public TypeRefComponent setVersioning(ReferenceVersionRules value) { 
+          if (value == null)
+            this.versioning = null;
+          else {
+            if (this.versioning == null)
+              this.versioning = new Enumeration<ReferenceVersionRules>(new ReferenceVersionRulesEnumFactory());
+            this.versioning.setValue(value);
+          }
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Name of Data type or Resource that is a(or the) type used for this element.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation));
+          childrenList.add(new Property("versioning", "code", "Whether this reference needs to be version specific or version independent, or whetehr either can be used.", 0, java.lang.Integer.MAX_VALUE, versioning));
         }
 
       @Override
@@ -1203,6 +1408,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.getProfile().add(castToUri(value));
         else if (name.equals("aggregation"))
           this.getAggregation().add(new AggregationModeEnumFactory().fromType(value));
+        else if (name.equals("versioning"))
+          this.versioning = new ReferenceVersionRulesEnumFactory().fromType(value); // Enumeration<ReferenceVersionRules>
         else
           super.setProperty(name, value);
       }
@@ -1217,6 +1424,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         else if (name.equals("aggregation")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.aggregation");
+        }
+        else if (name.equals("versioning")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.versioning");
         }
         else
           return super.addChild(name);
@@ -1236,6 +1446,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           for (Enumeration<AggregationMode> i : aggregation)
             dst.aggregation.add(i.copy());
         };
+        dst.versioning = versioning == null ? null : versioning.copy();
         return dst;
       }
 
@@ -1247,7 +1458,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         TypeRefComponent o = (TypeRefComponent) other;
         return compareDeep(code, o.code, true) && compareDeep(profile, o.profile, true) && compareDeep(aggregation, o.aggregation, true)
-          ;
+           && compareDeep(versioning, o.versioning, true);
       }
 
       @Override
@@ -1258,12 +1469,12 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         TypeRefComponent o = (TypeRefComponent) other;
         return compareValues(code, o.code, true) && compareValues(profile, o.profile, true) && compareValues(aggregation, o.aggregation, true)
-          ;
+           && compareValues(versioning, o.versioning, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (profile == null || profile.isEmpty())
-           && (aggregation == null || aggregation.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  profile,  aggregation,  versioning
+          );
       }
 
   public String fhirType() {
@@ -1286,7 +1497,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          * Description of why this constraint is necessary or appropriate.
          */
         @Child(name = "requirements", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Why this constraint necessary or appropriate", formalDefinition="Description of why this constraint is necessary or appropriate." )
+        @Description(shortDefinition="Why this constraint is necessary or appropriate", formalDefinition="Description of why this constraint is necessary or appropriate." )
         protected StringType requirements;
 
         /**
@@ -1304,13 +1515,20 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected StringType human;
 
         /**
+         * A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         */
+        @Child(name = "expression", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="FluentPath expression of constraint", formalDefinition="A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met." )
+        protected StringType expression;
+
+        /**
          * An XPath expression of constraint that can be executed to see if this constraint is met.
          */
-        @Child(name = "xpath", type = {StringType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "xpath", type = {StringType.class}, order=6, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="XPath expression of constraint", formalDefinition="An XPath expression of constraint that can be executed to see if this constraint is met." )
         protected StringType xpath;
 
-        private static final long serialVersionUID = 854521265L;
+        private static final long serialVersionUID = -1412249932L;
 
     /**
      * Constructor
@@ -1515,6 +1733,55 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
+         * @return {@link #expression} (A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StringType getExpressionElement() { 
+          if (this.expression == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ElementDefinitionConstraintComponent.expression");
+            else if (Configuration.doAutoCreate())
+              this.expression = new StringType(); // bb
+          return this.expression;
+        }
+
+        public boolean hasExpressionElement() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        public boolean hasExpression() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        /**
+         * @param value {@link #expression} (A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public ElementDefinitionConstraintComponent setExpressionElement(StringType value) { 
+          this.expression = value;
+          return this;
+        }
+
+        /**
+         * @return A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         */
+        public String getExpression() { 
+          return this.expression == null ? null : this.expression.getValue();
+        }
+
+        /**
+         * @param value A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         */
+        public ElementDefinitionConstraintComponent setExpression(String value) { 
+          if (Utilities.noString(value))
+            this.expression = null;
+          else {
+            if (this.expression == null)
+              this.expression = new StringType();
+            this.expression.setValue(value);
+          }
+          return this;
+        }
+
+        /**
          * @return {@link #xpath} (An XPath expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getXpath" gives direct access to the value
          */
         public StringType getXpathElement() { 
@@ -1565,6 +1832,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("requirements", "string", "Description of why this constraint is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, requirements));
           childrenList.add(new Property("severity", "code", "Identifies the impact constraint violation has on the conformance of the instance.", 0, java.lang.Integer.MAX_VALUE, severity));
           childrenList.add(new Property("human", "string", "Text that can be used to describe the constraint in messages identifying that the constraint has been violated.", 0, java.lang.Integer.MAX_VALUE, human));
+          childrenList.add(new Property("expression", "string", "A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, expression));
           childrenList.add(new Property("xpath", "string", "An XPath expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, xpath));
         }
 
@@ -1578,6 +1846,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.severity = new ConstraintSeverityEnumFactory().fromType(value); // Enumeration<ConstraintSeverity>
         else if (name.equals("human"))
           this.human = castToString(value); // StringType
+        else if (name.equals("expression"))
+          this.expression = castToString(value); // StringType
         else if (name.equals("xpath"))
           this.xpath = castToString(value); // StringType
         else
@@ -1598,6 +1868,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         else if (name.equals("human")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.human");
         }
+        else if (name.equals("expression")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.expression");
+        }
         else if (name.equals("xpath")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.xpath");
         }
@@ -1612,6 +1885,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.requirements = requirements == null ? null : requirements.copy();
         dst.severity = severity == null ? null : severity.copy();
         dst.human = human == null ? null : human.copy();
+        dst.expression = expression == null ? null : expression.copy();
         dst.xpath = xpath == null ? null : xpath.copy();
         return dst;
       }
@@ -1624,7 +1898,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
         return compareDeep(key, o.key, true) && compareDeep(requirements, o.requirements, true) && compareDeep(severity, o.severity, true)
-           && compareDeep(human, o.human, true) && compareDeep(xpath, o.xpath, true);
+           && compareDeep(human, o.human, true) && compareDeep(expression, o.expression, true) && compareDeep(xpath, o.xpath, true)
+          ;
       }
 
       @Override
@@ -1635,13 +1910,13 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
         return compareValues(key, o.key, true) && compareValues(requirements, o.requirements, true) && compareValues(severity, o.severity, true)
-           && compareValues(human, o.human, true) && compareValues(xpath, o.xpath, true);
+           && compareValues(human, o.human, true) && compareValues(expression, o.expression, true) && compareValues(xpath, o.xpath, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (key == null || key.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (severity == null || severity.isEmpty()) && (human == null || human.isEmpty()) && (xpath == null || xpath.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( key,  requirements,  severity,  human
+          ,  expression,  xpath);
       }
 
   public String fhirType() {
@@ -1901,8 +2176,8 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (strength == null || strength.isEmpty()) && (description == null || description.isEmpty())
-           && (valueSet == null || valueSet.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( strength,  description,  valueSet
+          );
       }
 
   public String fhirType() {
@@ -2158,8 +2433,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identity == null || identity.isEmpty()) && (language == null || language.isEmpty())
-           && (map == null || map.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identity,  language,  map);
       }
 
   public String fhirType() {
@@ -2180,14 +2454,14 @@ public class ElementDefinition extends Type implements ICompositeType {
      * Codes that define how this element is represented in instances, when the deviation varies from the normal case.
      */
     @Child(name = "representation", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="How this element is represented in instances", formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case." )
+    @Description(shortDefinition="xmlAttr | xmlText | typeAttr | cdaText", formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case." )
     protected List<Enumeration<PropertyRepresentation>> representation;
 
     /**
-     * The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.
+     * The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.
      */
     @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name for this particular element definition (reference target)", formalDefinition="The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element." )
+    @Description(shortDefinition="Name for this particular element definition (reference target)", formalDefinition="The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element." )
     protected StringType name;
 
     /**
@@ -2236,7 +2510,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      * This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element.
      */
     @Child(name = "requirements", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why is this needed?", formalDefinition="This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element." )
+    @Description(shortDefinition="Why this resource has been created", formalDefinition="This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element." )
     protected MarkdownType requirements;
 
     /**
@@ -2261,31 +2535,31 @@ public class ElementDefinition extends Type implements ICompositeType {
     protected StringType max;
 
     /**
-     * Information about the base definition of the element, provided to make it unncessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.
+     * Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.
      */
     @Child(name = "base", type = {}, order=13, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Base definition information for tools", formalDefinition="Information about the base definition of the element, provided to make it unncessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition." )
+    @Description(shortDefinition="Base definition information for tools", formalDefinition="Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition." )
     protected ElementDefinitionBaseComponent base;
+
+    /**
+     * Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.
+     */
+    @Child(name = "contentReference", type = {UriType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Reference to definition of content for the element", formalDefinition="Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element." )
+    protected UriType contentReference;
 
     /**
      * The data type or resource that the value of this element is permitted to be.
      */
-    @Child(name = "type", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "type", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Data type and Profile for this element", formalDefinition="The data type or resource that the value of this element is permitted to be." )
     protected List<TypeRefComponent> type;
-
-    /**
-     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.
-     */
-    @Child(name = "nameReference", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="To another element constraint (by element.name)", formalDefinition="Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element." )
-    protected StringType nameReference;
 
     /**
      * The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').
      */
     @Child(name = "defaultValue", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Specified value it missing from instance", formalDefinition="The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false')." )
+    @Description(shortDefinition="Specified value if missing from instance", formalDefinition="The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false')." )
     protected org.hl7.fhir.dstu3.model.Type defaultValue;
 
     /**
@@ -2313,7 +2587,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      * A sample value for this element demonstrating the type of information that would typically be captured.
      */
     @Child(name = "example", type = {}, order=20, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Example value: [as defined for type]", formalDefinition="A sample value for this element demonstrating the type of information that would typically be captured." )
+    @Description(shortDefinition="Example value (as defined for type)", formalDefinition="A sample value for this element demonstrating the type of information that would typically be captured." )
     protected org.hl7.fhir.dstu3.model.Type example;
 
     /**
@@ -2386,7 +2660,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     @Description(shortDefinition="Map element to another set of definitions", formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element." )
     protected List<ElementDefinitionMappingComponent> mapping;
 
-    private static final long serialVersionUID = 529293980L;
+    private static final long serialVersionUID = -904637873L;
 
   /**
    * Constructor
@@ -2503,7 +2777,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #name} (The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -2523,7 +2797,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #name} (The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public ElementDefinition setNameElement(StringType value) { 
       this.name = value;
@@ -2531,14 +2805,14 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.
+     * @return The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.
+     * @param value The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.
      */
     public ElementDefinition setName(String value) { 
       if (Utilities.noString(value))
@@ -3009,7 +3283,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #base} (Information about the base definition of the element, provided to make it unncessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.)
+     * @return {@link #base} (Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.)
      */
     public ElementDefinitionBaseComponent getBase() { 
       if (this.base == null)
@@ -3025,10 +3299,59 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #base} (Information about the base definition of the element, provided to make it unncessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.)
+     * @param value {@link #base} (Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.)
      */
     public ElementDefinition setBase(ElementDefinitionBaseComponent value) { 
       this.base = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #contentReference} (Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.). This is the underlying object with id, value and extensions. The accessor "getContentReference" gives direct access to the value
+     */
+    public UriType getContentReferenceElement() { 
+      if (this.contentReference == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ElementDefinition.contentReference");
+        else if (Configuration.doAutoCreate())
+          this.contentReference = new UriType(); // bb
+      return this.contentReference;
+    }
+
+    public boolean hasContentReferenceElement() { 
+      return this.contentReference != null && !this.contentReference.isEmpty();
+    }
+
+    public boolean hasContentReference() { 
+      return this.contentReference != null && !this.contentReference.isEmpty();
+    }
+
+    /**
+     * @param value {@link #contentReference} (Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.). This is the underlying object with id, value and extensions. The accessor "getContentReference" gives direct access to the value
+     */
+    public ElementDefinition setContentReferenceElement(UriType value) { 
+      this.contentReference = value;
+      return this;
+    }
+
+    /**
+     * @return Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.
+     */
+    public String getContentReference() { 
+      return this.contentReference == null ? null : this.contentReference.getValue();
+    }
+
+    /**
+     * @param value Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.
+     */
+    public ElementDefinition setContentReference(String value) { 
+      if (Utilities.noString(value))
+        this.contentReference = null;
+      else {
+        if (this.contentReference == null)
+          this.contentReference = new UriType();
+        this.contentReference.setValue(value);
+      }
       return this;
     }
 
@@ -3069,55 +3392,6 @@ public class ElementDefinition extends Type implements ICompositeType {
       if (this.type == null)
         this.type = new ArrayList<TypeRefComponent>();
       this.type.add(t);
-      return this;
-    }
-
-    /**
-     * @return {@link #nameReference} (Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.). This is the underlying object with id, value and extensions. The accessor "getNameReference" gives direct access to the value
-     */
-    public StringType getNameReferenceElement() { 
-      if (this.nameReference == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ElementDefinition.nameReference");
-        else if (Configuration.doAutoCreate())
-          this.nameReference = new StringType(); // bb
-      return this.nameReference;
-    }
-
-    public boolean hasNameReferenceElement() { 
-      return this.nameReference != null && !this.nameReference.isEmpty();
-    }
-
-    public boolean hasNameReference() { 
-      return this.nameReference != null && !this.nameReference.isEmpty();
-    }
-
-    /**
-     * @param value {@link #nameReference} (Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.). This is the underlying object with id, value and extensions. The accessor "getNameReference" gives direct access to the value
-     */
-    public ElementDefinition setNameReferenceElement(StringType value) { 
-      this.nameReference = value;
-      return this;
-    }
-
-    /**
-     * @return Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.
-     */
-    public String getNameReference() { 
-      return this.nameReference == null ? null : this.nameReference.getValue();
-    }
-
-    /**
-     * @param value Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.
-     */
-    public ElementDefinition setNameReference(String value) { 
-      if (Utilities.noString(value))
-        this.nameReference = null;
-      else {
-        if (this.nameReference == null)
-          this.nameReference = new StringType();
-        this.nameReference.setValue(value);
-      }
       return this;
     }
 
@@ -3626,7 +3900,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         super.listChildren(childrenList);
         childrenList.add(new Property("path", "string", "The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource or extension.", 0, java.lang.Integer.MAX_VALUE, path));
         childrenList.add(new Property("representation", "code", "Codes that define how this element is represented in instances, when the deviation varies from the normal case.", 0, java.lang.Integer.MAX_VALUE, representation));
-        childrenList.add(new Property("name", "string", "The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("name", "string", "The name of this element definition. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("label", "string", "The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.", 0, java.lang.Integer.MAX_VALUE, label));
         childrenList.add(new Property("code", "Coding", "A code that provides the meaning for the element according to a particular terminology.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("slicing", "", "Indicates that the element is sliced into a set of alternative definitions (i.e. in a structure definition, there are multiple different constraints on a single element in the base resource). Slicing can be used in any resource that has cardinality ..* on the base resource, or any resource with a choice of types. The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set).", 0, java.lang.Integer.MAX_VALUE, slicing));
@@ -3637,9 +3911,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         childrenList.add(new Property("alias", "string", "Identifies additional names by which this element might also be known.", 0, java.lang.Integer.MAX_VALUE, alias));
         childrenList.add(new Property("min", "integer", "The minimum number of times this element SHALL appear in the instance.", 0, java.lang.Integer.MAX_VALUE, min));
         childrenList.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the instance.", 0, java.lang.Integer.MAX_VALUE, max));
-        childrenList.add(new Property("base", "", "Information about the base definition of the element, provided to make it unncessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.", 0, java.lang.Integer.MAX_VALUE, base));
+        childrenList.add(new Property("base", "", "Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition.", 0, java.lang.Integer.MAX_VALUE, base));
+        childrenList.add(new Property("contentReference", "uri", "Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.", 0, java.lang.Integer.MAX_VALUE, contentReference));
         childrenList.add(new Property("type", "", "The data type or resource that the value of this element is permitted to be.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("nameReference", "string", "Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.", 0, java.lang.Integer.MAX_VALUE, nameReference));
         childrenList.add(new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, java.lang.Integer.MAX_VALUE, defaultValue));
         childrenList.add(new Property("meaningWhenMissing", "markdown", "The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'.", 0, java.lang.Integer.MAX_VALUE, meaningWhenMissing));
         childrenList.add(new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, java.lang.Integer.MAX_VALUE, fixed));
@@ -3687,10 +3961,10 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.max = castToString(value); // StringType
         else if (name.equals("base"))
           this.base = (ElementDefinitionBaseComponent) value; // ElementDefinitionBaseComponent
+        else if (name.equals("contentReference"))
+          this.contentReference = castToUri(value); // UriType
         else if (name.equals("type"))
           this.getType().add((TypeRefComponent) value);
-        else if (name.equals("nameReference"))
-          this.nameReference = castToString(value); // StringType
         else if (name.equals("defaultValue[x]"))
           this.defaultValue = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else if (name.equals("meaningWhenMissing"))
@@ -3771,11 +4045,11 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.base = new ElementDefinitionBaseComponent();
           return this.base;
         }
+        else if (name.equals("contentReference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.contentReference");
+        }
         else if (name.equals("type")) {
           return addType();
-        }
-        else if (name.equals("nameReference")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.nameReference");
         }
         else if (name.equals("defaultValueBoolean")) {
           this.defaultValue = new BooleanType();
@@ -4635,12 +4909,12 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.min = min == null ? null : min.copy();
         dst.max = max == null ? null : max.copy();
         dst.base = base == null ? null : base.copy();
+        dst.contentReference = contentReference == null ? null : contentReference.copy();
         if (type != null) {
           dst.type = new ArrayList<TypeRefComponent>();
           for (TypeRefComponent i : type)
             dst.type.add(i.copy());
         };
-        dst.nameReference = nameReference == null ? null : nameReference.copy();
         dst.defaultValue = defaultValue == null ? null : defaultValue.copy();
         dst.meaningWhenMissing = meaningWhenMissing == null ? null : meaningWhenMissing.copy();
         dst.fixed = fixed == null ? null : fixed.copy();
@@ -4686,12 +4960,11 @@ public class ElementDefinition extends Type implements ICompositeType {
            && compareDeep(label, o.label, true) && compareDeep(code, o.code, true) && compareDeep(slicing, o.slicing, true)
            && compareDeep(short_, o.short_, true) && compareDeep(definition, o.definition, true) && compareDeep(comments, o.comments, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(alias, o.alias, true) && compareDeep(min, o.min, true)
-           && compareDeep(max, o.max, true) && compareDeep(base, o.base, true) && compareDeep(type, o.type, true)
-           && compareDeep(nameReference, o.nameReference, true) && compareDeep(defaultValue, o.defaultValue, true)
-           && compareDeep(meaningWhenMissing, o.meaningWhenMissing, true) && compareDeep(fixed, o.fixed, true)
-           && compareDeep(pattern, o.pattern, true) && compareDeep(example, o.example, true) && compareDeep(minValue, o.minValue, true)
-           && compareDeep(maxValue, o.maxValue, true) && compareDeep(maxLength, o.maxLength, true) && compareDeep(condition, o.condition, true)
-           && compareDeep(constraint, o.constraint, true) && compareDeep(mustSupport, o.mustSupport, true)
+           && compareDeep(max, o.max, true) && compareDeep(base, o.base, true) && compareDeep(contentReference, o.contentReference, true)
+           && compareDeep(type, o.type, true) && compareDeep(defaultValue, o.defaultValue, true) && compareDeep(meaningWhenMissing, o.meaningWhenMissing, true)
+           && compareDeep(fixed, o.fixed, true) && compareDeep(pattern, o.pattern, true) && compareDeep(example, o.example, true)
+           && compareDeep(minValue, o.minValue, true) && compareDeep(maxValue, o.maxValue, true) && compareDeep(maxLength, o.maxLength, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(constraint, o.constraint, true) && compareDeep(mustSupport, o.mustSupport, true)
            && compareDeep(isModifier, o.isModifier, true) && compareDeep(isSummary, o.isSummary, true) && compareDeep(binding, o.binding, true)
            && compareDeep(mapping, o.mapping, true);
       }
@@ -4706,26 +4979,18 @@ public class ElementDefinition extends Type implements ICompositeType {
         return compareValues(path, o.path, true) && compareValues(representation, o.representation, true) && compareValues(name, o.name, true)
            && compareValues(label, o.label, true) && compareValues(short_, o.short_, true) && compareValues(definition, o.definition, true)
            && compareValues(comments, o.comments, true) && compareValues(requirements, o.requirements, true) && compareValues(alias, o.alias, true)
-           && compareValues(min, o.min, true) && compareValues(max, o.max, true) && compareValues(nameReference, o.nameReference, true)
+           && compareValues(min, o.min, true) && compareValues(max, o.max, true) && compareValues(contentReference, o.contentReference, true)
            && compareValues(meaningWhenMissing, o.meaningWhenMissing, true) && compareValues(maxLength, o.maxLength, true)
            && compareValues(condition, o.condition, true) && compareValues(mustSupport, o.mustSupport, true) && compareValues(isModifier, o.isModifier, true)
            && compareValues(isSummary, o.isSummary, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (path == null || path.isEmpty()) && (representation == null || representation.isEmpty())
-           && (name == null || name.isEmpty()) && (label == null || label.isEmpty()) && (code == null || code.isEmpty())
-           && (slicing == null || slicing.isEmpty()) && (short_ == null || short_.isEmpty()) && (definition == null || definition.isEmpty())
-           && (comments == null || comments.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (alias == null || alias.isEmpty()) && (min == null || min.isEmpty()) && (max == null || max.isEmpty())
-           && (base == null || base.isEmpty()) && (type == null || type.isEmpty()) && (nameReference == null || nameReference.isEmpty())
-           && (defaultValue == null || defaultValue.isEmpty()) && (meaningWhenMissing == null || meaningWhenMissing.isEmpty())
-           && (fixed == null || fixed.isEmpty()) && (pattern == null || pattern.isEmpty()) && (example == null || example.isEmpty())
-           && (minValue == null || minValue.isEmpty()) && (maxValue == null || maxValue.isEmpty()) && (maxLength == null || maxLength.isEmpty())
-           && (condition == null || condition.isEmpty()) && (constraint == null || constraint.isEmpty())
-           && (mustSupport == null || mustSupport.isEmpty()) && (isModifier == null || isModifier.isEmpty())
-           && (isSummary == null || isSummary.isEmpty()) && (binding == null || binding.isEmpty()) && (mapping == null || mapping.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( path,  representation,  name,  label
+          ,  code,  slicing,  short_,  definition,  comments,  requirements,  alias,  min,  max,  base
+          ,  contentReference,  type,  defaultValue,  meaningWhenMissing,  fixed,  pattern,  example,  minValue
+          ,  maxValue,  maxLength,  condition,  constraint,  mustSupport,  isModifier,  isSummary,  binding
+          ,  mapping);
       }
 
 

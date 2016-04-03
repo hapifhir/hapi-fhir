@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,165 +39,13 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.
  */
 @ResourceDef(name="AppointmentResponse", profile="http://hl7.org/fhir/Profile/AppointmentResponse")
 public class AppointmentResponse extends DomainResource {
-
-    public enum ParticipantStatus {
-        /**
-         * The appointment participant has accepted that they can attend the appointment at the time specified in the AppointmentResponse.
-         */
-        ACCEPTED, 
-        /**
-         * The appointment participant has declined the appointment.
-         */
-        DECLINED, 
-        /**
-         * The appointment participant has tentatively accepted the appointment.
-         */
-        TENTATIVE, 
-        /**
-         * The participant has in-process the appointment.
-         */
-        INPROCESS, 
-        /**
-         * The participant has completed the appointment.
-         */
-        COMPLETED, 
-        /**
-         * This is the intitial status of an appointment participant until a participant has replied. It implies that there is no commitment for the appointment.
-         */
-        NEEDSACTION, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static ParticipantStatus fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("accepted".equals(codeString))
-          return ACCEPTED;
-        if ("declined".equals(codeString))
-          return DECLINED;
-        if ("tentative".equals(codeString))
-          return TENTATIVE;
-        if ("in-process".equals(codeString))
-          return INPROCESS;
-        if ("completed".equals(codeString))
-          return COMPLETED;
-        if ("needs-action".equals(codeString))
-          return NEEDSACTION;
-        throw new FHIRException("Unknown ParticipantStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case ACCEPTED: return "accepted";
-            case DECLINED: return "declined";
-            case TENTATIVE: return "tentative";
-            case INPROCESS: return "in-process";
-            case COMPLETED: return "completed";
-            case NEEDSACTION: return "needs-action";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case ACCEPTED: return "http://hl7.org/fhir/participantstatus";
-            case DECLINED: return "http://hl7.org/fhir/participantstatus";
-            case TENTATIVE: return "http://hl7.org/fhir/participantstatus";
-            case INPROCESS: return "http://hl7.org/fhir/participantstatus";
-            case COMPLETED: return "http://hl7.org/fhir/participantstatus";
-            case NEEDSACTION: return "http://hl7.org/fhir/participantstatus";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case ACCEPTED: return "The appointment participant has accepted that they can attend the appointment at the time specified in the AppointmentResponse.";
-            case DECLINED: return "The appointment participant has declined the appointment.";
-            case TENTATIVE: return "The appointment participant has tentatively accepted the appointment.";
-            case INPROCESS: return "The participant has in-process the appointment.";
-            case COMPLETED: return "The participant has completed the appointment.";
-            case NEEDSACTION: return "This is the intitial status of an appointment participant until a participant has replied. It implies that there is no commitment for the appointment.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case ACCEPTED: return "Accepted";
-            case DECLINED: return "Declined";
-            case TENTATIVE: return "Tentative";
-            case INPROCESS: return "In Process";
-            case COMPLETED: return "Completed";
-            case NEEDSACTION: return "Needs Action";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ParticipantStatusEnumFactory implements EnumFactory<ParticipantStatus> {
-    public ParticipantStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("accepted".equals(codeString))
-          return ParticipantStatus.ACCEPTED;
-        if ("declined".equals(codeString))
-          return ParticipantStatus.DECLINED;
-        if ("tentative".equals(codeString))
-          return ParticipantStatus.TENTATIVE;
-        if ("in-process".equals(codeString))
-          return ParticipantStatus.INPROCESS;
-        if ("completed".equals(codeString))
-          return ParticipantStatus.COMPLETED;
-        if ("needs-action".equals(codeString))
-          return ParticipantStatus.NEEDSACTION;
-        throw new IllegalArgumentException("Unknown ParticipantStatus code '"+codeString+"'");
-        }
-        public Enumeration<ParticipantStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("accepted".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.ACCEPTED);
-        if ("declined".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.DECLINED);
-        if ("tentative".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.TENTATIVE);
-        if ("in-process".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.INPROCESS);
-        if ("completed".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.COMPLETED);
-        if ("needs-action".equals(codeString))
-          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.NEEDSACTION);
-        throw new FHIRException("Unknown ParticipantStatus code '"+codeString+"'");
-        }
-    public String toCode(ParticipantStatus code) {
-      if (code == ParticipantStatus.ACCEPTED)
-        return "accepted";
-      if (code == ParticipantStatus.DECLINED)
-        return "declined";
-      if (code == ParticipantStatus.TENTATIVE)
-        return "tentative";
-      if (code == ParticipantStatus.INPROCESS)
-        return "in-process";
-      if (code == ParticipantStatus.COMPLETED)
-        return "completed";
-      if (code == ParticipantStatus.NEEDSACTION)
-        return "needs-action";
-      return "?";
-      }
-    public String toSystem(ParticipantStatus code) {
-      return code.getSystem();
-      }
-    }
 
     /**
      * This records identifiers associated with this appointment response concern that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.
@@ -256,7 +104,7 @@ public class AppointmentResponse extends DomainResource {
      */
     @Child(name = "participantStatus", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="accepted | declined | tentative | in-process | completed | needs-action", formalDefinition="Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty." )
-    protected Enumeration<ParticipantStatus> participantStatus;
+    protected CodeType participantStatus;
 
     /**
      * Additional comments about the appointment.
@@ -265,7 +113,7 @@ public class AppointmentResponse extends DomainResource {
     @Description(shortDefinition="Additional comments", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
-    private static final long serialVersionUID = 248548635L;
+    private static final long serialVersionUID = -1645343660L;
 
   /**
    * Constructor
@@ -277,7 +125,7 @@ public class AppointmentResponse extends DomainResource {
   /**
    * Constructor
    */
-    public AppointmentResponse(Reference appointment, Enumeration<ParticipantStatus> participantStatus) {
+    public AppointmentResponse(Reference appointment, CodeType participantStatus) {
       super();
       this.appointment = appointment;
       this.participantStatus = participantStatus;
@@ -547,12 +395,12 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @return {@link #participantStatus} (Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.). This is the underlying object with id, value and extensions. The accessor "getParticipantStatus" gives direct access to the value
      */
-    public Enumeration<ParticipantStatus> getParticipantStatusElement() { 
+    public CodeType getParticipantStatusElement() { 
       if (this.participantStatus == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create AppointmentResponse.participantStatus");
         else if (Configuration.doAutoCreate())
-          this.participantStatus = new Enumeration<ParticipantStatus>(new ParticipantStatusEnumFactory()); // bb
+          this.participantStatus = new CodeType(); // bb
       return this.participantStatus;
     }
 
@@ -567,7 +415,7 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @param value {@link #participantStatus} (Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.). This is the underlying object with id, value and extensions. The accessor "getParticipantStatus" gives direct access to the value
      */
-    public AppointmentResponse setParticipantStatusElement(Enumeration<ParticipantStatus> value) { 
+    public AppointmentResponse setParticipantStatusElement(CodeType value) { 
       this.participantStatus = value;
       return this;
     }
@@ -575,16 +423,16 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @return Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.
      */
-    public ParticipantStatus getParticipantStatus() { 
+    public String getParticipantStatus() { 
       return this.participantStatus == null ? null : this.participantStatus.getValue();
     }
 
     /**
      * @param value Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.
      */
-    public AppointmentResponse setParticipantStatus(ParticipantStatus value) { 
+    public AppointmentResponse setParticipantStatus(String value) { 
         if (this.participantStatus == null)
-          this.participantStatus = new Enumeration<ParticipantStatus>(new ParticipantStatusEnumFactory());
+          this.participantStatus = new CodeType();
         this.participantStatus.setValue(value);
       return this;
     }
@@ -665,7 +513,7 @@ public class AppointmentResponse extends DomainResource {
         else if (name.equals("actor"))
           this.actor = castToReference(value); // Reference
         else if (name.equals("participantStatus"))
-          this.participantStatus = new ParticipantStatusEnumFactory().fromType(value); // Enumeration<ParticipantStatus>
+          this.participantStatus = castToCode(value); // CodeType
         else if (name.equals("comment"))
           this.comment = castToString(value); // StringType
         else
@@ -760,10 +608,8 @@ public class AppointmentResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (appointment == null || appointment.isEmpty())
-           && (start == null || start.isEmpty()) && (end == null || end.isEmpty()) && (participantType == null || participantType.isEmpty())
-           && (actor == null || actor.isEmpty()) && (participantStatus == null || participantStatus.isEmpty())
-           && (comment == null || comment.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  appointment,  start
+          ,  end,  participantType,  actor,  participantStatus,  comment);
       }
 
   @Override
@@ -779,7 +625,7 @@ public class AppointmentResponse extends DomainResource {
    * Path: <b>AppointmentResponse.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference" )
+  @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>

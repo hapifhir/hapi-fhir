@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,9 +38,8 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A  text note which also  contains information about who made the statement and when.
  */
@@ -64,7 +63,7 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * The text of the annotation.
      */
-    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The annotation  - text content", formalDefinition="The text of the annotation." )
     protected StringType text;
 
@@ -303,8 +302,7 @@ public class Annotation extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (author == null || author.isEmpty()) && (time == null || time.isEmpty())
-           && (text == null || text.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( author,  time,  text);
       }
 
 

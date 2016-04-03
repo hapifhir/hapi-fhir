@@ -162,7 +162,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 			"<type value=\"Patient\"/>",
 			"<operation>", 
 			"<name value=\"$andlist\"/>",
-			"<operation>" 
+			"</operation>" 
 		));
 		assertThat(conf, stringContainsInOrder(
 			"<type value=\"Patient\"/>",

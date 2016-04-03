@@ -63,7 +63,7 @@ public class ValidationResult {
 	 * Was the validation successful (in other words, do we have no issues that are at
 	 * severity {@link ResultSeverityEnum#ERROR} or {@link ResultSeverityEnum#FATAL}. A validation
 	 * is still considered successful if it only has issues at level {@link ResultSeverityEnum#WARNING} or
-	 * lower. 
+	 * lower.
 	 * 
 	 * @return true if the validation was successful
 	 */
@@ -74,6 +74,10 @@ public class ValidationResult {
 	private String toDescription() {
 		StringBuilder b = new StringBuilder(100);
 		if (myMessages.size() > 0) {
+			if (myMessages.get(0).getSeverity() != null) {
+				b.append(myMessages.get(0).getSeverity().name());
+				b.append(" - ");
+			}
 			b.append(myMessages.get(0).getMessage());
 			b.append(" - ");
 			b.append(myMessages.get(0).getLocationString());

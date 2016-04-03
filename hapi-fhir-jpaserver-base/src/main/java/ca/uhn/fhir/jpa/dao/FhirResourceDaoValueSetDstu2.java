@@ -56,7 +56,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> {
+public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
 
 	@Autowired
 	private IJpaValidationSupportDstu2 myJpaValidationSupport;
@@ -208,7 +208,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 			}
 			String code = theCode.getValue();
 			String system = toStringOrNull(theSystem);
-			valueSetIds = findValueSetIdsContainingSystemAndCode(code, system);
+			valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 		}
 
 		for (IIdType nextId : valueSetIds) {
@@ -228,7 +228,8 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return new ValidateCodeResult(false, "Code not found", null);
 	}
 
-	private List<IIdType> findValueSetIdsContainingSystemAndCode(String theCode, String theSystem) {
+	@Override
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
 		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/")) {
 			return Collections.singletonList((IIdType)new IdDt(theSystem));
 		}
@@ -289,7 +290,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequestDetails) {
+	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -311,11 +312,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 			system = theSystem.getValue();
 		}
 		
-		List<IIdType> valueSetIds = findValueSetIdsContainingSystemAndCode(code, system);
+		List<IIdType> valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult result = lookup(contains, system, code);
+			LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
 				return result;
 			}
@@ -328,13 +329,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return retVal;
 	}
 
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
+	private LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
 		for (ExpansionContains nextCode : theContains) {
 
 				String system = nextCode.getSystem();
 				String code = nextCode.getCode();
 				if (theSystem.equals(system) && theCode.equals(code)) {
-					ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult retVal = new LookupCodeResult();
+					LookupCodeResult retVal = new LookupCodeResult();
 					retVal.setSearchedForCode(code);
 					retVal.setSearchedForSystem(system);
 					retVal.setFound(true);
@@ -351,5 +352,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 
 		return null;
 	}
+
+	@Override
+	public void purgeCaches() {
+		// nothing
+	}
+
 
 }

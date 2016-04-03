@@ -2,7 +2,7 @@ package ca.uhn.fhir.jaxrs.client;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JAX-RS Server
  * %%
  * Copyright (C) 2014 - 2016 University Health Network
  * %%

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
  */
@@ -71,17 +69,17 @@ public class Signature extends Type implements ICompositeType {
     protected Type who;
 
     /**
-     * A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.
+     * A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.
      */
-    @Child(name = "contentType", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The technical format of the signature", formalDefinition="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature." )
+    @Child(name = "contentType", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The technical format of the signature", formalDefinition="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc." )
     protected CodeType contentType;
 
     /**
-     * The base64 encoding of the Signature content.
+     * The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.
      */
-    @Child(name = "blob", type = {Base64BinaryType.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The actual signature content (XML DigSig. JWT, picture, etc.)", formalDefinition="The base64 encoding of the Signature content." )
+    @Child(name = "blob", type = {Base64BinaryType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="The actual signature content (XML DigSig. JWT, picture, etc.)", formalDefinition="The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty." )
     protected Base64BinaryType blob;
 
     private static final long serialVersionUID = -452432714L;
@@ -96,12 +94,10 @@ public class Signature extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public Signature(InstantType when, Type who, CodeType contentType, Base64BinaryType blob) {
+    public Signature(InstantType when, Type who) {
       super();
       this.when = when;
       this.who = who;
-      this.contentType = contentType;
-      this.blob = blob;
     }
 
     /**
@@ -235,7 +231,7 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #contentType} (A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+     * @return {@link #contentType} (A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
      */
     public CodeType getContentTypeElement() { 
       if (this.contentType == null)
@@ -255,7 +251,7 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #contentType} (A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
+     * @param value {@link #contentType} (A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
      */
     public Signature setContentTypeElement(CodeType value) { 
       this.contentType = value;
@@ -263,24 +259,28 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @return A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.
+     * @return A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.
      */
     public String getContentType() { 
       return this.contentType == null ? null : this.contentType.getValue();
     }
 
     /**
-     * @param value A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.
+     * @param value A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.
      */
     public Signature setContentType(String value) { 
+      if (Utilities.noString(value))
+        this.contentType = null;
+      else {
         if (this.contentType == null)
           this.contentType = new CodeType();
         this.contentType.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #blob} (The base64 encoding of the Signature content.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
+     * @return {@link #blob} (The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
      */
     public Base64BinaryType getBlobElement() { 
       if (this.blob == null)
@@ -300,7 +300,7 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #blob} (The base64 encoding of the Signature content.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
+     * @param value {@link #blob} (The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
      */
     public Signature setBlobElement(Base64BinaryType value) { 
       this.blob = value;
@@ -308,19 +308,23 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @return The base64 encoding of the Signature content.
+     * @return The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.
      */
     public byte[] getBlob() { 
       return this.blob == null ? null : this.blob.getValue();
     }
 
     /**
-     * @param value The base64 encoding of the Signature content.
+     * @param value The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.
      */
     public Signature setBlob(byte[] value) { 
+      if (value == null)
+        this.blob = null;
+      else {
         if (this.blob == null)
           this.blob = new Base64BinaryType();
         this.blob.setValue(value);
+      }
       return this;
     }
 
@@ -329,8 +333,8 @@ public class Signature extends Type implements ICompositeType {
         childrenList.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("when", "instant", "When the digital signature was signed.", 0, java.lang.Integer.MAX_VALUE, when));
         childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).", 0, java.lang.Integer.MAX_VALUE, who));
-        childrenList.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.", 0, java.lang.Integer.MAX_VALUE, contentType));
-        childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content.", 0, java.lang.Integer.MAX_VALUE, blob));
+        childrenList.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.", 0, java.lang.Integer.MAX_VALUE, contentType));
+        childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, java.lang.Integer.MAX_VALUE, blob));
       }
 
       @Override
@@ -422,9 +426,8 @@ public class Signature extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (when == null || when.isEmpty())
-           && (who == null || who.isEmpty()) && (contentType == null || contentType.isEmpty()) && (blob == null || blob.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  when,  who,  contentType
+          ,  blob);
       }
 
 

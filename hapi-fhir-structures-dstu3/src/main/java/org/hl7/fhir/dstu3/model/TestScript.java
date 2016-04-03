@@ -29,232 +29,24 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
 public class TestScript extends DomainResource {
-
-    public enum ProfileOriginType {
-        /**
-         * General DSTU2 client initiating against a DSTU2 Server.
-         */
-        FHIRDSTU2CLIENT, 
-        /**
-         * DSTU2 client that serves as an SDC-FormFiller.
-         */
-        FHIRDSTU2SDCFORMFILLER, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static ProfileOriginType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("FHIR-DSTU2-Client".equals(codeString))
-          return FHIRDSTU2CLIENT;
-        if ("FHIR-DSTU2-SDC-FormFiller".equals(codeString))
-          return FHIRDSTU2SDCFORMFILLER;
-        throw new FHIRException("Unknown ProfileOriginType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case FHIRDSTU2CLIENT: return "FHIR-DSTU2-Client";
-            case FHIRDSTU2SDCFORMFILLER: return "FHIR-DSTU2-SDC-FormFiller";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case FHIRDSTU2CLIENT: return "http://hl7.org/fhir/profile-origin-types";
-            case FHIRDSTU2SDCFORMFILLER: return "http://hl7.org/fhir/profile-origin-types";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case FHIRDSTU2CLIENT: return "General DSTU2 client initiating against a DSTU2 Server.";
-            case FHIRDSTU2SDCFORMFILLER: return "DSTU2 client that serves as an SDC-FormFiller.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case FHIRDSTU2CLIENT: return "FHIR-DSTU2-Client";
-            case FHIRDSTU2SDCFORMFILLER: return "FHIR-DSTU2-SDC-FormFiller";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ProfileOriginTypeEnumFactory implements EnumFactory<ProfileOriginType> {
-    public ProfileOriginType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("FHIR-DSTU2-Client".equals(codeString))
-          return ProfileOriginType.FHIRDSTU2CLIENT;
-        if ("FHIR-DSTU2-SDC-FormFiller".equals(codeString))
-          return ProfileOriginType.FHIRDSTU2SDCFORMFILLER;
-        throw new IllegalArgumentException("Unknown ProfileOriginType code '"+codeString+"'");
-        }
-        public Enumeration<ProfileOriginType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("FHIR-DSTU2-Client".equals(codeString))
-          return new Enumeration<ProfileOriginType>(this, ProfileOriginType.FHIRDSTU2CLIENT);
-        if ("FHIR-DSTU2-SDC-FormFiller".equals(codeString))
-          return new Enumeration<ProfileOriginType>(this, ProfileOriginType.FHIRDSTU2SDCFORMFILLER);
-        throw new FHIRException("Unknown ProfileOriginType code '"+codeString+"'");
-        }
-    public String toCode(ProfileOriginType code) {
-      if (code == ProfileOriginType.FHIRDSTU2CLIENT)
-        return "FHIR-DSTU2-Client";
-      if (code == ProfileOriginType.FHIRDSTU2SDCFORMFILLER)
-        return "FHIR-DSTU2-SDC-FormFiller";
-      return "?";
-      }
-    public String toSystem(ProfileOriginType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum ProfileDestinationType {
-        /**
-         * General DSTU2 server.
-         */
-        FHIRDSTU2SERVER, 
-        /**
-         * DSTU2 server that serves as an SDC-FormManager.
-         */
-        FHIRDSTU2SDCFORMMANAGER, 
-        /**
-         * DSTU2 server that serves as an SDC-FormReceiver.
-         */
-        FHIRDSTU2SDCFORMRECEIVER, 
-        /**
-         * DSTU2 server that serves as an SDC-FormProcessor.
-         */
-        FHIRDSTU2SDCFORMPROCESSOR, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static ProfileDestinationType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("FHIR-DSTU2-Server".equals(codeString))
-          return FHIRDSTU2SERVER;
-        if ("FHIR-DSTU2-SDC-FormManager".equals(codeString))
-          return FHIRDSTU2SDCFORMMANAGER;
-        if ("FHIR-DSTU2-SDC-FormReceiver".equals(codeString))
-          return FHIRDSTU2SDCFORMRECEIVER;
-        if ("FHIR-DSTU2-SDC-FormProcessor".equals(codeString))
-          return FHIRDSTU2SDCFORMPROCESSOR;
-        throw new FHIRException("Unknown ProfileDestinationType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case FHIRDSTU2SERVER: return "FHIR-DSTU2-Server";
-            case FHIRDSTU2SDCFORMMANAGER: return "FHIR-DSTU2-SDC-FormManager";
-            case FHIRDSTU2SDCFORMRECEIVER: return "FHIR-DSTU2-SDC-FormReceiver";
-            case FHIRDSTU2SDCFORMPROCESSOR: return "FHIR-DSTU2-SDC-FormProcessor";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case FHIRDSTU2SERVER: return "http://hl7.org/fhir/profile-destination-types";
-            case FHIRDSTU2SDCFORMMANAGER: return "http://hl7.org/fhir/profile-destination-types";
-            case FHIRDSTU2SDCFORMRECEIVER: return "http://hl7.org/fhir/profile-destination-types";
-            case FHIRDSTU2SDCFORMPROCESSOR: return "http://hl7.org/fhir/profile-destination-types";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case FHIRDSTU2SERVER: return "General DSTU2 server.";
-            case FHIRDSTU2SDCFORMMANAGER: return "DSTU2 server that serves as an SDC-FormManager.";
-            case FHIRDSTU2SDCFORMRECEIVER: return "DSTU2 server that serves as an SDC-FormReceiver.";
-            case FHIRDSTU2SDCFORMPROCESSOR: return "DSTU2 server that serves as an SDC-FormProcessor.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case FHIRDSTU2SERVER: return "FHIR-DSTU2-Server";
-            case FHIRDSTU2SDCFORMMANAGER: return "FHIR-DSTU2-SDC-FormManager";
-            case FHIRDSTU2SDCFORMRECEIVER: return "FHIR-DSTU2-SDC-FormReceiver";
-            case FHIRDSTU2SDCFORMPROCESSOR: return "FHIR-DSTU2-SDC-FormProcessor";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ProfileDestinationTypeEnumFactory implements EnumFactory<ProfileDestinationType> {
-    public ProfileDestinationType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("FHIR-DSTU2-Server".equals(codeString))
-          return ProfileDestinationType.FHIRDSTU2SERVER;
-        if ("FHIR-DSTU2-SDC-FormManager".equals(codeString))
-          return ProfileDestinationType.FHIRDSTU2SDCFORMMANAGER;
-        if ("FHIR-DSTU2-SDC-FormReceiver".equals(codeString))
-          return ProfileDestinationType.FHIRDSTU2SDCFORMRECEIVER;
-        if ("FHIR-DSTU2-SDC-FormProcessor".equals(codeString))
-          return ProfileDestinationType.FHIRDSTU2SDCFORMPROCESSOR;
-        throw new IllegalArgumentException("Unknown ProfileDestinationType code '"+codeString+"'");
-        }
-        public Enumeration<ProfileDestinationType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("FHIR-DSTU2-Server".equals(codeString))
-          return new Enumeration<ProfileDestinationType>(this, ProfileDestinationType.FHIRDSTU2SERVER);
-        if ("FHIR-DSTU2-SDC-FormManager".equals(codeString))
-          return new Enumeration<ProfileDestinationType>(this, ProfileDestinationType.FHIRDSTU2SDCFORMMANAGER);
-        if ("FHIR-DSTU2-SDC-FormReceiver".equals(codeString))
-          return new Enumeration<ProfileDestinationType>(this, ProfileDestinationType.FHIRDSTU2SDCFORMRECEIVER);
-        if ("FHIR-DSTU2-SDC-FormProcessor".equals(codeString))
-          return new Enumeration<ProfileDestinationType>(this, ProfileDestinationType.FHIRDSTU2SDCFORMPROCESSOR);
-        throw new FHIRException("Unknown ProfileDestinationType code '"+codeString+"'");
-        }
-    public String toCode(ProfileDestinationType code) {
-      if (code == ProfileDestinationType.FHIRDSTU2SERVER)
-        return "FHIR-DSTU2-Server";
-      if (code == ProfileDestinationType.FHIRDSTU2SDCFORMMANAGER)
-        return "FHIR-DSTU2-SDC-FormManager";
-      if (code == ProfileDestinationType.FHIRDSTU2SDCFORMRECEIVER)
-        return "FHIR-DSTU2-SDC-FormReceiver";
-      if (code == ProfileDestinationType.FHIRDSTU2SDCFORMPROCESSOR)
-        return "FHIR-DSTU2-SDC-FormProcessor";
-      return "?";
-      }
-    public String toSystem(ProfileDestinationType code) {
-      return code.getSystem();
-      }
-    }
 
     public enum ContentType {
         /**
@@ -898,7 +690,7 @@ public class TestScript extends DomainResource {
          * The name of an individual to contact regarding the Test Script.
          */
         @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the Test Script." )
+        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the Test Script." )
         protected StringType name;
 
         /**
@@ -1067,12 +859,353 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
       }
 
   public String fhirType() {
     return "TestScript.contact";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptOriginComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
+         */
+        @Child(name = "index", type = {IntegerType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The index of the abstract origin server starting at 1", formalDefinition="Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1." )
+        protected IntegerType index;
+
+        /**
+         * The type of origin profile the test system supports.
+         */
+        @Child(name = "profile", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="FHIR-Client | FHIR-SDC-FormFiller", formalDefinition="The type of origin profile the test system supports." )
+        protected Coding profile;
+
+        private static final long serialVersionUID = -1239935149L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptOriginComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptOriginComponent(IntegerType index, Coding profile) {
+        super();
+        this.index = index;
+        this.profile = profile;
+      }
+
+        /**
+         * @return {@link #index} (Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
+         */
+        public IntegerType getIndexElement() { 
+          if (this.index == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptOriginComponent.index");
+            else if (Configuration.doAutoCreate())
+              this.index = new IntegerType(); // bb
+          return this.index;
+        }
+
+        public boolean hasIndexElement() { 
+          return this.index != null && !this.index.isEmpty();
+        }
+
+        public boolean hasIndex() { 
+          return this.index != null && !this.index.isEmpty();
+        }
+
+        /**
+         * @param value {@link #index} (Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
+         */
+        public TestScriptOriginComponent setIndexElement(IntegerType value) { 
+          this.index = value;
+          return this;
+        }
+
+        /**
+         * @return Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
+         */
+        public int getIndex() { 
+          return this.index == null || this.index.isEmpty() ? 0 : this.index.getValue();
+        }
+
+        /**
+         * @param value Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
+         */
+        public TestScriptOriginComponent setIndex(int value) { 
+            if (this.index == null)
+              this.index = new IntegerType();
+            this.index.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #profile} (The type of origin profile the test system supports.)
+         */
+        public Coding getProfile() { 
+          if (this.profile == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptOriginComponent.profile");
+            else if (Configuration.doAutoCreate())
+              this.profile = new Coding(); // cc
+          return this.profile;
+        }
+
+        public boolean hasProfile() { 
+          return this.profile != null && !this.profile.isEmpty();
+        }
+
+        /**
+         * @param value {@link #profile} (The type of origin profile the test system supports.)
+         */
+        public TestScriptOriginComponent setProfile(Coding value) { 
+          this.profile = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("index", "integer", "Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
+          childrenList.add(new Property("profile", "Coding", "The type of origin profile the test system supports.", 0, java.lang.Integer.MAX_VALUE, profile));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("index"))
+          this.index = castToInteger(value); // IntegerType
+        else if (name.equals("profile"))
+          this.profile = castToCoding(value); // Coding
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("index")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.index");
+        }
+        else if (name.equals("profile")) {
+          this.profile = new Coding();
+          return this.profile;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptOriginComponent copy() {
+        TestScriptOriginComponent dst = new TestScriptOriginComponent();
+        copyValues(dst);
+        dst.index = index == null ? null : index.copy();
+        dst.profile = profile == null ? null : profile.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptOriginComponent))
+          return false;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptOriginComponent))
+          return false;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        return compareValues(index, o.index, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( index,  profile);
+      }
+
+  public String fhirType() {
+    return "TestScript.origin";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptDestinationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
+         */
+        @Child(name = "index", type = {IntegerType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The index of the abstract destination server starting at 1", formalDefinition="Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1." )
+        protected IntegerType index;
+
+        /**
+         * The type of destination profile the test system supports.
+         */
+        @Child(name = "profile", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="FHIR-Server | FHIR-SDC-FormManager | FHIR-SDC-FormReceiver | FHIR-SDC-FormProcessor", formalDefinition="The type of destination profile the test system supports." )
+        protected Coding profile;
+
+        private static final long serialVersionUID = -1239935149L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptDestinationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptDestinationComponent(IntegerType index, Coding profile) {
+        super();
+        this.index = index;
+        this.profile = profile;
+      }
+
+        /**
+         * @return {@link #index} (Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
+         */
+        public IntegerType getIndexElement() { 
+          if (this.index == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptDestinationComponent.index");
+            else if (Configuration.doAutoCreate())
+              this.index = new IntegerType(); // bb
+          return this.index;
+        }
+
+        public boolean hasIndexElement() { 
+          return this.index != null && !this.index.isEmpty();
+        }
+
+        public boolean hasIndex() { 
+          return this.index != null && !this.index.isEmpty();
+        }
+
+        /**
+         * @param value {@link #index} (Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
+         */
+        public TestScriptDestinationComponent setIndexElement(IntegerType value) { 
+          this.index = value;
+          return this;
+        }
+
+        /**
+         * @return Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
+         */
+        public int getIndex() { 
+          return this.index == null || this.index.isEmpty() ? 0 : this.index.getValue();
+        }
+
+        /**
+         * @param value Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
+         */
+        public TestScriptDestinationComponent setIndex(int value) { 
+            if (this.index == null)
+              this.index = new IntegerType();
+            this.index.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #profile} (The type of destination profile the test system supports.)
+         */
+        public Coding getProfile() { 
+          if (this.profile == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptDestinationComponent.profile");
+            else if (Configuration.doAutoCreate())
+              this.profile = new Coding(); // cc
+          return this.profile;
+        }
+
+        public boolean hasProfile() { 
+          return this.profile != null && !this.profile.isEmpty();
+        }
+
+        /**
+         * @param value {@link #profile} (The type of destination profile the test system supports.)
+         */
+        public TestScriptDestinationComponent setProfile(Coding value) { 
+          this.profile = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("index", "integer", "Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
+          childrenList.add(new Property("profile", "Coding", "The type of destination profile the test system supports.", 0, java.lang.Integer.MAX_VALUE, profile));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("index"))
+          this.index = castToInteger(value); // IntegerType
+        else if (name.equals("profile"))
+          this.profile = castToCoding(value); // Coding
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("index")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.index");
+        }
+        else if (name.equals("profile")) {
+          this.profile = new Coding();
+          return this.profile;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptDestinationComponent copy() {
+        TestScriptDestinationComponent dst = new TestScriptDestinationComponent();
+        copyValues(dst);
+        dst.index = index == null ? null : index.copy();
+        dst.profile = profile == null ? null : profile.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptDestinationComponent))
+          return false;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptDestinationComponent))
+          return false;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        return compareValues(index, o.index, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( index,  profile);
+      }
+
+  public String fhirType() {
+    return "TestScript.destination";
 
   }
 
@@ -1248,8 +1381,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (link == null || link.isEmpty()) && (capability == null || capability.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( link,  capability);
       }
 
   public String fhirType() {
@@ -1443,8 +1575,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (description == null || description.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  description);
       }
 
   public String fhirType() {
@@ -1968,398 +2099,12 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (required == null || required.isEmpty()) && (validated == null || validated.isEmpty())
-           && (description == null || description.isEmpty()) && (origin == null || origin.isEmpty())
-           && (destination == null || destination.isEmpty()) && (link == null || link.isEmpty()) && (conformance == null || conformance.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( required,  validated,  description
+          ,  origin,  destination,  link,  conformance);
       }
 
   public String fhirType() {
     return "TestScript.metadata.capability";
-
-  }
-
-  }
-
-    @Block()
-    public static class TestScriptOriginComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
-         */
-        @Child(name = "index", type = {IntegerType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The index of the abstract origin server starting at 1", formalDefinition="Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1." )
-        protected IntegerType index;
-
-        /**
-         * The type of profile the server supports.
-         */
-        @Child(name = "profile", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="FHIR-DSTU2-Client | FHIR-DSTU2-SDC-FormFiller", formalDefinition="The type of profile the server supports." )
-        protected Enumeration<ProfileOriginType> profile;
-
-        private static final long serialVersionUID = -1472818765L;
-
-    /**
-     * Constructor
-     */
-      public TestScriptOriginComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public TestScriptOriginComponent(IntegerType index, Enumeration<ProfileOriginType> profile) {
-        super();
-        this.index = index;
-        this.profile = profile;
-      }
-
-        /**
-         * @return {@link #index} (Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
-         */
-        public IntegerType getIndexElement() { 
-          if (this.index == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptOriginComponent.index");
-            else if (Configuration.doAutoCreate())
-              this.index = new IntegerType(); // bb
-          return this.index;
-        }
-
-        public boolean hasIndexElement() { 
-          return this.index != null && !this.index.isEmpty();
-        }
-
-        public boolean hasIndex() { 
-          return this.index != null && !this.index.isEmpty();
-        }
-
-        /**
-         * @param value {@link #index} (Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
-         */
-        public TestScriptOriginComponent setIndexElement(IntegerType value) { 
-          this.index = value;
-          return this;
-        }
-
-        /**
-         * @return Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
-         */
-        public int getIndex() { 
-          return this.index == null || this.index.isEmpty() ? 0 : this.index.getValue();
-        }
-
-        /**
-         * @param value Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.
-         */
-        public TestScriptOriginComponent setIndex(int value) { 
-            if (this.index == null)
-              this.index = new IntegerType();
-            this.index.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #profile} (The type of profile the server supports.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
-         */
-        public Enumeration<ProfileOriginType> getProfileElement() { 
-          if (this.profile == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptOriginComponent.profile");
-            else if (Configuration.doAutoCreate())
-              this.profile = new Enumeration<ProfileOriginType>(new ProfileOriginTypeEnumFactory()); // bb
-          return this.profile;
-        }
-
-        public boolean hasProfileElement() { 
-          return this.profile != null && !this.profile.isEmpty();
-        }
-
-        public boolean hasProfile() { 
-          return this.profile != null && !this.profile.isEmpty();
-        }
-
-        /**
-         * @param value {@link #profile} (The type of profile the server supports.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
-         */
-        public TestScriptOriginComponent setProfileElement(Enumeration<ProfileOriginType> value) { 
-          this.profile = value;
-          return this;
-        }
-
-        /**
-         * @return The type of profile the server supports.
-         */
-        public ProfileOriginType getProfile() { 
-          return this.profile == null ? null : this.profile.getValue();
-        }
-
-        /**
-         * @param value The type of profile the server supports.
-         */
-        public TestScriptOriginComponent setProfile(ProfileOriginType value) { 
-            if (this.profile == null)
-              this.profile = new Enumeration<ProfileOriginType>(new ProfileOriginTypeEnumFactory());
-            this.profile.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("index", "integer", "Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
-          childrenList.add(new Property("profile", "code", "The type of profile the server supports.", 0, java.lang.Integer.MAX_VALUE, profile));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("index"))
-          this.index = castToInteger(value); // IntegerType
-        else if (name.equals("profile"))
-          this.profile = new ProfileOriginTypeEnumFactory().fromType(value); // Enumeration<ProfileOriginType>
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("index")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.index");
-        }
-        else if (name.equals("profile")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.profile");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public TestScriptOriginComponent copy() {
-        TestScriptOriginComponent dst = new TestScriptOriginComponent();
-        copyValues(dst);
-        dst.index = index == null ? null : index.copy();
-        dst.profile = profile == null ? null : profile.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof TestScriptOriginComponent))
-          return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
-        return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof TestScriptOriginComponent))
-          return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
-        return compareValues(index, o.index, true) && compareValues(profile, o.profile, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (index == null || index.isEmpty()) && (profile == null || profile.isEmpty())
-          ;
-      }
-
-  public String fhirType() {
-    return "TestScript.origin";
-
-  }
-
-  }
-
-    @Block()
-    public static class TestScriptDestinationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
-         */
-        @Child(name = "index", type = {IntegerType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The index of the abstract destination server starting at 1", formalDefinition="Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1." )
-        protected IntegerType index;
-
-        /**
-         * The type of profile the server supports.
-         */
-        @Child(name = "profile", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="FHIR-DSTU2-Server | FHIR-DSTU2-SDC-FormManager | FHIR-DSTU2-SDC-FormReceiver | FHIR-DSTU2-SDC-FormProcessor", formalDefinition="The type of profile the server supports." )
-        protected Enumeration<ProfileDestinationType> profile;
-
-        private static final long serialVersionUID = 399132503L;
-
-    /**
-     * Constructor
-     */
-      public TestScriptDestinationComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public TestScriptDestinationComponent(IntegerType index, Enumeration<ProfileDestinationType> profile) {
-        super();
-        this.index = index;
-        this.profile = profile;
-      }
-
-        /**
-         * @return {@link #index} (Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
-         */
-        public IntegerType getIndexElement() { 
-          if (this.index == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptDestinationComponent.index");
-            else if (Configuration.doAutoCreate())
-              this.index = new IntegerType(); // bb
-          return this.index;
-        }
-
-        public boolean hasIndexElement() { 
-          return this.index != null && !this.index.isEmpty();
-        }
-
-        public boolean hasIndex() { 
-          return this.index != null && !this.index.isEmpty();
-        }
-
-        /**
-         * @param value {@link #index} (Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.). This is the underlying object with id, value and extensions. The accessor "getIndex" gives direct access to the value
-         */
-        public TestScriptDestinationComponent setIndexElement(IntegerType value) { 
-          this.index = value;
-          return this;
-        }
-
-        /**
-         * @return Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
-         */
-        public int getIndex() { 
-          return this.index == null || this.index.isEmpty() ? 0 : this.index.getValue();
-        }
-
-        /**
-         * @param value Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.
-         */
-        public TestScriptDestinationComponent setIndex(int value) { 
-            if (this.index == null)
-              this.index = new IntegerType();
-            this.index.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #profile} (The type of profile the server supports.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
-         */
-        public Enumeration<ProfileDestinationType> getProfileElement() { 
-          if (this.profile == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptDestinationComponent.profile");
-            else if (Configuration.doAutoCreate())
-              this.profile = new Enumeration<ProfileDestinationType>(new ProfileDestinationTypeEnumFactory()); // bb
-          return this.profile;
-        }
-
-        public boolean hasProfileElement() { 
-          return this.profile != null && !this.profile.isEmpty();
-        }
-
-        public boolean hasProfile() { 
-          return this.profile != null && !this.profile.isEmpty();
-        }
-
-        /**
-         * @param value {@link #profile} (The type of profile the server supports.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
-         */
-        public TestScriptDestinationComponent setProfileElement(Enumeration<ProfileDestinationType> value) { 
-          this.profile = value;
-          return this;
-        }
-
-        /**
-         * @return The type of profile the server supports.
-         */
-        public ProfileDestinationType getProfile() { 
-          return this.profile == null ? null : this.profile.getValue();
-        }
-
-        /**
-         * @param value The type of profile the server supports.
-         */
-        public TestScriptDestinationComponent setProfile(ProfileDestinationType value) { 
-            if (this.profile == null)
-              this.profile = new Enumeration<ProfileDestinationType>(new ProfileDestinationTypeEnumFactory());
-            this.profile.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("index", "integer", "Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
-          childrenList.add(new Property("profile", "code", "The type of profile the server supports.", 0, java.lang.Integer.MAX_VALUE, profile));
-        }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("index"))
-          this.index = castToInteger(value); // IntegerType
-        else if (name.equals("profile"))
-          this.profile = new ProfileDestinationTypeEnumFactory().fromType(value); // Enumeration<ProfileDestinationType>
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("index")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.index");
-        }
-        else if (name.equals("profile")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.profile");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public TestScriptDestinationComponent copy() {
-        TestScriptDestinationComponent dst = new TestScriptDestinationComponent();
-        copyValues(dst);
-        dst.index = index == null ? null : index.copy();
-        dst.profile = profile == null ? null : profile.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof TestScriptDestinationComponent))
-          return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
-        return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof TestScriptDestinationComponent))
-          return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
-        return compareValues(index, o.index, true) && compareValues(profile, o.profile, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (index == null || index.isEmpty()) && (profile == null || profile.isEmpty())
-          ;
-      }
-
-  public String fhirType() {
-    return "TestScript.destination";
 
   }
 
@@ -2598,8 +2343,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (autocreate == null || autocreate.isEmpty()) && (autodelete == null || autodelete.isEmpty())
-           && (resource == null || resource.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( autocreate,  autodelete,  resource
+          );
       }
 
   public String fhirType() {
@@ -2622,7 +2367,7 @@ public class TestScript extends DomainResource {
          * A default, hard-coded, or user-defined value for this variable.
          */
         @Child(name = "defaultValue", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Default value for this variable", formalDefinition="A default, hard-coded, or user-defined value for this variable." )
+        @Description(shortDefinition="Default, hard-coded, or user-defined value for this variable", formalDefinition="A default, hard-coded, or user-defined value for this variable." )
         protected StringType defaultValue;
 
         /**
@@ -2984,13 +2729,900 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (defaultValue == null || defaultValue.isEmpty())
-           && (headerField == null || headerField.isEmpty()) && (path == null || path.isEmpty()) && (sourceId == null || sourceId.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  defaultValue,  headerField
+          ,  path,  sourceId);
       }
 
   public String fhirType() {
     return "TestScript.variable";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptRuleComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Reference to the resource (containing the contents of the rule needed for assertions).
+         */
+        @Child(name = "resource", type = {}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Assert rule resource reference", formalDefinition="Reference to the resource (containing the contents of the rule needed for assertions)." )
+        protected Reference resource;
+
+        /**
+         * The actual object that is the target of the reference (Reference to the resource (containing the contents of the rule needed for assertions).)
+         */
+        protected Resource resourceTarget;
+
+        /**
+         * Each rule template can take one or more parameters for rule evaluation.
+         */
+        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
+        protected List<TestScriptRuleParamComponent> param;
+
+        private static final long serialVersionUID = -524260474L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptRuleComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptRuleComponent(Reference resource) {
+        super();
+        this.resource = resource;
+      }
+
+        /**
+         * @return {@link #resource} (Reference to the resource (containing the contents of the rule needed for assertions).)
+         */
+        public Reference getResource() { 
+          if (this.resource == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRuleComponent.resource");
+            else if (Configuration.doAutoCreate())
+              this.resource = new Reference(); // cc
+          return this.resource;
+        }
+
+        public boolean hasResource() { 
+          return this.resource != null && !this.resource.isEmpty();
+        }
+
+        /**
+         * @param value {@link #resource} (Reference to the resource (containing the contents of the rule needed for assertions).)
+         */
+        public TestScriptRuleComponent setResource(Reference value) { 
+          this.resource = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the rule needed for assertions).)
+         */
+        public Resource getResourceTarget() { 
+          return this.resourceTarget;
+        }
+
+        /**
+         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the rule needed for assertions).)
+         */
+        public TestScriptRuleComponent setResourceTarget(Resource value) { 
+          this.resourceTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+        public List<TestScriptRuleParamComponent> getParam() { 
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRuleParamComponent>();
+          return this.param;
+        }
+
+        public boolean hasParam() { 
+          if (this.param == null)
+            return false;
+          for (TestScriptRuleParamComponent item : this.param)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+    // syntactic sugar
+        public TestScriptRuleParamComponent addParam() { //3
+          TestScriptRuleParamComponent t = new TestScriptRuleParamComponent();
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRuleParamComponent>();
+          this.param.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public TestScriptRuleComponent addParam(TestScriptRuleParamComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRuleParamComponent>();
+          this.param.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("resource"))
+          this.resource = castToReference(value); // Reference
+        else if (name.equals("param"))
+          this.getParam().add((TestScriptRuleParamComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("resource")) {
+          this.resource = new Reference();
+          return this.resource;
+        }
+        else if (name.equals("param")) {
+          return addParam();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptRuleComponent copy() {
+        TestScriptRuleComponent dst = new TestScriptRuleComponent();
+        copyValues(dst);
+        dst.resource = resource == null ? null : resource.copy();
+        if (param != null) {
+          dst.param = new ArrayList<TestScriptRuleParamComponent>();
+          for (TestScriptRuleParamComponent i : param)
+            dst.param.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptRuleComponent))
+          return false;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        return compareDeep(resource, o.resource, true) && compareDeep(param, o.param, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptRuleComponent))
+          return false;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( resource,  param);
+      }
+
+  public String fhirType() {
+    return "TestScript.rule";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter name matching external assert rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert rule parameter name." )
+        protected StringType name;
+
+        /**
+         * The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         */
+        @Child(name = "value", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The explict or dynamic value for the parameter that will be passed on to the external rule template." )
+        protected StringType value;
+
+        private static final long serialVersionUID = 395259392L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptRuleParamComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptRuleParamComponent(StringType name) {
+        super();
+        this.name = name;
+      }
+
+        /**
+         * @return {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRuleParamComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public TestScriptRuleParamComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        public TestScriptRuleParamComponent setName(String value) { 
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The explict or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRuleParamComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The explict or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public TestScriptRuleParamComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         */
+        public TestScriptRuleParamComponent setValue(String value) { 
+          if (Utilities.noString(value))
+            this.value = null;
+          else {
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("value", "string", "The explict or dynamic value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptRuleParamComponent copy() {
+        TestScriptRuleParamComponent dst = new TestScriptRuleParamComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptRuleParamComponent))
+          return false;
+        TestScriptRuleParamComponent o = (TestScriptRuleParamComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptRuleParamComponent))
+          return false;
+        TestScriptRuleParamComponent o = (TestScriptRuleParamComponent) other;
+        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+      }
+
+  public String fhirType() {
+    return "TestScript.rule.param";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptRulesetComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Reference to the resource (containing the contents of the ruleset needed for assertions).
+         */
+        @Child(name = "resource", type = {}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Assert ruleset resource reference", formalDefinition="Reference to the resource (containing the contents of the ruleset needed for assertions)." )
+        protected Reference resource;
+
+        /**
+         * The actual object that is the target of the reference (Reference to the resource (containing the contents of the ruleset needed for assertions).)
+         */
+        protected Resource resourceTarget;
+
+        /**
+         * Id of the referenced rule within the external ruleset template.
+         */
+        @Child(name = "rule", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        protected List<TestScriptRulesetRuleComponent> rule;
+
+        private static final long serialVersionUID = 5813554L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetComponent(Reference resource) {
+        super();
+        this.resource = resource;
+      }
+
+        /**
+         * @return {@link #resource} (Reference to the resource (containing the contents of the ruleset needed for assertions).)
+         */
+        public Reference getResource() { 
+          if (this.resource == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRulesetComponent.resource");
+            else if (Configuration.doAutoCreate())
+              this.resource = new Reference(); // cc
+          return this.resource;
+        }
+
+        public boolean hasResource() { 
+          return this.resource != null && !this.resource.isEmpty();
+        }
+
+        /**
+         * @param value {@link #resource} (Reference to the resource (containing the contents of the ruleset needed for assertions).)
+         */
+        public TestScriptRulesetComponent setResource(Reference value) { 
+          this.resource = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the ruleset needed for assertions).)
+         */
+        public Resource getResourceTarget() { 
+          return this.resourceTarget;
+        }
+
+        /**
+         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the ruleset needed for assertions).)
+         */
+        public TestScriptRulesetComponent setResourceTarget(Resource value) { 
+          this.resourceTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         */
+        public List<TestScriptRulesetRuleComponent> getRule() { 
+          if (this.rule == null)
+            this.rule = new ArrayList<TestScriptRulesetRuleComponent>();
+          return this.rule;
+        }
+
+        public boolean hasRule() { 
+          if (this.rule == null)
+            return false;
+          for (TestScriptRulesetRuleComponent item : this.rule)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         */
+    // syntactic sugar
+        public TestScriptRulesetRuleComponent addRule() { //3
+          TestScriptRulesetRuleComponent t = new TestScriptRulesetRuleComponent();
+          if (this.rule == null)
+            this.rule = new ArrayList<TestScriptRulesetRuleComponent>();
+          this.rule.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public TestScriptRulesetComponent addRule(TestScriptRulesetRuleComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.rule == null)
+            this.rule = new ArrayList<TestScriptRulesetRuleComponent>();
+          this.rule.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("rule", "", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("resource"))
+          this.resource = castToReference(value); // Reference
+        else if (name.equals("rule"))
+          this.getRule().add((TestScriptRulesetRuleComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("resource")) {
+          this.resource = new Reference();
+          return this.resource;
+        }
+        else if (name.equals("rule")) {
+          return addRule();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptRulesetComponent copy() {
+        TestScriptRulesetComponent dst = new TestScriptRulesetComponent();
+        copyValues(dst);
+        dst.resource = resource == null ? null : resource.copy();
+        if (rule != null) {
+          dst.rule = new ArrayList<TestScriptRulesetRuleComponent>();
+          for (TestScriptRulesetRuleComponent i : rule)
+            dst.rule.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetComponent))
+          return false;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        return compareDeep(resource, o.resource, true) && compareDeep(rule, o.rule, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetComponent))
+          return false;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( resource,  rule);
+      }
+
+  public String fhirType() {
+    return "TestScript.ruleset";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptRulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Each rule template can take one or more parameters for rule evaluation.
+         */
+        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Ruleset rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
+        protected List<TestScriptRulesetRuleParamComponent> param;
+
+        private static final long serialVersionUID = 1266281462L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetRuleComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+        public List<TestScriptRulesetRuleParamComponent> getParam() { 
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
+          return this.param;
+        }
+
+        public boolean hasParam() { 
+          if (this.param == null)
+            return false;
+          for (TestScriptRulesetRuleParamComponent item : this.param)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+    // syntactic sugar
+        public TestScriptRulesetRuleParamComponent addParam() { //3
+          TestScriptRulesetRuleParamComponent t = new TestScriptRulesetRuleParamComponent();
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
+          this.param.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public TestScriptRulesetRuleComponent addParam(TestScriptRulesetRuleParamComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.param == null)
+            this.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
+          this.param.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("param"))
+          this.getParam().add((TestScriptRulesetRuleParamComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("param")) {
+          return addParam();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptRulesetRuleComponent copy() {
+        TestScriptRulesetRuleComponent dst = new TestScriptRulesetRuleComponent();
+        copyValues(dst);
+        if (param != null) {
+          dst.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
+          for (TestScriptRulesetRuleParamComponent i : param)
+            dst.param.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetRuleComponent))
+          return false;
+        TestScriptRulesetRuleComponent o = (TestScriptRulesetRuleComponent) other;
+        return compareDeep(param, o.param, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetRuleComponent))
+          return false;
+        TestScriptRulesetRuleComponent o = (TestScriptRulesetRuleComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+      }
+
+  public String fhirType() {
+    return "TestScript.ruleset.rule";
+
+  }
+
+  }
+
+    @Block()
+    public static class TestScriptRulesetRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter name matching external assert ruleset rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert ruleset rule parameter name." )
+        protected StringType name;
+
+        /**
+         * The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        @Child(name = "value", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external ruleset rule template." )
+        protected StringType value;
+
+        private static final long serialVersionUID = 395259392L;
+
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetRuleParamComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetRuleParamComponent(StringType name) {
+        super();
+        this.name = name;
+      }
+
+        /**
+         * @return {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRulesetRuleParamComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public TestScriptRulesetRuleParamComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        public TestScriptRulesetRuleParamComponent setName(String value) { 
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRulesetRuleParamComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public TestScriptRulesetRuleParamComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        public TestScriptRulesetRuleParamComponent setValue(String value) { 
+          if (Utilities.noString(value))
+            this.value = null;
+          else {
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TestScriptRulesetRuleParamComponent copy() {
+        TestScriptRulesetRuleParamComponent dst = new TestScriptRulesetRuleParamComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetRuleParamComponent))
+          return false;
+        TestScriptRulesetRuleParamComponent o = (TestScriptRulesetRuleParamComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptRulesetRuleParamComponent))
+          return false;
+        TestScriptRulesetRuleParamComponent o = (TestScriptRulesetRuleParamComponent) other;
+        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+      }
+
+  public String fhirType() {
+    return "TestScript.ruleset.rule.param";
 
   }
 
@@ -3147,8 +3779,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( metadata,  action);
       }
 
   public String fhirType() {
@@ -3290,8 +3921,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation,  assert_);
       }
 
   public String fhirType() {
@@ -3307,7 +3937,7 @@ public class TestScript extends DomainResource {
          * Server interaction or operation type.
          */
         @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The setup operation type that will be executed", formalDefinition="Server interaction or operation type." )
+        @Description(shortDefinition="The operation code type that will be executed", formalDefinition="Server interaction or operation type." )
         protected Coding type;
 
         /**
@@ -4268,13 +4898,9 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (resource == null || resource.isEmpty())
-           && (label == null || label.isEmpty()) && (description == null || description.isEmpty()) && (accept == null || accept.isEmpty())
-           && (contentType == null || contentType.isEmpty()) && (destination == null || destination.isEmpty())
-           && (encodeRequestUrl == null || encodeRequestUrl.isEmpty()) && (origin == null || origin.isEmpty())
-           && (params == null || params.isEmpty()) && (requestHeader == null || requestHeader.isEmpty())
-           && (responseId == null || responseId.isEmpty()) && (sourceId == null || sourceId.isEmpty())
-           && (targetId == null || targetId.isEmpty()) && (url == null || url.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  resource,  label,  description
+          ,  accept,  contentType,  destination,  encodeRequestUrl,  origin,  params,  requestHeader,  responseId
+          ,  sourceId,  targetId,  url);
       }
 
   public String fhirType() {
@@ -4465,8 +5091,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (field == null || field.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( field,  value);
       }
 
   public String fhirType() {
@@ -4528,10 +5153,10 @@ public class TestScript extends DomainResource {
         protected StringType headerField;
 
         /**
-         * The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
+         * The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.
          */
         @Child(name = "minimumId", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Fixture Id of minimum content resource", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId." )
+        @Description(shortDefinition="Fixture Id of minimum content resource", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId." )
         protected StringType minimumId;
 
         /**
@@ -4577,34 +5202,48 @@ public class TestScript extends DomainResource {
         protected StringType responseCode;
 
         /**
+         * The TestScript.rule id value this assert will evaluate.
+         */
+        @Child(name = "rule", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of the TestScript.rule", formalDefinition="The TestScript.rule id value this assert will evaluate." )
+        protected SetupActionAssertRuleComponent rule;
+
+        /**
+         * The TestScript.ruleset id value this assert will evaluate.
+         */
+        @Child(name = "ruleset", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of the TestScript.ruleset", formalDefinition="The TestScript.ruleset id value this assert will evaluate." )
+        protected SetupActionAssertRulesetComponent ruleset;
+
+        /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "sourceId", type = {IdType.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of source expression or headerField", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
         /**
          * The ID of the Profile to validate against.
          */
-        @Child(name = "validateProfileId", type = {IdType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validateProfileId", type = {IdType.class}, order=18, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile Id of validation profile reference", formalDefinition="The ID of the Profile to validate against." )
         protected IdType validateProfileId;
 
         /**
          * The value to compare to.
          */
-        @Child(name = "value", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {StringType.class}, order=19, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The value to compare to", formalDefinition="The value to compare to." )
         protected StringType value;
 
         /**
          * Whether or not the test execution will produce a warning only on error for this assert.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=20, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
-        private static final long serialVersionUID = -607939856L;
+        private static final long serialVersionUID = -561290310L;
 
     /**
      * Constructor
@@ -4957,7 +5596,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #minimumId} (The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.). This is the underlying object with id, value and extensions. The accessor "getMinimumId" gives direct access to the value
+         * @return {@link #minimumId} (The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.). This is the underlying object with id, value and extensions. The accessor "getMinimumId" gives direct access to the value
          */
         public StringType getMinimumIdElement() { 
           if (this.minimumId == null)
@@ -4977,7 +5616,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #minimumId} (The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.). This is the underlying object with id, value and extensions. The accessor "getMinimumId" gives direct access to the value
+         * @param value {@link #minimumId} (The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.). This is the underlying object with id, value and extensions. The accessor "getMinimumId" gives direct access to the value
          */
         public SetupActionAssertComponent setMinimumIdElement(StringType value) { 
           this.minimumId = value;
@@ -4985,14 +5624,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
+         * @return The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.
          */
         public String getMinimumId() { 
           return this.minimumId == null ? null : this.minimumId.getValue();
         }
 
         /**
-         * @param value The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
+         * @param value The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.
          */
         public SetupActionAssertComponent setMinimumId(String value) { 
           if (Utilities.noString(value))
@@ -5296,6 +5935,54 @@ public class TestScript extends DomainResource {
         }
 
         /**
+         * @return {@link #rule} (The TestScript.rule id value this assert will evaluate.)
+         */
+        public SetupActionAssertRuleComponent getRule() { 
+          if (this.rule == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.rule");
+            else if (Configuration.doAutoCreate())
+              this.rule = new SetupActionAssertRuleComponent(); // cc
+          return this.rule;
+        }
+
+        public boolean hasRule() { 
+          return this.rule != null && !this.rule.isEmpty();
+        }
+
+        /**
+         * @param value {@link #rule} (The TestScript.rule id value this assert will evaluate.)
+         */
+        public SetupActionAssertComponent setRule(SetupActionAssertRuleComponent value) { 
+          this.rule = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #ruleset} (The TestScript.ruleset id value this assert will evaluate.)
+         */
+        public SetupActionAssertRulesetComponent getRuleset() { 
+          if (this.ruleset == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.ruleset");
+            else if (Configuration.doAutoCreate())
+              this.ruleset = new SetupActionAssertRulesetComponent(); // cc
+          return this.ruleset;
+        }
+
+        public boolean hasRuleset() { 
+          return this.ruleset != null && !this.ruleset.isEmpty();
+        }
+
+        /**
+         * @param value {@link #ruleset} (The TestScript.ruleset id value this assert will evaluate.)
+         */
+        public SetupActionAssertComponent setRuleset(SetupActionAssertRulesetComponent value) { 
+          this.ruleset = value;
+          return this;
+        }
+
+        /**
          * @return {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
         public IdType getSourceIdElement() { 
@@ -5496,13 +6183,15 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
           childrenList.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
-          childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
+          childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
           childrenList.add(new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, java.lang.Integer.MAX_VALUE, navigationLinks));
           childrenList.add(new Property("operator", "code", "The operator type.", 0, java.lang.Integer.MAX_VALUE, operator));
           childrenList.add(new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, java.lang.Integer.MAX_VALUE, response));
           childrenList.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, java.lang.Integer.MAX_VALUE, responseCode));
+          childrenList.add(new Property("rule", "", "The TestScript.rule id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rule));
+          childrenList.add(new Property("ruleset", "", "The TestScript.ruleset id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleset));
           childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, java.lang.Integer.MAX_VALUE, sourceId));
           childrenList.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, java.lang.Integer.MAX_VALUE, validateProfileId));
           childrenList.add(new Property("value", "string", "The value to compare to.", 0, java.lang.Integer.MAX_VALUE, value));
@@ -5539,6 +6228,10 @@ public class TestScript extends DomainResource {
           this.response = new AssertionResponseTypesEnumFactory().fromType(value); // Enumeration<AssertionResponseTypes>
         else if (name.equals("responseCode"))
           this.responseCode = castToString(value); // StringType
+        else if (name.equals("rule"))
+          this.rule = (SetupActionAssertRuleComponent) value; // SetupActionAssertRuleComponent
+        else if (name.equals("ruleset"))
+          this.ruleset = (SetupActionAssertRulesetComponent) value; // SetupActionAssertRulesetComponent
         else if (name.equals("sourceId"))
           this.sourceId = castToId(value); // IdType
         else if (name.equals("validateProfileId"))
@@ -5595,6 +6288,14 @@ public class TestScript extends DomainResource {
         else if (name.equals("responseCode")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.responseCode");
         }
+        else if (name.equals("rule")) {
+          this.rule = new SetupActionAssertRuleComponent();
+          return this.rule;
+        }
+        else if (name.equals("ruleset")) {
+          this.ruleset = new SetupActionAssertRulesetComponent();
+          return this.ruleset;
+        }
         else if (name.equals("sourceId")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.sourceId");
         }
@@ -5628,6 +6329,8 @@ public class TestScript extends DomainResource {
         dst.resource = resource == null ? null : resource.copy();
         dst.response = response == null ? null : response.copy();
         dst.responseCode = responseCode == null ? null : responseCode.copy();
+        dst.rule = rule == null ? null : rule.copy();
+        dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.sourceId = sourceId == null ? null : sourceId.copy();
         dst.validateProfileId = validateProfileId == null ? null : validateProfileId.copy();
         dst.value = value == null ? null : value.copy();
@@ -5647,9 +6350,9 @@ public class TestScript extends DomainResource {
            && compareDeep(contentType, o.contentType, true) && compareDeep(headerField, o.headerField, true)
            && compareDeep(minimumId, o.minimumId, true) && compareDeep(navigationLinks, o.navigationLinks, true)
            && compareDeep(operator, o.operator, true) && compareDeep(path, o.path, true) && compareDeep(resource, o.resource, true)
-           && compareDeep(response, o.response, true) && compareDeep(responseCode, o.responseCode, true) && compareDeep(sourceId, o.sourceId, true)
-           && compareDeep(validateProfileId, o.validateProfileId, true) && compareDeep(value, o.value, true)
-           && compareDeep(warningOnly, o.warningOnly, true);
+           && compareDeep(response, o.response, true) && compareDeep(responseCode, o.responseCode, true) && compareDeep(rule, o.rule, true)
+           && compareDeep(ruleset, o.ruleset, true) && compareDeep(sourceId, o.sourceId, true) && compareDeep(validateProfileId, o.validateProfileId, true)
+           && compareDeep(value, o.value, true) && compareDeep(warningOnly, o.warningOnly, true);
       }
 
       @Override
@@ -5670,19 +6373,762 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (label == null || label.isEmpty()) && (description == null || description.isEmpty())
-           && (direction == null || direction.isEmpty()) && (compareToSourceId == null || compareToSourceId.isEmpty())
-           && (compareToSourcePath == null || compareToSourcePath.isEmpty()) && (contentType == null || contentType.isEmpty())
-           && (headerField == null || headerField.isEmpty()) && (minimumId == null || minimumId.isEmpty())
-           && (navigationLinks == null || navigationLinks.isEmpty()) && (operator == null || operator.isEmpty())
-           && (path == null || path.isEmpty()) && (resource == null || resource.isEmpty()) && (response == null || response.isEmpty())
-           && (responseCode == null || responseCode.isEmpty()) && (sourceId == null || sourceId.isEmpty())
-           && (validateProfileId == null || validateProfileId.isEmpty()) && (value == null || value.isEmpty())
-           && (warningOnly == null || warningOnly.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( label,  description,  direction
+          ,  compareToSourceId,  compareToSourcePath,  contentType,  headerField,  minimumId,  navigationLinks
+          ,  operator,  path,  resource,  response,  responseCode,  rule,  ruleset,  sourceId,  validateProfileId
+          ,  value,  warningOnly);
       }
 
   public String fhirType() {
     return "TestScript.setup.action.assert";
+
+  }
+
+  }
+
+    @Block()
+    public static class SetupActionAssertRuleComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Each rule template can take one or more parameters for rule evaluation.
+         */
+        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
+        protected List<SetupActionAssertRuleParamComponent> param;
+
+        private static final long serialVersionUID = 791319302L;
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRuleComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+        public List<SetupActionAssertRuleParamComponent> getParam() { 
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRuleParamComponent>();
+          return this.param;
+        }
+
+        public boolean hasParam() { 
+          if (this.param == null)
+            return false;
+          for (SetupActionAssertRuleParamComponent item : this.param)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+    // syntactic sugar
+        public SetupActionAssertRuleParamComponent addParam() { //3
+          SetupActionAssertRuleParamComponent t = new SetupActionAssertRuleParamComponent();
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRuleParamComponent>();
+          this.param.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SetupActionAssertRuleComponent addParam(SetupActionAssertRuleParamComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRuleParamComponent>();
+          this.param.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("param"))
+          this.getParam().add((SetupActionAssertRuleParamComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("param")) {
+          return addParam();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SetupActionAssertRuleComponent copy() {
+        SetupActionAssertRuleComponent dst = new SetupActionAssertRuleComponent();
+        copyValues(dst);
+        if (param != null) {
+          dst.param = new ArrayList<SetupActionAssertRuleParamComponent>();
+          for (SetupActionAssertRuleParamComponent i : param)
+            dst.param.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRuleComponent))
+          return false;
+        SetupActionAssertRuleComponent o = (SetupActionAssertRuleComponent) other;
+        return compareDeep(param, o.param, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRuleComponent))
+          return false;
+        SetupActionAssertRuleComponent o = (SetupActionAssertRuleComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+      }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert.rule";
+
+  }
+
+  }
+
+    @Block()
+    public static class SetupActionAssertRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter name matching external assert rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert rule parameter name." )
+        protected StringType name;
+
+        /**
+         * The value for the parameter that will be passed on to the external rule template.
+         */
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external rule template." )
+        protected StringType value;
+
+        private static final long serialVersionUID = 395259392L;
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRuleParamComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRuleParamComponent(StringType name, StringType value) {
+        super();
+        this.name = name;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRuleParamComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public SetupActionAssertRuleParamComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Descriptive name for this parameter that matches the external assert rule parameter name.
+         */
+        public SetupActionAssertRuleParamComponent setName(String value) { 
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRuleParamComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public SetupActionAssertRuleParamComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return The value for the parameter that will be passed on to the external rule template.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value The value for the parameter that will be passed on to the external rule template.
+         */
+        public SetupActionAssertRuleParamComponent setValue(String value) { 
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SetupActionAssertRuleParamComponent copy() {
+        SetupActionAssertRuleParamComponent dst = new SetupActionAssertRuleParamComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRuleParamComponent))
+          return false;
+        SetupActionAssertRuleParamComponent o = (SetupActionAssertRuleParamComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRuleParamComponent))
+          return false;
+        SetupActionAssertRuleParamComponent o = (SetupActionAssertRuleParamComponent) other;
+        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+      }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert.rule.param";
+
+  }
+
+  }
+
+    @Block()
+    public static class SetupActionAssertRulesetComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Id of the referenced rule within the external ruleset template.
+         */
+        @Child(name = "rule", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        protected List<SetupActionAssertRulesetRuleComponent> rule;
+
+        private static final long serialVersionUID = 2134080946L;
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         */
+        public List<SetupActionAssertRulesetRuleComponent> getRule() { 
+          if (this.rule == null)
+            this.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
+          return this.rule;
+        }
+
+        public boolean hasRule() { 
+          if (this.rule == null)
+            return false;
+          for (SetupActionAssertRulesetRuleComponent item : this.rule)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         */
+    // syntactic sugar
+        public SetupActionAssertRulesetRuleComponent addRule() { //3
+          SetupActionAssertRulesetRuleComponent t = new SetupActionAssertRulesetRuleComponent();
+          if (this.rule == null)
+            this.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
+          this.rule.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SetupActionAssertRulesetComponent addRule(SetupActionAssertRulesetRuleComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.rule == null)
+            this.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
+          this.rule.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("rule", "", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("rule"))
+          this.getRule().add((SetupActionAssertRulesetRuleComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("rule")) {
+          return addRule();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SetupActionAssertRulesetComponent copy() {
+        SetupActionAssertRulesetComponent dst = new SetupActionAssertRulesetComponent();
+        copyValues(dst);
+        if (rule != null) {
+          dst.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
+          for (SetupActionAssertRulesetRuleComponent i : rule)
+            dst.rule.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetComponent))
+          return false;
+        SetupActionAssertRulesetComponent o = (SetupActionAssertRulesetComponent) other;
+        return compareDeep(rule, o.rule, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetComponent))
+          return false;
+        SetupActionAssertRulesetComponent o = (SetupActionAssertRulesetComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( rule);
+      }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert.ruleset";
+
+  }
+
+  }
+
+    @Block()
+    public static class SetupActionAssertRulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Each rule template can take one or more parameters for rule evaluation.
+         */
+        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
+        protected List<SetupActionAssertRulesetRuleParamComponent> param;
+
+        private static final long serialVersionUID = -905162350L;
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetRuleComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+        public List<SetupActionAssertRulesetRuleParamComponent> getParam() { 
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
+          return this.param;
+        }
+
+        public boolean hasParam() { 
+          if (this.param == null)
+            return false;
+          for (SetupActionAssertRulesetRuleParamComponent item : this.param)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
+         */
+    // syntactic sugar
+        public SetupActionAssertRulesetRuleParamComponent addParam() { //3
+          SetupActionAssertRulesetRuleParamComponent t = new SetupActionAssertRulesetRuleParamComponent();
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
+          this.param.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SetupActionAssertRulesetRuleComponent addParam(SetupActionAssertRulesetRuleParamComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.param == null)
+            this.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
+          this.param.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("param"))
+          this.getParam().add((SetupActionAssertRulesetRuleParamComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("param")) {
+          return addParam();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SetupActionAssertRulesetRuleComponent copy() {
+        SetupActionAssertRulesetRuleComponent dst = new SetupActionAssertRulesetRuleComponent();
+        copyValues(dst);
+        if (param != null) {
+          dst.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
+          for (SetupActionAssertRulesetRuleParamComponent i : param)
+            dst.param.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetRuleComponent))
+          return false;
+        SetupActionAssertRulesetRuleComponent o = (SetupActionAssertRulesetRuleComponent) other;
+        return compareDeep(param, o.param, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetRuleComponent))
+          return false;
+        SetupActionAssertRulesetRuleComponent o = (SetupActionAssertRulesetRuleComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+      }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert.ruleset.rule";
+
+  }
+
+  }
+
+    @Block()
+    public static class SetupActionAssertRulesetRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter name matching external assert ruleset rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert ruleset rule parameter name." )
+        protected StringType name;
+
+        /**
+         * The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external ruleset rule template." )
+        protected StringType value;
+
+        private static final long serialVersionUID = 395259392L;
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetRuleParamComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetRuleParamComponent(StringType name, StringType value) {
+        super();
+        this.name = name;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRulesetRuleParamComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public SetupActionAssertRulesetRuleParamComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
+         */
+        public SetupActionAssertRulesetRuleParamComponent setName(String value) { 
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public StringType getValueElement() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRulesetRuleParamComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new StringType(); // bb
+          return this.value;
+        }
+
+        public boolean hasValueElement() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         */
+        public SetupActionAssertRulesetRuleParamComponent setValueElement(StringType value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        public String getValue() { 
+          return this.value == null ? null : this.value.getValue();
+        }
+
+        /**
+         * @param value The value for the parameter that will be passed on to the external ruleset rule template.
+         */
+        public SetupActionAssertRulesetRuleParamComponent setValue(String value) { 
+            if (this.value == null)
+              this.value = new StringType();
+            this.value.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SetupActionAssertRulesetRuleParamComponent copy() {
+        SetupActionAssertRulesetRuleParamComponent dst = new SetupActionAssertRulesetRuleParamComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetRuleParamComponent))
+          return false;
+        SetupActionAssertRulesetRuleParamComponent o = (SetupActionAssertRulesetRuleParamComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SetupActionAssertRulesetRuleParamComponent))
+          return false;
+        SetupActionAssertRulesetRuleParamComponent o = (SetupActionAssertRulesetRuleParamComponent) other;
+        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+      }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert.ruleset.rule.param";
 
   }
 
@@ -5966,8 +7412,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
-           && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  description,  metadata,  action
+          );
       }
 
   public String fhirType() {
@@ -6109,8 +7555,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation,  assert_);
       }
 
   public String fhirType() {
@@ -6232,7 +7677,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (action == null || action.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( action);
       }
 
   public String fhirType() {
@@ -6335,7 +7780,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (operation == null || operation.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation);
       }
 
   public String fhirType() {
@@ -6437,44 +7882,37 @@ public class TestScript extends DomainResource {
     protected StringType copyright;
 
     /**
-     * The required capability must exist and are assumed to function correctly on the FHIR server being tested.
-     */
-    @Child(name = "metadata", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and are assumed to function correctly on the FHIR server being tested." )
-    protected TestScriptMetadataComponent metadata;
-
-    /**
      * An abstract server used in operations within this test script in the origin element.
      */
-    @Child(name = "origin", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "origin", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An abstract server representing a client or sender in a message exchange", formalDefinition="An abstract server used in operations within this test script in the origin element." )
     protected List<TestScriptOriginComponent> origin;
 
     /**
      * An abstract server used in operations within this test script in the destination element.
      */
-    @Child(name = "destination", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "destination", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An abstract server representing a destination or receiver in a message exchange", formalDefinition="An abstract server used in operations within this test script in the destination element." )
     protected List<TestScriptDestinationComponent> destination;
 
     /**
-     * If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
+     * The required capability must exist and are assumed to function correctly on the FHIR server being tested.
      */
-    @Child(name = "multiserver", type = {BooleanType.class}, order=16, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Whether or not the tests apply to more than one FHIR server", formalDefinition="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified." )
-    protected BooleanType multiserver;
+    @Child(name = "metadata", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and are assumed to function correctly on the FHIR server being tested." )
+    protected TestScriptMetadataComponent metadata;
 
     /**
      * Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.
      */
-    @Child(name = "fixture", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "fixture", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Fixture in the test script - by reference (uri)", formalDefinition="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute." )
     protected List<TestScriptFixtureComponent> fixture;
 
     /**
      * Reference to the profile to be used for validation.
      */
-    @Child(name = "profile", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "profile", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reference of the validation profile", formalDefinition="Reference to the profile to be used for validation." )
     protected List<Reference> profile;
     /**
@@ -6486,32 +7924,46 @@ public class TestScript extends DomainResource {
     /**
      * Variable is set based either on element value in response body or on header field value in the response headers.
      */
-    @Child(name = "variable", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "variable", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Placeholder for evaluated elements", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
     protected List<TestScriptVariableComponent> variable;
 
     /**
+     * Assert rule to be used in one or more asserts within the test script.
+     */
+    @Child(name = "rule", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Assert rule used within the test script", formalDefinition="Assert rule to be used in one or more asserts within the test script." )
+    protected List<TestScriptRuleComponent> rule;
+
+    /**
+     * Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.
+     */
+    @Child(name = "ruleset", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Assert ruleset used within the test script", formalDefinition="Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied." )
+    protected List<TestScriptRulesetComponent> ruleset;
+
+    /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "setup", type = {}, order=21, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "test", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=22, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "teardown", type = {}, order=23, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = -1185376163L;
+    private static final long serialVersionUID = -468958725L;
 
   /**
    * Constructor
@@ -7109,30 +8561,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
-     */
-    public TestScriptMetadataComponent getMetadata() { 
-      if (this.metadata == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.metadata");
-        else if (Configuration.doAutoCreate())
-          this.metadata = new TestScriptMetadataComponent(); // cc
-      return this.metadata;
-    }
-
-    public boolean hasMetadata() { 
-      return this.metadata != null && !this.metadata.isEmpty();
-    }
-
-    /**
-     * @param value {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
-     */
-    public TestScript setMetadata(TestScriptMetadataComponent value) { 
-      this.metadata = value;
-      return this;
-    }
-
-    /**
      * @return {@link #origin} (An abstract server used in operations within this test script in the origin element.)
      */
     public List<TestScriptOriginComponent> getOrigin() { 
@@ -7213,47 +8641,26 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #multiserver} (If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.). This is the underlying object with id, value and extensions. The accessor "getMultiserver" gives direct access to the value
+     * @return {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
      */
-    public BooleanType getMultiserverElement() { 
-      if (this.multiserver == null)
+    public TestScriptMetadataComponent getMetadata() { 
+      if (this.metadata == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.multiserver");
+          throw new Error("Attempt to auto-create TestScript.metadata");
         else if (Configuration.doAutoCreate())
-          this.multiserver = new BooleanType(); // bb
-      return this.multiserver;
+          this.metadata = new TestScriptMetadataComponent(); // cc
+      return this.metadata;
     }
 
-    public boolean hasMultiserverElement() { 
-      return this.multiserver != null && !this.multiserver.isEmpty();
-    }
-
-    public boolean hasMultiserver() { 
-      return this.multiserver != null && !this.multiserver.isEmpty();
+    public boolean hasMetadata() { 
+      return this.metadata != null && !this.metadata.isEmpty();
     }
 
     /**
-     * @param value {@link #multiserver} (If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.). This is the underlying object with id, value and extensions. The accessor "getMultiserver" gives direct access to the value
+     * @param value {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
      */
-    public TestScript setMultiserverElement(BooleanType value) { 
-      this.multiserver = value;
-      return this;
-    }
-
-    /**
-     * @return If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
-     */
-    public boolean getMultiserver() { 
-      return this.multiserver == null || this.multiserver.isEmpty() ? false : this.multiserver.getValue();
-    }
-
-    /**
-     * @param value If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
-     */
-    public TestScript setMultiserver(boolean value) { 
-        if (this.multiserver == null)
-          this.multiserver = new BooleanType();
-        this.multiserver.setValue(value);
+    public TestScript setMetadata(TestScriptMetadataComponent value) { 
+      this.metadata = value;
       return this;
     }
 
@@ -7387,6 +8794,86 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return {@link #rule} (Assert rule to be used in one or more asserts within the test script.)
+     */
+    public List<TestScriptRuleComponent> getRule() { 
+      if (this.rule == null)
+        this.rule = new ArrayList<TestScriptRuleComponent>();
+      return this.rule;
+    }
+
+    public boolean hasRule() { 
+      if (this.rule == null)
+        return false;
+      for (TestScriptRuleComponent item : this.rule)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #rule} (Assert rule to be used in one or more asserts within the test script.)
+     */
+    // syntactic sugar
+    public TestScriptRuleComponent addRule() { //3
+      TestScriptRuleComponent t = new TestScriptRuleComponent();
+      if (this.rule == null)
+        this.rule = new ArrayList<TestScriptRuleComponent>();
+      this.rule.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public TestScript addRule(TestScriptRuleComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.rule == null)
+        this.rule = new ArrayList<TestScriptRuleComponent>();
+      this.rule.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #ruleset} (Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.)
+     */
+    public List<TestScriptRulesetComponent> getRuleset() { 
+      if (this.ruleset == null)
+        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
+      return this.ruleset;
+    }
+
+    public boolean hasRuleset() { 
+      if (this.ruleset == null)
+        return false;
+      for (TestScriptRulesetComponent item : this.ruleset)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #ruleset} (Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.)
+     */
+    // syntactic sugar
+    public TestScriptRulesetComponent addRuleset() { //3
+      TestScriptRulesetComponent t = new TestScriptRulesetComponent();
+      if (this.ruleset == null)
+        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
+      this.ruleset.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public TestScript addRuleset(TestScriptRulesetComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.ruleset == null)
+        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
+      this.ruleset.add(t);
+      return this;
+    }
+
+    /**
      * @return {@link #setup} (A series of required setup operations before tests are executed.)
      */
     public TestScriptSetupComponent getSetup() { 
@@ -7489,13 +8976,14 @@ public class TestScript extends DomainResource {
         childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("requirements", "string", "Explains why this Test Script is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
         childrenList.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
         childrenList.add(new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination));
-        childrenList.add(new Property("multiserver", "boolean", "If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.", 0, java.lang.Integer.MAX_VALUE, multiserver));
+        childrenList.add(new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
         childrenList.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
         childrenList.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable));
+        childrenList.add(new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule));
+        childrenList.add(new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, java.lang.Integer.MAX_VALUE, setup));
         childrenList.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
         childrenList.add(new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, java.lang.Integer.MAX_VALUE, teardown));
@@ -7529,20 +9017,22 @@ public class TestScript extends DomainResource {
           this.requirements = castToString(value); // StringType
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
-        else if (name.equals("metadata"))
-          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
         else if (name.equals("origin"))
           this.getOrigin().add((TestScriptOriginComponent) value);
         else if (name.equals("destination"))
           this.getDestination().add((TestScriptDestinationComponent) value);
-        else if (name.equals("multiserver"))
-          this.multiserver = castToBoolean(value); // BooleanType
+        else if (name.equals("metadata"))
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
         else if (name.equals("fixture"))
           this.getFixture().add((TestScriptFixtureComponent) value);
         else if (name.equals("profile"))
           this.getProfile().add(castToReference(value));
         else if (name.equals("variable"))
           this.getVariable().add((TestScriptVariableComponent) value);
+        else if (name.equals("rule"))
+          this.getRule().add((TestScriptRuleComponent) value);
+        else if (name.equals("ruleset"))
+          this.getRuleset().add((TestScriptRulesetComponent) value);
         else if (name.equals("setup"))
           this.setup = (TestScriptSetupComponent) value; // TestScriptSetupComponent
         else if (name.equals("test"))
@@ -7595,18 +9085,15 @@ public class TestScript extends DomainResource {
         else if (name.equals("copyright")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.copyright");
         }
-        else if (name.equals("metadata")) {
-          this.metadata = new TestScriptMetadataComponent();
-          return this.metadata;
-        }
         else if (name.equals("origin")) {
           return addOrigin();
         }
         else if (name.equals("destination")) {
           return addDestination();
         }
-        else if (name.equals("multiserver")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.multiserver");
+        else if (name.equals("metadata")) {
+          this.metadata = new TestScriptMetadataComponent();
+          return this.metadata;
         }
         else if (name.equals("fixture")) {
           return addFixture();
@@ -7616,6 +9103,12 @@ public class TestScript extends DomainResource {
         }
         else if (name.equals("variable")) {
           return addVariable();
+        }
+        else if (name.equals("rule")) {
+          return addRule();
+        }
+        else if (name.equals("ruleset")) {
+          return addRuleset();
         }
         else if (name.equals("setup")) {
           this.setup = new TestScriptSetupComponent();
@@ -7661,7 +9154,6 @@ public class TestScript extends DomainResource {
         };
         dst.requirements = requirements == null ? null : requirements.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
-        dst.metadata = metadata == null ? null : metadata.copy();
         if (origin != null) {
           dst.origin = new ArrayList<TestScriptOriginComponent>();
           for (TestScriptOriginComponent i : origin)
@@ -7672,7 +9164,7 @@ public class TestScript extends DomainResource {
           for (TestScriptDestinationComponent i : destination)
             dst.destination.add(i.copy());
         };
-        dst.multiserver = multiserver == null ? null : multiserver.copy();
+        dst.metadata = metadata == null ? null : metadata.copy();
         if (fixture != null) {
           dst.fixture = new ArrayList<TestScriptFixtureComponent>();
           for (TestScriptFixtureComponent i : fixture)
@@ -7687,6 +9179,16 @@ public class TestScript extends DomainResource {
           dst.variable = new ArrayList<TestScriptVariableComponent>();
           for (TestScriptVariableComponent i : variable)
             dst.variable.add(i.copy());
+        };
+        if (rule != null) {
+          dst.rule = new ArrayList<TestScriptRuleComponent>();
+          for (TestScriptRuleComponent i : rule)
+            dst.rule.add(i.copy());
+        };
+        if (ruleset != null) {
+          dst.ruleset = new ArrayList<TestScriptRulesetComponent>();
+          for (TestScriptRulesetComponent i : ruleset)
+            dst.ruleset.add(i.copy());
         };
         dst.setup = setup == null ? null : setup.copy();
         if (test != null) {
@@ -7714,10 +9216,10 @@ public class TestScript extends DomainResource {
            && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
            && compareDeep(description, o.description, true) && compareDeep(useContext, o.useContext, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
-           && compareDeep(metadata, o.metadata, true) && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true)
-           && compareDeep(multiserver, o.multiserver, true) && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true)
-           && compareDeep(variable, o.variable, true) && compareDeep(setup, o.setup, true) && compareDeep(test, o.test, true)
-           && compareDeep(teardown, o.teardown, true);
+           && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(metadata, o.metadata, true)
+           && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
+           && compareDeep(rule, o.rule, true) && compareDeep(ruleset, o.ruleset, true) && compareDeep(setup, o.setup, true)
+           && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true);
       }
 
       @Override
@@ -7730,20 +9232,14 @@ public class TestScript extends DomainResource {
         return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
            && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
            && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
-           && compareValues(copyright, o.copyright, true) && compareValues(multiserver, o.multiserver, true);
+           && compareValues(copyright, o.copyright, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
-           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
-           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
-           && (useContext == null || useContext.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (copyright == null || copyright.isEmpty()) && (metadata == null || metadata.isEmpty())
-           && (origin == null || origin.isEmpty()) && (destination == null || destination.isEmpty())
-           && (multiserver == null || multiserver.isEmpty()) && (fixture == null || fixture.isEmpty())
-           && (profile == null || profile.isEmpty()) && (variable == null || variable.isEmpty()) && (setup == null || setup.isEmpty())
-           && (test == null || test.isEmpty()) && (teardown == null || teardown.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  version,  name,  status,  identifier
+          ,  experimental,  publisher,  contact,  date,  description,  useContext,  requirements,  copyright
+          ,  origin,  destination,  metadata,  fixture,  profile,  variable,  rule,  ruleset,  setup,  test
+          ,  teardown);
       }
 
   @Override

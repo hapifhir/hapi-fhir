@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,9 +39,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
  */
@@ -964,10 +963,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
-           && (duration == null || duration.isEmpty()) && (precondition == null || precondition.isEmpty())
-           && (exit == null || exit.isEmpty()) && (firstActivity == null || firstActivity.isEmpty())
-           && (activity == null || activity.isEmpty()) && (next == null || next.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  description,  duration,  precondition
+          ,  exit,  firstActivity,  activity,  next);
       }
 
   public String fhirType() {
@@ -1309,9 +1306,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (condition == null || condition.isEmpty())
-           && (intersection == null || intersection.isEmpty()) && (union == null || union.isEmpty())
-           && (exclude == null || exclude.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( description,  condition,  intersection
+          ,  union,  exclude);
       }
 
   public String fhirType() {
@@ -1521,8 +1517,7 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  value);
       }
 
   public String fhirType() {
@@ -1877,9 +1872,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (alternative == null || alternative.isEmpty()) && (component == null || component.isEmpty())
-           && (following == null || following.isEmpty()) && (wait == null || wait.isEmpty()) && (detail == null || detail.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( alternative,  component,  following
+          ,  wait,  detail);
       }
 
   public String fhirType() {
@@ -2069,8 +2063,7 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (sequence == null || sequence.isEmpty()) && (activity == null || activity.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  activity);
       }
 
   public String fhirType() {
@@ -2600,10 +2593,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (category == null || category.isEmpty()) && (code == null || code.isEmpty())
-           && (timing == null || timing.isEmpty()) && (location == null || location.isEmpty()) && (performer == null || performer.isEmpty())
-           && (product == null || product.isEmpty()) && (quantity == null || quantity.isEmpty()) && (description == null || description.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( category,  code,  timing,  location
+          ,  performer,  product,  quantity,  description);
       }
 
   public String fhirType() {
@@ -2834,8 +2825,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (reference == null || reference.isEmpty())
-           && (condition == null || condition.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( description,  reference,  condition
+          );
       }
 
   public String fhirType() {
@@ -3463,10 +3454,8 @@ public class Protocol extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (title == null || title.isEmpty())
-           && (status == null || status.isEmpty()) && (type == null || type.isEmpty()) && (subject == null || subject.isEmpty())
-           && (group == null || group.isEmpty()) && (purpose == null || purpose.isEmpty()) && (author == null || author.isEmpty())
-           && (step == null || step.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  title,  status,  type
+          ,  subject,  group,  purpose,  author,  step);
       }
 
   @Override
@@ -3502,7 +3491,7 @@ public class Protocol extends DomainResource {
    * Path: <b>Protocol.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference" )
+  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

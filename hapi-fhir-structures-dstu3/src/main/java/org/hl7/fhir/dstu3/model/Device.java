@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -39,11 +39,10 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
-
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
- * This resource identifies an instance of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
+ * This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/Profile/Device")
 public class Device extends DomainResource {
@@ -152,81 +151,86 @@ public class Device extends DomainResource {
     }
 
     /**
-     * Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.
+     * Unique instance identifiers assigned to a device by manufacturers other organizations or owners.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Instance id from manufacturer, owner, and others", formalDefinition="Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used." )
+    @Description(shortDefinition="Instance identifier", formalDefinition="Unique instance identifiers assigned to a device by manufacturers other organizations or owners." )
     protected List<Identifier> identifier;
 
     /**
-     * Code or identifier to identify a kind of device.
+     * [Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device." )
-    protected CodeableConcept type;
-
-    /**
-     * Descriptive information, usage information or implantation information that is not captured in an existing element.
-     */
-    @Child(name = "note", type = {Annotation.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Device notes and comments", formalDefinition="Descriptive information, usage information or implantation information that is not captured in an existing element." )
-    protected List<Annotation> note;
+    @Child(name = "udiCarrier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Unique Device Identifier (UDI) Barcode string", formalDefinition="[Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package." )
+    protected Identifier udiCarrier;
 
     /**
      * Status of the Device availability.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="available | not-available | entered-in-error", formalDefinition="Status of the Device availability." )
     protected Enumeration<DeviceStatus> status;
 
     /**
+     * Code or identifier to identify a kind of device.
+     */
+    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device." )
+    protected CodeableConcept type;
+
+    /**
+     * Lot number assigned by the manufacturer.
+     */
+    @Child(name = "lotNumber", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Lot number of manufacture", formalDefinition="Lot number assigned by the manufacturer." )
+    protected StringType lotNumber;
+
+    /**
      * A name of the manufacturer.
      */
-    @Child(name = "manufacturer", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "manufacturer", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Name of device manufacturer", formalDefinition="A name of the manufacturer." )
     protected StringType manufacturer;
 
     /**
-     * The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
-     */
-    @Child(name = "model", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
-    protected StringType model;
-
-    /**
-     * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.
-     */
-    @Child(name = "version", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Version number (i.e. software)", formalDefinition="The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware." )
-    protected StringType version;
-
-    /**
      * The date and time when the device was manufactured.
      */
-    @Child(name = "manufactureDate", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "manufactureDate", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Date when the device was made", formalDefinition="The date and time when the device was manufactured." )
     protected DateTimeType manufactureDate;
 
     /**
      * The date and time beyond which this device is no longer valid or should not be used (if applicable).
      */
-    @Child(name = "expiry", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expirationDate", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Date and time of expiry of this device (if applicable)", formalDefinition="The date and time beyond which this device is no longer valid or should not be used (if applicable)." )
-    protected DateTimeType expiry;
+    protected DateTimeType expirationDate;
 
     /**
-     * United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
+     * The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
-    @Child(name = "udi", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="FDA mandated Unique Device Identifier", formalDefinition="United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
-    protected StringType udi;
+    @Child(name = "model", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
+    protected StringType model;
 
     /**
-     * Lot number assigned by the manufacturer.
+     * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.
      */
-    @Child(name = "lotNumber", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Lot number of manufacture", formalDefinition="Lot number assigned by the manufacturer." )
-    protected StringType lotNumber;
+    @Child(name = "version", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Version number (i.e. software)", formalDefinition="The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware." )
+    protected StringType version;
+
+    /**
+     * Patient information, If the device is affixed to a person.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Patient to whom Device is affixed", formalDefinition="Patient information, If the device is affixed to a person." )
+    protected Reference patient;
+
+    /**
+     * The actual object that is the target of the reference (Patient information, If the device is affixed to a person.)
+     */
+    protected Patient patientTarget;
 
     /**
      * An organization that is responsible for the provision and ongoing maintenance of the device.
@@ -241,9 +245,16 @@ public class Device extends DomainResource {
     protected Organization ownerTarget;
 
     /**
+     * Contact details for an organization or a particular human that is responsible for the device.
+     */
+    @Child(name = "contact", type = {ContactPoint.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Details for human/organization for support", formalDefinition="Contact details for an organization or a particular human that is responsible for the device." )
+    protected List<ContactPoint> contact;
+
+    /**
      * The place where the device can be found.
      */
-    @Child(name = "location", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "location", type = {Location.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Where the resource is found", formalDefinition="The place where the device can be found." )
     protected Reference location;
 
@@ -253,32 +264,20 @@ public class Device extends DomainResource {
     protected Location locationTarget;
 
     /**
-     * Patient information, if the resource is affixed to a person.
-     */
-    @Child(name = "patient", type = {Patient.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="If the resource is affixed to a person", formalDefinition="Patient information, if the resource is affixed to a person." )
-    protected Reference patient;
-
-    /**
-     * The actual object that is the target of the reference (Patient information, if the resource is affixed to a person.)
-     */
-    protected Patient patientTarget;
-
-    /**
-     * Contact details for an organization or a particular human that is responsible for the device.
-     */
-    @Child(name = "contact", type = {ContactPoint.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Details for human/organization for support", formalDefinition="Contact details for an organization or a particular human that is responsible for the device." )
-    protected List<ContactPoint> contact;
-
-    /**
      * A network address on which the device may be contacted directly.
      */
-    @Child(name = "url", type = {UriType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "url", type = {UriType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Network address to contact device", formalDefinition="A network address on which the device may be contacted directly." )
     protected UriType url;
 
-    private static final long serialVersionUID = 366690094L;
+    /**
+     * Descriptive information, usage information or implantation information that is not captured in an existing element.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Device notes and comments", formalDefinition="Descriptive information, usage information or implantation information that is not captured in an existing element." )
+    protected List<Annotation> note;
+
+    private static final long serialVersionUID = -710362206L;
 
   /**
    * Constructor
@@ -296,7 +295,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.)
+     * @return {@link #identifier} (Unique instance identifiers assigned to a device by manufacturers other organizations or owners.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -314,7 +313,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.)
+     * @return {@link #identifier} (Unique instance identifiers assigned to a device by manufacturers other organizations or owners.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -336,66 +335,26 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Code or identifier to identify a kind of device.)
+     * @return {@link #udiCarrier} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.)
      */
-    public CodeableConcept getType() { 
-      if (this.type == null)
+    public Identifier getUdiCarrier() { 
+      if (this.udiCarrier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.type");
+          throw new Error("Attempt to auto-create Device.udiCarrier");
         else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
+          this.udiCarrier = new Identifier(); // cc
+      return this.udiCarrier;
     }
 
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (Code or identifier to identify a kind of device.)
-     */
-    public Device setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
+    public boolean hasUdiCarrier() { 
+      return this.udiCarrier != null && !this.udiCarrier.isEmpty();
     }
 
     /**
-     * @return {@link #note} (Descriptive information, usage information or implantation information that is not captured in an existing element.)
+     * @param value {@link #udiCarrier} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.)
      */
-    public List<Annotation> getNote() { 
-      if (this.note == null)
-        this.note = new ArrayList<Annotation>();
-      return this.note;
-    }
-
-    public boolean hasNote() { 
-      if (this.note == null)
-        return false;
-      for (Annotation item : this.note)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #note} (Descriptive information, usage information or implantation information that is not captured in an existing element.)
-     */
-    // syntactic sugar
-    public Annotation addNote() { //3
-      Annotation t = new Annotation();
-      if (this.note == null)
-        this.note = new ArrayList<Annotation>();
-      this.note.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public Device addNote(Annotation t) { //3
-      if (t == null)
-        return this;
-      if (this.note == null)
-        this.note = new ArrayList<Annotation>();
-      this.note.add(t);
+    public Device setUdiCarrier(Identifier value) { 
+      this.udiCarrier = value;
       return this;
     }
 
@@ -449,6 +408,79 @@ public class Device extends DomainResource {
     }
 
     /**
+     * @return {@link #type} (Code or identifier to identify a kind of device.)
+     */
+    public CodeableConcept getType() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Device.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new CodeableConcept(); // cc
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (Code or identifier to identify a kind of device.)
+     */
+    public Device setType(CodeableConcept value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #lotNumber} (Lot number assigned by the manufacturer.). This is the underlying object with id, value and extensions. The accessor "getLotNumber" gives direct access to the value
+     */
+    public StringType getLotNumberElement() { 
+      if (this.lotNumber == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Device.lotNumber");
+        else if (Configuration.doAutoCreate())
+          this.lotNumber = new StringType(); // bb
+      return this.lotNumber;
+    }
+
+    public boolean hasLotNumberElement() { 
+      return this.lotNumber != null && !this.lotNumber.isEmpty();
+    }
+
+    public boolean hasLotNumber() { 
+      return this.lotNumber != null && !this.lotNumber.isEmpty();
+    }
+
+    /**
+     * @param value {@link #lotNumber} (Lot number assigned by the manufacturer.). This is the underlying object with id, value and extensions. The accessor "getLotNumber" gives direct access to the value
+     */
+    public Device setLotNumberElement(StringType value) { 
+      this.lotNumber = value;
+      return this;
+    }
+
+    /**
+     * @return Lot number assigned by the manufacturer.
+     */
+    public String getLotNumber() { 
+      return this.lotNumber == null ? null : this.lotNumber.getValue();
+    }
+
+    /**
+     * @param value Lot number assigned by the manufacturer.
+     */
+    public Device setLotNumber(String value) { 
+      if (Utilities.noString(value))
+        this.lotNumber = null;
+      else {
+        if (this.lotNumber == null)
+          this.lotNumber = new StringType();
+        this.lotNumber.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #manufacturer} (A name of the manufacturer.). This is the underlying object with id, value and extensions. The accessor "getManufacturer" gives direct access to the value
      */
     public StringType getManufacturerElement() { 
@@ -493,6 +525,104 @@ public class Device extends DomainResource {
         if (this.manufacturer == null)
           this.manufacturer = new StringType();
         this.manufacturer.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     */
+    public DateTimeType getManufactureDateElement() { 
+      if (this.manufactureDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Device.manufactureDate");
+        else if (Configuration.doAutoCreate())
+          this.manufactureDate = new DateTimeType(); // bb
+      return this.manufactureDate;
+    }
+
+    public boolean hasManufactureDateElement() { 
+      return this.manufactureDate != null && !this.manufactureDate.isEmpty();
+    }
+
+    public boolean hasManufactureDate() { 
+      return this.manufactureDate != null && !this.manufactureDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     */
+    public Device setManufactureDateElement(DateTimeType value) { 
+      this.manufactureDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date and time when the device was manufactured.
+     */
+    public Date getManufactureDate() { 
+      return this.manufactureDate == null ? null : this.manufactureDate.getValue();
+    }
+
+    /**
+     * @param value The date and time when the device was manufactured.
+     */
+    public Device setManufactureDate(Date value) { 
+      if (value == null)
+        this.manufactureDate = null;
+      else {
+        if (this.manufactureDate == null)
+          this.manufactureDate = new DateTimeType();
+        this.manufactureDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #expirationDate} (The date and time beyond which this device is no longer valid or should not be used (if applicable).). This is the underlying object with id, value and extensions. The accessor "getExpirationDate" gives direct access to the value
+     */
+    public DateTimeType getExpirationDateElement() { 
+      if (this.expirationDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Device.expirationDate");
+        else if (Configuration.doAutoCreate())
+          this.expirationDate = new DateTimeType(); // bb
+      return this.expirationDate;
+    }
+
+    public boolean hasExpirationDateElement() { 
+      return this.expirationDate != null && !this.expirationDate.isEmpty();
+    }
+
+    public boolean hasExpirationDate() { 
+      return this.expirationDate != null && !this.expirationDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #expirationDate} (The date and time beyond which this device is no longer valid or should not be used (if applicable).). This is the underlying object with id, value and extensions. The accessor "getExpirationDate" gives direct access to the value
+     */
+    public Device setExpirationDateElement(DateTimeType value) { 
+      this.expirationDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date and time beyond which this device is no longer valid or should not be used (if applicable).
+     */
+    public Date getExpirationDate() { 
+      return this.expirationDate == null ? null : this.expirationDate.getValue();
+    }
+
+    /**
+     * @param value The date and time beyond which this device is no longer valid or should not be used (if applicable).
+     */
+    public Device setExpirationDate(Date value) { 
+      if (value == null)
+        this.expirationDate = null;
+      else {
+        if (this.expirationDate == null)
+          this.expirationDate = new DateTimeType();
+        this.expirationDate.setValue(value);
       }
       return this;
     }
@@ -596,198 +726,46 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     * @return {@link #patient} (Patient information, If the device is affixed to a person.)
      */
-    public DateTimeType getManufactureDateElement() { 
-      if (this.manufactureDate == null)
+    public Reference getPatient() { 
+      if (this.patient == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.manufactureDate");
+          throw new Error("Attempt to auto-create Device.patient");
         else if (Configuration.doAutoCreate())
-          this.manufactureDate = new DateTimeType(); // bb
-      return this.manufactureDate;
+          this.patient = new Reference(); // cc
+      return this.patient;
     }
 
-    public boolean hasManufactureDateElement() { 
-      return this.manufactureDate != null && !this.manufactureDate.isEmpty();
-    }
-
-    public boolean hasManufactureDate() { 
-      return this.manufactureDate != null && !this.manufactureDate.isEmpty();
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
     }
 
     /**
-     * @param value {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     * @param value {@link #patient} (Patient information, If the device is affixed to a person.)
      */
-    public Device setManufactureDateElement(DateTimeType value) { 
-      this.manufactureDate = value;
+    public Device setPatient(Reference value) { 
+      this.patient = value;
       return this;
     }
 
     /**
-     * @return The date and time when the device was manufactured.
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Patient information, If the device is affixed to a person.)
      */
-    public Date getManufactureDate() { 
-      return this.manufactureDate == null ? null : this.manufactureDate.getValue();
-    }
-
-    /**
-     * @param value The date and time when the device was manufactured.
-     */
-    public Device setManufactureDate(Date value) { 
-      if (value == null)
-        this.manufactureDate = null;
-      else {
-        if (this.manufactureDate == null)
-          this.manufactureDate = new DateTimeType();
-        this.manufactureDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #expiry} (The date and time beyond which this device is no longer valid or should not be used (if applicable).). This is the underlying object with id, value and extensions. The accessor "getExpiry" gives direct access to the value
-     */
-    public DateTimeType getExpiryElement() { 
-      if (this.expiry == null)
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.expiry");
+          throw new Error("Attempt to auto-create Device.patient");
         else if (Configuration.doAutoCreate())
-          this.expiry = new DateTimeType(); // bb
-      return this.expiry;
-    }
-
-    public boolean hasExpiryElement() { 
-      return this.expiry != null && !this.expiry.isEmpty();
-    }
-
-    public boolean hasExpiry() { 
-      return this.expiry != null && !this.expiry.isEmpty();
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
     }
 
     /**
-     * @param value {@link #expiry} (The date and time beyond which this device is no longer valid or should not be used (if applicable).). This is the underlying object with id, value and extensions. The accessor "getExpiry" gives direct access to the value
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Patient information, If the device is affixed to a person.)
      */
-    public Device setExpiryElement(DateTimeType value) { 
-      this.expiry = value;
-      return this;
-    }
-
-    /**
-     * @return The date and time beyond which this device is no longer valid or should not be used (if applicable).
-     */
-    public Date getExpiry() { 
-      return this.expiry == null ? null : this.expiry.getValue();
-    }
-
-    /**
-     * @param value The date and time beyond which this device is no longer valid or should not be used (if applicable).
-     */
-    public Device setExpiry(Date value) { 
-      if (value == null)
-        this.expiry = null;
-      else {
-        if (this.expiry == null)
-          this.expiry = new DateTimeType();
-        this.expiry.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #udi} (United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.). This is the underlying object with id, value and extensions. The accessor "getUdi" gives direct access to the value
-     */
-    public StringType getUdiElement() { 
-      if (this.udi == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.udi");
-        else if (Configuration.doAutoCreate())
-          this.udi = new StringType(); // bb
-      return this.udi;
-    }
-
-    public boolean hasUdiElement() { 
-      return this.udi != null && !this.udi.isEmpty();
-    }
-
-    public boolean hasUdi() { 
-      return this.udi != null && !this.udi.isEmpty();
-    }
-
-    /**
-     * @param value {@link #udi} (United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.). This is the underlying object with id, value and extensions. The accessor "getUdi" gives direct access to the value
-     */
-    public Device setUdiElement(StringType value) { 
-      this.udi = value;
-      return this;
-    }
-
-    /**
-     * @return United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
-     */
-    public String getUdi() { 
-      return this.udi == null ? null : this.udi.getValue();
-    }
-
-    /**
-     * @param value United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
-     */
-    public Device setUdi(String value) { 
-      if (Utilities.noString(value))
-        this.udi = null;
-      else {
-        if (this.udi == null)
-          this.udi = new StringType();
-        this.udi.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #lotNumber} (Lot number assigned by the manufacturer.). This is the underlying object with id, value and extensions. The accessor "getLotNumber" gives direct access to the value
-     */
-    public StringType getLotNumberElement() { 
-      if (this.lotNumber == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.lotNumber");
-        else if (Configuration.doAutoCreate())
-          this.lotNumber = new StringType(); // bb
-      return this.lotNumber;
-    }
-
-    public boolean hasLotNumberElement() { 
-      return this.lotNumber != null && !this.lotNumber.isEmpty();
-    }
-
-    public boolean hasLotNumber() { 
-      return this.lotNumber != null && !this.lotNumber.isEmpty();
-    }
-
-    /**
-     * @param value {@link #lotNumber} (Lot number assigned by the manufacturer.). This is the underlying object with id, value and extensions. The accessor "getLotNumber" gives direct access to the value
-     */
-    public Device setLotNumberElement(StringType value) { 
-      this.lotNumber = value;
-      return this;
-    }
-
-    /**
-     * @return Lot number assigned by the manufacturer.
-     */
-    public String getLotNumber() { 
-      return this.lotNumber == null ? null : this.lotNumber.getValue();
-    }
-
-    /**
-     * @param value Lot number assigned by the manufacturer.
-     */
-    public Device setLotNumber(String value) { 
-      if (Utilities.noString(value))
-        this.lotNumber = null;
-      else {
-        if (this.lotNumber == null)
-          this.lotNumber = new StringType();
-        this.lotNumber.setValue(value);
-      }
+    public Device setPatientTarget(Patient value) { 
+      this.patientTarget = value;
       return this;
     }
 
@@ -836,6 +814,46 @@ public class Device extends DomainResource {
     }
 
     /**
+     * @return {@link #contact} (Contact details for an organization or a particular human that is responsible for the device.)
+     */
+    public List<ContactPoint> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactPoint>();
+      return this.contact;
+    }
+
+    public boolean hasContact() { 
+      if (this.contact == null)
+        return false;
+      for (ContactPoint item : this.contact)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #contact} (Contact details for an organization or a particular human that is responsible for the device.)
+     */
+    // syntactic sugar
+    public ContactPoint addContact() { //3
+      ContactPoint t = new ContactPoint();
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactPoint>();
+      this.contact.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Device addContact(ContactPoint t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactPoint>();
+      this.contact.add(t);
+      return this;
+    }
+
+    /**
      * @return {@link #location} (The place where the device can be found.)
      */
     public Reference getLocation() { 
@@ -876,90 +894,6 @@ public class Device extends DomainResource {
      */
     public Device setLocationTarget(Location value) { 
       this.locationTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #patient} (Patient information, if the resource is affixed to a person.)
-     */
-    public Reference getPatient() { 
-      if (this.patient == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.patient");
-        else if (Configuration.doAutoCreate())
-          this.patient = new Reference(); // cc
-      return this.patient;
-    }
-
-    public boolean hasPatient() { 
-      return this.patient != null && !this.patient.isEmpty();
-    }
-
-    /**
-     * @param value {@link #patient} (Patient information, if the resource is affixed to a person.)
-     */
-    public Device setPatient(Reference value) { 
-      this.patient = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Patient information, if the resource is affixed to a person.)
-     */
-    public Patient getPatientTarget() { 
-      if (this.patientTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.patient");
-        else if (Configuration.doAutoCreate())
-          this.patientTarget = new Patient(); // aa
-      return this.patientTarget;
-    }
-
-    /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Patient information, if the resource is affixed to a person.)
-     */
-    public Device setPatientTarget(Patient value) { 
-      this.patientTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #contact} (Contact details for an organization or a particular human that is responsible for the device.)
-     */
-    public List<ContactPoint> getContact() { 
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactPoint>();
-      return this.contact;
-    }
-
-    public boolean hasContact() { 
-      if (this.contact == null)
-        return false;
-      for (ContactPoint item : this.contact)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #contact} (Contact details for an organization or a particular human that is responsible for the device.)
-     */
-    // syntactic sugar
-    public ContactPoint addContact() { //3
-      ContactPoint t = new ContactPoint();
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactPoint>();
-      this.contact.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public Device addContact(ContactPoint t) { //3
-      if (t == null)
-        return this;
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactPoint>();
-      this.contact.add(t);
       return this;
     }
 
@@ -1012,60 +946,100 @@ public class Device extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #note} (Descriptive information, usage information or implantation information that is not captured in an existing element.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #note} (Descriptive information, usage information or implantation information that is not captured in an existing element.)
+     */
+    // syntactic sugar
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Device addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("udiCarrier", "Identifier", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.", 0, java.lang.Integer.MAX_VALUE, udiCarrier));
         childrenList.add(new Property("status", "code", "Status of the Device availability.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
         childrenList.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
+        childrenList.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
+        childrenList.add(new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, java.lang.Integer.MAX_VALUE, expirationDate));
         childrenList.add(new Property("model", "string", "The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
         childrenList.add(new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
-        childrenList.add(new Property("expiry", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, java.lang.Integer.MAX_VALUE, expiry));
-        childrenList.add(new Property("udi", "string", "United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.", 0, java.lang.Integer.MAX_VALUE, udi));
-        childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Patient information, If the device is affixed to a person.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("owner", "Reference(Organization)", "An organization that is responsible for the provision and ongoing maintenance of the device.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Patient information, if the resource is affixed to a person.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("note"))
-          this.getNote().add(castToAnnotation(value));
+        else if (name.equals("udiCarrier"))
+          this.udiCarrier = castToIdentifier(value); // Identifier
         else if (name.equals("status"))
           this.status = new DeviceStatusEnumFactory().fromType(value); // Enumeration<DeviceStatus>
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("lotNumber"))
+          this.lotNumber = castToString(value); // StringType
         else if (name.equals("manufacturer"))
           this.manufacturer = castToString(value); // StringType
+        else if (name.equals("manufactureDate"))
+          this.manufactureDate = castToDateTime(value); // DateTimeType
+        else if (name.equals("expirationDate"))
+          this.expirationDate = castToDateTime(value); // DateTimeType
         else if (name.equals("model"))
           this.model = castToString(value); // StringType
         else if (name.equals("version"))
           this.version = castToString(value); // StringType
-        else if (name.equals("manufactureDate"))
-          this.manufactureDate = castToDateTime(value); // DateTimeType
-        else if (name.equals("expiry"))
-          this.expiry = castToDateTime(value); // DateTimeType
-        else if (name.equals("udi"))
-          this.udi = castToString(value); // StringType
-        else if (name.equals("lotNumber"))
-          this.lotNumber = castToString(value); // StringType
-        else if (name.equals("owner"))
-          this.owner = castToReference(value); // Reference
-        else if (name.equals("location"))
-          this.location = castToReference(value); // Reference
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
+        else if (name.equals("owner"))
+          this.owner = castToReference(value); // Reference
         else if (name.equals("contact"))
           this.getContact().add(castToContactPoint(value));
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
         else if (name.equals("url"))
           this.url = castToUri(value); // UriType
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
         else
           super.setProperty(name, value);
       }
@@ -1075,18 +1049,28 @@ public class Device extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
-        else if (name.equals("note")) {
-          return addNote();
+        else if (name.equals("udiCarrier")) {
+          this.udiCarrier = new Identifier();
+          return this.udiCarrier;
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.status");
         }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("lotNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.lotNumber");
+        }
         else if (name.equals("manufacturer")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.manufacturer");
+        }
+        else if (name.equals("manufactureDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.manufactureDate");
+        }
+        else if (name.equals("expirationDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.expirationDate");
         }
         else if (name.equals("model")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.model");
@@ -1094,35 +1078,26 @@ public class Device extends DomainResource {
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.version");
         }
-        else if (name.equals("manufactureDate")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Device.manufactureDate");
-        }
-        else if (name.equals("expiry")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Device.expiry");
-        }
-        else if (name.equals("udi")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Device.udi");
-        }
-        else if (name.equals("lotNumber")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Device.lotNumber");
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
         }
         else if (name.equals("owner")) {
           this.owner = new Reference();
           return this.owner;
         }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
         else if (name.equals("location")) {
           this.location = new Reference();
           return this.location;
         }
-        else if (name.equals("patient")) {
-          this.patient = new Reference();
-          return this.patient;
-        }
-        else if (name.equals("contact")) {
-          return addContact();
-        }
         else if (name.equals("url")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.url");
+        }
+        else if (name.equals("note")) {
+          return addNote();
         }
         else
           return super.addChild(name);
@@ -1141,29 +1116,29 @@ public class Device extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.type = type == null ? null : type.copy();
-        if (note != null) {
-          dst.note = new ArrayList<Annotation>();
-          for (Annotation i : note)
-            dst.note.add(i.copy());
-        };
+        dst.udiCarrier = udiCarrier == null ? null : udiCarrier.copy();
         dst.status = status == null ? null : status.copy();
+        dst.type = type == null ? null : type.copy();
+        dst.lotNumber = lotNumber == null ? null : lotNumber.copy();
         dst.manufacturer = manufacturer == null ? null : manufacturer.copy();
+        dst.manufactureDate = manufactureDate == null ? null : manufactureDate.copy();
+        dst.expirationDate = expirationDate == null ? null : expirationDate.copy();
         dst.model = model == null ? null : model.copy();
         dst.version = version == null ? null : version.copy();
-        dst.manufactureDate = manufactureDate == null ? null : manufactureDate.copy();
-        dst.expiry = expiry == null ? null : expiry.copy();
-        dst.udi = udi == null ? null : udi.copy();
-        dst.lotNumber = lotNumber == null ? null : lotNumber.copy();
-        dst.owner = owner == null ? null : owner.copy();
-        dst.location = location == null ? null : location.copy();
         dst.patient = patient == null ? null : patient.copy();
+        dst.owner = owner == null ? null : owner.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactPoint>();
           for (ContactPoint i : contact)
             dst.contact.add(i.copy());
         };
+        dst.location = location == null ? null : location.copy();
         dst.url = url == null ? null : url.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         return dst;
       }
 
@@ -1178,12 +1153,13 @@ public class Device extends DomainResource {
         if (!(other instanceof Device))
           return false;
         Device o = (Device) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(note, o.note, true)
-           && compareDeep(status, o.status, true) && compareDeep(manufacturer, o.manufacturer, true) && compareDeep(model, o.model, true)
-           && compareDeep(version, o.version, true) && compareDeep(manufactureDate, o.manufactureDate, true)
-           && compareDeep(expiry, o.expiry, true) && compareDeep(udi, o.udi, true) && compareDeep(lotNumber, o.lotNumber, true)
-           && compareDeep(owner, o.owner, true) && compareDeep(location, o.location, true) && compareDeep(patient, o.patient, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(url, o.url, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(udiCarrier, o.udiCarrier, true)
+           && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(lotNumber, o.lotNumber, true)
+           && compareDeep(manufacturer, o.manufacturer, true) && compareDeep(manufactureDate, o.manufactureDate, true)
+           && compareDeep(expirationDate, o.expirationDate, true) && compareDeep(model, o.model, true) && compareDeep(version, o.version, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(owner, o.owner, true) && compareDeep(contact, o.contact, true)
+           && compareDeep(location, o.location, true) && compareDeep(url, o.url, true) && compareDeep(note, o.note, true)
+          ;
       }
 
       @Override
@@ -1193,19 +1169,16 @@ public class Device extends DomainResource {
         if (!(other instanceof Device))
           return false;
         Device o = (Device) other;
-        return compareValues(status, o.status, true) && compareValues(manufacturer, o.manufacturer, true) && compareValues(model, o.model, true)
-           && compareValues(version, o.version, true) && compareValues(manufactureDate, o.manufactureDate, true)
-           && compareValues(expiry, o.expiry, true) && compareValues(udi, o.udi, true) && compareValues(lotNumber, o.lotNumber, true)
-           && compareValues(url, o.url, true);
+        return compareValues(status, o.status, true) && compareValues(lotNumber, o.lotNumber, true) && compareValues(manufacturer, o.manufacturer, true)
+           && compareValues(manufactureDate, o.manufactureDate, true) && compareValues(expirationDate, o.expirationDate, true)
+           && compareValues(model, o.model, true) && compareValues(version, o.version, true) && compareValues(url, o.url, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (note == null || note.isEmpty()) && (status == null || status.isEmpty()) && (manufacturer == null || manufacturer.isEmpty())
-           && (model == null || model.isEmpty()) && (version == null || version.isEmpty()) && (manufactureDate == null || manufactureDate.isEmpty())
-           && (expiry == null || expiry.isEmpty()) && (udi == null || udi.isEmpty()) && (lotNumber == null || lotNumber.isEmpty())
-           && (owner == null || owner.isEmpty()) && (location == null || location.isEmpty()) && (patient == null || patient.isEmpty())
-           && (contact == null || contact.isEmpty()) && (url == null || url.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  udiCarrier,  status
+          ,  type,  lotNumber,  manufacturer,  manufactureDate,  expirationDate,  model,  version,  patient
+          ,  owner,  contact,  location,  url,  note);
       }
 
   @Override
@@ -1332,26 +1305,6 @@ public class Device extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Device:location").toLocked();
 
  /**
-   * Search parameter: <b>udi</b>
-   * <p>
-   * Description: <b>FDA mandated Unique Device Identifier</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Device.udi</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="udi", path="Device.udi", description="FDA mandated Unique Device Identifier", type="string" )
-  public static final String SP_UDI = "udi";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>udi</b>
-   * <p>
-   * Description: <b>FDA mandated Unique Device Identifier</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Device.udi</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam UDI = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_UDI);
-
- /**
    * Search parameter: <b>type</b>
    * <p>
    * Description: <b>The type of the device</b><br>
@@ -1370,6 +1323,26 @@ public class Device extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>udicarrier</b>
+   * <p>
+   * Description: <b>Barcode string (udi)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Device.udiCarrier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token" )
+  public static final String SP_UDICARRIER = "udicarrier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>udicarrier</b>
+   * <p>
+   * Description: <b>Barcode string (udi)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Device.udiCarrier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam UDICARRIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_UDICARRIER);
 
  /**
    * Search parameter: <b>url</b>

@@ -39,6 +39,8 @@ import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Substance;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.term.ITerminologySvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -77,6 +80,12 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @ContextConfiguration(classes= {TestDstu3Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
+	
+	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
+
+	@Autowired
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -118,17 +127,17 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myMedicationDaoDstu3")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-	
-@Autowired
-	@Qualifier("myMedicationOrderDaoDstu3")
-	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
-	
+	@Autowired
+		@Qualifier("myMedicationOrderDaoDstu3")
+		protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-	@Autowired
-	@Qualifier("myObservationDaoDstu3")
-	protected IFhirResourceDao<Observation> myObservationDao;
+	
+@Autowired
+@Qualifier("myObservationDaoDstu3")
+protected IFhirResourceDao<Observation> myObservationDao;
+	
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
@@ -178,7 +187,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
-
+	@After()
+	public void afterGrabCaches() {
+		ourValueSetDao = myValueSetDao;
+		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
+	}
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
@@ -203,13 +216,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		purgeDatabase(entityManager, myTxManager);
 	}
 
-
 	@Before
 	public void beforeResetConfig() {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 	}
+
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
@@ -226,6 +239,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		retVal.afterPropertiesSet();
 		return retVal;
+	}
+
+	@AfterClass
+	public static void afterFlushCaches() {
+		ourValueSetDao.purgeCaches();
+		ourJpaValidationSupportChainDstu3.flush();
 	}
 
 }

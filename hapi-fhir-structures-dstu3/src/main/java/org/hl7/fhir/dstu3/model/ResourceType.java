@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 
-// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
 
 public enum ResourceType {
     Account,
@@ -15,12 +15,14 @@ public enum ResourceType {
     BodySite,
     Bundle,
     CarePlan,
+    CareTeam,
     Claim,
     ClaimResponse,
     ClinicalImpression,
     CodeSystem,
     Communication,
     CommunicationRequest,
+    CompartmentDefinition,
     Composition,
     ConceptMap,
     Condition,
@@ -54,6 +56,7 @@ public enum ResourceType {
     Group,
     GuidanceResponse,
     HealthcareService,
+    ImagingExcerpt,
     ImagingObjectSelection,
     ImagingStudy,
     Immunization,
@@ -64,6 +67,7 @@ public enum ResourceType {
     List,
     Location,
     Measure,
+    MeasureReport,
     Media,
     Medication,
     MedicationAdministration,
@@ -72,7 +76,6 @@ public enum ResourceType {
     MedicationStatement,
     MessageHeader,
     ModuleDefinition,
-    ModuleMetadata,
     NamingSystem,
     NutritionOrder,
     Observation,
@@ -88,6 +91,7 @@ public enum ResourceType {
     PaymentReconciliation,
     Person,
     Practitioner,
+    PractitionerRole,
     Procedure,
     ProcedureRequest,
     ProcessRequest,
@@ -105,10 +109,12 @@ public enum ResourceType {
     Slot,
     Specimen,
     StructureDefinition,
+    StructureMap,
     Subscription,
     Substance,
     SupplyDelivery,
     SupplyRequest,
+    Task,
     TestScript,
     ValueSet,
     VisionPrescription;
@@ -136,6 +142,8 @@ public enum ResourceType {
       return "bundle";
     case CarePlan:
       return "careplan";
+    case CareTeam:
+      return "careteam";
     case Claim:
       return "claim";
     case ClaimResponse:
@@ -148,6 +156,8 @@ public enum ResourceType {
       return "communication";
     case CommunicationRequest:
       return "communicationrequest";
+    case CompartmentDefinition:
+      return "compartmentdefinition";
     case Composition:
       return "composition";
     case ConceptMap:
@@ -214,6 +224,8 @@ public enum ResourceType {
       return "guidanceresponse";
     case HealthcareService:
       return "healthcareservice";
+    case ImagingExcerpt:
+      return "imagingexcerpt";
     case ImagingObjectSelection:
       return "imagingobjectselection";
     case ImagingStudy:
@@ -234,6 +246,8 @@ public enum ResourceType {
       return "location";
     case Measure:
       return "measure";
+    case MeasureReport:
+      return "measurereport";
     case Media:
       return "media";
     case Medication:
@@ -250,8 +264,6 @@ public enum ResourceType {
       return "messageheader";
     case ModuleDefinition:
       return "moduledefinition";
-    case ModuleMetadata:
-      return "modulemetadata";
     case NamingSystem:
       return "namingsystem";
     case NutritionOrder:
@@ -282,6 +294,8 @@ public enum ResourceType {
       return "person";
     case Practitioner:
       return "practitioner";
+    case PractitionerRole:
+      return "practitionerrole";
     case Procedure:
       return "procedure";
     case ProcedureRequest:
@@ -316,6 +330,8 @@ public enum ResourceType {
       return "specimen";
     case StructureDefinition:
       return "structuredefinition";
+    case StructureMap:
+      return "structuremap";
     case Subscription:
       return "subscription";
     case Substance:
@@ -324,6 +340,8 @@ public enum ResourceType {
       return "supplydelivery";
     case SupplyRequest:
       return "supplyrequest";
+    case Task:
+      return "task";
     case TestScript:
       return "testscript";
     case ValueSet:
@@ -356,6 +374,8 @@ public enum ResourceType {
       return Bundle;
     if ("CarePlan".equals(code))
       return CarePlan;
+    if ("CareTeam".equals(code))
+      return CareTeam;
     if ("Claim".equals(code))
       return Claim;
     if ("ClaimResponse".equals(code))
@@ -368,6 +388,8 @@ public enum ResourceType {
       return Communication;
     if ("CommunicationRequest".equals(code))
       return CommunicationRequest;
+    if ("CompartmentDefinition".equals(code))
+      return CompartmentDefinition;
     if ("Composition".equals(code))
       return Composition;
     if ("ConceptMap".equals(code))
@@ -434,6 +456,8 @@ public enum ResourceType {
       return GuidanceResponse;
     if ("HealthcareService".equals(code))
       return HealthcareService;
+    if ("ImagingExcerpt".equals(code))
+      return ImagingExcerpt;
     if ("ImagingObjectSelection".equals(code))
       return ImagingObjectSelection;
     if ("ImagingStudy".equals(code))
@@ -454,6 +478,8 @@ public enum ResourceType {
       return Location;
     if ("Measure".equals(code))
       return Measure;
+    if ("MeasureReport".equals(code))
+      return MeasureReport;
     if ("Media".equals(code))
       return Media;
     if ("Medication".equals(code))
@@ -470,8 +496,6 @@ public enum ResourceType {
       return MessageHeader;
     if ("ModuleDefinition".equals(code))
       return ModuleDefinition;
-    if ("ModuleMetadata".equals(code))
-      return ModuleMetadata;
     if ("NamingSystem".equals(code))
       return NamingSystem;
     if ("NutritionOrder".equals(code))
@@ -502,6 +526,8 @@ public enum ResourceType {
       return Person;
     if ("Practitioner".equals(code))
       return Practitioner;
+    if ("PractitionerRole".equals(code))
+      return PractitionerRole;
     if ("Procedure".equals(code))
       return Procedure;
     if ("ProcedureRequest".equals(code))
@@ -536,6 +562,8 @@ public enum ResourceType {
       return Specimen;
     if ("StructureDefinition".equals(code))
       return StructureDefinition;
+    if ("StructureMap".equals(code))
+      return StructureMap;
     if ("Subscription".equals(code))
       return Subscription;
     if ("Substance".equals(code))
@@ -544,6 +572,8 @@ public enum ResourceType {
       return SupplyDelivery;
     if ("SupplyRequest".equals(code))
       return SupplyRequest;
+    if ("Task".equals(code))
+      return Task;
     if ("TestScript".equals(code))
       return TestScript;
     if ("ValueSet".equals(code))

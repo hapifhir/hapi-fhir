@@ -43,7 +43,7 @@ public class BaseSearchParamExtractor {
 
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
 		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = thePaths.split("\\|");
+		String[] nextPathsSplit = thePaths.split("\\||or");
 		FhirTerser t = myContext.newTerser();
 		for (String nextPath : nextPathsSplit) {
 			String nextPathTrimmed = nextPath.trim();

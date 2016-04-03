@@ -135,7 +135,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 			obs.setValue(new Quantity(null, 2.223, null, null, "mg/L"));
 			obs.addReferenceRange().setLow((SimpleQuantity) new SimpleQuantity().setValue(2.20)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(2.99));
 			obs.setStatus(ObservationStatus.FINAL);
-			obs.setComments("This is a result comment");
+			obs.setComment("This is a result comment");
 
 			Reference result = value.addResult();
 			result.setResource(obs);

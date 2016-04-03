@@ -1418,6 +1418,8 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
+			super.wereBack();
+			
 			IResource res = (IResource) getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
@@ -1456,6 +1458,8 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
+			super.wereBack();
+
 			IBaseResource res = getCurrentElement();
 			assert res != null;
 			if (res.getIdElement() == null || res.getIdElement().isEmpty()) {

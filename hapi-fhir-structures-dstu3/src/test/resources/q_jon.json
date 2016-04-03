@@ -73,19 +73,19 @@
                             "linkId":"2.1",
                             "text":"Overall Image Quality:",
                             "type":"choice",
-                            "option":[
-                                {
+                            "option":[{
+                                "valueCoding":{
                                     "code":"2.1a",
                                     "display":"Adequate"
-                                },
-                                {
+                                }},
+                                {"valueCoding":{
                                     "code":"2.1b",
                                     "display":"Suboptimal"
-                                },
-                                {
+                                }},
+                                {"valueCoding":{
                                     "code":"2.1c",
                                     "display":"Non-diagnostic"
-                                }
+                                }}
                             ]
                         },
                         {
@@ -150,18 +150,18 @@
                                             "text":"Location of main nodule/mass:",
                                             "type":"choice",
                                             "option":[
-                                                {
+                                                {"valueCoding":{
                                                     "code":"3.1.1a",
                                                     "display":"Peripheral"
-                                                },
-                                                {
+                                                }},
+                                                {"valueCoding":{
                                                     "code":"3.1.1b",
                                                     "display":"Central*"
-                                                },
-                                                {
+                                                }},
+                                                {"valueCoding":{
                                                     "code":"3.1.1c",
                                                     "display":"Both*"
-                                                }
+                                                }}
                                             ],
                                             "item":[
                                                 {
@@ -279,18 +279,18 @@
                                             "text":"Size of the nodule/mass:",
                                             "type":"choice",
                                             "option":[
-                                                {
+                                                {"valueCoding":{
                                                     "code":"3.2.1a",
                                                     "display":"Solid nodule/mass"
-                                                },
-                                                {
+                                                }},
+                                                {"valueCoding":{
                                                     "code":"3.2.1b",
                                                     "display":"Part-solid nodule/mass"
-                                                },
-                                                {
+                                                }},
+                                                {"valueCoding":{
                                                     "code":"3.2.1c",
                                                     "display":"Pure Ground glass"
-                                                }
+                                                }}
                                             ],
                                             "item":[
                                                 {

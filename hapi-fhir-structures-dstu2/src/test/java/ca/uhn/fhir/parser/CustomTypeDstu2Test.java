@@ -22,6 +22,8 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -30,221 +32,12 @@ import ca.uhn.fhir.util.ElementUtil;
 
 public class CustomTypeDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
-
-	@Test
-	public void testAccessEmptyMetaLists() {
-		Patient p = new Patient();
-		assertThat(p.getMeta().getProfile(), empty());
-		assertThat(p.getMeta().getFormatCommentsPost(), empty());
-		assertThat(p.getMeta().getFormatCommentsPre(), empty());
-		assertThat(p.getMeta().getLastUpdated(), nullValue());
-		assertThat(p.getMeta().getSecurity(), empty());
-		assertThat(p.getMeta().getSecurity("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getTag(), empty());
-		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getVersionId(), nullValue());
-		
-	}
-	
-	
-	@Test
-	public void testEncodeCompleteMetaLists() {
-		Patient p = new Patient();
-		p.getMeta().addProfile("http://foo/profile1");
-		p.getMeta().addProfile("http://foo/profile2");
-		p.getMeta().addSecurity().setSystem("SEC_S1").setCode("SEC_C1").setDisplay("SED_D1");
-		p.getMeta().addSecurity().setSystem("SEC_S2").setCode("SEC_C2").setDisplay("SED_D2");
-		p.getMeta().addTag().setSystem("TAG_S1").setCode("TAG_C1").setDisplay("TAG_D1");
-		p.getMeta().addTag().setSystem("TAG_S2").setCode("TAG_C2").setDisplay("TAG_D2");
-		
-		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(out);
-		
-		//@formatter:off
-		assertThat(out, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://foo/profile1\"/>", 
-			"<profile value=\"http://foo/profile2\"/>", 
-			"<security>", 
-			"<system value=\"SEC_S1\"/>", 
-			"<code value=\"SEC_C1\"/>", 
-			"<display value=\"SED_D1\"/>", 
-			"</security>", 
-			"<security>", 
-			"<system value=\"SEC_S2\"/>", 
-			"<code value=\"SEC_C2\"/>", 
-			"<display value=\"SED_D2\"/>", 
-			"</security>", 
-			"<tag>", 
-			"<system value=\"TAG_S1\"/>", 
-			"<display value=\"TAG_D1\"/>", 
-			"</tag>", 
-			"<tag>", 
-			"<system value=\"TAG_S2\"/>", 
-			"<display value=\"TAG_D2\"/>", 
-			"</tag>", 
-			"</meta>"));
-		//@formatter:on
-		
-	}
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeDstu2Test.class);
 
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-	}
-	
-	@Test
-	public void testEncodeWithCustomType() {
-
-		MyCustomPatient patient = new MyCustomPatient();
-
-		patient.addIdentifier().setSystem("urn:system").setValue("1234");
-		patient.addName().addFamily("Rossi").addGiven("Mario");
-		patient.setInsulinLevel(new QuantityDt());
-		patient.setGlucoseLevel(new QuantityDt());
-		patient.setHbA1c(new QuantityDt());
-		patient.setBloodPressure(new QuantityDt());
-		patient.setCholesterol(new QuantityDt());
-		patient.setWeight(new StringDt("80 kg"));
-		patient.setWeight(new StringDt("185 cm"));
-		patient.setCheckDates(new ArrayList<DateTimeDt>());
-		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
-
-		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		String messageString = p.encodeResourceToString(patient);
-
-		ourLog.info(messageString);
-		
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
-		//@formatter:on
-
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
-	}
-
-	@Test
-	public void testEncodeWithCustomTypeAndAutoInsertedProfile() {
-
-		MyCustomPatient patient = new MyCustomPatient();
-
-		patient.getMeta().addProfile("http://example.com/foo");
-		patient.getMeta().addProfile("http://example.com/bar");
-		
-		patient.addIdentifier().setSystem("urn:system").setValue("1234");
-		patient.addName().addFamily("Rossi").addGiven("Mario");
-		patient.setInsulinLevel(new QuantityDt());
-		patient.setGlucoseLevel(new QuantityDt());
-		patient.setHbA1c(new QuantityDt());
-		patient.setBloodPressure(new QuantityDt());
-		patient.setCholesterol(new QuantityDt());
-		patient.setWeight(new StringDt("80 kg"));
-		patient.setWeight(new StringDt("185 cm"));
-		patient.setCheckDates(new ArrayList<DateTimeDt>());
-		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
-
-		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		String messageString = p.encodeResourceToString(patient);
-
-		ourLog.info(messageString);
-		
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
-		//@formatter:on
-
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
-	}
-
-	@Test
-	public void testEncodeNormalType() {
-
-		Patient patient = new Patient();
-
-		patient.addIdentifier().setSystem("urn:system").setValue("1234");
-		patient.addName().addFamily("Rossi").addGiven("Mario");
-
-		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		String messageString = p.encodeResourceToString(patient);
-		ourLog.info(messageString);
-
-		assertThat(messageString, not(containsString("<profile")));
-	}
-
-	@Test
-	public void parseResourceWithNoDirective() {
-		String input = createResource(true);
-		
-		FhirContext ctx = FhirContext.forDstu2();
-		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
-		
-		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
-		assertEquals("185 cm", ((StringDt)exts.get(0).getValueAsPrimitive()).getValue());
-	}
-
-	@Test
-	public void parseResourceWithDirective() {
-		String input = createResource(true);
-		
-		FhirContext ctx = FhirContext.forDstu2();
-		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
-		
-		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
-		
-		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
-		
-		assertEquals("185 cm", parsed.getWeight().getValue());
-	}
-
-	@Test
-	public void parseBundleWithResourceDirective() {
-		
-		String input = createBundle(createResource(false), createResource(true));
-		
-		FhirContext ctx = FhirContext.forDstu2();
-		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
-		
-		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, input);
-		
-		Patient res0 = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(0, res0.getMeta().getProfile().size());
-		List<ExtensionDt> exts = res0.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
-		assertEquals("185 cm", ((StringDt)exts.get(0).getValueAsPrimitive()).getValue());
-
-		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
-		assertEquals(1, res1.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
-		exts = res1.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
-		assertEquals("185 cm", res1.getWeight().getValue());
 	}
 
 	private String createBundle(String... theResources) {
@@ -322,12 +115,253 @@ public class CustomTypeDstu2Test {
 		b.append("      <given value=\"Mario\"/>\n");
 		b.append("   </name>\n");
 		b.append("</Patient>");
-		String input =
-			b.toString();
+		String input = b.toString();
 		return input;
 	}
-	
-	
+
+	@Test
+	public void parseBundleWithResourceDirective() {
+
+		String input = createBundle(createResource(false), createResource(true));
+
+		FhirContext ctx = FhirContext.forDstu2();
+		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
+
+		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, input);
+
+		Patient res0 = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(0, res0.getMeta().getProfile().size());
+		List<ExtensionDt> exts = res0.getUndeclaredExtensionsByUrl("http://example.com/Weight");
+		assertEquals(1, exts.size());
+		assertEquals("185 cm", ((StringDt) exts.get(0).getValueAsPrimitive()).getValue());
+
+		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
+		assertEquals(1, res1.getMeta().getProfile().size());
+		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
+		exts = res1.getUndeclaredExtensionsByUrl("http://example.com/Weight");
+		assertEquals(0, exts.size());
+		assertEquals("185 cm", res1.getWeight().getValue());
+	}
+
+	@Test
+	public void parseResourceWithDirective() {
+		String input = createResource(true);
+
+		FhirContext ctx = FhirContext.forDstu2();
+		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
+
+		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
+		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+
+		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
+		assertEquals(0, exts.size());
+
+		assertEquals("185 cm", parsed.getWeight().getValue());
+	}
+
+	@Test
+	public void parseResourceWithNoDirective() {
+		String input = createResource(true);
+
+		FhirContext ctx = FhirContext.forDstu2();
+		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
+		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+
+		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
+		assertEquals(1, exts.size());
+		assertEquals("185 cm", ((StringDt) exts.get(0).getValueAsPrimitive()).getValue());
+	}
+
+	@Test
+	public void testAccessEmptyMetaLists() {
+		Patient p = new Patient();
+		assertThat(p.getMeta().getProfile(), empty());
+		assertThat(p.getMeta().getFormatCommentsPost(), empty());
+		assertThat(p.getMeta().getFormatCommentsPre(), empty());
+		assertThat(p.getMeta().getLastUpdated(), nullValue());
+		assertThat(p.getMeta().getSecurity(), empty());
+		assertThat(p.getMeta().getSecurity("foo", "bar"), nullValue());
+		assertThat(p.getMeta().getTag(), empty());
+		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
+		assertThat(p.getMeta().getVersionId(), nullValue());
+
+	}
+
+	@Test
+	public void testEncodeCompleteMetaLists() {
+		Patient p = new Patient();
+		p.getMeta().addProfile("http://foo/profile1");
+		p.getMeta().addProfile("http://foo/profile2");
+		p.getMeta().addSecurity().setSystem("SEC_S1").setCode("SEC_C1").setDisplay("SED_D1");
+		p.getMeta().addSecurity().setSystem("SEC_S2").setCode("SEC_C2").setDisplay("SED_D2");
+		p.getMeta().addTag().setSystem("TAG_S1").setCode("TAG_C1").setDisplay("TAG_D1");
+		p.getMeta().addTag().setSystem("TAG_S2").setCode("TAG_C2").setDisplay("TAG_D2");
+
+		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(out);
+
+		//@formatter:off
+		assertThat(out, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://foo/profile1\"/>", 
+			"<profile value=\"http://foo/profile2\"/>", 
+			"<security>", 
+			"<system value=\"SEC_S1\"/>", 
+			"<code value=\"SEC_C1\"/>", 
+			"<display value=\"SED_D1\"/>", 
+			"</security>", 
+			"<security>", 
+			"<system value=\"SEC_S2\"/>", 
+			"<code value=\"SEC_C2\"/>", 
+			"<display value=\"SED_D2\"/>", 
+			"</security>", 
+			"<tag>", 
+			"<system value=\"TAG_S1\"/>", 
+			"<display value=\"TAG_D1\"/>", 
+			"</tag>", 
+			"<tag>", 
+			"<system value=\"TAG_S2\"/>", 
+			"<display value=\"TAG_D2\"/>", 
+			"</tag>", 
+			"</meta>"));
+		//@formatter:on
+
+	}
+
+	@Test
+	public void testEncodeNormalType() {
+
+		Patient patient = new Patient();
+
+		patient.addIdentifier().setSystem("urn:system").setValue("1234");
+		patient.addName().addFamily("Rossi").addGiven("Mario");
+
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String messageString = p.encodeResourceToString(patient);
+		ourLog.info(messageString);
+
+		assertThat(messageString, not(containsString("<profile")));
+	}
+
+	@Test
+	public void testEncodeWithCustomType() {
+
+		MyCustomPatient patient = new MyCustomPatient();
+
+		patient.addIdentifier().setSystem("urn:system").setValue("1234");
+		patient.addName().addFamily("Rossi").addGiven("Mario");
+		patient.setInsulinLevel(new QuantityDt());
+		patient.setGlucoseLevel(new QuantityDt());
+		patient.setHbA1c(new QuantityDt());
+		patient.setBloodPressure(new QuantityDt());
+		patient.setCholesterol(new QuantityDt());
+		patient.setWeight(new StringDt("80 kg"));
+		patient.setWeight(new StringDt("185 cm"));
+		patient.setCheckDates(new ArrayList<DateTimeDt>());
+		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String messageString = p.encodeResourceToString(patient);
+
+		ourLog.info(messageString);
+
+		//@formatter:off
+		assertThat(messageString, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>"));
+		//@formatter:on
+
+		//@formatter:off
+		assertThat(messageString, not(stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"", "/>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>")));
+		//@formatter:on
+	}
+
+	@Test
+	public void testEncodeWithCustomTypeAndAutoInsertedProfile() {
+
+		MyCustomPatient patient = new MyCustomPatient();
+
+		patient.getMeta().addProfile("http://example.com/foo");
+		patient.getMeta().addProfile("http://example.com/bar");
+
+		patient.addIdentifier().setSystem("urn:system").setValue("1234");
+		patient.addName().addFamily("Rossi").addGiven("Mario");
+		patient.setInsulinLevel(new QuantityDt());
+		patient.setGlucoseLevel(new QuantityDt());
+		patient.setHbA1c(new QuantityDt());
+		patient.setBloodPressure(new QuantityDt());
+		patient.setCholesterol(new QuantityDt());
+		patient.setWeight(new StringDt("80 kg"));
+		patient.setWeight(new StringDt("185 cm"));
+		patient.setCheckDates(new ArrayList<DateTimeDt>());
+		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String messageString = p.encodeResourceToString(patient);
+
+		ourLog.info(messageString);
+
+		//@formatter:off
+		assertThat(messageString, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"<profile value=\"http://example.com/bar\"/>", 
+			"</meta>"));
+		//@formatter:on
+
+		//@formatter:off
+		assertThat(messageString, not(stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"", "/>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>")));
+		//@formatter:on
+	}
+
+	/**
+	 * See #318
+	 */
+	@Test
+	public void testParseResourceWithContainedResourcesWithProfile() {
+		//@formatter:off
+		String input = "<MedicationOrder xmlns=\"http://hl7.org/fhir\">"
+				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
+				+ "<meta> "
+				+ "<profile value=\"http://fhir.something.com/StructureDefinition/our-medication-order\"/> "
+				+ "</meta> "
+				+ "<contained> "
+				+ "<Medication xmlns=\"http://hl7.org/fhir\"> "
+				+ "<id value=\"1\"/>"
+				+ "<meta> "
+				+ "<profile value=\"http://fhir.something.com/StructureDefinition/our-medication\"/> "
+				+ "</meta> "
+				+ "<code> "
+				+ "<text value=\"medication\"/> "
+				+ "</code> "
+				+ "</Medication> "
+				+ "</contained> "
+				+ "<medication> "
+				+ "<reference value=\"#1\"/> "
+				+ "</medication> "
+				+ "</MedicationOrder>";
+		//@formatter:on
+
+		FhirContext ctx = FhirContext.forDstu2();
+		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
+
+		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
+		assertEquals(MyMedication.class, mo.getContained().getContainedResources().get(0).getClass());
+	}
+
 	@ResourceDef(name = "Patient", profile = "http://example.com/foo")
 	public static class MyCustomPatient extends Patient {
 
@@ -505,6 +539,13 @@ public class CustomTypeDstu2Test {
 		public void setWeight(StringDt weight) {
 			myWeight = weight;
 		}
+
+	}
+
+	@ResourceDef()
+	public static class MyMedication extends Medication {
+
+		private static final long serialVersionUID = 1L;
 
 	}
 }

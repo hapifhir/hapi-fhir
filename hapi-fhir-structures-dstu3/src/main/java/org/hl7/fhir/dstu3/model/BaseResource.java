@@ -24,11 +24,11 @@ public abstract class BaseResource extends Base implements IAnyResource, IElemen
         return this;
     }
 
+	public abstract BaseResource setIdElement(IdType theIdType);
+
 	@Override
 	public FhirVersionEnum getStructureFhirVersionEnum() {
 		return FhirVersionEnum.DSTU3;
 	}
 
-	public abstract BaseResource setIdElement(IdType theIdType);
-    
 }

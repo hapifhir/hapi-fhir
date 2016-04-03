@@ -1,6 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -43,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * 
  */
 @DatatypeDef(name = "code", isSpecialization = true)
-public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T>, Externalizable {
+public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T> {
 
 	private static final long serialVersionUID = 1L;
 	private EnumFactory<T> myEnumFactory;

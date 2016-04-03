@@ -1,23 +1,27 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
@@ -48,7 +52,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValueSet fetchCodeSystem(String theSystem) {
+	public CodeSystem fetchCodeSystem(String theSystem) {
 		if (myValidationSupport == null) {
 			return null;
 		} else {
@@ -133,24 +137,22 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-		if (theSystem == null || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
-			for (ConceptDefinitionComponent next : theVs.getCodeSystem().getConcept()) {
-				ValidationResult retVal = validateCodeSystem(theCode, next);
-				if (retVal != null && retVal.isOk()) {
-					return retVal;
-				}
-			}
-		}
-
 		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
 			if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
-				for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
-					ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
-					conceptDef.setCode(nextComposeCode.getCode());
-					conceptDef.setDisplay(nextComposeCode.getDisplay());
-					ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
+				if (nextComposeConceptSet.getConcept().isEmpty()) {
+					ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
 					if (retVal != null && retVal.isOk()) {
 						return retVal;
+					}
+				} else {
+					for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
+						ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
+						conceptDef.setCode(nextComposeCode.getCode());
+						conceptDef.setDisplay(nextComposeCode.getDisplay());
+						ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
+						if (retVal != null && retVal.isOk()) {
+							return retVal;
+						}
 					}
 				}
 			}
@@ -235,5 +237,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public ValueSetExpander getExpander() {
 		return new ValueSetExpanderSimple(this, this);
+	}
+
+	@Override
+	public Set<String> typeTails() {
+		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code", "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity",
+				"SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint", "Timing", "Reference", "Annotation", "Signature", "Meta"));
 	}
 }

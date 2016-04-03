@@ -24,14 +24,28 @@ import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
+<<<<<<< HEAD
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+||||||| merged common ancestors
+=======
+import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+>>>>>>> dstu3_structs
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
+<<<<<<< HEAD
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+||||||| merged common ancestors
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+=======
+>>>>>>> dstu3_structs
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -140,11 +154,19 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<ValueSet>() {
+		when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
-			public ValueSet answer(InvocationOnMock theInvocation) throws Throwable {
-				ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
+			public CodeSystem answer(InvocationOnMock theInvocation) throws Throwable {
+				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
 				ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
+				return retVal;
+			}
+		});
+		when(myMockSupport.fetchStructureDefinition(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<StructureDefinition>() {
+			@Override
+			public StructureDefinition answer(InvocationOnMock theInvocation) throws Throwable {
+				StructureDefinition retVal = myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
+				ourLog.info("fetchStructureDefinition({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
 				return retVal;
 			}
 		});
@@ -270,9 +292,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
-		assertEquals(output.toString(), 3, output.getMessages().size());
-		ourLog.info(output.getMessages().get(0).getLocationString());
-		ourLog.info(output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
 	}
 
 	@Test
@@ -302,28 +322,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	}
 
-	/**
-	 * See #216
-	 */
-	@Test
-	public void testValidateRawXmlInvalidChoiceName() throws Exception {
-		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
-		ValidationResult output = myVal.validateWithResult(input);
 
-		List<SingleValidationMessage> res = logResultsAndReturnAll(output);
-		ourLog.info(res.toString());
-
-		for (SingleValidationMessage nextMessage : res) {
-			if (nextMessage.getSeverity() == ResultSeverityEnum.ERROR) {
-				fail(nextMessage.toString());
-			}
-		}
-
-		// TODO: we should really not have any errors at all here, but for
-		// now we aren't validating snomed codes correctly
-		// assertEquals(output.toString(), 0, res.size());
-
-	}
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {

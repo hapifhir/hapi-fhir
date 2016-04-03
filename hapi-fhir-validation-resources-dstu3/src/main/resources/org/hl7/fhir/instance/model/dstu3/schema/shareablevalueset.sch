@@ -23,29 +23,8 @@
   <sch:pattern>
     <sch:title>ValueSet</sch:title>
     <sch:rule context="f:ValueSet">
-      <sch:assert test="not(f:codeSystem/f:system/@value = f:url/@value)">A defined code system (if present) SHALL have a different url than the value set url (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))">A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system (inherited)</sch:assert>
-      <sch:assert test="exists(f:codeSystem) or exists(f:compose) or exists(f:expansion)">Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element (inherited)</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-  <sch:pattern>
-    <sch:title>f:ValueSet/f:codeSystem</sch:title>
-    <sch:rule context="f:ValueSet/f:codeSystem">
-      <sch:assert test="count(f:caseSensitive) &gt;= 1">caseSensitive: minimum cardinality of 'caseSensitive' is 1</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-  <sch:pattern>
-    <sch:title>ValueSet.codeSystem</sch:title>
-    <sch:rule context="f:ValueSet/f:codeSystem">
-      <sch:assert test="count(descendant::f:concept)=count(distinct-values(descendant::f:concept/f:code/@value))">Codes must be unique (inherited)</sch:assert>
-      <sch:assert test="count(distinct-values(descendant::f:concept/f:code/@value))=count(descendant::f:concept)">Within a code system definition, all the codes SHALL be unique (inherited)</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-  <sch:pattern>
-    <sch:title>f:ValueSet/f:codeSystem/f:concept</sch:title>
-    <sch:rule context="f:ValueSet/f:codeSystem/f:concept">
-      <sch:assert test="count(f:display) &gt;= 1">display: minimum cardinality of 'display' is 1</sch:assert>
-      <sch:assert test="count(f:definition) &gt;= 1">definition: minimum cardinality of 'definition' is 1</sch:assert>
+      <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude))">A value set with only one import SHALL also have an include and/or an exclude unless the value set includes an inline code system (inherited)</sch:assert>
+      <sch:assert test="exists(f:compose) or exists(f:expansion)">Value set SHALL contain at least one of a a compose, or an expansion element (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>

@@ -10,14 +10,14 @@
   <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-09-17T18:50:53Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16575</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>14010</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>2</ActiveSheet>
@@ -4216,9 +4216,9 @@
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">Immunization</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">If immunization was not administred (wasNotGiven=true) then there SHALL be no reaction nor explanation.reason present</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">If immunization was not administered (wasNotGiven=true) then there SHALL be no reaction nor explanation.reason present</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = 'true').not() or (reaction.empty() and explanation.reason.empty())</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = true).not() or (reaction.empty() and explanation.reason.empty())</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">not(f:wasNotGiven/@value=true() and (count(f:reaction) &gt; 0 or exists(f:explanation/f:reason)))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4230,7 +4230,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Immunization</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If immunization was administered (wasNotGiven=false) then explanation.reasonNotGiven SHALL be absent.</Data></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = 'true') or explanation.reasonNotGiven.empty()</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = true) or explanation.reasonNotGiven.empty()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(f:wasNotGiven/@value=false() and exists(f:explanation/f:reasonNotGiven))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">

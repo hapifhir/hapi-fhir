@@ -88,9 +88,19 @@
 					</td>
 					<td th:text="${result.resource.statusElement.value}">final</td>
 				</tr>
-				<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
-					<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
-				</tr>
+
+				<th:block th:switch="${fhirVersion}">
+					<th:block th:case="'DSTU3'">
+						<tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+							<td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+						</tr>
+					</th:block>
+					<th:block th:case="*">
+						<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+							<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
+						</tr>
+					</th:block>
+				</th:block>
 				
 				<!--/* The following are just examples that don't appear in the generated narrative -->
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
