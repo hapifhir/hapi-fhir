@@ -1,7 +1,9 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,6 +25,24 @@ public class BaseDateTimeDtDstu2Test {
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	}
+
+	@Test
+	public void testParseInvalid() {
+		try {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString("1974-12-25+10:00");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25+10:00", e.getMessage());
+		}
+		try {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString("1974-12-25Z");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25Z", e.getMessage());
+		}
 	}
 
 	/**

@@ -3,6 +3,7 @@ package ca.uhn.fhir.model;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,6 +28,39 @@ public class BaseDateTimeTypeDstu3Test {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 
+	@Test
+	public void testMinutePrecisionEncode() throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
+		
+		DateTimeType date = new DateTimeType();
+		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
+		date.setTimeZone(TimeZone.getTimeZone("EST"));
+		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
+
+		date.setTimeZoneZulu(true);
+		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
+	}
+	
+	@Test
+	public void testParseInvalid() {
+		try {
+			DateTimeType dt = new DateTimeType();
+			dt.setValueAsString("1974-12-25+10:00");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string: 1974-12-25+10:00", e.getMessage());
+		}
+		try {
+			DateTimeType dt = new DateTimeType();
+			dt.setValueAsString("1974-12-25Z");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25Z", e.getMessage());
+		}
+	}
+	
 	/**
 	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
 	 */
@@ -41,21 +75,6 @@ public class BaseDateTimeTypeDstu3Test {
 		DateType date = new DateType();
 		date.setValue(time);
 		assertEquals("2012-01-02", date.getValueAsString());
-	}
-
-	@Test
-	public void testMinutePrecisionEncode() throws Exception {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
-		
-		DateTimeType date = new DateTimeType();
-		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
-		date.setTimeZone(TimeZone.getTimeZone("EST"));
-		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
-
-		date.setTimeZoneZulu(true);
-		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
 	}
 
 	/**

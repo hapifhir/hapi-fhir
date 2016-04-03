@@ -367,6 +367,10 @@
 				performance when searching over large datasets.
 				Thanks to Emmanuel Duviviers for the suggestion!
 			</action>
+			<action type="fix">
+				DateTimeType should fail to parse 1974-12-25+10:00 as this is not
+				a valid time in FHIR. Thanks to Grahame Grieve for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
