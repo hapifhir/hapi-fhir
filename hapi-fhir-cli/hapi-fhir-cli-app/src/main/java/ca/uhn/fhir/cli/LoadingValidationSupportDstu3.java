@@ -1,7 +1,8 @@
 package ca.uhn.fhir.cli;
 
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -23,7 +24,7 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -43,6 +44,11 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 		}
 		ourLog.info("Successfully loaded resource");
 		return result;
+	}
+
+	@Override
+	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+		return null;
 	}
 
 	@Override
