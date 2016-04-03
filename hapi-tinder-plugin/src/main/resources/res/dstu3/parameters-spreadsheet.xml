@@ -10,14 +10,14 @@
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-06-20T09:12:31Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16575</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>6900</WindowHeight>
+  <WindowWidth>2910</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>2</ActiveSheet>
@@ -796,7 +796,7 @@
   </Style>
  </Styles>
  <Names>
-  <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R50C1"/>
+  <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R49C1"/>
  </Names>
  <Worksheet ss:Name="Instructions">
   <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="6" x:FullColumns="1"
@@ -3643,7 +3643,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Invariants!R1C1:R2C7"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="50" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s101" ss:DefaultRowHeight="15">
    <Column ss:Index="2" ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="115.5"/>
    <Column ss:StyleID="s101" ss:Width="55.5"/>
@@ -3689,22 +3689,13 @@
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><Data ss:Type="String">Parameters.parameter</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">A parameter must have a value or a resource, but not both</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">A parameter must have only one of (value, resource, part)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">value[x] xor resource</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">value xor resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">exists(f:value) or exists(f:resource) and not(exists(f:value) and exists(f:resource))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s105"><Data ss:Type="Number">2</Data><NamedCell
-      ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">Only one value</Data></Cell>
-    <Cell ss:StyleID="s83"/>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">Parameters.parameter.part</Data></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">A part must have a value or a resource, but not both</Data></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">value[x] xor resource</Data></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">exists(f:value) or exists(f:resource) and not(exists(f:value) and exists(f:resource))</Data></Cell>
+    <Cell ss:Index="9" ss:StyleID="s83"><Data ss:Type="String">part and not (value[x] xor resource) or not part and (value[x] xor resource)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s107"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4164,7 +4155,7 @@
     <Pane>
      <Number>0</Number>
      <ActiveRow>2</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

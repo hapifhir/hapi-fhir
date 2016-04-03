@@ -1,16 +1,18 @@
 package org.hl7.fhir.dstu3.utils;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
@@ -140,14 +142,14 @@ public interface IWorkerContext {
 
   // these are the terminology services used internally by the tools
   /**
-   * Find a value set for the nominated system uri. 
+   * Find the code system definition for the nominated system uri. 
    * return null if there isn't one (then the tool might try 
    * supportsSystem)
    * 
    * @param system
    * @return
    */
-  public ValueSet fetchCodeSystem(String system);
+  public CodeSystem fetchCodeSystem(String system);
 
   /**
    * True if the underlying terminology service provider will do 
@@ -285,6 +287,9 @@ public interface IWorkerContext {
    * @return
    */
   public String getAbbreviation(String name);
+
+  // return a set of types that have tails
+  public Set<String> typeTails();
 
 
 }

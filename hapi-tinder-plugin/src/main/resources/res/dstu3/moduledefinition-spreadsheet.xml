@@ -10,8 +10,8 @@
   <Author>Grahame</Author>
   <LastAuthor>Bryn</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-11-17T22:03:35Z</LastSaved>
-  <Version>15.00</Version>
+  <LastSaved>2016-02-17T18:33:14Z</LastSaved>
+  <Version>16.00</Version>
  </DocumentProperties>
  <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <WorkbookGuid dt:dt="string">52714b8f-bb4c-43f9-add8-76ad4227964b</WorkbookGuid>
@@ -20,11 +20,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>8355</WindowHeight>
-  <WindowWidth>21570</WindowWidth>
+  <WindowHeight>4980</WindowHeight>
+  <WindowWidth>7470</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>8</ActiveSheet>
+  <ActiveSheet>1</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -1722,7 +1722,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">ModuleDefinitionParameterType</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">FHIRDefinedType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1813,7 +1813,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">ModuleDefinitionParameterType</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">FHIRDefinedType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3708,10 +3708,11 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>13</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3724,11 +3725,10 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>24</ActiveRow>
+     <ActiveRow>25</ActiveRow>
      <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
@@ -6202,7 +6202,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Bindings!R1C1:R1C13"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="30" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="168.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="274.5"/>
@@ -6268,22 +6268,6 @@
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s145"><Data ss:Type="String">ModuleDefinitionParameterType</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">The type of the parameter</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">required</Data></Cell>
-    <Cell ss:StyleID="s62" ss:HRef="http://hl7.org/fhir/ValueSet/operation-parameter-type"><Data
-      ss:Type="String">http://hl7.org/fhir/ValueSet/operation-parameter-type</Data></Cell>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s115"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s145"><Data ss:Type="String">ModuleDefinitionParameterUse</Data></Cell>
@@ -6720,7 +6704,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6740,8 +6723,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
      <ActiveCol>0</ActiveCol>
+     <RangeSelection>R2</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

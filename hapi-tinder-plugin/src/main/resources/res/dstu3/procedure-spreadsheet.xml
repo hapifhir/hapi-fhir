@@ -4080,7 +4080,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Reason not performed is only permitted if notPerformed indicator is true</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">reasonNotPerformed.empty() or notPerformed = 'true'</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">reasonNotPerformed.empty() or notPerformed = true</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(exists(f:reasonNotPerformed)) or f:notPerformed/@value=true()</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>

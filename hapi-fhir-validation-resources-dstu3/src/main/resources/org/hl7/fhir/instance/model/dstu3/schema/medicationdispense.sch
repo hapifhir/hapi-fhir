@@ -36,6 +36,9 @@
     <sch:rule context="//f:MedicationDispense/f:identifier/f:assigner">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
+    <sch:rule context="//f:MedicationDispense/f:medicationReference">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
     <sch:rule context="//f:MedicationDispense/f:patient">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
@@ -51,20 +54,22 @@
     <sch:rule context="//f:MedicationDispense/f:daysSupply">
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
-    <sch:rule context="//f:MedicationDispense/f:medicationReference">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
-    </sch:rule>
     <sch:rule context="//f:MedicationDispense/f:destination">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="//f:MedicationDispense/f:receiver">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
+    <sch:rule context="//f:MedicationDispense/f:note/f:authorReference">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
     <sch:rule context="//f:MedicationDispense/f:dosageInstruction/f:timing/f:repeat">
+      <sch:assert test="not(exists(f:offset)) or exists(f:when)">tim-9: If there's an offset, there must be a when</sch:assert>
       <sch:assert test="not(exists(f:periodMax)) or exists(f:period)">tim-6: If there's a periodMax, there must be a period</sch:assert>
       <sch:assert test="not(exists(f:durationMax)) or exists(f:duration)">tim-7: If there's a durationMax, there must be a duration</sch:assert>
-      <sch:assert test="not(exists(f:duration)) or exists(f:durationUnits)">tim-1: if there's a duration, there needs to be duration units</sch:assert>
-      <sch:assert test="not(exists(f:period)) or exists(f:periodUnits)">tim-2: if there's a period, there needs to be period units</sch:assert>
+      <sch:assert test="not(exists(f:countMax)) or exists(f:count)">tim-8: If there's a countMax, there must be a count</sch:assert>
+      <sch:assert test="not(exists(f:duration)) or exists(f:durationUnit)">tim-1: if there's a duration, there needs to be duration units</sch:assert>
+      <sch:assert test="not(exists(f:period)) or exists(f:periodUnit)">tim-2: if there's a period, there needs to be period units</sch:assert>
       <sch:assert test="not((f:period or f:frequency) and f:when)">tim-3: Either frequency or when can exist, not both</sch:assert>
     </sch:rule>
     <sch:rule context="//f:MedicationDispense/f:dosageInstruction/f:timing/f:repeat/f:boundsQuantity">

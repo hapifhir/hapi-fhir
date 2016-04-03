@@ -731,7 +731,15 @@ class ModelScanner {
 				providesMembershipInCompartments = new HashSet<String>();
 				for (Compartment next : searchParam.providesMembershipIn()) {
 					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
-						throw new ConfigurationException("Search param " + searchParam.name() + " provides compartment membershit but is not of type 'reference'");
+						StringBuilder b = new StringBuilder();
+						b.append("Search param ");
+						b.append(searchParam.name());
+						b.append(" on resource type ");
+						b.append(theClass.getName());
+						b.append(" provides compartment membership but is not of type 'reference'");
+						ourLog.warn(b.toString());
+						continue;
+//						throw new ConfigurationException(b.toString());
 					}
 					providesMembershipInCompartments.add(next.name());
 				}

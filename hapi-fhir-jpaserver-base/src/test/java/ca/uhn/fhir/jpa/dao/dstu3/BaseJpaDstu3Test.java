@@ -40,6 +40,7 @@ import org.hl7.fhir.dstu3.model.Substance;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,15 +81,11 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	
-	@After()
-	public void afterFlushCaches() {
-		myValueSetDao.purgeCaches();
-		myJpaValidationSupportChainDstu3.flush();
-	}
-	
+	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
+
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
-	
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -130,17 +127,17 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myMedicationDaoDstu3")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-	
-@Autowired
-	@Qualifier("myMedicationOrderDaoDstu3")
-	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
-	
+	@Autowired
+		@Qualifier("myMedicationOrderDaoDstu3")
+		protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-	@Autowired
-	@Qualifier("myObservationDaoDstu3")
-	protected IFhirResourceDao<Observation> myObservationDao;
+	
+@Autowired
+@Qualifier("myObservationDaoDstu3")
+protected IFhirResourceDao<Observation> myObservationDao;
+	
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
@@ -190,7 +187,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
-
+	@After()
+	public void afterGrabCaches() {
+		ourValueSetDao = myValueSetDao;
+		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
+	}
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
@@ -215,13 +216,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		purgeDatabase(entityManager, myTxManager);
 	}
 
-
 	@Before
 	public void beforeResetConfig() {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 	}
+
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
@@ -238,6 +239,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		retVal.afterPropertiesSet();
 		return retVal;
+	}
+
+	@AfterClass
+	public static void afterFlushCaches() {
+		ourValueSetDao.purgeCaches();
+		ourJpaValidationSupportChainDstu3.flush();
 	}
 
 }

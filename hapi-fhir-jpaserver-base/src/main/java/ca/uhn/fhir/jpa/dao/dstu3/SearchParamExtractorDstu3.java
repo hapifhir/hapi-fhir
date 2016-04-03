@@ -36,23 +36,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.BaseDateTimeType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
+import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
-import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
-import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -419,9 +419,9 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<BaseResourceIndexedSearchParam>();
 
 		String useSystem = null;
-		if (theResource instanceof ValueSet) {
-			ValueSet vs = (ValueSet) theResource;
-			useSystem = vs.getCodeSystem().getSystem();
+		if (theResource instanceof CodeSystem) {
+			CodeSystem cs = (CodeSystem) theResource;
+			useSystem = cs.getUrl();
 		}
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -444,12 +444,12 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			List<String> codes = new ArrayList<String>();
 
 			String needContactPointSystem = null;
-			if (nextPath.endsWith(".where(system='phone')")) {
-				nextPath = nextPath.substring(0, nextPath.length() - ".where(system='phone')".length());
+			if (nextPath.contains(".where(system='phone')")) {
+				nextPath = nextPath.replace(".where(system='phone')", "");
 				needContactPointSystem = "phone";
 			}
-			if (nextPath.endsWith(".where(system='email')")) {
-				nextPath = nextPath.substring(0, nextPath.length() - ".where(system='email')".length());
+			if (nextPath.contains(".where(system='email')")) {
+				nextPath = nextPath.replace(".where(system='email')", "");
 				needContactPointSystem = "email";
 			}
 
@@ -502,7 +502,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					if ("ValueSet.codeSystem.concept.code".equals(nextPath)) {
+					if ("CodeSystem.concept.code".equals(nextPath)) {
 						systems.add(useSystem);
 					} else {
 						systems.add(null);

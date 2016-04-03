@@ -7,20 +7,20 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Grahame</LastAuthor>
+  <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-02-18T12:40:45Z</LastSaved>
-  <Version>14.00</Version>
+  <LastSaved>2016-02-04T01:34:39Z</LastSaved>
+  <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16440</WindowHeight>
-  <WindowWidth>10005</WindowWidth>
+  <WindowHeight>17610</WindowHeight>
+  <WindowWidth>-27136</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>8</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -654,14 +654,14 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s134">
+  <Style ss:ID="s135">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s135">
+  <Style ss:ID="s136">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -669,7 +669,7 @@
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"/>
    <Interior/>
   </Style>
-  <Style ss:ID="s136">
+  <Style ss:ID="s137">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -678,10 +678,10 @@
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"/>
    <Interior/>
   </Style>
-  <Style ss:ID="s137">
+  <Style ss:ID="s138">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
   </Style>
-  <Style ss:ID="s138">
+  <Style ss:ID="s139">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -694,18 +694,10 @@
     ss:Bold="1"/>
    <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
   </Style>
-  <Style ss:ID="s139">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
-   <Borders>
-    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="3"/>
-    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
-   </Borders>
-   <Interior/>
-  </Style>
   <Style ss:ID="s140">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
-    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="3"/>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
    </Borders>
    <Interior/>
@@ -713,18 +705,26 @@
   <Style ss:ID="s141">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
-    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="3"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="3"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
    </Borders>
    <Interior/>
   </Style>
   <Style ss:ID="s142">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
-    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="3"/>
    </Borders>
    <Interior/>
   </Style>
   <Style ss:ID="s143">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="3"/>
+   </Borders>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s144">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -732,7 +732,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s144">
+  <Style ss:ID="s145">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -741,7 +741,7 @@
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"/>
    <Interior/>
   </Style>
-  <Style ss:ID="s145">
+  <Style ss:ID="s146">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -749,7 +749,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s146">
+  <Style ss:ID="s147">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -757,7 +757,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s147">
+  <Style ss:ID="s148">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -766,7 +766,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s149" ss:Parent="s63">
+  <Style ss:ID="s150" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
@@ -776,7 +776,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s150" ss:Parent="s63">
+  <Style ss:ID="s151" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
@@ -784,7 +784,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s151" ss:Parent="s63">
+  <Style ss:ID="s152" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -4190,7 +4190,7 @@
   </Names>
   <Table ss:ExpandedColumnCount="12" ss:ExpandedRowCount="47" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="192"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s111" ss:Width="24"/>
    <Column ss:StyleID="s111" ss:Width="25.5"/>
@@ -4254,7 +4254,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">The validate operation checks whether the attached content would be acceptable either generally, as a create, an update or as a delete to an existing resource.  The action the server takes depends on the mode parameter:  &#10;&#10;* [mode not provided]: The server checks the content of the resource against any schema, constraint rules, and other general terminology rules &#10;* create: The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints) &#10;* update: The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate) &#10;* delete: The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules)  &#10;&#10;Modes update and delete can only be used when the operation is invoked at the resource instance level.   The return from this operation is an [[[OperationOutcome]]]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation may be used during design and development to validate application design. It can also be used at run-time. One possible use might be that a client asks the server whether a proposed update is valid as the user is editing a dialog and displays an updated error to the user. The operation can be used as part of a light-weight two phase commit protocol but there is no expectation that the server will hold the content of the resource after this operation is used, or that the server guarantees to successfully perform an actual create, update or delete after the validation operation completes.</Data><NamedCell
+    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation may be used during design and development to validate application design. It can also be used at run-time. One possible use might be that a client asks the server whether a proposed update is valid as the user is editing a dialog and displays an updated error to the user. The operation can be used as part of a light-weight two phase commit protocol but there is no expectation that the server will hold the content of the resource after this operation is used, or that the server guarantees to successfully perform an actual create, update or delete after the validation operation completes.&#10;&#10;This operation returns a 200 OK whether or not the resource is valid. A 4xx or 5xx error means that the validation itself could not be performed, and it is unknown whether the resource is valid or not.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$validate-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$validate-response.txt</Data></Cell>
@@ -4410,388 +4410,388 @@
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">System</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">operation</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The CDS Hook operation is the core API request for CDS Hooks</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">It represents an outbound call from the EHR, in the context of a user session, and in the context of a specific activity within that user sesssion (e.g. opening a patient record; prescribing a new med; or reviewing orders before signing them).</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activity</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Coding</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Activity that the user is performing</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Name of the Activity (expressed as a coding, preferably drawn from SMART's activity catalog) that the user is performing in the EHR, and for which this hook was triggered (e.g. patient-view, or medication-prescribe)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activityInstance</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">links multiple cds-hook calls together</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">While working in the EHR, a user can perform multiple activities in series or in parallel. For example, a clinician might prescribe two drugs in a row; each prescription activity would be assigned a unique activityInstance. The activity catalog provides a description of what events should initiate and terminate a given activity. This allows an external service to associate requests with activity state, which is necessary to support the following app-centric decision sequence, where the steps are tied together by a common activityInstance:&#10;&#10;EHR invokes CDS hook&#10;CDS service returns app link card&#10;User clicks app link and interacts with app&#10;Flow returns to EHR, which re-invokes CDS hook&#10;CDS service returns decision with user's choice&#10;Note: the activityInstance is globally unique and should contain enough entropy to be un-guessable.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.fhirServer</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Base URL for the calling EHR's FHIR server</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Base URL for the calling EHR's FHIR server. The scheme should be https</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Allow the CDS service to connect to the EHR's FHIR server</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Security details allowing the CDS service to connect to the EHR's FHIR server. These fields allow the CDS service to access EHR data in a context limited by the current user's privileges</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.token</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">a bearer token to be presented by the CDS service to the EHR</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">is a bearer token to be presented with any API calls the CDS service makes to the EHR, by including it in an Authorization header like:&#10;&#10;Authorization: Bearer {{token}}</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.scope</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.expires</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.redirect</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Used by services that will return an app link card</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String"> This field is only used by services that will return an app link card: when a user clicks the card's link to launch an app, it becomes the app's job to send the user to this redirect URL upon completion of user interaction. (Design note: this field is supplied up-front, as part of the initial request, to avoid requiring the EHR to append any content to app launch links. This helps support an important &quot;degenerate&quot; use case for app link cards: pointing to static content. See below for details.)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.user</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource type + id representing the current user</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.patient</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current patient</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current patient. For example, 123.</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.encounter</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current encounter</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current encounter. For example, 123</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.context</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Any</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">activity-specific contextual data that an external service needs</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">activity-specific contextual data (see Activity) that an external service needs. (For exampe, with the order-review activity this will include MedicationOrder and Diagnostic resources, among others)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.preFetchData</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Bundle</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">prefetch data per config</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">as a performance tweak, the EHR may pass along data according to the service's Prefetch-Template. This helps provide the service with all the data it needs to efficiently compute a set of recommendations. (Note that in the absence of preFetchData, an external service can always execute FHIR REST API calls against the EHR server to obtain additional data ad-hoc.)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">one CDS result for the EHR to present to the user</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">one CDS result for the EHR to present to the user. Cards can provide a combination of information (for reading), suggested actions (to be applied if a user selects them), and links (to launch an app if the user selects them). The EHR decides how to display cards, but we recommend displaying suggestions using buttons, and links using underlined text.</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.summary</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.detail</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">optional detailed information to display, represented in Markdown</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">optional detailed information to display, represented in Markdown. (For non-urgent cards, the EHR may hide these details until the user clicks a link like &quot;view more details...&quot;.)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.indicator</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">code</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Urgency/importance of what this card conveys. </Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Urgency/importance of what this card conveys. Allowed values, in order of increasing urgency, are: success, info, warning, hard-stop. The EHR can use this field to help make UI display decisions such as sort order or coloring. The value hard-stop indicates that the workflow should not be allowed to proceed.R[-12]C</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a short, human-readable description</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure for a short, human-readable description (in source.label) of the source of the information displayed on this card, with an optional link (in source.url) where the user can learn more about the organization or data set that provided the information on this card. Note that source.url should not be used to supply a context-specific &quot;drill-down&quot; view of the information on this card. For that, use link.url instead.</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.label</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.url</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.label</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.create</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.delete</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.label</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.url</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">URL to load when a user clicks on this link</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">URL to load when a user clicks on this link. Note that this may be a &quot;deep link&quot; with context embedded in path segments, query parameters, or a hash. In general this URL should embed enough context for the app to determine the activityInstance, and redirect url upon downstream launch, because the EHR will simply use this url as-is, without appending any parameters at launch time.</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Grouping structure representing a decision to be applied directly to the user session</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure representing a decision to be applied directly to the user session. Note that a CDS service may only return a decision after interacting with the user through an app link. Decisions are designed to convey any choices the user made in an app session</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.create</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.delete</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list)</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s136"/>
+    <Cell ss:StyleID="s137"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
   </Table>
@@ -4802,6 +4802,13 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-1</HorizontalResolution>
+    <VerticalResolution>-1</VerticalResolution>
+   </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4821,8 +4828,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
-     <ActiveCol>8</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>9</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5435,14 +5442,14 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s137" ss:DefaultColumnWidth="260.25"
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s137" ss:Width="88.5"/>
-   <Column ss:StyleID="s137" ss:Width="27.75"/>
-   <Column ss:StyleID="s137" ss:Width="327.75"/>
-   <Column ss:StyleID="s137" ss:Width="57"/>
-   <Column ss:StyleID="s137" ss:Width="205.5" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s137" ss:Width="39.75"/>
+   <Column ss:StyleID="s138" ss:Width="88.5"/>
+   <Column ss:StyleID="s138" ss:Width="27.75"/>
+   <Column ss:StyleID="s138" ss:Width="327.75"/>
+   <Column ss:StyleID="s138" ss:Width="57"/>
+   <Column ss:StyleID="s138" ss:Width="205.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s138" ss:Width="39.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -5452,7 +5459,7 @@
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
         x:Family="Swiss" html:Size="8" html:Color="#000000">Default = XML.  Leave at default unless told otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s138"><Data ss:Type="String">Description</Data><Comment
+    <Cell ss:StyleID="s139"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Description of content/purposes of example</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5474,355 +5481,355 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s139"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s140"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s127"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s140"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s141"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s143"/>
-    <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s146"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
   </Table>
@@ -5950,7 +5957,7 @@
     <Cell ss:StyleID="s115"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -5965,7 +5972,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -5980,7 +5987,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -5995,7 +6002,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6010,7 +6017,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6025,7 +6032,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6040,7 +6047,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6055,7 +6062,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6070,7 +6077,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6085,7 +6092,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6100,7 +6107,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6115,7 +6122,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6130,7 +6137,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6145,7 +6152,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6160,7 +6167,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6175,7 +6182,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6190,7 +6197,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6205,7 +6212,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6220,7 +6227,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6235,7 +6242,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6250,7 +6257,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6265,7 +6272,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6280,7 +6287,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6295,7 +6302,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6310,7 +6317,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6325,7 +6332,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6340,7 +6347,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6355,7 +6362,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s147"/>
+    <Cell ss:StyleID="s148"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -6383,7 +6390,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6419,14 +6425,14 @@
     ss:RefersTo="='resource-validation-mode'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s137" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s137" ss:Width="80.25"/>
-   <Column ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="34.5"/>
-   <Column ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="155.25"/>
-   <Column ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="244.5"/>
-   <Column ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s137" ss:AutoFitWidth="0" ss:Width="242.25"/>
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s138" ss:Width="80.25"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="244.5"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
+   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -6466,544 +6472,544 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s139"><Data ss:Type="String">create</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">create</Data></Cell>
     <Cell ss:StyleID="s127"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">Validate for Create</Data></Cell>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints).</Data></Cell>
+    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">Validate for Create</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints).</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"/>
-    <Cell ss:StyleID="s140"/>
+    <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"><Data ss:Type="String">update</Data></Cell>
+    <Cell ss:StyleID="s142"><Data ss:Type="String">update</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">Validate for Update</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate).</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Validate for Update</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate).</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"><Data ss:Type="String">delete</Data></Cell>
+    <Cell ss:StyleID="s142"><Data ss:Type="String">delete</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">Validate for Delete</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Validate for Delete</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
     <Cell ss:Index="11" ss:StyleID="s128"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s143"/>
-    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s144"/>
+    <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s146"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
   </Table>

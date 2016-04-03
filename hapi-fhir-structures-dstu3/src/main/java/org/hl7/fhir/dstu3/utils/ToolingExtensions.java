@@ -38,6 +38,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.exceptions.FHIRFormatError;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -52,23 +53,22 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.MarkdownType;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
 
 
 public class ToolingExtensions {
 
   // validated
-  public static final String EXT_SUBSUMES = "http://hl7.org/fhir/StructureDefinition/valueset-subsumes"; 
+  public static final String EXT_SUBSUMES = "http://hl7.org/fhir/StructureDefinition/codesystem-subsumes"; 
   private static final String EXT_OID = "http://hl7.org/fhir/StructureDefinition/valueset-oid";
-  public static final String EXT_DEPRECATED = "http://hl7.org/fhir/StructureDefinition/valueset-deprecated";
+//  public static final String EXT_DEPRECATED = "http://hl7.org/fhir/StructureDefinition/codesystem-deprecated";
   public static final String EXT_DEFINITION = "http://hl7.org/fhir/StructureDefinition/valueset-definition";
   public static final String EXT_COMMENT = "http://hl7.org/fhir/StructureDefinition/valueset-comments";
   private static final String EXT_IDENTIFIER = "http://hl7.org/fhir/StructureDefinition/identifier";
@@ -84,8 +84,6 @@ public class ToolingExtensions {
   public static final String EXT_MAXOCCURS = "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs";
   public static final String EXT_ALLOWEDRESOURCE = "http://hl7.org/fhir/StructureDefinition/questionnaire-allowedResource";
   public static final String EXT_REFERENCEFILTER = "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter";
-  public static final String EXT_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-expression";
-  public static final String EXT_SEARCH_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/searchparameter-expression";
 
   // unregistered?
 
@@ -132,6 +130,16 @@ public class ToolingExtensions {
     }
   }
 
+  public static void addMarkdownExtension(DomainResource dr, String url, String content) {
+    if (!StringUtils.isBlank(content)) {
+      Extension ex = getExtension(dr, url);
+      if (ex != null)
+        ex.setValue(new StringType(content));
+      else
+        dr.getExtension().add(Factory.newExtension(url, new MarkdownType(content), true));   
+    }
+  }
+
   public static void addStringExtension(Element e, String url, String content) {
     if (!StringUtils.isBlank(content)) {
       Extension ex = getExtension(e, url);
@@ -155,10 +163,10 @@ public class ToolingExtensions {
       nc.getExtension().add(Factory.newExtension(EXT_COMMENT, Factory.newString_(comment), true));   
   }
 
-  public static void markDeprecated(Element nc) {
-    setDeprecated(nc);   
-  }
-
+//  public static void markDeprecated(Element nc) {
+//    setDeprecated(nc);   
+//  }
+//
   public static void addSubsumes(ConceptDefinitionComponent nc, String code) {
     nc.getModifierExtension().add(Factory.newExtension(EXT_SUBSUMES, Factory.newCode(code), true));   
   }
@@ -239,18 +247,18 @@ public class ToolingExtensions {
   public static String getComment(ConceptDefinitionComponent c) {
     return readStringExtension(c, EXT_COMMENT);    
   }
-
-  public static Boolean getDeprecated(Element c) {
-    return readBooleanExtension(c, EXT_DEPRECATED);    
-  }
+//
+//  public static Boolean getDeprecated(Element c) {
+//    return readBooleanExtension(c, EXT_DEPRECATED);    
+//  }
 
   public static boolean hasComment(ConceptDefinitionComponent c) {
     return findStringExtension(c, EXT_COMMENT);    
   }
 
-  public static boolean hasDeprecated(Element c) {
-    return findBooleanExtension(c, EXT_DEPRECATED);    
-  }
+//  public static boolean hasDeprecated(Element c) {
+//    return findBooleanExtension(c, EXT_DEPRECATED);    
+//  }
 
   public static List<CodeType> getSubsumes(ConceptDefinitionComponent c) {
     List<CodeType> res = new ArrayList<CodeType>();
@@ -335,7 +343,7 @@ public class ToolingExtensions {
       resource.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
   }
 
-  public static String getOID(ValueSetCodeSystemComponent define) {
+  public static String getOID(CodeSystem define) {
     return readStringExtension(define, EXT_OID);    
   }
 
@@ -343,19 +351,25 @@ public class ToolingExtensions {
     return readStringExtension(vs, EXT_OID);    
   }
 
-  public static void setOID(ValueSetCodeSystemComponent define, String oid) throws FHIRFormatError, URISyntaxException {
+  public static void setOID(CodeSystem define, String oid) throws FHIRFormatError, URISyntaxException {
     if (!oid.startsWith("urn:oid:"))
       throw new FHIRFormatError("Error in OID format");
     if (oid.startsWith("urn:oid:urn:oid:"))
       throw new FHIRFormatError("Error in OID format");
+    if (!hasExtension(define, EXT_OID))
     define.getExtension().add(Factory.newExtension(EXT_OID, Factory.newUri(oid), false));       
+    else if (!oid.equals(readStringExtension(define, EXT_OID)))
+      throw new Error("Attempt to assign multiple OIDs to a code system");
   }
   public static void setOID(ValueSet vs, String oid) throws FHIRFormatError, URISyntaxException {
     if (!oid.startsWith("urn:oid:"))
       throw new FHIRFormatError("Error in OID format");
     if (oid.startsWith("urn:oid:urn:oid:"))
       throw new FHIRFormatError("Error in OID format");
+    if (!hasExtension(vs, EXT_OID))
     vs.getExtension().add(Factory.newExtension(EXT_OID, Factory.newUri(oid), false));       
+    else if (!oid.equals(readStringExtension(vs, EXT_OID)))
+      throw new Error("Attempt to assign multiple OIDs to value set "+vs.getName()+" ("+vs.getUrl()+"). Has "+readStringExtension(vs, EXT_OID)+", trying to add "+oid);
   }
 
   public static boolean hasLanguageTranslation(Element element, String lang) {
@@ -432,14 +446,14 @@ public class ToolingExtensions {
     de.getExtension().add(new Extension().setUrl(EXT_CIMI_REFERENCE).setValue(new UriType(value)));
   }
 
-  public static void setDeprecated(Element nc) {
-    for (Extension e : nc.getExtension()) 
-      if (e.getUrl().equals(EXT_DEPRECATED)) {
-        e.setValue(new BooleanType(true));
-        return;
-      }
-    nc.getExtension().add(new Extension().setUrl(EXT_DEPRECATED).setValue(new BooleanType(true)));    
-  }
+//  public static void setDeprecated(Element nc) {
+//    for (Extension e : nc.getExtension()) 
+//      if (e.getUrl().equals(EXT_DEPRECATED)) {
+//        e.setValue(new BooleanType(true));
+//        return;
+//      }
+//    nc.getExtension().add(new Extension().setUrl(EXT_DEPRECATED).setValue(new BooleanType(true)));    
+//  }
 
   public static void setExtension(Element focus, String url, Coding c) {
     for (Extension e : focus.getExtension()) 
@@ -468,6 +482,10 @@ public class ToolingExtensions {
         i.remove();
       }
     }
+  }
+
+  public static boolean hasOID(ValueSet vs) {
+    return hasExtension(vs, EXT_OID);
   }
   
   

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -55,6 +56,10 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 
 	@Autowired
+	@Qualifier("myCodeSystemDaoDstu3")
+	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+
+	@Autowired
 	@Qualifier("myFhirContextDstu3")
 	private FhirContext myDstu3Ctx;
 
@@ -69,8 +74,8 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	}
 
 	@Override
-	public ValueSet fetchCodeSystem(FhirContext theCtx, String theSystem) {
-		return null;
+	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
+		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
 	@Override
@@ -93,6 +98,8 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
 		} else if ("Questionnaire".equals(resourceName)) {
 			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+		} else if ("CodeSystem".equals(resourceName)) {
+			search = myCodeSystemDao.search(CodeSystem.SP_URL, new UriParam(theUri));
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -116,6 +123,12 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	@Override
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
+	}
+
+
+	@Override
+	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+		return fetchResource(theCtx, StructureDefinition.class, theUrl);
 	}
 
 }

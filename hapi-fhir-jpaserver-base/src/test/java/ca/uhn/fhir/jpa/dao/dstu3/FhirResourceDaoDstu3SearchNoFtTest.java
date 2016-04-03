@@ -211,11 +211,11 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testIndexNoDuplicatesReference() {
 		Practitioner pract =new Practitioner();
 		pract.setId("Practitioner/somepract");
-		pract.getName().addFamily("SOME PRACT");
+		pract.addName().addFamily("SOME PRACT");
 		myPractitionerDao.update(pract, mySrd);
 		Practitioner pract2 =new Practitioner();
 		pract2.setId("Practitioner/somepract2");
-		pract2.getName().addFamily("SOME PRACT2");
+		pract2.addName().addFamily("SOME PRACT2");
 		myPractitionerDao.update(pract2, mySrd);
 		
 		DiagnosticOrder res = new DiagnosticOrder();
@@ -948,14 +948,14 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
-			patient.getName().addFamily(methodName);
+			patient.addName().addFamily(methodName);
 			patient.addTelecom().setSystem(ContactPointSystem.PHONE).setValue("123");
 			id1 = myPractitionerDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		IIdType id2;
 		{
 			Practitioner patient = new Practitioner();
-			patient.getName().addFamily(methodName);
+			patient.addName().addFamily(methodName);
 			patient.addTelecom().setSystem(ContactPointSystem.EMAIL).setValue("abc");
 			id2 = myPractitionerDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}

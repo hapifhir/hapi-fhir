@@ -45,7 +45,8 @@ import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
@@ -82,7 +83,6 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
       focus.getExpansion().setTimestampElement(DateTimeType.now());
       focus.getExpansion().setIdentifier(Factory.createUUID());
 
-      handleDefine(source, focus.getExpansion().getParameter());
       if (source.hasCompose()) 
         handleCompose(source.getCompose(), focus.getExpansion().getParameter());
 
@@ -145,11 +145,17 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 
   private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params) throws TerminologyServiceException, ETooCostly {
 	  if (context.supportsSystem(inc.getSystem())) {
+      try {
+        int i = codes.size();
         addCodes(context.expandVS(inc), params);
+        if (codes.size() > i)
       return;
+      } catch (Exception e) {
+        // ok, we'll try locally
+      }
 	  }
 	    
-	  ValueSet cs = context.fetchCodeSystem(inc.getSystem());
+	  CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
 	  if (cs == null)
 	  	throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
 	  if (cs.hasVersion())
@@ -157,8 +163,8 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
         params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl()+"?version="+cs.getVersion())));
 	  if (inc.getConcept().size() == 0 && inc.getFilter().size() == 0) {
 	    // special case - add all the code system
-	    for (ConceptDefinitionComponent def : cs.getCodeSystem().getConcept()) {
-        addCodeAndDescendents(inc.getSystem(), def);
+	    for (ConceptDefinitionComponent def : cs.getConcept()) {
+        addCodeAndDescendents(cs, inc.getSystem(), def);
 	    }
 	  }
 	    
@@ -171,10 +177,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	    ConceptSetFilterComponent fc = inc.getFilter().get(0);
 	  	if ("concept".equals(fc.getProperty()) && fc.getOp() == FilterOperator.ISA) {
 	  		// special: all non-abstract codes in the target code system under the value
-	  		ConceptDefinitionComponent def = getConceptForCode(cs.getCodeSystem().getConcept(), fc.getValue());
+	  		ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
 	  		if (def == null)
 	  			throw new TerminologyServiceException("Code '"+fc.getValue()+"' not found in system '"+inc.getSystem()+"'");
-	  		addCodeAndDescendents(inc.getSystem(), def);
+	  		addCodeAndDescendents(cs, inc.getSystem(), def);
 	  	} else
 	  		throw new NotImplementedException("not done yet");
 	  }
@@ -193,17 +199,17 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
     }   
   }
 
-	private void addCodeAndDescendents(String system, ConceptDefinitionComponent def) {
-		if (!ToolingExtensions.hasDeprecated(def)) {  
-			if (!def.hasAbstractElement() || !def.getAbstract())
+	private void addCodeAndDescendents(CodeSystem cs, String system, ConceptDefinitionComponent def) {
+		if (!CodeSystemUtilities.isDeprecated(cs, def)) {  
+			if (!CodeSystemUtilities.isAbstract(cs, def))
 				addCode(system, def.getCode(), def.getDisplay());
 			for (ConceptDefinitionComponent c : def.getConcept()) 
-				addCodeAndDescendents(system, c);
+				addCodeAndDescendents(cs, system, c);
 		}
   }
 
 	private void excludeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params) throws TerminologyServiceException {
-	  ValueSet cs = context.fetchCodeSystem(inc.getSystem().toString());
+	  CodeSystem cs = context.fetchCodeSystem(inc.getSystem().toString());
 	  if (cs == null)
 	  	throw new TerminologyServiceException("unable to find value set "+inc.getSystem().toString());
     if (inc.getConcept().size() == 0 && inc.getFilter().size() == 0) {
@@ -223,10 +229,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
   }
 
 	
-	private String getCodeDisplay(ValueSet cs, String code) throws TerminologyServiceException {
-		ConceptDefinitionComponent def = getConceptForCode(cs.getCodeSystem().getConcept(), code);
+	private String getCodeDisplay(CodeSystem cs, String code) throws TerminologyServiceException {
+		ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), code);
 		if (def == null)
-			throw new TerminologyServiceException("Unable to find code '"+code+"' in code system "+cs.getCodeSystem().getSystem());
+			throw new TerminologyServiceException("Unable to find code '"+code+"' in code system "+cs.getUrl());
 		return def.getDisplay();
   }
 
@@ -241,16 +247,6 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		return null;
   }
 	
-	private void handleDefine(ValueSet vs, List<ValueSetExpansionParameterComponent> list) {
-	  if (vs.hasVersion())
-	    list.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(vs.getUrl()+"?version="+vs.getVersion())));
-	  if (vs.hasCodeSystem()) {
-      // simple case: just generate the return
-    	for (ConceptDefinitionComponent c : vs.getCodeSystem().getConcept()) 
-    		addDefinedCode(vs, vs.getCodeSystem().getSystem(), c);
-   	}
-  }
-
 	private String key(ValueSetExpansionContainsComponent c) {
 		return key(c.getSystem(), c.getCode());
 	}
@@ -258,17 +254,6 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	private String key(String uri, String code) {
 		return "{"+uri+"}"+code;
 	}
-
-	private void addDefinedCode(ValueSet vs, String system, ConceptDefinitionComponent c) {
-		if (!ToolingExtensions.hasDeprecated(c)) { 
-
-			if (!c.hasAbstractElement() || !c.getAbstract()) {
-				addCode(system, c.getCode(), c.getDisplay());
-			}
-			for (ConceptDefinitionComponent g : c.getConcept()) 
-				addDefinedCode(vs, vs.getCodeSystem().getSystem(), g);
-		}
-  }
 
 	private void addCode(String system, String code, String display) {
 		ValueSetExpansionContainsComponent n = new ValueSet.ValueSetExpansionContainsComponent();

@@ -1,8 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,8 +28,9 @@ public interface IValidationSupport {
    *          The code system
    * @return The valueset (must not be null, but can be an empty ValueSet)
    */
-  ValueSet fetchCodeSystem(FhirContext theContext, String theSystem);
+  CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem);
 
+  
   /**
    * Loads a resource needed by the validation (a StructureDefinition, or a
    * ValueSet)
@@ -43,6 +45,8 @@ public interface IValidationSupport {
    *         given URI can be found
    */
   <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri);
+
+  StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl);
 
   /**
    * Returns <code>true</code> if codes in the given code system can be expanded
@@ -70,13 +74,13 @@ public interface IValidationSupport {
    */
   CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-  public class CodeValidationResult {
+public class CodeValidationResult {
     private ConceptDefinitionComponent definition;
     private String message;
     private IssueSeverity severity;
 
-    public CodeValidationResult(ConceptDefinitionComponent definition) {
-      this.definition = definition;
+    public CodeValidationResult(ConceptDefinitionComponent theNext) {
+      this.definition = theNext;
     }
 
     public CodeValidationResult(IssueSeverity severity, String message) {

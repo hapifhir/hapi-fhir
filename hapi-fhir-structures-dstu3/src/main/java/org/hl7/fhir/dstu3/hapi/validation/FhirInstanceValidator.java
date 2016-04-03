@@ -1,9 +1,5 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,13 +8,12 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.dstu3.validation.InstanceValidator;
 import org.hl7.fhir.dstu3.validation.ValidationMessage;
-import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -30,7 +25,6 @@ import com.google.gson.JsonObject;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -163,7 +157,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			String resourceName = determineResourceName(document);
-			StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : loadProfileOrReturnNull(messages, theCtx, resourceName);
+			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
 			if (profile != null) {
 				try {
 					v.validate(messages, document, profile);
@@ -176,7 +170,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			JsonObject json = gson.fromJson(theInput, JsonObject.class);
 
 			String resourceName = json.get("resourceType").getAsString();
-			StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : loadProfileOrReturnNull(messages, theCtx, resourceName);
+			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
 			if (profile != null) {
 				try {
 					v.validate(messages, json, profile);
@@ -198,41 +192,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		return messages;
 	}
 
+	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
+		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
+		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
+		return profile;
+	}
+
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
 		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
 	}
 
-	static StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx, String theResourceName) {
-		if (isBlank(theResourceName)) {
-			if (theMessages != null) {
-				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("Could not determine resource type from request. Content appears invalid."));
-			}
-			return null;
-		}
-
-		String profileClasspath = theCtx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/profile");
-		String profileCpName = profileClasspath + '/' + theResourceName.toLowerCase() + ".profile.xml";
-		String profileText;
-		try {
-			InputStream inputStream = FhirInstanceValidator.class.getResourceAsStream(profileCpName);
-			if (inputStream == null) {
-				if (theMessages != null) {
-					theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("No profile found for resource type " + theResourceName));
-					return null;
-				} else {
-					return null;
-				}
-			}
-			profileText = IOUtils.toString(inputStream, "UTF-8");
-		} catch (IOException e1) {
-			if (theMessages != null) {
-				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("No profile found for resource type " + theResourceName));
-			}
-			return null;
-		}
-		StructureDefinition profile = theCtx.newXmlParser().parseResource(StructureDefinition.class, profileText);
-		return profile;
-	}
 
 }

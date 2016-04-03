@@ -245,7 +245,11 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		return retVal;
 	}
 	
+	/**
+	 * Format has changed, this is out of date
+	 */
 	@Test
+	@Ignore
 	public void testValidateNewQuestionnaireFormat() throws Exception {
 		String input =IOUtils.toString(FhirResourceDaoDstu3ValidateTest.class.getResourceAsStream("/questionnaire_dstu3.xml"));
 		try {

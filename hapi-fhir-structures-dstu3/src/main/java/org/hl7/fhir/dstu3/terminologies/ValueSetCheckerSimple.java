@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
@@ -28,8 +29,6 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
 
   @Override
   public boolean codeInValueSet(String system, String code) throws EOperationOutcome, Exception {
-    if (valueset.hasCodeSystem() && system.equals(valueset.getCodeSystem().getSystem()) && codeInDefine(valueset.getCodeSystem().getConcept(), code, valueset.getCodeSystem().getCaseSensitive()))
-     return true;
 
     if (valueset.hasCompose()) {
       boolean ok = false;
@@ -88,9 +87,9 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
         return true;
       }
       
-    ValueSet def = context.fetchCodeSystem(system);
+    CodeSystem def = context.fetchCodeSystem(system);
     if (def != null) {
-      if (!def.getCodeSystem().getCaseSensitive()) {
+      if (!def.getCaseSensitive()) {
         // well, ok, it's not case sensitive - we'll check that too now
         for (ConceptReferenceComponent cc : vsi.getConcept())
           if (cc.getCode().equalsIgnoreCase(code)) {
@@ -98,7 +97,7 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
           }
       }
       if (vsi.getConcept().isEmpty() && vsi.getFilter().isEmpty()) {
-        return codeInDefine(def.getCodeSystem().getConcept(), code, def.getCodeSystem().getCaseSensitive());
+        return codeInDefine(def.getConcept(), code, def.getCaseSensitive());
       }
       for (ConceptSetFilterComponent f: vsi.getFilter())
         throw new Error("not done yet: "+f.getValue());

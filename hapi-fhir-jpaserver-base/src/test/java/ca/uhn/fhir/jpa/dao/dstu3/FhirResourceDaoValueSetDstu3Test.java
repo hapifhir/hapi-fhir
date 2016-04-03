@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -36,9 +37,12 @@ public class FhirResourceDaoValueSetDstu3Test extends BaseJpaDstu3Test {
 	@Before
 	@Transactional
 	public void before02() throws IOException {
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.1.xml");
-		upload.setId("");
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
+		
+		CodeSystem upload2 = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		myCodeSystemDao.create(upload2, mySrd).getId().toUnqualifiedVersionless();
+
 	}
 
 	@Test
@@ -196,7 +200,7 @@ public class FhirResourceDaoValueSetDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandByValueSet() throws IOException {
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);

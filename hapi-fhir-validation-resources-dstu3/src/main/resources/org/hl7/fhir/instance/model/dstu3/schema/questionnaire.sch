@@ -43,13 +43,37 @@
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Questionnaire/f:item">
+      <sch:assert test="not(f:type/@value='display' and f:readOnly)">que-9: Read-only can't be specified for &quot;display&quot; items</sch:assert>
+      <sch:assert test="not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])">que-8: Default values can't be specified for groups or display items</sch:assert>
       <sch:assert test="not(f:type/@value='display' and (f:required or f:repeats))">que-6: Required and repeat aren't permitted for display items</sch:assert>
       <sch:assert test="f:type/@value=('choice','open-choice') or not(f:option or f:options)">que-5: Only 'choice' items can have options</sch:assert>
       <sch:assert test="not(f:options and f:option)">que-4: A question cannot have both option and options</sch:assert>
       <sch:assert test="not(f:type/@value='display' and f:concept)">que-3: Display items cannot have a &quot;concept&quot; asserted</sch:assert>
+      <sch:assert test="f:type/@value=('boolean', 'decimal', 'integer', 'open-choice', 'string', 'text', 'url') or not(f:maxLength)">que-10: Maximum length can only be declared for simple question types</sch:assert>
       <sch:assert test="not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))">que-1: Group items must have nested items, display items cannot have nested items</sch:assert>
     </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:enableWhen">
+      <sch:assert test="count(*[starts-with(local-name(.), 'answer')]|answered) = 1">que-7: enableWhen must contain either an 'answer' or an 'answered' element</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:enableWhen/f:answerAttachment">
+      <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: It the Attachment has data, it SHALL have a contentType</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:enableWhen/f:answerQuantity">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:enableWhen/f:answerReference">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
     <sch:rule context="//f:Questionnaire/f:item/f:options">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:initialAttachment">
+      <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: It the Attachment has data, it SHALL have a contentType</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:initialQuantity">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:Questionnaire/f:item/f:initialReference">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
   </sch:pattern>

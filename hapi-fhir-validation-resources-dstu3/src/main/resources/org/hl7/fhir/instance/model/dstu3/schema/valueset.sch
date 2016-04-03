@@ -23,9 +23,8 @@
       <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL NOT contain any narrative</sch:assert>
       <sch:assert test="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
       <sch:assert test="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))">dom-3: If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</sch:assert>
-      <sch:assert test="not(f:codeSystem/f:system/@value = f:url/@value)">vsd-7: A defined code system (if present) SHALL have a different url than the value set url</sch:assert>
-      <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))">vsd-2: A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system</sch:assert>
-      <sch:assert test="exists(f:codeSystem) or exists(f:compose) or exists(f:expansion)">vsd-5: Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element</sch:assert>
+      <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude))">vsd-2: A value set with only one import SHALL also have an include and/or an exclude unless the value set includes an inline code system</sch:assert>
+      <sch:assert test="exists(f:compose) or exists(f:expansion)">vsd-5: Value set SHALL contain at least one of a a compose, or an expansion element</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:text/h:div">
       <sch:assert test="not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])">txt-3: The narrative SHALL contain only the basic html formatting attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
@@ -43,10 +42,6 @@
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:contact/f:telecom/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
-    </sch:rule>
-    <sch:rule context="//f:ValueSet/f:codeSystem">
-      <sch:assert test="count(descendant::f:concept)=count(distinct-values(descendant::f:concept/f:code/@value))">vsd-8: Codes must be unique</sch:assert>
-      <sch:assert test="count(distinct-values(descendant::f:concept/f:code/@value))=count(descendant::f:concept)">vsd-3: Within a code system definition, all the codes SHALL be unique</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:compose">
       <sch:assert test="exists(f:include) or exists(f:import)">vsd-1: A value set composition SHALL have an include or an import</sch:assert>
