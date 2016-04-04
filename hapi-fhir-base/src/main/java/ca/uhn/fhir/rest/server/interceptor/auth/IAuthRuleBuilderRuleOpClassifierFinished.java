@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,10 +23,14 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 public interface IAuthRuleBuilderRuleOpClassifierFinished {
-
 	/**
 	 * Start another rule
 	 */
 	IAuthRuleBuilder andThen();
+
+	/**
+	 * Build the rule list
+	 */
+	List<IAuthRule> build();
 	
 }

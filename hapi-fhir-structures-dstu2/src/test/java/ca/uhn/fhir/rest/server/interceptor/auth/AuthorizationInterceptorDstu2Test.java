@@ -1,7 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,8 +37,10 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -43,6 +48,8 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
@@ -61,7 +68,7 @@ public class AuthorizationInterceptorDstu2Test {
 	private static boolean ourHitMethod;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorDstu2Test.class);
 	private static int ourPort;
-	private static List<IBaseResource> ourReturn;
+	private static List<IResource> ourReturn;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
@@ -80,7 +87,7 @@ public class AuthorizationInterceptorDstu2Test {
 		return new StringEntity(out, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8"));
 	}
 
-	private IBaseResource createObservation(Integer theId, String theSubjectId) {
+	private IResource createObservation(Integer theId, String theSubjectId) {
 		Observation retVal = new Observation();
 		if (theId != null) {
 			retVal.setId(new IdDt("Observation", (long) theId));
@@ -90,7 +97,7 @@ public class AuthorizationInterceptorDstu2Test {
 		return retVal;
 	}
 
-	private IBaseResource createPatient(Integer theId) {
+	private IResource createPatient(Integer theId) {
 		Patient retVal = new Patient();
 		if (theId != null) {
 			retVal.setId(new IdDt("Patient", (long) theId));
@@ -113,8 +120,12 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testMetadataAllow() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").metadata();
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").metadata()
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -134,34 +145,48 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testTransactionWriteGood() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
 					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
-					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen();
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.build();
+				//@formatter:on
 			}
 		});
 
+		Bundle input = new Bundle();
+		input.setType(BundleTypeEnum.TRANSACTION);
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient");
 		
+		Bundle output = new Bundle();
+		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
+		output.addEntry().getResponse().setLocation("/Patient/1");
 		
-//		HttpGet httpGet;
-//		HttpResponse status;
-//		String response;
-//
-//		ourReturn = Arrays.asList(createPatient(2));
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
-//		status = ourClient.execute(httpGet);
-//		extractResponseAndClose(status);
-//		assertEquals(200, status.getStatusLine().getStatusCode());
+		HttpPost httpPost;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList((IResource)output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testMetadataDeny() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.deny("Rule 1").metadata();
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.deny("Rule 1").metadata()
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -181,8 +206,12 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId();
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId()
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -234,9 +263,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testAllowAll() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.deny("Rule 1").read().resourcesOfType(Patient.class).withAnyId();
-				theRuleBuilder.allowAll("Default Rule");
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.deny("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allowAll("Default Rule")
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -267,10 +300,14 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testDenyAll() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow().read().resourcesOfType(Patient.class).withAnyId();
-				theRuleBuilder.denyAll("Default Rule");
-			}
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("Default Rule")
+					.build();
+				//@formatter:on
+		}
 		});
 
 		HttpGet httpGet;
@@ -301,9 +338,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testReadByCompartmentRight() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"));
-				theRuleBuilder.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"));
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -340,9 +381,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testReadByCompartmentWrong() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"));
-				theRuleBuilder.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"));
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -396,9 +441,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testWriteByCompartmentCreate() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"));
-				theRuleBuilder.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"));
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -436,9 +485,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testWriteByCompartmentDelete() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"));
-				theRuleBuilder.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"));
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -466,9 +519,13 @@ public class AuthorizationInterceptorDstu2Test {
 	public void testWriteByCompartmentUpdate() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
-			protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-				theRuleBuilder.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"));
-				theRuleBuilder.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"));
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+				//@formatter:on
 			}
 		});
 
@@ -523,11 +580,13 @@ public class AuthorizationInterceptorDstu2Test {
 
 		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
 		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
 		ourServlet.setResourceProviders(patProvider, obsProv);
+		ourServlet.setPlainProviders(plainProvider);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -571,7 +630,7 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Search()
-		public List<IBaseResource> search() {
+		public List<IResource> search() {
 			ourHitMethod = true;
 			return ourReturn;
 		}
@@ -588,6 +647,16 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
+	public static class PlainProvider
+	{
+		@Transaction()
+		public Bundle search(@TransactionParam Bundle theInput) {
+			ourHitMethod = true;
+			return (Bundle) ourReturn.get(0);
+		}
+
+	}
+	
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Create()
@@ -622,7 +691,7 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Search()
-		public List<IBaseResource> search() {
+		public List<IResource> search() {
 			ourHitMethod = true;
 			return ourReturn;
 		}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.ArrayList;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -29,18 +31,14 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-class RuleBuilder implements IAuthRuleBuilder {
+public class RuleBuilder implements IAuthRuleBuilder {
 
-	private RuleVerdictEnum myRuleMode;
+	private ArrayList<IAuthRule> myRules;
 
-	private String myRuleName;
-
-	private List<IAuthRule> myRules;
-
-	public RuleBuilder(List<IAuthRule> theRules) {
-		myRules = theRules;
+	public RuleBuilder() {
+		myRules = new ArrayList<IAuthRule>();
 	}
-
+	
 	@Override
 	public IAuthRuleBuilderRule allow() {
 		return allow(null);
@@ -48,9 +46,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRule allow(String theRuleName) {
-		myRuleMode = RuleVerdictEnum.ALLOW;
-		myRuleName = theRuleName;
-		return new RuleBuilderRule();
+		return new RuleBuilderRule(RuleVerdictEnum.ALLOW, theRuleName);
 	}
 
 	@Override
@@ -61,7 +57,12 @@ class RuleBuilder implements IAuthRuleBuilder {
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished allowAll(String theRuleName) {
 		myRules.add(new Rule(theRuleName).setOp(RuleOpEnum.ALLOW_ALL));
-		return new RuleBuilderFinished(myRules);
+		return new RuleBuilderFinished();
+	}
+
+	@Override
+	public List<IAuthRule> build() {
+		return myRules;
 	}
 
 	@Override
@@ -71,9 +72,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRule deny(String theRuleName) {
-		myRuleMode = RuleVerdictEnum.DENY;
-		myRuleName = theRuleName;
-		return new RuleBuilderRule();
+		return new RuleBuilderRule(RuleVerdictEnum.DENY, theRuleName);
 	}
 
 	@Override
@@ -84,25 +83,32 @@ class RuleBuilder implements IAuthRuleBuilder {
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished denyAll(String theRuleName) {
 		myRules.add(new Rule(theRuleName).setOp(RuleOpEnum.DENY_ALL));
-		return new RuleBuilderFinished(myRules);
+		return new RuleBuilderFinished();
 	}
 
-	private static final class RuleBuilderFinished implements IAuthRuleBuilderRuleOpClassifierFinished {
-		private List<IAuthRule> myRules;
-
-		public RuleBuilderFinished(List<IAuthRule> theRules) {
-			myRules = theRules;
-		}
+	private final class RuleBuilderFinished implements IAuthRuleBuilderRuleOpClassifierFinished {
 
 		@Override
 		public IAuthRuleBuilder andThen() {
-			return new RuleBuilder(myRules);
+			return RuleBuilder.this;
+		}
+
+		@Override
+		public List<IAuthRule> build() {
+			return myRules;
 		}
 	}
 
-	class RuleBuilderRule implements IAuthRuleBuilderRule {
+	private class RuleBuilderRule implements IAuthRuleBuilderRule {
 
 		private RuleOpEnum myRuleOp;
+		private RuleVerdictEnum myRuleMode;
+		private String myRuleName;
+
+		public RuleBuilderRule(RuleVerdictEnum theRuleMode, String theRuleName) {
+			myRuleMode = theRuleMode;
+			myRuleName = theRuleName;
+		}
 
 		@Override
 		public RuleBuilderFinished metadata() {
@@ -110,7 +116,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 			rule.setOp(RuleOpEnum.METADATA);
 			rule.setMode(myRuleMode);
 			myRules.add(rule);
-			return new RuleBuilderFinished(myRules);
+			return new RuleBuilderFinished();
 		}
 		
 		@Override
@@ -131,7 +137,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 			return new RuleBuilderRuleOp();
 		}
 		
-		public class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
+		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
 
 			private AppliesTypeEnum myAppliesTo;
 			private Set<?> myAppliesToTypes;
@@ -150,7 +156,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderRuleOpClassifier();
 			}
 
-			public class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
+			private class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
 
 				private ClassifierTypeEnum myClassifierType;
 				private String myInCompartmentName;
@@ -168,7 +174,7 @@ class RuleBuilder implements IAuthRuleBuilder {
 					rule.setClassifierCompartmentOwners(myInCompartmentOwners);
 					myRules.add(rule);
 					
-					return new RuleBuilderFinished(myRules);
+					return new RuleBuilderFinished();
 				}
 
 				@Override
@@ -209,23 +215,22 @@ class RuleBuilder implements IAuthRuleBuilder {
 
 		}
 
-		public class RuleBuilderRuleTransaction implements IAuthRuleBuilderRuleTransaction {
+		private class RuleBuilderRuleTransaction implements IAuthRuleBuilderRuleTransaction {
 
 			@Override
 			public IAuthRuleBuilderRuleTransactionOp withAnyOperation() {
 				return new RuleBuilderRuleTransactionOp();
 			}
-			
-			
-			class RuleBuilderRuleTransactionOp implements IAuthRuleBuilderRuleTransactionOp {
+			private class RuleBuilderRuleTransactionOp implements IAuthRuleBuilderRuleTransactionOp {
 
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished andApplyNormalRules() {
 					Rule rule = new Rule(myRuleName);
+					rule.setMode(myRuleMode);
 					rule.setOp(myRuleOp);
 					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
 					myRules.add(rule);
-					return new RuleBuilderFinished(myRules);
+					return new RuleBuilderFinished();
 				}
 				
 			}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -34,11 +36,6 @@ public interface IAuthRuleBuilder {
 	IAuthRuleBuilderRule allow();
 
 	/**
-	 * Start a new rule to deny a given operation
-	 */
-	IAuthRuleBuilderRule deny();
-
-	/**
 	 * Start a new rule to allow a given operation
 	 * 
 	 * @param theRuleName
@@ -47,16 +44,6 @@ public interface IAuthRuleBuilder {
 	 *           HAPI FHIR.
 	 */
 	IAuthRuleBuilderRule allow(String theRuleName);
-
-	/**
-	 * Start a new rule to deny a given operation
-	 * 
-	 * @param theRuleName
-	 *           The name of this rule. The rule name is used for logging and error messages,
-	 *           and could be shown to the client, but has no semantic meaning within
-	 *           HAPI FHIR.
-	 */
-	IAuthRuleBuilderRule deny(String theRuleName);
 
 	/**
 	 * This rule allows any invocation to proceed. It is intended to be
@@ -81,6 +68,26 @@ public interface IAuthRuleBuilder {
 	 *           HAPI FHIR.
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished allowAll(String theRuleName);
+
+	/**
+	 * Build the rule list
+	 */
+	List<IAuthRule> build();
+
+	/**
+	 * Start a new rule to deny a given operation
+	 */
+	IAuthRuleBuilderRule deny();
+
+	/**
+	 * Start a new rule to deny a given operation
+	 * 
+	 * @param theRuleName
+	 *           The name of this rule. The rule name is used for logging and error messages,
+	 *           and could be shown to the client, but has no semantic meaning within
+	 *           HAPI FHIR.
+	 */
+	IAuthRuleBuilderRule deny(String theRuleName);
 
 	/**
 	 * This rule allows any invocation to proceed. It is intended to be

@@ -117,22 +117,21 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		return new Verdict(result, decidingRule);
 	}
 
-	private List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-		ArrayList<IAuthRule> retVal = new ArrayList<IAuthRule>();
-		buildRuleList(theRequestDetails, new RuleBuilder(retVal));
-		return retVal;
-	}
-
 	/**
 	 * Subclasses should override this method to supply the set of rules to be applied to
 	 * this individual request.
+	 * <p>
+	 * Typically this is done by examining <code>theRequestDetails</code> to find
+	 * out who the current user is and then using a {@link RuleBuilder} to create
+	 * an appropriate rule chain. 
+	 * </p>
 	 * 
 	 * @param theRequestDetails The individual request currently being applied
-	 * @param theRuleBuilder The builder used to create the rules 
 	 */
-	protected void buildRuleList(RequestDetails theRequestDetails, IAuthRuleBuilder theRuleBuilder) {
-		// nothing by default
+	public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+		return new ArrayList<IAuthRule>();
 	}
+
 	
 	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation) {
 		switch (theOperation) {
