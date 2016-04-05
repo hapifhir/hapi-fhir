@@ -382,6 +382,13 @@
 				the actual resource instance populated into the reference if the
 				IDs matched as they did in DSTU1/2.
 			</action>
+			<action type="fix" issue="326">
+				Contained resource references on DSTU3
+				resources were not serialized correctly when
+				using the Json Parser. Thanks to GitHub user
+				@fw060 for reporting and supplying a patch
+				which corrects the issue!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

@@ -1635,7 +1635,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (childName == null) {
 					childName = "value" + myContext.getElementDefinition(value.getClass()).getName();
 				}
-				BaseRuntimeElementDefinition<?> childDef = myContext.getElementDefinition(value.getClass());
+				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 				if (childDef == null) {
 					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + value.getClass().getCanonicalName());
 				}

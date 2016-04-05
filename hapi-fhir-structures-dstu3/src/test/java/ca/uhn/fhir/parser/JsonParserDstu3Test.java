@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -73,6 +74,44 @@ public class JsonParserDstu3Test {
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
+	
+	
+	/**
+	 * See #326
+	 */
+	@Test
+	public void testEncodeContainedResource() {
+		Patient patient = new Patient();
+		patient.setBirthDate(new Date());
+		patient.addExtension().setUrl("test").setValue(new Reference(new Condition()));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"{",
+			"\"resourceType\":\"Patient\",",
+			"\"extension\":[",
+			"{",
+			"\"url\":\"test\",",
+			"\"valueReference\":{",
+			"\"reference\":\"#1\"",
+			"}",
+			"}",
+			"],",
+			"\"contained\":[",
+			"{",
+			"\"resourceType\":\"Condition\",",
+			"\"id\":\"1\"",
+			"}",
+			"],",
+			"\"birthDate\":\"2016-04-05\"",
+			"}"
+		));
+		//@formatter:on
+	}
+
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {

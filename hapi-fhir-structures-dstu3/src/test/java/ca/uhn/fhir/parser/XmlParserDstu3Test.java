@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -45,6 +46,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.DataElement;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -102,7 +104,76 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testBundleWithBinary() {
+		//@formatter:off
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+			"   <meta/>\n" + 
+			"   <base value=\"http://localhost:52788\"/>\n" + 
+			"   <total value=\"1\"/>\n" + 
+			"   <link>\n" + 
+			"      <relation value=\"self\"/>\n" + 
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
+			"   </link>\n" + 
+			"   <entry>\n" + 
+			"      <resource>\n" + 
+			"         <Binary xmlns=\"http://hl7.org/fhir\">\n" + 
+			"            <id value=\"1\"/>\n" + 
+			"            <meta/>\n" + 
+			"            <contentType value=\"text/plain\"/>\n" + 
+			"            <content value=\"AQIDBA==\"/>\n" + 
+			"         </Binary>\n" + 
+			"      </resource>\n" + 
+			"   </entry>\n" + 
+			"</Bundle>";
+		//@formatter:on
+
+		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getEntry().size());
+
+		Binary bin = (Binary) b.getEntry().get(0).getResource();
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+
+	}
 	
+	
+	@Test
+	public void testContainedResourceInExtensionUndeclared() {
+		Patient p = new Patient();
+		p.addName().addFamily("PATIENT");
+
+		Organization o = new Organization();
+		o.setName("ORG");
+		p.addExtension(new Extension("urn:foo", new Reference(o)));
+
+		String str = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(str);
+
+		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
+		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
+
+		List<Extension> exts = p.getExtensionsByUrl("urn:foo");
+		assertEquals(1, exts.size());
+		Reference rr = (Reference) exts.get(0).getValue();
+		o = (Organization) rr.getResource();
+		assertEquals("ORG", o.getName());
+	}
+
+	
+	@Test
+	public void testDuration() {
+		Encounter enc = new Encounter();
+		Duration duration = new Duration();
+		duration.setUnit("day").setValue(123L);
+		enc.setLength(duration);
+
+		String str = ourCtx.newXmlParser().encodeResourceToString(enc);
+		ourLog.info(str);
+
+		assertThat(str, not(containsString("meta")));
+		assertThat(str, containsString("<length><value value=\"123\"/><unit value=\"day\"/></length>"));
+	}
+
 	@Test
 	public void testEncodeAndParseBundleWithResourceRefs() {
 		
@@ -138,75 +209,6 @@ public class XmlParserDstu3Test {
 		assertEquals("Organization/orgid", org.getIdElement().getValue());
 		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
 		assertSame(org, pt.getManagingOrganization().getResource());
-	}
-
-	
-	@Test
-	public void testBundleWithBinary() {
-		//@formatter:off
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <meta/>\n" + 
-			"   <base value=\"http://localhost:52788\"/>\n" + 
-			"   <total value=\"1\"/>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"self\"/>\n" + 
-			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
-			"   </link>\n" + 
-			"   <entry>\n" + 
-			"      <resource>\n" + 
-			"         <Binary xmlns=\"http://hl7.org/fhir\">\n" + 
-			"            <id value=\"1\"/>\n" + 
-			"            <meta/>\n" + 
-			"            <contentType value=\"text/plain\"/>\n" + 
-			"            <content value=\"AQIDBA==\"/>\n" + 
-			"         </Binary>\n" + 
-			"      </resource>\n" + 
-			"   </entry>\n" + 
-			"</Bundle>";
-		//@formatter:on
-
-		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, bundle);
-		assertEquals(1, b.getEntry().size());
-
-		Binary bin = (Binary) b.getEntry().get(0).getResource();
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-
-	}
-
-	@Test
-	public void testContainedResourceInExtensionUndeclared() {
-		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
-
-		Organization o = new Organization();
-		o.setName("ORG");
-		p.addExtension(new Extension("urn:foo", new Reference(o)));
-
-		String str = ourCtx.newXmlParser().encodeResourceToString(p);
-		ourLog.info(str);
-
-		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
-		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
-
-		List<Extension> exts = p.getExtensionsByUrl("urn:foo");
-		assertEquals(1, exts.size());
-		Reference rr = (Reference) exts.get(0).getValue();
-		o = (Organization) rr.getResource();
-		assertEquals("ORG", o.getName());
-	}
-
-	@Test
-	public void testDuration() {
-		Encounter enc = new Encounter();
-		Duration duration = new Duration();
-		duration.setUnit("day").setValue(123L);
-		enc.setLength(duration);
-
-		String str = ourCtx.newXmlParser().encodeResourceToString(enc);
-		ourLog.info(str);
-
-		assertThat(str, not(containsString("meta")));
-		assertThat(str, containsString("<length><value value=\"123\"/><unit value=\"day\"/></length>"));
 	}
 
 	@Test
@@ -711,6 +713,37 @@ public class XmlParserDstu3Test {
 
 		assertThat(encoded, stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport"));
 		assertThat(encoded, not(stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport")));
+	}
+
+	/**
+	 * See #326
+	 */
+	@Test
+	public void testEncodeContainedResource() {
+		Patient patient = new Patient();
+		patient.setBirthDate(new Date());
+		patient.addExtension().setUrl("test").setValue(new Reference(new Condition()));
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
+			"<extension url=\"test\">",
+			"<valueReference>",
+			"<reference value=\"#1\"/>", 
+			"</valueReference>",
+			"</extension>",
+			"<contained>", 
+			"<Condition xmlns=\"http://hl7.org/fhir\">", 
+			"<id value=\"1\"/>",
+			"</Condition>",
+			"</contained>",
+			"<birthDate value=\"2016-04-05\"/>", 
+			"</Patient>"
+		));
+		//@formatter:on
 	}
 
 	/**
