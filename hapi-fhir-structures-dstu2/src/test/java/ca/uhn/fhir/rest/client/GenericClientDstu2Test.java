@@ -199,6 +199,39 @@ public class GenericClientDstu2Test {
 
 	}
 
+	
+	
+	/**
+	 * See #322
+	 */
+	@Test
+	public void testFetchConformanceWithSmartExtensionsAltCase() throws Exception {
+		final String respString = IOUtils.toString(GenericClientDstu2Test.class.getResourceAsStream("/conformance_322.json")).replace("valueuri", "valueUri");
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
+		Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+		
+		Rest rest = conf.getRest().get(0);
+		RestSecurity security = rest.getSecurity();
+		
+		List<ExtensionDt> ext = security.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+		List<ExtensionDt> tokenExts = ext.get(0).getUndeclaredExtensionsByUrl("token");
+		ExtensionDt tokenExt = tokenExts.get(0);
+		UriDt value = (UriDt) tokenExt.getValue();
+		assertEquals("https://my-server.org/token", value.getValueAsString());
+
+	}
+
 	@Test
 	public void testAcceptHeaderPreflightConformance() throws Exception {
 		String methodName = "testAcceptHeaderPreflightConformance";

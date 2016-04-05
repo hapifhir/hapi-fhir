@@ -371,6 +371,17 @@
 				DateTimeType should fail to parse 1974-12-25+10:00 as this is not
 				a valid time in FHIR. Thanks to Grahame Grieve for reporting!
 			</action>
+			<action type="fix">
+				When parsing a Bundle resource, if the Bundle.entry.request.url contains a UUID
+				but the resource body has no ID, the Resource.id will be populated with the ID from the
+				Bundle.entry.request.url. This is helpful when round tripping Bundles containing
+				UUIDs.
+			</action>
+			<action type="fix">
+				When parsing a DSTU3 bundle, references between resources did not have
+				the actual resource instance populated into the reference if the
+				IDs matched as they did in DSTU1/2.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

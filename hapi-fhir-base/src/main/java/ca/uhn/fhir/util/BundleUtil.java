@@ -23,12 +23,15 @@ package ca.uhn.fhir.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
@@ -56,6 +59,43 @@ public class BundleUtil {
 		}
 
 		return retVal;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+		
+		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestDef = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
+		
+		BaseRuntimeChildDefinition urlChild = requestDef.getChildByName("url");
+
+		List<Pair<String, IBaseResource>> retVal = new ArrayList<Pair<String,IBaseResource>>(entries.size());
+		for (IBase nextEntry : entries) {
+			
+			String url = null;
+			IBaseResource resource = null;
+			
+			for (IBase nextEntryValue : requestChild.getAccessor().getValues(nextEntry)) {
+				for (IBase nextUrlValue : urlChild.getAccessor().getValues(nextEntryValue)) {
+					url = ((IPrimitiveType<String>)nextUrlValue).getValue();
+				}
+			}
+			
+			// Should return 0..1 only
+			for (IBase nextValue : resourceChild.getAccessor().getValues(nextEntry)) {
+				resource = (IBaseResource) nextValue;
+			}
+			
+			retVal.add(Pair.of(url, resource));
+		}
+		
+		return retVal;		
 	}
 
 }

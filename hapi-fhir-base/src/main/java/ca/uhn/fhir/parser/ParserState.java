@@ -35,10 +35,12 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -49,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -84,6 +87,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor;
 
@@ -2073,8 +2077,6 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
-			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
-
 			if (myContext.hasDefaultTypeForProfile()) {
 				IBaseMetaType meta = myInstance.getMeta();
 				Class<? extends IBaseResource> wantedProfileType = null;
@@ -2149,26 +2151,27 @@ class ParserState<T> {
 				}
 			});
 
+			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
 				/*
 				 * Stitch together resource references
 				 */
-				Map<IdDt, IResource> idToResource = new HashMap<IdDt, IResource>();
+				Map<IIdType, IBaseResource> idToResource = new HashMap<IIdType, IBaseResource>();
 				FhirTerser t = myContext.newTerser();
-				List<IResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IResource.class);
-				for (IResource next : resources) {
-					IdDt id = next.getId();
+				List<IBaseResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.class);
+				for (IBaseResource next : resources) {
+					IIdType id = next.getIdElement();
 					if (id != null && id.isEmpty() == false) {
 						String resName = myContext.getResourceDefinition(next).getName();
 						idToResource.put(id.withResourceType(resName).toUnqualifiedVersionless(), next);
 					}
 				}
 
-				for (IResource next : resources) {
-					List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
-					for (BaseResourceReferenceDt nextRef : refs) {
-						if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
-							IResource target = idToResource.get(nextRef.getReference().toUnqualifiedVersionless());
+				for (IBaseResource next : resources) {
+					List<IBaseReference> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
+					for (IBaseReference nextRef : refs) {
+						if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
+							IBaseResource target = idToResource.get(nextRef.getReferenceElement().toUnqualifiedVersionless());
 							if (target != null) {
 								nextRef.setResource(target);
 							}
@@ -2176,6 +2179,18 @@ class ParserState<T> {
 					}
 				}
 
+				/*
+				 * Set resource IDs based on Bundle.entry.request.url
+				 */
+				List<Pair<String, IBaseResource>> urlsAndResources = BundleUtil.getBundleEntryUrlsAndResources(myContext, (IBaseBundle) myInstance);
+				for (Pair<String, IBaseResource> pair : urlsAndResources) {
+					if (pair.getRight() != null && isNotBlank(pair.getLeft()) && pair.getRight().getIdElement().isEmpty()) {
+						if (pair.getLeft().startsWith("urn:")) {
+							pair.getRight().setId(pair.getLeft());
+						}
+					}
+				}
+				
 			}
 
 			populateTarget();

@@ -102,6 +102,45 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	
+	@Test
+	public void testEncodeAndParseBundleWithResourceRefs() {
+		
+		Patient pt = new Patient();
+		pt.setId("patid");
+		pt.addName().addFamily("PATIENT");
+		
+		Organization org = new Organization();
+		org.setId("orgid");
+		org.setName("ORG");
+		pt.getManagingOrganization().setResource(org);
+		
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(pt);
+		bundle.addEntry().setResource(org);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			"<managingOrganization>",
+			"<reference value=\"Organization/orgid\"/>", 
+			"</managingOrganization>"
+		));
+		//@formatter:on
+		
+		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		pt = (Patient) bundle.getEntry().get(0).getResource();
+		org = (Organization) bundle.getEntry().get(1).getResource();
+		
+		assertEquals("Organization/orgid", org.getIdElement().getValue());
+		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
+		assertSame(org, pt.getManagingOrganization().getResource());
+	}
+
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
