@@ -39,7 +39,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.fusesource.jansi.Ansi;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -158,13 +163,12 @@ public class ExampleDataUploader extends BaseCommand {
 				inputFiles = FileUtils.listFiles(suppliedFile, new String[] {"zip"}, false);
 
 				for (File inputFile : inputFiles) {
-					Bundle bundle = getBundleFromFile(limit, inputFile, ctx);
+					IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
 					processBundle(ctx, bundle);
 					sendBundleToTarget(targetServer, ctx, bundle);
 				}
 			} else {
-
-				Bundle bundle = getBundleFromFile(limit, suppliedFile, ctx);
+				IBaseBundle bundle = getBundleFromFile(limit, suppliedFile, ctx);
 				processBundle(ctx, bundle);
 				sendBundleToTarget(targetServer, ctx, bundle);
 			}
@@ -203,7 +207,7 @@ public class ExampleDataUploader extends BaseCommand {
 				IOUtils.closeQuietly(result.getEntity().getContent());
 			}
 
-			Bundle bundle = getBundleFromFile(limit, inputFile, ctx);
+			IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
 			processBundle(ctx, bundle);
 
 			sendBundleToTarget(targetServer, ctx, bundle);
@@ -212,7 +216,18 @@ public class ExampleDataUploader extends BaseCommand {
 
 	}
 
-	private void sendBundleToTarget(String targetServer, FhirContext ctx, Bundle bundle) throws Exception, IOException {
+	private IBaseBundle getBundleFromFile(Integer theLimit, File theSuppliedFile, FhirContext theCtx) throws ParseException, UnsupportedEncodingException, IOException {
+		switch (theCtx.getVersion().getVersion()) {
+		case DSTU2:
+			return getBundleFromFileDstu2(theLimit, theSuppliedFile, theCtx);
+		case DSTU3:
+			return getBundleFromFileDstu3(theLimit, theSuppliedFile, theCtx);
+		default:
+			throw new ParseException("Invalid spec version for this command: " + theCtx.getVersion().getVersion());
+	}
+	}
+
+	private void sendBundleToTarget(String targetServer, FhirContext ctx, IBaseBundle bundle) throws Exception, IOException {
 
 		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info("Final bundle: {}", FileUtils.byteCountToDisplaySize(encoded.length()));
@@ -240,8 +255,20 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Finished uploading bundle to server (took {} ms)", delay);
 		}
 	}
-
-	private void processBundle(FhirContext ctx, Bundle bundle) {
+	private void processBundle(FhirContext ctx, IBaseBundle bundle) {
+		switch (ctx.getVersion().getVersion()) {
+		case DSTU2:
+			processBundleDstu2(ctx, (Bundle) bundle);
+			break;
+		case DSTU3:
+			processBundleDstu3(ctx, (org.hl7.fhir.dstu3.model.Bundle) bundle);
+			break;
+		default:
+			throw new IllegalStateException();
+		}
+	}
+	
+	private void processBundleDstu2(FhirContext ctx, Bundle bundle) {
 
 		Map<String, Integer> ids = new HashMap<String, Integer>();
 		Set<String> fullIds = new HashSet<String>();
@@ -337,7 +364,103 @@ public class ExampleDataUploader extends BaseCommand {
 
 	}
 
-	private Bundle getBundleFromFile(Integer limit, File inputFile, FhirContext ctx)
+	private void processBundleDstu3(FhirContext ctx, org.hl7.fhir.dstu3.model.Bundle bundle) {
+
+		Map<String, Integer> ids = new HashMap<String, Integer>();
+		Set<String> fullIds = new HashSet<String>();
+
+		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
+			BundleEntryComponent next = iterator.next();
+
+			// DataElement have giant IDs that seem invalid, need to investigate this..
+			if ("DataElement".equals(next.getResource().getResourceType().name()) || "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
+				ourLog.info("Skipping " + next.getResource().getResourceType().name() + " example");
+				iterator.remove();
+			} else {
+				IdType resourceId = next.getResource().getIdElement();
+				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
+					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
+					iterator.remove();
+					continue;
+				}
+
+				String idPart = resourceId.getIdPart();
+				if (idPart != null) {
+					if (!ids.containsKey(idPart)) {
+						ids.put(idPart, 1);
+					} else {
+						ids.put(idPart, ids.get(idPart) + 1);
+					}
+				} else {
+					ourLog.info("Discarding resource with not explicit ID");
+					iterator.remove();
+				}
+			}
+		}
+		Set<String> qualIds = new HashSet<String>();
+		Map<String, String> renames = new HashMap<String, String>();
+		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
+			BundleEntryComponent next = iterator.next();
+			if (next.getResource().getIdElement().getIdPart() != null) {
+				String idPart = next.getResource().getIdElement().getIdPart();
+				String originalId = next.getResource().getResourceType().name() + '/' + idPart;
+				if (ids.get(idPart) > 1 || next.getResource().getIdElement().isIdPartValidLong()) {
+					idPart = next.getResource().getResourceType().name() + idPart;
+				}
+				String nextId = next.getResource().getResourceType().name() + '/' + idPart;
+				if (!qualIds.add(nextId)) {
+					ourLog.info("Discarding duplicate resource with ID: " + nextId);
+					iterator.remove();
+				}
+				next.getRequest().setMethod(HTTPVerb.PUT);
+				next.getRequest().setUrl(nextId);
+				next.getResource().setId("");
+				renames.put(originalId, nextId);
+			}
+		}
+
+		int goodRefs = 0;
+		for (BundleEntryComponent next : bundle.getEntry()) {
+			List<ResourceReferenceInfo> refs = ctx.newTerser().getAllResourceReferences(next.getResource());
+			for (ResourceReferenceInfo nextRef : refs) {
+				// if (nextRef.getResourceReference().getReferenceElement().isAbsolute()) {
+				// ourLog.info("Discarding absolute reference: {}",
+				// nextRef.getResourceReference().getReferenceElement().getValue());
+				// nextRef.getResourceReference().getReferenceElement().setValue(null);
+				// }
+				nextRef.getResourceReference().setResource(null);
+				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
+				if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
+					if (renames.containsKey(value)) {
+						nextRef.getResourceReference().setReference(renames.get(value));
+						goodRefs++;
+					} else {
+						ourLog.info("Discarding unknown reference: {}", value);
+						nextRef.getResourceReference().getReferenceElement().setValue(null);
+					}
+				} else {
+					goodRefs++;
+				}
+			}
+		}
+
+		// for (Entry next : bundle.getEntry()) {
+		// if (next.getResource().getId().hasIdPart() &&
+		// Character.isLetter(next.getResource().getId().getIdPart().charAt(0))) {
+		// next.getTransaction().setUrl(next.getResource().getResourceName() + '/' +
+		// next.getResource().getId().getIdPart());
+		// next.getTransaction().setMethod(HTTPVerbEnum.PUT);
+		// }
+		// }
+
+		ourLog.info("{} good references", goodRefs);
+		System.gc();
+
+		ourLog.info("Final bundle: {} entries", bundle.getEntry().size());
+
+	}
+
+	private Bundle getBundleFromFileDstu2(Integer limit, File inputFile, FhirContext ctx)
 		throws IOException, UnsupportedEncodingException {
 
 		Bundle bundle = new Bundle();
@@ -402,6 +525,76 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 		return bundle;
 	}
+
+	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx)
+			throws IOException, UnsupportedEncodingException {
+
+			org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+
+			ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
+			byte[] buffer = new byte[2048];
+
+			int count = 0;
+			while (true) {
+				count++;
+				if (limit != null && count > limit) {
+					break;
+				}
+
+				ZipEntry nextEntry = zis.getNextEntry();
+				if (nextEntry == null) {
+					break;
+				}
+
+				int len = 0;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				while ((len = zis.read(buffer)) > 0) {
+					bos.write(buffer, 0, len);
+				}
+				byte[] exampleBytes = bos.toByteArray();
+				String exampleString = new String(exampleBytes, "UTF-8");
+
+				if (ourLog.isTraceEnabled()) {
+					ourLog.trace("Next example: " + exampleString);
+				}
+
+				IBaseResource parsed;
+				try {
+					parsed = ctx.newJsonParser().parseResource(exampleString);
+				} catch (Exception e) {
+					ourLog.info("FAILED to parse example {}", nextEntry.getName(), e);
+					continue;
+				}
+				ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
+
+				if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+					BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+					BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+
+					for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
+						List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+						if (resources == null) {
+							continue;
+						}
+						for (IBase nextResource : resources) {
+							if (!ctx.getResourceDefinition(parsed).getName().equals("Bundle") && ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+								BundleEntryComponent entry = bundle.addEntry();
+								entry.getRequest().setMethod(HTTPVerb.POST);
+								entry.setResource((Resource) nextResource);
+							}
+						}
+					}
+				} else {
+					if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+						continue;
+					}
+					BundleEntryComponent entry = bundle.addEntry();
+					entry.getRequest().setMethod(HTTPVerb.POST);
+					entry.setResource((Resource) parsed);
+				}
+			}
+			return bundle;
+		}
 
 	private void downloadFileFromInternet(CloseableHttpResponse result, File localFile ) throws IOException {
 		FileOutputStream buffer = FileUtils.openOutputStream(localFile);
