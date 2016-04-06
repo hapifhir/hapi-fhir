@@ -84,6 +84,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.Constants;
@@ -2085,6 +2086,37 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, containsInAnyOrder(tag1id));
 		}
 
+	}
+	
+	@Test
+	public void testSearchWithTagParameterMissing() {
+		String methodName = "testSearchWithTagParameterMissing";
+
+		IIdType tag1id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			org.getMeta().addTag("urn:taglist", methodName + "1a", null);
+			org.getMeta().addTag("urn:taglist", methodName + "1b", null);
+			tag1id = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		IIdType tag2id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			org.getMeta().addTag("urn:taglist", methodName + "1b", null);
+			tag2id = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			// One tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a").setModifier(TokenParamModifier.NOT));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag2id));
+			assertThat(patients, not(containsInAnyOrder(tag1id)));
+		}
 	}
 	
 	@Test
