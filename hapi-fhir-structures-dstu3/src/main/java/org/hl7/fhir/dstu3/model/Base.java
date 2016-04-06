@@ -178,8 +178,14 @@ private Map<String, Object> userData;
   }
 
 	public static boolean compareDeep(Base e1, Base e2, boolean allowNull) {
-		if (e1 == null && e2 == null && allowNull)
-			return true;
+		if (allowNull) {
+			boolean noLeft = e1 == null || e1.isEmpty();
+			boolean noRight = e2 == null || e2.isEmpty();
+			if (noLeft && noRight) {
+				return true;
+			}
+		}
+		
 		if (e1 == null || e2 == null)
 			return false;
 		if (e2.isMetadataBased() && !e1.isMetadataBased()) // respect existing order for debugging consistency; outcome must be the same either way
@@ -211,11 +217,17 @@ private Map<String, Object> userData;
 		return true;
 	}
 
-	public static boolean compareValues(PrimitiveType e1, PrimitiveType e2, boolean allowNull) {
-		if (e1 == null && e2 == null && allowNull)
+	public static boolean compareValues(PrimitiveType<?> e1, PrimitiveType<?> e2, boolean allowNull) {
+		boolean noLeft = e1 == null || e1.isEmpty();
+		boolean noRight = e2 == null || e2.isEmpty();
+		if (noLeft && noRight && allowNull) {
 			return true;
-		if (e1 == null || e2 == null)
+		}
+		
+		if (e1 == null || e2 == null) {
 			return false;
+		}
+		
 		return e1.equalsShallow(e2);
   }
 	

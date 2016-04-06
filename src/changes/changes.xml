@@ -389,6 +389,15 @@
 				@fw060 for reporting and supplying a patch
 				which corrects the issue!
 			</action>
+			<action type="fix" issue="325">
+				DSTU3 model classes equalsShallow and equalsDeep both did not work
+				correctly if a field was null in one object, but contained an empty
+				object in the other (e.g. a StringType with no actual value in it). These
+				two should be considered equal, since they would produce the exact same
+				wire format.<![CDATA[<br/><br/>]]>
+				Thanks to GitHub user @ipropper for reporting and providing
+				a test case!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
