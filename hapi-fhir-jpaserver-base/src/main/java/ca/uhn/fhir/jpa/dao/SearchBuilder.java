@@ -28,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -795,14 +796,9 @@ public class SearchBuilder {
 			}
 
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-			Root<ResourceTag> from = cq.from(ResourceTag.class);
 
-			List<Predicate> andPredicates = new ArrayList<Predicate>();
-			andPredicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-			
-			List<Predicate> orPredicates = new ArrayList<Predicate>();
 			boolean paramInverted = false;
+			List<Pair<String, String>> tokens = Lists.newArrayList();
 			for (IQueryParameterType nextOrParams : nextAndParams) {
 				String code;
 				String system;
@@ -818,57 +814,66 @@ public class SearchBuilder {
 					code = nextParam.getValue();
 					system = null;
 				}
-				From<ResourceTag, TagDefinition> defJoin = from.join("myTag");
-				Predicate typePrediate = builder.equal(defJoin.get("myTagType"), tagType);
-				Predicate codePrediate = builder.equal(defJoin.get("myCode"), code);
-				if (isBlank(code)) {
-					continue;
-				}
-				if (isNotBlank(system)) {
-					Predicate systemPrediate = builder.equal(defJoin.get("mySystem"), system);
-					orPredicates.add(builder.and(typePrediate, systemPrediate, codePrediate));
-				} else {
-					orPredicates.add(builder.and(typePrediate, codePrediate));
-				}
 
+				if (isNotBlank(code)) {
+					tokens.add(Pair.of(system, code));
+				}
 			}
-			if (orPredicates.isEmpty() == false) {
-				Predicate tagOptions = builder.or(toArray(orPredicates));
-				andPredicates.add(tagOptions);
-			} else {
+			
+			if (tokens.isEmpty()) {
 				continue;
 			}
-
-			From<?, ResourceTable> defJoin;
+			
 			if (paramInverted) {
-				Subquery<Long> subQ = cq.subquery(Long.class);
-				Root<ResourceTag> subQfrom = cq.from(ResourceTag.class);
-				subQ.select(subQfrom.get("myResourceId").as(Long.class));
-				subQ.where(builder.and(toArray(andPredicates)));
-
+				ourLog.debug("Searching for _tag:not");
+				
+				CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 				Root<ResourceTable> newFrom = cq.from(ResourceTable.class);
-				cq.select(newFrom.get("myId").as(Long.class)).where(builder.not(builder.in(newFrom.get("myId")).value(subQ)));
 				
+				Subquery<Long> subQ = cq.subquery(Long.class);
+				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
+				subQ.select(subQfrom.get("myResourceId").as(Long.class));
+
+				cq.select(newFrom.get("myId").as(Long.class));
+				
+				List<Predicate> andPredicates = new ArrayList<Predicate>();
 				andPredicates = new ArrayList<Predicate>();
-				andPredicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-				defJoin = newFrom;
+				andPredicates.add(builder.equal(newFrom.get("myResourceType"), myResourceName));
+				andPredicates.add(builder.not(builder.in(newFrom.get("myId")).value(subQ)));
+
+				Subquery<Long> defJoin = subQ.subquery(Long.class);
+				Root<TagDefinition> defJoinFrom = defJoin.from(TagDefinition.class);
+				defJoin.select(defJoinFrom.get("myId").as(Long.class));
 				
+				subQ.where(subQfrom.get("myTagId").as(Long.class).in(defJoin));
+				
+				List<Predicate> orPredicates = createPredicateTagList(defJoinFrom, builder, tagType, tokens);
+				defJoin.where(toArray(orPredicates));
+				
+				cq.where(toArray(andPredicates));
+
 				TypedQuery<Long> q = myEntityManager.createQuery(cq);
 				Set<Long> pids = new HashSet<Long>(q.getResultList());
 				doSetPids(pids);
 				continue;
-				
-				
-				
-			} else {
-				defJoin = from.join("myResource");
-			}
+			} 
 			
-			Predicate notDeletedPredicatePrediate = builder.isNull(defJoin.get("myDeleted"));
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<ResourceTag> from = cq.from(ResourceTag.class);
+			List<Predicate> andPredicates = new ArrayList<Predicate>();
+			andPredicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+			From<ResourceTag, TagDefinition> defJoin = from.join("myTag");
+			
+			Join<?, ResourceTable> defJoin2 = from.join("myResource");
+			
+			Predicate notDeletedPredicatePrediate = builder.isNull(defJoin2.get("myDeleted"));
 			andPredicates.add(notDeletedPredicatePrediate);
 			
+			List<Predicate> orPredicates = createPredicateTagList(defJoin, builder, tagType, tokens);
+			andPredicates.add(builder.or(toArray(orPredicates)));
+			
 			if (theLastUpdated != null) {
-				andPredicates.addAll(createLastUpdatedPredicates(theLastUpdated, builder, defJoin));
+				andPredicates.addAll(createLastUpdatedPredicates(theLastUpdated, builder, defJoin2));
 			}
 
 			createPredicateResourceId(builder, cq, andPredicates, from.get("myResourceId").as(Long.class));
@@ -882,6 +887,22 @@ public class SearchBuilder {
 			doSetPids(pids);
 		}
 
+	}
+
+	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
+		Predicate typePrediate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
+		
+		List<Predicate> orPredicates = Lists.newArrayList();
+		for (Pair<String, String> next : theTokens) {
+			Predicate codePrediate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
+			if (isNotBlank(next.getLeft())) {
+				Predicate systemPrediate = theBuilder.equal(theDefJoin.get("mySystem"), next.getLeft());
+				orPredicates.add(theBuilder.and(typePrediate, systemPrediate, codePrediate));
+			} else {
+				orPredicates.add(theBuilder.and(typePrediate, codePrediate));
+			}
+		}
+		return orPredicates;
 	}
 
 	private void addPredicateToken(String theParamName, List<? extends IQueryParameterType> theList) {

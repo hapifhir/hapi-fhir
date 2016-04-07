@@ -2117,6 +2117,20 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, containsInAnyOrder(tag2id));
 			assertThat(patients, not(containsInAnyOrder(tag1id)));
 		}
+		{
+			// Non existant tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "FOO").setModifier(TokenParamModifier.NOT));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id, tag2id));
+		}
+		{
+			// Common tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "1b").setModifier(TokenParamModifier.NOT));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			assertThat(patients, empty());
+		}
 	}
 	
 	@Test

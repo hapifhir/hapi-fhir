@@ -398,6 +398,11 @@
 				Thanks to GitHub user @ipropper for reporting and providing
 				a test case!
 			</action>
+			<action type="add">
+				JPA server now supports searching for <![CDATA[<code>_tag:not=[tag]</code>]]>
+				which enables finding resources that to not have a given tag/profile/security tag.
+				Thanks to Lars Kristian Roland for the suggestion!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
