@@ -1,9 +1,8 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,13 +19,12 @@ public class MultiVersionJsonParserTest {
 		p.addIdentifier("urn:sys", "001");
 		p.addUndeclaredExtension(false, "http://foo#ext", new QuantityDt(2.2));
 		
-		String str = FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
-		ourLog.info(str);
-
-		assertThat(str, stringContainsInOrder(
-			"{\"resourceType\":\"Patient\"",
-			"\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}]",
-			"\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]"));
+		try {
+			FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU1", e.getMessage());
+		}
 	}
 
 }

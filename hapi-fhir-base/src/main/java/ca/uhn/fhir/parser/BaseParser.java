@@ -369,6 +369,10 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theResource, "theResource can not be null");
 		Validate.notNull(theWriter, "theWriter can not be null");
 
+		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
+			throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+		}
+		
 		doEncodeResourceToWriter(theResource, theWriter);
 	}
 

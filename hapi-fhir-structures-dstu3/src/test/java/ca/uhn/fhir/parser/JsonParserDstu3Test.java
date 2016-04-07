@@ -82,7 +82,7 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testEncodeContainedResource() {
 		Patient patient = new Patient();
-		patient.setBirthDate(new Date());
+		patient.getBirthDateElement().setValueAsString("2016-04-05");
 		patient.addExtension().setUrl("test").setValue(new Reference(new Condition()));
 		
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
