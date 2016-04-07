@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -31,6 +32,7 @@ import ca.uhn.fhir.util.FhirTerser;
 
 public class BaseSearchParamExtractor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
+	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private FhirContext myContext;
 	
 	public BaseSearchParamExtractor(FhirContext theContext) {
@@ -43,7 +45,7 @@ public class BaseSearchParamExtractor {
 
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
 		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = thePaths.split("\\||or");
+		String[] nextPathsSplit = SPLIT.split(thePaths);
 		FhirTerser t = myContext.newTerser();
 		for (String nextPath : nextPathsSplit) {
 			String nextPathTrimmed = nextPath.trim();
