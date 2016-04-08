@@ -39,7 +39,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.fusesource.jansi.Ansi;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -60,6 +63,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class ExampleDataUploader extends BaseCommand {
 
@@ -369,9 +374,10 @@ public class ExampleDataUploader extends BaseCommand {
 		Map<String, Integer> ids = new HashMap<String, Integer>();
 		Set<String> fullIds = new HashSet<String>();
 
+		
 		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
 			BundleEntryComponent next = iterator.next();
-
+			
 			// DataElement have giant IDs that seem invalid, need to investigate this..
 			if ("DataElement".equals(next.getResource().getResourceType().name()) || "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType().name() + " example");
@@ -530,6 +536,10 @@ public class ExampleDataUploader extends BaseCommand {
 			throws IOException, UnsupportedEncodingException {
 
 			org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+			bundle.setType(BundleType.TRANSACTION);
+			
+			FhirValidator val = ctx.newValidator();
+			val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport()));
 
 			ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 			byte[] buffer = new byte[2048];
@@ -567,6 +577,12 @@ public class ExampleDataUploader extends BaseCommand {
 				}
 				ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
+				ValidationResult result = val.validateWithResult(parsed);
+				if (result.isSuccessful() == false) {
+					ourLog.info("FAILED to validate example {}", nextEntry.getName());
+					continue;
+				}
+				
 				if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
 					BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
 					BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
@@ -577,7 +593,10 @@ public class ExampleDataUploader extends BaseCommand {
 							continue;
 						}
 						for (IBase nextResource : resources) {
-							if (!ctx.getResourceDefinition(parsed).getName().equals("Bundle") && ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+							if (nextResource == null) {
+								continue;
+							}
+							if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("Bundle") && ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("SearchParameter")) {
 								BundleEntryComponent entry = bundle.addEntry();
 								entry.getRequest().setMethod(HTTPVerb.POST);
 								entry.setResource((Resource) nextResource);

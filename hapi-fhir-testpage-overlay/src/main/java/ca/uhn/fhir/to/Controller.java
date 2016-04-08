@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -90,7 +91,20 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.conformance();
+			Class<? extends IBaseConformance> type;
+			switch (getContext(theRequest).getVersion().getVersion()) {
+			default:
+			case DSTU1:
+				type = Conformance.class;
+				break;
+			case DSTU2:
+				type = ca.uhn.fhir.model.dstu2.resource.Conformance.class;
+				break;
+			case DSTU3:
+				type = org.hl7.fhir.dstu3.model.Conformance.class;
+				break;
+			}
+			client.fetchConformance().ofType(type).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}

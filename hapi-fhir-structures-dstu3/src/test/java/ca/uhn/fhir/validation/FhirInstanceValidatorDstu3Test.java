@@ -226,6 +226,22 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+	public void testValidateRawJsonResourceFromExamples() throws Exception {
+		// @formatter:off
+		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/testscript-search.json"));
+		// @formatter:on
+
+		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnNonInformationalOnes(output);
+//		assertEquals(output.toString(), 1, output.getMessages().size());
+//		ourLog.info(output.getMessages().get(0).getLocationString());
+//		ourLog.info(output.getMessages().get(0).getMessage());
+//		assertEquals("/foo", output.getMessages().get(0).getLocationString());
+//		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+	}
+
+	
+	@Test
 	public void testValidateRawXmlResource() {
 		// @formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "</Patient>";

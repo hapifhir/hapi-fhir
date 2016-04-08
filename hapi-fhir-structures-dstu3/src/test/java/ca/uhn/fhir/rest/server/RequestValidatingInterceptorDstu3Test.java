@@ -105,6 +105,27 @@ public class RequestValidatingInterceptorDstu3Test {
 	}
 
 	@Test
+	public void testFetchMetadata() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		
+		// This header caused a crash
+		httpGet.addHeader("Content-Type", "application/xml+fhir");
+
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Conformance"));
+	}
+
+	@Test
 	public void testCreateJsonInvalidNoFailure() throws Exception {
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);

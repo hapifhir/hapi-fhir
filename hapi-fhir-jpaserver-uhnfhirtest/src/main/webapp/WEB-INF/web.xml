@@ -102,7 +102,7 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU 2.1 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU 3 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
