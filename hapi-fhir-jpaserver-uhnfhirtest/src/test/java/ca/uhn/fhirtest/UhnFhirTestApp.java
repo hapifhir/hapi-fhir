@@ -15,11 +15,13 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class UhnFhirTestApp {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UhnFhirTestApp.class);
+
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8888;
 		String base = "http://localhost:" + myPort + "/baseDstu3";
-		
+
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
@@ -29,7 +31,7 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu2", base);
 		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
-		
+
 		Server server = new Server(myPort);
 
 		WebAppContext root = new WebAppContext();
@@ -42,7 +44,12 @@ public class UhnFhirTestApp {
 
 		server.setHandler(root);
 
-		server.start();
+		try {
+			server.start();
+		} catch (Exception e) {
+			ourLog.error("Failure during startup", e);
+		}
+		server.stop();
 
 		// base = "http://fhir.healthintersections.com.au/open";
 		// base = "http://spark.furore.com/fhir";
@@ -50,7 +57,7 @@ public class UhnFhirTestApp {
 		if (true) {
 			FhirContext ctx = FhirContext.forDstu3();
 			IGenericClient client = ctx.newRestfulGenericClient(base);
-//			client.setLogRequestAndResponse(true);
+			//			client.setLogRequestAndResponse(true);
 
 			Organization o1 = new Organization();
 			o1.getNameElement().setValue("Some Org");
@@ -68,15 +75,15 @@ public class UhnFhirTestApp {
 			subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 			subs.setCriteria("Observation?");
 			client.create().resource(subs).execute();
-			
-//			for (int i = 0; i < 1000; i++) {
-//				
-//				Patient p = (Patient) resources.get(0);
-//				p.addName().addFamily("Transaction"+i);
-//				
-//				ourLog.info("Transaction count {}", i);
-//				client.transaction(resources);
-//			}
+
+			//			for (int i = 0; i < 1000; i++) {
+			//				
+			//				Patient p = (Patient) resources.get(0);
+			//				p.addName().addFamily("Transaction"+i);
+			//				
+			//				ourLog.info("Transaction count {}", i);
+			//				client.transaction(resources);
+			//			}
 
 			client.create().resource(p1).execute();
 			client.create().resource(p1).execute();
@@ -98,5 +105,4 @@ public class UhnFhirTestApp {
 		}
 
 	}
-
 }
