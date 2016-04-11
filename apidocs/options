@@ -1,0 +1,29 @@
+-classpath
+'/Users/t3903uhn/.m2/repository/org/springframework/spring-beans/4.1.5.RELEASE/spring-beans-4.1.5.RELEASE.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-commons/5.0.1/asm-commons-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/unbescape/unbescape/1.1.0.RELEASE/unbescape-1.1.0.RELEASE.jar:/Users/t3903uhn/.m2/repository/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar:/Users/t3903uhn/.m2/repository/org/thymeleaf/thymeleaf/2.1.4.RELEASE/thymeleaf-2.1.4.RELEASE.jar:/Users/t3903uhn/.m2/repository/ognl/ognl/3.0.8/ognl-3.0.8.jar:/Users/t3903uhn/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant-launcher/1.8.3/ant-launcher-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.4.1/woodstox-core-asl-4.4.1.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-tree/5.0.1/asm-tree-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/javassist/javassist/3.16.1-GA/javassist-3.16.1-GA.jar:/Users/t3903uhn/.m2/repository/net/sf/saxon/Saxon-HE/9.5.1-5/Saxon-HE-9.5.1-5.jar:/Users/t3903uhn/.m2/repository/org/ebaysf/web/cors-filter/1.0.1/cors-filter-1.0.1.jar:/Users/t3903uhn/.m2/repository/org/apache/httpcomponents/httpcore/4.4/httpcore-4.4.jar:/Users/t3903uhn/.m2/repository/org/apache/httpcomponents/httpclient/4.4/httpclient-4.4.jar:/Users/t3903uhn/.m2/repository/org/slf4j/slf4j-api/1.7.10/slf4j-api-1.7.10.jar:/Users/t3903uhn/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar:/Users/t3903uhn/.m2/repository/jaxen/jaxen/1.1.4/jaxen-1.1.4.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/servlet-api-2.5/6.1.14/servlet-api-2.5-6.1.14.jar:/Users/t3903uhn/.m2/repository/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar:/Users/t3903uhn/.m2/repository/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar:/Users/t3903uhn/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm/5.0.1/asm-5.0.1.jar:/Users/t3903uhn/.m2/repository/commons-codec/commons-codec/1.10/commons-codec-1.10.jar:/Users/t3903uhn/.m2/repository/ch/qos/logback/logback-core/1.1.2/logback-core-1.1.2.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-analysis/5.0.1/asm-analysis-5.0.1.jar:/Users/t3903uhn/.m2/repository/net/sourceforge/cobertura/cobertura/2.1.1/cobertura-2.1.1.jar:/Users/t3903uhn/.m2/repository/com/phloc/phloc-schematron/2.7.1/phloc-schematron-2.7.1.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant/1.8.3/ant-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/jetty-util/6.1.14/jetty-util-6.1.14.jar:/Users/t3903uhn/.m2/repository/org/slf4j/jcl-over-slf4j/1.7.10/jcl-over-slf4j-1.7.10.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-util/5.0.1/asm-util-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/codehaus/woodstox/stax2-api/3.1.4/stax2-api-3.1.4.jar:/Users/t3903uhn/.m2/repository/com/phloc/phloc-commons/4.3.6/phloc-commons-4.3.6.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant-junit/1.8.3/ant-junit-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/jetty/6.1.14/jetty-6.1.14.jar:/Users/t3903uhn/.m2/repository/ch/qos/logback/logback-classic/1.1.2/logback-classic-1.1.2.jar:/Users/t3903uhn/.m2/repository/org/springframework/spring-core/4.1.5.RELEASE/spring-core-4.1.5.RELEASE.jar:/Users/t3903uhn/.m2/repository/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home/jre/../lib/tools.jar:/Users/t3903uhn/.m2/repository/com/google/code/findbugs/annotations/2.0.3/annotations-2.0.3.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/Users/t3903uhn/git/hapi-fhir/hapi-fhir-base/src/main/java'
+-Xdoclint:none
+-author
+-bottom
+'Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/t3903uhn/git/hapi-fhir/hapi-fhir-base/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'HAPI FHIR - Core Library 1.2-SNAPSHOT API'
+-link
+'http://jamesagnew.github.io/hapi-fhir/apidocs'
+-link
+'https://docs.oracle.com/javaee/7/api'
+-linkoffline
+'http://docs.oracle.com/javase/6/docs/api' '/Users/t3903uhn/git/hapi-fhir/hapi-fhir-base/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'HAPI FHIR - Core Library 1.2-SNAPSHOT API'

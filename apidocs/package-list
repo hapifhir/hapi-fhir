@@ -13,6 +13,7 @@ ca.uhn.fhir.parser
 ca.uhn.fhir.rest.annotation
 ca.uhn.fhir.rest.api
 ca.uhn.fhir.rest.client
+ca.uhn.fhir.rest.client.apache
 ca.uhn.fhir.rest.client.api
 ca.uhn.fhir.rest.client.exceptions
 ca.uhn.fhir.rest.client.interceptor
@@ -23,6 +24,7 @@ ca.uhn.fhir.rest.server
 ca.uhn.fhir.rest.server.audit
 ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.interceptor
+ca.uhn.fhir.rest.server.interceptor.auth
 ca.uhn.fhir.rest.server.servlet
 ca.uhn.fhir.store
 ca.uhn.fhir.util

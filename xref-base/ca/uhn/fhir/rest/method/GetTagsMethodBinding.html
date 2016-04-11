@@ -62,8 +62,8 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">private</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; myType;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">private</strong> Integer myVersionIdParamIndex;
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/GetTagsMethodBinding.html">GetTagsMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theConetxt, Object theProvider, <a href="../../../../../ca/uhn/fhir/rest/annotation/GetTags.html">GetTags</a> theAnnotation) {
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<strong class="jxr_keyword">super</strong>(theMethod, theConetxt, theProvider);
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/GetTagsMethodBinding.html">GetTagsMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider, <a href="../../../../../ca/uhn/fhir/rest/annotation/GetTags.html">GetTags</a> theAnnotation) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<strong class="jxr_keyword">super</strong>(theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  		<strong class="jxr_keyword">if</strong> (theProvider instanceof IResourceProvider) {
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  			myType = ((IResourceProvider) theProvider).getResourceType();
@@ -72,7 +72,7 @@
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		}
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		<strong class="jxr_keyword">if</strong> (!Modifier.isInterface(myType.getModifiers())) {
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			myResourceName = theConetxt.getResourceDefinition(myType).getName();
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			myResourceName = theContext.getResourceDefinition(myType).getName();
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  		}
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
@@ -135,17 +135,17 @@
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 		<strong class="jxr_keyword">if</strong> (myType != IResource.<strong class="jxr_keyword">class</strong>) {
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">if</strong> (id != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 				<strong class="jxr_keyword">if</strong> (versionId != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (id.hasVersionIdPart()) {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 					retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 				}
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getResourceName(), Constants.PARAM_TAGS);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getContext(), getResourceName(), Constants.PARAM_TAGS);
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 			}
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(Constants.PARAM_TAGS);
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(getContext(), Constants.PARAM_TAGS);
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 		}
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 		<strong class="jxr_keyword">if</strong> (theArgs != <strong class="jxr_keyword">null</strong>) {

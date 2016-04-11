@@ -86,7 +86,7 @@
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Override
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseResourceReturningMethodBinding.html">ResourceOrDstu1Bundle</a> invokeServer(IRestfulServer&lt;?&gt; theServer, <a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, byte[] requestContents) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseResourceReturningMethodBinding.html">ResourceOrDstu1Bundle</a> doInvokeServer(IRestfulServer&lt;?&gt; theServer, <a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest) {
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		IBase bundle = handlePagingRequest(theServer, theRequest, <strong class="jxr_keyword">null</strong>, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">if</strong> (bundle instanceof Bundle) {
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseResourceReturningMethodBinding.html">ResourceOrDstu1Bundle</a>((Bundle) bundle);

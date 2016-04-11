@@ -57,7 +57,7 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * limit of 36 characters.</em>
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * regex: [a-z0-9\-\.]{1,36}</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * regex: [a-z-Z0-9\-\.]{1,36}</em>
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  @DatatypeDef(name = <span class="jxr_string">"id"</span>, profileOf=StringDt.<strong class="jxr_keyword">class</strong>)
@@ -178,533 +178,536 @@
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 		myUnqualifiedId = theId;
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 		myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	}
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">	 * Creates an ID based on a given URL</em>
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/UriDt.html">UriDt</a> theUrl) {
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		setValue(theUrl.getValueAsString());
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 	}
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> applyTo(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResouce) {
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 		<strong class="jxr_keyword">if</strong> (theResouce == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theResource can not be null"</span>);
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theResouce instanceof IResource) {
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			((IResource) theResouce).setId(<strong class="jxr_keyword">new</strong> IdDt(getValue()));
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theResouce instanceof IAnyResource) {
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 			((IAnyResource) theResouce).setId(getValue());
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L190" href="#L190">190</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unknown resource class type, does not implement IResource or extend Resource"</span>);
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		}
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	}
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 
-<a class="jxr_linenumber" name="L194" href="#L194">194</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)</em>
-<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L197" href="#L197">197</a> 	@Deprecated
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 	<strong class="jxr_keyword">public</strong> BigDecimal asBigDecimal() {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 		<strong class="jxr_keyword">return</strong> getIdPartAsBigDecimal();
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 	}
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 	<strong class="jxr_keyword">private</strong> String determineLocalPrefix(String theValue) {
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 		<strong class="jxr_keyword">if</strong> (theValue == <strong class="jxr_keyword">null</strong> || theValue.isEmpty()) {
-<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L205" href="#L205">205</a> 		}
-<a class="jxr_linenumber" name="L206" href="#L206">206</a> 		<strong class="jxr_keyword">if</strong> (theValue.startsWith(<span class="jxr_string">"#"</span>)) {
-<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"#"</span>;
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		<strong class="jxr_keyword">if</strong> (isBlank(myBaseUrl) &amp;&amp; isBlank(myResourceType) &amp;&amp; isBlank(myUnqualifiedId) &amp;&amp; isBlank(myUnqualifiedVersionId)) {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			myHaveComponentParts = false;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		}
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	}
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">	 * Creates an ID based on a given URL</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/UriDt.html">UriDt</a> theUrl) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		setValue(theUrl.getValueAsString());
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	}
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> applyTo(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResouce) {
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		<strong class="jxr_keyword">if</strong> (theResouce == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theResource can not be null"</span>);
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theResouce instanceof IResource) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 			((IResource) theResouce).setId(<strong class="jxr_keyword">new</strong> IdDt(getValue()));
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theResouce instanceof IAnyResource) {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 			((IAnyResource) theResouce).setId(getValue());
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unknown resource class type, does not implement IResource or extend Resource"</span>);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		}
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 	}
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 	@Deprecated
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 	<strong class="jxr_keyword">public</strong> BigDecimal asBigDecimal() {
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		<strong class="jxr_keyword">return</strong> getIdPartAsBigDecimal();
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 	}
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 	<strong class="jxr_keyword">private</strong> String determineLocalPrefix(String theValue) {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 		<strong class="jxr_keyword">if</strong> (theValue == <strong class="jxr_keyword">null</strong> || theValue.isEmpty()) {
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 		}
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		<strong class="jxr_keyword">int</strong> lastPrefix = -1;
-<a class="jxr_linenumber" name="L210" href="#L210">210</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theValue.length(); i++) {
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 			<strong class="jxr_keyword">char</strong> nextChar = theValue.charAt(i);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			<strong class="jxr_keyword">if</strong> (nextChar == ':') {
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 				lastPrefix = i;
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L216" href="#L216">216</a> 			}
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		}
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		<strong class="jxr_keyword">if</strong> (lastPrefix != -1) {
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 			String candidate = theValue.substring(0, lastPrefix + 1);
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 			<strong class="jxr_keyword">if</strong> (candidate.startsWith(<span class="jxr_string">"cid:"</span>) || candidate.startsWith(<span class="jxr_string">"urn:"</span>)) {
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 				<strong class="jxr_keyword">return</strong> candidate;
-<a class="jxr_linenumber" name="L222" href="#L222">222</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L224" href="#L224">224</a> 			}
-<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L226" href="#L226">226</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L227" href="#L227">227</a> 		}
-<a class="jxr_linenumber" name="L228" href="#L228">228</a> 	}
-<a class="jxr_linenumber" name="L229" href="#L229">229</a> 
-<a class="jxr_linenumber" name="L230" href="#L230">230</a> 	@Override
-<a class="jxr_linenumber" name="L231" href="#L231">231</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equals(Object theArg0) {
-<a class="jxr_linenumber" name="L232" href="#L232">232</a> 		<strong class="jxr_keyword">if</strong> (!(theArg0 instanceof IdDt)) {
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L234" href="#L234">234</a> 		}
-<a class="jxr_linenumber" name="L235" href="#L235">235</a> 		IdDt id = (IdDt) theArg0;
-<a class="jxr_linenumber" name="L236" href="#L236">236</a> 		<strong class="jxr_keyword">return</strong> StringUtils.equals(getValueAsString(), id.getValueAsString());
-<a class="jxr_linenumber" name="L237" href="#L237">237</a> 	}
-<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
-<a class="jxr_linenumber" name="L239" href="#L239">239</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base</em>
-<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L242" href="#L242">242</a> 	@SuppressWarnings(<span class="jxr_string">"deprecation"</span>)
-<a class="jxr_linenumber" name="L243" href="#L243">243</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equalsIgnoreBase(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
-<a class="jxr_linenumber" name="L244" href="#L244">244</a> 		<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L245" href="#L245">245</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L246" href="#L246">246</a> 		}
-<a class="jxr_linenumber" name="L247" href="#L247">247</a> 		<strong class="jxr_keyword">if</strong> (theId.isEmpty()) {
-<a class="jxr_linenumber" name="L248" href="#L248">248</a> 			<strong class="jxr_keyword">return</strong> isEmpty();
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		<strong class="jxr_keyword">if</strong> (theValue.startsWith(<span class="jxr_string">"#"</span>)) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"#"</span>;
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		}
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 		<strong class="jxr_keyword">int</strong> lastPrefix = -1;
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theValue.length(); i++) {
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 			<strong class="jxr_keyword">char</strong> nextChar = theValue.charAt(i);
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			<strong class="jxr_keyword">if</strong> (nextChar == ':') {
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 				lastPrefix = i;
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 			}
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		}
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 		<strong class="jxr_keyword">if</strong> (lastPrefix != -1) {
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 			String candidate = theValue.substring(0, lastPrefix + 1);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 			<strong class="jxr_keyword">if</strong> (candidate.startsWith(<span class="jxr_string">"cid:"</span>) || candidate.startsWith(<span class="jxr_string">"urn:"</span>)) {
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 				<strong class="jxr_keyword">return</strong> candidate;
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 			}
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 		}
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 	}
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 	@Override
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equals(Object theArg0) {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 		<strong class="jxr_keyword">if</strong> (!(theArg0 instanceof IdDt)) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		}
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 		IdDt id = (IdDt) theArg0;
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 		<strong class="jxr_keyword">return</strong> StringUtils.equals(getValueAsString(), id.getValueAsString());
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> 	}
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 	@SuppressWarnings(<span class="jxr_string">"deprecation"</span>)
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equalsIgnoreBase(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 		<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L249" href="#L249">249</a> 		}
-<a class="jxr_linenumber" name="L250" href="#L250">250</a> 		<strong class="jxr_keyword">return</strong> ObjectUtils.equals(getResourceType(), theId.getResourceType()) &amp;&amp; ObjectUtils.equals(getIdPart(), theId.getIdPart()) &amp;&amp; ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
-<a class="jxr_linenumber" name="L251" href="#L251">251</a> 	}
-<a class="jxr_linenumber" name="L252" href="#L252">252</a> 
-<a class="jxr_linenumber" name="L253" href="#L253">253</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">	 * Returns the portion of this resource ID which corresponds to the server base URL. For example given the resource ID &lt;code&gt;<a href="http://example.com/fhir/Patient/123&lt;/code&gt;" target="alexandria_uri">http://example.com/fhir/Patient/123&lt;/code&gt;</a> the base URL would be</em>
-<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">	 * &lt;code&gt;<a href="http://example.com/fhir&lt;/code&gt;" target="alexandria_uri">http://example.com/fhir&lt;/code&gt;</a>.</em>
-<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">	 * This method may return null if the ID contains no base (e.g. "Patient/123")</em>
-<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L260" href="#L260">260</a> 	@Override
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 	<strong class="jxr_keyword">public</strong> String getBaseUrl() {
-<a class="jxr_linenumber" name="L262" href="#L262">262</a> 		<strong class="jxr_keyword">return</strong> myBaseUrl;
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	}
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> 
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">	 * Returns only the logical ID part of this ID. For example, given the ID "<a href="http://example,.com/fhir/Patient/123/_history/456" target="alexandria_uri">http://example,.com/fhir/Patient/123/_history/456</a>", this method would return "123".</em>
-<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> 	@Override
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> 	<strong class="jxr_keyword">public</strong> String getIdPart() {
-<a class="jxr_linenumber" name="L270" href="#L270">270</a> 		<strong class="jxr_keyword">return</strong> myUnqualifiedId;
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> 	}
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> 
-<a class="jxr_linenumber" name="L273" href="#L273">273</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">	 * Returns the unqualified portion of this ID as a big decimal, or &lt;code&gt;null&lt;/code&gt; if the value is null</em>
-<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">	 * @throws NumberFormatException</em>
-<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">	 *             If the value is not a valid BigDecimal</em>
-<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L279" href="#L279">279</a> 	<strong class="jxr_keyword">public</strong> BigDecimal getIdPartAsBigDecimal() {
-<a class="jxr_linenumber" name="L280" href="#L280">280</a> 		String val = getIdPart();
-<a class="jxr_linenumber" name="L281" href="#L281">281</a> 		<strong class="jxr_keyword">if</strong> (isBlank(val)) {
-<a class="jxr_linenumber" name="L282" href="#L282">282</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L283" href="#L283">283</a> 		}
-<a class="jxr_linenumber" name="L284" href="#L284">284</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> BigDecimal(val);
-<a class="jxr_linenumber" name="L285" href="#L285">285</a> 	}
-<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
-<a class="jxr_linenumber" name="L287" href="#L287">287</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">	 * Returns the unqualified portion of this ID as a {@link Long}, or &lt;code&gt;null&lt;/code&gt; if the value is null</em>
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">	 * @throws NumberFormatException</em>
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment">	 *             If the value is not a valid Long</em>
-<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 	@Override
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> 	<strong class="jxr_keyword">public</strong> Long getIdPartAsLong() {
-<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		String val = getIdPart();
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 		<strong class="jxr_keyword">if</strong> (isBlank(val)) {
-<a class="jxr_linenumber" name="L297" href="#L297">297</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		}
-<a class="jxr_linenumber" name="L299" href="#L299">299</a> 		<strong class="jxr_keyword">return</strong> Long.parseLong(val);
-<a class="jxr_linenumber" name="L300" href="#L300">300</a> 	}
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
-<a class="jxr_linenumber" name="L302" href="#L302">302</a> 	@Override
-<a class="jxr_linenumber" name="L303" href="#L303">303</a> 	<strong class="jxr_keyword">public</strong> String getResourceType() {
-<a class="jxr_linenumber" name="L304" href="#L304">304</a> 		<strong class="jxr_keyword">return</strong> myResourceType;
-<a class="jxr_linenumber" name="L305" href="#L305">305</a> 	}
-<a class="jxr_linenumber" name="L306" href="#L306">306</a> 
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.</em>
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">	 * @see #getIdPart()</em>
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 	@Override
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 	<strong class="jxr_keyword">public</strong> String getValue() {
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 		<strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">super</strong>.getValue() == <strong class="jxr_keyword">null</strong> &amp;&amp; myHaveComponentParts) {
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 			
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			<strong class="jxr_keyword">if</strong> (determineLocalPrefix(myBaseUrl) != <strong class="jxr_keyword">null</strong> &amp;&amp; myResourceType == <strong class="jxr_keyword">null</strong> &amp;&amp; myUnqualifiedVersionId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 				<strong class="jxr_keyword">return</strong> myBaseUrl + myUnqualifiedId;
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			}
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 			
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 			StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myBaseUrl)) {
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 				b.append(myBaseUrl);
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				<strong class="jxr_keyword">if</strong> (myBaseUrl.charAt(myBaseUrl.length() - 1) != '/') {
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 					b.append('/');
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				}
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 			}
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myResourceType)) {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 				b.append(myResourceType);
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 			}
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 			<strong class="jxr_keyword">if</strong> (b.length() &gt; 0) {
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 				b.append('/');
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 			}
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 			b.append(myUnqualifiedId);
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myUnqualifiedVersionId)) {
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 				b.append('/');
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 				b.append(Constants.PARAM_HISTORY);
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 				b.append('/');
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 				b.append(myUnqualifiedVersionId);
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 			}
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 			String value = b.toString();
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 			<strong class="jxr_keyword">super</strong>.setValue(value);
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 		}
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getValue();
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 	}
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 	@Override
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 	<strong class="jxr_keyword">public</strong> String getValueAsString() {
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		<strong class="jxr_keyword">return</strong> getValue();
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 	}
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 	@Override
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 	<strong class="jxr_keyword">public</strong> String getVersionIdPart() {
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<strong class="jxr_keyword">return</strong> myUnqualifiedVersionId;
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 	}
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 	<strong class="jxr_keyword">public</strong> Long getVersionIdPartAsLong() {
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		<strong class="jxr_keyword">if</strong> (!hasVersionIdPart()) {
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 			<strong class="jxr_keyword">return</strong> Long.parseLong(getVersionIdPart());
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 		}
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> 	}
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">	 * Returns true if this ID has a base url</em>
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">	 * @see #getBaseUrl()</em>
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasBaseUrl() {
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(myBaseUrl);
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 	}
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 	@Override
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 		HashCodeBuilder b = <strong class="jxr_keyword">new</strong> HashCodeBuilder();
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 		b.append(getValueAsString());
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		<strong class="jxr_keyword">return</strong> b.toHashCode();
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 	}
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 	@Override
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasIdPart() {
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(getIdPart());
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 	}
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> 
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 	@Override
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasResourceType() {
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(myResourceType);
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 	}
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 	@Override
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasVersionIdPart() {
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(getVersionIdPart());
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> 	}
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an absolute URL (in other words, a URL starting with "<a href="http://" target="alexandria_uri">http://</a>" or "https://"</em>
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	@Override
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isAbsolute() {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(getValue())) {
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 		}
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 		<strong class="jxr_keyword">return</strong> UrlUtil.isAbsolute(getValue());
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 	}
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 	@Override
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isEmpty() {
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 		<strong class="jxr_keyword">return</strong> isBlank(getValue());
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	}
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 	@Override
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isIdPartValid() {
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 		String id = getIdPart();
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(id)) {
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		}
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">if</strong> (id.length() &gt; 64) {
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 		<strong class="jxr_keyword">if</strong> (theId.isEmpty()) {
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 			<strong class="jxr_keyword">return</strong> isEmpty();
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 		}
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		<strong class="jxr_keyword">return</strong> ObjectUtils.equals(getResourceType(), theId.getResourceType()) &amp;&amp; ObjectUtils.equals(getIdPart(), theId.getIdPart()) &amp;&amp; ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	}
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">	 * Returns the portion of this resource ID which corresponds to the server base URL. For example given the resource ID &lt;code&gt;<a href="http://example.com/fhir/Patient/123&lt;/code&gt;" target="alexandria_uri">http://example.com/fhir/Patient/123&lt;/code&gt;</a> the base URL would be</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">	 * &lt;code&gt;<a href="http://example.com/fhir&lt;/code&gt;" target="alexandria_uri">http://example.com/fhir&lt;/code&gt;</a>.</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">	 * This method may return null if the ID contains no base (e.g. "Patient/123")</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	@Override
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 	<strong class="jxr_keyword">public</strong> String getBaseUrl() {
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 		<strong class="jxr_keyword">return</strong> myBaseUrl;
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 	}
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">	 * Returns only the logical ID part of this ID. For example, given the ID "<a href="http://example,.com/fhir/Patient/123/_history/456" target="alexandria_uri">http://example,.com/fhir/Patient/123/_history/456</a>", this method would return "123".</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 	@Override
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 	<strong class="jxr_keyword">public</strong> String getIdPart() {
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 		<strong class="jxr_keyword">return</strong> myUnqualifiedId;
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 	}
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">	 * Returns the unqualified portion of this ID as a big decimal, or &lt;code&gt;null&lt;/code&gt; if the value is null</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">	 * @throws NumberFormatException</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 *             If the value is not a valid BigDecimal</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 	<strong class="jxr_keyword">public</strong> BigDecimal getIdPartAsBigDecimal() {
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 		String val = getIdPart();
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 		<strong class="jxr_keyword">if</strong> (isBlank(val)) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 		}
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> BigDecimal(val);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	}
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment">	 * Returns the unqualified portion of this ID as a {@link Long}, or &lt;code&gt;null&lt;/code&gt; if the value is null</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> <em class="jxr_javadoccomment">	 * @throws NumberFormatException</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> <em class="jxr_javadoccomment">	 *             If the value is not a valid Long</em>
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 	@Override
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 	<strong class="jxr_keyword">public</strong> Long getIdPartAsLong() {
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		String val = getIdPart();
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 		<strong class="jxr_keyword">if</strong> (isBlank(val)) {
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 		}
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		<strong class="jxr_keyword">return</strong> Long.parseLong(val);
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 	}
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 	@Override
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 	<strong class="jxr_keyword">public</strong> String getResourceType() {
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 		<strong class="jxr_keyword">return</strong> myResourceType;
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 	}
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">	 * @see #getIdPart()</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 	@Override
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 	<strong class="jxr_keyword">public</strong> String getValue() {
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		<strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">super</strong>.getValue() == <strong class="jxr_keyword">null</strong> &amp;&amp; myHaveComponentParts) {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 			<strong class="jxr_keyword">if</strong> (determineLocalPrefix(myBaseUrl) != <strong class="jxr_keyword">null</strong> &amp;&amp; myResourceType == <strong class="jxr_keyword">null</strong> &amp;&amp; myUnqualifiedVersionId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 				<strong class="jxr_keyword">return</strong> myBaseUrl + myUnqualifiedId;
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 			}
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 			
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 			StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myBaseUrl)) {
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				b.append(myBaseUrl);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 				<strong class="jxr_keyword">if</strong> (myBaseUrl.charAt(myBaseUrl.length() - 1) != '/') {
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 					b.append('/');
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 				}
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 			}
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myResourceType)) {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 				b.append(myResourceType);
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 			}
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 			<strong class="jxr_keyword">if</strong> (b.length() &gt; 0) {
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 				b.append('/');
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			}
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			b.append(myUnqualifiedId);
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(myUnqualifiedVersionId)) {
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 				b.append('/');
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 				b.append(Constants.PARAM_HISTORY);
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 				b.append('/');
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 				b.append(myUnqualifiedVersionId);
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 			}
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 			String value = b.toString();
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			<strong class="jxr_keyword">super</strong>.setValue(value);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 		}
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getValue();
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 	}
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 	@Override
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 	<strong class="jxr_keyword">public</strong> String getValueAsString() {
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		<strong class="jxr_keyword">return</strong> getValue();
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 	}
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 	@Override
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 	<strong class="jxr_keyword">public</strong> String getVersionIdPart() {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 		<strong class="jxr_keyword">return</strong> myUnqualifiedVersionId;
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 	}
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 	<strong class="jxr_keyword">public</strong> Long getVersionIdPartAsLong() {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 		<strong class="jxr_keyword">if</strong> (!hasVersionIdPart()) {
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 			<strong class="jxr_keyword">return</strong> Long.parseLong(getVersionIdPart());
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 		}
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 	}
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">	 * Returns true if this ID has a base url</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_javadoccomment">	 * @see #getBaseUrl()</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasBaseUrl() {
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(myBaseUrl);
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 	}
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 	@Override
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 		HashCodeBuilder b = <strong class="jxr_keyword">new</strong> HashCodeBuilder();
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 		b.append(getValueAsString());
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 		<strong class="jxr_keyword">return</strong> b.toHashCode();
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 	}
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 	@Override
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasIdPart() {
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(getIdPart());
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	}
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 	@Override
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasResourceType() {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(myResourceType);
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 	}
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 	@Override
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasVersionIdPart() {
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 		<strong class="jxr_keyword">return</strong> isNotBlank(getVersionIdPart());
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 	}
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an absolute URL (in other words, a URL starting with "<a href="http://" target="alexandria_uri">http://</a>" or "https://"</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 	@Override
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isAbsolute() {
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(getValue())) {
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 		}
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 		<strong class="jxr_keyword">return</strong> UrlUtil.isAbsolute(getValue());
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	}
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	@Override
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isEmpty() {
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 		<strong class="jxr_keyword">return</strong> isBlank(getValue());
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 	}
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 	@Override
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isIdPartValid() {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		String id = getIdPart();
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(id)) {
 <a class="jxr_linenumber" name="L421" href="#L421">421</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L422" href="#L422">422</a> 		}
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; id.length(); i++) {
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 			<strong class="jxr_keyword">char</strong> nextChar = id.charAt(i);
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= 'a' &amp;&amp; nextChar &lt;= 'z') {
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 				<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			}
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= 'A' &amp;&amp; nextChar &lt;= 'Z') {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		<strong class="jxr_keyword">if</strong> (id.length() &gt; 64) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 		}
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; id.length(); i++) {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			<strong class="jxr_keyword">char</strong> nextChar = id.charAt(i);
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= 'a' &amp;&amp; nextChar &lt;= 'z') {
 <a class="jxr_linenumber" name="L429" href="#L429">429</a> 				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L430" href="#L430">430</a> 			}
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= '0' &amp;&amp; nextChar &lt;= '9') {
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= 'A' &amp;&amp; nextChar &lt;= 'Z') {
 <a class="jxr_linenumber" name="L432" href="#L432">432</a> 				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L433" href="#L433">433</a> 			}
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '-' || nextChar == '.') {
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			<strong class="jxr_keyword">if</strong> (nextChar &gt;= '0' &amp;&amp; nextChar &lt;= '9') {
 <a class="jxr_linenumber" name="L435" href="#L435">435</a> 				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L436" href="#L436">436</a> 			}
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		}
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 	}
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 	@Override
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isIdPartValidLong() {
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		<strong class="jxr_keyword">return</strong> isValidLong(getIdPart());
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 	}
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the ID is a local reference (in other words, it begins with the '#' character)</em>
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 	@Override
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isLocal() {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"#"</span>.equals(myBaseUrl);
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 	}
-<a class="jxr_linenumber" name="L454" href="#L454">454</a> 
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 	@Override
-<a class="jxr_linenumber" name="L456" href="#L456">456</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isVersionIdPartValidLong() {
-<a class="jxr_linenumber" name="L457" href="#L457">457</a> 		<strong class="jxr_keyword">return</strong> isValidLong(getVersionIdPart());
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> 	}
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> 	
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">	 * Copies the value from the given IdDt to &lt;code&gt;this&lt;/code&gt; IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.</em>
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L463" href="#L463">463</a> 	@Override
-<a class="jxr_linenumber" name="L464" href="#L464">464</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 		setValue(theId.getValue());
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	}
-<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_javadoccomment">	 * Set the value</em>
-<a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Description&lt;/b&gt;: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length</em>
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">	 * limit of 36 characters.</em>
-<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">	 * regex: [a-z0-9\-\.]{1,36}</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '-' || nextChar == '.') {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 				<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 			}
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 		}
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 	}
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 	@Override
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isIdPartValidLong() {
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		<strong class="jxr_keyword">return</strong> isValidLong(getIdPart());
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 	}
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the ID is a local reference (in other words, it begins with the '#' character)</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 	@Override
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isLocal() {
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 		<strong class="jxr_keyword">return</strong> <span class="jxr_string">"#"</span>.equals(myBaseUrl);
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 	}
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 	@Override
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isVersionIdPartValidLong() {
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 		<strong class="jxr_keyword">return</strong> isValidLong(getVersionIdPart());
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 	}
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 	
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">	 * Copies the value from the given IdDt to &lt;code&gt;this&lt;/code&gt; IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	@Override
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		setValue(theId.getValue());
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 	}
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">	 * Set the value</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Description&lt;/b&gt;: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">	 * limit of 36 characters.</em>
 <a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L479" href="#L479">479</a> 	@Override
-<a class="jxr_linenumber" name="L480" href="#L480">480</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> setValue(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 		<em class="jxr_comment">// TODO: add validation</em>
-<a class="jxr_linenumber" name="L482" href="#L482">482</a> 		<strong class="jxr_keyword">super</strong>.setValue(theValue);
-<a class="jxr_linenumber" name="L483" href="#L483">483</a> 		myHaveComponentParts = false;
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 		
-<a class="jxr_linenumber" name="L485" href="#L485">485</a> 		String localPrefix = determineLocalPrefix(theValue);
-<a class="jxr_linenumber" name="L486" href="#L486">486</a> 		
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(theValue)) {
-<a class="jxr_linenumber" name="L488" href="#L488">488</a> 			myBaseUrl = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L489" href="#L489">489</a> 			<strong class="jxr_keyword">super</strong>.setValue(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 			myUnqualifiedId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L491" href="#L491">491</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L492" href="#L492">492</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L493" href="#L493">493</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theValue.charAt(0) == '#' &amp;&amp; theValue.length() &gt; 1) {
-<a class="jxr_linenumber" name="L494" href="#L494">494</a> 			<strong class="jxr_keyword">super</strong>.setValue(theValue);
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 			myBaseUrl = <span class="jxr_string">"#"</span>;
-<a class="jxr_linenumber" name="L496" href="#L496">496</a> 			myUnqualifiedId = theValue.substring(1);
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L498" href="#L498">498</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L499" href="#L499">499</a> 			myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (localPrefix != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 			myBaseUrl = localPrefix;
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			myUnqualifiedId = theValue.substring(localPrefix.length());
-<a class="jxr_linenumber" name="L503" href="#L503">503</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 			myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L506" href="#L506">506</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			<strong class="jxr_keyword">int</strong> vidIndex = theValue.indexOf(<span class="jxr_string">"/_history/"</span>);
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 			<strong class="jxr_keyword">int</strong> idIndex;
-<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			<strong class="jxr_keyword">if</strong> (vidIndex != -1) {
-<a class="jxr_linenumber" name="L510" href="#L510">510</a> 				myUnqualifiedVersionId = theValue.substring(vidIndex + <span class="jxr_string">"/_history/"</span>.length());
-<a class="jxr_linenumber" name="L511" href="#L511">511</a> 				idIndex = theValue.lastIndexOf('/', vidIndex - 1);
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 				myUnqualifiedId = theValue.substring(idIndex + 1, vidIndex);
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 				idIndex = theValue.lastIndexOf('/');
-<a class="jxr_linenumber" name="L515" href="#L515">515</a> 				myUnqualifiedId = theValue.substring(idIndex + 1);
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> 				myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L517" href="#L517">517</a> 			}
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
-<a class="jxr_linenumber" name="L519" href="#L519">519</a> 			myBaseUrl = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 			<strong class="jxr_keyword">if</strong> (idIndex &lt;= 0) {
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> 				myResourceType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L522" href="#L522">522</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L523" href="#L523">523</a> 				<strong class="jxr_keyword">int</strong> typeIndex = theValue.lastIndexOf('/', idIndex - 1);
-<a class="jxr_linenumber" name="L524" href="#L524">524</a> 				<strong class="jxr_keyword">if</strong> (typeIndex == -1) {
-<a class="jxr_linenumber" name="L525" href="#L525">525</a> 					myResourceType = theValue.substring(0, idIndex);
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L527" href="#L527">527</a> 					myResourceType = theValue.substring(typeIndex + 1, idIndex);
-<a class="jxr_linenumber" name="L528" href="#L528">528</a> 
-<a class="jxr_linenumber" name="L529" href="#L529">529</a> 					<strong class="jxr_keyword">if</strong> (typeIndex &gt; 4) {
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 						myBaseUrl = theValue.substring(0, typeIndex);
-<a class="jxr_linenumber" name="L531" href="#L531">531</a> 					}
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 
-<a class="jxr_linenumber" name="L533" href="#L533">533</a> 				}
-<a class="jxr_linenumber" name="L534" href="#L534">534</a> 			}
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> <em class="jxr_javadoccomment">	 * regex: [a-z0-9\-\.]{1,36}</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 	@Override
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> setValue(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 		<em class="jxr_comment">// TODO: add validation</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 		<strong class="jxr_keyword">super</strong>.setValue(theValue);
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 		myHaveComponentParts = false;
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 		
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 		String localPrefix = determineLocalPrefix(theValue);
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 		
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(theValue)) {
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 			myBaseUrl = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 			<strong class="jxr_keyword">super</strong>.setValue(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 			myUnqualifiedId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theValue.charAt(0) == '#' &amp;&amp; theValue.length() &gt; 1) {
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 			<strong class="jxr_keyword">super</strong>.setValue(theValue);
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 			myBaseUrl = <span class="jxr_string">"#"</span>;
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 			myUnqualifiedId = theValue.substring(1);
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (localPrefix != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 			myBaseUrl = localPrefix;
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 			myUnqualifiedId = theValue.substring(localPrefix.length());
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 			myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			myResourceType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 			myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 			<strong class="jxr_keyword">int</strong> vidIndex = theValue.indexOf(<span class="jxr_string">"/_history/"</span>);
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 			<strong class="jxr_keyword">int</strong> idIndex;
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 			<strong class="jxr_keyword">if</strong> (vidIndex != -1) {
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 				myUnqualifiedVersionId = theValue.substring(vidIndex + <span class="jxr_string">"/_history/"</span>.length());
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 				idIndex = theValue.lastIndexOf('/', vidIndex - 1);
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 				myUnqualifiedId = theValue.substring(idIndex + 1, vidIndex);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 				idIndex = theValue.lastIndexOf('/');
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 				myUnqualifiedId = theValue.substring(idIndex + 1);
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> 				myUnqualifiedVersionId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 			}
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 			myBaseUrl = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 			<strong class="jxr_keyword">if</strong> (idIndex &lt;= 0) {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> 				myResourceType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 				<strong class="jxr_keyword">int</strong> typeIndex = theValue.lastIndexOf('/', idIndex - 1);
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 				<strong class="jxr_keyword">if</strong> (typeIndex == -1) {
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> 					myResourceType = theValue.substring(0, idIndex);
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 					myResourceType = theValue.substring(typeIndex + 1, idIndex);
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 					<strong class="jxr_keyword">if</strong> (typeIndex &gt; 4) {
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 						myBaseUrl = theValue.substring(0, typeIndex);
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 					}
 <a class="jxr_linenumber" name="L535" href="#L535">535</a> 
-<a class="jxr_linenumber" name="L536" href="#L536">536</a> 		}
-<a class="jxr_linenumber" name="L537" href="#L537">537</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L538" href="#L538">538</a> 	}
-<a class="jxr_linenumber" name="L539" href="#L539">539</a> 
-<a class="jxr_linenumber" name="L540" href="#L540">540</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">	 * Set the value</em>
-<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L543" href="#L543">543</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Description&lt;/b&gt;: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length</em>
-<a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">	 * limit of 36 characters.</em>
-<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">	 * regex: [a-z0-9\-\.]{1,36}</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 				}
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 			}
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> 
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 		}
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> 	}
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> 
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_javadoccomment">	 * Set the value</em>
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Description&lt;/b&gt;: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">	 * limit of 36 characters.</em>
 <a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L551" href="#L551">551</a> 	@Override
-<a class="jxr_linenumber" name="L552" href="#L552">552</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsString(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L553" href="#L553">553</a> 		setValue(theValue);
-<a class="jxr_linenumber" name="L554" href="#L554">554</a> 	}
-<a class="jxr_linenumber" name="L555" href="#L555">555</a> 
-<a class="jxr_linenumber" name="L556" href="#L556">556</a> 	@Override
-<a class="jxr_linenumber" name="L557" href="#L557">557</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L558" href="#L558">558</a> 		<strong class="jxr_keyword">return</strong> getValue();
-<a class="jxr_linenumber" name="L559" href="#L559">559</a> 	}
-<a class="jxr_linenumber" name="L560" href="#L560">560</a> 
-<a class="jxr_linenumber" name="L561" href="#L561">561</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L562" href="#L562">562</a> <em class="jxr_javadoccomment">	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one is present in this IdDt. For example, if this IdDt contains the ID "<a href="http://foo/Patient/1" target="alexandria_uri">http://foo/Patient/1</a>", this method will</em>
-<a class="jxr_linenumber" name="L563" href="#L563">563</a> <em class="jxr_javadoccomment">	 * return a new IdDt containing ID "Patient/1".</em>
-<a class="jxr_linenumber" name="L564" href="#L564">564</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L565" href="#L565">565</a> 	@Override
-<a class="jxr_linenumber" name="L566" href="#L566">566</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toUnqualified() {
-<a class="jxr_linenumber" name="L567" href="#L567">567</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getResourceType(), getIdPart(), getVersionIdPart());
-<a class="jxr_linenumber" name="L568" href="#L568">568</a> 	}
-<a class="jxr_linenumber" name="L569" href="#L569">569</a> 
-<a class="jxr_linenumber" name="L570" href="#L570">570</a> 	@Override
-<a class="jxr_linenumber" name="L571" href="#L571">571</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toUnqualifiedVersionless() {
-<a class="jxr_linenumber" name="L572" href="#L572">572</a> 		<strong class="jxr_keyword">if</strong> (isLocal()) {
-<a class="jxr_linenumber" name="L573" href="#L573">573</a> 			<strong class="jxr_keyword">return</strong> toVersionless();
-<a class="jxr_linenumber" name="L574" href="#L574">574</a> 		}
-<a class="jxr_linenumber" name="L575" href="#L575">575</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getResourceType(), getIdPart());
-<a class="jxr_linenumber" name="L576" href="#L576">576</a> 	}
-<a class="jxr_linenumber" name="L577" href="#L577">577</a> 
-<a class="jxr_linenumber" name="L578" href="#L578">578</a> 	@Override
-<a class="jxr_linenumber" name="L579" href="#L579">579</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toVersionless() {
-<a class="jxr_linenumber" name="L580" href="#L580">580</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getBaseUrl(), getResourceType(), getIdPart(), <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L581" href="#L581">581</a> 	}
-<a class="jxr_linenumber" name="L582" href="#L582">582</a> 
-<a class="jxr_linenumber" name="L583" href="#L583">583</a> 	@Override
-<a class="jxr_linenumber" name="L584" href="#L584">584</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withResourceType(String theResourceName) {
-<a class="jxr_linenumber" name="L585" href="#L585">585</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theResourceName, getIdPart(), getVersionIdPart());
-<a class="jxr_linenumber" name="L586" href="#L586">586</a> 	}
-<a class="jxr_linenumber" name="L587" href="#L587">587</a> 
-<a class="jxr_linenumber" name="L588" href="#L588">588</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L589" href="#L589">589</a> <em class="jxr_javadoccomment">	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,</em>
-<a class="jxr_linenumber" name="L590" href="#L590">590</a> <em class="jxr_javadoccomment">	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.</em>
-<a class="jxr_linenumber" name="L591" href="#L591">591</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">	 * @param theServerBase</em>
-<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">	 *            The server base (e.g. "<a href="http://example.com/fhir" target="alexandria_uri">http://example.com/fhir</a>")</em>
-<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">	 * @param theResourceType</em>
-<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">	 *            The resource name (e.g. "Patient")</em>
-<a class="jxr_linenumber" name="L596" href="#L596">596</a> <em class="jxr_javadoccomment">	 * @return A fully qualified URL for this ID (e.g. "<a href="http://example.com/fhir/Patient/1" target="alexandria_uri">http://example.com/fhir/Patient/1</a>")</em>
-<a class="jxr_linenumber" name="L597" href="#L597">597</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L598" href="#L598">598</a> 	@Override
-<a class="jxr_linenumber" name="L599" href="#L599">599</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withServerBase(String theServerBase, String theResourceType) {
-<a class="jxr_linenumber" name="L600" href="#L600">600</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
-<a class="jxr_linenumber" name="L601" href="#L601">601</a> 	}
-<a class="jxr_linenumber" name="L602" href="#L602">602</a> 
-<a class="jxr_linenumber" name="L603" href="#L603">603</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L604" href="#L604">604</a> <em class="jxr_javadoccomment">	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.</em>
-<a class="jxr_linenumber" name="L605" href="#L605">605</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L606" href="#L606">606</a> <em class="jxr_javadoccomment">	 * @param theVersion</em>
-<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">	 *            The actual version string, e.g. "1"</em>
-<a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.</em>
-<a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L610" href="#L610">610</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withVersion(String theVersion) {
-<a class="jxr_linenumber" name="L611" href="#L611">611</a> 		Validate.notBlank(theVersion, <span class="jxr_string">"Version may not be null or empty"</span>);
-<a class="jxr_linenumber" name="L612" href="#L612">612</a> 
-<a class="jxr_linenumber" name="L613" href="#L613">613</a> 		String existingValue = getValue();
-<a class="jxr_linenumber" name="L614" href="#L614">614</a> 
-<a class="jxr_linenumber" name="L615" href="#L615">615</a> 		<strong class="jxr_keyword">int</strong> i = existingValue.indexOf(Constants.PARAM_HISTORY);
-<a class="jxr_linenumber" name="L616" href="#L616">616</a> 		String value;
-<a class="jxr_linenumber" name="L617" href="#L617">617</a> 		<strong class="jxr_keyword">if</strong> (i &gt; 1) {
-<a class="jxr_linenumber" name="L618" href="#L618">618</a> 			value = existingValue.substring(0, i - 1);
-<a class="jxr_linenumber" name="L619" href="#L619">619</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L620" href="#L620">620</a> 			value = existingValue;
-<a class="jxr_linenumber" name="L621" href="#L621">621</a> 		}
-<a class="jxr_linenumber" name="L622" href="#L622">622</a> 
-<a class="jxr_linenumber" name="L623" href="#L623">623</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
-<a class="jxr_linenumber" name="L624" href="#L624">624</a> 	}
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">	 * regex: [a-z0-9\-\.]{1,36}</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> 	@Override
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsString(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> 		setValue(theValue);
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> 	}
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> 
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 	@Override
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 		<strong class="jxr_keyword">return</strong> getValue();
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 	}
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one is present in this IdDt. For example, if this IdDt contains the ID "<a href="http://foo/Patient/1" target="alexandria_uri">http://foo/Patient/1</a>", this method will</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> <em class="jxr_javadoccomment">	 * return a new IdDt containing ID "Patient/1".</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 	@Override
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toUnqualified() {
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getResourceType(), getIdPart(), getVersionIdPart());
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> 	}
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> 
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> 	@Override
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toUnqualifiedVersionless() {
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> 		<strong class="jxr_keyword">if</strong> (isLocal()) {
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> 			<strong class="jxr_keyword">return</strong> toVersionless();
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> 		}
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getResourceType(), getIdPart());
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> 	}
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 	@Override
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> toVersionless() {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(getBaseUrl(), getResourceType(), getIdPart(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 	}
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> 
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> 	@Override
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withResourceType(String theResourceName) {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theResourceName, getIdPart(), getVersionIdPart());
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> 	}
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">	 * @param theServerBase</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> <em class="jxr_javadoccomment">	 *            The server base (e.g. "<a href="http://example.com/fhir" target="alexandria_uri">http://example.com/fhir</a>")</em>
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> <em class="jxr_javadoccomment">	 * @param theResourceType</em>
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> <em class="jxr_javadoccomment">	 *            The resource name (e.g. "Patient")</em>
+<a class="jxr_linenumber" name="L599" href="#L599">599</a> <em class="jxr_javadoccomment">	 * @return A fully qualified URL for this ID (e.g. "<a href="http://example.com/fhir/Patient/1" target="alexandria_uri">http://example.com/fhir/Patient/1</a>")</em>
+<a class="jxr_linenumber" name="L600" href="#L600">600</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L601" href="#L601">601</a> 	@Override
+<a class="jxr_linenumber" name="L602" href="#L602">602</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withServerBase(String theServerBase, String theResourceType) {
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> 	}
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> 
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">	 * @param theVersion</em>
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> <em class="jxr_javadoccomment">	 *            The actual version string, e.g. "1"</em>
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> <em class="jxr_javadoccomment">	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.</em>
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> withVersion(String theVersion) {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> 		Validate.notBlank(theVersion, <span class="jxr_string">"Version may not be null or empty"</span>);
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> 
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> 		String existingValue = getValue();
+<a class="jxr_linenumber" name="L617" href="#L617">617</a> 
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> 		<strong class="jxr_keyword">int</strong> i = existingValue.indexOf(Constants.PARAM_HISTORY);
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> 		String value;
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> 		<strong class="jxr_keyword">if</strong> (i &gt; 1) {
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> 			value = existingValue.substring(0, i - 1);
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a> 			value = existingValue;
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> 		}
 <a class="jxr_linenumber" name="L625" href="#L625">625</a> 
-<a class="jxr_linenumber" name="L626" href="#L626">626</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isValidLong(String id) {
-<a class="jxr_linenumber" name="L627" href="#L627">627</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(id)) {
-<a class="jxr_linenumber" name="L628" href="#L628">628</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L629" href="#L629">629</a> 		}
-<a class="jxr_linenumber" name="L630" href="#L630">630</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; id.length(); i++) {
-<a class="jxr_linenumber" name="L631" href="#L631">631</a> 			<strong class="jxr_keyword">if</strong> (Character.isDigit(id.charAt(i)) == false) {
-<a class="jxr_linenumber" name="L632" href="#L632">632</a> 				<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L633" href="#L633">633</a> 			}
-<a class="jxr_linenumber" name="L634" href="#L634">634</a> 		}
-<a class="jxr_linenumber" name="L635" href="#L635">635</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L636" href="#L636">636</a> 	}
-<a class="jxr_linenumber" name="L637" href="#L637">637</a> 
-<a class="jxr_linenumber" name="L638" href="#L638">638</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L639" href="#L639">639</a> <em class="jxr_javadoccomment">	 * Construct a new ID with with form "urn:uuid:[UUID]" where [UUID] is a new, randomly</em>
-<a class="jxr_linenumber" name="L640" href="#L640">640</a> <em class="jxr_javadoccomment">	 * created UUID generated by {@link UUID#randomUUID()}</em>
-<a class="jxr_linenumber" name="L641" href="#L641">641</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L642" href="#L642">642</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> newRandomUuid() {
-<a class="jxr_linenumber" name="L643" href="#L643">643</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<span class="jxr_string">"urn:uuid:"</span> + UUID.randomUUID().toString());
-<a class="jxr_linenumber" name="L644" href="#L644">644</a> 	}
-<a class="jxr_linenumber" name="L645" href="#L645">645</a> 
-<a class="jxr_linenumber" name="L646" href="#L646">646</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L647" href="#L647">647</a> <em class="jxr_javadoccomment">	 * Retrieves the ID from the given resource instance</em>
-<a class="jxr_linenumber" name="L648" href="#L648">648</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L649" href="#L649">649</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> of(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResouce) {
-<a class="jxr_linenumber" name="L650" href="#L650">650</a> 		<strong class="jxr_keyword">if</strong> (theResouce == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L651" href="#L651">651</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theResource can not be null"</span>);
-<a class="jxr_linenumber" name="L652" href="#L652">652</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L653" href="#L653">653</a> 			IIdType retVal = theResouce.getIdElement();
-<a class="jxr_linenumber" name="L654" href="#L654">654</a> 			<strong class="jxr_keyword">if</strong> (retVal == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L655" href="#L655">655</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L656" href="#L656">656</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (retVal instanceof IdDt) {
-<a class="jxr_linenumber" name="L657" href="#L657">657</a> 				<strong class="jxr_keyword">return</strong> (IdDt) retVal;
-<a class="jxr_linenumber" name="L658" href="#L658">658</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L659" href="#L659">659</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(retVal.getValue());
-<a class="jxr_linenumber" name="L660" href="#L660">660</a> 			}
-<a class="jxr_linenumber" name="L661" href="#L661">661</a> 		}
-<a class="jxr_linenumber" name="L662" href="#L662">662</a> 	}
-<a class="jxr_linenumber" name="L663" href="#L663">663</a> 
-<a class="jxr_linenumber" name="L664" href="#L664">664</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
-<a class="jxr_linenumber" name="L665" href="#L665">665</a> 		<strong class="jxr_keyword">if</strong> (theIdPart == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L666" href="#L666">666</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"BigDecimal ID can not be null"</span>);
-<a class="jxr_linenumber" name="L667" href="#L667">667</a> 		}
-<a class="jxr_linenumber" name="L668" href="#L668">668</a> 		<strong class="jxr_keyword">return</strong> theIdPart.toPlainString();
-<a class="jxr_linenumber" name="L669" href="#L669">669</a> 	}
-<a class="jxr_linenumber" name="L670" href="#L670">670</a> 
-<a class="jxr_linenumber" name="L671" href="#L671">671</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
-<a class="jxr_linenumber" name="L672" href="#L672">672</a> 		<strong class="jxr_keyword">if</strong> (theIdPart == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L673" href="#L673">673</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"Long ID can not be null"</span>);
-<a class="jxr_linenumber" name="L674" href="#L674">674</a> 		}
-<a class="jxr_linenumber" name="L675" href="#L675">675</a> 		<strong class="jxr_keyword">return</strong> theIdPart.toString();
-<a class="jxr_linenumber" name="L676" href="#L676">676</a> 	}
-<a class="jxr_linenumber" name="L677" href="#L677">677</a> 
-<a class="jxr_linenumber" name="L678" href="#L678">678</a> 	@Override
-<a class="jxr_linenumber" name="L679" href="#L679">679</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
-<a class="jxr_linenumber" name="L680" href="#L680">680</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(theVersionIdPart)) {
-<a class="jxr_linenumber" name="L681" href="#L681">681</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"If theVersionIdPart is populated, theResourceType and theIdPart must be populated"</span>);
-<a class="jxr_linenumber" name="L682" href="#L682">682</a> 			Validate.notBlank(theIdPart, <span class="jxr_string">"If theVersionIdPart is populated, theResourceType and theIdPart must be populated"</span>);
-<a class="jxr_linenumber" name="L683" href="#L683">683</a> 		}
-<a class="jxr_linenumber" name="L684" href="#L684">684</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(theBaseUrl) &amp;&amp; isNotBlank(theIdPart)) {
-<a class="jxr_linenumber" name="L685" href="#L685">685</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated"</span>);
+<a class="jxr_linenumber" name="L626" href="#L626">626</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> 	}
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> 
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isValidLong(String id) {
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(id)) {
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> 		}
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; id.length(); i++) {
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> 			<strong class="jxr_keyword">if</strong> (Character.isDigit(id.charAt(i)) == false) {
+<a class="jxr_linenumber" name="L635" href="#L635">635</a> 				<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L636" href="#L636">636</a> 			}
+<a class="jxr_linenumber" name="L637" href="#L637">637</a> 		}
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 	}
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> 
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">	 * Construct a new ID with with form "urn:uuid:[UUID]" where [UUID] is a new, randomly</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">	 * created UUID generated by {@link UUID#randomUUID()}</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> newRandomUuid() {
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(<span class="jxr_string">"urn:uuid:"</span> + UUID.randomUUID().toString());
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> 	}
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> 
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> <em class="jxr_javadoccomment">	 * Retrieves the ID from the given resource instance</em>
+<a class="jxr_linenumber" name="L651" href="#L651">651</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> of(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResouce) {
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 		<strong class="jxr_keyword">if</strong> (theResouce == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theResource can not be null"</span>);
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> 			IIdType retVal = theResouce.getIdElement();
+<a class="jxr_linenumber" name="L657" href="#L657">657</a> 			<strong class="jxr_keyword">if</strong> (retVal == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (retVal instanceof IdDt) {
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> 				<strong class="jxr_keyword">return</strong> (IdDt) retVal;
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(retVal.getValue());
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> 			}
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> 		}
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> 	}
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> 
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> 		<strong class="jxr_keyword">if</strong> (theIdPart == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"BigDecimal ID can not be null"</span>);
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> 		}
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> 		<strong class="jxr_keyword">return</strong> theIdPart.toPlainString();
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> 	}
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> 
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> 		<strong class="jxr_keyword">if</strong> (theIdPart == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"Long ID can not be null"</span>);
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> 		}
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> 		<strong class="jxr_keyword">return</strong> theIdPart.toString();
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> 	}
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> 
+<a class="jxr_linenumber" name="L681" href="#L681">681</a> 	@Override
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
+<a class="jxr_linenumber" name="L683" href="#L683">683</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(theVersionIdPart)) {
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"If theVersionIdPart is populated, theResourceType and theIdPart must be populated"</span>);
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> 			Validate.notBlank(theIdPart, <span class="jxr_string">"If theVersionIdPart is populated, theResourceType and theIdPart must be populated"</span>);
 <a class="jxr_linenumber" name="L686" href="#L686">686</a> 		}
-<a class="jxr_linenumber" name="L687" href="#L687">687</a> 		
-<a class="jxr_linenumber" name="L688" href="#L688">688</a> 		setValue(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L689" href="#L689">689</a> 		
-<a class="jxr_linenumber" name="L690" href="#L690">690</a> 		myBaseUrl = theBaseUrl;
-<a class="jxr_linenumber" name="L691" href="#L691">691</a> 		myResourceType = theResourceType;
-<a class="jxr_linenumber" name="L692" href="#L692">692</a> 		myUnqualifiedId = theIdPart;
-<a class="jxr_linenumber" name="L693" href="#L693">693</a> 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L694" href="#L694">694</a> 		myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L695" href="#L695">695</a> 		
-<a class="jxr_linenumber" name="L696" href="#L696">696</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L697" href="#L697">697</a> 	}
-<a class="jxr_linenumber" name="L698" href="#L698">698</a> 
-<a class="jxr_linenumber" name="L699" href="#L699">699</a> }
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(theBaseUrl) &amp;&amp; isNotBlank(theIdPart)) {
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated"</span>);
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> 		}
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> 		
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> 		setValue(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> 		
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> 		myBaseUrl = theBaseUrl;
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> 		myResourceType = theResourceType;
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 		myUnqualifiedId = theIdPart;
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> 		myHaveComponentParts = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> 		
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> 	}
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> 
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

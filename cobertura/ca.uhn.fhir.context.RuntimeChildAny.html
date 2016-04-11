@@ -102,27 +102,27 @@
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;42</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> RuntimeChildAny(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;43</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;44</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;43</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;44</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;45</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;46</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;47</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">void</span> sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;                List&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;&gt; choiceTypes = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;                List&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;&gt; choiceTypes = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;49</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;50</td>  <td class="nbHitsCovered"><a title="Line 50: Conditional coverage 100% (2/2).">&nbsp;2890</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 50: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (Class&lt;? <span class="keyword">extends</span> IBase&gt; next : theClassToElementDefinitions.keySet()) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered"><a title="Line 51: Conditional coverage 100% (2/2).">&nbsp;244557</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 51: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next.equals(XhtmlDt.<span class="keyword">class</span>)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;2023</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">continue</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;50</td>  <td class="nbHitsCovered"><a title="Line 50: Conditional coverage 100% (2/2).">&nbsp;1154</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 50: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (Class&lt;? <span class="keyword">extends</span> IBase&gt; next : theClassToElementDefinitions.keySet()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered"><a title="Line 51: Conditional coverage 100% (2/2).">&nbsp;96376</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 51: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next.equals(XhtmlDt.<span class="keyword">class</span>)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;806</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">continue</span>;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;53</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;54</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;55</td>  <td class="nbHitsCovered">&nbsp;242534</td>  <td class="src"><pre class="src">&nbsp;                        BaseRuntimeElementDefinition&lt;?&gt; nextDef = theClassToElementDefinitions.get(next);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered"><a title="Line 56: Conditional coverage 100% (2/2).">&nbsp;242534</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 56: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (nextDef <span class="keyword">instanceof</span> IRuntimeDatatypeDefinition) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;57</td>  <td class="nbHitsCovered"><a title="Line 57: Conditional coverage 100% (2/2).">&nbsp;100150</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 57: Conditional coverage 100% (2/2).">                                <span class="keyword">if</span> (((IRuntimeDatatypeDefinition) nextDef).isSpecialization()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;55</td>  <td class="nbHitsCovered">&nbsp;95570</td>  <td class="src"><pre class="src">&nbsp;                        BaseRuntimeElementDefinition&lt;?&gt; nextDef = theClassToElementDefinitions.get(next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered"><a title="Line 56: Conditional coverage 100% (2/2).">&nbsp;95570</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 56: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (nextDef <span class="keyword">instanceof</span> IRuntimeDatatypeDefinition) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;57</td>  <td class="nbHitsCovered"><a title="Line 57: Conditional coverage 100% (2/2).">&nbsp;40042</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 57: Conditional coverage 100% (2/2).">                                <span class="keyword">if</span> (((IRuntimeDatatypeDefinition) nextDef).isSpecialization()) {</a></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;58</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        <span class="comment">/*</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;59</td>  <td class="nbHits">&nbsp;</td>
@@ -131,45 +131,45 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">                                         * we'll already have CodeDt as an option </span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;61</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                                         */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;62</td>  <td class="nbHitsCovered">&nbsp;4943</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">continue</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;62</td>  <td class="nbHitsCovered">&nbsp;1972</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">continue</span>;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;63</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;64</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;65</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;66</td>  <td class="nbHitsUncovered"><a title="Line 66: Conditional coverage 87% (7/8) [each condition: 100%, 100%, 100%, 50%].">&nbsp;237591</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 66: Conditional coverage 87% (7/8) [each condition: 100%, 100%, 100%, 50%].">                        <span class="keyword">if</span> (IResource.<span class="keyword">class</span>.isAssignableFrom(next) || IDatatype.<span class="keyword">class</span>.isAssignableFrom(next) || IBaseDatatype.<span class="keyword">class</span>.isAssignableFrom(next) || IBaseReference.<span class="keyword">class</span>.isAssignableFrom(next)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;67</td>  <td class="nbHitsCovered">&nbsp;119126</td>  <td class="src"><pre class="src">&nbsp;                                choiceTypes.add(next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;66</td>  <td class="nbHitsUncovered"><a title="Line 66: Conditional coverage 87% (7/8) [each condition: 100%, 100%, 100%, 50%].">&nbsp;93598</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 66: Conditional coverage 87% (7/8) [each condition: 100%, 100%, 100%, 50%].">                        <span class="keyword">if</span> (IResource.<span class="keyword">class</span>.isAssignableFrom(next) || IDatatype.<span class="keyword">class</span>.isAssignableFrom(next) || IBaseDatatype.<span class="keyword">class</span>.isAssignableFrom(next) || IBaseReference.<span class="keyword">class</span>.isAssignableFrom(next)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;67</td>  <td class="nbHitsCovered">&nbsp;47616</td>  <td class="src"><pre class="src">&nbsp;                                choiceTypes.add(next);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;68</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;69</td>  <td class="nbHitsCovered">&nbsp;237591</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;70</td>  <td class="nbHitsCovered">&nbsp;338338</td>  <td class="src"><pre class="src">&nbsp;                Collections.sort(choiceTypes,<span class="keyword">new</span> Comparator&lt;Class&lt;?&gt;&gt;(){</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;69</td>  <td class="nbHitsCovered">&nbsp;93598</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;70</td>  <td class="nbHitsCovered">&nbsp;142181</td>  <td class="src"><pre class="src">&nbsp;                Collections.sort(choiceTypes,<span class="keyword">new</span> Comparator&lt;Class&lt;?&gt;&gt;(){</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;71</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;72</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        <span class="keyword">public</span> <span class="keyword">int</span> compare(Class&lt;?&gt; theO1, Class&lt;?&gt; theO2) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;73</td>  <td class="nbHitsCovered">&nbsp;335448</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">boolean</span> o1res = IResource.<span class="keyword">class</span>.isAssignableFrom(theO1);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;74</td>  <td class="nbHitsCovered">&nbsp;335448</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">boolean</span> o2res = IResource.<span class="keyword">class</span>.isAssignableFrom(theO2);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;75</td>  <td class="nbHitsCovered"><a title="Line 75: Conditional coverage 100% (4/4) [each condition: 100%, 100%].">&nbsp;335448</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 75: Conditional coverage 100% (4/4) [each condition: 100%, 100%].">                                <span class="keyword">if</span> (o1res &amp;&amp; o2res) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;71026</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> theO1.getSimpleName().compareTo(theO2.getSimpleName());</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered"><a title="Line 77: Conditional coverage 100% (2/2).">&nbsp;264422</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 77: Conditional coverage 100% (2/2).">                                } <span class="keyword">else</span> <span class="keyword">if</span> (o1res) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;78</td>  <td class="nbHitsCovered">&nbsp;66333</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> -1;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;79</td>  <td class="nbHitsUncovered"><a title="Line 79: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">&nbsp;198089</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 79: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">                                } <span class="keyword">else</span> <span class="keyword">if</span> (o1res == <span class="keyword">false</span> &amp;&amp; o2res == <span class="keyword">false</span>) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;80</td>  <td class="nbHitsCovered">&nbsp;188853</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> 0;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;73</td>  <td class="nbHitsCovered">&nbsp;141027</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">boolean</span> o1res = IResource.<span class="keyword">class</span>.isAssignableFrom(theO1);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;74</td>  <td class="nbHitsCovered">&nbsp;141027</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">boolean</span> o2res = IResource.<span class="keyword">class</span>.isAssignableFrom(theO2);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;75</td>  <td class="nbHitsCovered"><a title="Line 75: Conditional coverage 100% (4/4) [each condition: 100%, 100%].">&nbsp;141027</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 75: Conditional coverage 100% (4/4) [each condition: 100%, 100%].">                                <span class="keyword">if</span> (o1res &amp;&amp; o2res) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;28572</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> theO1.getSimpleName().compareTo(theO2.getSimpleName());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered"><a title="Line 77: Conditional coverage 100% (2/2).">&nbsp;112455</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 77: Conditional coverage 100% (2/2).">                                } <span class="keyword">else</span> <span class="keyword">if</span> (o1res) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;78</td>  <td class="nbHitsCovered">&nbsp;26104</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> -1;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;79</td>  <td class="nbHitsUncovered"><a title="Line 79: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">&nbsp;86351</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 79: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">                                } <span class="keyword">else</span> <span class="keyword">if</span> (o1res == <span class="keyword">false</span> &amp;&amp; o2res == <span class="keyword">false</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;80</td>  <td class="nbHitsCovered">&nbsp;82824</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> 0;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;81</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }<span class="keyword">else</span> {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;82</td>  <td class="nbHitsCovered">&nbsp;9236</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> 1;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;82</td>  <td class="nbHitsCovered">&nbsp;3527</td>  <td class="src"><pre class="src">&nbsp;                                        <span class="keyword">return</span> 1;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;83</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;84</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }});</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;85</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;                setChoiceTypes(choiceTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;                setChoiceTypes(choiceTypes);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;88</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;2890</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;88</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;1154</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;90</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;91</td>  <td class="nbHits">&nbsp;</td>
@@ -180,7 +180,7 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 14/07/15 10:00 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

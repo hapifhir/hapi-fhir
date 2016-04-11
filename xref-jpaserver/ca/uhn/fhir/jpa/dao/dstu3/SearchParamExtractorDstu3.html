@@ -44,23 +44,23 @@
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.tuple.Pair;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Address;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.BaseDateTimeType;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.CodeableConcept;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Coding;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.ContactPoint;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Duration;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Enumeration;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.HumanName;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Identifier;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.IntegerType;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Period;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Quantity;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Questionnaire;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.StringType;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.UriType;
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.ValueSet;
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.CodeSystem;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.CodeableConcept;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Coding;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.ContactPoint;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Duration;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Enumeration;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.HumanName;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Identifier;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.IntegerType;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Period;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Quantity;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Questionnaire;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.StringType;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.UriType;
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -427,9 +427,9 @@
 <a class="jxr_linenumber" name="L419" href="#L419">419</a> 		HashSet&lt;BaseResourceIndexedSearchParam&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;BaseResourceIndexedSearchParam&gt;();
 <a class="jxr_linenumber" name="L420" href="#L420">420</a> 
 <a class="jxr_linenumber" name="L421" href="#L421">421</a> 		String useSystem = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 		<strong class="jxr_keyword">if</strong> (theResource instanceof ValueSet) {
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 			ValueSet vs = (ValueSet) theResource;
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 			useSystem = vs.getCodeSystem().getSystem();
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 		<strong class="jxr_keyword">if</strong> (theResource instanceof CodeSystem) {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 			CodeSystem cs = (CodeSystem) theResource;
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 			useSystem = cs.getUrl();
 <a class="jxr_linenumber" name="L425" href="#L425">425</a> 		}
 <a class="jxr_linenumber" name="L426" href="#L426">426</a> 
 <a class="jxr_linenumber" name="L427" href="#L427">427</a> 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -452,12 +452,12 @@
 <a class="jxr_linenumber" name="L444" href="#L444">444</a> 			List&lt;String&gt; codes = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
 <a class="jxr_linenumber" name="L445" href="#L445">445</a> 
 <a class="jxr_linenumber" name="L446" href="#L446">446</a> 			String needContactPointSystem = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 			<strong class="jxr_keyword">if</strong> (nextPath.endsWith(<span class="jxr_string">".where(system='phone')"</span>)) {
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 				nextPath = nextPath.substring(0, nextPath.length() - <span class="jxr_string">".where(system='phone')"</span>.length());
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 			<strong class="jxr_keyword">if</strong> (nextPath.contains(<span class="jxr_string">".where(system='phone')"</span>)) {
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 				nextPath = nextPath.replace(<span class="jxr_string">".where(system='phone')"</span>, <span class="jxr_string">""</span>);
 <a class="jxr_linenumber" name="L449" href="#L449">449</a> 				needContactPointSystem = <span class="jxr_string">"phone"</span>;
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> 			}
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 			<strong class="jxr_keyword">if</strong> (nextPath.endsWith(<span class="jxr_string">".where(system='email')"</span>)) {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				nextPath = nextPath.substring(0, nextPath.length() - <span class="jxr_string">".where(system='email')"</span>.length());
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 			<strong class="jxr_keyword">if</strong> (nextPath.contains(<span class="jxr_string">".where(system='email')"</span>)) {
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				nextPath = nextPath.replace(<span class="jxr_string">".where(system='email')"</span>, <span class="jxr_string">""</span>);
 <a class="jxr_linenumber" name="L453" href="#L453">453</a> 				needContactPointSystem = <span class="jxr_string">"email"</span>;
 <a class="jxr_linenumber" name="L454" href="#L454">454</a> 			}
 <a class="jxr_linenumber" name="L455" href="#L455">455</a> 
@@ -510,7 +510,7 @@
 <a class="jxr_linenumber" name="L502" href="#L502">502</a> 					<strong class="jxr_keyword">if</strong> (nextValue.isEmpty()) {
 <a class="jxr_linenumber" name="L503" href="#L503">503</a> 						<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L504" href="#L504">504</a> 					}
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 					<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"ValueSet.codeSystem.concept.code"</span>.equals(nextPath)) {
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 					<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"CodeSystem.concept.code"</span>.equals(nextPath)) {
 <a class="jxr_linenumber" name="L506" href="#L506">506</a> 						systems.add(useSystem);
 <a class="jxr_linenumber" name="L507" href="#L507">507</a> 					} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L508" href="#L508">508</a> 						systems.add(<strong class="jxr_keyword">null</strong>);

@@ -61,8 +61,8 @@
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<strong class="jxr_keyword">private</strong> String myResourceName;
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../ca/uhn/fhir/rest/api/RestOperationTypeEnum.html">RestOperationTypeEnum</a> myResourceOperationType;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HistoryMethodBinding.html">HistoryMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theConetxt, Object theProvider) {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		<strong class="jxr_keyword">super</strong>(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HistoryMethodBinding.html">HistoryMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider) {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		<strong class="jxr_keyword">super</strong>(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  
@@ -88,7 +88,7 @@
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		}
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">if</strong> (type != IResource.<strong class="jxr_keyword">class</strong>) {
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			myResourceName = theConetxt.getResourceDefinition(type).getName();
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			myResourceName = theContext.getResourceDefinition(type).getName();
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  		} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  			myResourceName = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		}
@@ -150,7 +150,7 @@
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 		}
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 		String historyId = id != <strong class="jxr_keyword">null</strong> ? id.getIdPart() : <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 		<strong class="jxr_keyword">if</strong> (theArgs != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 			<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> idx = 0; idx &lt; theArgs.length; idx++) {
@@ -214,7 +214,7 @@
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> 		};
 <a class="jxr_linenumber" name="L207" href="#L207">207</a> 	}
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a> createHistoryInvocation(String theResourceName, String theId, IPrimitiveType&lt;Date&gt; theSince, Integer theLimit) {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a> createHistoryInvocation(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, String theResourceName, String theId, IPrimitiveType&lt;Date&gt; theSince, Integer theLimit) {
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 		StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 		<strong class="jxr_keyword">if</strong> (theResourceName != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 			b.append(theResourceName);
@@ -238,7 +238,7 @@
 <a class="jxr_linenumber" name="L230" href="#L230">230</a> 			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
 <a class="jxr_linenumber" name="L231" href="#L231">231</a> 		}
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> 
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		HttpGetClientInvocation retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(b.toString());
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		HttpGetClientInvocation retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/HttpGetClientInvocation.html">HttpGetClientInvocation</a>(theContext, b.toString());
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> 	}
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 

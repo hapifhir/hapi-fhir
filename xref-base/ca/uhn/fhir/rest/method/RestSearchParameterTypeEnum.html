@@ -140,7 +140,7 @@
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">	 * Returns the enumerated value associated with this code</em>
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> forCode(String theCode) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> forCode(String theCode) {
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 		RestSearchParameterTypeEnum retVal = CODE_TO_ENUM.get(theCode);
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 	}
@@ -149,42 +149,44 @@
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment">	 * Converts codes to their respective enumerated values</em>
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> IValueSetEnumBinder&lt;RestSearchParameterTypeEnum&gt; VALUESET_BINDER = <strong class="jxr_keyword">new</strong> IValueSetEnumBinder&lt;RestSearchParameterTypeEnum&gt;() {
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		@Override
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 		<strong class="jxr_keyword">public</strong> String toCodeString(<a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> theEnum) {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			<strong class="jxr_keyword">return</strong> theEnum.getCode();
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		}
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 		@Override
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 		<strong class="jxr_keyword">public</strong> String toSystemString(<a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> theEnum) {
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			<strong class="jxr_keyword">return</strong> theEnum.getSystem();
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		}
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 		
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 		@Override
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> fromCodeString(String theCodeString) {
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			<strong class="jxr_keyword">return</strong> CODE_TO_ENUM.get(theCodeString);
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		}
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		@Override
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> fromCodeString(String theCodeString, String theSystemString) {
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			Map&lt;String, RestSearchParameterTypeEnum&gt; map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			<strong class="jxr_keyword">if</strong> (map == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			}
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			<strong class="jxr_keyword">return</strong> map.get(theCodeString);
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		}
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 		
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 	};
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	<em class="jxr_javadoccomment">/** </em>
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">	 * Constructor</em>
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	RestSearchParameterTypeEnum(String theCode, String theSystem) {
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		myCode = theCode;
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		mySystem = theSystem;
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	}
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> }
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 1L;
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 		@Override
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		<strong class="jxr_keyword">public</strong> String toCodeString(<a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> theEnum) {
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			<strong class="jxr_keyword">return</strong> theEnum.getCode();
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 		}
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 		@Override
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		<strong class="jxr_keyword">public</strong> String toSystemString(<a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> theEnum) {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			<strong class="jxr_keyword">return</strong> theEnum.getSystem();
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 		}
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 		@Override
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> fromCodeString(String theCodeString) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			<strong class="jxr_keyword">return</strong> CODE_TO_ENUM.get(theCodeString);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		}
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		@Override
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> fromCodeString(String theCodeString, String theSystemString) {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			Map&lt;String, RestSearchParameterTypeEnum&gt; map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			<strong class="jxr_keyword">if</strong> (map == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			}
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			<strong class="jxr_keyword">return</strong> map.get(theCodeString);
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		}
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	};
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	<em class="jxr_javadoccomment">/** </em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">	 * Constructor</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	RestSearchParameterTypeEnum(String theCode, String theSystem) {
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		myCode = theCode;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		mySystem = theSystem;
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	}
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 	
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

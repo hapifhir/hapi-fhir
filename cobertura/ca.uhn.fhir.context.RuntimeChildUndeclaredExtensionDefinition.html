@@ -109,10 +109,10 @@
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; myDatatypeToDefinition;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;45</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> RuntimeChildUndeclaredExtensionDefinition() {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> RuntimeChildUndeclaredExtensionDefinition() {</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;47</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                <span class="comment">// nothing</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;49</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;50</td>  <td class="nbHits">&nbsp;</td>
@@ -143,7 +143,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;66</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildByName(String theName) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;67</td>  <td class="nbHitsCovered">&nbsp;2087</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myAttributeNameToDefinition.get(theName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;67</td>  <td class="nbHitsCovered">&nbsp;834</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myAttributeNameToDefinition.get(theName);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;68</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;69</td>  <td class="nbHits">&nbsp;</td>
@@ -152,7 +152,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;71</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theType) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;72</td>  <td class="nbHitsCovered">&nbsp;1678</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatypeToDefinition.get(theType);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;72</td>  <td class="nbHitsCovered">&nbsp;670</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatypeToDefinition.get(theType);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;73</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;74</td>  <td class="nbHits">&nbsp;</td>
@@ -161,7 +161,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;76</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getChildNameByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered">&nbsp;2498</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatypeToAttributeName.get(theDatatype);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered">&nbsp;996</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatypeToAttributeName.get(theDatatype);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;79</td>  <td class="nbHits">&nbsp;</td>
@@ -246,17 +246,17 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;127</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">void</span> sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;128</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                Map&lt;String, BaseRuntimeElementDefinition&lt;?&gt;&gt; datatypeAttributeNameToDefinition = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeElementDefinition&lt;?&gt;&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                myDatatypeToAttributeName = <span class="keyword">new</span> HashMap&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, String&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;130</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                myDatatypeToDefinition = <span class="keyword">new</span> HashMap&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;128</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                Map&lt;String, BaseRuntimeElementDefinition&lt;?&gt;&gt; datatypeAttributeNameToDefinition = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeElementDefinition&lt;?&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                myDatatypeToAttributeName = <span class="keyword">new</span> HashMap&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, String&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;130</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                myDatatypeToDefinition = <span class="keyword">new</span> HashMap&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;131</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;132</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">//                for (theContext.get)</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;133</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;134</td>  <td class="nbHitsCovered"><a title="Line 134: Conditional coverage 100% (2/2).">&nbsp;6228</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 134: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeElementDefinition&lt;?&gt; next : theClassToElementDefinitions.values()) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;135</td>  <td class="nbHitsCovered"><a title="Line 135: Conditional coverage 100% (2/2).">&nbsp;861588</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 135: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next <span class="keyword">instanceof</span> IRuntimeDatatypeDefinition) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;134</td>  <td class="nbHitsCovered"><a title="Line 134: Conditional coverage 100% (2/2).">&nbsp;2436</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 134: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeElementDefinition&lt;?&gt; next : theClassToElementDefinitions.values()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;135</td>  <td class="nbHitsCovered"><a title="Line 135: Conditional coverage 100% (2/2).">&nbsp;327660</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 135: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next <span class="keyword">instanceof</span> IRuntimeDatatypeDefinition) {</a></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;136</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                <span class="comment">// if (next.getName().equals("CodeableConcept")) {</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;137</td>  <td class="nbHits">&nbsp;</td>
@@ -265,19 +265,19 @@
   <td class="src"><pre class="src">&nbsp;                                <span class="comment">// }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;139</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;140</td>  <td class="nbHitsCovered">&nbsp;217573</td>  <td class="src"><pre class="src">&nbsp;                                myDatatypeToDefinition.put(next.getImplementingClass(), next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;140</td>  <td class="nbHitsCovered">&nbsp;84940</td>  <td class="src"><pre class="src">&nbsp;                                myDatatypeToDefinition.put(next.getImplementingClass(), next);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;141</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;142</td>  <td class="nbHitsCovered"><a title="Line 142: Conditional coverage 100% (2/2).">&nbsp;217573</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 142: Conditional coverage 100% (2/2).">                                <span class="keyword">if</span> (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;142</td>  <td class="nbHitsCovered"><a title="Line 142: Conditional coverage 100% (2/2).">&nbsp;84940</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 142: Conditional coverage 100% (2/2).">                                <span class="keyword">if</span> (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {</a></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;143</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;144</td>  <td class="nbHitsCovered"><a title="Line 144: Conditional coverage 100% (2/2).">&nbsp;205643</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 144: Conditional coverage 100% (2/2).">                                        <span class="keyword">if</span> (!next.isStandardType()) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;145</td>  <td class="nbHitsCovered">&nbsp;16325</td>  <td class="src"><pre class="src">&nbsp;                                                <span class="keyword">continue</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;144</td>  <td class="nbHitsCovered"><a title="Line 144: Conditional coverage 100% (2/2).">&nbsp;80228</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 144: Conditional coverage 100% (2/2).">                                        <span class="keyword">if</span> (!next.isStandardType()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;145</td>  <td class="nbHitsCovered">&nbsp;6260</td>  <td class="src"><pre class="src">&nbsp;                                                <span class="keyword">continue</span>;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;146</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;147</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;148</td>  <td class="nbHitsCovered">&nbsp;189318</td>  <td class="src"><pre class="src">&nbsp;                                        String qualifiedName = next.getImplementingClass().getName();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;148</td>  <td class="nbHitsCovered">&nbsp;73968</td>  <td class="src"><pre class="src">&nbsp;                                        String qualifiedName = next.getImplementingClass().getName();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;149</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        </pre></td></tr>
 <tr>  <td class="numLine">&nbsp;150</td>  <td class="nbHits">&nbsp;</td>
@@ -292,8 +292,8 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">                                         * type.</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;155</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                                         */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;156</td>  <td class="nbHitsCovered"><a title="Line 156: Conditional coverage 100% (2/2).">&nbsp;189318</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 156: Conditional coverage 100% (2/2).">                                        <span class="keyword">if</span> (!qualifiedName.startsWith(<span class="string">"ca.uhn.fhir.model"</span>)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;157</td>  <td class="nbHitsUncovered"><a title="Line 157: Conditional coverage 50% (1/2).">&nbsp;22272</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 157: Conditional coverage 50% (1/2).">                                                <span class="keyword">if</span> (!qualifiedName.startsWith(<span class="string">"org.hl7.fhir.instance.model"</span>)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;156</td>  <td class="nbHitsCovered"><a title="Line 156: Conditional coverage 100% (2/2).">&nbsp;73968</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 156: Conditional coverage 100% (2/2).">                                        <span class="keyword">if</span> (!qualifiedName.startsWith(<span class="string">"ca.uhn.fhir.model"</span>)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;157</td>  <td class="nbHitsUncovered"><a title="Line 157: Conditional coverage 50% (1/2).">&nbsp;7296</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 157: Conditional coverage 50% (1/2).">                                                <span class="keyword">if</span> (!qualifiedName.startsWith(<span class="string">"org.hl7.fhir.instance.model"</span>)) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;158</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                                                        <span class="keyword">continue</span>;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;159</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                                }</pre></td></tr>
@@ -301,23 +301,23 @@
   <td class="src"><pre class="src">&nbsp;                                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;161</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;162</td>  <td class="nbHitsCovered">&nbsp;189318</td>  <td class="src"><pre class="src">&nbsp;                                        String attrName = createExtensionChildName(next);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;163</td>  <td class="nbHitsUncovered"><a title="Line 163: Conditional coverage 50% (1/2).">&nbsp;189318</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 163: Conditional coverage 50% (1/2).">                                        <span class="keyword">if</span> (datatypeAttributeNameToDefinition.containsKey(attrName)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;162</td>  <td class="nbHitsCovered">&nbsp;73968</td>  <td class="src"><pre class="src">&nbsp;                                        String attrName = createExtensionChildName(next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;163</td>  <td class="nbHitsUncovered"><a title="Line 163: Conditional coverage 50% (1/2).">&nbsp;73968</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 163: Conditional coverage 50% (1/2).">                                        <span class="keyword">if</span> (datatypeAttributeNameToDefinition.containsKey(attrName)) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;164</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                                                BaseRuntimeElementDefinition&lt;?&gt; existing = datatypeAttributeNameToDefinition.get(attrName);</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;165</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                                                <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(<span class="string">"More than one child of "</span> + getElementName() + <span class="string">" matches attribute name "</span> + attrName + <span class="string">". Found ["</span> + existing.getImplementingClass().getName() + <span class="string">"] and ["</span> + next.getImplementingClass().getName() + <span class="string">"]"</span>);</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;166</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;167</td>  <td class="nbHitsCovered">&nbsp;189318</td>  <td class="src"><pre class="src">&nbsp;                                        datatypeAttributeNameToDefinition.put(attrName, next);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsCovered">&nbsp;189318</td>  <td class="src"><pre class="src">&nbsp;                                        datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;169</td>  <td class="nbHitsCovered">&nbsp;189318</td>  <td class="src"><pre class="src">&nbsp;                                        myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;167</td>  <td class="nbHitsCovered">&nbsp;73968</td>  <td class="src"><pre class="src">&nbsp;                                        datatypeAttributeNameToDefinition.put(attrName, next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsCovered">&nbsp;73968</td>  <td class="src"><pre class="src">&nbsp;                                        datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;169</td>  <td class="nbHitsCovered">&nbsp;73968</td>  <td class="src"><pre class="src">&nbsp;                                        myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;170</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;171</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;172</td>  <td class="nbHitsCovered">&nbsp;845263</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;172</td>  <td class="nbHitsCovered">&nbsp;321400</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;173</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;174</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                myAttributeNameToDefinition = datatypeAttributeNameToDefinition;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;174</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                myAttributeNameToDefinition = datatypeAttributeNameToDefinition;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;175</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;176</td>  <td class="nbHits">&nbsp;</td>
@@ -340,42 +340,42 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;185</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;186</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_RESOURCE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;187</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_REFERENCE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;188</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;186</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_RESOURCE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;187</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_REFERENCE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;188</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;189</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;190</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> <span class="keyword">void</span> addReferenceBinding(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions, String value) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;191</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                List&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt; types = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;192</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                types.add(IBaseResource.<span class="keyword">class</span>);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;193</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                RuntimeResourceReferenceDefinition def = <span class="keyword">new</span> RuntimeResourceReferenceDefinition(value, types, <span class="keyword">false</span>);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;194</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                def.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;191</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                List&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt; types = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;192</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                types.add(IBaseResource.<span class="keyword">class</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;193</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                RuntimeResourceReferenceDefinition def = <span class="keyword">new</span> RuntimeResourceReferenceDefinition(value, types, <span class="keyword">false</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;194</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                def.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;195</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;196</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                myAttributeNameToDefinition.put(value, def);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;196</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                myAttributeNameToDefinition.put(value, def);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;197</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                <span class="comment">/*</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;198</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;199</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;200</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">boolean</span> dstu1 = (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1));</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsCovered"><a title="Line 201: Conditional coverage 100% (8/8) [each condition: 100%, 100%, 100%, 100%].">&nbsp;12456</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 201: Conditional coverage 100% (8/8) [each condition: 100%, 100%, 100%, 100%].">                <span class="keyword">if</span> ((dstu1 &amp;&amp; (value != VALUE_REFERENCE)) || (!dstu1 &amp;&amp; (value != VALUE_RESOURCE))) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;202</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;203</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToDefinition.put(BaseResourceReferenceDt.<span class="keyword">class</span>, def);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;204</td>  <td class="nbHitsCovered">&nbsp;6228</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;200</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">boolean</span> dstu1 = (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsCovered"><a title="Line 201: Conditional coverage 100% (8/8) [each condition: 100%, 100%, 100%, 100%].">&nbsp;4872</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 201: Conditional coverage 100% (8/8) [each condition: 100%, 100%, 100%, 100%].">                <span class="keyword">if</span> ((dstu1 &amp;&amp; (value != VALUE_REFERENCE)) || (!dstu1 &amp;&amp; (value != VALUE_RESOURCE))) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;202</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;203</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToDefinition.put(BaseResourceReferenceDt.<span class="keyword">class</span>, def);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;204</td>  <td class="nbHitsCovered">&nbsp;2436</td>  <td class="src"><pre class="src">&nbsp;                        myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;205</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;206</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;207</td>  <td class="nbHitsCovered">&nbsp;12456</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;207</td>  <td class="nbHitsCovered">&nbsp;4872</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;208</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;209</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">static</span> String createExtensionChildName(BaseRuntimeElementDefinition&lt;?&gt; next) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsCovered">&nbsp;189413</td>  <td class="src"><pre class="src">&nbsp;                String attrName = <span class="string">"value"</span> + WordUtils.capitalize(next.getName());</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;211</td>  <td class="nbHitsCovered">&nbsp;189413</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> attrName;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsCovered">&nbsp;74006</td>  <td class="src"><pre class="src">&nbsp;                String attrName = <span class="string">"value"</span> + WordUtils.capitalize(next.getName());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;211</td>  <td class="nbHitsCovered">&nbsp;74006</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> attrName;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;212</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;213</td>  <td class="nbHits">&nbsp;</td>
@@ -384,7 +384,7 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 14/07/15 10:00 PM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -54,17 +54,21 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 * for the generated profile exported by the server. For example, if you set this value to</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">	 * "hello" on a custom resource class, your server will automatically export a profile with the</em>
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">	 * identity: &lt;code&gt;<a href="http://localhost:8080/fhir/Profile/hello&lt;/code&gt;" target="alexandria_uri">http://localhost:8080/fhir/Profile/hello&lt;/code&gt;</a> (the base URL will be whatever</em>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">	 * your server uses, not necessarily "<a href="http://localhost:8080/fhir" target="alexandria_uri">http://localhost:8080/fhir</a>")    </em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">	 * your server uses, not necessarily "<a href="http://localhost:8080/fhir" target="alexandria_uri">http://localhost:8080/fhir</a>")</em>
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	String id() <strong class="jxr_keyword">default</strong> <span class="jxr_string">""</span>;
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  	
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">	 * The URL indicating the profile for this resource definition. If specified, this URL will be</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">	 * automatically added to the meta tag when the resource is serialized.</em>
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	String profile() <strong class="jxr_keyword">default</strong> <span class="jxr_string">""</span>;
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  }
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">	 * This URL should be fully qualified to indicate the complete URL of</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * the profile being used, e.g. &lt;code&gt;<a href="http://example.com/fhir/StructureDefiniton/some_profile&lt;/code&gt" target="alexandria_uri">http://example.com/fhir/StructureDefiniton/some_profile&lt;/code&gt</a>;</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	String profile() <strong class="jxr_keyword">default</strong> <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -36,59 +36,60 @@
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.OperationParam;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Validate;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.ResourceParameter;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.EncodingEnum;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.ParametersUtil;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ValidateMethodBindingDstu2.html">ValidateMethodBindingDstu2</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationMethodBinding.html">OperationMethodBinding</a> {
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ValidateMethodBindingDstu2.html">ValidateMethodBindingDstu2</a>(Class&lt;?&gt; theReturnResourceType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theReturnTypeFromRp, Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider,
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  			Validate theAnnotation) {
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  		<strong class="jxr_keyword">super</strong>(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, <strong class="jxr_keyword">true</strong>, Constants.EXTOP_VALIDATE, theAnnotation.type(), <strong class="jxr_keyword">new</strong> OperationParam[0]);
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  		List&lt;IParameter&gt; newParams = <strong class="jxr_keyword">new</strong> ArrayList&lt;IParameter&gt;();
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  		<strong class="jxr_keyword">int</strong> idx = 0;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  		<strong class="jxr_keyword">for</strong> (IParameter next : getParameters()) {
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  			<strong class="jxr_keyword">if</strong> (next instanceof ResourceParameter) {
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  				<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(((ResourceParameter) next).getResourceType())) {
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  					Class&lt;?&gt; parameterType = theMethod.getParameterTypes()[idx];
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  					<strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.equals(parameterType) || EncodingEnum.<strong class="jxr_keyword">class</strong>.equals(parameterType)) {
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  						newParams.add(next);
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  						OperationParameter parameter = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParameter</a>(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  						parameter.initializeTypes(theMethod, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, parameterType);
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  						newParams.add(parameter);
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  					}
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  					newParams.add(next);
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  				}
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  				newParams.add(next);
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			}
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  			idx++;
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		}
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		setParameters(newParams);
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	}
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.valueset.BundleTypeEnum;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.OperationParam;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Validate;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.ResourceParameter;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.EncodingEnum;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.ParametersUtil;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ValidateMethodBindingDstu2.html">ValidateMethodBindingDstu2</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationMethodBinding.html">OperationMethodBinding</a> {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ValidateMethodBindingDstu2.html">ValidateMethodBindingDstu2</a>(Class&lt;?&gt; theReturnResourceType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theReturnTypeFromRp, Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider,
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  			Validate theAnnotation) {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  		<strong class="jxr_keyword">super</strong>(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, <strong class="jxr_keyword">true</strong>, Constants.EXTOP_VALIDATE, theAnnotation.type(), <strong class="jxr_keyword">new</strong> OperationParam[0], BundleTypeEnum.COLLECTION);
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  		List&lt;IParameter&gt; newParams = <strong class="jxr_keyword">new</strong> ArrayList&lt;IParameter&gt;();
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  		<strong class="jxr_keyword">int</strong> idx = 0;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  		<strong class="jxr_keyword">for</strong> (IParameter next : getParameters()) {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  			<strong class="jxr_keyword">if</strong> (next instanceof ResourceParameter) {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  				<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(((ResourceParameter) next).getResourceType())) {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  					Class&lt;?&gt; parameterType = theMethod.getParameterTypes()[idx];
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  					<strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.equals(parameterType) || EncodingEnum.<strong class="jxr_keyword">class</strong>.equals(parameterType)) {
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  						newParams.add(next);
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  						OperationParameter parameter = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParameter</a>(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  						parameter.initializeTypes(theMethod, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, parameterType);
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  						newParams.add(parameter);
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  					}
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  					newParams.add(next);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  				}
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  				newParams.add(next);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  			}
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			idx++;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		}
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		setParameters(newParams);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  	
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> createValidateInvocation(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition(<span class="jxr_string">"Parameters"</span>).newInstance();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		ParametersUtil.addParameterToParameters(theContext, parameters, theResource, <span class="jxr_string">"resource"</span>);
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		String resourceName = theContext.getResourceDefinition(theResource).getName();
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		String resourceId = theResource.getIdElement().getIdPart();
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, Constants.EXTOP_VALIDATE, parameters, false);
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> createValidateInvocation(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition(<span class="jxr_string">"Parameters"</span>).newInstance();
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		ParametersUtil.addParameterToParameters(theContext, parameters, theResource, <span class="jxr_string">"resource"</span>);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		String resourceName = theContext.getResourceDefinition(theResource).getName();
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		String resourceId = theResource.getIdElement().getIdPart();
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, Constants.EXTOP_VALIDATE, parameters, false);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	}
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

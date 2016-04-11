@@ -408,43 +408,50 @@
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> 		}
 <a class="jxr_linenumber" name="L401" href="#L401">401</a> 
 <a class="jxr_linenumber" name="L402" href="#L402">402</a> 		<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">		 * For requests where a resource is passed from the client to the server (e.g. create, update, etc.) this method</em>
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">		 * will return the resource which was provided by the client. Otherwise, this method will return &lt;code&gt;null&lt;/code&gt;</em>
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">		 * .</em>
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">		 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">		 * Note that this method is currently only populated if the handling method has a parameter annotated with the</em>
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">		 * {@link ResourceParam} annotation.</em>
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_javadoccomment">		 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> getResource() {
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 			<strong class="jxr_keyword">return</strong> myResource;
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 		}
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 		<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">		 * Returns the resource type this request pertains to, or &lt;code&gt;null&lt;/code&gt; if this request is not type specific</em>
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">		 * (e.g. server-history)</em>
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		<strong class="jxr_keyword">public</strong> String getResourceType() {
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 			<strong class="jxr_keyword">return</strong> myResourceType;
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 		}
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">		 * Returns the same map which was </em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">		 * Returns the request details associated with this request</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> getRequestDetails() {
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 			<strong class="jxr_keyword">return</strong> myRequestDetails;
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		}
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">		 * For requests where a resource is passed from the client to the server (e.g. create, update, etc.) this method</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_javadoccomment">		 * will return the resource which was provided by the client. Otherwise, this method will return &lt;code&gt;null&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">		 * .</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">		 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">		 * Note that this method is currently only populated if the handling method has a parameter annotated with the</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">		 * {@link ResourceParam} annotation.</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">		 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> getResource() {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 			<strong class="jxr_keyword">return</strong> myResource;
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		}
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> <em class="jxr_javadoccomment">		 * Returns the resource type this request pertains to, or &lt;code&gt;null&lt;/code&gt; if this request is not type specific</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">		 * (e.g. server-history)</em>
 <a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 		<strong class="jxr_keyword">public</strong> Map&lt;Object, Object&gt; getUserData() {
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			<strong class="jxr_keyword">return</strong> myRequestDetails.getUserData();
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 		<strong class="jxr_keyword">public</strong> String getResourceType() {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			<strong class="jxr_keyword">return</strong> myResourceType;
 <a class="jxr_linenumber" name="L428" href="#L428">428</a> 		}
 <a class="jxr_linenumber" name="L429" href="#L429">429</a> 
 <a class="jxr_linenumber" name="L430" href="#L430">430</a> 		<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">		 * This method should not be called by client code</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">		 * Returns the same map which was </em>
 <a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResource(<a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theObject) {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			myResource = theObject;
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 		<strong class="jxr_keyword">public</strong> Map&lt;Object, Object&gt; getUserData() {
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			<strong class="jxr_keyword">return</strong> myRequestDetails.getUserData();
 <a class="jxr_linenumber" name="L435" href="#L435">435</a> 		}
 <a class="jxr_linenumber" name="L436" href="#L436">436</a> 
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 	}
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> }
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">		 * This method should not be called by client code</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResource(<a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theObject) {
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 			myResource = theObject;
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		}
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 	}
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

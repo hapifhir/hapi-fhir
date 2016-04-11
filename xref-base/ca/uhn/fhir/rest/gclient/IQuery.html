@@ -91,50 +91,53 @@
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">	 * Forces the query to perform the search using the given method (allowable methods are described in the </em>
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">	 * &lt;a href="<a href="http://www.hl7.org/implement/standards/fhir/http.html" target="alexandria_uri">http://www.hl7.org/implement/standards/fhir/http.html</a>#search"&gt;FHIR Specification Section 2.1.11&lt;/a&gt;)</em>
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment">	 * @see SearchStyleEnum</em>
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment">	 * @since 0.6</em>
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	IQuery&lt;T&gt; usingStyle(<a href="../../../../../ca/uhn/fhir/rest/method/SearchStyleEnum.html">SearchStyleEnum</a> theStyle);
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	IQuery&lt;T&gt; withIdAndCompartment(String theResourceId, String theCompartmentName);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">	 * Add a "_revinclude" specification</em>
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">	 * @since HAPI FHIR 1.0 - Note that option was added to FHIR itself in DSTU2</em>
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	IQuery&lt;T&gt; revInclude(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theIncludeTarget);
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 * Add a "_lastUpdated" specification</em>
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">	 * @since HAPI FHIR 1.1 - Note that option was added to FHIR itself in DSTU2</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	IQuery&lt;T&gt; lastUpdated(<a href="../../../../../ca/uhn/fhir/rest/param/DateRangeParam.html">DateRangeParam</a> theLastUpdated);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">	 * Request that the client return the specified bundle type, e.g. &lt;code&gt;org.hl7.fhir.instance.model.Bundle.class&lt;/code&gt;</em>
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">	 * or &lt;code&gt;ca.uhn.fhir.model.dstu2.resource.Bundle.class&lt;/code&gt;</em>
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	&lt;B <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; IQuery&lt;B&gt; returnBundle(Class&lt;B&gt; theClass);
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_comment">// This is here as an overridden method to allow mocking clients with Mockito to work</em>
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	@Override
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 	IQuery&lt;T&gt; where(ICriterion&lt;?&gt; theCriterion);
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<em class="jxr_comment">// This is here as an overridden method to allow mocking clients with Mockito to work</em>
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	@Override
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	IQuery&lt;T&gt; and(ICriterion&lt;?&gt; theCriterion);
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> }
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">	 * &lt;a href="<a href="http://www.hl7.org/fhir/search.html" target="alexandria_uri">http://www.hl7.org/fhir/search.html</a>"&gt;FHIR Search Specification&lt;/a&gt;)</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment">	 * This can be used to force the use of an HTTP POST instead of an HTTP GET</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">	 * @see SearchStyleEnum</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">	 * @since 0.6</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	IQuery&lt;T&gt; usingStyle(<a href="../../../../../ca/uhn/fhir/rest/method/SearchStyleEnum.html">SearchStyleEnum</a> theStyle);
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	IQuery&lt;T&gt; withIdAndCompartment(String theResourceId, String theCompartmentName);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 * Add a "_revinclude" specification</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 * @since HAPI FHIR 1.0 - Note that option was added to FHIR itself in DSTU2</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	IQuery&lt;T&gt; revInclude(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theIncludeTarget);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 * Add a "_lastUpdated" specification</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 * @since HAPI FHIR 1.1 - Note that option was added to FHIR itself in DSTU2</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	IQuery&lt;T&gt; lastUpdated(<a href="../../../../../ca/uhn/fhir/rest/param/DateRangeParam.html">DateRangeParam</a> theLastUpdated);
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">	 * Request that the client return the specified bundle type, e.g. &lt;code&gt;org.hl7.fhir.instance.model.Bundle.class&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 * or &lt;code&gt;ca.uhn.fhir.model.dstu2.resource.Bundle.class&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	&lt;B <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; IQuery&lt;B&gt; returnBundle(Class&lt;B&gt; theClass);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<em class="jxr_comment">// This is here as an overridden method to allow mocking clients with Mockito to work</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	@Override
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	IQuery&lt;T&gt; where(ICriterion&lt;?&gt; theCriterion);
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	<em class="jxr_comment">// This is here as an overridden method to allow mocking clients with Mockito to work</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@Override
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	IQuery&lt;T&gt; and(ICriterion&lt;?&gt; theCriterion);
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -34,13 +34,11 @@
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> IRestfulServer&lt;T <strong class="jxr_keyword">extends</strong> RequestDetails&gt; <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IRestfulServerDefaults.html">IRestfulServerDefaults</a> {
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>      List&lt;IServerInterceptor&gt; getInterceptors();
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	IPagingProvider getPagingProvider();
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>      <a href="../../../../../ca/uhn/fhir/rest/server/IPagingProvider.html">IPagingProvider</a> getPagingProvider();
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>      
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>      <a href="../../../../../ca/uhn/fhir/rest/server/BundleInclusionRule.html">BundleInclusionRule</a> getBundleInclusionRule();
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>      
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  }
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	BundleInclusionRule getBundleInclusionRule();
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

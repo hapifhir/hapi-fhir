@@ -40,7 +40,7 @@
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment"> * which version of the strctures your application is using.   </em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> {
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> <strong class="jxr_keyword">extends</strong> IPrimitiveType&lt;String&gt; {
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">void</strong> applyTo(<a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource);
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
@@ -129,37 +129,38 @@
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 	<strong class="jxr_keyword">boolean</strong> isVersionIdPartValidLong();
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	IIdType setValue(String theString);
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	IIdType toUnqualified();
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	IIdType toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	IIdType toVersionless();
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	IIdType withResourceType(String theResName);
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	IIdType withServerBase(String theServerBase, String theResourceName);
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	IIdType withVersion(String theVersion);
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">	 * Sets the value of this ID by combining all of the individual parts.</em>
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Required parameters:&lt;/b&gt; The following rules apply to the parameters of this method (in this case, populated means</em>
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_javadoccomment">	 * a non-empty string and not populated means &lt;code&gt;null&lt;/code&gt; or an empty string)</em>
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;All values may be not populated&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;If &lt;b&gt;theVersionIdPart&lt;/b&gt; is populated, &lt;b&gt;theResourceType&lt;/b&gt; and &lt;b&gt;theIdPart&lt;/b&gt; must be populated&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;If &lt;b&gt;theBaseUrl&lt;/b&gt; is populated and &lt;b&gt;theIdPart&lt;/b&gt; is populated, &lt;b&gt;theResourceType&lt;/b&gt; must be populated&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">	 * @return Returns a reference to &lt;code&gt;this&lt;/code&gt; for easy method chaining</em>
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart);
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> }
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	@Override
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	IIdType setValue(String theString);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	IIdType toUnqualified();
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	IIdType toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	IIdType toVersionless();
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	IIdType withResourceType(String theResName);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	IIdType withServerBase(String theServerBase, String theResourceName);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	IIdType withVersion(String theVersion);
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">	 * Sets the value of this ID by combining all of the individual parts.</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_javadoccomment">	 * &lt;b&gt;Required parameters:&lt;/b&gt; The following rules apply to the parameters of this method (in this case, populated means</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">	 * a non-empty string and not populated means &lt;code&gt;null&lt;/code&gt; or an empty string)</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;All values may be not populated&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;If &lt;b&gt;theVersionIdPart&lt;/b&gt; is populated, &lt;b&gt;theResourceType&lt;/b&gt; and &lt;b&gt;theIdPart&lt;/b&gt; must be populated&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;If &lt;b&gt;theBaseUrl&lt;/b&gt; is populated and &lt;b&gt;theIdPart&lt;/b&gt; is populated, &lt;b&gt;theResourceType&lt;/b&gt; must be populated&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">	 * @return Returns a reference to &lt;code&gt;this&lt;/code&gt; for easy method chaining</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

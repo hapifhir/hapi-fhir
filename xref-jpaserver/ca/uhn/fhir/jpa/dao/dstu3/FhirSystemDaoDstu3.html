@@ -210,9 +210,9 @@
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> 	}
 <a class="jxr_linenumber" name="L203" href="#L203">203</a> 
 <a class="jxr_linenumber" name="L204" href="#L204">204</a> 	@Override
-<a class="jxr_linenumber" name="L205" href="#L205">205</a> 	<strong class="jxr_keyword">public</strong> Meta metaGetOperation() {
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 	<strong class="jxr_keyword">public</strong> Meta metaGetOperation(RequestDetails theRequestDetails) {
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> 		<em class="jxr_comment">// Notify interceptors</em>
-<a class="jxr_linenumber" name="L207" href="#L207">207</a> 		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, getContext());
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, getContext(), theRequestDetails);
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> 
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 		String sql = <span class="jxr_string">"SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)"</span>;
@@ -271,7 +271,7 @@
 <a class="jxr_linenumber" name="L263" href="#L263">263</a> 	@Transactional(propagation = Propagation.REQUIRED)
 <a class="jxr_linenumber" name="L264" href="#L264">264</a> 	@Override
 <a class="jxr_linenumber" name="L265" href="#L265">265</a> 	<strong class="jxr_keyword">public</strong> Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> 		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, <span class="jxr_string">"Bundle"</span>, theRequest, getContext());
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, <span class="jxr_string">"Bundle"</span>, theRequest, getContext(), theRequestDetails);
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> 
 <a class="jxr_linenumber" name="L269" href="#L269">269</a> 		String actionName = <span class="jxr_string">"Transaction"</span>;
@@ -397,7 +397,7 @@
 <a class="jxr_linenumber" name="L389" href="#L389">389</a> 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 <a class="jxr_linenumber" name="L390" href="#L390">390</a> 				res.setId((String) <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L391" href="#L391">391</a> 				DaoMethodOutcome outcome;
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
 <a class="jxr_linenumber" name="L393" href="#L393">393</a> 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 <a class="jxr_linenumber" name="L394" href="#L394">394</a> 				<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L395" href="#L395">395</a> 			}
@@ -408,12 +408,12 @@
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> 				ca.uhn.fhir.jpa.dao.IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = toDao(parts, verb.toCode(), url);
 <a class="jxr_linenumber" name="L401" href="#L401">401</a> 				<strong class="jxr_keyword">int</strong> status = Constants.STATUS_HTTP_204_NO_CONTENT;
 <a class="jxr_linenumber" name="L402" href="#L402">402</a> 				<strong class="jxr_keyword">if</strong> (parts.getResourceId() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 					ResourceTable deleted = dao.delete(<strong class="jxr_keyword">new</strong> IdType(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 					ResourceTable deleted = dao.delete(<strong class="jxr_keyword">new</strong> IdType(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
 <a class="jxr_linenumber" name="L404" href="#L404">404</a> 					<strong class="jxr_keyword">if</strong> (deleted != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L405" href="#L405">405</a> 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
 <a class="jxr_linenumber" name="L406" href="#L406">406</a> 					}
 <a class="jxr_linenumber" name="L407" href="#L407">407</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 					List&lt;ResourceTable&gt; allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts);
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 					List&lt;ResourceTable&gt; allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
 <a class="jxr_linenumber" name="L409" href="#L409">409</a> 					<strong class="jxr_keyword">for</strong> (ResourceTable deleted : allDeleted) {
 <a class="jxr_linenumber" name="L410" href="#L410">410</a> 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());						
 <a class="jxr_linenumber" name="L411" href="#L411">411</a> 					}
@@ -437,10 +437,10 @@
 <a class="jxr_linenumber" name="L429" href="#L429">429</a> 				UrlParts parts = UrlUtil.parseUrl(url);
 <a class="jxr_linenumber" name="L430" href="#L430">430</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(parts.getResourceId())) {
 <a class="jxr_linenumber" name="L431" href="#L431">431</a> 					res.setId(<strong class="jxr_keyword">new</strong> IdType(parts.getResourceType(), parts.getResourceId()));
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 					outcome = resourceDao.update(res, <strong class="jxr_keyword">null</strong>, false);
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 					outcome = resourceDao.update(res, <strong class="jxr_keyword">null</strong>, false, theRequestDetails);
 <a class="jxr_linenumber" name="L433" href="#L433">433</a> 				} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L434" href="#L434">434</a> 					res.setId((String) <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false, theRequestDetails);
 <a class="jxr_linenumber" name="L436" href="#L436">436</a> 				}
 <a class="jxr_linenumber" name="L437" href="#L437">437</a> 
 <a class="jxr_linenumber" name="L438" href="#L438">438</a> 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
@@ -470,7 +470,7 @@
 <a class="jxr_linenumber" name="L462" href="#L462">462</a> 
 <a class="jxr_linenumber" name="L463" href="#L463">463</a> 		FhirTerser terser = getContext().newTerser();
 <a class="jxr_linenumber" name="L464" href="#L464">464</a> 		<strong class="jxr_keyword">for</strong> (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 			IBaseResource nextResource = (IBaseResource) nextOutcome.getResource();
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 			IBaseResource nextResource = nextOutcome.getResource();
 <a class="jxr_linenumber" name="L466" href="#L466">466</a> 			<strong class="jxr_keyword">if</strong> (nextResource == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L467" href="#L467">467</a> 				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L468" href="#L468">468</a> 			}
@@ -489,7 +489,7 @@
 <a class="jxr_linenumber" name="L481" href="#L481">481</a> 
 <a class="jxr_linenumber" name="L482" href="#L482">482</a> 			IPrimitiveType&lt;Date&gt; deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 <a class="jxr_linenumber" name="L483" href="#L483">483</a> 			Date deletedTimestampOrNull = deletedInstantOrNull != <strong class="jxr_keyword">null</strong> ? deletedInstantOrNull.getValue() : <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, <strong class="jxr_keyword">true</strong>, false, updateTime);
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, <strong class="jxr_keyword">true</strong>, false, updateTime, theRequestDetails);
 <a class="jxr_linenumber" name="L485" href="#L485">485</a> 		}
 <a class="jxr_linenumber" name="L486" href="#L486">486</a> 
 <a class="jxr_linenumber" name="L487" href="#L487">487</a> 		myEntityManager.flush();
@@ -574,7 +574,7 @@
 <a class="jxr_linenumber" name="L566" href="#L566">566</a> 			
 <a class="jxr_linenumber" name="L567" href="#L567">567</a> 			<strong class="jxr_keyword">if</strong> (method instanceof BaseResourceReturningMethodBinding) {
 <a class="jxr_linenumber" name="L568" href="#L568">568</a> 				<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L569" href="#L569">569</a> 					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).invokeServer(theRequestDetails.getServer(), requestDetails, <strong class="jxr_keyword">new</strong> byte[0]);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
 <a class="jxr_linenumber" name="L570" href="#L570">570</a> 					IBaseResource resource = responseData.getResource();
 <a class="jxr_linenumber" name="L571" href="#L571">571</a> 					<strong class="jxr_keyword">if</strong> (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 <a class="jxr_linenumber" name="L572" href="#L572">572</a> 						resource = filterNestedBundle(requestDetails, resource);
