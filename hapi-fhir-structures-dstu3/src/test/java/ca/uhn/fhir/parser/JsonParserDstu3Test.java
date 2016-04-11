@@ -611,7 +611,7 @@ public class JsonParserDstu3Test {
 	    ourLog.info(val);
 	    assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
 
-	    MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
+	    MyPatientWithOneDeclaredEnumerationExtensionDstu3 actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtensionDstu3.class, val);
 	    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 	    Enumeration<AddressUse> ref = actual.getFoo();
 	    assertEquals("home", ref.getValue().toCode());

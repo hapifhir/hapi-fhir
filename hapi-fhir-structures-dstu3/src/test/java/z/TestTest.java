@@ -6,7 +6,7 @@ import org.junit.Test;
 public class TestTest {
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testId() throws InterruptedException {
 		Thread.sleep(1000000);
 	}

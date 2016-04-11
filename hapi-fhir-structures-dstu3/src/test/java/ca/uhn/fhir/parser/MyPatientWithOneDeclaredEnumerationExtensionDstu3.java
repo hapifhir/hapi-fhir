@@ -8,7 +8,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "Patient")
-public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
+public class MyPatientWithOneDeclaredEnumerationExtensionDstu3 extends Patient {
 
 	private static final long serialVersionUID = 1L;
 

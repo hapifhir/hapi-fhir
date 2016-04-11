@@ -145,7 +145,7 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new ServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
-		reqDetails.setServer(new RestfulServer());
+		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
@@ -182,7 +182,7 @@ public class ResponseHighlightingInterceptorTest {
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
 		reqDetails.setParameters(params);
-		reqDetails.setServer(new RestfulServer());
+		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
@@ -219,7 +219,7 @@ public class ResponseHighlightingInterceptorTest {
 		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
 		params.put(ResponseHighlighterInterceptor.PARAM_RAW, new String[] { ResponseHighlighterInterceptor.PARAM_RAW_TRUE });
 		reqDetails.setParameters(params);
-		reqDetails.setServer(new RestfulServer());
+		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
@@ -249,7 +249,7 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new ServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
-		reqDetails.setServer(new RestfulServer());
+		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
@@ -287,7 +287,7 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new ServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
-		RestfulServer server = new RestfulServer();
+		RestfulServer server = new RestfulServer(ourCtx);
 		server.setDefaultResponseEncoding(EncodingEnum.JSON);
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
@@ -325,7 +325,7 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new ServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
-		RestfulServer server = new RestfulServer();
+		RestfulServer server = new RestfulServer(ourCtx);
 		server.setDefaultResponseEncoding(EncodingEnum.JSON);
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
