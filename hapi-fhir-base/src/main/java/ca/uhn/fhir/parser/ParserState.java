@@ -1421,6 +1421,11 @@ class ParserState<T> {
 		}
 
 		@Override
+		protected void populateTarget() {
+			// nothing
+		}
+
+		@Override
 		public void wereBack() {
 			super.wereBack();
 			
@@ -1442,11 +1447,6 @@ class ParserState<T> {
 
 		}
 
-		@Override
-		protected void populateTarget() {
-			// nothing
-		}
-
 	}
 
 	private class ContainedResourcesStateHl7Org extends PreResourceState {
@@ -1458,6 +1458,11 @@ class ParserState<T> {
 		@Override
 		public void endingElement() throws DataFormatException {
 			pop();
+		}
+
+		@Override
+		protected void populateTarget() {
+			// nothing
 		}
 
 		@Override
@@ -1478,11 +1483,6 @@ class ParserState<T> {
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(preResCurrentElement);
 			def.getChildByName("contained").getMutator().addValue(preResCurrentElement, res);
-		}
-
-		@Override
-		protected void populateTarget() {
-			// nothing
 		}
 
 	}
@@ -1974,7 +1974,7 @@ class ParserState<T> {
 
 	private abstract class PreResourceState extends BaseState {
 
-		private Map<String, IBaseResource> myContainedResources = new HashMap<String, IBaseResource>();
+		private Map<String, IBaseResource> myContainedResources;
 		private IBaseResource myInstance;
 		private FhirVersionEnum myParentVersion;
 		private boolean myRequireResourceType = true;
@@ -1983,6 +1983,7 @@ class ParserState<T> {
 		public PreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
+			myContainedResources = new HashMap<String, IBaseResource>();
 			if (theResourceType != null) {
 				myParentVersion = myContext.getResourceDefinition(theResourceType).getStructureVersion();
 			} else {
@@ -1990,12 +1991,11 @@ class ParserState<T> {
 			}
 		}
 
-		protected abstract void populateTarget();
-
 		public PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
 			Validate.notNull(theParentVersion);
 			myParentVersion = theParentVersion;
+			myContainedResources = thePreResourcesState.getContainedResources();
 		}
 
 		@Override
@@ -2069,6 +2069,8 @@ class ParserState<T> {
 		public boolean isPreResource() {
 			return true;
 		}
+
+		protected abstract void populateTarget();
 
 		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
 			myRequireResourceType = theRequireResourceType;

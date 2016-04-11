@@ -44,12 +44,12 @@ public interface IModelVisitor {
 	void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
 
 	/**
-	 * 
-	 * @param theContainingElement
-	 * @param theChildDefinition May be null if this is a root element
-	 * @param theDefinition
-	 * @param theNextExt
+	 * @deprecated As of HAPI FHIR 1.5, this method is not recommended to be used. It will be removed from
+	 * this interface in HAPI FHIR 2.0. Previously, undeclared extensions were handled differently but as of 1.5
+	 * they will also be called back via {@link #acceptElement(IBase, List, BaseRuntimeChildDefinition, BaseRuntimeElementDefinition)} 
+	 * like any other child.
 	 */
+	@Deprecated
 	void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt);
 
 }

@@ -300,6 +300,7 @@
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<!--<reportFormat>plain</reportFormat>-->
 					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>-->
+					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>
 			<plugin>

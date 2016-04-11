@@ -56,15 +56,16 @@ public class CreateDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
 				"<id value=\"2\"/>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-				"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
 				"<meta>", 
-				"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
+					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
 				"</meta>", 
-				"</Patient>"));
+				"<modifierExtension url=\"http://example.com/ext/date\">", 
+					"<valueDate value=\"2011-01-01\"/>", 
+				"</modifierExtension>", 
+			"</Patient>"));
 		//@formatter:on
 	}
 
@@ -82,15 +83,16 @@ public class CreateDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
 				"<id value=\"0\"/>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-				"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
 				"<meta>", 
-				"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
+					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
 				"</meta>", 
-				"</Patient>"));
+				"<modifierExtension url=\"http://example.com/ext/date\">", 
+					"<valueDate value=\"2011-01-01\"/>", 
+				"</modifierExtension>", 
+			"</Patient>"));
 		//@formatter:on
 		
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));

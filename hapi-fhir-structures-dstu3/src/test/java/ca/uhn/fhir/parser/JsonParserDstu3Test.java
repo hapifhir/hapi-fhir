@@ -15,13 +15,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
+import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -34,6 +36,8 @@ import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.EnumFactory;
+import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -46,6 +50,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -76,43 +81,6 @@ public class JsonParserDstu3Test {
 	}
 	
 	
-	/**
-	 * See #326
-	 */
-	@Test
-	public void testEncodeContainedResource() {
-		Patient patient = new Patient();
-		patient.getBirthDateElement().setValueAsString("2016-04-05");
-		patient.addExtension().setUrl("test").setValue(new Reference(new Condition()));
-		
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-		
-		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
-			"{",
-			"\"resourceType\":\"Patient\",",
-			"\"extension\":[",
-			"{",
-			"\"url\":\"test\",",
-			"\"valueReference\":{",
-			"\"reference\":\"#1\"",
-			"}",
-			"}",
-			"],",
-			"\"contained\":[",
-			"{",
-			"\"resourceType\":\"Condition\",",
-			"\"id\":\"1\"",
-			"}",
-			"],",
-			"\"birthDate\":\"2016-04-05\"",
-			"}"
-		));
-		//@formatter:on
-	}
-
-
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -335,7 +303,8 @@ public class JsonParserDstu3Test {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals("VERSION2", label.getVersion());
 	}
-	
+
+
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -353,7 +322,44 @@ public class JsonParserDstu3Test {
 		assertThat(val, not(containsString("text")));
 
 	}
+	
+	/**
+	 * See #326
+	 */
+	@Test
+	public void testEncodeContainedResource() {
+		Patient patient = new Patient();
+		patient.getBirthDateElement().setValueAsString("2016-04-05");
+		patient.addExtension().setUrl("test").setValue(new Reference(new Condition()));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"{",
+				"\"resourceType\":\"Patient\",",
+				"\"contained\":[",
+					"{",
+					"\"resourceType\":\"Condition\",",
+					"\"id\":\"1\"",
+					"}",
+				"],",
+				"\"extension\":[",
+					"{",
+					"\"url\":\"test\",",
+					"\"valueReference\":{",
+					"\"reference\":\"#1\"",
+					"}",
+					"}",
+				"],",
+				"\"birthDate\":\"2016-04-05\"",
+			"}"
+		));
+		//@formatter:on
+	}
 
+	
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
 		Patient p = new Patient();
@@ -363,7 +369,7 @@ public class JsonParserDstu3Test {
 		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
-
+	
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
@@ -405,6 +411,87 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeExtensionUndeclaredNonModifier() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		Extension ext = obs.addExtension();
+		ext.setUrl("http://exturl").setValue(new StringType("ext_url_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"\"id\":\"1\"",
+			"\"meta\"",
+			"\"extension\"",
+			"\"url\":\"http://exturl\"",
+			"\"valueString\":\"ext_url_value\"",
+			"\"code\":"
+		));
+		assertThat(output, not(stringContainsInOrder(
+			"\"url\":\"http://exturl\"",
+			",",
+			"\"url\":\"http://exturl\""
+		)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getExtension().size());
+		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
+		assertEquals("ext_url_value", ((StringType)obs.getExtension().get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		Extension ext = obs.addExtension();
+		ext.setUrl("http://exturl");
+		
+		Extension subExt = ext.addExtension();
+		subExt.setUrl("http://subext").setValue(new StringType("sub_ext_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+				"\"id\":\"1\"",
+				"\"meta\"",
+				"\"extension\"",
+				"\"url\":\"http://exturl\"",
+				"\"extension\"",
+				"\"url\":\"http://subext\"",
+				"\"valueString\":\"sub_ext_value\"",
+				"\"code\":"
+			));
+			assertThat(output, not(stringContainsInOrder(
+				"\"url\":\"http://exturl\"",
+				",",
+				"\"url\":\"http://exturl\""
+			)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getExtension().size());
+		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
+		assertEquals(1, obs.getExtension().get(0).getExtension().size());
+		assertEquals("http://subext", obs.getExtension().get(0).getExtension().get(0).getUrl());
+		assertEquals("sub_ext_value", ((StringType)obs.getExtension().get(0).getExtension().get(0).getValue()).getValue());
+	}
+	
+	@Test
 	public void testEncodeNarrativeSuppressed() throws Exception {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
@@ -422,6 +509,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, containsString("maritalStatus"));
 	}
+
 
 	@Test
 	public void testEncodeParametersWithId() {
@@ -508,6 +596,27 @@ public class JsonParserDstu3Test {
 		bundle = (Bundle) parser.parseResource(json);
 		assertThat(json, not(containsString("\"id\"")));
 	}
+
+	@Test
+	  public void testEncodeUndeclaredExtensionWithEnumerationContent() {
+	    IParser parser = ourCtx.newJsonParser();
+
+	    Patient patient = new Patient();
+	    patient.addAddress().setUse(AddressUse.HOME);
+	    EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
+	    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+	    patient.addExtension().setUrl("urn:foo").setValue(enumeration);
+
+	    String val = parser.encodeResourceToString(patient);
+	    ourLog.info(val);
+	    assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
+
+	    MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
+	    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+	    Enumeration<AddressUse> ref = actual.getFoo();
+	    assertEquals("home", ref.getValue().toCode());
+
+	  }
 
 	@Test
 	public void testEncodeWithDontEncodeElements() throws Exception {

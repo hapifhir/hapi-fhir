@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 
@@ -152,5 +154,15 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	public List<ExtensionDt> getExtension() {
 		return getAllUndeclaredExtensions();
 	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder retVal = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		retVal.append("url", getUrl());
+		retVal.append("value", getValue());
+		return retVal.build();
+	}
+	
+	
 
 }

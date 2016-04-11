@@ -560,6 +560,7 @@ public abstract class BaseStructureParser {
 
 			// Binary is manually generated but should still go in the list
 			myNameToResourceClass.put("Binary", thePackageBase + ".resource.Binary");
+			myNameToDatatypeClass.put("Extension", ExtensionDt.class.getName());
 
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");

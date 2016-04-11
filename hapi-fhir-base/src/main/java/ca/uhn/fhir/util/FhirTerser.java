@@ -189,16 +189,10 @@ public class FhirTerser {
 				}
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
 					BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-				if (theType.isAssignableFrom(theNextExt.getClass())) {
-					retVal.add((T) theNextExt);
-				}
-				if (theNextExt.getValue() != null && theType.isAssignableFrom(theNextExt.getValue().getClass())) {
-					retVal.add((T) theNextExt.getValue());
-				}
+				// nothing
 			}
 		});
 		return retVal;
@@ -221,9 +215,7 @@ public class FhirTerser {
 			@Override
 			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
 					BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-				if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
-					retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (BaseResourceReferenceDt) theNextExt.getValue()));
-				}
+				// nothing
 			}
 		});
 		return retVal;
@@ -575,20 +567,12 @@ public class FhirTerser {
 			// These are primitive types
 			break;
 		case RESOURCE_REF:
-			IBaseReference resRefDt = (IBaseReference) theElement;
-			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
-				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
-					def = myContext.getResourceDefinition(theResource);
-					visit(theStack, theResource, pathToElement, null, def, theCallback);
-				}
-			}
-			break;
 		case RESOURCE:
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+				
 				List<?> values = nextChild.getAccessor().getValues(theElement);
 				if (values != null) {
 					for (Object nextValueObject : values) {

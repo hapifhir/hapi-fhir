@@ -26,6 +26,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Address.AddressUse;
+import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
@@ -36,6 +37,7 @@ import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
+import org.hl7.fhir.instance.model.EnumFactory;
 import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
@@ -46,6 +48,8 @@ import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.instance.model.Patient.ContactComponent;
+import org.hl7.fhir.instance.model.PrimitiveType;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
@@ -57,6 +61,7 @@ import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -64,20 +69,40 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
-public class JsonParserHl7OrgTest {
+public class JsonParserHl7OrgDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
 
 	@After
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	@Test
+  public void testEncodeUndeclaredExtensionWithEnumerationContent() {
+    IParser parser = ourCtx.newJsonParser();
+
+    Patient patient = new Patient();
+    patient.addAddress().setUse(AddressUse.HOME);
+    EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
+    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+    patient.addExtension().setUrl("urn:foo").setValue(enumeration);
+
+    String val = parser.encodeResourceToString(patient);
+    ourLog.info(val);
+    assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
+
+    MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
+    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+    Enumeration<AddressUse> ref = actual.getFoo();
+    assertEquals("home", ref.getValue().toCode());
+
+  }
 
 	
 	@Test
@@ -613,7 +638,7 @@ public class JsonParserHl7OrgTest {
 		list.setId("listId");
 		list.addEntry().setItem(new Reference(pt)).setDeleted(true);
 		
-		String enc = ourCtx.newJsonParser().encodeResourceToString(list);
+		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list);
 		ourLog.info(enc);
 		
 		assertThat(enc, containsString("\"id\":\"1\""));
@@ -1096,6 +1121,7 @@ public class JsonParserHl7OrgTest {
 	 * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
 	 */
 	@Test
+	@Ignore
 	public void testParseWithIncorrectReference() throws IOException {
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
@@ -1153,11 +1179,56 @@ public class JsonParserHl7OrgTest {
 	}
 
 	@Test
+	public void testParsePrimitiveExtension() {
+	  //@formatter:off
+	  String input = "{\n" + 
+	      "    \"resourceType\":\"Patient\",\n" + 
+	      "    \"contact\":[\n" + 
+	      "        {\n" + 
+	      "            \"name\":{\n" + 
+	      "                \"family\":[\n" + 
+	      "                    \"du\",\n" + 
+	      "                    \"Marché\"\n" + 
+	      "                ],\n" + 
+	      "                \"_family\":[\n" + 
+	      "                    {\n" + 
+	      "                        \"extension\":[\n" + 
+	      "                            {\n" + 
+	      "                                \"url\":\"http://hl7.org/fhir/Profile/iso-21090#qualifier\",\n" + 
+	      "                                \"valueCode\":\"VV\"\n" + 
+	      "                            }\n" + 
+	      "                        ]\n" + 
+	      "                    },\n" + 
+	      "                    null\n" + 
+	      "                ]\n" + 
+	      "            }\n" + 
+	      "        }\n" + 
+	      "    ]\n" + 
+	      "}";
+    //@formatter:off
+	  
+	  Patient p = ourCtx.newJsonParser().parseResource(Patient.class, input);
+	  ContactComponent contact = p.getContact().get(0);
+	  StringType family = contact.getName().getFamily().get(0);
+	  
+	  assertEquals("du", family.getValueAsString());
+	  assertEquals(1, family.getExtension().size());
+	}
+	
+	
+	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
+		{
+    ContactComponent contact = obs.getContact().get(0);
+    StringType family = contact.getName().getFamily().get(0);
+    assertEquals("du", family.getValueAsString());
+    assertEquals(1, family.getExtension().size());
+		}
+    
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
@@ -1266,25 +1337,6 @@ public class JsonParserHl7OrgTest {
 		}
 
 		public void setFoo(Address theFoo) {
-			myFoo = theFoo;
-		}
-
-	}
-
-	@ResourceDef(name = "Patient")
-	public static class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
-
-		private static final long serialVersionUID = 1L;
-
-		@Child(order = 0, name = "foo")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private Enumeration<AddressUse> myFoo;
-
-		public Enumeration<AddressUse> getFoo() {
-			return myFoo;
-		}
-
-		public void setFoo(Enumeration<AddressUse> theFoo) {
 			myFoo = theFoo;
 		}
 

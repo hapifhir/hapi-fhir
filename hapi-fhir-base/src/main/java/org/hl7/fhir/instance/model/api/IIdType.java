@@ -121,6 +121,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	 */
 	boolean isVersionIdPartValidLong();
 
+	@Override
 	IIdType setValue(String theString);
 
 	IIdType toUnqualified();

@@ -138,6 +138,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 		return myDefinedLocally;
 	}
 
+	@Override
 	public boolean isModifier() {
 		return myModifier;
 	}
@@ -164,7 +165,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 				myDatatypeChildName = "valueResource";
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
-				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types, false);
+				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 			} else {
 				myChildDef = elementDef;
 			}

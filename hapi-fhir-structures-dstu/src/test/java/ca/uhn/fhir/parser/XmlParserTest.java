@@ -711,8 +711,9 @@ public class XmlParserTest {
 		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
 		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueResource><reference value=\"Organization/123\"/></valueResource></extension>"));
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
@@ -875,7 +876,12 @@ public class XmlParserTest {
 		String val = ourCtx.newXmlParser().encodeResourceToString(q);
 		ourLog.info(val);
 
-		assertEquals("<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>", val);
+		String expected = "<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>";
+		
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", val);
+		
+		assertEquals(expected, val);
 
 	}
 
@@ -1033,9 +1039,6 @@ public class XmlParserTest {
 				"	<extension url=\"http://foo/#f1\">\n" + 
 				"		<valueString value=\"Foo1Value2\"/>\n" + 
 				"	</extension>\n" + 
-				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
-				"		<valueString value=\"Foo2Value1\"/>\n" + 
-				"	</modifierExtension>\n" + 
 				"	<extension url=\"http://bar/#b1\">\n" + 
 				"		<extension url=\"http://bar/#b1/1\">\n" +
 				"			<valueDate value=\"2013-01-01\"/>\n" +
@@ -1052,6 +1055,9 @@ public class XmlParserTest {
 				"			</extension>\n" + 
 				"		</extension>\n" + 
 				"	</extension>\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
+				"		<valueString value=\"Foo2Value1\"/>\n" + 
+				"	</modifierExtension>\n" + 
 				"	<identifier>\n" + 
 				"		<label value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 

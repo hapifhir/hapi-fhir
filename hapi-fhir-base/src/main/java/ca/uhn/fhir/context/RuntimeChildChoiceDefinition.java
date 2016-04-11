@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -101,8 +102,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
-				nextDef = new RuntimeResourceReferenceDefinition(elementName, types, false);
-				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+				nextDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
 				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
@@ -168,6 +168,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
 
 	}
+
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {

@@ -38,7 +38,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
@@ -64,6 +63,7 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -100,7 +100,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
@@ -295,11 +294,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).limitTo(10).execute();
+		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(10, found.getEntries().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).limitTo(999).execute();
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(50, found.getEntries().size());
 
@@ -1765,7 +1764,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 					.search()
 					.forResource(Organization.class)
 					.where(Organization.NAME.isMissing(false))
-					.limitTo(100)
+					.count(100)
 					.prettyPrint()
 					.execute();
 			//@formatter:on
@@ -1783,7 +1782,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 					.search()
 					.forResource(Organization.class)
 					.where(Organization.NAME.isMissing(true))
-					.limitTo(100)
+					.count(100)
 					.prettyPrint()
 					.execute();
 			//@formatter:on
@@ -1917,7 +1916,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
 			.sort().ascending(Patient.FAMILY)
 			.sort().ascending(Patient.GIVEN)
-			.limitTo(100)
+			.count(100)
 			.execute();
 		//@formatter:on
 

@@ -65,7 +65,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * 
  * </p> 
  */
-@DatatypeDef(name="ResourceReferenceDt") 
+@DatatypeDef(name="reference") 
 public class ResourceReferenceDt
         extends  BaseResourceReferenceDt         implements ICompositeDatatype
 {

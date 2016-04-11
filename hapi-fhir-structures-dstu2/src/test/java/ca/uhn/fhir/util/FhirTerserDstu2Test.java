@@ -1,25 +1,31 @@
 package ca.uhn.fhir.util;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.client.methods.HttpUriRequest;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -31,6 +37,23 @@ public class FhirTerserDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
+	@Test
+	public void testGetResourceReferenceInExtension() {
+		Patient p = new Patient();
+		p.addName().addFamily("PATIENT");
+
+		Organization o = new Organization();
+		o.setName("ORG");
+		ResourceReferenceDt ref = new ResourceReferenceDt(o);
+		ExtensionDt ext = new ExtensionDt(false, "urn:foo", ref);
+		p.addUndeclaredExtension(ext);
+
+		List<IBaseReference> refs = ourCtx.newTerser().getAllPopulatedChildElementsOfType(p, IBaseReference.class);
+		assertEquals(1, refs.size());
+		assertSame(ref, refs.get(0));
+	}
+
+	
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDoesntDescendIntoEmbedded() {
 		Patient p = new Patient();

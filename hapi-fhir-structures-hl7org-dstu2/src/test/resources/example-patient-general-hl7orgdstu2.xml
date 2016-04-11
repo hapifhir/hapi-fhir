@@ -1,24 +1,4 @@
 <Patient xmlns="http://hl7.org/fhir">
-  	<extension url="urn:patientext:att">
-		<valueAttachment>
-			<contentType value="aaaa"/>
-			<data value="AAAA"/>
-		</valueAttachment>
-	</extension>
-  
-  	<extension url="urn:patientext:moreext">
-  		<extension url="urn:patientext:moreext:1">
-  			<valueString value="str1"/>
-  		</extension>  		
-  		<extension url="urn:patientext:moreext:2">
-  			<valueString value="str2"/>
-  		</extension>
-  	</extension>
-  
-  	<modifierExtension url="urn:modext">
-  		<valueDate value="2011-01-02"/>
-  	</modifierExtension>
-  
   <text>
     <status value="generated"/>
     <div xmlns="http://www.w3.org/1999/xhtml">
@@ -45,6 +25,26 @@
     </div>
   </text>
 
+  	<extension url="urn:patientext:att">
+		<valueAttachment>
+			<contentType value="aaaa"/>
+			<data value="AAAA"/>
+		</valueAttachment>
+	</extension>
+  
+  	<extension url="urn:patientext:moreext">
+  		<extension url="urn:patientext:moreext:1">
+  			<valueString value="str1"/>
+  		</extension>  		
+  		<extension url="urn:patientext:moreext:2">
+  			<valueString value="str2"/>
+  		</extension>
+  	</extension>
+  
+  	<modifierExtension url="urn:modext">
+  		<valueDate value="2011-01-02"/>
+  	</modifierExtension>
+  
   <identifier>
     <use value="usual"/>
     <system value="urn:oid:1.2.36.146.595.217.0.1"/>

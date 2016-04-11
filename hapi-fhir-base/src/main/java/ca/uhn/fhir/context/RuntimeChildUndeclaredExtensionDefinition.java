@@ -50,8 +50,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types, false);
-		def.sealAndInitialize(theContext, theClassToElementDefinitions);
+		BaseRuntimeElementDefinition<?> def = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myAttributeNameToDefinition.put(value, def);
 		/*

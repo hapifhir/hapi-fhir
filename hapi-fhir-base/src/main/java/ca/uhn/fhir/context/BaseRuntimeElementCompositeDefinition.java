@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -51,16 +52,16 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		myChildren.add(theNext);
 	}
 
+	public BaseRuntimeChildDefinition getChildByName(String theName){
+		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
+		return retVal;
+	}
+
 	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
 		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
 			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName() + " - Valid names are: " + new TreeSet<String>(myNameToChild.keySet()));
 		}
-		return retVal;
-	}
-
-	public BaseRuntimeChildDefinition getChildByName(String theName){
-		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		return retVal;
 	}
 
@@ -72,8 +73,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		return myChildrenAndExtensions;
 	}
 
-	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	@Override 
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		for (BaseRuntimeChildDefinition next : myChildren) {
@@ -100,9 +101,25 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		
 		List<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
 		children.addAll(myChildren);
-		children.addAll(getExtensionsModifier());
-		children.addAll(getExtensionsNonModifier());
+		if (getExtensionsNonModifier().isEmpty() == false) {
+			children.addAll(findIndex(children, "extension"), getExtensionsNonModifier());
+		}
+		if (getExtensionsModifier().isEmpty() == false) {
+			children.addAll(findIndex(children, "modifierExtension"), getExtensionsModifier());
+		}
+		
 		myChildrenAndExtensions=Collections.unmodifiableList(children);
+	}
+
+	private static int findIndex(List<BaseRuntimeChildDefinition> theChildren, String theName) {
+		int index = theChildren.size();
+		for (ListIterator<BaseRuntimeChildDefinition> iter = theChildren.listIterator(); iter.hasNext(); ) {
+			if (iter.next().getElementName().equals(theName)) {
+				index = iter.previousIndex();
+				break;
+			}
+		}
+		return index;
 	}
 
 }

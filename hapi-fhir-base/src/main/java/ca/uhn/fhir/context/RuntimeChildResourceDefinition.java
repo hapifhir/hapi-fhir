@@ -83,8 +83,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes, false);
-		myRuntimeDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+		myRuntimeDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myValidChildNames = new HashSet<String>();
 		myValidChildNames.add(getElementName());

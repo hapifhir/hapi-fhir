@@ -52,6 +52,7 @@ import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
@@ -75,6 +76,28 @@ public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
+	@Test
+	public void testContainedResourceInExtensionUndeclared() {
+		Patient p = new Patient();
+		p.addName().addFamily("PATIENT");
+
+		Organization o = new Organization();
+		o.setName("ORG");
+		p.addUndeclaredExtension(new ExtensionDt(false, "urn:foo", new ResourceReferenceDt(o)));
+
+		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(str);
+
+		p = ourCtx.newJsonParser().parseResource(Patient.class, str);
+		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
+
+		List<ExtensionDt> exts = p.getUndeclaredExtensionsByUrl("urn:foo");
+		assertEquals(1, exts.size());
+		ResourceReferenceDt rr = (ResourceReferenceDt) exts.get(0).getValue();
+		o = (Organization) rr.getResource();
+		assertEquals("ORG", o.getName());
+	}
+
 	
 	/**
 	 * See #308
@@ -93,24 +116,6 @@ public class JsonParserDstu2Test {
 		obs = p.parseResource(ReportObservation.class, encoded);
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
-
-	
-	@Test
-	public void testParseBundleWithCustomObservationType() {
-		ReportObservation obs = new ReportObservation();
-		obs.setReadOnly(true);
-
-		IParser p = ourCtx.newJsonParser();
-//		p.set
-		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
-
-		String encoded = p.encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		obs = p.parseResource(ReportObservation.class, encoded);
-		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
-	}
-
 	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -253,6 +258,7 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
 
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -314,6 +320,7 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
+	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -424,6 +431,87 @@ public class JsonParserDstu2Test {
 	}
 
 	@Test
+	public void testEncodeExtensionUndeclaredNonModifier() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		ExtensionDt ext = obs.addUndeclaredExtension(false, "http://exturl");
+		ext.setUrl("http://exturl").setValue(new StringDt("ext_url_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"\"id\":\"1\"",
+			"\"meta\"",
+			"\"extension\"",
+			"\"url\":\"http://exturl\"",
+			"\"valueString\":\"ext_url_value\"",
+			"\"code\":"
+		));
+		assertThat(output, not(stringContainsInOrder(
+			"\"url\":\"http://exturl\"",
+			",",
+			"\"url\":\"http://exturl\""
+		)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getUndeclaredExtensions().size());
+		assertEquals("http://exturl", obs.getUndeclaredExtensions().get(0).getUrl());
+		assertEquals("ext_url_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		ExtensionDt ext = obs.addUndeclaredExtension(false, "http://exturl");
+		ext.setUrl("http://exturl");
+		
+		ExtensionDt subExt = ext.addUndeclaredExtension(false, "http://subext");
+		subExt.setUrl("http://subext").setValue(new StringDt("sub_ext_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+				"\"id\":\"1\"",
+				"\"meta\"",
+				"\"extension\"",
+				"\"url\":\"http://exturl\"",
+				"\"extension\"",
+				"\"url\":\"http://subext\"",
+				"\"valueString\":\"sub_ext_value\"",
+				"\"code\":"
+			));
+			assertThat(output, not(stringContainsInOrder(
+				"\"url\":\"http://exturl\"",
+				",",
+				"\"url\":\"http://exturl\""
+			)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getUndeclaredExtensions().size());
+		assertEquals("http://exturl", obs.getUndeclaredExtensions().get(0).getUrl());
+		assertEquals(1, obs.getUndeclaredExtensions().get(0).getExtension().size());
+		assertEquals("http://subext", obs.getUndeclaredExtensions().get(0).getExtension().get(0).getUrl());
+		assertEquals("sub_ext_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getExtension().get(0).getValue()).getValue());
+	}
+
+	@Test
 	public void testEncodeForceResourceId() {
 		Patient p = new Patient();
 		p.setId("111");
@@ -511,9 +599,13 @@ public class JsonParserDstu2Test {
 		ResourceMetadataKeyEnum.TAG_LIST.put(pt, tagList);
 
 		String enc = ourCtx.newJsonParser().encodeResourceToString(pt);
-		ourLog.info(enc);
 
-		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}", enc);
+		String expected = "{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}";
+		
+		ourLog.info("Expected: " + expected);
+		ourLog.info("Actual  : " + enc);
+		
+		assertEquals(expected, enc);
 
 	}
 
@@ -671,7 +763,12 @@ public class JsonParserDstu2Test {
 		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", parsed.getText().getDiv().getValueAsString());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>", encoded);
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>";
+		
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", encoded);
+		
+		assertEquals(expected, encoded);
 	}
 
 	@Test
@@ -1030,6 +1127,22 @@ public class JsonParserDstu2Test {
 
 		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+	}
+
+	@Test
+	public void testParseBundleWithCustomObservationType() {
+		ReportObservation obs = new ReportObservation();
+		obs.setReadOnly(true);
+
+		IParser p = ourCtx.newJsonParser();
+//		p.set
+		p.setParserErrorHandler(mock(IParserErrorHandler.class, new ThrowsException(new IllegalStateException())));
+
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		obs = p.parseResource(ReportObservation.class, encoded);
+		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
 
 	/**

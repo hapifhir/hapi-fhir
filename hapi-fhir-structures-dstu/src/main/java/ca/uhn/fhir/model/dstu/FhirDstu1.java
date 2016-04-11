@@ -50,6 +50,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
@@ -166,18 +167,20 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
+		assert nextDef != null;
+		
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
-			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
-				StructureElementDefinitionType type = elem.getDefinition().addType();
-				type.getCode().setValue("ResourceReference");
-
-				if (next != IResource.class) {
-					@SuppressWarnings("unchecked")
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
-					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
-				}
-			}
+//			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
+//			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
+//				StructureElementDefinitionType type = elem.getDefinition().addType();
+//				type.getCode().setValue("ResourceReference");
+//
+//				if (next != IResource.class) {
+//					@SuppressWarnings("unchecked")
+//					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
+//					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
+//				}
+//			}
 
 			return;
 		}
@@ -232,6 +235,9 @@ public class FhirDstu1 implements IFhirVersion {
 				if (nextChild instanceof RuntimeChildUndeclaredExtensionDefinition) {
 					continue;
 				}
+				if (nextChild instanceof RuntimeChildExtension) {
+					continue;
+				} 
 
 				BaseRuntimeDeclaredChildDefinition child = (BaseRuntimeDeclaredChildDefinition) nextChild;
 				StructureElement elem = theStruct.addElement();

@@ -403,6 +403,15 @@
 				which enables finding resources that to not have a given tag/profile/security tag.
 				Thanks to Lars Kristian Roland for the suggestion!
 			</action>
+			<action type="fix">
+				Extensions containing resource references did not get encoded correctly
+				some of the time. Thanks to Poseidon for reporting!
+			</action>
+			<action type="fix">
+				Parsers (both XML and JSON) encoded the first few elements of DSTU3 structures in the wrong order:
+				Extensions were placed before any other content, which is incorrect (several
+				elements come first: meta, text, etc.)
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

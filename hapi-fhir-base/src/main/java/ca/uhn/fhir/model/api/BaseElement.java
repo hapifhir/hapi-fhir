@@ -27,11 +27,23 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
 	private List<String> myFormatCommentsPost;
 	private List<String> myFormatCommentsPre;
+	
+   @Child(name = "extension", type = {ExtensionDt.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+   @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
 	private List<ExtensionDt> myUndeclaredExtensions;
+	
+   /**
+    * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
+    */
+   @Child(name = "modifierExtension", type = {ExtensionDt.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=false)
+   @Description(shortDefinition="Extensions that cannot be ignored", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions." )
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override

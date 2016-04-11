@@ -42,7 +42,6 @@ import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -152,6 +151,8 @@ public class XmlParserDstu2Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		assertThat(encoded, containsString("<valueMarkdown value=\"THIS IS MARKDOWN\"/>"));
 	}
+
+	
 	
 	@Test
 	public void testChoiceTypeWithProfiledType2() {
@@ -169,7 +170,7 @@ public class XmlParserDstu2Test {
 		assertEquals(StringDt.class, par.getParameter().get(0).getValue().getClass());
 		assertEquals(MarkdownDt.class, par.getParameter().get(1).getValue().getClass());
 	}
-
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -179,7 +180,7 @@ public class XmlParserDstu2Test {
 		o.setName("ORG");
 		p.addUndeclaredExtension(new ExtensionDt(false, "urn:foo", new ResourceReferenceDt(o)));
 
-		String str = ourCtx.newXmlParser().encodeResourceToString(p);
+		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(str);
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
@@ -191,7 +192,7 @@ public class XmlParserDstu2Test {
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
-
+	
 	/**
 	 * See #308
 	 */
@@ -852,7 +853,7 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 
 	}
-	
+
 	/**
 	 * See #113
 	 */
@@ -921,7 +922,7 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 
 	}
-
+	
 	@Test
 	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -997,6 +998,82 @@ public class XmlParserDstu2Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeExtensionUndeclaredNonModifier() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		ExtensionDt ext = obs.addUndeclaredExtension(false, "http://exturl");
+		ext.setUrl("http://exturl").setValue(new StringDt("ext_url_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newXmlParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"<id value=\"1\"/>",
+			"<meta>",
+			"<profile value=\"http://profile\"/>",
+			"<extension url=\"http://exturl\">",
+			"<valueString value=\"ext_url_value\"/>",
+			"<text value=\"CODE\"/>"
+		));
+		assertThat(output, not(stringContainsInOrder(
+			"<url value=\"http://exturl\"/>"
+		)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getUndeclaredExtensions().size());
+		assertEquals("http://exturl", obs.getUndeclaredExtensions().get(0).getUrl());
+		assertEquals("ext_url_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
+		Observation obs = new Observation();
+		obs.setId("1");
+		obs.getMeta().addProfile("http://profile");
+		ExtensionDt ext = obs.addUndeclaredExtension(false, "http://exturl");
+		ext.setUrl("http://exturl");
+		
+		ExtensionDt subExt = ext.addUndeclaredExtension(false, "http://subext");
+		subExt.setUrl("http://subext").setValue(new StringDt("sub_ext_value"));
+		
+		obs.getCode().setText("CODE");
+		
+		IParser parser = ourCtx.newXmlParser();
+		
+		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(output);
+
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"<id value=\"1\"/>",
+			"<meta>",
+			"<profile value=\"http://profile\"/>",
+			"<extension url=\"http://exturl\">",
+			"<extension url=\"http://subext\">",
+			"<valueString value=\"sub_ext_value\"/>",
+			"<text value=\"CODE\"/>"
+		));
+		assertThat(output, not(stringContainsInOrder(
+			"<url value=\"http://exturl\"/>"
+		)));
+		//@formatter:on
+		
+		obs = parser.parseResource(Observation.class, output);
+		assertEquals(1, obs.getUndeclaredExtensions().size());
+		assertEquals("http://exturl", obs.getUndeclaredExtensions().get(0).getUrl());
+		assertEquals(1, obs.getUndeclaredExtensions().get(0).getExtension().size());
+		assertEquals("http://subext", obs.getUndeclaredExtensions().get(0).getExtension().get(0).getUrl());
+		assertEquals("sub_ext_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getExtension().get(0).getValue()).getValue());
 	}
 
 	@Test
@@ -1661,72 +1738,6 @@ public class XmlParserDstu2Test {
 					"<name value=\"Gender Code\"/>"+ 
 					"<status value=\"active\"/>"+ 
 					"<publisher value=\"DCP\"/>"+ 
-					"<useContext>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/FBPP\"/>"+ 
-						"<display value=\"FBPP Pooled Database\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/PhenX\"/>"+ 
-						"<display value=\"Demographics\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/EligibilityCriteria\"/>"+ 
-						"<display value=\"Pt. Administrative\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/UAMSClinicalResearch\"/>"+ 
-						"<display value=\"UAMS New CDEs\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/PhenX\"/>"+ 
-						"<display value=\"Substance Abuse and \"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Category\"/>"+ 
-						"<display value=\"CSAERS Adverse Event\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/PhenX\"/>"+ 
-						"<display value=\"Core: Tier 1\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Category\"/>"+ 
-						"<display value=\"Case Report Forms\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Category\"/>"+ 
-						"<display value=\"CSAERS Review Set\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Demonstration%20Applications\"/>"+ 
-						"<display value=\"CIAF\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/NIDA%20CTN%20Usage\"/>"+ 
-						"<display value=\"Clinical Research\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/NIDA%20CTN%20Usage\"/>"+ 
-						"<display value=\"Electronic Health Re\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Condition\"/>"+ 
-						"<display value=\"Barretts Esophagus\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Condition\"/>"+ 
-						"<display value=\"Bladder Cancer\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Condition\"/>"+ 
-						"<display value=\"Oral Leukoplakia\"/>"+ 
-						"</coding>"+ 
-						"<coding>"+ 
-						"<system value=\"http://example.org/Condition\"/>"+ 
-						"<display value=\"Sulindac for Breast\"/>"+ 
-						"</coding>"+ 
-					"</useContext>"+ 
 					"<element>"+ 
 						"<extension url=\"http://hl7.org/fhir/StructureDefinition/minLength\">"+ 
 							"<valueInteger value=\"1\"/>"+ 
@@ -1743,17 +1754,17 @@ public class XmlParserDstu2Test {
 						"<binding>"+ 
 							"<strength value=\"required\"/>"+ 
 							"<valueSetReference>"+ 
-							"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset\">"+ 
-							"<valueReference>"+ 
-							"<reference value=\"#2179414-permitted\"/>"+ 
-							"</valueReference>"+ 
-							"</extension>"+ 
-							"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap\">"+ 
-							"<valueReference>"+ 
-							"<reference value=\"#2179414-cm\"/>"+ 
-							"</valueReference>"+ 
-							"</extension>"+ 
-							"<reference value=\"#2179414\"/>"+ 
+								"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset\">"+ 
+									"<valueReference>"+ 
+										"<reference value=\"#2179414-permitted\"/>"+ 
+									"</valueReference>"+ 
+								"</extension>"+ 
+								"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap\">"+ 
+									"<valueReference>"+ 
+										"<reference value=\"#2179414-cm\"/>"+ 
+									"</valueReference>"+ 
+								"</extension>"+ 
+								"<reference value=\"#2179414\"/>"+ 
 							"</valueSetReference>"+ 
 						"</binding>"+ 
 					"</element>"+ 
@@ -1770,10 +1781,16 @@ public class XmlParserDstu2Test {
 		assertEquals("#2179414", ref.getReference().getValue());
 
 		assertEquals(2, ref.getUndeclaredExtensions().size());
+		
 		ExtensionDt ext = ref.getUndeclaredExtensions().get(0);
 		assertEquals("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset", ext.getUrl());
 		assertEquals(ResourceReferenceDt.class, ext.getValue().getClass());
 		assertEquals("#2179414-permitted", ((ResourceReferenceDt) ext.getValue()).getReference().getValue());
+
+		ext = ref.getUndeclaredExtensions().get(1);
+		assertEquals("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap", ext.getUrl());
+		assertEquals(ResourceReferenceDt.class, ext.getValue().getClass());
+		assertEquals("#2179414-cm", ((ResourceReferenceDt) ext.getValue()).getReference().getValue());
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 

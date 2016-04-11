@@ -104,7 +104,11 @@ public abstract class BaseParser implements IParser {
 		myErrorHandler = theParserErrorHandler;
 	}
 
-	protected Iterable<CompositeChildElement> compositeChildIterator(final List<? extends BaseRuntimeChildDefinition> theChildren, final boolean theContainedResource, final CompositeChildElement theParent) {
+	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent) {
+		
+		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theCompositeElement.getClass());
+		final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
+		
 		return new Iterable<BaseParser.CompositeChildElement>() {
 			@Override
 			public Iterator<CompositeChildElement> iterator() {
@@ -118,7 +122,7 @@ public abstract class BaseParser implements IParser {
 					 * Constructor
 					 */
 					{
-						myChildrenIter = theChildren.iterator();
+						myChildrenIter = children.iterator();
 					}
 
 					@Override
@@ -139,9 +143,10 @@ public abstract class BaseParser implements IParser {
 							/*
 							 * There are lots of reasons we might skip encoding a particular child
 							 */
-							if (myNext.getDef().getElementName().equals("extension") || myNext.getDef().getElementName().equals("modifierExtension")) {
-								myNext = null;
-							} else if (myNext.getDef().getElementName().equals("id")) {
+//							if (myNext.getDef().getElementName().equals("extension") || myNext.getDef().getElementName().equals("modifierExtension")) {
+//								myNext = null;
+//							} else 
+							if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
 							} else if (!myNext.shouldBeEncoded()) {
 								myNext = null;
@@ -261,7 +266,7 @@ public abstract class BaseParser implements IParser {
 		myContainedResources = contained;
 	}
 
-	protected String determineReferenceText(IBaseReference theRef) {
+	private String determineReferenceText(IBaseReference theRef) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
@@ -396,11 +401,14 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-	protected IdDt fixContainedResourceId(String theValue) {
+	protected IIdType fixContainedResourceId(String theValue) {
+		IIdType retVal = (IIdType) myContext.getElementDefinition("id").newInstance();
 		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
-			return new IdDt(theValue.substring(1));
+			retVal.setValue(theValue.substring(1));
+		} else {
+			retVal.setValue(theValue);
 		}
-		return new IdDt(theValue);
+		return retVal;
 	}
 
 	ContainedResources getContainedResources() {
@@ -544,6 +552,14 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+		
+		if (theResourceType != null) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+			if (def.getStructureVersion() != myContext.getVersion().getVersion()) {
+				throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not parse a structure for version " + def.getStructureVersion());
+			}
+		}
+		
 		T retVal = doParseResource(theResourceType, theReader);
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
@@ -666,7 +682,35 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		return theValues;
+		@SuppressWarnings("unchecked")
+		List<IBase> retVal = (List<IBase>) theValues;
+		
+		for (int i = 0; i < retVal.size(); i++) {
+			IBase next = retVal.get(i);
+			
+			/*
+			 * If we have automatically contained any resources via
+			 * their references, this ensures that we output the new
+			 * local reference
+			 */
+			if (next instanceof IBaseReference) {
+				IBaseReference nextRef = (IBaseReference)next;
+				String refText = determineReferenceText(nextRef);
+				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
+					
+					if (retVal == theValues) {
+						retVal = new ArrayList<IBase>(theValues);
+					}
+					IBaseReference newRef = (IBaseReference) myContext.getElementDefinition(nextRef.getClass()).newInstance();
+					myContext.newTerser().cloneInto(nextRef, newRef, true);
+					newRef.setReference(refText);
+					retVal.set(i, newRef);
+					
+				}
+			}
+		}
+		
+		return retVal;
 	}
 
 	@Override

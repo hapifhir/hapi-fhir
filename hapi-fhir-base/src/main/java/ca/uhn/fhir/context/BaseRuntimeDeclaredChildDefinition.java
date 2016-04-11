@@ -40,9 +40,9 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final int myMin;
 	private boolean myModifier;
 	private final IMutator myMutator;
+
 	private final String myShortDefinition;
 	private boolean mySummary;
-
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
 		Validate.notNull(theField, "No field speficied");
@@ -124,8 +124,13 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myModifier;
 	}
 
+	@Override
 	public boolean isSummary() {
 		return mySummary;
+	}
+
+	protected void setModifier(boolean theModifier) {
+		myModifier = theModifier;
 	}
 
 	private final class FieldListAccessor implements IAccessor {

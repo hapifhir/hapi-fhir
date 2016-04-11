@@ -478,7 +478,13 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
+			if (childAnnotation.name().equals("extension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
+				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
+				orderMap.put(order, def);
+			} else if (childAnnotation.name().equals("modifierExtension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
+				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
+				orderMap.put(order, def);
+			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
 				/*
 				 * Child is contained resources
 				 */
