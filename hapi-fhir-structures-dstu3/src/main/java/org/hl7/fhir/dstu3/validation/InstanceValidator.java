@@ -1333,6 +1333,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	// }
 
 	private boolean passesCodeWhitespaceRules(String v) {
+		if (v == null) {
+			return true;
+		}
 		if (!v.trim().equals(v))
 			return false;
 		boolean lastWasSpace = true;
@@ -2161,7 +2164,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			NodeStack firstStack = stack.push(firstEntry, 0, null, null);
 			String fullUrl = firstEntry.getNamedChildValue("fullUrl");
 
-			if (type.equals("document")) {
+			if ("document".equals(type)) {
 				WrapperElement res = firstEntry.getNamedChild("resource");
 				NodeStack localStack = firstStack.push(res, -1, null, null);
 				WrapperElement resource = res.getFirstChild();
@@ -2173,7 +2176,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 						validateDocument(errors, entries, res, localStack, fullUrl, id);
 				}
 			}
-			if (type.equals("message"))
+			if ("message".equals(type))
 				validateMessage(errors, bundle);
 		}
 	}
@@ -2475,8 +2478,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 							match = sliceMatches(ei.element, ei.path, slice, ed, profile);
 					}
 					if (match) {
-						if (rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition == null, "Element matches more than one slice"))
+						if (rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition == null, "Element matches more than one slice")) {
 							ei.definition = ed;
+						}
 					}
 				}
 			}

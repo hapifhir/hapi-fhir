@@ -179,14 +179,16 @@ public class ProfileUtilities {
     // if we have a name reference, we have to find it, and iterate it's children
     if (contentReference != null) {
     	boolean found = false;
-    	String candidateName = profile.getName() + "." + contentReference.substring(1);
       for (ElementDefinition e : profile.getSnapshot().getElement()) {
-      	if (e.getPath().equals(candidateName)) {
+      	String elementPath = e.getPath();
+			if (elementPath.startsWith(profile.getName()) && elementPath.endsWith("." + contentReference.substring(1))) {
       		found = true;
-      		path = e.getPath();
+      		path = elementPath;
+      		break;
       	} else if (contentReference.equals("#"+e.getId())) {
       		found = true;
-      		path = e.getPath();
+      		path = elementPath;
+      		break;
       	}
       }
       if (!found)

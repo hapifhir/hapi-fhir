@@ -26,7 +26,6 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -148,6 +147,14 @@ public class JpaServerDemo extends RestfulServer {
 			this.registerInterceptor(interceptor);
 		}
 
+		/*
+		 * If you are hosting this server at a specific DNS name, the server will try to 
+		 * figure out the FHIR base URL based on what the web container tells it, but
+		 * this doesn't always work. If you are setting links in your search bundles that
+		 * just refer to "localhost", you might want to use a server address strategy:
+		 */
+		//setServerAddressStrategy(new HardcodedServerAddressStrategy("http://mydomain.com/fhir/baseDstu2"));
+		
 	}
 
 }

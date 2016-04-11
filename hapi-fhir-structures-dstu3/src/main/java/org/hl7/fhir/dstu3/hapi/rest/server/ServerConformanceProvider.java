@@ -187,7 +187,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDateElement(conformanceDate());
-		retVal.setFhirVersion("1.0.2"); // TODO: pull from model
+		retVal.setFhirVersion("1.4.0"); // TODO: pull from model
 		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
 																					// effort since the parser
 		// needs to be modified to actually allow it

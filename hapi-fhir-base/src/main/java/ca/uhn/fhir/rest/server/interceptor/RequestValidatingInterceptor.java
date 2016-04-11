@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -59,6 +61,12 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 
 		Charset charset = ResourceParameter.determineRequestCharset(theRequestDetails);
 		String requestText = new String(theRequestDetails.loadRequestContents(), charset);
+
+		if (isBlank(requestText)) {
+			ourLog.trace("Incoming request does not have a body");
+			return true;
+		}
+
 		validate(requestText, theRequestDetails);
 
 		return true;

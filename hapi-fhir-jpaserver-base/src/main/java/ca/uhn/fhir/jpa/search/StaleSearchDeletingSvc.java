@@ -84,6 +84,9 @@ public class StaleSearchDeletingSvc {
 				}
 			});
 		}
+		
+		ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
+		
 	}
 	
 }
