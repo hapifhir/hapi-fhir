@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 @EnableTransactionManagement()
 public class TestDstu1Config extends BaseJavaConfigDstu1 {
 
-	@Value("${fhir.db.location}")
+	public static final String FHIR_DB_LOCATION = "${fhir.db.location}";
+	
+	@Value(FHIR_DB_LOCATION)
 	private String myFhirDbLocation;
 
 	/**

@@ -29,10 +29,13 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
-	@Value("${fhir.db.location.dstu2}")
+	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
+	public static final String FHIR_DB_LOCATION_DSTU2 = "${fhir.db.location.dstu2}";
+
+	@Value(FHIR_DB_LOCATION_DSTU2)
 	private String myFhirDbLocation;
 
-	@Value("${fhir.lucene.location.dstu2}")
+	@Value(FHIR_LUCENE_LOCATION_DSTU2)
 	private String myFhirLuceneLocation;
 
 	/**
