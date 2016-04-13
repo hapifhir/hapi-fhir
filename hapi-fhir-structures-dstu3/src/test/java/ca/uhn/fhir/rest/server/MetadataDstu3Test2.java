@@ -27,14 +27,15 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class MetadataDstu3Test2 {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Test
 	public void testHttpMethods() throws Exception {
@@ -66,8 +67,9 @@ public class MetadataDstu3Test2 {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -94,14 +96,14 @@ public class MetadataDstu3Test2 {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		@Validate()
-		public MethodOutcome validate(@ResourceParam Patient theResource) {
-			return new MethodOutcome();
-		}
-
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
+		}
+
+		@Validate()
+		public MethodOutcome validate(@ResourceParam Patient theResource) {
+			return new MethodOutcome();
 		}
 	}
 

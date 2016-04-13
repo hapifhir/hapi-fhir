@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -67,12 +68,27 @@ public class ServerFeaturesDstu2Test {
 
 	}
 
+
 	/**
 	 * See #313
 	 */
 	@Test
 	public void testOptionsForNonBasePath1() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	/**
+	 * See #313
+	 */
+	@Test
+	public void testOptionsForNonBasePath2() throws Exception {
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -93,20 +109,6 @@ public class ServerFeaturesDstu2Test {
 
 		ourLog.info(responseContent);
 		assertEquals(405, status.getStatusLine().getStatusCode());
-	}
-
-	/**
-	 * See #313
-	 */
-	@Test
-	public void testOptionsForNonBasePath2() throws Exception {
-		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -145,9 +147,11 @@ public class ServerFeaturesDstu2Test {
 
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

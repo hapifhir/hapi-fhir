@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SystemProviderDstu1Test  extends BaseJpaTest {
 
@@ -65,11 +66,6 @@ public class SystemProviderDstu1Test  extends BaseJpaTest {
 	}
 	
 	
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-		ourAppCtx.stop();
-	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -121,5 +117,13 @@ public class SystemProviderDstu1Test  extends BaseJpaTest {
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
 		ourClient.setLogRequestAndResponse(true);
 	}
-	
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		ourAppCtx.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 }

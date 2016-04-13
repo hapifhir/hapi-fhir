@@ -6,13 +6,21 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SearchBuilderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilderTest.class);
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testAA() {
 		assertTrue(123.00004f <= 123.0001f);

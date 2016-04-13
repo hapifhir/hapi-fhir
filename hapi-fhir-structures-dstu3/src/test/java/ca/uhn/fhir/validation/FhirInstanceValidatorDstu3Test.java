@@ -48,31 +48,32 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirInstanceValidatorDstu3Test {
 
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private FhirInstanceValidator myInstanceVal;
 	private IValidationSupport myMockSupport;
 
+	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<String>();
-	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
+	@Rule
+	public TestRule watcher = new TestWatcher() {
+		protected void starting(Description description) {
+			ourLog.info("Starting test: " + description.getMethodName());
+		}
+	};
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		myDefaultValidationSupport.flush();
-		myDefaultValidationSupport = null;
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
@@ -159,6 +160,24 @@ public class FhirInstanceValidatorDstu3Test {
 		});
 
 	}
+	
+	private Object defaultString(Integer theLocationLine) {
+		return theLocationLine != null ? theLocationLine.toString() : "";
+	}
+
+	private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
+		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+
+		int index = 0;
+		for (SingleValidationMessage next : theOutput.getMessages()) {
+			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
+			index++;
+
+			retVal.add(next);
+		}
+
+		return retVal;
+	}
 
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
 		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
@@ -176,30 +195,37 @@ public class FhirInstanceValidatorDstu3Test {
 		return retVal;
 	}
 
-	private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+	@Test
+	public void testValidateBigRawJsonResource() throws Exception {
+		InputStream stream = FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/conformance.json.gz");
+		stream = new GZIPInputStream(stream);
+		String input = IOUtils.toString(stream);
 
-		int index = 0;
-		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
-			index++;
-
-			retVal.add(next);
+		long start = System.currentTimeMillis();
+		ValidationResult output = null;
+		int passes = 1;
+		for (int i = 0; i < passes; i++) {
+			ourLog.info("Pass {}", i + 1);
+			output = myVal.validateWithResult(input);
 		}
 
-		return retVal;
+		long delay = System.currentTimeMillis() - start;
+		long per = delay / passes;
+
+		logResultsAndReturnAll(output);
+
+		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
 	}
 
-	private Object defaultString(Integer theLocationLine) {
-		return theLocationLine != null ? theLocationLine.toString() : "";
-	}
+	@Test
+	public void testValidateQuestionnaireResponse() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/qr_jon.xml"));
 
-	@Rule
-	public TestRule watcher = new TestWatcher() {
-		protected void starting(Description description) {
-			ourLog.info("Starting test: " + description.getMethodName());
-		}
-	};
+		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnAll(output);
+
+		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
+	}
 
 	@Test
 	public void testValidateRawJsonResource() {
@@ -252,28 +278,6 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	public void testValidateBigRawJsonResource() throws Exception {
-		InputStream stream = FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/conformance.json.gz");
-		stream = new GZIPInputStream(stream);
-		String input = IOUtils.toString(stream);
-
-		long start = System.currentTimeMillis();
-		ValidationResult output = null;
-		int passes = 1;
-		for (int i = 0; i < passes; i++) {
-			ourLog.info("Pass {}", i + 1);
-			output = myVal.validateWithResult(input);
-		}
-
-		long delay = System.currentTimeMillis() - start;
-		long per = delay / passes;
-
-		logResultsAndReturnAll(output);
-
-		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
-	}
-
-	@Test
 	public void testValidateRawXmlResourceBadAttributes() {
 		// @formatter:off
     String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"
@@ -289,59 +293,24 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	public void testValidateQuestionnaireResponse() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/qr_jon.xml"));
-
-		ValidationResult output = myVal.validateWithResult(input);
-		logResultsAndReturnAll(output);
-
-		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
-	}
-
-	@Test
-	@Ignore
-	public void testValidateStructureDefinition() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sdc-questionnaire.profile.xml"));
-
-		ValidationResult output = myVal.validateWithResult(input);
-		logResultsAndReturnAll(output);
-
-		assertEquals(output.toString(), 3, output.getMessages().size());
-		ourLog.info(output.getMessages().get(0).getLocationString());
-		ourLog.info(output.getMessages().get(0).getMessage());
-	}
-
-	@Test
-	public void testValidateResourceFailingInvariant() {
-		Observation input = new Observation();
-
-		// Has a value, but not a status (which is required)
-		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
-		input.setValue(new StringType("AAA"));
-
-		ValidationResult output = myVal.validateWithResult(input);
-		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
-
-	}
-
-
-
-	@Test
-	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
-		addValidConcept("http://loinc.org", "12345");
+	public void testValidateResourceContainingLoincCode() {
+		addValidConcept("http://loinc.org", "1234567");
 
 		Observation input = new Observation();
-		input.getMeta().addProfile("http://foo/myprofile");
+		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
-		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+		input.addIdentifier().setSystem("http://acme").setValue("12345");
+		input.getEncounter().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 1, errors.size());
-		assertEquals("StructureDefinition reference \"http://foo/myprofile\" could not be resolved", errors.get(0).getMessage());
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+
+		assertThat(errors.toString(), containsString("information"));
+		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(1, errors.size());
 	}
 
 	@Test
@@ -367,25 +336,37 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	public void testValidateResourceContainingLoincCode() {
-		addValidConcept("http://loinc.org", "1234567");
+	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
+		addValidConcept("http://loinc.org", "12345");
 
 		Observation input = new Observation();
-		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
+		input.getMeta().addProfile("http://foo/myprofile");
 
-		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getEncounter().setReference("http://foo.com/Encounter/9");
-		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+		input.setStatus(ObservationStatus.FINAL);
 
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-
-		assertThat(errors.toString(), containsString("information"));
-		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
-		assertEquals(1, errors.size());
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 1, errors.size());
+		assertEquals("StructureDefinition reference \"http://foo/myprofile\" could not be resolved", errors.get(0).getMessage());
 	}
+
+	@Test
+	public void testValidateResourceFailingInvariant() {
+		Observation input = new Observation();
+
+		// Has a value, but not a status (which is required)
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+		input.setValue(new StringType("AAA"));
+
+		ValidationResult output = myVal.validateWithResult(input);
+		assertThat(output.getMessages().size(), greaterThan(0));
+		assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+
+	}
+
+
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
@@ -408,33 +389,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(
 				"The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
 				output.getMessages().get(0).getMessage());
-	}
-
-	@Test
-	public void testValidateResourceWithValuesetExpansionBad() {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
-
-		ValidationResult output = myVal.validateWithResult(patient);
-		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
-		assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
-		assertEquals(
-				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code",
-				all.get(0).getMessage());
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
-
-	}
-
-	@Test
-	public void testValidateResourceWithValuesetExpansionGood() {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("http://hl7.org/fhir/v2/0203").setCode("MR");
-
-		ValidationResult output = myVal.validateWithResult(patient);
-		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(0, all.size());
 	}
 
 	@Test
@@ -500,6 +454,54 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(errors.toString(), 0, errors.size());
+	}
+
+	@Test
+	public void testValidateResourceWithValuesetExpansionBad() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
+
+		ValidationResult output = myVal.validateWithResult(patient);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
+		assertEquals(1, all.size());
+		assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
+		assertEquals(
+				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code",
+				all.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+	}
+
+	@Test
+	public void testValidateResourceWithValuesetExpansionGood() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("http://hl7.org/fhir/v2/0203").setCode("MR");
+
+		ValidationResult output = myVal.validateWithResult(patient);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
+		assertEquals(0, all.size());
+	}
+
+	@Test
+	@Ignore
+	public void testValidateStructureDefinition() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sdc-questionnaire.profile.xml"));
+
+		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnAll(output);
+
+		assertEquals(output.toString(), 3, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+		ourLog.info(output.getMessages().get(0).getMessage());
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		myDefaultValidationSupport.flush();
+		myDefaultValidationSupport = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

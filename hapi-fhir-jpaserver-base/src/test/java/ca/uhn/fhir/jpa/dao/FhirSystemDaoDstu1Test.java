@@ -50,7 +50,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
@@ -64,6 +64,13 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	private RequestDetails myRequestDetails;
 	private static EntityManager ourEntityManager;
 	private static PlatformTransactionManager ourTxManager;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourCtx.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {
@@ -476,10 +483,6 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		ourCtx.close();
-	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass

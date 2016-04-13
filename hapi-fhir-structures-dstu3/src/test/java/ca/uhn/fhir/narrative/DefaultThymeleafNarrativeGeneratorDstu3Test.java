@@ -28,12 +28,14 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterClass;
 import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderStatus;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -49,6 +51,13 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 		ourCtx.setNarrativeGenerator(myGen);
 	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testGeneratePatient() throws DataFormatException {

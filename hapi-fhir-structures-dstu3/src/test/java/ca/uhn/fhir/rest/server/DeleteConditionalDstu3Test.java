@@ -43,20 +43,20 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DeleteConditionalDstu3Test {
 	private static CloseableHttpClient ourClient;
-	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DeleteConditionalDstu3Test.class);
-	private static int ourPort;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static Server ourServer;
+	private static IGenericClient ourHapiClient;
+	private static String ourLastConditionalUrl;
 	private static IdType ourLastIdParam;
 	private static boolean ourLastRequestWasDelete;
-	private static IGenericClient ourHapiClient;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DeleteConditionalDstu3Test.class);
+	private static int ourPort;
+	private static Server ourServer;
 	
-	
-	
+
 	@Before
 	public void before() {
 		ourLastConditionalUrl = null;
@@ -65,6 +65,7 @@ public class DeleteConditionalDstu3Test {
 	}
 
 
+	
 	@Test
 	public void testSearchStillWorks() throws Exception {
 
@@ -94,10 +95,12 @@ public class DeleteConditionalDstu3Test {
 
 	}
 
+
 	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
@@ -128,17 +131,17 @@ public class DeleteConditionalDstu3Test {
 	
 	public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
-		
 		@Delete()
 		public MethodOutcome deletePatient(@IdParam IdType theIdParam, @ConditionalUrlParam String theConditional) {
 			ourLastRequestWasDelete = true;
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
 			return new MethodOutcome(new IdType("Patient/001/_history/002"));
+		}
+		
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
 		}
 
 	}

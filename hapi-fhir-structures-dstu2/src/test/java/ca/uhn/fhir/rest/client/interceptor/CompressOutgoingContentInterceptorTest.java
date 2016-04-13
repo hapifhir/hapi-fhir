@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CompressOutgoingContentInterceptorTest {
 
@@ -42,6 +43,7 @@ public class CompressOutgoingContentInterceptorTest {
 		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
+
 	@Test
 	public void testCreate() throws Exception {
 		ourClient.registerInterceptor(new GZipContentInterceptor());
@@ -56,9 +58,11 @@ public class CompressOutgoingContentInterceptorTest {
 		assertEquals("gzip", ourLastResponseEncoding);
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

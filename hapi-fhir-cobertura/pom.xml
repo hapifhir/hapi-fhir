@@ -296,7 +296,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>-Xmx1024m</argLine>
+					<argLine>-Xmx1624m</argLine>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<!--<reportFormat>plain</reportFormat>-->
 					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>-->
@@ -400,21 +400,4 @@
 		</plugins>
 	</reporting>
 
-	<profiles>
-		<profile>
-			<id>TRAVIS</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<!-- Travis build seems to run out of memory unless we don't reuse JVMs -->
-							<reuseForks>false</reuseForks>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

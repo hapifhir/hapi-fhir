@@ -34,17 +34,18 @@ import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ReadDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourInitializeProfileList;
+	private static IdDt ourLastId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
-	private static IdDt ourLastId;
 
 	@Before
 	public void before() {
@@ -52,6 +53,7 @@ public class ReadDstu2Test {
 		ourInitializeProfileList = false;
 		ourLastId = null;
 	}
+
 
 	/**
 	 * See #302
@@ -75,27 +77,6 @@ public class ReadDstu2Test {
 		assertEquals("Patient/123", ourLastId.getValue());
 	}
 
-	@Test
-	public void testVread() throws Exception {
-		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
-		
-		ourLog.info(responseContent);
-		
-		assertEquals("Patient/123/_history/1", ourLastId.getValue());
-		assertEquals("123", ourLastId.getIdPart());
-		assertEquals("1", ourLastId.getVersionIdPart());
-	}
-	
 	/**
 	 * See #302 and #268
 	 */
@@ -116,7 +97,7 @@ public class ReadDstu2Test {
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 	}
-	
+
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -135,7 +116,7 @@ public class ReadDstu2Test {
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertThat(responseContent, containsString("\"meta\":{\"profile\":[\"http://foo_profile\"]}"));
 	}
-
+	
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -152,10 +133,32 @@ public class ReadDstu2Test {
 		
 		ourLog.info(responseContent);
 	}
+	
+	@Test
+	public void testVread() throws Exception {
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals("Patient/123/_history/1", ourLastId.getValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("1", ourLastId.getVersionIdPart());
+	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

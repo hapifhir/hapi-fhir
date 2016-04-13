@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -43,6 +44,12 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	private static Server ourServer;
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	public BaseResourceProviderDstu2Test() {
 		super();

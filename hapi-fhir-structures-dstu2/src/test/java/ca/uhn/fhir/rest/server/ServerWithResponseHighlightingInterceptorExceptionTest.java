@@ -31,14 +31,15 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
-
 	private static CloseableHttpClient ourClient;
+
+	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static RestfulServer ourServlet;
 
 	@Test
@@ -53,6 +54,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		assertThat(responseContent, containsString("<diagnostics value=\"AAABBB\"/>"));
 	}
 
+
 	@Test
 	public void testUnexpectedException() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=123");
@@ -65,9 +67,11 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		assertThat(responseContent, containsString("<diagnostics value=\"Failed to call access method\"/>"));
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -97,6 +101,11 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Read
 		public Patient read(@IdParam IdDt theId) {
 			throw new InvalidRequestException("AAABBB");
@@ -105,11 +114,6 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		@Search
 		public Patient search(@RequiredParam(name="identifier") TokenParam theToken) {
 			throw new Error("AAABBB");
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,11 +20,18 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ServerInvalidDefinitionDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testOperationReturningOldBundleProvider() {
 		RestfulServer srv = new RestfulServer(ourCtx);

@@ -11,11 +11,13 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -27,6 +29,13 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 
 		myDaoConfig.setExpireSearchResultsAfterMillis(DateUtils.MILLIS_PER_HOUR);
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() throws Exception {

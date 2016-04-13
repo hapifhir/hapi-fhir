@@ -2,9 +2,18 @@ package ca.uhn.fhir.jpa.entity;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.util.TestUtil;
+
 public class TagTypeEnumTest {
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testOrder() {

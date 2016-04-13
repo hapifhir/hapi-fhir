@@ -14,9 +14,12 @@ import java.util.TimeZone;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseDateTimeTypeDstu3Test {
 	private static Locale ourDefaultLocale;
@@ -27,6 +30,14 @@ public class BaseDateTimeTypeDstu3Test {
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
+	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 
 	@Test
 	public void testMinutePrecisionEncode() throws Exception {

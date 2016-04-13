@@ -20,6 +20,7 @@ import org.junit.Test;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -27,6 +28,14 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseDstu3Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
+		ourValidatingInterceptor = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Override
 	@Before
@@ -45,11 +54,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		}
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
-		ourValidatingInterceptor = null;
-	}
 	
 	
 	@Test

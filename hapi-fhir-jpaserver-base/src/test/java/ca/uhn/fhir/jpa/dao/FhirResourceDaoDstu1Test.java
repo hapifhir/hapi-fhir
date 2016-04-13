@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unused")
 public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
@@ -124,11 +125,6 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		ourCtx.close();
-	}
-
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
@@ -141,6 +137,12 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		ourLocationDao = ourCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
 		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourCtx.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

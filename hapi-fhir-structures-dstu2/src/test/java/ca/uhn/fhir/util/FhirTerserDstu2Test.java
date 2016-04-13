@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -53,7 +54,13 @@ public class FhirTerserDstu2Test {
 		assertSame(ref, refs.get(0));
 	}
 
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDoesntDescendIntoEmbedded() {
 		Patient p = new Patient();
