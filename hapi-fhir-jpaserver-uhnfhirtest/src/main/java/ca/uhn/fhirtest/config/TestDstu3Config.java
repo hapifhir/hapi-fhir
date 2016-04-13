@@ -34,10 +34,13 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
-	@Value("${fhir.db.location.dstu3}")
+	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
+	public static final String FHIR_DB_LOCATION_DSTU3 = "${fhir.db.location.dstu3}";
+
+	@Value(FHIR_DB_LOCATION_DSTU3)
 	private String myFhirDbLocation;
 
-	@Value("${fhir.lucene.location.dstu3}")
+	@Value(FHIR_LUCENE_LOCATION_DSTU3)
 	private String myFhirLuceneLocation;
 
 	@Bean()

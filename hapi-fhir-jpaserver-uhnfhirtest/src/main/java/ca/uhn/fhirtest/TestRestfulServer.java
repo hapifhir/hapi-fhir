@@ -38,6 +38,10 @@ import ca.uhn.fhirtest.config.TestDstu2Config;
 
 public class TestRestfulServer extends RestfulServer {
 
+	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
+	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
+	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
+
 	private static final long serialVersionUID = 1L;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
@@ -85,7 +89,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu1";
+			baseUrlProperty = FHIR_BASEURL_DSTU1;
 			break;
 		}
 		case "DSTU2": {
@@ -102,7 +106,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu2";
+			baseUrlProperty = FHIR_BASEURL_DSTU2;
 			break;
 		}
 		case "DSTU3": {
@@ -119,7 +123,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu3";
+			baseUrlProperty = FHIR_BASEURL_DSTU3;
 			break;
 		}
 		default:
