@@ -101,6 +101,34 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		
 		List<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
 		children.addAll(myChildren);
+		
+		/*
+		 * Because of the way the type hierarchy works for DSTU2 resources,
+		 * things end up in the wrong order
+		 */
+		int extIndex = findIndex(children, "extension");
+		int containedIndex = findIndex(children, "contained");
+		if (containedIndex != -1 && extIndex != -1 && extIndex < containedIndex) {
+			BaseRuntimeChildDefinition extension = children.remove(extIndex);
+			if (containedIndex > children.size()) {
+				children.add(extension);
+			} else {
+				children.add(containedIndex, extension);
+			}
+		}
+		int modIndex = findIndex(children, "modifierExtension");
+		if (modIndex < containedIndex) {
+			BaseRuntimeChildDefinition extension = children.remove(modIndex);
+			if (containedIndex > children.size()) {
+				children.add(extension);
+			} else {
+				children.add(containedIndex, extension);
+			}
+		}
+		
+		/*
+		 * Add declared extensions alongside the undeclared ones
+		 */
 		if (getExtensionsNonModifier().isEmpty() == false) {
 			children.addAll(findIndex(children, "extension"), getExtensionsNonModifier());
 		}

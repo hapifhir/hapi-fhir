@@ -6,9 +6,15 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.naming.StringManager;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -16,7 +22,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
@@ -30,6 +38,52 @@ public class ResourceValidatorDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	
+	/**
+	 * Make sure that the elements that appear in all resources (meta, language, extension, etc)
+	 * all appear in the correct order
+	 */
+	@Test
+	public void testValidateResourceWithResourceElements() {
+
+      XmlParserDstu3Test.TestPatientFor327 patient = new XmlParserDstu3Test.TestPatientFor327();
+      patient.setBirthDate(new Date());
+      patient.setId("123");
+      patient.getText().setDivAsString("<div>FOO</div>");
+      patient.getText().setStatus(NarrativeStatus.GENERATED);
+      patient.getLanguageElement().setValue("en");
+      patient.addExtension().setUrl("http://foo").setValue(new StringType("MOD"));
+      patient.getMeta().setLastUpdated(new Date());
+
+      List<Reference> conditions = new ArrayList<Reference>();
+      Condition condition = new Condition();
+      condition.getPatient().setReference("Patient/123");
+      condition.addBodySite().setText("BODY SITE");
+      condition.getCode().setText("CODE");
+      condition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
+		conditions.add(new Reference(condition));
+      patient.setCondition(conditions);
+      patient.addIdentifier().setSystem("http://foo").setValue("123");
+      
+      String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
+		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		val.registerValidatorModule(new FhirInstanceValidator());
+        
+		ValidationResult result = val.validateWithResult(encoded);
+		
+		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
+		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
+		ourLog.info(ooencoded);
+
+		assertTrue(result.isSuccessful());
+		
+		assertThat(ooencoded, containsString("No issues"));
 	}
 
 	/**

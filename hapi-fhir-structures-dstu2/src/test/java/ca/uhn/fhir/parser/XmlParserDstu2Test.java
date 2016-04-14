@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +49,9 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.AnnotationDt;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -66,6 +70,7 @@ import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DataElement;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
@@ -107,6 +112,68 @@ public class XmlParserDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+
+	@ResourceDef(name="Patient")
+	public static class TestPatientFor327 extends Patient
+	{
+
+		private static final long serialVersionUID = 1L;
+		
+		@Child(name = "testCondition")
+	    @ca.uhn.fhir.model.api.annotation.Extension(url="testCondition", definedLocally=true, isModifier=false)
+	    private List<ResourceReferenceDt> testConditions = null;
+
+	    public void setCondition(List<ResourceReferenceDt> ref)
+	    {
+	        this.testConditions = ref;
+	    }
+
+	    public List<ResourceReferenceDt> getConditions()
+	    {
+	        return this.testConditions;
+	    }
+	}
+	
+	/**
+	 * See #327
+	 */
+	@Test
+	public void testEncodeExtensionWithContainedResource() {
+
+      TestPatientFor327 patient = new TestPatientFor327();
+      patient.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
+
+      List<ResourceReferenceDt> conditions = new ArrayList<ResourceReferenceDt>();
+      Condition condition = new Condition();
+      condition.addBodySite().setText("BODY SITE");
+		conditions.add(new ResourceReferenceDt(condition));
+      patient.setCondition(conditions);
+      
+      String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
+				"<extension url=\"testCondition\">", 
+					"<valueReference>", 
+						"<reference value=\"#1\"/>", 
+					"</valueReference>", 
+				"</extension>", 
+				"<contained>", 
+					"<Condition xmlns=\"http://hl7.org/fhir\">", 
+						"<id value=\"1\"/>", 
+						"<bodySite>", 
+							"<text value=\"BODY SITE\"/>", 
+						"</bodySite>", 
+					"</Condition>", 
+				"</contained>", 
+				"<birthDate value=\"2016-04-14\"/>", 
+			"</Patient>"
+		));
+		//@formatter:on
+	}
+	
 
 	@Test
 	public void testBundleWithBinary() {
