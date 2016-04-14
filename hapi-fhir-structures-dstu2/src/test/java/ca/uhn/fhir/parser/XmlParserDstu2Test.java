@@ -155,11 +155,6 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
 			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<extension url=\"testCondition\">", 
-					"<valueReference>", 
-						"<reference value=\"#1\"/>", 
-					"</valueReference>", 
-				"</extension>", 
 				"<contained>", 
 					"<Condition xmlns=\"http://hl7.org/fhir\">", 
 						"<id value=\"1\"/>", 
@@ -168,6 +163,11 @@ public class XmlParserDstu2Test {
 						"</bodySite>", 
 					"</Condition>", 
 				"</contained>", 
+				"<extension url=\"testCondition\">", 
+				"<valueReference>", 
+					"<reference value=\"#1\"/>", 
+				"</valueReference>", 
+			"</extension>", 
 				"<birthDate value=\"2016-04-14\"/>", 
 			"</Patient>"
 		));

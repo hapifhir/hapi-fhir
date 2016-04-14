@@ -106,23 +106,25 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		 * Because of the way the type hierarchy works for DSTU2 resources,
 		 * things end up in the wrong order
 		 */
-		int extIndex = findIndex(children, "extension");
-		int containedIndex = findIndex(children, "contained");
-		if (containedIndex != -1 && extIndex != -1 && extIndex < containedIndex) {
-			BaseRuntimeChildDefinition extension = children.remove(extIndex);
-			if (containedIndex > children.size()) {
-				children.add(extension);
-			} else {
-				children.add(containedIndex, extension);
-			}
-		}
-		int modIndex = findIndex(children, "modifierExtension");
-		if (modIndex < containedIndex) {
-			BaseRuntimeChildDefinition extension = children.remove(modIndex);
-			if (containedIndex > children.size()) {
-				children.add(extension);
-			} else {
-				children.add(containedIndex, extension);
+		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			int extIndex = findIndex(children, "extension", false);
+			int containedIndex = findIndex(children, "contained", false);
+			if (containedIndex != -1 && extIndex != -1 && extIndex < containedIndex) {
+				BaseRuntimeChildDefinition extension = children.remove(extIndex);
+				if (containedIndex > children.size()) {
+					children.add(extension);
+				} else {
+					children.add(containedIndex, extension);
+				}
+				int modIndex = findIndex(children, "modifierExtension", false);
+				if (modIndex < containedIndex) {
+					extension = children.remove(modIndex);
+					if (containedIndex > children.size()) {
+						children.add(extension);
+					} else {
+						children.add(containedIndex, extension);
+					}
+				}
 			}
 		}
 		
@@ -130,17 +132,17 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		 * Add declared extensions alongside the undeclared ones
 		 */
 		if (getExtensionsNonModifier().isEmpty() == false) {
-			children.addAll(findIndex(children, "extension"), getExtensionsNonModifier());
+			children.addAll(findIndex(children, "extension", true), getExtensionsNonModifier());
 		}
 		if (getExtensionsModifier().isEmpty() == false) {
-			children.addAll(findIndex(children, "modifierExtension"), getExtensionsModifier());
+			children.addAll(findIndex(children, "modifierExtension", true), getExtensionsModifier());
 		}
 		
 		myChildrenAndExtensions=Collections.unmodifiableList(children);
 	}
 
-	private static int findIndex(List<BaseRuntimeChildDefinition> theChildren, String theName) {
-		int index = theChildren.size();
+	private static int findIndex(List<BaseRuntimeChildDefinition> theChildren, String theName, boolean theDefaultAtEnd) {
+		int index = theDefaultAtEnd ? theChildren.size() : -1;
 		for (ListIterator<BaseRuntimeChildDefinition> iter = theChildren.listIterator(); iter.hasNext(); ) {
 			if (iter.next().getElementName().equals(theName)) {
 				index = iter.previousIndex();
