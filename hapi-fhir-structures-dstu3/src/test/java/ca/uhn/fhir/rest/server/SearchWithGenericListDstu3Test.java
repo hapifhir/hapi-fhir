@@ -17,8 +17,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,11 +32,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchWithGenericListHl7OrgDstu2Test {
+public class SearchWithGenericListDstu3Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithGenericListHl7OrgDstu2Test.class);
+	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithGenericListDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourLastMethod;

@@ -412,6 +412,10 @@
 				Extensions were placed before any other content, which is incorrect (several
 				elements come first: meta, text, etc.)
 			</action>
+			<action type="fix">
+				In server implementations, the Bundle.entry.fullUrl was not getting correctly
+				populated on Hl7OrgDstu2 servers. Thanks to Christian Ohr for reporting!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
