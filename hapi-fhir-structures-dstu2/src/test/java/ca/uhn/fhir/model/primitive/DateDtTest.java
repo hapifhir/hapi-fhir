@@ -7,10 +7,19 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class DateDtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateDtTest.class);
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testPrecision() {

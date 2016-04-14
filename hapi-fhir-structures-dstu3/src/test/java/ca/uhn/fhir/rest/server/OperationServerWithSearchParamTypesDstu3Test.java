@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class OperationServerWithSearchParamTypesDstu3Test {
@@ -62,7 +63,6 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerWithSearchParamTypesDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-
 	@Before
 	public void before() {
 		ourLastMethod = "";
@@ -244,6 +244,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		//@formatter:on
 
 	}
+
 	@Test
 	public void testNonRepeatingWithParams() throws Exception {
 		Parameters p = new Parameters();
@@ -269,7 +270,6 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
 	}
-
 	@Test
 	public void testNonRepeatingWithUrl() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escape("VALTOKA|VALTOKB"));
@@ -289,7 +289,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
 	}
-	
+
 	@Test
 	public void testNonRepeatingWithUrlQualified() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escape("VALTOKA|VALTOKB"));
@@ -311,7 +311,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertEquals(TokenParamModifier.NOT, ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getModifier());
 		assertEquals("type $nonrepeating", ourLastMethod);
 	}
-
+	
 	@Test
 	public void testOrListWithParameters() throws Exception {
 		Parameters p = new Parameters();
@@ -371,8 +371,9 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	@BeforeClass
 	public static void beforeClass() throws Exception {

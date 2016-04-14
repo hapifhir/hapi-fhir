@@ -2,11 +2,19 @@ package ca.uhn.fhir.jpa.provider;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SearchParameterMapTest {
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	/**
 	 * {@link Search} uses these ordinals so they shouldn't get out of order

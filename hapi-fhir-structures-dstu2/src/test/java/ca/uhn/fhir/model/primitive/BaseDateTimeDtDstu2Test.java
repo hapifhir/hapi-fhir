@@ -11,16 +11,24 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseDateTimeDtDstu2Test {
 	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private SimpleDateFormat myDateInstantParser;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {

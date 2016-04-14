@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,12 +25,19 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
 
 	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2ValueSetTest.class);
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Before
 	@Transactional
 	public void before02() throws IOException {

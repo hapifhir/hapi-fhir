@@ -11,11 +11,11 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="Welcome">
 			<p style="float:right; text-align: center;">
-				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=watch&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=watch&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 				<br/>
-				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 				<br/>
-				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=fork&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=fork&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 				<br/>
 				<a href="https://travis-ci.org/jamesagnew/hapi-fhir"><img src="https://travis-ci.org/jamesagnew/hapi-fhir.svg?branch=master" alt="Build Status"/></a>
 				<br/>
@@ -25,7 +25,7 @@
 				<br/>
 				<a href="https://www.versioneye.com/user/projects/55e1d0d9c6d8f2001c00043e"><img src="https://www.versioneye.com/user/projects/55e1d0d9c6d8f2001c00043e/badge.svg?style=flat" alt="VersionEye"/></a>
 				<br/>
-				<a href="http://jamesagnew.github.io/hapi-fhir/license.html"><img src="https://img.shields.io/badge/license-apache%202.0-ff69b4.svg" alt="Apache 2.0 Licensed"/></a>
+				<a href="http://jamesagnew.github.io/hapi-fhir/license.html"><img src="https://img.shields.io/badge/license-apache%202.0-60C060.svg" alt="Apache 2.0 Licensed"/></a>
 			</p>
 			
 			<p>

@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class InterceptorUserDataMapDstu2Test {
 
@@ -68,20 +69,21 @@ public class InterceptorUserDataMapDstu2Test {
 	private Map<Object, Object> myMap;
 	private Set<String> myMapCheckMethods;
 	private final Object myValue = "VALUE";
-	
+
 	@Before
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
 		servlet.setInterceptors(Collections.singletonList(myInterceptor));
 	}
 
-	
+
 	@Before
 	public void beforePurgeMap() {
 		myMap = null;
 		myMapCheckMethods= new HashSet<String>();
 	}
 
+	
 	@Test
 	public void testException() throws Exception {
 
@@ -125,8 +127,9 @@ public class InterceptorUserDataMapDstu2Test {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

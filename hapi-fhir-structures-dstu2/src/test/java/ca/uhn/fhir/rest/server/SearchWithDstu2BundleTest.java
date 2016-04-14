@@ -24,14 +24,15 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SearchWithDstu2BundleTest {
 
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithDstu2BundleTest.class);
+	private static int ourPort;
+	private static Server ourServer;
 
 	@Test
 	public void testSearch() throws Exception {
@@ -61,9 +62,11 @@ public class SearchWithDstu2BundleTest {
 	}
 
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -95,6 +98,11 @@ public class SearchWithDstu2BundleTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Search
 		public Bundle search() {
 			Bundle retVal = new Bundle();
@@ -106,11 +114,6 @@ public class SearchWithDstu2BundleTest {
 			retVal.addEntry().setResource(p1);
 			
 			return retVal;
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

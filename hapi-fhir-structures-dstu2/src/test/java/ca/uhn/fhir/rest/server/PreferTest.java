@@ -35,39 +35,17 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class PreferTest {
 	private static CloseableHttpClient ourClient;
 	
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PreferTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	
-	
-	@Test
-	public void testCreateWithNoPrefer() throws Exception {
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-	}
-
-	
 	@Test
 	public void testCreatePreferMinimal() throws Exception {
 
@@ -92,6 +70,7 @@ public class PreferTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
 	}
+
 
 	@Test
 	public void testCreatePreferRepresentation() throws Exception {
@@ -119,9 +98,33 @@ public class PreferTest {
 	}
 
 	
+	@Test
+	public void testCreateWithNoPrefer() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		
+	}
+
+	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
@@ -149,11 +152,6 @@ public class PreferTest {
 	
 	public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 			IdDt id = new IdDt("Patient/001/_history/002");
@@ -164,6 +162,11 @@ public class PreferTest {
 			retVal.setResource(pt);
 			
 			return retVal;
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
 		}
 
 		@Update()

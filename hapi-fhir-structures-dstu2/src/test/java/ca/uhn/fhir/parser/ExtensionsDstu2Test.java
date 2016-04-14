@@ -5,17 +5,25 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ExtensionsDstu2Test {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testParseExtensions() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/smart-conf.xml"));

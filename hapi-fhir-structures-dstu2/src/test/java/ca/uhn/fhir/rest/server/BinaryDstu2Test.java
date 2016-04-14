@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -55,6 +56,13 @@ public class BinaryDstu2Test {
 	private static int ourPort;
 
 	private static Server ourServer;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {
@@ -205,11 +213,6 @@ public class BinaryDstu2Test {
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
 	}
 
 	@BeforeClass

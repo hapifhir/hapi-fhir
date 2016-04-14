@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -62,6 +63,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu2Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void beforeStartServer() throws Exception {
@@ -419,9 +427,5 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(0, respSub.getEntry().size());
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
 
 }

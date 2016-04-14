@@ -29,18 +29,18 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CreateBinaryDstu3Test {
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static Server ourServer;
 	private static Binary ourLastBinary;
-	private static String ourLastBinaryString;
 	private static byte[] ourLastBinaryBytes;
+	private static String ourLastBinaryString;
+	private static int ourPort;
+	private static Server ourServer;
 	
-	
-	
+
 	@Before
 	public void before() {
 		ourLastBinary = null;
@@ -49,16 +49,7 @@ public class CreateBinaryDstu3Test {
 	}
 
 
-	@Test
-	public void testRawBytesNoContentType() throws Exception {
-		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[] {0,1,2,3,4}));
-		ourClient.execute(post);
-		
-		assertNull(ourLastBinary.getContentType());
-		assertArrayEquals(new byte[] {0,1,2,3,4}, ourLastBinary.getContent());
-	}
-
+	
 	@Test
 	public void testRawBytesBinaryContentType() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
@@ -70,7 +61,8 @@ public class CreateBinaryDstu3Test {
 		assertArrayEquals(new byte[] {0,1,2,3,4}, ourLastBinary.getContent());
 		assertArrayEquals(new byte[] {0,1,2,3,4}, ourLastBinaryBytes);
 	}
-	
+
+
 	/**
 	 * Technically the client shouldn't be doing it this way,
 	 * but we'll be accepting
@@ -113,10 +105,21 @@ public class CreateBinaryDstu3Test {
 		assertEquals(encoded, ourLastBinaryString);
 		assertArrayEquals(encoded.getBytes("UTF-8"), ourLastBinaryBytes);
 	}
+	
+	@Test
+	public void testRawBytesNoContentType() throws Exception {
+		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		post.setEntity(new ByteArrayEntity(new byte[] {0,1,2,3,4}));
+		ourClient.execute(post);
+		
+		assertNull(ourLastBinary.getContentType());
+		assertArrayEquals(new byte[] {0,1,2,3,4}, ourLastBinary.getContent());
+	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
@@ -143,17 +146,17 @@ public class CreateBinaryDstu3Test {
 	
 	public static class BinaryProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Binary.class;
-		}
-		
 		@Create()
 		public MethodOutcome createBinary(@ResourceParam Binary theBinary, @ResourceParam String theBinaryString, @ResourceParam byte[] theBinaryBytes) {
 			ourLastBinary = theBinary;
 			ourLastBinaryString = theBinaryString;
 			ourLastBinaryBytes = theBinaryBytes;
 			return new MethodOutcome(new IdType("Binary/001/_history/002"));
+		}
+		
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Binary.class;
 		}
 
 	}

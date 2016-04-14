@@ -27,18 +27,18 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DeleteDstu2Test {
 	private static CloseableHttpClient ourClient;
-	private static String ourLastConditionalUrl;
-	private static int ourPort;
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
-	private static Server ourServer;
-	private static IdDt ourLastIdParam;
 	private static boolean ourInvoked;
+	private static String ourLastConditionalUrl;
+	private static IdDt ourLastIdParam;
+	private static int ourPort;
+	private static Server ourServer;
 	
-	
-	
+
 	@Before
 	public void before() {
 		ourLastConditionalUrl = null;
@@ -46,6 +46,8 @@ public class DeleteDstu2Test {
 		ourInvoked = false;
 	}
 
+
+	
 	@Test
 	public void testUpdateWithConditionalUrl() throws Exception {
 		Patient patient = new Patient();
@@ -76,9 +78,11 @@ public class DeleteDstu2Test {
 		assertNull(ourLastConditionalUrl);
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
@@ -106,18 +110,18 @@ public class DeleteDstu2Test {
 	
 	public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-		
 		@Delete()
 		public MethodOutcome delete(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
 			ourInvoked = true;
 			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+		}
+
+		
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
 		}
 
 	}

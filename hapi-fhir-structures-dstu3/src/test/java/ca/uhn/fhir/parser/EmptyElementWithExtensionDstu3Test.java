@@ -6,9 +6,11 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by Bill de Beaubien on 12/20/2015.
@@ -17,6 +19,13 @@ public class EmptyElementWithExtensionDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmptyElementWithExtensionDstu3Test.class);
 	private static FhirContext ctx = FhirContext.forDstu3();
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testNullFlavorCompositeJson() throws Exception {

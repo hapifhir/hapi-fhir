@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -45,6 +47,12 @@ public class ETagClientDstu2Test {
 	private HttpClient myHttpClient;
 
 	private HttpResponse myHttpResponse;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {

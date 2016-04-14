@@ -74,6 +74,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.TestUtil;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -83,6 +84,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;

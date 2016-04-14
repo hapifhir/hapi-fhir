@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unused")
 public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
@@ -124,32 +125,24 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		ourAppCtx.close();
-		ourAppCtx = null;
-		ourCtx = null;
-		ourDeviceDao = null;
-		ourDiagnosticReportDao = null;
-		ourEncounterDao = null;
-		ourLocationDao = null;
-		ourObservationDao = null;
-		ourOrganizationDao = null;
-		ourPatientDao = null;
-	}
-
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
-		ourDeviceDao = ourAppCtx.getBean("myDeviceDaoDstu1", IFhirResourceDao.class);
-		ourDiagnosticReportDao = ourAppCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);
-		ourEncounterDao = ourAppCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
-		ourLocationDao = ourAppCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
-		ourObservationDao = ourAppCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
-		ourOrganizationDao = ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
-		ourPatientDao = ourAppCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
-		ourCtx = ourAppCtx.getBean(FhirContext.class);
+		ourCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
+		ourPatientDao = ourCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
+		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
+		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);
+		ourDeviceDao = ourCtx.getBean("myDeviceDaoDstu1", IFhirResourceDao.class);
+		ourOrganizationDao = ourCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
+		ourLocationDao = ourCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
+		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
+		ourFhirCtx = ourCtx.getBean(FhirContext.class);
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourAppCtx.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

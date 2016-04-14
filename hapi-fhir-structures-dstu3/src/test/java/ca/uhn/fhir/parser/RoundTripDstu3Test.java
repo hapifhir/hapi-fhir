@@ -17,9 +17,11 @@ import javax.xml.stream.events.XMLEvent;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.XmlUtil;
 
 public class RoundTripDstu3Test {
@@ -30,7 +32,13 @@ public class RoundTripDstu3Test {
 	public void testIt() {
 		// Just so this doesn't complain until we enable roundtrip test
 	}
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 //	@Test
 	public void testRoundTrip() throws Exception {
 		ZipInputStream is = new ZipInputStream(new FileInputStream("src/test/resources/examples.zip"));

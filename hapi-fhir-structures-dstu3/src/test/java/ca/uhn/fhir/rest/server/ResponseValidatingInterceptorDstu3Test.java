@@ -37,19 +37,20 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 public class ResponseValidatingInterceptorDstu3Test {
-	private static CloseableHttpClient ourClient;
+	public static IBaseResource myReturnResource;
 
+	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 	private ResponseValidatingInterceptor myInterceptor;
-	public static IBaseResource myReturnResource;
 
 	@Before
 	public void before() {
@@ -65,6 +66,74 @@ public class ResponseValidatingInterceptorDstu3Test {
 		// myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 
 		ourServlet.registerInterceptor(myInterceptor);
+	}
+
+	@Test
+	public void testLongHeaderTruncated() throws Exception {
+		IValidatorModule module = new FhirInstanceValidator();
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		myInterceptor.setFailOnSeverity(null);
+
+		Patient patient = new Patient();
+		for (int i = 0; i < 1000; i++) {
+			patient.addContact().setGender(AdministrativeGender.MALE);
+		}
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+
+		{
+			HttpResponse status = ourClient.execute(httpPost);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.trace("Response was:\n{}", responseContent);
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
+		}
+		{
+			myInterceptor.setMaximumHeaderLength(100);
+			HttpResponse status = ourClient.execute(httpPost);
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.trace("Response was:\n{}", responseContent);
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
+		}
+	}
+
+	@Test
+	public void testOperationOutcome() throws Exception {
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.trace("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), (containsString(
+				"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
 	}
 
 	/**
@@ -139,6 +208,32 @@ public class ResponseValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation: NO ISSUES")));
 	}
 
+	@Test
+	public void testSearchXmlInvalidInstanceValidator() throws Exception {
+		IValidatorModule module = new FhirInstanceValidator();
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		patient.addContact().addRelationship().setText("FOO");
+		myReturnResource = patient;
+
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), containsString("X-FHIR-Response-Validation"));
+	}
+
 	/**
 	 * Ignored until #264 is fixed
 	 */
@@ -166,15 +261,10 @@ public class ResponseValidatingInterceptorDstu3Test {
 	}
 
 	@Test
-	public void testSearchXmlInvalidInstanceValidator() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
-		myInterceptor.addValidatorModule(module);
-		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-
+	public void testSearchXmlValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
-		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
@@ -185,10 +275,10 @@ public class ResponseValidatingInterceptorDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
+		ourLog.trace("Response was:\n{}", responseContent);
 
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Response-Validation"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
 	}
 
 	@Test
@@ -231,98 +321,10 @@ public class ResponseValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation")));
 	}
 
-	@Test
-	public void testSearchXmlValidNoValidatorsSpecified() throws Exception {
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-		patient.setGender(AdministrativeGender.MALE);
-		myReturnResource = patient;
-
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.trace("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
-	}
-
-	@Test
-	public void testOperationOutcome() throws Exception {
-		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-		patient.setGender(AdministrativeGender.MALE);
-		myReturnResource = patient;
-
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.trace("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString(
-				"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
-	}
-
-	@Test
-	public void testLongHeaderTruncated() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
-		myInterceptor.addValidatorModule(module);
-		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		myInterceptor.setFailOnSeverity(null);
-
-		Patient patient = new Patient();
-		for (int i = 0; i < 1000; i++) {
-			patient.addContact().setGender(AdministrativeGender.MALE);
-		}
-		patient.setGender(AdministrativeGender.MALE);
-		myReturnResource = patient;
-
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-
-		{
-			HttpResponse status = ourClient.execute(httpPost);
-
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			ourLog.info("Response was:\n{}", status);
-			ourLog.trace("Response was:\n{}", responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
-		}
-		{
-			myInterceptor.setMaximumHeaderLength(100);
-			HttpResponse status = ourClient.execute(httpPost);
-
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			ourLog.info("Response was:\n{}", status);
-			ourLog.trace("Response was:\n{}", responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
-		}
-	}
-
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

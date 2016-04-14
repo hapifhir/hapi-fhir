@@ -37,17 +37,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 public class QuestionnaireResponseValidatorDstu3Test {
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 
+	private static final FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
 
-	private IWorkerContext myWorkerCtx;
-	private IValidationSupport myValSupport;
-	private FhirValidator myVal;
-
 	private FhirInstanceValidator myInstanceVal;
+	private FhirValidator myVal;
+	private IValidationSupport myValSupport;
+
+	private IWorkerContext myWorkerCtx;
 
 	@Before
 	public void before() {
@@ -65,13 +67,17 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		myVal.registerValidatorModule(myInstanceVal);
 
 	}
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
-	@AfterClass
-	public static void afterClass() {
-		myDefaultValidationSupport.flush();
-		myDefaultValidationSupport = null;
+	private ValidationResult stripBindingHasNoSourceMessage(ValidationResult theErrors) {
+		List<SingleValidationMessage> messages = new ArrayList<SingleValidationMessage>(theErrors.getMessages());
+		for (int i = 0; i < messages.size(); i++) {
+			if (messages.get(i).getMessage().contains("has no source, so can't")) {
+				messages.remove(i);
+				i--;
+			}
+		}
+		
+		return new ValidationResult(ourCtx, messages);
 	}
-
 	@Test
 	public void testAnswerWithWrongType() {
 		Questionnaire q = new Questionnaire();
@@ -148,6 +154,66 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system2::code3) is not in the options value set in the questionnaire"));
 		assertThat(errors.toString(), containsString("/f:QuestionnaireResponse/f:item/f:answer"));
 
+	}
+
+	@Test
+	public void testGroupWithNoLinkIdInQuestionnaireResponse() {
+		Questionnaire q = new Questionnaire();
+		QuestionnaireItemComponent qGroup = q.addItem().setType(QuestionnaireItemType.GROUP);
+		qGroup.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.BOOLEAN);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		QuestionnaireResponseItemComponent qaGroup = qa.addItem();
+		qaGroup.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
+	}
+
+	@Test
+	public void testItemWithNoType() {
+		Questionnaire q = new Questionnaire();
+		QuestionnaireItemComponent qGroup = q.addItem();
+		qGroup.setLinkId("link0");
+		qGroup.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		QuestionnaireResponseItemComponent qaGroup = qa.addItem().setLinkId("link0");
+		qaGroup.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("Definition for item link0 does not contain a type"));
+		assertEquals(1, errors.getMessages().size());
+	}
+
+	@Test
+	public void testMissingRequiredQuestion() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No response found for required item link0"));
 	}
 
 	@Test
@@ -264,78 +330,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	}
 
-	private ValidationResult stripBindingHasNoSourceMessage(ValidationResult theErrors) {
-		List<SingleValidationMessage> messages = new ArrayList<SingleValidationMessage>(theErrors.getMessages());
-		for (int i = 0; i < messages.size(); i++) {
-			if (messages.get(i).getMessage().contains("has no source, so can't")) {
-				messages.remove(i);
-				i--;
-			}
-		}
-		
-		return new ValidationResult(ourCtx, messages);
-	}
-
-	@Test
-	public void testGroupWithNoLinkIdInQuestionnaireResponse() {
-		Questionnaire q = new Questionnaire();
-		QuestionnaireItemComponent qGroup = q.addItem().setType(QuestionnaireItemType.GROUP);
-		qGroup.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.BOOLEAN);
-
-		QuestionnaireResponse qa = new QuestionnaireResponse();
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		QuestionnaireResponseItemComponent qaGroup = qa.addItem();
-		qaGroup.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
-
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
-		ValidationResult errors = myVal.validateWithResult(qa);
-
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
-	}
-
-	@Test
-	public void testMissingRequiredQuestion() {
-
-		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
-		q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
-
-		QuestionnaireResponse qa = new QuestionnaireResponse();
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
-
-		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
-		ValidationResult errors = myVal.validateWithResult(qa);
-
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item link0"));
-	}
-
-	@Test
-	public void testItemWithNoType() {
-		Questionnaire q = new Questionnaire();
-		QuestionnaireItemComponent qGroup = q.addItem();
-		qGroup.setLinkId("link0");
-		qGroup.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-
-		QuestionnaireResponse qa = new QuestionnaireResponse();
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		QuestionnaireResponseItemComponent qaGroup = qa.addItem().setLinkId("link0");
-		qaGroup.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
-
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
-		ValidationResult errors = myVal.validateWithResult(qa);
-
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Definition for item link0 does not contain a type"));
-		assertEquals(1, errors.getMessages().size());
-	}
-
 	@Test
 	public void testUnexpectedAnswer() {
 		Questionnaire q = new Questionnaire();
@@ -405,6 +399,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
 		errors = myVal.validateWithResult(qa);
 		assertEquals(errors.toString(), 10, errors.getMessages().size());
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		myDefaultValidationSupport.flush();
+		myDefaultValidationSupport = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

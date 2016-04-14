@@ -14,6 +14,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
@@ -29,10 +30,17 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testSuggestIgnoresBase64Content() {

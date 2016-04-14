@@ -38,18 +38,19 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CustomTypeServerDstu3 {
 	private static CloseableHttpClient ourClient;
 
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeServerDstu3.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static IdType ourLastId;
 	private static IdType ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeServerDstu3.class);
+	private static int ourPort;
+	private static Server ourServer;
 
 	@Before
 	public void before() {
@@ -58,6 +59,7 @@ public class CustomTypeServerDstu3 {
 		ourLastIdParam = null;
 		ourLastRequestWasSearch = false;
 	}
+
 
 	@Test
 	public void testCreateWithIdInBody() throws Exception {
@@ -126,9 +128,11 @@ public class CustomTypeServerDstu3 {
 		assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -155,6 +159,14 @@ public class CustomTypeServerDstu3 {
 
 	public static class PatientProvider implements IResourceProvider {
 
+		@Create()
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
+			ourLastConditionalUrl = theConditional;
+			ourLastId = thePatient.getIdElement();
+			ourLastIdParam = theIdParam;
+			return new MethodOutcome(new IdType("Patient/001/_history/002"));
+		}
+
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
@@ -164,14 +176,6 @@ public class CustomTypeServerDstu3 {
 		public List<IResource> search(@OptionalParam(name = "foo") StringDt theString) {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<IResource>();
-		}
-
-		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
-			ourLastConditionalUrl = theConditional;
-			ourLastId = thePatient.getIdElement();
-			ourLastIdParam = theIdParam;
-			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
 
 	}

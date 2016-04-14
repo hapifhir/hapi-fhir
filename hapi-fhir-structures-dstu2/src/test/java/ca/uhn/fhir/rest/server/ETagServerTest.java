@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -47,12 +48,37 @@ import ca.uhn.fhir.util.PortUtil;
 public class ETagServerTest {
 
 	private static CloseableHttpClient ourClient;
+	private static PoolingHttpClientConnectionManager ourConnectionManager;
 	private static FhirContext ourCtx;
+	private static IdDt ourLastId;
+
 	private static Date ourLastModifiedDate;
 	private static int ourPort;
 
 	private static Server ourServer;
-	private static PoolingHttpClientConnectionManager ourConnectionManager;
+
+
+	@Before
+	public void before() throws IOException {
+		ourLastId = null;
+	}
+
+	@Test
+	public void testAutomaticNotModified() throws Exception {
+		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
+		HttpResponse status = ourClient.execute(httpGet);
+		try {
+			assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
+		} finally {
+			if (status.getEntity() != null) {
+				IOUtils.closeQuietly(status.getEntity().getContent());
+			}
+		}
+
+	}
 
 	@Test
 	public void testETagHeader() throws Exception {
@@ -77,23 +103,6 @@ public class ETagServerTest {
 	}
 
 	@Test
-	public void testAutomaticNotModified() throws Exception {
-		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
-		HttpResponse status = ourClient.execute(httpGet);
-		try {
-			assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
-		} finally {
-			if (status.getEntity() != null) {
-				IOUtils.closeQuietly(status.getEntity().getContent());
-			}
-		}
-
-	}
-
-	@Test
 	public void testLastModifiedHeader() throws Exception {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
@@ -115,32 +124,6 @@ public class ETagServerTest {
 				IOUtils.closeQuietly(status.getEntity().getContent());
 			}
 		}
-	}
-
-	@Before
-	public void before() throws IOException {
-		ourLastId = null;
-	}
-
-	@Test
-	public void testUpdateWithNoVersion() throws Exception {
-		Patient p = new Patient();
-		p.setId("2");
-		p.addIdentifier().setSystem("urn:system").setValue("001");
-		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
-
-		HttpPut http;
-		http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
-		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(http);
-		try {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		} finally {
-			if (status.getEntity() != null) {
-				IOUtils.closeQuietly(status.getEntity().getContent());
-			}
-		}
-
 	}
 
 	@Test
@@ -187,9 +170,31 @@ public class ETagServerTest {
 		}
 	}
 
+	@Test
+	public void testUpdateWithNoVersion() throws Exception {
+		Patient p = new Patient();
+		p.setId("2");
+		p.addIdentifier().setSystem("urn:system").setValue("001");
+		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPut http;
+		http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(http);
+		try {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} finally {
+			if (status.getEntity() != null) {
+				IOUtils.closeQuietly(status.getEntity().getContent());
+			}
+		}
+
+	}
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -215,8 +220,6 @@ public class ETagServerTest {
 
 	}
 
-	private static IdDt ourLastId;
-
 	public static class PatientProvider implements IResourceProvider {
 
 		@Read(version = true)
@@ -228,6 +231,11 @@ public class ETagServerTest {
 			return patient;
 		}
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Update
 		public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient theResource) {
 			ourLastId = theId;
@@ -237,11 +245,6 @@ public class ETagServerTest {
 			}
 
 			return new MethodOutcome(theId.withVersion(theId.getVersionIdPart() + "0"));
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamCo
 import org.hl7.fhir.dstu3.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -63,12 +64,17 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu3Test.class);
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);

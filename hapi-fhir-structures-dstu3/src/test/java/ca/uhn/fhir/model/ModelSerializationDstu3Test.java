@@ -11,11 +11,13 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelSerializationDstu3Test {
 
@@ -33,6 +35,12 @@ public class ModelSerializationDstu3Test {
 		AdministrativeGender deserialized = SerializationUtils.deserialize(bytes);
 		assertEquals(AdministrativeGender.MALE, deserialized);
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testBoundCodeSerialization() {

@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,12 +64,19 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.TestUtil;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes= {TestDstu2Config.class/*, ca.uhn.fhir.jpa.config.WebsocketDstu2Config.class*/ })
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Autowired
 	protected ApplicationContext myAppCtx;

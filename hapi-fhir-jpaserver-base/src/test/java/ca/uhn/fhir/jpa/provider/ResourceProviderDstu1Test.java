@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
@@ -79,6 +80,14 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	private static Server ourServer;
 	private static String ourServerBase;
 	private static CloseableHttpClient ourHttpClient;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		ourAppCtx.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -515,11 +524,6 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	}
 
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-		ourAppCtx.stop();
-	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass

@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ServerSearchDstu2Test {
 
@@ -43,7 +44,8 @@ public class ServerSearchDstu2Test {
 		ourLastMethod = null;
 		ourLastRef = null;
 	}
-	
+
+
 	@Test
 	public void testSearchParam1() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param1=param1value");
@@ -54,7 +56,7 @@ public class ServerSearchDstu2Test {
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("param1value", ourLastRef.getValue());
 	}
-
+	
 	@Test
 	public void testSearchParam2() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param2=param2value&foo=bar");
@@ -76,9 +78,11 @@ public class ServerSearchDstu2Test {
 		assertEquals(null, ourLastMethod);
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

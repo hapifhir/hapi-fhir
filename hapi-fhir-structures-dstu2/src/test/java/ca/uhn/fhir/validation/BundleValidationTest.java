@@ -8,11 +8,15 @@ import ca.uhn.fhir.model.dstu2.valueset.AppointmentStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipantTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipationStatusEnum;
+import ca.uhn.fhir.util.TestUtil;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import org.junit.AfterClass;
 
 /**
  * @author Bill de Beaubien on 11/30/2015.
@@ -35,6 +39,12 @@ public class BundleValidationTest {
 			System.out.println(singleValidationMessage.getMessage());
 		}
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 
 	@Ignore

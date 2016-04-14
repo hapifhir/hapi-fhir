@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CreateDstu3Test {
 	private static CloseableHttpClient ourClient;
@@ -69,6 +70,7 @@ public class CreateDstu3Test {
 		//@formatter:on
 	}
 
+
 	@Test
 	public void testSearch() throws Exception {
 
@@ -99,8 +101,9 @@ public class CreateDstu3Test {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

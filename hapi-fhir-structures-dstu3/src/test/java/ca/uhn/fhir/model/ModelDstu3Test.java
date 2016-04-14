@@ -14,9 +14,11 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerPractitionerRoleComponent;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelDstu3Test {
 
@@ -32,6 +34,12 @@ public class ModelDstu3Test {
 		CodeableConcept roleField = role.getRole();
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	/**
 	 * See #304

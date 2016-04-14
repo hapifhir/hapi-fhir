@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ElementsParamTest {
 
@@ -46,6 +47,7 @@ public class ElementsParamTest {
 	public void before() {
 		ourLastElements = null;
 	}
+
 
 	@Test
 	public void testReadSummaryData() throws Exception {
@@ -99,7 +101,6 @@ public class ElementsParamTest {
 		assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
 	}
 
-
 	@Test
 	public void testSearchSummaryText() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_elements=text");
@@ -117,9 +118,11 @@ public class ElementsParamTest {
 		assertThat(ourLastElements, containsInAnyOrder("text"));
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

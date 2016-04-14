@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -58,10 +59,9 @@ public class RequestValidatingInterceptorDstu3Test {
 
 	private static RestfulServer ourServlet;
 	
-	
-	
 	private RequestValidatingInterceptor myInterceptor;
 
+	
 	@Before
 	public void before() {
 		ourLastRequestWasSearch = false;
@@ -76,53 +76,6 @@ public class RequestValidatingInterceptorDstu3Test {
 //		myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 		
 		ourServlet.registerInterceptor(myInterceptor);
-	}
-
-	@Test
-	public void testCreateJsonInvalidNoValidatorsSpecified() throws Exception {
-		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-		patient.setGender(AdministrativeGender.MALE);
-		patient.addContact().addRelationship().setText("FOO");
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
-		
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
-		assertThat(responseContent, containsString("<severity value=\"error\"/>"));
-	}
-
-	@Test
-	public void testFetchMetadata() throws Exception {
-		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
-		
-		// This header caused a crash
-		httpGet.addHeader("Content-Type", "application/xml+fhir");
-
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Conformance"));
 	}
 
 	@Test
@@ -151,7 +104,33 @@ public class RequestValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 		assertThat(responseContent, not(containsString("<severity value=\"error\"/>")));
 	}
-	
+
+	@Test
+	public void testCreateJsonInvalidNoValidatorsSpecified() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		patient.addContact().addRelationship().setText("FOO");
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
+		assertThat(responseContent, containsString("<severity value=\"error\"/>"));
+	}
+
 	@Test
 	public void testCreateJsonValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
@@ -200,7 +179,10 @@ public class RequestValidatingInterceptorDstu3Test {
 	}
 	
 	@Test
-	public void testCreateXmlInvalidNoValidatorsSpecified() throws Exception {
+	public void testCreateXmlInvalidInstanceValidator() throws Exception {
+		IValidatorModule module = new FhirInstanceValidator();
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		Patient patient = new Patient();
@@ -224,7 +206,31 @@ public class RequestValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 	}
 
+	@Test
+	public void testCreateXmlInvalidNoValidatorsSpecified() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		patient.addContact().addRelationship().setText("FOO");
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
+	}
+	
 	@Test
 	public void testCreateXmlInvalidNoValidatorsSpecifiedOutcomeHeader() throws Exception {
 		myInterceptor.setAddResponseHeaderOnSeverity(null);
@@ -252,50 +258,6 @@ public class RequestValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
 	}
 
-	@Test
-	public void testCreateXmlInvalidInstanceValidator() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
-		myInterceptor.addValidatorModule(module);
-		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-		patient.setGender(AdministrativeGender.MALE);
-		patient.addContact().addRelationship().setText("FOO");
-		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
-		
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
-	}
-	
-	@Test
-	public void testSearch() throws Exception {
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
-		assertEquals(true, ourLastRequestWasSearch);
-	}
 
 	@Test
 	public void testCreateXmlValidNoValidatorsSpecified() throws Exception {
@@ -318,10 +280,49 @@ public class RequestValidatingInterceptorDstu3Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
 	}
+
+	@Test
+	public void testFetchMetadata() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		
+		// This header caused a crash
+		httpGet.addHeader("Content-Type", "application/xml+fhir");
+
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Conformance"));
+	}
+	
+	@Test
+	public void testSearch() throws Exception {
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
+		assertEquals(true, ourLastRequestWasSearch);
+	}
 	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	
 	@BeforeClass

@@ -85,6 +85,7 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -97,6 +98,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 
 public class XmlParserDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3();
@@ -106,6 +108,12 @@ public class XmlParserDstu3Test {
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testBundleWithBinary() {

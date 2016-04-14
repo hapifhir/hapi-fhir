@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionStatus;
@@ -66,10 +67,17 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testReindexing() {

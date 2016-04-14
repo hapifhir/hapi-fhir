@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Specimen;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
+import ca.uhn.fhir.util.TestUtil;
 
 public class Dstu2BundleFactoryTest {
     private static FhirContext ourCtx;
@@ -34,6 +36,12 @@ public class Dstu2BundleFactoryTest {
     public static void beforeClass() throws Exception {
         ourCtx = FhirContext.forDstu2();
     }
+
+ 	@AfterClass
+ 	public static void afterClassClearContext() {
+ 		TestUtil.clearAllStaticFieldsForUnitTest();
+ 	}
+
 
     @Before
     public void setUp() throws Exception {

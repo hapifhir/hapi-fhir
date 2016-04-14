@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 
 public class ResourceValidatorDstu2Test {
@@ -49,6 +51,12 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchematron(true);
 		return val;
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	/**
 	 * See

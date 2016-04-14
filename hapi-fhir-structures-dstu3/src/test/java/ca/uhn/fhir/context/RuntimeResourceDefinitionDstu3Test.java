@@ -4,7 +4,10 @@ import static org.junit.Assert.*;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class RuntimeResourceDefinitionDstu3Test {
 
@@ -19,5 +22,11 @@ public class RuntimeResourceDefinitionDstu3Test {
 	public void testAsClassWrong() {
 		ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 }

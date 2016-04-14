@@ -5,17 +5,25 @@ import static org.junit.Assert.*;
 import java.util.Properties;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelInstantiationTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelInstantiationTest.class);
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testBinaryIsBaseBinary() {
 		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));

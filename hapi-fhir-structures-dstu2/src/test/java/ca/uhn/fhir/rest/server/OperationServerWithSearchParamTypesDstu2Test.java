@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class OperationServerWithSearchParamTypesDstu2Test {
@@ -69,6 +70,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ourLastParamValStr = null;
 		ourLastParamValTok = null;
 	}
+
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -324,8 +326,9 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
