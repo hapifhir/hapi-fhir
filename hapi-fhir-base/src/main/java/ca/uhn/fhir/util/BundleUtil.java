@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
@@ -96,6 +95,17 @@ public class BundleUtil {
 		}
 		
 		return retVal;		
+	}
+
+	public static String getBundleType(FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+		if (entries.size() > 0) {
+			IPrimitiveType<?> typeElement = (IPrimitiveType<?>) entries.get(0);
+			return typeElement.getValueAsString();
+		}
+		return null;
 	}
 
 }

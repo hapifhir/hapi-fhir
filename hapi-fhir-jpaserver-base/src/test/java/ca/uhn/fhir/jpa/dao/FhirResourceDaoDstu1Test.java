@@ -31,11 +31,11 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 @SuppressWarnings("unused")
 public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
-	private static AnnotationConfigApplicationContext ourCtx;
+	private static AnnotationConfigApplicationContext ourAppCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;
 	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
-	private static FhirContext ourFhirCtx;
+	private static FhirContext ourCtx;
 	private static IFhirResourceDao<Location> ourLocationDao;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu1Test.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
@@ -126,21 +126,30 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 	@AfterClass
 	public static void afterClass() {
-		ourCtx.close();
+		ourAppCtx.close();
+		ourAppCtx = null;
+		ourCtx = null;
+		ourDeviceDao = null;
+		ourDiagnosticReportDao = null;
+		ourEncounterDao = null;
+		ourLocationDao = null;
+		ourObservationDao = null;
+		ourOrganizationDao = null;
+		ourPatientDao = null;
 	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
-		ourPatientDao = ourCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
-		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
-		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);
-		ourDeviceDao = ourCtx.getBean("myDeviceDaoDstu1", IFhirResourceDao.class);
-		ourOrganizationDao = ourCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
-		ourLocationDao = ourCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
-		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
-		ourFhirCtx = ourCtx.getBean(FhirContext.class);
+		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
+		ourDeviceDao = ourAppCtx.getBean("myDeviceDaoDstu1", IFhirResourceDao.class);
+		ourDiagnosticReportDao = ourAppCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);
+		ourEncounterDao = ourAppCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
+		ourLocationDao = ourAppCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
+		ourObservationDao = ourAppCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
+		ourOrganizationDao = ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
+		ourPatientDao = ourAppCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
+		ourCtx = ourAppCtx.getBean(FhirContext.class);
 	}
 
 }

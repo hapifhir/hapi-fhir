@@ -178,6 +178,42 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testBatchWhenTransactionAllowed() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		Bundle input = new Bundle();
+		input.setType(BundleTypeEnum.BATCH);
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient");
+		
+		Bundle output = new Bundle();
+		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
+		output.addEntry().getResponse().setLocation("/Patient/1");
+		
+		HttpPost httpPost;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList((IResource)output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		extractResponseAndClose(status);
+		assertEquals(401, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
 	public void testMetadataDeny() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override

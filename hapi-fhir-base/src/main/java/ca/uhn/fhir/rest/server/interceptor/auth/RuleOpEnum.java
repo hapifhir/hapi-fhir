@@ -26,5 +26,6 @@ enum RuleOpEnum {
 	ALLOW_ALL,
 	DENY_ALL, 
 	TRANSACTION, 
-	METADATA
+	METADATA, 
+	BATCH
 }

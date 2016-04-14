@@ -41,12 +41,14 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -174,6 +176,23 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		return retVal;
+	}
+
+	
+	@Override
+	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
+		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+		
+		/*
+		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
+		 */
+		if (myTransactionParamIndex != -1) {
+			theDetails.setResource((IBaseResource) theMethodParams[myTransactionParamIndex]);
+		} else {
+			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
+			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
+		}
+
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {

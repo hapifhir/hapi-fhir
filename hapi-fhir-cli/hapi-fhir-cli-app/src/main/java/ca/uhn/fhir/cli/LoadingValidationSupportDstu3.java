@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class LoadingValidationSupportDstu3 implements IValidationSupport {
 
-	private static FhirContext myCtx = FhirContext.forDstu3();
+	private FhirContext myCtx = FhirContext.forDstu3();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu3.class);
 

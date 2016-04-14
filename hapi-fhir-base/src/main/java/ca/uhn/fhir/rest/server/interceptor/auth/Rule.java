@@ -23,12 +23,14 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import java.util.Collection;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 
 class Rule implements IAuthRule {
@@ -59,8 +61,13 @@ class Rule implements IAuthRule {
 		case WRITE:
 			appliesTo = theInputResource;
 			break;
+		case BATCH:
 		case TRANSACTION:
-			return myMode;
+			if (requestAppliesToTransaction(ctx, myOp, theInputResource)) {
+				return myMode;
+			} else {
+				return RuleVerdictEnum.NO_DECISION;
+			}
 		case ALLOW_ALL:
 			return RuleVerdictEnum.ALLOW;
 		case DENY_ALL:
@@ -109,6 +116,19 @@ class Rule implements IAuthRule {
 		}
 
 		return myMode;
+	}
+
+	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
+		IBaseBundle request = (IBaseBundle) theInputResource;
+		String bundleType = BundleUtil.getBundleType(theContext, request);
+		switch (theOp) {
+		case TRANSACTION:
+			return "transaction".equals(bundleType);
+		case BATCH:
+			return "batch".equals(bundleType);
+		default:
+			return false;
+		}
 	}
 
 	@Override
