@@ -441,6 +441,16 @@ public interface IServerInterceptor {
 			myResource = theObject;
 		}
 
+		/**
+		 * This method may be invoked by user code to notify interceptors that a nested 
+		 * operation is being invoked which is denoted by this request details.
+		 */
+		public void notifyIncomingRequestPreHandled(RestOperationTypeEnum theOperationType) {
+			for (IServerInterceptor next : getRequestDetails().getServer().getInterceptors()) {
+				next.incomingRequestPreHandled(theOperationType, this);
+			}
+		}
+
 	}
 
 }

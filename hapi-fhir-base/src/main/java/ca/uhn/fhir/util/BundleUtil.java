@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -33,33 +35,13 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 /**
  * Fetch resources from a bundle
  */
 public class BundleUtil {
 
-	/**
-	 * Extract all of the resources from a given bundle
-	 */
-	public static List<IBaseResource> toListOfResources(FhirContext theContext, IBaseBundle theBundle) {
-		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-
-		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
-		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
-		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
-
-		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
-		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
-		for (IBase nextEntry : entries) {
-			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
-				retVal.add((IBaseResource) next);
-			}
-		}
-
-		return retVal;
-	}
-	
 	@SuppressWarnings("unchecked")
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -96,7 +78,7 @@ public class BundleUtil {
 		
 		return retVal;		
 	}
-
+	
 	public static String getBundleType(FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
@@ -106,6 +88,98 @@ public class BundleUtil {
 			return typeElement.getValueAsString();
 		}
 		return null;
+	}
+
+	/**
+	 * Extract all of the resources from a given bundle
+	 */
+	public static List<BundleEntryParts> toListOfEntries(FhirContext theContext, IBaseBundle theBundle) {
+		List<BundleEntryParts> retVal = new ArrayList<BundleEntryParts>();
+
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?>  requestElem = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
+		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName("url");
+		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName("method");
+		
+		IBaseResource resource = null;
+		String url = null;
+		RequestTypeEnum requestType = null;
+		
+		for (IBase nextEntry : entries) {
+			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
+				resource = (IBaseResource) next;
+			}
+			for (IBase nextRequest : requestChild.getAccessor().getValues(nextEntry)) {
+				for (IBase nextUrl : urlChild.getAccessor().getValues(nextRequest)) {
+					url = ((IPrimitiveType<?>)nextUrl).getValueAsString();
+				}
+				for (IBase nextUrl : methodChild.getAccessor().getValues(nextRequest)) {
+					String methodString = ((IPrimitiveType<?>)nextUrl).getValueAsString();
+					if (isNotBlank(methodString)) {
+						requestType = RequestTypeEnum.valueOf(methodString);
+					}
+				}
+			}
+
+			/* 
+			 * All 3 might be null - That's ok because we still want to know the
+			 * order in the original bundle.
+			 */
+			retVal.add(new BundleEntryParts(requestType, url, resource));
+		}
+
+		
+		return retVal;
+	}
+	
+	/**
+	 * Extract all of the resources from a given bundle
+	 */
+	public static List<IBaseResource> toListOfResources(FhirContext theContext, IBaseBundle theBundle) {
+		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+		for (IBase nextEntry : entries) {
+			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
+				retVal.add((IBaseResource) next);
+			}
+		}
+
+		return retVal;
+	}
+
+	public static class BundleEntryParts
+	{
+		private final RequestTypeEnum myRequestType;
+		private final IBaseResource myResource;
+		private final String myUrl;
+		public BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
+			super();
+			myRequestType = theRequestType;
+			myUrl = theUrl;
+			myResource = theResource;
+		}
+		public RequestTypeEnum getRequestType() {
+			return myRequestType;
+		}
+		public IBaseResource getResource() {
+			return myResource;
+		}
+		public String getUrl() {
+			return myUrl;
+		}
 	}
 
 }

@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 
 public interface IAuthRule {
 
@@ -38,9 +39,12 @@ public interface IAuthRule {
 	 *           The resource being input by the client, or <code>null</code>
 	 * @param theOutputResource
 	 *           The resource being returned by the server, or <code>null</code>
-	 * @return Returns a policy decision, or {@link RuleVerdictEnum#NO_DECISION} if the rule does not apply
+	 * @param theRuleApplier
+	 *           The rule applying module (this can be used by rules to apply the rule set to
+	 *           nested objects in the request, such as nested requests in a transaction)
+	 * @return Returns a policy decision, or <code>null</code> if the rule does not apply
 	 */
-	RuleVerdictEnum applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource);
+	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier);
 
 	/**
 	 * Returns a name for this rule, to be used in logs and error messages

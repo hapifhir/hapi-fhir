@@ -23,6 +23,11 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 public interface IAuthRuleBuilderRule {
 
 	/**
+	 * This rule applies to the FHIR delete operation
+	 */
+	IAuthRuleBuilderRuleOp delete();
+
+	/**
 	 * This rules applies to the metadata operation (retrieve the
 	 * server's conformance statement)
 	 * <p>

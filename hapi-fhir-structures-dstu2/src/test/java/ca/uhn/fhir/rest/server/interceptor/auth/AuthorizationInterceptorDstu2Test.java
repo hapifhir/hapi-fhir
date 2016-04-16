@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -152,7 +153,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -189,7 +190,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 	
@@ -219,8 +220,7 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
-	@Ignore // not done yet
-	public void testBatchWhenTransactionAllowed() throws Exception {
+	public void testBatchWhenOnlyTransactionAllowed() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -236,7 +236,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
-		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient");
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
 		
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
@@ -252,7 +252,80 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(input));
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testBatchWhenTransactionReadDenied() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		Bundle input = new Bundle();
+		input.setType(BundleTypeEnum.BATCH);
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
+		
+		Bundle output = new Bundle();
+		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
+		output.addEntry().setResource(createPatient(2));
+		
+		HttpPost httpPost;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList((IResource)output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testBatchWhenTransactionWrongBundleType() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		Bundle input = new Bundle();
+		input.setType(BundleTypeEnum.COLLECTION);
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
+		
+		Bundle output = new Bundle();
+		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
+		output.addEntry().setResource(createPatient(1));
+		
+		HttpPost httpPost;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList((IResource)output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertThat(response, containsString("Invalid transaction bundle type: collection"));
 	}
 
 	@Test
@@ -277,7 +350,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 	}
 	
 	@Test
@@ -312,7 +385,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
@@ -322,7 +395,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
@@ -332,7 +405,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 	}
@@ -405,7 +478,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
@@ -415,7 +488,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
@@ -425,7 +498,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
@@ -435,7 +508,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 	}
@@ -458,7 +531,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);
-		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient");
+		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.PUT);
 		
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
@@ -500,7 +573,7 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
 		assertEquals("Access denied by default policy (no applicable rules)", response);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
@@ -509,7 +582,7 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals("Access denied by default policy (no applicable rules)", response);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
@@ -543,7 +616,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/2");
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -578,7 +651,7 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
 		assertEquals("Access denied by default policy (no applicable rules)", response);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
@@ -603,10 +676,12 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals("Access denied by default policy (no applicable rules)", response);
-		assertEquals(401, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
 
+	
+	
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {

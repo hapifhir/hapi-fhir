@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.util.BundleUtil;
@@ -49,7 +50,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * inspect requests and responses to determine whether the calling user
  * has permission to perform the given action.
  */
-public class AuthorizationInterceptor extends InterceptorAdapter implements IServerOperationInterceptor {
+public class AuthorizationInterceptor extends InterceptorAdapter implements IServerOperationInterceptor, IRuleApplier {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	
@@ -72,9 +73,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		setDefaultPolicy(theDefaultPolicy);
 	}
 
-	private void applyRulesAndFailIfDeny(List<IAuthRule> theRules, RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
-		ourLog.trace("Applying {} rules to render an auth decision for operation {}", theRules.size(), theOperation);
-		Verdict decision = applyRulesAndReturnDecision(theRules, theOperation, theRequestDetails, theInputResource, theOutputResource);
+	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theOutputResource);
 		
 		if (decision.getDecision() == PolicyEnum.ALLOW) {
 			return;
@@ -83,38 +83,26 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		handleDeny(decision);
 	}
 
-	private Verdict applyRulesAndReturnDecision(List<IAuthRule> theRules, RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
-		PolicyEnum result = null;
-//		PolicyEnum preference = null;
-		IAuthRule decidingRule = null;
-		
-		for (IAuthRule nextRule : theRules) {
-			RuleVerdictEnum decision = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theOutputResource);
-			
-			switch (decision) {
-			case NO_DECISION:
-				continue;
-			case ALLOW:
-				result = PolicyEnum.ALLOW;
-				decidingRule = nextRule;
-				break;
-			case DENY:
-				result = PolicyEnum.DENY;
-				decidingRule = nextRule;
-				break;
-			}
-			
-			if (result != null) {
-				ourLog.trace("Rule {} returned decision {}", nextRule, result);
+	@Override
+	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+		List<IAuthRule> rules = buildRuleList(theRequestDetails);
+		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
+
+		Verdict verdict = null;
+		for (IAuthRule nextRule : rules) {
+			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theOutputResource, this);
+			if (verdict != null) {
+				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
 				break;
 			}
 		}
 		
-		if (result == null) {
+		if (verdict == null) {
 			ourLog.trace("No rules returned a decision, applying default {}", myDefaultPolicy);
-			result = myDefaultPolicy;
+			return new Verdict(myDefaultPolicy, null);
 		}
-		return new Verdict(result, decidingRule);
+		
+		return verdict;
 	}
 
 	/**
@@ -197,22 +185,21 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	 * Handle an access control verdict of {@link PolicyEnum#DENY}.
 	 * <p>
 	 * Subclasses may override to implement specific behaviour, but default is to 
-	 * throw {@link AuthenticationException} (HTTP 401) with error message citing the
+	 * throw {@link ForbiddenOperationException} (HTTP 403) with error message citing the
 	 * rule name which trigered failure
 	 * </p>
 	 */
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
 			String ruleName = defaultString(decision.getDecidingRule().getName(), "(unnamed rule)");
-			throw new AuthenticationException("Access denied by rule: " + ruleName);
+			throw new ForbiddenOperationException("Access denied by rule: " + ruleName);
 		} else {
-			throw new AuthenticationException("Access denied by default policy (no applicable rules)");
+			throw new ForbiddenOperationException("Access denied by default policy (no applicable rules)");
 		}
 	}
 	
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum operation) {
-		List<IAuthRule> rules = buildRuleList(theRequest);
-		applyRulesAndFailIfDeny(rules, operation, theRequest, theResource, null);
+		applyRulesAndFailIfDeny(operation, theRequest, theResource, null);
 	}
 	
 	@Override
@@ -227,8 +214,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 
 		RequestDetails requestDetails = theProcessedRequest.getRequestDetails();
-		List<IAuthRule> rules = buildRuleList(requestDetails);
-		applyRulesAndFailIfDeny(rules, theOperation, requestDetails, theProcessedRequest.getResource(), null);
+		applyRulesAndFailIfDeny(theOperation, requestDetails, theProcessedRequest.getResource(), null);
 	}
 	
 	@Override
@@ -281,7 +267,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 		
 		for (IBaseResource nextResponse : resources) {
-			applyRulesAndFailIfDeny(rules, theRequestDetails.getRestOperationType(), theRequestDetails, null, nextResponse);
+			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, nextResponse);
 		}
 
 		return true;

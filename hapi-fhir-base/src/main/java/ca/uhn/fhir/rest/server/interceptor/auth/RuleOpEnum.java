@@ -27,5 +27,6 @@ enum RuleOpEnum {
 	DENY_ALL, 
 	TRANSACTION, 
 	METADATA, 
-	BATCH
+	BATCH, 
+	DELETE
 }
