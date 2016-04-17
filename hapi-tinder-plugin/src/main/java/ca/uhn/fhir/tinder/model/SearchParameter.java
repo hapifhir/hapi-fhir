@@ -1,5 +1,7 @@
 package ca.uhn.fhir.tinder.model;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,7 +86,9 @@ public class SearchParameter {
 			}
 		} else {
 			if (myType == null) {
-				ourLog.warn("Search parameter {} has no type", myName);
+				if (isNotBlank(myName)) {
+					ourLog.warn("Search parameter {} has no type", myName);
+				}
 			}
 			if ("resource".equals(myType) || "reference".equals(myType)) {
 				retVal.add(new Include(myResourceName + ":" + myName));

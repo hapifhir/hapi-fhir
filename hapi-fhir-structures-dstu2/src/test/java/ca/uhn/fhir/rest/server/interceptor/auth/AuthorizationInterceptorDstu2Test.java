@@ -66,6 +66,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class AuthorizationInterceptorDstu2Test {
 
+	private static final String ERR403 = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Access denied by default policy (no applicable rules)\"/></issue></OperationOutcome>";
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourHitMethod;
@@ -325,7 +326,7 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertThat(response, containsString("Invalid transaction bundle type: collection"));
+		assertEquals(ERR403, response);
 	}
 
 	@Test
@@ -572,7 +573,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
-		assertEquals("Access denied by default policy (no applicable rules)", response);
+		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
@@ -581,7 +582,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/2")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals("Access denied by default policy (no applicable rules)", response);
+		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
@@ -650,7 +651,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(2)));
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
-		assertEquals("Access denied by default policy (no applicable rules)", response);
+		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
@@ -675,7 +676,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(10, "Patient/2")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals("Access denied by default policy (no applicable rules)", response);
+		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}

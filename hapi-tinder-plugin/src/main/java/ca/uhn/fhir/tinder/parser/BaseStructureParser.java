@@ -516,8 +516,9 @@ public abstract class BaseStructureParser {
 		}
 
 		if (!myImportsResolved) {
+			ourLog.info("Scanning resources for imports...");
 			for (BaseRootType next : myResources) {
-				ourLog.info("Scanning resource for imports {}", next.getName());
+				ourLog.debug("Scanning resource for imports {}", next.getName());
 				scanForImportsNames(next);
 			}
 			myImportsResolved = true;

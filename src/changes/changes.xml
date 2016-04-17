@@ -14,7 +14,7 @@
 					<ul>
 						<li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
 						<li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li>
-						<li>SLF4j (All): 1.7.14 -&gt; 1.7.16</li>
+						<li>SLF4j (All): 1.7.14 -&gt; 1.7.21</li>
 					</ul>
 				]]>
 			</action>
