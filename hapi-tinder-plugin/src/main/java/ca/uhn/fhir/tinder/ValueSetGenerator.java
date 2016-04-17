@@ -167,7 +167,7 @@ public class ValueSetGenerator {
 
 	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs) {
 		myConceptCount += nextVs.getCodeSystem().getConcept().size();
-		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
+		ourLog.debug("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
 		// next.getDisplay().getValue(), next.getDefinition());
 
@@ -216,7 +216,7 @@ public class ValueSetGenerator {
 
 	private ValueSetTm parseValueSet(ValueSet nextVs) {
 		myConceptCount += nextVs.getDefine().getConcept().size();
-		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
+		ourLog.debug("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
 		// next.getDisplay().getValue(), next.getDefinition());
 

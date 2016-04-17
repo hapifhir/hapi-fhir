@@ -57,53 +57,6 @@ public class BinaryTest {
 	}
 
 	@Test
-	public void testRead() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("foo", status.getFirstHeader("content-type").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
-
-	}
-
-	@Test
-	public void testReadWithExplicitTypeXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info(responseContent);
-		
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
-		
-		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
-		assertEquals("foo", bin.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-	}
-
-	@Test
-	public void testReadWithExplicitTypeJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info(responseContent);
-		
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
-		
-		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
-		assertEquals("foo", bin.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-	}
-
-	
-	@Test
 	public void testCreate() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
 		http.setEntity(new ByteArrayEntity(new byte[] {1,2,3,4}, ContentType.create("foo/bar", "UTF-8")));
@@ -134,6 +87,53 @@ public class BinaryTest {
 	}
 
 	@Test
+	public void testRead() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+
+	}
+
+	
+	@Test
+	public void testReadWithExplicitTypeJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+		
+		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+	}
+
+	@Test
+	public void testReadWithExplicitTypeXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+		
+		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+	}
+
+	@Test
 	public void testSearch() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -151,11 +151,13 @@ public class BinaryTest {
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 	}
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
 
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -177,7 +179,8 @@ public class BinaryTest {
 		ourClient = builder.build();
 
 	}
-	
+
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -215,11 +218,5 @@ public class BinaryTest {
 		}
 
 }
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

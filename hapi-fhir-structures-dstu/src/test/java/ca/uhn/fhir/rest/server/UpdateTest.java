@@ -44,11 +44,11 @@ import ca.uhn.fhir.util.TestUtil;
  */
 public class UpdateTest {
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateTest.class);
 	private static int ourPort;
 	private static DiagnosticReportProvider ourReportProvider;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testUpdate() throws Exception {
@@ -72,30 +72,6 @@ public class UpdateTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-
-	}
-
-	@Test
-	public void testUpdateWhichReturnsCreate() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001CREATE");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001CREATE/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 
@@ -140,6 +116,47 @@ public class UpdateTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+	}
+
+	@Test
+	public void testUpdateWhichReturnsCreate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001CREATE");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001CREATE/_history/002", status.getFirstHeader("location").getValue());
+
+	}
+
+	@Test
+	public void testUpdateWithNoReturn() throws Exception {
+
+		Organization dr = new Organization();
+		dr.setId("001");
+		dr.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Organization/001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		status.close();
 	}
 
 	@Test
@@ -301,26 +318,10 @@ public class UpdateTest {
 		fail();
 	}
 
-	@Test
-	public void testUpdateWithNoReturn() throws Exception {
-
-		Organization dr = new Organization();
-		dr.setId("001");
-		dr.addIdentifier().setValue("002");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Organization/001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		status.close();
-	}
-
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -344,21 +345,6 @@ public class UpdateTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
-	}
-
-	public static class OrganizationResourceProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Organization.class;
-		}
-
-		@SuppressWarnings("unused")
-		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Organization theOrganization) {
-			return new MethodOutcome();
-		}
 
 	}
 
@@ -408,6 +394,22 @@ public class UpdateTest {
 		}
 	}
 
+	public static class OrganizationResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
+		}
+
+		@SuppressWarnings("unused")
+		@Update
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Organization theOrganization) {
+			return new MethodOutcome();
+		}
+
+	}
+
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -427,12 +429,6 @@ public class UpdateTest {
 			return new MethodOutcome(id, oo);
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

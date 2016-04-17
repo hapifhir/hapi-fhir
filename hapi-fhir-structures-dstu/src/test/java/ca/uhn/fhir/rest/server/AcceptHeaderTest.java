@@ -32,9 +32,9 @@ import ca.uhn.fhir.util.TestUtil;
 public class AcceptHeaderTest {
 
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testReadNoHeader() throws Exception {
@@ -49,16 +49,6 @@ public class AcceptHeaderTest {
 	public void testReadXmlHeaderHigherPriority() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; q=1.0, " + Constants.CT_FHIR_JSON + "; q=0.9");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
-	}
-
-	@Test
-	public void testReadXmlHeaderHigherPriorityWithStar() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "*/*; q=1.0, " + Constants.CT_FHIR_XML + "; q=1.0, " + Constants.CT_FHIR_JSON + "; q=0.9");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -83,9 +73,20 @@ public class AcceptHeaderTest {
 		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 	}
 
+	@Test
+	public void testReadXmlHeaderHigherPriorityWithStar() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader(Constants.HEADER_ACCEPT, "*/*; q=1.0, " + Constants.CT_FHIR_XML + "; q=1.0, " + Constants.CT_FHIR_JSON + "; q=0.9");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
+	}
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -109,10 +110,16 @@ public class AcceptHeaderTest {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
 
 		@Read(version = true)
 		public Patient read(@IdParam IdDt theId) {
@@ -122,17 +129,6 @@ public class AcceptHeaderTest {
 			return patient;
 		}
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

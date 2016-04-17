@@ -40,10 +40,10 @@ import ca.uhn.fhir.util.TestUtil;
 public class DefaultEncodingTest {
 
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static int ourPort;
 	private static RestfulServer ourRestfulServer;
+	private static Server ourServer;
 
 	@Test
 	public void testHonoursAcceptHeader() throws Exception {
@@ -175,8 +175,9 @@ public class DefaultEncodingTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -199,10 +200,16 @@ public class DefaultEncodingTest {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
 
 		@Read(version = true)
 		public Patient read(@IdParam IdDt theId) {
@@ -212,17 +219,6 @@ public class DefaultEncodingTest {
 			return patient;
 		}
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

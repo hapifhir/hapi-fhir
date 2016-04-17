@@ -41,12 +41,19 @@ import ca.uhn.fhir.util.TestUtil;
 public class ExceptionInterceptorMethodTest {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
+	@Before
+	public void before() {
+		myInterceptor = mock(IServerInterceptor.class);
+		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+	}
+	
 	
 	@Test
 	public void testThrowUnprocessableEntityException() throws Exception {
@@ -66,8 +73,7 @@ public class ExceptionInterceptorMethodTest {
 
 		assertEquals(UnprocessableEntityException.class, captor.getValue().getClass());
 	}
-	
-	
+
 	@Test
 	public void testThrowUnprocessableEntityExceptionAndOverrideResponse() throws Exception {
 
@@ -98,14 +104,9 @@ public class ExceptionInterceptorMethodTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
-	}
-
-	@Before
-	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -135,6 +136,11 @@ public class ExceptionInterceptorMethodTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -147,16 +153,6 @@ public class ExceptionInterceptorMethodTest {
 			throw new UnprocessableEntityException("Unprocessable!");
 		}
 
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

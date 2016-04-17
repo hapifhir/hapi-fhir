@@ -38,10 +38,10 @@ import ca.uhn.fhir.util.TestUtil;
  */
 public class ValidateDstu1Test {
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
 	private static int ourPort;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static Server ourServer;
 
 	@Before()
@@ -88,8 +88,9 @@ public class ValidateDstu1Test {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -114,7 +115,30 @@ public class ValidateDstu1Test {
 
 	}
 
+	public static class OrganizationProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
+		}
+
+		@Validate()
+		public MethodOutcome validate(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
+			ourLastResourceBody = theResourceBody;
+			ourLastEncoding = theEncoding;
+
+			return new MethodOutcome(new IdDt("001"));
+		}
+
+	}
+
+
 	public static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
 
 		@Validate()
 		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
@@ -129,34 +153,6 @@ public class ValidateDstu1Test {
 			return new MethodOutcome(id.withVersion("002"));
 		}
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-	public static class OrganizationProvider implements IResourceProvider {
-
-		@Validate()
-		public MethodOutcome validate(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
-			ourLastResourceBody = theResourceBody;
-			ourLastEncoding = theEncoding;
-
-			return new MethodOutcome(new IdDt("001"));
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Organization.class;
-		}
-
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

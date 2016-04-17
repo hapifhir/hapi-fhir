@@ -116,8 +116,9 @@ public class HistoryTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -143,7 +144,8 @@ public class HistoryTest {
 		ourClient = builder.build();
 
 	}
-
+	
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -170,8 +172,7 @@ public class HistoryTest {
 
 
 	}
-	
-	
+
 	public static class DummyResourceProvider implements IResourceProvider {
 
 		@Override
@@ -222,11 +223,6 @@ public class HistoryTest {
 		}
 
 	
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

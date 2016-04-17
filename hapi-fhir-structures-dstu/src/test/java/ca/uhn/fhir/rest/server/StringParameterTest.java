@@ -162,8 +162,9 @@ public class StringParameterTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -188,6 +189,7 @@ public class StringParameterTest {
 		ourClient = builder.build();
 
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -248,12 +250,6 @@ public class StringParameterTest {
 			return Patient.class;
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

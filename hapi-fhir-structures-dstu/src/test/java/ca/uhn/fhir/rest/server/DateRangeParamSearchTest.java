@@ -37,9 +37,28 @@ import ca.uhn.fhir.util.TestUtil;
 public class DateRangeParamSearchTest {
 
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static DateRangeParam ourLastDateRange;
+	private static int ourPort;
+	
+	private static Server ourServer;
+
+	@Before
+	public void before() {
+		ourLastDateRange = null;
+	}
+
+	@Test
+	public void testSearchForMultipleUnqualifiedDate() throws Exception {
+		String baseUrl = "http://localhost:" + ourPort + "/Patient?" + Patient.SP_BIRTHDATE + "=";
+		HttpGet httpGet = new HttpGet(baseUrl + "2012-01-01&" + Patient.SP_BIRTHDATE + "=2012-02-03");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+	}
+
 	
 	@Test
 	public void testSearchForOneUnqualifiedDate() throws Exception {
@@ -57,27 +76,12 @@ public class DateRangeParamSearchTest {
 		assertEquals(DateRangeParamTest.parseM1("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 
 	}
-
-	@Test
-	public void testSearchForMultipleUnqualifiedDate() throws Exception {
-		String baseUrl = "http://localhost:" + ourPort + "/Patient?" + Patient.SP_BIRTHDATE + "=";
-		HttpGet httpGet = new HttpGet(baseUrl + "2012-01-01&" + Patient.SP_BIRTHDATE + "=2012-02-03");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(400, status.getStatusLine().getStatusCode());
-
-	}
+	
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
-	}
-
-	
-	@Before
-	public void before() {
-		ourLastDateRange = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	
 	@BeforeClass
@@ -104,13 +108,18 @@ public class DateRangeParamSearchTest {
 
 	}
 
-	private static DateRangeParam ourLastDateRange;
-	
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		
 		@Search()
 		public List<Patient> search(@RequiredParam(name=Patient.SP_BIRTHDATE) DateRangeParam theDateRange) {
 			ourLastDateRange = theDateRange;
@@ -124,18 +133,6 @@ public class DateRangeParamSearchTest {
 			return retVal;
 		}
 
-		
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -20,7 +20,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class DateRangeParamTest {
 
-	private static SimpleDateFormat ourFmt;
+	private static final SimpleDateFormat ourFmt;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateRangeParamTest.class);
 
 	static {

@@ -273,9 +273,11 @@ public class IncludeTest {
 
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -479,6 +481,7 @@ public class IncludeTest {
 
 	}
 
+
 	@ResourceDef(name = "Patient")
 	public static class ExtPatient extends Patient {
 		@Child(name = "secondOrg")
@@ -501,12 +504,6 @@ public class IncludeTest {
 			mySecondOrg = theSecondOrg;
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

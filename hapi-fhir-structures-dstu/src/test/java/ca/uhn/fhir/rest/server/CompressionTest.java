@@ -39,21 +39,11 @@ import ca.uhn.fhir.util.TestUtil;
 public class CompressionTest {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompressionTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
 
-	public static String decompress(byte[] theResource) {
-		GZIPInputStream is;
-		try {
-			is = new GZIPInputStream(new ByteArrayInputStream(theResource));
-			return IOUtils.toString(is, "UTF-8");
-		} catch (IOException e) {
-			throw new DataFormatException("Failed to decompress contents", e);
-		}
-	}
-	
 	@Test
 	public void testRead() throws Exception {
 		{
@@ -80,7 +70,7 @@ public class CompressionTest {
 		}
 		
 	}
-
+	
 	@Test
 	public void testVRead() throws Exception {
 		{
@@ -96,8 +86,9 @@ public class CompressionTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -128,6 +119,17 @@ public class CompressionTest {
 
 	}
 
+	public static String decompress(byte[] theResource) {
+		GZIPInputStream is;
+		try {
+			is = new GZIPInputStream(new ByteArrayInputStream(theResource));
+			return IOUtils.toString(is, "UTF-8");
+		} catch (IOException e) {
+			throw new DataFormatException("Failed to decompress contents", e);
+		}
+	}
+
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -146,12 +148,6 @@ public class CompressionTest {
 			return Patient.class;
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

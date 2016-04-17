@@ -55,10 +55,10 @@ public class ReferenceParameterTest {
 
 	private static CloseableHttpClient ourClient;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static ReferenceParam ourLastRefParam;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static ReferenceParam ourLastRefParam;
 
 	@Before
 	public void before() {
@@ -101,6 +101,19 @@ public class ReferenceParameterTest {
 
 		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
 		assertEquals(null, p.getManagingOrganization().getReference().getVersionIdPart());
+	}
+
+	@Test
+	public void testReferenceParamViewToken() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?provider.name=" + URLEncoder.encode("foo|bar", "UTF-8"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo|bar", ourLastRefParam.getValue());
+		assertEquals("foo", ourLastRefParam.toTokenParam(ourCtx).getSystem());
+		assertEquals("bar", ourLastRefParam.toTokenParam(ourCtx).getValue());
 	}
 
 	@Test
@@ -220,19 +233,6 @@ public class ReferenceParameterTest {
 		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
 	}
 
-	@Test
-	public void testReferenceParamViewToken() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?provider.name=" + URLEncoder.encode("foo|bar", "UTF-8"));
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("foo|bar", ourLastRefParam.getValue());
-		assertEquals("foo", ourLastRefParam.toTokenParam(ourCtx).getSystem());
-		assertEquals("bar", ourLastRefParam.toTokenParam(ourCtx).getValue());
-	}
-
 	
 	
 	@Test
@@ -287,8 +287,9 @@ public class ReferenceParameterTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -404,6 +405,7 @@ public class ReferenceParameterTest {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -457,12 +459,6 @@ public class ReferenceParameterTest {
 			return createPatient();
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

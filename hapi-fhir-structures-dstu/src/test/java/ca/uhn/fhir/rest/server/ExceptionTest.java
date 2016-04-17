@@ -54,33 +54,18 @@ public class ExceptionTest {
 
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Before
 	public void before() {
 		ourGenerateOperationOutcome = false;
 		ourExceptionType = null;
-	}
-
-	@Test
-	public void testInternalError() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(500, status.getStatusLine().getStatusCode());
-			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
-		}
 	}
 
 	@Test
@@ -107,18 +92,17 @@ public class ExceptionTest {
 	}
 
 	@Test
-	public void testResourceNotFound() throws Exception {
-		ourExceptionType = ResourceNotFoundException.class;
-		ourGenerateOperationOutcome = false;
+	public void testInternalError() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Resource Patient/123 is not known"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
 		}
 	}
 
@@ -148,6 +132,36 @@ public class ExceptionTest {
 		OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newJsonParser().parseResource(responseContent);
 		assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
 		assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
+	}
+
+	@Test
+	public void testMethodNotAllowed() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwMethodNotAllowed=aaa&_format=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			ourLog.info(status.toString());
+			assertEquals(MethodNotAllowedException.STATUS_CODE, status.getStatusLine().getStatusCode());
+			assertEquals("POST,PUT", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		}
+	}
+
+	@Test
+	public void testResourceNotFound() throws Exception {
+		ourExceptionType = ResourceNotFoundException.class;
+		ourGenerateOperationOutcome = false;
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Resource Patient/123 is not known"));
+		}
 	}
 
 	@Test
@@ -210,23 +224,11 @@ public class ExceptionTest {
 		}
 	}
 
-	@Test
-	public void testMethodNotAllowed() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwMethodNotAllowed=aaa&_format=true");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			ourLog.info(status.toString());
-			assertEquals(MethodNotAllowedException.STATUS_CODE, status.getStatusLine().getStatusCode());
-			assertEquals("POST,PUT", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
-		}
-	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -250,6 +252,7 @@ public class ExceptionTest {
 		ourClient = builder.build();
 
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -283,13 +286,13 @@ public class ExceptionTest {
 		}
 
 		@Search()
-		public List<Patient> throwUnprocessableEntity(@RequiredParam(name = "throwUnprocessableEntity") StringParam theParam) {
-			throw new UnprocessableEntityException("Exception Text");
+		public List<Patient> throwMethodNotAllowed(@RequiredParam(name = "throwMethodNotAllowed") StringParam theParam) {
+			throw new MethodNotAllowedException("Exception Text", RequestTypeEnum.POST, RequestTypeEnum.PUT);
 		}
 
 		@Search()
-		public List<Patient> throwMethodNotAllowed(@RequiredParam(name = "throwMethodNotAllowed") StringParam theParam) {
-			throw new MethodNotAllowedException("Exception Text", RequestTypeEnum.POST, RequestTypeEnum.PUT);
+		public List<Patient> throwUnprocessableEntity(@RequiredParam(name = "throwUnprocessableEntity") StringParam theParam) {
+			throw new UnprocessableEntityException("Exception Text");
 		}
 
 		@Search
@@ -297,12 +300,6 @@ public class ExceptionTest {
 			throw new UnprocessableEntityException("message1", "message2", "message3");
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

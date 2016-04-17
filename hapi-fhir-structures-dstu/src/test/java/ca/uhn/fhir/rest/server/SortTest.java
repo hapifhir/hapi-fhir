@@ -37,9 +37,9 @@ import ca.uhn.fhir.util.TestUtil;
 public class SortTest {
 
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testNoSort() throws Exception {
@@ -125,8 +125,9 @@ public class SortTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -150,6 +151,7 @@ public class SortTest {
 		ourClient = builder.build();
 
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -179,12 +181,6 @@ public class SortTest {
 			return Patient.class;
 		}
 
-	}
-
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
