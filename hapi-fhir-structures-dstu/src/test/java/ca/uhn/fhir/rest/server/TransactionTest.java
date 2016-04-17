@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -280,6 +281,12 @@ public class TransactionTest {
 			return retVal;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

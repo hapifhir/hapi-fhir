@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DefaultEncodingTest {
 
@@ -216,6 +217,12 @@ public class DefaultEncodingTest {
 			return Patient.class;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

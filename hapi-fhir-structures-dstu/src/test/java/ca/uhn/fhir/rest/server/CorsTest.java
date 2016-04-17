@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,6 +34,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.server.RestfulServerSelfReferenceTest.DummyPatientResourceProvider;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CorsTest {
 	private static CloseableHttpClient ourClient;
@@ -146,6 +148,12 @@ public class CorsTest {
 		ourServer.start();
 		ourBaseUri = "http://localhost:" + port + "/rootctx/rcp2/fhirctx/fcp2";
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

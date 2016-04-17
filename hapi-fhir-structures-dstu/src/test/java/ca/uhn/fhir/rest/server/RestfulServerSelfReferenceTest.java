@@ -17,6 +17,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -211,6 +213,12 @@ public class RestfulServerSelfReferenceTest {
 			return Patient.class;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

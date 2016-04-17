@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +23,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceMethodTest {
 
@@ -134,4 +136,10 @@ public class ResourceMethodTest {
 	public void testWildcardSet() {
 		assertTrue(IResource.WILDCARD_ALL_SET.contains(IResource.INCLUDE_ALL));
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

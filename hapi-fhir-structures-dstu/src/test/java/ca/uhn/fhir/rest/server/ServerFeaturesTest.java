@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -461,6 +462,12 @@ public class ServerFeaturesTest {
 			return patient;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

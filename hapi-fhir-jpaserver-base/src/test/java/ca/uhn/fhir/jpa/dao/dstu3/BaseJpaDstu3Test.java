@@ -46,6 +46,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -79,6 +80,7 @@ import ca.uhn.fhir.util.TestUtil;
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes= {TestDstu3Config.class})
+@DirtiesContext
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	
@@ -86,7 +88,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 
 	@AfterClass
-	public static void afterClassClearContext() throws Exception {
+	public static void afterClassClearContextBaseJpaDstu3Test() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

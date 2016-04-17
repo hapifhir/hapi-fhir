@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -192,5 +193,11 @@ public class DynamicSearchTest {
 		}
 
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 }

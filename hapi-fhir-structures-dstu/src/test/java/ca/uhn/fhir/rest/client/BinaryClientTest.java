@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 
 public class BinaryClientTest {
 
@@ -104,6 +106,12 @@ public class BinaryClientTest {
 		@Create(type = Binary.class)
 		public MethodOutcome create(@ResourceParam Binary theBinary);
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionInterceptorMethodTest {
 
@@ -152,5 +153,11 @@ public class ExceptionInterceptorMethodTest {
 		}
 
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 }

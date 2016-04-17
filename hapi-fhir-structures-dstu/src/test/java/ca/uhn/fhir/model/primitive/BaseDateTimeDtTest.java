@@ -12,6 +12,7 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Condition;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class BaseDateTimeDtTest {
@@ -277,6 +279,12 @@ public class BaseDateTimeDtTest {
 
 		assertEquals(1403295729000L, i.getValue().getTime());
 		assertEquals("2014-06-20T20:22:09Z", i.getValueAsString());
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

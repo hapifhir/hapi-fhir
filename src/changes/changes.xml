@@ -422,6 +422,10 @@
 				serialized in a bunch of circumstances. Thanks to Vadim Peretokin for reporting
 				and providing test cases!
 			</action>
+			<action type="add">
+				Improve CLI error message if the tool can't bind to the requested port. Thanks
+				to Claude Nanjo for the suggestion!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

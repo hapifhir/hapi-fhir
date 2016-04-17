@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import junit.framework.AssertionFailedError;
 
 /**
@@ -296,6 +297,12 @@ public class ExceptionTest {
 			throw new UnprocessableEntityException("message1", "message2", "message3");
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

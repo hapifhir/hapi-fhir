@@ -2,7 +2,10 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class StringDtTest {
 
@@ -13,4 +16,10 @@ public class StringDtTest {
 		
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

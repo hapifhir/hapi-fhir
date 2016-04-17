@@ -2,10 +2,12 @@ package ca.uhn.fhir.rest.method;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseOutcomeReturningMethodBindingTest {
 
@@ -193,4 +195,10 @@ public class BaseOutcomeReturningMethodBindingTest {
 		}
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

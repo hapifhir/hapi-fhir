@@ -42,48 +42,19 @@ import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
+	private static JpaValidationSupportChainDstu3 myValidationSupport;
 	protected static IGenericClient ourClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
+	protected static RestfulServer ourRestServer;
 	private static Server ourServer;
 	protected static String ourServerBase;
-	protected static RestfulServer ourRestServer;
-	private static JpaValidationSupportChainDstu3 myValidationSupport;
 	private static GenericWebApplicationContext ourWebApplicationContext;
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	public BaseResourceProviderDstu3Test() {
 		super();
 	}
 
-	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
-		for (BundleEntryComponent next : resp.getEntry()) {
-			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamilyAsSingleString() : "";
-			if (isNotBlank(nextStr)) {
-				names.add(nextStr);
-			}
-		}
-		return names;
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-		ourHttpClient.close();
-		ourServer = null;
-		ourHttpClient = null;
-		myValidationSupport.flush();
-		myValidationSupport = null;
-		ourWebApplicationContext.close();
-		ourWebApplicationContext = null;
-	}
 
 	@After
 	public void after() throws Exception {
@@ -157,6 +128,31 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	
 			ourServer = server;
 		}
+	}
+
+	protected List<String> toNameList(Bundle resp) {
+		List<String> names = new ArrayList<String>();
+		for (BundleEntryComponent next : resp.getEntry()) {
+			Patient nextPt = (Patient) next.getResource();
+			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamilyAsSingleString() : "";
+			if (isNotBlank(nextStr)) {
+				names.add(nextStr);
+			}
+		}
+		return names;
+	}
+
+	@AfterClass
+	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
+		ourServer.stop();
+		ourHttpClient.close();
+		ourServer = null;
+		ourHttpClient = null;
+		myValidationSupport.flush();
+		myValidationSupport = null;
+		ourWebApplicationContext.close();
+		ourWebApplicationContext = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

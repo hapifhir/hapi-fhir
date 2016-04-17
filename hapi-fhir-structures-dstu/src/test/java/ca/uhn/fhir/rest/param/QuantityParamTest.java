@@ -2,10 +2,12 @@ package ca.uhn.fhir.rest.param;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class QuantityParamTest {
 	private static FhirContext ourCtx = FhirContext.forDstu1();
@@ -57,4 +59,10 @@ public class QuantityParamTest {
 		assertEquals("5.4||", p.getValueAsQueryToken(ourCtx));
 	}
  
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

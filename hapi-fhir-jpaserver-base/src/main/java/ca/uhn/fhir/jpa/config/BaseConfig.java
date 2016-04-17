@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.config;
 
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -34,6 +38,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
@@ -110,11 +116,22 @@ public class BaseConfig implements SchedulingConfigurer {
 		return new StaleSearchDeletingSvc();
 	}
 
+	@Bean()
+	public ScheduledExecutorFactoryBean scheduledExecutorService() {
+		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
+		b.setPoolSize(5);
+		return b;
+	}
+	
 	@Bean
 	public TaskScheduler taskScheduler() {
-		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
-		retVal.setPoolSize(5);
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
+		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
+//		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
+//		retVal.setPoolSize(5);
+//		return retVal;
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

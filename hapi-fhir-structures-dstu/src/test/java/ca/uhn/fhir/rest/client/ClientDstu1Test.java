@@ -37,6 +37,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -86,6 +87,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ClientDstu1Test {
@@ -1408,6 +1410,12 @@ public class ClientDstu1Test {
 		@Search()
 		public List<Patient> getPatientWithIncludes(@Elements Set<String> theElements);
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

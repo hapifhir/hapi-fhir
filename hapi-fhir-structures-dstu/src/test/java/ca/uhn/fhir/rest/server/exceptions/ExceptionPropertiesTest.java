@@ -3,11 +3,14 @@ package ca.uhn.fhir.rest.server.exceptions;
 import static org.junit.Assert.*;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);
@@ -51,6 +54,12 @@ public class ExceptionPropertiesTest {
 			}
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

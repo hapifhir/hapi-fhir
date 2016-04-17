@@ -3,11 +3,13 @@ package ca.uhn.fhir.context;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirContextDstu1Test {
 
@@ -56,6 +58,12 @@ public class FhirContextDstu1Test {
 		} catch (IllegalStateException e) {
 			assertThat(e.getMessage(), containsString("Could not find the HAPI-FHIR structure JAR on the classpath for version DSTU2"));
 		}
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

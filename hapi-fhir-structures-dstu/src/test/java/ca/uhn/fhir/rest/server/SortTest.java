@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -178,6 +179,12 @@ public class SortTest {
 			return Patient.class;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -8,6 +8,9 @@ import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.util.TestUtil;
+
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.util.List;
@@ -145,6 +148,12 @@ public class RuntimeResourceDefinitionTest {
 
 	@ResourceDef(name = "Patient", id = "PatientWithShortProfileId", profile="PatientWithShortProfile")
 	public static class PatientWithShortProfile extends Patient {
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

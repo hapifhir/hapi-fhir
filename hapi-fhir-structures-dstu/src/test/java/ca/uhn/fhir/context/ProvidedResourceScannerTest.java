@@ -3,11 +3,14 @@ package ca.uhn.fhir.context;
 import ca.uhn.fhir.model.api.annotation.ProvidesResources;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.util.TestUtil;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import org.junit.AfterClass;
 
 public class ProvidedResourceScannerTest extends TestCase {
 	@Test
@@ -33,4 +36,10 @@ public class ProvidedResourceScannerTest extends TestCase {
 	@ProvidesResources(resources = { CustomPatient.class, ResourceWithExtensionsA.class })
 	public static class TestResourceProviderB {
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

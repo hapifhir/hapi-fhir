@@ -22,6 +22,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -72,6 +73,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredExtension;
+import ca.uhn.fhir.util.TestUtil;
 
 public class XmlParserTest {
 
@@ -1957,4 +1959,10 @@ public class XmlParserTest {
 		 System.setProperty("file.encoding", "ISO-8859-1");
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

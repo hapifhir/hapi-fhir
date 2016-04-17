@@ -84,6 +84,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class RestfulServerMethodTest {
 	private static CloseableHttpClient ourClient;
@@ -1437,6 +1438,12 @@ public class RestfulServerMethodTest {
 			return myResourceProviders;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

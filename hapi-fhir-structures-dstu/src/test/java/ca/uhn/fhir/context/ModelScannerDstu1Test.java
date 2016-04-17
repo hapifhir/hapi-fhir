@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import ca.uhn.fhir.model.dstu.resource.CarePlan;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.MyPatient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelScannerDstu1Test {
 
@@ -127,6 +129,12 @@ public class ModelScannerDstu1Test {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

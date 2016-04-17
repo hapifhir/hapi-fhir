@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ViewGeneratorTest {
 
@@ -107,4 +109,10 @@ public class ViewGeneratorTest {
 		
 		assertEquals(0, va.getAllUndeclaredExtensions().size());
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

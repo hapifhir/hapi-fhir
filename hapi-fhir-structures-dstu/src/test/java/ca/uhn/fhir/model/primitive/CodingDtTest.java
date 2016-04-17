@@ -2,10 +2,12 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CodingDtTest {
 
@@ -55,4 +57,10 @@ public class CodingDtTest {
 		
 		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

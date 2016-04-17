@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class TokenParameterTest {
@@ -250,4 +251,10 @@ public class TokenParameterTest {
 		assertEquals("a|b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

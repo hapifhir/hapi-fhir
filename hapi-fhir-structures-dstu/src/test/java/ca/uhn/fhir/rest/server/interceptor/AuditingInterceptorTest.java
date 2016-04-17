@@ -57,6 +57,7 @@ import ca.uhn.fhir.rest.server.audit.IResourceAuditor;
 import ca.uhn.fhir.rest.server.audit.PatientAuditor;
 import ca.uhn.fhir.store.IAuditDataStore;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class AuditingInterceptorTest {
 
@@ -291,5 +292,11 @@ public class AuditingInterceptorTest {
 		}
 
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by Bill de Beaubien on 3/3/2015.
@@ -188,4 +190,10 @@ public class Dstu1BundleFactoryTest {
         }
         return resources;
     }
+
+ 	@AfterClass
+ 	public static void afterClassClearContext() {
+ 		TestUtil.clearAllStaticFieldsForUnitTest();
+ 	}
+
 }

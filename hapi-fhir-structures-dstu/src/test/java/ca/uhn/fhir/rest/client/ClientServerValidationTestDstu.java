@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ClientServerValidationTestDstu {
 
@@ -106,4 +108,10 @@ public class ClientServerValidationTestDstu {
 			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4.0\" which corresponds to DSTU2, but this client is configured to use DSTU1 (via the FhirContext)"));
 		}
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

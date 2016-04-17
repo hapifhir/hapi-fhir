@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -102,4 +103,10 @@ public class FhirTerserTest {
 		assertEquals("cid:patient@bundle", elems.get(0).getReference().getValue());
 		assertEquals("cid:device@bundle", elems.get(1).getReference().getValue());
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

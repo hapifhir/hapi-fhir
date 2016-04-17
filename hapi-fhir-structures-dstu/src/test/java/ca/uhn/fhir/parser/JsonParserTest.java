@@ -26,6 +26,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -74,6 +75,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
@@ -1482,6 +1484,12 @@ public class JsonParserTest {
 			myFoo = theFoo;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

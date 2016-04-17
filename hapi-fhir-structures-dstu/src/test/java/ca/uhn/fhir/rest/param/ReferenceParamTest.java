@@ -2,7 +2,10 @@ package ca.uhn.fhir.rest.param;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class ReferenceParamTest {
 
@@ -26,4 +29,10 @@ public class ReferenceParamTest {
 		
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

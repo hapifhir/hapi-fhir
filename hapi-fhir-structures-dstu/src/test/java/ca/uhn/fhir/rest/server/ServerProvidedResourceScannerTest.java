@@ -9,8 +9,10 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.util.TestUtil;
 import junit.framework.TestCase;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
@@ -108,5 +110,11 @@ public class ServerProvidedResourceScannerTest extends TestCase {
             return null;
         }
     }
+
+
+ 	@AfterClass
+ 	public static void afterClassClearContext() {
+ 		TestUtil.clearAllStaticFieldsForUnitTest();
+ 	}
 
 }

@@ -5,11 +5,13 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu.resource.Composition;
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseParserTest {
 
@@ -156,4 +158,10 @@ public class BaseParserTest {
 		assertEquals(WorkflowActionEnum.SIGNOFF, res.getWorkflowAction().getValueAsEnum());
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

@@ -6,10 +6,12 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class TagListTest {
 
@@ -78,4 +80,10 @@ public class TagListTest {
 		
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

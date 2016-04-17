@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ReferenceClientTest {
 
@@ -123,6 +125,12 @@ public class ReferenceClientTest {
 		@Search(type=Patient.class)
 		public List<Patient> search(@RequiredParam(name=Patient.SP_PROVIDER) ReferenceParam theString);
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
