@@ -563,6 +563,60 @@ public class XmlParserDstu3Test {
 	}
 
 	/**
+	 * See #336
+	 */
+	@Test
+	public void testEncodeAndParseNullPrimitiveWithExtensions() {
+		
+		Patient p = new Patient();
+		p.setId("patid");
+		HumanName name = p.addName();
+		name.addFamilyElement().setValue(null).setId("f0").addExtension(new Extension("http://foo", new StringType("FOOEXT0")));
+		name.addFamilyElement().setValue("V1").setId("f1").addExtension((Extension) new Extension("http://foo", new StringType("FOOEXT1")).setId("ext1id"));
+		name.addFamilyElement(); // this one shouldn't get encoded
+		name.addFamilyElement().setValue(null).addExtension(new Extension("http://foo", new StringType("FOOEXT3")));
+		name.setId("nameid");
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		
+		output = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(p);
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patid\"/><name id=\"nameid\"><family id=\"f0\"><extension url=\"http://foo\"><valueString value=\"FOOEXT0\"/></extension></family><family id=\"f1\" value=\"V1\"><extension id=\"ext1id\" url=\"http://foo\"><valueString value=\"FOOEXT1\"/></extension></family><family><extension url=\"http://foo\"><valueString value=\"FOOEXT3\"/></extension></family></name></Patient>";
+		assertEquals(expected, output);
+
+		p = ourCtx.newXmlParser().parseResource(Patient.class, output);
+		assertEquals("patid", p.getIdElement().getIdPart());
+		
+		name = p.getName().get(0);
+		assertEquals("nameid", name.getId());
+		assertEquals(3, name.getFamily().size());
+		
+		assertEquals(null, name.getFamily().get(0).getValue());
+		assertEquals("V1", name.getFamily().get(1).getValue());
+		assertEquals(null, name.getFamily().get(2).getValue());
+		
+		assertEquals("f0", name.getFamily().get(0).getId());
+		assertEquals("f1", name.getFamily().get(1).getId());
+		assertEquals(null, name.getFamily().get(2).getId());
+
+		assertEquals(1, name.getFamily().get(0).getExtension().size());
+		assertEquals("http://foo", name.getFamily().get(0).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT0", ((StringType)name.getFamily().get(0).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getFamily().get(0).getExtension().get(0).getId());
+
+		assertEquals(1, name.getFamily().get(1).getExtension().size());
+		assertEquals("http://foo", name.getFamily().get(1).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT1", ((StringType)name.getFamily().get(1).getExtension().get(0).getValue()).getValue());
+		assertEquals("ext1id", name.getFamily().get(1).getExtension().get(0).getId());
+
+		assertEquals(1, name.getFamily().get(2).getExtension().size());
+		assertEquals("http://foo", name.getFamily().get(2).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT3", ((StringType)name.getFamily().get(2).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getFamily().get(2).getExtension().get(0).getId());
+
+	}
+
+	/**
 	 * Test for #233
 	 */
 	@Test

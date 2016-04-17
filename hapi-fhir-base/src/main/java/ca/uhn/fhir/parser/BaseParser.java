@@ -42,6 +42,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -65,6 +66,7 @@ import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -105,10 +107,10 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent) {
-		
+
 		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theCompositeElement.getClass());
 		final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
-		
+
 		return new Iterable<BaseParser.CompositeChildElement>() {
 			@Override
 			public Iterator<CompositeChildElement> iterator() {
@@ -143,9 +145,9 @@ public abstract class BaseParser implements IParser {
 							/*
 							 * There are lots of reasons we might skip encoding a particular child
 							 */
-//							if (myNext.getDef().getElementName().equals("extension") || myNext.getDef().getElementName().equals("modifierExtension")) {
-//								myNext = null;
-//							} else 
+							//							if (myNext.getDef().getElementName().equals("extension") || myNext.getDef().getElementName().equals("modifierExtension")) {
+							//								myNext = null;
+							//							} else 
 							if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
 							} else if (!myNext.shouldBeEncoded()) {
@@ -377,7 +379,7 @@ public abstract class BaseParser implements IParser {
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
-		
+
 		doEncodeResourceToWriter(theResource, theWriter);
 	}
 
@@ -409,6 +411,18 @@ public abstract class BaseParser implements IParser {
 			retVal.setValue(theValue);
 		}
 		return retVal;
+	}
+
+	protected String getCompositeElementId(IBase theElement) {
+		String elementId = null;
+		if (!(theElement instanceof IBaseResource)) {
+			if (theElement instanceof IBaseElement) {
+				elementId = ((IBaseElement) theElement).getId();
+			} else if (theElement instanceof IIdentifiableElement) {
+				elementId = ((IIdentifiableElement) theElement).getElementSpecificId();
+			}
+		}
+		return elementId;
 	}
 
 	ContainedResources getContainedResources() {
@@ -552,14 +566,14 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
-		
+
 		if (theResourceType != null) {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
 			if (def.getStructureVersion() != myContext.getVersion().getVersion()) {
 				throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not parse a structure for version " + def.getStructureVersion());
 			}
 		}
-		
+
 		T retVal = doParseResource(theResourceType, theReader);
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
@@ -684,20 +698,20 @@ public abstract class BaseParser implements IParser {
 
 		@SuppressWarnings("unchecked")
 		List<IBase> retVal = (List<IBase>) theValues;
-		
+
 		for (int i = 0; i < retVal.size(); i++) {
 			IBase next = retVal.get(i);
-			
+
 			/*
 			 * If we have automatically contained any resources via
 			 * their references, this ensures that we output the new
 			 * local reference
 			 */
 			if (next instanceof IBaseReference) {
-				IBaseReference nextRef = (IBaseReference)next;
+				IBaseReference nextRef = (IBaseReference) next;
 				String refText = determineReferenceText(nextRef);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
-					
+
 					if (retVal == theValues) {
 						retVal = new ArrayList<IBase>(theValues);
 					}
@@ -705,11 +719,11 @@ public abstract class BaseParser implements IParser {
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
 					newRef.setReference(refText);
 					retVal.set(i, newRef);
-					
+
 				}
 			}
 		}
-		
+
 		return retVal;
 	}
 

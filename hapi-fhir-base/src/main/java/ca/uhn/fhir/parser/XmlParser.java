@@ -518,6 +518,10 @@ public class XmlParser extends BaseParser implements IParser {
 			String value = pd.getValueAsString();
 			if (value != null || super.hasExtensions(pd)) {
 				theEventWriter.writeStartElement(childName);
+				String elementId = getCompositeElementId(theElement);
+				if (isNotBlank(elementId)) {
+					theEventWriter.writeAttribute("id", elementId);
+				}
 				if (value != null) {
 					theEventWriter.writeAttribute("value", value);
 				}
@@ -530,10 +534,13 @@ public class XmlParser extends BaseParser implements IParser {
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			theEventWriter.writeStartElement(childName);
+			String elementId = getCompositeElementId(theElement);
+			if (isNotBlank(elementId)) {
+				theEventWriter.writeAttribute("id", elementId);
+			}
 			if (isNotBlank(theExtensionUrl)) {
 				theEventWriter.writeAttribute("url", theExtensionUrl);
 			}
-			BaseRuntimeElementCompositeDefinition<?> childCompositeDef = (BaseRuntimeElementCompositeDefinition<?>) childDef;
 			encodeCompositeElementToStreamWriter(theResource, theElement, theEventWriter, theIncludedResource, theParent);
 			theEventWriter.writeEndElement();
 			break;
@@ -592,6 +599,7 @@ public class XmlParser extends BaseParser implements IParser {
 	@SuppressWarnings("rawtypes")
 	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent)
 			throws XMLStreamException, DataFormatException {
+		
 		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theElement, theContainedResource, theParent)) {
 
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
@@ -701,6 +709,11 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeStartElement("extension");
 		}
 
+		String elementId = getCompositeElementId(nextValue);
+		if (isNotBlank(elementId)) {
+			theEventWriter.writeAttribute("id", elementId);
+		}
+		
 		theEventWriter.writeAttribute("url", extensionUrl);
 		encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, null, theContainedResource, nextChildElem);
 		theEventWriter.writeEndElement();
@@ -892,18 +905,23 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theEventWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;
 			}
 
-			writeCommentsPre(theWriter, next);
+			writeCommentsPre(theEventWriter, next);
 
-			theWriter.writeStartElement(tagName);
+			theEventWriter.writeStartElement(tagName);
+
+			String elementId = getCompositeElementId(next);
+			if (isNotBlank(elementId)) {
+				theEventWriter.writeAttribute("id", elementId);
+			}
 
 			String url = next.getUrl();
-			theWriter.writeAttribute("url", url);
+			theEventWriter.writeAttribute("url", url);
 
 			if (next.getValue() != null) {
 				IBaseDatatype value = next.getValue();
@@ -923,15 +941,15 @@ public class XmlParser extends BaseParser implements IParser {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 				}
-				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, null, theIncludedResource, null);
+				encodeChildElementToStreamWriter(theResource, theEventWriter, value, childName, childDef, null, theIncludedResource, null);
 			}
 
 			// child extensions
-			encodeExtensionsIfPresent(theResource, theWriter, next, theIncludedResource);
+			encodeExtensionsIfPresent(theResource, theEventWriter, next, theIncludedResource);
 
-			theWriter.writeEndElement();
+			theEventWriter.writeEndElement();
 
-			writeCommentsPost(theWriter, next);
+			writeCommentsPost(theEventWriter, next);
 
 		}
 	}

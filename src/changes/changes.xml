@@ -416,6 +416,12 @@
 				In server implementations, the Bundle.entry.fullUrl was not getting correctly
 				populated on Hl7OrgDstu2 servers. Thanks to Christian Ohr for reporting!
 			</action>
+			<action type="fix" issue="335">
+				Ensure that element IDs within resources (i.e. IDs on elements other than the
+				resource itself) get serialized and parsed correctly. Previously, these didn't get
+				serialized in a bunch of circumstances. Thanks to Vadim Peretokin for reporting
+				and providing test cases!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
