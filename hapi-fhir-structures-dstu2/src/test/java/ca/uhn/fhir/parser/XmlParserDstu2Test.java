@@ -197,7 +197,7 @@ public class XmlParserDstu2Test {
 	public void testEncodeExtensionWithContainedResource() {
 
       TestPatientFor327 patient = new TestPatientFor327();
-      patient.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
+      patient.setBirthDate(new DateDt("2016-04-17"));
 
       List<ResourceReferenceDt> conditions = new ArrayList<ResourceReferenceDt>();
       Condition condition = new Condition();
@@ -220,11 +220,11 @@ public class XmlParserDstu2Test {
 					"</Condition>", 
 				"</contained>", 
 				"<extension url=\"testCondition\">", 
-				"<valueReference>", 
-					"<reference value=\"#1\"/>", 
-				"</valueReference>", 
-			"</extension>", 
-				"<birthDate value=\"2016-04-14\"/>", 
+					"<valueReference>", 
+						"<reference value=\"#1\"/>", 
+					"</valueReference>", 
+				"</extension>", 
+				"<birthDate value=\"2016-04-17\"/>", 
 			"</Patient>"
 		));
 		//@formatter:on
