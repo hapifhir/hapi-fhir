@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.MyPatient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ExtensionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExtensionTest.class);
@@ -82,6 +84,12 @@ public class ExtensionTest {
 			RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
 			System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile("http://foo.org/fhir")));
 		}
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

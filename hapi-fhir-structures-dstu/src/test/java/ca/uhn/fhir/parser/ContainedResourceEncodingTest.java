@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Initially contributed by Alexander Kley for bug #29
@@ -247,6 +249,12 @@ public class ContainedResourceEncodingTest {
 		ourLog.info(xml);
 		Assert.assertTrue(xml.contains("Mueller"));
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

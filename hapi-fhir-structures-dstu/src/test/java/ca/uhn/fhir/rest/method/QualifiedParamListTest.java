@@ -4,7 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class QualifiedParamListTest {
 
@@ -30,6 +33,12 @@ public class QualifiedParamListTest {
 		assertEquals(2, actual.size());
 		assertEquals("aaa", actual.get(0));
 		assertEquals("b,bb", actual.get(1));
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
@@ -439,6 +441,25 @@ public interface IServerInterceptor {
 		 */
 		public void setResource(IBaseResource theObject) {
 			myResource = theObject;
+		}
+
+		/**
+		 * This method may be invoked by user code to notify interceptors that a nested 
+		 * operation is being invoked which is denoted by this request details.
+		 */
+		public void notifyIncomingRequestPreHandled(RestOperationTypeEnum theOperationType) {
+			RequestDetails requestDetails = getRequestDetails();
+			if (requestDetails == null) {
+				return;
+			}
+			IRestfulServerDefaults server = requestDetails.getServer();
+			if (server == null) {
+				return;
+			}
+			List<IServerInterceptor> interceptors = server.getInterceptors();
+			for (IServerInterceptor next : interceptors) {
+				next.incomingRequestPreHandled(theOperationType, this);
+			}
 		}
 
 	}

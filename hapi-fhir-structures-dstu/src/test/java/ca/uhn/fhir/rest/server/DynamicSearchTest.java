@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -41,17 +42,30 @@ public class DynamicSearchTest {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static SearchParameterMap ourLastSearchParams;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DynamicSearchTest.class);
+
 	private static int ourPort;
 
 	private static Server ourServer;
-
-	private static SearchParameterMap ourLastSearchParams;
 
 	@Before
 	public void before() {
 		ourLastSearchParams = null;
 	}
+
+	@Test
+	public void testConformance() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class,responseContent);
+		
+		ourLog.info(responseContent);
+	}
+
 
 	@Test
 	public void testSearchOneStringParam() throws Exception {
@@ -70,28 +84,6 @@ public class DynamicSearchTest {
 		assertEquals(1,orList.getValuesAsQueryTokens().size());
 		StringParam param1 = orList.getValuesAsQueryTokens().get(0);
 		assertEquals("param1value", param1.getValue());
-	}
-
-
-	@Test
-	public void testSearchOneStringParamWithOr() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?param1=param1value,param1value2");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.getEntries().size());
-
-		assertEquals(1, ourLastSearchParams.size());
-		StringAndListParam andList =(StringAndListParam) ourLastSearchParams.get("param1");
-		assertEquals(1,andList.getValuesAsQueryTokens().size());
-		StringOrListParam orList = andList.getValuesAsQueryTokens().get(0);
-		assertEquals(2,orList.getValuesAsQueryTokens().size());
-		StringParam param1 = orList.getValuesAsQueryTokens().get(0);
-		assertEquals("param1value", param1.getValue());
-		StringParam param1b = orList.getValuesAsQueryTokens().get(1);
-		assertEquals("param1value2", param1b.getValue());
 	}
 
 	@Test
@@ -119,21 +111,31 @@ public class DynamicSearchTest {
 	}
 
 	@Test
-	public void testConformance() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+	public void testSearchOneStringParamWithOr() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?param1=param1value,param1value2");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class,responseContent);
-		
-		ourLog.info(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		assertEquals(1, ourLastSearchParams.size());
+		StringAndListParam andList =(StringAndListParam) ourLastSearchParams.get("param1");
+		assertEquals(1,andList.getValuesAsQueryTokens().size());
+		StringOrListParam orList = andList.getValuesAsQueryTokens().get(0);
+		assertEquals(2,orList.getValuesAsQueryTokens().size());
+		StringParam param1 = orList.getValuesAsQueryTokens().get(0);
+		assertEquals("param1value", param1.getValue());
+		StringParam param1b = orList.getValuesAsQueryTokens().get(1);
+		assertEquals("param1value2", param1b.getValue());
 	}
 
-	
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -192,5 +194,6 @@ public class DynamicSearchTest {
 		}
 
 	}
+
 
 }

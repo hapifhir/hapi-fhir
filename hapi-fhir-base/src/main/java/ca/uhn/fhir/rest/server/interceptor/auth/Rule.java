@@ -21,16 +21,23 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 
 class Rule implements IAuthRule {
@@ -40,7 +47,7 @@ class Rule implements IAuthRule {
 	private String myClassifierCompartmentName;
 	private Collection<? extends IIdType> myClassifierCompartmentOwners;
 	private ClassifierTypeEnum myClassifierType;
-	private RuleVerdictEnum myMode;
+	private PolicyEnum myMode;
 	private String myName;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
@@ -50,33 +57,107 @@ class Rule implements IAuthRule {
 	}
 
 	@Override
-	public RuleVerdictEnum applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		IBaseResource appliesTo;
 		switch (myOp) {
 		case READ:
+			if (theOutputResource == null) {
+				return null;
+			}
 			appliesTo = theOutputResource;
 			break;
 		case WRITE:
+			if (theInputResource == null) {
+				return null;
+			}
 			appliesTo = theInputResource;
+			break;
+		case DELETE:
+			if (theOperation == RestOperationTypeEnum.DELETE) {
+				if (theInputResource == null) {
+					return new Verdict(myMode, this);
+				} else {
+					appliesTo = theInputResource;
+				}
+			} else {
+				return null;
+			}
 			break;
 		case BATCH:
 		case TRANSACTION:
-			if (requestAppliesToTransaction(ctx, myOp, theInputResource)) {
-				return myMode;
+			if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
+				if (myMode == PolicyEnum.DENY) {
+					return new Verdict(PolicyEnum.DENY, this);
+				} else  {
+					List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
+					Verdict verdict = null;
+					for (BundleEntryParts nextPart : inputResources) {
+						
+						IBaseResource inputResource = nextPart.getResource();
+						RestOperationTypeEnum operation = null;
+						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
+							continue;
+						}
+						if (nextPart.getRequestType() == RequestTypeEnum.POST) {
+							operation = RestOperationTypeEnum.CREATE;
+						} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
+							operation = RestOperationTypeEnum.UPDATE;
+						} else {
+							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+						}
+
+						/*
+						 * This is basically just being conservative - Be careful of transactions containing
+						 * nested operations and nested transactions. We block the by default. At some point
+						 * it would be nice to be more nuanced here. 
+						 */
+						RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
+						if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());							
+						}
+						
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null);
+						if (newVerdict == null) {
+							continue;
+						} else if (verdict == null) {
+							verdict = newVerdict;
+						} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+							verdict = newVerdict;
+						}
+					}
+					return verdict;
+				}
+			} else if (theOutputResource != null) {
+				List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
+				Verdict verdict = null;
+				for (BundleEntryParts nextPart : inputResources) {
+					if (nextPart.getResource() == null) {
+						continue;
+					}
+					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, nextPart.getResource());
+					if (newVerdict == null) {
+						continue;
+					} else if (verdict == null) {
+						verdict = newVerdict;
+					} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+						verdict = newVerdict;
+					}
+				}
+				return verdict;
 			} else {
-				return RuleVerdictEnum.NO_DECISION;
+				return null;
 			}
 		case ALLOW_ALL:
-			return RuleVerdictEnum.ALLOW;
+			return new Verdict(PolicyEnum.ALLOW, this);
 		case DENY_ALL:
-			return RuleVerdictEnum.DENY;
+			return new Verdict(PolicyEnum.DENY, this);
 		case METADATA:
 			if (theOperation == RestOperationTypeEnum.METADATA) {
-				return myMode;
+				return new Verdict(myMode, this);
 			} else {
-				return RuleVerdictEnum.NO_DECISION;
+				return null;
 			}
 		default:
 			// Should not happen
@@ -88,7 +169,7 @@ class Rule implements IAuthRule {
 			break;
 		case TYPES:
 			if (myAppliesToTypes.contains(appliesTo.getClass()) == false) {
-				return RuleVerdictEnum.NO_DECISION;
+				return null;
 			}
 			break;
 		default:
@@ -108,17 +189,21 @@ class Rule implements IAuthRule {
 				}
 			}
 			if (!foundMatch) {
-				return RuleVerdictEnum.NO_DECISION;
+				return null;
 			}
 			break;
 		default:
 			throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
-		return myMode;
+		return new Verdict(myMode, this);
 	}
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
+		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
+			return false;
+		}
+		
 		IBaseBundle request = (IBaseBundle) theInputResource;
 		String bundleType = BundleUtil.getBundleType(theContext, request);
 		switch (theOp) {
@@ -160,7 +245,7 @@ class Rule implements IAuthRule {
 		myClassifierType = theClassifierType;
 	}
 
-	public void setMode(RuleVerdictEnum theRuleMode) {
+	public void setMode(PolicyEnum theRuleMode) {
 		myMode = theRuleMode;
 	}
 

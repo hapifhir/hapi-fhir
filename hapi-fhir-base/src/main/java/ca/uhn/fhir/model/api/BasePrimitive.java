@@ -97,7 +97,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 	}
 
 	@Override
-	public IPrimitiveType<T> setValue(T theValue) throws DataFormatException {
+	public BasePrimitive<T> setValue(T theValue) throws DataFormatException {
 		myCoercedValue = theValue;
 		updateStringValue();
 		return this;

@@ -2,7 +2,10 @@ package ca.uhn.fhir.narrative;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGeneratorTest.class);
@@ -58,5 +61,11 @@ public class BaseThymeleafNarrativeGeneratorTest {
 		assertEquals(expected, actual);
 	}
 
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 }

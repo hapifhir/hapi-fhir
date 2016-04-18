@@ -665,18 +665,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theProvider.setSearchResultDao(mySearchResultDao);
 	}
 
-	protected void notifyInterceptors(RestOperationTypeEnum operationType, ActionRequestDetails requestDetails) {
+	protected void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails requestDetails) {
 		if (requestDetails.getId() != null && requestDetails.getId().hasResourceType() && isNotBlank(requestDetails.getResourceType())) {
 			if (requestDetails.getId().getResourceType().equals(requestDetails.getResourceType()) == false) {
 				throw new InternalErrorException("Inconsistent server state - Resource types don't match: " + requestDetails.getId().getResourceType() + " / " + requestDetails.getResourceType());
 			}
 		}
+
+		requestDetails.notifyIncomingRequestPreHandled(theOperationType);
+		
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		if (interceptors == null) {
 			return;
 		}
 		for (IServerInterceptor next : interceptors) {
-			next.incomingRequestPreHandled(operationType, requestDetails);
+			next.incomingRequestPreHandled(theOperationType, requestDetails);
 		}
 	}
 

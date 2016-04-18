@@ -1255,6 +1255,22 @@
 			</p>
 			
 			<p>
+				In terms of actually implementing the method, unfortunately there is only so much help 
+				HAPI will give you. One might expect HAPI to automatically delegate the individual 
+				operations in the transaction to other methods on the server but at this point it 
+				does not do that. There is a lot that transaction needs to handle 
+				(making everything atomic, replacing placeholder IDs across multiple resources 
+				which may even be circular, handling operations in the right order) and 
+				so far we have not found a way for the framework to do this in a generic way.
+			</p>
+			<p>
+				What it comes down to is the fact that transaction is a tricky thing to implement.
+				For what it's worth, you could look at our JPA module's "transaction" method in
+				<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/dstu3/FhirSystemDaoDstu3.java">our source repository</a> 
+				to see how we implemented transaction in the JPA server.
+			</p>
+			
+			<p>
 				Example URL to invoke this method:
 				<br />
 				<code>POST http://fhir.example.com/</code><br/>

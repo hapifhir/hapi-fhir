@@ -57,67 +57,21 @@ import ca.uhn.fhir.rest.server.audit.IResourceAuditor;
 import ca.uhn.fhir.rest.server.audit.PatientAuditor;
 import ca.uhn.fhir.store.IAuditDataStore;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class AuditingInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	
-	private class MockDataStore implements IAuditDataStore {
-
-		@Override
-		public void store(BaseSecurityEvent auditEvent) throws Exception {
-			//do nothing
-		}
-		
-	}
-
-	@Test
-	public void testSinglePatient() throws Exception {
-		
-		AuditingInterceptor interceptor = new AuditingInterceptor("HAPITEST", false);
-		Map<String, Class<? extends IResourceAuditor<? extends IResource>>> auditors = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
-		auditors.put("Patient", PatientAuditor.class);
-		interceptor.setAuditableResources(auditors );
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor)interceptor));
-		
-		MockDataStore mockDataStore = mock(MockDataStore.class);
-		interceptor.setDataStore(mockDataStore);
-		
-		String requestURL = "http://localhost:" + ourPort + "/Patient/1";
-		HttpGet httpGet = new HttpGet(requestURL);
-		httpGet.addHeader(UserInfoInterceptor.HEADER_USER_ID, "hapi-fhir-junit-user");
-		httpGet.addHeader(UserInfoInterceptor.HEADER_USER_NAME, "HAPI FHIR Junit Test Cases");
-		httpGet.addHeader(UserInfoInterceptor.HEADER_APPLICATION_NAME, "hapi-fhir-junit");
-		
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ArgumentCaptor<SecurityEvent> captor = ArgumentCaptor.forClass(SecurityEvent.class);
-		
-		verify(mockDataStore, times(1)).store(captor.capture());
-		
-		SecurityEvent auditEvent = captor.getValue();
-		assertEquals(SecurityEventOutcomeEnum.SUCCESS.getCode(), auditEvent.getEvent().getOutcome().getValue());
-		assertEquals("HAPI FHIR Junit Test Cases", auditEvent.getParticipantFirstRep().getName().getValue());
-		assertEquals("hapi-fhir-junit-user", auditEvent.getParticipantFirstRep().getUserId().getValue());				
-		assertEquals("hapi-fhir-junit", auditEvent.getSource().getIdentifier().getValue());
-		assertEquals("HAPITEST", auditEvent.getSource().getSite().getValue());
-		assertEquals(SecurityEventSourceTypeEnum.USER_DEVICE.getCode(), auditEvent.getSource().getTypeFirstRep().getCode().getValue());
-		
-		List<ObjectElement> objects = auditEvent.getObject();
-		assertEquals(1, objects.size());		
-		ObjectElement object = objects.get(0);		
-		assertEquals("00001", object.getIdentifier().getValue().getValue());
-		assertEquals("Patient: PatientOne Test", object.getName().getValue());
-		assertEquals(SecurityEventObjectLifecycleEnum.ACCESS_OR_USE, object.getLifecycle().getValueAsEnum());
-		assertEquals(SecurityEventObjectTypeEnum.PERSON, object.getType().getValueAsEnum());
-		assertEquals(requestURL, new String(Base64.decodeBase64(object.getQuery().getValueAsString())));
-		
+	@Before
+	public void before() {
+		myInterceptor = mock(IServerInterceptor.class);
+		servlet.setInterceptors(Collections.singletonList(myInterceptor));
 	}
 
 	@Test
@@ -169,18 +123,57 @@ public class AuditingInterceptorTest {
 		}
 		
 	}
-	
 
-	
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
+	@Test
+	public void testSinglePatient() throws Exception {
+		
+		AuditingInterceptor interceptor = new AuditingInterceptor("HAPITEST", false);
+		Map<String, Class<? extends IResourceAuditor<? extends IResource>>> auditors = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
+		auditors.put("Patient", PatientAuditor.class);
+		interceptor.setAuditableResources(auditors );
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor)interceptor));
+		
+		MockDataStore mockDataStore = mock(MockDataStore.class);
+		interceptor.setDataStore(mockDataStore);
+		
+		String requestURL = "http://localhost:" + ourPort + "/Patient/1";
+		HttpGet httpGet = new HttpGet(requestURL);
+		httpGet.addHeader(UserInfoInterceptor.HEADER_USER_ID, "hapi-fhir-junit-user");
+		httpGet.addHeader(UserInfoInterceptor.HEADER_USER_NAME, "HAPI FHIR Junit Test Cases");
+		httpGet.addHeader(UserInfoInterceptor.HEADER_APPLICATION_NAME, "hapi-fhir-junit");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<SecurityEvent> captor = ArgumentCaptor.forClass(SecurityEvent.class);
+		
+		verify(mockDataStore, times(1)).store(captor.capture());
+		
+		SecurityEvent auditEvent = captor.getValue();
+		assertEquals(SecurityEventOutcomeEnum.SUCCESS.getCode(), auditEvent.getEvent().getOutcome().getValue());
+		assertEquals("HAPI FHIR Junit Test Cases", auditEvent.getParticipantFirstRep().getName().getValue());
+		assertEquals("hapi-fhir-junit-user", auditEvent.getParticipantFirstRep().getUserId().getValue());				
+		assertEquals("hapi-fhir-junit", auditEvent.getSource().getIdentifier().getValue());
+		assertEquals("HAPITEST", auditEvent.getSource().getSite().getValue());
+		assertEquals(SecurityEventSourceTypeEnum.USER_DEVICE.getCode(), auditEvent.getSource().getTypeFirstRep().getCode().getValue());
+		
+		List<ObjectElement> objects = auditEvent.getObject();
+		assertEquals(1, objects.size());		
+		ObjectElement object = objects.get(0);		
+		assertEquals("00001", object.getIdentifier().getValue().getValue());
+		assertEquals("Patient: PatientOne Test", object.getName().getValue());
+		assertEquals(SecurityEventObjectLifecycleEnum.ACCESS_OR_USE, object.getLifecycle().getValueAsEnum());
+		assertEquals(SecurityEventObjectTypeEnum.PERSON, object.getType().getValueAsEnum());
+		assertEquals(requestURL, new String(Base64.decodeBase64(object.getQuery().getValueAsString())));
+		
 	}
+	
 
-	@Before
-	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	
@@ -209,6 +202,20 @@ public class AuditingInterceptorTest {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
+		}
+
 		public Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
 			{
@@ -236,6 +243,7 @@ public class AuditingInterceptorTest {
 			return idToPatient;
 		}
 
+		
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -250,7 +258,7 @@ public class AuditingInterceptorTest {
 			return retVal;
 		}
 
-		
+
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -270,26 +278,21 @@ public class AuditingInterceptorTest {
 			return patients;
 		}
 
-
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.getGender().setText("M");
-			patient.getId().setValue("1");
-			return patient;
-		}
-
 	}
+
+	private class MockDataStore implements IAuditDataStore {
+
+		@Override
+		public void store(BaseSecurityEvent auditEvent) throws Exception {
+			//do nothing
+		}
+		
+	}
+
 
 }

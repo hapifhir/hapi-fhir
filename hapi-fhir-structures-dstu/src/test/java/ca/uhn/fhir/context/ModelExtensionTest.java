@@ -2,12 +2,14 @@ package ca.uhn.fhir.context;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.MyOrganization;
 import ca.uhn.fhir.parser.MyPatient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelExtensionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelExtensionTest.class);
@@ -33,6 +35,12 @@ public class ModelExtensionTest {
 //		assertEquals(MyOrganization.class, parsed.getManagingOrganization().getResource().getClass());
 //		MyOrganization parsedOrg = (MyOrganization) parsed.getManagingOrganization().getResource();
 //		assertEquals("arg0", parsedOrg.getName().getValue());
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

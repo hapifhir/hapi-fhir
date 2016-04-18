@@ -44,16 +44,25 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class InterceptorTest {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+
+	@Before
+	public void before() {
+		myInterceptor1 = mock(IServerInterceptor.class);
+		myInterceptor2 = mock(IServerInterceptor.class);
+		servlet.setInterceptors(myInterceptor1, myInterceptor2);
+	}
+
 
 	@Test
 	public void testInterceptorFires() throws Exception {
@@ -82,20 +91,13 @@ public class InterceptorTest {
 		verifyNoMoreInteractions(myInterceptor2);
 	}
 
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
-
-	@Before
-	public void before() {
-		myInterceptor1 = mock(IServerInterceptor.class);
-		myInterceptor2 = mock(IServerInterceptor.class);
-		servlet.setInterceptors(myInterceptor1, myInterceptor2);
-	}
-
 	
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -118,10 +120,25 @@ public class InterceptorTest {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
+		}
 
 		public Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
@@ -145,6 +162,7 @@ public class InterceptorTest {
 			return idToPatient;
 		}
 
+		
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -157,15 +175,6 @@ public class InterceptorTest {
 			String key = theId.getIdPart();
 			Patient retVal = getIdToPatient().get(key);
 			return retVal;
-		}
-
-		
-		@Search(queryName="searchWithWildcardRetVal")
-		public List<? extends IResource> searchWithWildcardRetVal() {
-			Patient p = new Patient();
-			p.setId("1234");
-			p.addName().addFamily("searchWithWildcardRetVal");
-			return Collections.singletonList(p);
 		}
 		
 		/**
@@ -191,18 +200,12 @@ public class InterceptorTest {
 			return Patient.class;
 		}
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.getGender().setText("M");
-			patient.getId().setValue("1");
-			return patient;
+		@Search(queryName="searchWithWildcardRetVal")
+		public List<? extends IResource> searchWithWildcardRetVal() {
+			Patient p = new Patient();
+			p.setId("1234");
+			p.addName().addFamily("searchWithWildcardRetVal");
+			return Collections.singletonList(p);
 		}
 
 	}

@@ -2,10 +2,12 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.util.TestUtil;
 
 public class IdentifierDtTest {
 	private static FhirContext ourCtx = FhirContext.forDstu1();
@@ -56,4 +58,10 @@ public class IdentifierDtTest {
 	}
 
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

@@ -94,15 +94,15 @@ import ca.uhn.fhir.util.IModelVisitor;
 class ParserState<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParserState.class);
+
 	private List<String> myComments = new ArrayList<String>(2);
 	private final FhirContext myContext;
 	private final IParserErrorHandler myErrorHandler;
 	private final boolean myJsonMode;
 	private T myObject;
-	private BaseState myState;
-	private IBase myPreviousElement;
 	private final IParser myParser;
-
+	private IBase myPreviousElement;
+	private BaseState myState;
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myParser = theParser;
 		myContext = theContext;
@@ -1121,10 +1121,6 @@ class ParserState<T> {
 			}
 		}
 
-		protected BundleEntry getEntry() {
-			return myEntry;
-		}
-
 		@SuppressWarnings("deprecation")
 		private void populateResourceMetadata() {
 			if (myEntry.getResource() == null) {
@@ -1624,6 +1620,13 @@ class ParserState<T> {
 			try {
 				child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			} catch (DataFormatException e) {
+				if (theChildName.equals("id")) {
+					if (getCurrentElement() instanceof IIdentifiableElement) {
+						push(new IdentifiableElementIdState(getPreResourceState(), (IIdentifiableElement) getCurrentElement()));
+						return;
+					}
+				}
+				
 				/*
 				 * This means we've found an element that doesn't exist on the structure. If the error handler doesn't throw
 				 * an exception, swallow the element silently along with any child elements
@@ -1751,6 +1754,27 @@ class ParserState<T> {
 
 	}
 
+	public class ElementIdState extends BaseState {
+
+		private IBaseElement myElement;
+
+		public ElementIdState(ParserState<T>.PreResourceState thePreResourceState, IBaseElement theElement) {
+			super(thePreResourceState);
+			myElement = theElement;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			myElement.setId(theValue);
+		}
+
+		@Override
+		public void endingElement() {
+			pop();
+		}
+
+	}
+
 	private class ExtensionState extends BaseState {
 
 		private IBaseExtension<?, ?> myExtension;
@@ -1767,6 +1791,15 @@ class ParserState<T> {
 				// of "value" like every single other place
 				return;
 			}
+			if ("id".equals(theName)) {
+				if (getCurrentElement() instanceof IBaseElement) {
+					((IBaseElement)getCurrentElement()).setId(theValue);
+					return;
+				} else if (getCurrentElement() instanceof IIdentifiableElement) {
+					((IIdentifiableElement)getCurrentElement()).setElementSpecificId(theValue);
+					return;
+				}
+			}
 			super.attributeValue(theName, theValue);
 		}
 
@@ -1780,6 +1813,16 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
+			if (theLocalPart.equals("id")) {
+				if (getCurrentElement() instanceof IBaseElement) {
+					push(new ElementIdState(getPreResourceState(), (IBaseElement)getCurrentElement()));
+					return;
+				} else if (getCurrentElement() instanceof IIdentifiableElement) {
+					push(new IdentifiableElementIdState(getPreResourceState(), (IIdentifiableElement)getCurrentElement()));
+					return;
+				}
+			}
+			
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
 			if (target == null) {
 				myErrorHandler.unknownElement(null, theLocalPart);
@@ -1832,6 +1875,27 @@ class ParserState<T> {
 		@Override
 		protected IBaseExtension<?, ?> getCurrentElement() {
 			return myExtension;
+		}
+
+	}
+
+	public class IdentifiableElementIdState extends BaseState {
+
+		private IIdentifiableElement myElement;
+
+		public IdentifiableElementIdState(ParserState<T>.PreResourceState thePreResourceState, IIdentifiableElement theElement) {
+			super(thePreResourceState);
+			myElement = theElement;
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			myElement.setElementSpecificId(theValue);
+		}
+
+		@Override
+		public void endingElement() {
+			pop();
 		}
 
 	}

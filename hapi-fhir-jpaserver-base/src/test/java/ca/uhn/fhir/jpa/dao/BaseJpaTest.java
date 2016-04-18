@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.mockito.Mockito;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -71,8 +73,9 @@ public class BaseJpaTest {
 
 	@Before
 	public void beforeCreateSrd() {
-		mySrd = mock(ServletRequestDetails.class);
+		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
 		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
+		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
 	}
 	
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {

@@ -56,7 +56,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		for (InputStream nextInputStream : getInputStreams()) {
 
 			String spreadsheetName = getInputStreamNames().get(index);
-			ourLog.info("Reading spreadsheet file {}", spreadsheetName);
+			ourLog.debug("Reading spreadsheet file {}", spreadsheetName);
 
 			Document file;
 			try {

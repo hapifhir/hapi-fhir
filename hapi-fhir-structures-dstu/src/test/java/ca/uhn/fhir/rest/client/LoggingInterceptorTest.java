@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -42,11 +43,16 @@ import ch.qos.logback.core.Appender;
  */
 public class LoggingInterceptorTest {
 
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
-	private Appender<ILoggingEvent> myMockAppender;
 	private Logger myLoggerRoot;
+	private Appender<ILoggingEvent> myMockAppender;
+
+	@After
+	public void after() {
+		myLoggerRoot.detachAppender(myMockAppender);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -62,11 +68,6 @@ public class LoggingInterceptorTest {
 
 		myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
 		myLoggerRoot.addAppender(myMockAppender);
-	}
-
-	@After
-	public void after() {
-		myLoggerRoot.detachAppender(myMockAppender);
 	}
 
 	@Test
@@ -88,8 +89,9 @@ public class LoggingInterceptorTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -118,6 +120,7 @@ public class LoggingInterceptorTest {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.

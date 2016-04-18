@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -36,9 +37,9 @@ import ca.uhn.fhir.util.PortUtil;
 public class SortTest {
 
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testNoSort() throws Exception {
@@ -124,8 +125,9 @@ public class SortTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -149,6 +151,7 @@ public class SortTest {
 		ourClient = builder.build();
 
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.

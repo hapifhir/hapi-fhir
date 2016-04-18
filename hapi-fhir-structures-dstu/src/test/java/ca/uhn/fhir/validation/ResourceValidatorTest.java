@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -18,6 +19,7 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceValidatorTest {
 
@@ -182,4 +184,10 @@ public class ResourceValidatorTest {
 		val.setValidateAgainstStandardSchematron(true);
 		return val;
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

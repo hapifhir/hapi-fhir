@@ -3,9 +3,11 @@ package ca.uhn.fhir.model.primitive;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class XhtmlDtTest {
 
@@ -95,6 +97,12 @@ public class XhtmlDtTest {
 		} catch (DataFormatException e) {
 			assertThat(e.toString(), containsString("AAAA"));
 		}
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

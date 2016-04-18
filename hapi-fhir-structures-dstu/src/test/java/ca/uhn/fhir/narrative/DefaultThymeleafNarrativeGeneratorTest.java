@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +34,7 @@ import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DefaultThymeleafNarrativeGeneratorTest {
 	private FhirContext myCtx;
@@ -236,6 +238,12 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
 		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

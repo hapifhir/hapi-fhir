@@ -24,4 +24,6 @@ public interface IBaseElement {
 
 	IBaseElement setId(String theValue);
 
+	String getId();
+	
 }

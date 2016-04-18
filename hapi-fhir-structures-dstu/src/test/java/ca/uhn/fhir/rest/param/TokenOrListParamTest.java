@@ -3,7 +3,9 @@ package ca.uhn.fhir.rest.param;
 import static org.junit.Assert.*;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.util.TestUtil;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -62,4 +64,10 @@ public class TokenOrListParamTest {
 		assertEquals("code-include-but-not-end-with-comma,suffix", params.getListAsCodings().get(0).getCodeElement().getValue());
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

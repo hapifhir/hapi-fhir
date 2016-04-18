@@ -14,7 +14,7 @@
 					<ul>
 						<li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
 						<li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li>
-						<li>SLF4j (All): 1.7.14 -&gt; 1.7.16</li>
+						<li>SLF4j (All): 1.7.14 -&gt; 1.7.21</li>
 					</ul>
 				]]>
 			</action>
@@ -415,6 +415,16 @@
 			<action type="fix">
 				In server implementations, the Bundle.entry.fullUrl was not getting correctly
 				populated on Hl7OrgDstu2 servers. Thanks to Christian Ohr for reporting!
+			</action>
+			<action type="fix" issue="335">
+				Ensure that element IDs within resources (i.e. IDs on elements other than the
+				resource itself) get serialized and parsed correctly. Previously, these didn't get
+				serialized in a bunch of circumstances. Thanks to Vadim Peretokin for reporting
+				and providing test cases!
+			</action>
+			<action type="add">
+				Improve CLI error message if the tool can't bind to the requested port. Thanks
+				to Claude Nanjo for the suggestion!
 			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">

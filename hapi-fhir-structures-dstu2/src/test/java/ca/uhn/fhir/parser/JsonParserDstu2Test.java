@@ -62,6 +62,7 @@ import ca.uhn.fhir.model.dstu2.valueset.ConditionVerificationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -77,12 +78,6 @@ import net.sf.json.JsonConfig;
 public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
@@ -106,7 +101,6 @@ public class JsonParserDstu2Test {
 		assertEquals("ORG", o.getName());
 	}
 
-	
 	/**
 	 * See #308
 	 */
@@ -124,6 +118,7 @@ public class JsonParserDstu2Test {
 		obs = p.parseResource(ReportObservation.class, encoded);
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
+
 	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -210,6 +205,7 @@ public class JsonParserDstu2Test {
 
 	}
 
+
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
@@ -266,6 +262,63 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
 
+	
+	/**
+	 * See #336
+	 */
+	@Test
+	public void testEncodeAndParseNullPrimitiveWithExtensions() {
+		
+		Patient p = new Patient();
+		p.setId("patid");
+		HumanNameDt name = p.addName();
+		name.addFamily().setValue(null).addUndeclaredExtension(new ExtensionDt(false, "http://foo", new StringDt("FOOEXT0")));
+		name.getFamily().get(0).setElementSpecificId("f0");
+		name.addFamily().setValue("V1").addUndeclaredExtension((ExtensionDt) new ExtensionDt(false, "http://foo", new StringDt("FOOEXT1")));
+		name.getFamily().get(1).setElementSpecificId("f1");
+		name.getFamily().get(1).getUndeclaredExtensions().get(0).setElementSpecificId("ext1id");
+		name.addFamily(); // this one shouldn't get encoded
+		name.addFamily().setValue(null).addUndeclaredExtension(new ExtensionDt(false, "http://foo", new StringDt("FOOEXT3")));
+		name.setElementSpecificId("nameid");
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		
+		output = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(p);
+		String expected = "{\"resourceType\":\"Patient\",\"id\":\"patid\",\"name\":[{\"id\":\"nameid\",\"family\":[null,\"V1\",null],\"_family\":[{\"id\":\"f0\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT0\"}]},{\"id\":\"f1\",\"extension\":[{\"id\":\"ext1id\",\"url\":\"http://foo\",\"valueString\":\"FOOEXT1\"}]},{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT3\"}]}]}]}";
+		assertEquals(expected, output);
+
+		p = ourCtx.newJsonParser().parseResource(Patient.class, output);
+		assertEquals("patid", p.getIdElement().getIdPart());
+		
+		name = p.getName().get(0);
+		assertEquals("nameid", name.getElementSpecificId());
+		assertEquals(3, name.getFamily().size());
+		
+		assertEquals(null, name.getFamily().get(0).getValue());
+		assertEquals("V1", name.getFamily().get(1).getValue());
+		assertEquals(null, name.getFamily().get(2).getValue());
+		
+		assertEquals("f0", name.getFamily().get(0).getElementSpecificId());
+		assertEquals("f1", name.getFamily().get(1).getElementSpecificId());
+		assertEquals(null, name.getFamily().get(2).getElementSpecificId());
+
+		assertEquals(1, name.getFamily().get(0).getAllUndeclaredExtensions().size());
+		assertEquals("http://foo", name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("FOOEXT0", ((StringDt)name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getValue()).getValue());
+		assertEquals(null, name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getElementSpecificId());
+
+		assertEquals(1, name.getFamily().get(1).getAllUndeclaredExtensions().size());
+		assertEquals("http://foo", name.getFamily().get(1).getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("FOOEXT1", ((StringDt)name.getFamily().get(1).getAllUndeclaredExtensions().get(0).getValue()).getValue());
+		assertEquals("ext1id", name.getFamily().get(1).getAllUndeclaredExtensions().get(0).getElementSpecificId());
+
+		assertEquals(1, name.getFamily().get(2).getAllUndeclaredExtensions().size());
+		assertEquals("http://foo", name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("FOOEXT3", ((StringDt)name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getValue()).getValue());
+		assertEquals(null, name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId());
+
+	}
 	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
@@ -328,7 +381,6 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
-	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -350,6 +402,7 @@ public class JsonParserDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -369,6 +422,7 @@ public class JsonParserDstu2Test {
 
 	}
 
+	
 	/**
 	 * Fixing #89
 	 */
@@ -436,6 +490,35 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeExtensionInPrimitiveElement() {
+
+		Conformance c = new Conformance();
+		c.getAcceptUnknownElement().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
+
+		// Now with a value
+		ourLog.info("---------------");
+
+		c = new Conformance();
+		c.getAcceptUnknownElement().setValueAsEnum(UnknownContentCodeEnum.UNKNOWN_ELEMENTS);;
+		c.getAcceptUnknownElement().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+
+		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"elements\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
+
 	}
 
 	@Test
@@ -1374,7 +1457,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
 	}
-	
+
 	/**
 	 * See #144 and #146
 	 */
@@ -1397,5 +1480,10 @@ public class JsonParserDstu2Test {
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
+	}
+	
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 }

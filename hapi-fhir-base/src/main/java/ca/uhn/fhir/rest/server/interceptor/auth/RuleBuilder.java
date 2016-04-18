@@ -46,7 +46,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRule allow(String theRuleName) {
-		return new RuleBuilderRule(RuleVerdictEnum.ALLOW, theRuleName);
+		return new RuleBuilderRule(PolicyEnum.ALLOW, theRuleName);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRule deny(String theRuleName) {
-		return new RuleBuilderRule(RuleVerdictEnum.DENY, theRuleName);
+		return new RuleBuilderRule(PolicyEnum.DENY, theRuleName);
 	}
 
 	@Override
@@ -101,15 +101,21 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	private class RuleBuilderRule implements IAuthRuleBuilderRule {
 
-		private RuleOpEnum myRuleOp;
-		private RuleVerdictEnum myRuleMode;
+		private PolicyEnum myRuleMode;
 		private String myRuleName;
+		private RuleOpEnum myRuleOp;
 
-		public RuleBuilderRule(RuleVerdictEnum theRuleMode, String theRuleName) {
+		public RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
 			myRuleName = theRuleName;
 		}
 
+		@Override
+		public IAuthRuleBuilderRuleOp delete() {
+			myRuleOp = RuleOpEnum.DELETE;
+			return new RuleBuilderRuleOp();
+		}
+		
 		@Override
 		public RuleBuilderFinished metadata() {
 			Rule rule = new Rule(myRuleName);
@@ -118,13 +124,13 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			myRules.add(rule);
 			return new RuleBuilderFinished();
 		}
-		
+
 		@Override
 		public IAuthRuleBuilderRuleOp read() {
 			myRuleOp = RuleOpEnum.READ;
 			return new RuleBuilderRuleOp();
 		}
-
+		
 		@Override
 		public IAuthRuleBuilderRuleTransaction transaction() {
 			myRuleOp = RuleOpEnum.TRANSACTION;
@@ -136,7 +142,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			myRuleOp = RuleOpEnum.WRITE;
 			return new RuleBuilderRuleOp();
 		}
-		
+
 		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
 
 			private AppliesTypeEnum myAppliesTo;

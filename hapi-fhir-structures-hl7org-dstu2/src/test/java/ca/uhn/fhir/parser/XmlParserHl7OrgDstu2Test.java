@@ -923,7 +923,7 @@ public class XmlParserHl7OrgDstu2Test {
   public void testEncodeExtensionWithContainedResource() {
 
     TestPatientFor327 patient = new TestPatientFor327();
-    patient.setBirthDate(new Date());
+    patient.setBirthDateElement(new DateType("2016-04-14"));
 
     List<Reference> conditions = new ArrayList<Reference>();
     Condition condition = new Condition();

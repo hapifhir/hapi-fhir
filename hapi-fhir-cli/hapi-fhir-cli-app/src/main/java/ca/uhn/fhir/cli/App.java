@@ -190,11 +190,13 @@ public class App {
 			System.err.println("  " + ansi().fg(Color.RED).bold() + e.getMessage());
 			System.err.println("" + ansi().fg(Color.WHITE).boldOff());
 			logCommandUsageNoHeader(command);
-			return;
+			System.exit(1);
 		} catch (CommandFailureException e) {
 			ourLog.error(e.getMessage());
+			System.exit(1);
 		} catch (Exception e) {
 			ourLog.error("Error during execution: ", e);
+			System.exit(1);
 		}
 
 	}

@@ -2,6 +2,8 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
+import org.junit.AfterClass;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
@@ -12,6 +14,7 @@ import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.TestUtil;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
 public class ResourceWithExtensionsA extends BaseResource {
@@ -209,6 +212,12 @@ public class ResourceWithExtensionsA extends BaseResource {
 	@Override
 	public FhirVersionEnum getStructureFhirVersionEnum() {
 		return FhirVersionEnum.DSTU1;
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

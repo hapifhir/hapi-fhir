@@ -35,7 +35,7 @@ public class CompartmentParser {
 			throw new MojoFailureException("Unknown base resource name: " + resName);
 		}
 
-		ourLog.info("Reading spreadsheet file {}", resName);
+		ourLog.debug("Reading compartment file {}", resName);
 
 		Document file;
 		try {

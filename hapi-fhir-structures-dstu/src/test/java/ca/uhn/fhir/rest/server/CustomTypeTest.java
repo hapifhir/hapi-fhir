@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -44,9 +45,68 @@ public class CustomTypeTest {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = new FhirContext(ExtendedPatient.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeTest.class);
 	private static int ourPort;
+	private static boolean ourReturnExtended = false;
+
+	
 	private static Server ourServer;
+	
 	private static RestfulServer ourServlet;
+	
+	@Test
+	public void testFindProfileItself() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		ourReturnExtended=true;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile/prof2?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		ourLog.info(responseContent);
+		
+		Profile bundle = ourCtx.newXmlParser().parseResource(Profile.class, responseContent);
+		
+	}
+	
+	
+	@Test
+	public void testSearchReturnsNoProfileForExtendedType() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
+		ourReturnExtended=true;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
+		assertEquals(0, profileTags.size());
+	}
+	
+	@Test
+	public void testSearchReturnsNoProfileForNormalType() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		ourReturnExtended=false;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
+		assertEquals(0, profileTags.size());
+	}
 
 	
 	@Test
@@ -71,64 +131,7 @@ public class CustomTypeTest {
 		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
 		
 	}
-	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeTest.class);
-	
-	@Test
-	public void testFindProfileItself() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		ourReturnExtended=true;
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Profile/prof2?_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		ourLog.info(responseContent);
-		
-		Profile bundle = ourCtx.newXmlParser().parseResource(Profile.class, responseContent);
-		
-	}
-	
-	
-	@Test
-	public void testSearchReturnsNoProfileForNormalType() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		ourReturnExtended=false;
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.getEntries().size());
 
-		BundleEntry entry = bundle.getEntries().get(0);
-		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
-		assertEquals(0, profileTags.size());
-	}
-	
-	@Test
-	public void testSearchReturnsNoProfileForExtendedType() throws Exception {
-		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
-		ourReturnExtended=true;
-		
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.getEntries().size());
-
-		BundleEntry entry = bundle.getEntries().get(0);
-		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
-		assertEquals(0, profileTags.size());
-	}
-
-	
 	@Test
 	public void testSearchReturnsProfileForNormalType() throws Exception {
 		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
@@ -152,11 +155,13 @@ public class CustomTypeTest {
 		
 	}
 
+	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
+	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -183,8 +188,31 @@ public class CustomTypeTest {
 		fhirContext.getResourceDefinition(ExtendedPatient.class);
 		
 	}
-
 	
+	public static class DummyPatientResourceProvider implements IResourceProvider {
+		
+		@Search
+		public List<Patient> findPatient(@OptionalParam(name = "_id") StringParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = ourReturnExtended ? new ExtendedPatient() : new Patient();
+			patient.setId("1");
+			patient.addIdentifier("system", "identifier123");
+			if (theParam != null) {
+				patient.addName().addFamily("id" + theParam.getValue());
+			}
+			retVal.add(patient);
+			return retVal;
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+	}
+
+
 	@ResourceDef(name="Patient", profile="http://foo/profiles/Profile", id="prof2")
 	public static class ExtendedPatient extends Patient {
 		
@@ -210,31 +238,6 @@ public class CustomTypeTest {
 			myPetName = thePetName;
 		}
 		
-	}
-	
-	private static boolean ourReturnExtended = false;
-	
-	public static class DummyPatientResourceProvider implements IResourceProvider {
-		
-		@Search
-		public List<Patient> findPatient(@OptionalParam(name = "_id") StringParam theParam) {
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-
-			Patient patient = ourReturnExtended ? new ExtendedPatient() : new Patient();
-			patient.setId("1");
-			patient.addIdentifier("system", "identifier123");
-			if (theParam != null) {
-				patient.addName().addFamily("id" + theParam.getValue());
-			}
-			retVal.add(patient);
-			return retVal;
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
 	}
 
 }

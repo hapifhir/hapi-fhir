@@ -3,11 +3,13 @@ package ca.uhn.fhir.narrative;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CustomThymeleafNarrativeGeneratorTest {
 
@@ -35,4 +37,10 @@ public class CustomThymeleafNarrativeGeneratorTest {
 		assertThat(actual, containsString("<h1>Name</h1><div class=\"nameElement\"> given <b>FAM1 </b></div><h1>Address</h1><div><span>line1 </span><br /><span>line2 </span><br /></div></div>"));
 		
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }
