@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -1111,40 +1112,13 @@ public class TagMethodProvider
 
 //START SNIPPET: transaction
 @Transaction
-public List<IResource> transaction(@TransactionParam List<IResource> theResources) {
-   // theResources will contain a complete bundle of all resources to persist
-   // in a single transaction
-   for (IResource next : theResources) {
-      InstantDt deleted = (InstantDt) next.getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT);
-      if (deleted != null && deleted.isEmpty() == false) {
-         // delete this resource
-      } else {
-         // create or update this resource
-      }
+public Bundle transaction(@TransactionParam Bundle theInput) {
+   for (BundleEntry nextEntry : theInput.getEntries()) {
+      // Process entry
    }
 
-   // According to the specification, a bundle must be returned. This bundle will contain
-   // all of the created/updated/deleted resources, including their new/updated identities.
-   //
-   // The returned list must be the exact same size as the list of resources
-   // passed in, and it is acceptable to return the same list instance that was
-   // passed in. 
-   List<IResource> retVal = new ArrayList<IResource>(theResources);
-   for (IResource next : theResources) {
-      /*
-       * Populate each returned resource with the new ID for that resource,
-       * including the new version if the server supports versioning.
-       */
-      IdDt newId = new IdDt("Patient", "1", "2"); 
-      next.setId(newId);
-   }
-
-   // If wanted, you may optionally also return an OperationOutcome resource
-   // If present, the OperationOutcome must come first in the returned list.
-   OperationOutcome oo = new OperationOutcome();
-   oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Completed successfully");
-   retVal.add(0, oo);
-   
+   Bundle retVal = new Bundle();
+   // Populate return bundle
    return retVal;
 }
 //END SNIPPET: transaction

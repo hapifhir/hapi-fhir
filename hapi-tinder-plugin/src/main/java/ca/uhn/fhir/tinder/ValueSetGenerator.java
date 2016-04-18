@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
@@ -92,6 +93,7 @@ public class ValueSetGenerator {
 	public void parse() throws FileNotFoundException, IOException {
 		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
+		newXmlParser.setParserErrorHandler(new LenientErrorHandler(false));
 
 		ourLog.info("Parsing built-in ValueSets");
 		String version = myVersion;
