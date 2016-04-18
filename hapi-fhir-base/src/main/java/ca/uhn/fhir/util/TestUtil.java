@@ -9,6 +9,10 @@ public class TestUtil {
 
 	/**
 	 * THIS IS FOR UNIT TESTS ONLY
+	 * 
+	 * When we run the unit tests in cobertura, JUnit doesn't seem to clean up static fields which leads to 
+	 * tons of memory being used by the end and the JVM crashes in Travis. Manually clearing all of the
+	 * static fields seems to solve this.
 	 */
 	@CoverageIgnore
 	public static void clearAllStaticFieldsForUnitTest() {
