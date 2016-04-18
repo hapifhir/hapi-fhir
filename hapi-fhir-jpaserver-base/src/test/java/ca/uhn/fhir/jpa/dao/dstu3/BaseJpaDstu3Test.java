@@ -84,19 +84,13 @@ import ca.uhn.fhir.util.TestUtil;
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
+	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	@AfterClass
-	public static void afterClassClearContextBaseJpaDstu3Test() throws Exception {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-	@Autowired
-	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 	@Autowired
 	protected ApplicationContext myAppCtx;
+
+
 	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
 	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
@@ -128,6 +122,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
 	@Autowired
@@ -142,14 +138,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
+	@Autowired
+	@Qualifier("myObservationDaoDstu3")
+	protected IFhirResourceDao<Observation> myObservationDao;
 	
 @Autowired
-@Qualifier("myObservationDaoDstu3")
-protected IFhirResourceDao<Observation> myObservationDao;
+@Qualifier("myOrganizationDaoDstu3")
+protected IFhirResourceDao<Organization> myOrganizationDao;
 	
-	@Autowired
-	@Qualifier("myOrganizationDaoDstu3")
-	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -206,7 +202,6 @@ protected IFhirResourceDao<Observation> myObservationDao;
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
 	}
-
 	@Before
 	@Transactional
 	public void beforeFlushFT() {
@@ -232,7 +227,6 @@ protected IFhirResourceDao<Observation> myObservationDao;
 		myDaoConfig.setIncludeLimit(2000);
 	}
 
-
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {
@@ -243,6 +237,7 @@ protected IFhirResourceDao<Observation> myObservationDao;
 		return newJsonParser.parseResource(type, string);
 	}
 
+
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
 		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -251,9 +246,10 @@ protected IFhirResourceDao<Observation> myObservationDao;
 	}
 
 	@AfterClass
-	public static void afterFlushCaches() {
+	public static void afterClassClearContextBaseJpaDstu3Test() throws Exception {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainDstu3.flush();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
