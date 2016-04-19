@@ -93,11 +93,26 @@ public class SchemaBaseValidator implements IValidatorModule {
 				encodedResource = theContext.getFhirContext().newXmlParser().encodeResourceToString((IBaseResource) theContext.getResource());
 			}
 
+			/*
+			 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+			 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
+			 */
+			validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
+		} catch (SAXParseException e) {
+			SingleValidationMessage message = new SingleValidationMessage();
+			message.setLocationLine(e.getLineNumber());
+			message.setLocationCol(e.getColumnNumber());
+			message.setMessage(e.getLocalizedMessage());
+			message.setSeverity(ResultSeverityEnum.FATAL);
+			theContext.addValidationMessage(message);
 		} catch (SAXException e) {
-			throw new ConfigurationException("Could not apply schema file", e);
+			// Catch all
+			throw new ConfigurationException("Could not load/parse schema file", e);
 		} catch (IOException e) {
-			// This shouldn't happen since we're using a string source
+			// Catch all
 			throw new ConfigurationException("Could not load/parse schema file", e);
 		}
 	}
@@ -117,6 +132,13 @@ public class SchemaBaseValidator implements IValidatorModule {
 			schemaFactory.setResourceResolver(new MyResourceResolver());
 
 			try {
+				
+				/*
+				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
+				 */
+				schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				
 				schema = schemaFactory.newSchema(new Source[] { baseSource });
 			} catch (SAXException e) {
 				throw new ConfigurationException("Could not load/parse schema file: " + theSchemaName, e);

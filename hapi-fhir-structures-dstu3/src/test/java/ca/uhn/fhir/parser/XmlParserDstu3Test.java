@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -146,7 +146,7 @@ public class XmlParserDstu3Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
 	}
-
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -1139,8 +1139,6 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("maritalStatus"));
 	}
 
-	
-
 	@Test
 	public void testEncodeNonContained() {
 		// Create an organization
@@ -1180,6 +1178,8 @@ public class XmlParserDstu3Test {
 		
 		
 	}
+
+	
 
 	/**
 	 * See #312
@@ -1236,7 +1236,7 @@ public class XmlParserDstu3Test {
 		assertThat(str, containsString("<reference value=\"Patient/phitcc_pat_normal\"/>"));
 		assertThat(str, containsString("<reference value=\"Observation/phitcc_obs_bp_dia\"/>"));
 	}
-	
+
 	@Test
 	public void testEncodeSummary() {
 		Patient patient = new Patient();
@@ -1254,7 +1254,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-
+	
 	@Test
 	public void testEncodeSummary2() {
 		Patient patient = new Patient();
@@ -2534,6 +2534,38 @@ public class XmlParserDstu3Test {
 
 		assertEquals("Patient", patient.getIdElement().getResourceType());
 		assertEquals("Patient", reincarnatedPatient.getIdElement().getResourceType());
+	}
+
+	/**
+	 * See #339
+	 * 
+	 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
+	 */
+	@Test
+	public void testXxe() {
+		//@formatter:off
+		String input =
+			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + 
+			"<!DOCTYPE foo [  \n" + 
+			"<!ELEMENT foo ANY >\n" + 
+			"<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>" +
+			"<Patient xmlns=\"http://hl7.org/fhir\">" +
+				"<text>" + 
+					"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n" + 
+				"</text>" +
+				"<address>" + 
+					"<line value=\"FOO\"/>" + 
+				"</address>" +
+			"</Patient>";
+		//@formatter:on
+		
+		try {
+			ourCtx.newXmlParser().parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertThat(e.toString(), containsString("Undeclared general entity"));
+		}
+		
 	}
 
 	@AfterClass

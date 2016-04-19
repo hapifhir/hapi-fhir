@@ -7,6 +7,13 @@
 	</properties>
 	<body>
 		<release version="1.5" date="TBD">
+			<action type="fix" issue="339">
+				Security Fix: XML parser was vulnerable to XXE (XML External Entity) 
+				processing, which could result in local files on disk being disclosed.
+				See <![CDATA[<a href="https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing">this page</a>]]>
+				for more information.
+				Thanks to Jim Steel for reporting!
+			</action>
 			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):
