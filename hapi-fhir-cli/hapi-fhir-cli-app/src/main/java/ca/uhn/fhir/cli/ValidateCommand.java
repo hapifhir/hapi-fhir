@@ -119,7 +119,8 @@ public class ValidateCommand extends BaseCommand {
 				org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
 						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
 				if (localProfileResource != null) {
-					instanceValidator.setStructureDefintion((org.hl7.fhir.instance.model.StructureDefinition) localProfileResource);
+					org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
+					instanceValidator.setStructureDefintion(convertedSd);
 				}
 				if (theCommandLine.hasOption("r")) {
 					validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
