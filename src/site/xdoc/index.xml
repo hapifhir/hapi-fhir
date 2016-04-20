@@ -61,6 +61,44 @@
 
 		<section name="Announcements">
 			<p>
+				<b>April 20, 2016 - HAPI FHIR 1.5 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section. This release corrects a security vulnerability
+				as described below. All users are recommended to upgrade.
+			</p>
+			<p>
+				This release brings a number of bugfixes and a few bigger things.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Some changes of note include:
+			</p>
+			<ul>
+				<li>
+					This release fixes a security vulnerability in the XML parser. See
+					GitHub <a href="https://github.com/jamesagnew/hapi-fhir/issues/339">Issue #339</a>
+					for information.
+				</li>
+				<li>
+					This release adds support for the current draft STU3 structure definitions,
+					known as FHIR 1.4.0 (or the Montreal Connectathon Snapshot). See the 
+					<a href="./downloads.html">downloads page</a> for information on the
+					various versions of FHIR supported by HAPI FHIR.
+				</li>
+				<li>
+					A new 
+					<a href="./doc_rest_client_alternate_provider.html">JAX-RS based client</a>
+					has been added.
+				</li>
+				<li>
+					A 
+					<a href="./doc_rest_server_security.html">Server Security Interceptor</a>
+					has been added.
+				</li>
+			</ul>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<!-- 
+			<p>
 				<b>February 4, 2016 - HAPI FHIR 1.4 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section. 
@@ -119,6 +157,7 @@
 				<a href="http://goo.gl/forms/R8Ifg2qvOY">HAPI FHIR Community Survey</a>, we
 				would really appreciate if you did so!
 			</p>
+			-->
 			<!-- 
 			<p>
 				<b>November 15, 2015 - HAPI FHIR 1.3 Released</b> -

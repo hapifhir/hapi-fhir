@@ -2545,19 +2545,21 @@ public class XmlParserDstu3Test {
 	public void testXxe() {
 		//@formatter:off
 		String input =
-			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + 
-			"<!DOCTYPE foo [  \n" + 
-			"<!ELEMENT foo ANY >\n" + 
+			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + 
+			"<!DOCTYPE foo [  " + 
+			"<!ELEMENT foo ANY >" + 
 			"<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>" +
 			"<Patient xmlns=\"http://hl7.org/fhir\">" +
 				"<text>" + 
-					"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n" + 
+					"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>" + 
 				"</text>" +
 				"<address>" + 
 					"<line value=\"FOO\"/>" + 
 				"</address>" +
 			"</Patient>";
 		//@formatter:on
+		
+		ourLog.info(input);
 		
 		try {
 			ourCtx.newXmlParser().parseResource(Patient.class, input);
