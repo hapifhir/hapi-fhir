@@ -1476,6 +1476,30 @@ public class XmlParserDstu2Test {
 
 
 	@Test
+	public void testEncodeWithEncodeElementsMandatory() throws Exception {
+		MedicationOrder mo = new MedicationOrder();
+		mo.getText().setDiv("<div>DIV</div>");
+		mo.setNote("NOTE");
+		mo.setMedication(new ResourceReferenceDt("Medication/123"));
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		bundle.setTotal(100);
+		bundle.addEntry().setResource(mo);
+
+		{
+			IParser p = ourCtx.newXmlParser();
+			p.setEncodeElements(new HashSet<String>(Arrays.asList("Bundle.entry", "*.text", "*.(mandatory)")));
+			p.setPrettyPrint(true);
+			String out = p.encodeResourceToString(bundle);
+			ourLog.info(out);
+			assertThat(out, (containsString("DIV")));
+			assertThat(out, (containsString("Medication/123")));
+			assertThat(out, not(containsString("NOTE")));
+		}
+	}
+	
+	
+	@Test
 	public void testEncodeWithEncodeElements() throws Exception {
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");

@@ -71,7 +71,7 @@ public class RestfulServerUtils {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
-	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text"));
+	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
 
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print

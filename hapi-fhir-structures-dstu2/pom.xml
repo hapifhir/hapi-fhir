@@ -188,7 +188,9 @@
 								<baseResourceName>deviceusestatement</baseResourceName>
 								<baseResourceName>diagnosticorder</baseResourceName>
 								<baseResourceName>diagnosticreport</baseResourceName>
+								<!-- This is not a real resource 
 								<baseResourceName>documentation</baseResourceName>
+								-->
 								<baseResourceName>documentmanifest</baseResourceName>
 								<baseResourceName>documentreference</baseResourceName>
 								<baseResourceName>eligibilityrequest</baseResourceName>

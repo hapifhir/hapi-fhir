@@ -36,6 +36,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -532,6 +533,48 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testCreateBundleAllowsDocumentAndCollection() {
+		String methodName = "testCreateBundleAllowsDocumentAndCollection";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType pid = myPatientDao.create(p, mySrd).getId();
+		p.setId(pid);
+		ourLog.info("Created patient, got it: {}", pid);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(null);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type value of: (missing)", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleType.SEARCHSET);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type value of: searchset", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleType.COLLECTION);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
+		bundle = new Bundle();
+		bundle.setType(BundleType.DOCUMENT);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
+	}
+	
 	@Test
 	public void testCreateWithIfNoneExistBasic() {
 		String methodName = "testCreateWithIfNoneExistBasic";

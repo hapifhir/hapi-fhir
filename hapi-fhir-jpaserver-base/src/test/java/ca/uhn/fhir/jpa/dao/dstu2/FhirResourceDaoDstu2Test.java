@@ -34,6 +34,7 @@ import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -73,6 +74,7 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
@@ -106,7 +108,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
@@ -129,6 +130,49 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
+	@Test
+	public void testCreateBundleAllowsDocumentAndCollection() {
+		String methodName = "testCreateBundleAllowsDocumentAndCollection";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType pid = myPatientDao.create(p, mySrd).getId();
+		p.setId(pid);
+		ourLog.info("Created patient, got it: {}", pid);
+
+		Bundle bundle = new Bundle();
+		bundle.setType((BundleTypeEnum)null);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: (missing)", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.BATCH_RESPONSE);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: batch-response", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.COLLECTION);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.DOCUMENT);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
+	}
+
+	
 	/**
 	 * This gets called from assertGone too! Careful about exceptions...
 	 */

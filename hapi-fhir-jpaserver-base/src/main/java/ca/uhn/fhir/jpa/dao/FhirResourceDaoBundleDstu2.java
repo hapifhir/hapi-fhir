@@ -31,8 +31,8 @@ public class FhirResourceDaoBundleDstu2 extends FhirResourceDaoDstu2<Bundle> {
 	protected void preProcessResourceForStorage(Bundle theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		if (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type value other than '" + BundleTypeEnum.DOCUMENT.getCode() + "' - Value was: " + (theResource.getTypeElement().getValueAsEnum() != null ? theResource.getTypeElement().getValueAsEnum().getCode() : "(missing)");
+		if (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT && theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.COLLECTION) {
+			String message = "Unable to store a Bundle resource on this server with a Bundle.type of: " + (theResource.getTypeElement().getValueAsEnum() != null ? theResource.getTypeElement().getValueAsEnum().getCode() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}
 

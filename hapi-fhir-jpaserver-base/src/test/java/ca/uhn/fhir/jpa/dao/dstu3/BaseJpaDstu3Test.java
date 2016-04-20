@@ -93,6 +93,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myCodeSystemDaoDstu3")
 	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
+	@Qualifier("myBundleDaoDstu3")
+	protected IFhirResourceDao<Bundle> myBundleDao;
+	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 	@Autowired

@@ -145,9 +145,6 @@ public abstract class BaseParser implements IParser {
 							/*
 							 * There are lots of reasons we might skip encoding a particular child
 							 */
-							//							if (myNext.getDef().getElementName().equals("extension") || myNext.getDef().getElementName().equals("modifierExtension")) {
-							//								myNext = null;
-							//							} else 
 							if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
 							} else if (!myNext.shouldBeEncoded()) {
@@ -981,6 +978,12 @@ public abstract class BaseParser implements IParser {
 				}
 
 				if (myDef != null) {
+					if (myDef.getMin() > 0) {
+						if (theElements.contains("*.(mandatory)")) {
+							return true;
+						}
+					}
+
 					thePathBuilder.append('.');
 					thePathBuilder.append(myDef.getElementName());
 					return theElements.contains(thePathBuilder.toString());
@@ -1016,6 +1019,12 @@ public abstract class BaseParser implements IParser {
 					retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), true);
 				}
 			}
+//			if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
+//				if (myDef.getMin() > 0) {
+//					retVal = true;
+//				}
+//			}
+			
 			return retVal;
 		}
 	}

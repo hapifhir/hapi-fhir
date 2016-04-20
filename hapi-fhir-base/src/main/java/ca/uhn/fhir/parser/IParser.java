@@ -257,6 +257,7 @@ public interface IParser {
 	 * <li><b>Patient.name.family</b> - Encode only the patient's family name</li>
 	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
 	 * wildcard)</li>
+	 * <li><b>*.(mandatory)</b> - This is a special case which causes any mandatory fields (min > 0) to be encoded</li>
 	 * </ul>
 	 * 
 	 * @param theEncodeElements

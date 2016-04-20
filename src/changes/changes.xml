@@ -426,6 +426,16 @@
 				Improve CLI error message if the tool can't bind to the requested port. Thanks
 				to Claude Nanjo for the suggestion!
 			</action>
+			<action type="fix">
+				Server param of <![CDATA[<code>_summary=text</code>]]> did not
+				include mandatory elements in return as well as
+				the text element, even though the FHIR specification
+				required it.
+			</action>
+			<action type="fix">
+				Remove invalid resource type "Documentation" from DSTU2
+				structures.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
