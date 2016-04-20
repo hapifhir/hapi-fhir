@@ -171,7 +171,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			client.create().resource(resBody).execute().getId();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value other than 'document' - Value was: transaction"));
+			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction"));
 		}
 	}
 

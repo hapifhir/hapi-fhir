@@ -78,7 +78,24 @@
 				has the appropriate permission to perform a given task on a FHIR server. This is
 				done by declaring
 			</p>
-						
+			<p class="doc_info_bubble">
+				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
+				been heavily tested. Use with caution, and do lots of testing! We welcome
+				feedback and suggestions on this feature.
+			</p>
+			
+			<p>
+				The AuthorizationInterceptor works by allowing you to declare 
+				permissions based on an individual request coming in. In other
+				words, you could have code that examines an incoming request and
+				determines that it is being made by a Patient with ID 123. You
+				could then declare that the requesting user has access to read and
+				write any resource in compartment "Patient/123", which corresponds
+				to any Observation, MedicationOrder etc with a subject of 
+				"<code>Patient/123</code>". On the other hand, another request
+				might be detemrined to belong to an administrator user, and
+				could be declared to be allowed to do anything.
+			</p>
 		</section>
 		
 	</body>
