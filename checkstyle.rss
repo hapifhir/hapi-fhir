@@ -25,9 +25,9 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2014 - 2016 University Health Network</copyright>
     <item>
-      <title>File: 530,
+      <title>File: 531,
              Errors: 0,
-             Warnings: 1302,
+             Warnings: 1270,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -808,7 +808,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  8
                 </td>
                 <td>
                   0
@@ -1102,7 +1102,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  46
+                  5
                 </td>
                 <td>
                   0
@@ -1550,7 +1550,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  1
                 </td>
                 <td>
                   0
@@ -1914,7 +1914,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  8
                 </td>
                 <td>
                   0
@@ -1999,6 +1999,20 @@ under the License.
                 </td>
                 <td>
                   4
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier.java">ca/uhn/fhir/rest/server/interceptor/auth/IRuleApplier.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
                 </td>
                 <td>
                   0
@@ -3281,20 +3295,6 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.param.BaseOrListParam.java">ca/uhn/fhir/rest/param/BaseOrListParam.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
-                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.interceptor.auth.RuleVerdictEnum.java">ca/uhn/fhir/rest/server/interceptor/auth/RuleVerdictEnum.java</a>
                 </td>
                 <td>
                   0
@@ -5680,7 +5680,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  3
                 </td>
                 <td>
                   0
@@ -6955,6 +6955,20 @@ under the License.
                 </td>
                 <td>
                   101
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.TestUtil.java">ca/uhn/fhir/util/TestUtil.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
                 </td>
                 <td>
                   0

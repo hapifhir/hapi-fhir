@@ -39,8 +39,8 @@
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> preProcessResourceForStorage(Bundle theResource) {
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  		<strong class="jxr_keyword">super</strong>.preProcessResourceForStorage(theResource);
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		<strong class="jxr_keyword">if</strong> (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT) {
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  			String message = <span class="jxr_string">"Unable to store a Bundle resource on this server with a Bundle.type value other than '"</span> + BundleTypeEnum.DOCUMENT.getCode() + <span class="jxr_string">"' - Value was: "</span> + (theResource.getTypeElement().getValueAsEnum() != <strong class="jxr_keyword">null</strong> ? theResource.getTypeElement().getValueAsEnum().getCode() : <span class="jxr_string">"(missing)"</span>);
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		<strong class="jxr_keyword">if</strong> (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT &amp;&amp; theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.COLLECTION) {
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  			String message = <span class="jxr_string">"Unable to store a Bundle resource on this server with a Bundle.type of: "</span> + (theResource.getTypeElement().getValueAsEnum() != <strong class="jxr_keyword">null</strong> ? theResource.getTypeElement().getValueAsEnum().getCode() : <span class="jxr_string">"(missing)"</span>);
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(message);
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  		}
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
