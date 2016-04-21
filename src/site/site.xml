@@ -97,8 +97,9 @@
 				<item name="Using RESTful Server" href="./doc_rest_server.html" />
 				<item name="RESTful Operations" href="./doc_rest_operations.html" />
 				<item name="Narrative Generator" href="./doc_narrative.html" />
-				<item name="CORS Support" href="./doc_cors.html" />
 				<item name="Interceptors (server)" href="./doc_rest_server_interceptor.html" />
+				<item name="Security" href="./doc_rest_server_security.html" />
+				<item name="CORS Support" href="./doc_cors.html" />
 				<item name="Web Testing UI" href="./doc_server_tester.html" />
 				<item name="JAX-RS Support" href="./doc_rest_server_jaxrs.html" />
 			</item>

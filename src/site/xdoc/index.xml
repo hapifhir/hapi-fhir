@@ -93,6 +93,12 @@
 					<a href="./doc_rest_server_security.html">Server Security Interceptor</a>
 					has been added.
 				</li>
+				<li>
+					The JPA server has been enhanced so that search results are now paged into
+					the database instead of simply to memory. This makes the server much more
+					scalable to supporting larger result sets, larger volumes of queries, and
+					operation across multiple nodes in a cluster.
+				</li>
 			</ul>
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>

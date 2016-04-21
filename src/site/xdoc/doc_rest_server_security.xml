@@ -81,7 +81,9 @@
 			<p class="doc_info_bubble">
 				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
 				been heavily tested. Use with caution, and do lots of testing! We welcome
-				feedback and suggestions on this feature.
+				feedback and suggestions on this feature. In addition, this documentation is 
+				not yet complete. More examples and details will be added soon! Please get in
+				touch if you'd like to help test, have suggestions, etc.
 			</p>
 			
 			<p>
@@ -96,6 +98,45 @@
 				might be detemrined to belong to an administrator user, and
 				could be declared to be allowed to do anything.
 			</p>
+			
+			<p>
+				The AuthorizationInterceptor is used by subclassing it and then registering your
+				subclass with the <code>RestfulServer</code>. The following example shows a subclassed
+				interceptor implementing some basic rules:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="patientAndAdmin" />
+				<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+			</macro>
+			
+			<subsection name="Using AuthorizationInterceptor in a REST Server">
+				
+				<p>
+					The AuthorizationInterceptor works by examining the client request
+					in order to determine whether "write" operations are legal, and looks at
+					the response from the server in order to determine whether "read" operations
+					are legal.
+				</p>
+				<p>
+					This approach has limitations however: If a request has a conditional operation, 
+					such as a delete operation which uses a search URL, or a create operation which
+					uses an <code>If-None-Exist</code> header, the interceptor will not know the
+					actual target until the server actually processes the request. 
+				</p>
+				<p>
+					For better security, individual resource providers should notify interceptors
+					about their actual targets in the event of any "write" operations (create, 
+					operations embedded in transactions, etc.)
+				</p>
+				<p>
+					The mechanism for doing this isn't yet fully documented, this will be improved
+					over the next release cycle (post 1.5). Please get in touch on our google group
+					if you want to help! 
+				</p>
+				
+			</subsection>
+			
 		</section>
 		
 	</body>

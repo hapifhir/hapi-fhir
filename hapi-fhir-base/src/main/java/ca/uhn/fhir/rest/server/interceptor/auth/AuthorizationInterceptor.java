@@ -49,6 +49,11 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * This class is a base class for interceptors which can be used to
  * inspect requests and responses to determine whether the calling user
  * has permission to perform the given action.
+ * <p>
+ * See the HAPI FHIR 
+ * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_security.html">Documentation on Server Security</a>
+ * for information on how to use this interceptor.
+ * </p>
  */
 public class AuthorizationInterceptor extends InterceptorAdapter implements IServerOperationInterceptor, IRuleApplier {
 
