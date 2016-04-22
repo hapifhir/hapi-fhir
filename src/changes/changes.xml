@@ -6,7 +6,13 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.5" date="TBD">
+		<release version="1.6" date="TBD">
+			<action type="fix" issue="345">
+				ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations
+				that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!
+			</action>
+		</release>
+		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
 				Security Fix: XML parser was vulnerable to XXE (XML External Entity) 
 				processing, which could result in local files on disk being disclosed.

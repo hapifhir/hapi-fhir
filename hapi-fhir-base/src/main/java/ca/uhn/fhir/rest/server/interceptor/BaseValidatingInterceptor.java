@@ -244,6 +244,10 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 		}
 
+		if (theRequest == null) {
+			return;
+		}
+		
 		ValidationResult validationResult = doValidate(validator, theRequest);
 		
 		if (myAddResponseIssueHeaderOnSeverity != null) {

@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -20,6 +22,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
@@ -31,8 +34,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
@@ -67,6 +73,28 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		ourServlet.registerInterceptor(myInterceptor);
 	}
+	
+	/**
+	 * Test for #345
+	 */
+	@Test
+	public void testDelete() throws Exception {
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
+		HttpDelete httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/123");
+
+		CloseableHttpResponse status = ourClient.execute(httpDelete);
+		try {
+			ourLog.info("Response was:\n{}", status);
+
+			assertEquals(204, status.getStatusLine().getStatusCode());
+			assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+	}
+
 
 	@Test
 	public void testLongHeaderTruncated() throws Exception {
@@ -350,6 +378,11 @@ public class ResponseValidatingInterceptorDstu3Test {
 	}
 
 	public static class PatientProvider implements IResourceProvider {
+
+		@Delete
+		public MethodOutcome delete(@IdParam IdType theId) {
+			return new MethodOutcome(theId.withVersion("2"));
+		}
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {

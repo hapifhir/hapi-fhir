@@ -120,7 +120,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -295,7 +294,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		cs.setUrl("http://urn/system");
 		cs.addConcept().setCode("code0");
 		ourClient.create().resource(cs).execute();
-		
+
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://urn/system");
 		IIdType optId = ourClient.create().resource(options).execute().getId();
@@ -438,8 +437,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
-					oo.getIssue().get(0).getDiagnostics());
+			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 
 		} finally {
 			response.getEntity().getContent().close();
@@ -522,8 +520,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("HTTP 412 Precondition Failed: Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
-					e.getMessage());
+			assertEquals("HTTP 412 Precondition Failed: Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources", e.getMessage());
 		}
 
 		// Not deleted yet..
@@ -565,6 +562,27 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(responseString, containsString("Can not perform delete, no ID provided"));
 		} finally {
 			response.close();
+		}
+	}
+
+	/**
+	 * Test for #345
+	 */
+	@Test
+	public void testDeleteNormal() throws IOException {
+		Patient p = new Patient();
+		p.addName().addFamily("FAM");
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		ourClient.read().resource(Patient.class).withId(id).execute();
+
+		ourClient.delete().resourceById(id).execute();
+
+		try {
+			ourClient.read().resource(Patient.class).withId(id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
 		}
 	}
 
@@ -634,7 +652,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
+		 * make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -1168,8 +1187,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			response.close();
 		}
 
-		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
-				+ new InstantType(new Date(time3)).getValueAsString());
+		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantType(new Date(time3)).getValueAsString());
 		response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -1761,8 +1779,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
-				.setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
@@ -2474,8 +2491,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString(
-					"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"2\""));
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"2\""));
 		} finally {
 			response.close();
 		}
@@ -2499,10 +2515,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp,
-					stringContainsInOrder(">ERROR<", "/f:Patient/f:contact", "<pre>SHALL at least contain a contact's details or a reference to an organization</pre>", "<issue><severity value=\"error\"/>",
-							"<code value=\"processing\"/>", "<diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization\"/>",
-							"<location value=\"/f:Patient/f:contact\"/>"));
+			assertThat(resp, stringContainsInOrder(">ERROR<", "/f:Patient/f:contact", "<pre>SHALL at least contain a contact's details or a reference to an organization</pre>", "<issue><severity value=\"error\"/>", "<code value=\"processing\"/>",
+					"<diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization\"/>", "<location value=\"/f:Patient/f:contact\"/>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2585,8 +2599,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
 			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
-			assertThat(resp,
-					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
+			assertThat(resp, stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2611,8 +2624,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
 			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
-			assertThat(resp,
-					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
+			assertThat(resp, stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
