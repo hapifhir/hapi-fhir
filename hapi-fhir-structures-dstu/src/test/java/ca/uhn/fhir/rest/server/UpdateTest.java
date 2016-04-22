@@ -76,7 +76,7 @@ public class UpdateTest {
 	}
 
 	@Test
-	public void testUpdateMethodReturnsInvalidId() throws Exception {
+	public void testUpdateWithWrongResourceType() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -91,8 +91,10 @@ public class UpdateTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(500, status.getStatusLine().getStatusCode());
-
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		
+		String expected = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><details value=\"Failed to parse request body as XML resource. Error was: DataFormatException at [[row,col {unknown-source}]: [1,1]]: Incorrect resource type found, expected &quot;DiagnosticReport&quot; but found &quot;Patient&quot;\"/></issue></OperationOutcome>";
+		assertEquals(expected, responseContent);
 	}
 
 	@Test

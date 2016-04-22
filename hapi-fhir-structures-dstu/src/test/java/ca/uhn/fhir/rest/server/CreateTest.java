@@ -224,7 +224,7 @@ public class CreateTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("Unexpected char"));
 	}
 
@@ -246,7 +246,7 @@ public class CreateTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("Unexpected character"));
 	}
 
