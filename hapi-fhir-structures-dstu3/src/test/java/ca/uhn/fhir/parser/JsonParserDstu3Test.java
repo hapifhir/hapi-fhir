@@ -166,7 +166,6 @@ public class JsonParserDstu3Test {
 		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
 	}
-	
 
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
@@ -245,6 +244,7 @@ public class JsonParserDstu3Test {
 		assertEquals("sec_term2", tagList.get(1).getCode());
 		assertEquals("sec_label2", tagList.get(1).getDisplay());
 	}
+	
 
 	/**
 	 * See #336
@@ -359,7 +359,6 @@ public class JsonParserDstu3Test {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals("VERSION2", label.getVersion());
 	}
-	
 
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
@@ -379,6 +378,7 @@ public class JsonParserDstu3Test {
 
 	}
 	
+
 	/**
 	 * See #326
 	 */
@@ -414,7 +414,6 @@ public class JsonParserDstu3Test {
 		));
 		//@formatter:on
 	}
-
 	
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
@@ -426,13 +425,14 @@ public class JsonParserDstu3Test {
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
 
-
+	
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
 		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
-	
+
+
 	/**
 	 * #158
 	 */
@@ -448,7 +448,6 @@ public class JsonParserDstu3Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
 	}
-
 	
 	/**
 	 * #158
@@ -467,6 +466,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
 	}
+
 	
 	@Test
 	public void testEncodeExtensionInPrimitiveElement() {
@@ -496,7 +496,7 @@ public class JsonParserDstu3Test {
 		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"elements\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
-
+	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
 		Observation obs = new Observation();
@@ -608,7 +608,7 @@ public class JsonParserDstu3Test {
 
 		assertThat(enc, containsString("\"valueId\":\"1\""));
 	}
-	
+
 	@Test
 	public void testEncodeSummary() {
 		Patient patient = new Patient();
@@ -629,8 +629,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-
-
+	
 	@Test
 	public void testEncodeSummary2() {
 		Patient patient = new Patient();
@@ -650,6 +649,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
+
 
 	/**
 	 * See #205
@@ -1247,6 +1247,14 @@ public class JsonParserDstu3Test {
 		StringType family1 = p.getContact().get(0).getName().getFamily().get(1);
 		assertEquals("du", family1.getValue());
 		assertEquals("a2", family1.getId());
+	}
+
+	/**
+	 * See #342
+	 */
+	@Test(expected=DataFormatException.class)
+	public void testParseInvalid() {
+		ourCtx.newJsonParser().parseResource("FOO");
 	}
 
 	@Test

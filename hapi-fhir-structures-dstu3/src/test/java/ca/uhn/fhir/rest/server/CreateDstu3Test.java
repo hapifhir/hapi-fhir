@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -28,9 +31,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -70,6 +76,25 @@ public class CreateDstu3Test {
 		//@formatter:on
 	}
 
+	/**
+	 * #342
+	 */
+	@Test
+	public void testCreateWithInvalidContent() throws Exception {
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		String expected = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F' (code 70) in prolog; expected '&lt;'&#xa; at [row,col {unknown-source}]: [1,1]\"/></issue></OperationOutcome>";
+		assertEquals(expected, responseContent);
+		
+	}
 
 	@Test
 	public void testSearch() throws Exception {
@@ -142,6 +167,11 @@ public class CreateDstu3Test {
 			p0.setId(theIdParam);
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
+		}
+
+		@Create()
+		public MethodOutcome read(@ResourceParam Patient theIdParam) {
+			return new MethodOutcome(new IdType("Patient", "1"), true);
 		}
 
 		@Search

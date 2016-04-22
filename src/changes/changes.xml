@@ -11,6 +11,11 @@
 				ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations
 				that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!
 			</action>
+			<action type="fix" issue="342">
+				REST server now throws an HTTP 400 instead of an HTTP 500 if an operation which takes
+				a FHIR resource in the request body (e.g. create, update) contains invalid content that
+				the parser is unable to parse. Thanks to Jim Steel for the suggestion!				
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

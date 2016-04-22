@@ -42,6 +42,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -180,12 +181,17 @@ public class ResourceParameter implements IParameter {
 		IParser parser = encoding.newParser(ctx);
 
 		T retVal;
-		if (theResourceType != null) {
-			retVal = parser.parseResource(theResourceType, requestReader);
-		} else {
-			retVal = (T) parser.parseResource(requestReader);
+		try {
+			if (theResourceType != null) {
+				retVal = parser.parseResource(theResourceType, requestReader);
+			} else {
+				retVal = (T) parser.parseResource(requestReader);
+			}
+		} catch (DataFormatException e) {
+			String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "failedToParseRequest", encoding.name(), e.getMessage());
+			throw new InvalidRequestException(msg);
 		}
-
+		
 		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			TagList tagList = new TagList();
 			for (String nextTagComplete : theRequest.getHeaders(Constants.HEADER_CATEGORY)) {

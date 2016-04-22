@@ -168,7 +168,7 @@ public class XmlParserDstu3Test {
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
-
+	
 	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
@@ -1179,8 +1179,6 @@ public class XmlParserDstu3Test {
 		
 	}
 
-	
-
 	/**
 	 * See #312
 	 */
@@ -1199,6 +1197,8 @@ public class XmlParserDstu3Test {
 		ourLog.info(xml);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://hello.world\"><valueString value=\"Hello World\"/></extension></Patient>", xml);
 	}
+
+	
 
 	@Test
 	public void testEncodeReferenceUsingUnqualifiedResourceWorksCorrectly() {
@@ -1254,7 +1254,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-	
+
 	@Test
 	public void testEncodeSummary2() {
 		Patient patient = new Patient();
@@ -1275,7 +1275,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-
+	
 	@Test
 	public void testEncodeUndeclaredExtensionWithEnumerationContent() {
 		IParser parser = ourCtx.newXmlParser();
@@ -2341,6 +2341,14 @@ public class XmlParserDstu3Test {
 		 * summary=true)
 		 */
 		assertNotNull(((Reference) actual.getContent().get(0).getP()).getResource());
+	}
+
+	/**
+	 * See #342
+	 */
+	@Test(expected=DataFormatException.class)
+	public void testParseInvalid() {
+		ourCtx.newXmlParser().parseResource("FOO");
 	}
 
 	@Test
