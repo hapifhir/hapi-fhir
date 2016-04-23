@@ -115,6 +115,22 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	/**
+	 * See #347
+	 */
+	@Test
+	public void testEncodeAndParseMedicationOrder() {
+		MedicationOrder mo = new MedicationOrder();
+		mo.getDateWrittenElement().setValueAsString("2015-10-05");
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
+		ourLog.info(encoded);
+		
+		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, encoded);
+		assertEquals("2015-10-05", mo.getDateWrittenElement().getValueAsString());
+	}
+	
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
