@@ -22,8 +22,22 @@
 			</action>
 			<action type="add" issue="346">
 				Server now respects the parameter <![CDATA[<code>_format=application/xml+fhir"</code>]]>
-				which is technically invalid since the + should be escaped, but is likely to be used.
+				which is technically invalid since the + should be escaped, but is likely to be used. Also,
+				a parameter of <![CDATA[<code>_format=html</code>]]> can now be used, which 
+				forces SyntaxHighlightingInterceptor to use HTML even
+				if the headers wouldn't otherwise trigger it.
 				Thanks to Jim Steel for reporting!
+			</action>
+			<action type="fix">
+				Improve performance when parsing large bundles by fixing a loop over all of the
+				entries inthe bundle to stitch together cross-references, which was happening once
+				per entry instead of once overall. Thanks to Erick on the HAPI FHIR Google Group for
+				noticing that this was an issue!
+			</action>
+			<action type="remove">
+				JSON parser no longer allows the resource ID to be specified in an element called "_id"
+				(the correct one is "id"). Previously _id was allowed because some early FHIR examples
+				used that form, but this was never actually valid so it is now being removed.
 			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">

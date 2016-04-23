@@ -681,10 +681,6 @@ public class JsonParserTest {
 
 		ListResource parsed = ourCtx.newJsonParser().parseResource(ListResource.class, enc);
 		assertEquals(Patient.class, parsed.getEntryFirstRep().getItem().getResource().getClass());
-
-		enc = enc.replace("\"id\"", "\"_id\"");
-		parsed = ourCtx.newJsonParser().parseResource(ListResource.class, enc);
-		assertEquals(Patient.class, parsed.getEntryFirstRep().getItem().getResource().getClass());
 	}
 
 	@Test

@@ -149,14 +149,8 @@ class ParserState<T> {
 		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier);
 	}
 
-	@SuppressWarnings("unchecked")
 	public T getObject() {
-		IBase retVal = myState.getCurrentElement();
-		return (T) retVal;
-	}
-
-	public boolean isComplete() {
-		return myObject != null;
+		return myObject;
 	}
 
 	public boolean isPreResource() {
@@ -191,10 +185,16 @@ class ParserState<T> {
 		return newChildInstance;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void pop() {
 		myPreviousElement = myState.getCurrentElement();
-		myState = myState.myStack;
-		myState.wereBack();
+		if (myState.myStack != null) {
+			myState = myState.myStack;
+			myState.wereBack();
+		} else {
+			myObject = (T) myState.getCurrentElement();
+			myState = null;
+		}
 	}
 
 	private void push(BaseState theState) {
@@ -250,7 +250,9 @@ class ParserState<T> {
 	 * intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
-		myState.xmlEvent(theNextEvent);
+		if (myState != null) {
+			myState.xmlEvent(theNextEvent);
+		}
 	}
 
 	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
@@ -772,7 +774,7 @@ class ParserState<T> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
-			// ignore
+			pop();
 		}
 
 		@Override
@@ -795,7 +797,6 @@ class ParserState<T> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
-			myObject = (T) myInstance;
 
 			/*
 			 * Stitch together resource references
@@ -1609,9 +1610,6 @@ class ParserState<T> {
 		@Override
 		public void endingElement() {
 			pop();
-			if (myState == null) {
-				myObject = (T) myInstance;
-			}
 		}
 
 		@Override
@@ -1995,11 +1993,6 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void endingElement() throws DataFormatException {
-			// ignore
-		}
-
-		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if (!"feed".equals(theLocalPart)) {
 				throw new DataFormatException("Expecting outer element called 'feed', found: " + theLocalPart);
@@ -2016,11 +2009,6 @@ class ParserState<T> {
 
 		public PreBundleState(Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
-		}
-
-		@Override
-		public void endingElement() throws DataFormatException {
-			// ignore
 		}
 
 		@Override
@@ -2064,6 +2052,8 @@ class ParserState<T> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
+//			postProcess();
+			stitchBundleCrossReferences();
 			pop();
 		}
 
@@ -2143,6 +2133,10 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
+			postProcess();
+		}
+
+		private void postProcess() {
 			if (myContext.hasDefaultTypeForProfile()) {
 				IBaseMetaType meta = myInstance.getMeta();
 				Class<? extends IBaseResource> wantedProfileType = null;
@@ -2217,8 +2211,13 @@ class ParserState<T> {
 				}
 			});
 
+			populateTarget();
+		}
+
+		private void stitchBundleCrossReferences() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
+				
 				/*
 				 * Stitch together resource references
 				 */
@@ -2258,8 +2257,6 @@ class ParserState<T> {
 				}
 				
 			}
-
-			populateTarget();
 		}
 
 	}
@@ -2307,9 +2304,6 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			if (myEntry == null && myMutator == null) {
-				myObject = (T) getCurrentElement();
-			}
 
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
@@ -2353,9 +2347,6 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			if (myTarget == null) {
-				myObject = (T) getCurrentElement();
-			}
 
 			if (getCurrentElement() instanceof IDomainResource) {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
@@ -2404,12 +2395,6 @@ class ParserState<T> {
 		@Override
 		public boolean isPreResource() {
 			return true;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public void wereBack() {
-			myObject = (T) myTagList;
 		}
 
 	}

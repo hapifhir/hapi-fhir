@@ -645,11 +645,7 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
-
-		enc = enc.replace("\"id\"", "\"_id\"");
-		parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
-		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
-}
+	}
 
 	@Test
 	public void testEncodeInvalidChildGoodException() {

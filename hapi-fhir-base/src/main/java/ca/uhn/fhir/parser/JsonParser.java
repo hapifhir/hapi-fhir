@@ -231,6 +231,7 @@ public class JsonParser extends BaseParser implements IParser {
 			parseChildren(object, state);
 
 			state.endingElement();
+			state.endingElement();
 
 			@SuppressWarnings("unchecked")
 			T retVal = (T) state.getObject();
@@ -1110,6 +1111,7 @@ public class JsonParser extends BaseParser implements IParser {
 		parseBundleChildren(object, state);
 
 		state.endingElement();
+		state.endingElement();
 
 		Bundle retVal = state.getObject();
 
@@ -1191,8 +1193,6 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void parseChildren(JsonObject theObject, ParserState<?> theState) {
-		String elementId = null;
-
 		Set<String> keySet = theObject.keySet();
 
 		int allUnderscoreNames = 0;
@@ -1200,23 +1200,6 @@ public class JsonParser extends BaseParser implements IParser {
 
 		for (String nextName : keySet) {
 			if ("resourceType".equals(nextName)) {
-				continue;
-			} else if ("id".equals(nextName)) {
-				if (theObject.isNull(nextName)) {
-					continue;
-				}
-				elementId = theObject.getString(nextName);
-				if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-					continue;
-				}
-			} else if ("_id".equals(nextName)) {
-				if (theObject.isNull(nextName)) {
-					continue;
-				}
-				// _id is incorrect, but some early examples in the FHIR spec used it
-				if (theObject.get(nextName).getValueType() == ValueType.STRING) {
-					elementId = theObject.getString(nextName);
-				}
 				continue;
 			} else if ("extension".equals(nextName)) {
 				JsonArray array = grabJsonArray(theObject, nextName, "extension");
@@ -1245,14 +1228,14 @@ public class JsonParser extends BaseParser implements IParser {
 
 		}
 
-		if (elementId != null) {
-			IBase object = (IBase) theState.getObject();
-			if (object instanceof IIdentifiableElement) {
-				((IIdentifiableElement) object).setElementSpecificId(elementId);
-			} else if (object instanceof IBaseResource) {
-				((IBaseResource) object).getIdElement().setValue(elementId);
-			}
-		}
+//		if (elementId != null) {
+//			IBase object = (IBase) theState.getObject();
+//			if (object instanceof IIdentifiableElement) {
+//				((IIdentifiableElement) object).setElementSpecificId(elementId);
+//			} else if (object instanceof IBaseResource) {
+//				((IBaseResource) object).getIdElement().setValue(elementId);
+//			}
+//		}
 
 		/*
 		 * This happens if an element has an extension but no actual value. I.e.
@@ -1394,6 +1377,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 		parseChildren(object, state);
 
+		state.endingElement();
 		state.endingElement();
 
 		return state.getObject();

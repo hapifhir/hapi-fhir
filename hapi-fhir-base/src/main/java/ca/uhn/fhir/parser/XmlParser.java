@@ -242,6 +242,7 @@ public class XmlParser extends BaseParser implements IParser {
 						parserState.attributeValue(name, elem.getValue());
 						break;
 					}
+					case XMLStreamConstants.END_DOCUMENT:
 					case XMLStreamConstants.END_ELEMENT: {
 						if (!heldComments.isEmpty()) {
 							for (String next : heldComments) {
@@ -250,9 +251,9 @@ public class XmlParser extends BaseParser implements IParser {
 							heldComments.clear();
 						}
 						parserState.endingElement();
-						if (parserState.isComplete()) {
-							return parserState.getObject();
-						}
+//						if (parserState.isComplete()) {
+//							return parserState.getObject();
+//						}
 						break;
 					}
 					case XMLStreamConstants.CHARACTERS: {
@@ -273,7 +274,7 @@ public class XmlParser extends BaseParser implements IParser {
 					throw new DataFormatException("DataFormatException at [" + nextEvent.getLocation().toString() + "]: " + e.getMessage(), e);
 				}
 			}
-			return null;
+			return parserState.getObject();
 		} catch (XMLStreamException e) {
 			throw new DataFormatException(e);
 		}
