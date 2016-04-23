@@ -16,6 +16,10 @@
 				a FHIR resource in the request body (e.g. create, update) contains invalid content that
 				the parser is unable to parse. Thanks to Jim Steel for the suggestion!				
 			</action>
+			<action type="add">
+				Deprecate fluent client search operations without an explicit declaration of the
+				bundle type being used
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

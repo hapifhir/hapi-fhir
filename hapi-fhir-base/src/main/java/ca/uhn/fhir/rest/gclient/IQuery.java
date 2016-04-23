@@ -129,4 +129,13 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	@Override
 	IQuery<T> and(ICriterion<?> theCriterion);
 
+	/**
+	 * @deprecated You should call {@link #returnBundle(Class)} on the method chain before calling
+	 * {@link #execute()} in order to specify why return type to use
+	 */
+	// This is overriding in order to deprecate
+	@Deprecated
+	@Override
+	T execute();
+	
 }
