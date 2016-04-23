@@ -23,6 +23,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -184,11 +186,21 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 
+		boolean force = false;
+		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
+		if (formatParams != null) {
+			for (String next : formatParams) {
+				if (Constants.FORMATS_HTML.contains(next)) {
+					force = true;
+				}
+			}
+		}
+		
 		/*
 		 * It's not a browser...
 		 */
 		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
-		if (highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
+		if (!force && highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
@@ -196,21 +208,21 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		 * It's an AJAX request, so no HTML
 		 */
 		String requestedWith = theServletRequest.getHeader("X-Requested-With");
-		if (requestedWith != null) {
+		if (!force && requestedWith != null) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * Not a GET
 		 */
-		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
+		if (!force && theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * Not binary
 		 */
-		if ("Binary".equals(theRequestDetails.getResourceName())) {
+		if (!force && "Binary".equals(theRequestDetails.getResourceName())) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
@@ -218,7 +230,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		 * Request for _raw
 		 */
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
-		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
+		if (!force && rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 

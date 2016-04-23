@@ -20,6 +20,11 @@
 				Deprecate fluent client search operations without an explicit declaration of the
 				bundle type being used
 			</action>
+			<action type="add" issue="346">
+				Server now respects the parameter <![CDATA[<code>_format=application/xml+fhir"</code>]]>
+				which is technically invalid since the + should be escaped, but is likely to be used.
+				Thanks to Jim Steel for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

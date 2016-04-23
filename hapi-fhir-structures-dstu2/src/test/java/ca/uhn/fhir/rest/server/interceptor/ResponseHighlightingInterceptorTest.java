@@ -234,6 +234,74 @@ public class ResponseHighlightingInterceptorTest {
 		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
 
 	}
+	
+	/**
+	 * See #346
+	 */
+	@Test
+	public void testHighlightForceHtmlCt() throws Exception {
+		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
+			@Override
+			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ArrayEnumeration<String>("application/xml+fhir");
+			}
+		});
+
+		HttpServletResponse resp = mock(HttpServletResponse.class);
+		StringWriter sw = new StringWriter();
+		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
+
+		Patient resource = new Patient();
+		resource.addName().addFamily("FAMILY");
+
+		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		reqDetails.setRequestType(RequestTypeEnum.GET);
+		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		params.put(Constants.PARAM_FORMAT, new String[] { Constants.FORMAT_HTML });
+		reqDetails.setParameters(params);
+		reqDetails.setServer(new RestfulServer(ourCtx));
+		reqDetails.setServletRequest(req);
+
+		// false means it decided to handle the request..
+		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+	}
+
+	/**
+	 * See #346
+	 */
+	@Test
+	public void testHighlightForceHtmlFormat() throws Exception {
+		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
+			@Override
+			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ArrayEnumeration<String>("application/xml+fhir");
+			}
+		});
+
+		HttpServletResponse resp = mock(HttpServletResponse.class);
+		StringWriter sw = new StringWriter();
+		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
+
+		Patient resource = new Patient();
+		resource.addName().addFamily("FAMILY");
+
+		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		reqDetails.setRequestType(RequestTypeEnum.GET);
+		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_HTML });
+		reqDetails.setParameters(params);
+		reqDetails.setServer(new RestfulServer(ourCtx));
+		reqDetails.setServletRequest(req);
+
+		// false means it decided to handle the request..
+		assertFalse(ic.outgoingResponse(reqDetails, resource, req, resp));
+	}
 
 	@Test
 	public void testHighlightNormalResponse() throws Exception {
