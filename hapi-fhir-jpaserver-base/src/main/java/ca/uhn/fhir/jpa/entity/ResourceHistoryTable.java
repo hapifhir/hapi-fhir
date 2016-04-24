@@ -101,8 +101,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public IdDt getIdDt() {
-		Object id = getForcedId() == null ? getResourceId() : getForcedId().getForcedId();
-		return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		if (getForcedId() == null) {
+			Long id = myResourceId;
+			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
 	}
 
 	public Long getResourceId() {

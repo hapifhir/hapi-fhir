@@ -18,7 +18,12 @@
 			</action>
 			<action type="add">
 				Deprecate fluent client search operations without an explicit declaration of the
-				bundle type being used
+				bundle type being used. This also means that in a client 
+				<![CDATA[<code>.search()</code>]]>
+				operation, the
+				<![CDATA[<code>.returnBundle(Bundle.class)</code>]]>
+				needs to be the last statement before
+				<![CDATA[<code>.execute()</code>]]>
 			</action>
 			<action type="add" issue="346">
 				Server now respects the parameter <![CDATA[<code>_format=application/xml+fhir"</code>]]>
@@ -38,6 +43,13 @@
 				JSON parser no longer allows the resource ID to be specified in an element called "_id"
 				(the correct one is "id"). Previously _id was allowed because some early FHIR examples
 				used that form, but this was never actually valid so it is now being removed.
+			</action>
+			<action type="add">
+				JPA server now allows "forced IDs" (ids containing non-numeric, client assigned IDs)
+				to use the same logical ID part on different resource types. E.g. A server may now have
+				both Patient/foo and Obervation/foo on the same server.<![CDATA[<br/><br/>]]>
+				Note that existing databases will need to modify index "IDX_FORCEDID" as
+				it is no longer unique, and perform a reindexing pass.
 			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">

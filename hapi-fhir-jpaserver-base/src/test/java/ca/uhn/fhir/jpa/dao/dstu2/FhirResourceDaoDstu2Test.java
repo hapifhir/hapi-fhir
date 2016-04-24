@@ -569,8 +569,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
 			myPatientDao.create(p, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/testCreateWithIllegalReference but resource with ID testCreateWithIllegalReference is actually of type Observation", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 
 	}

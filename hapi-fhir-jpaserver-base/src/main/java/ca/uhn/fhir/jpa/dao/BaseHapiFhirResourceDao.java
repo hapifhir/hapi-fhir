@@ -305,7 +305,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			if (entity.getForcedId() != null) {
 				try {
-					translateForcedIdToPid(theResource.getIdElement());
+					translateForcedIdToPid(getResourceName(), theResource.getIdElement().getIdPart());
 					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "duplicateCreateForcedId", theResource.getIdElement().getIdPart()));
 				} catch (ResourceNotFoundException e) {
 					// good, this ID doesn't exist so we can create it
@@ -750,12 +750,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return entity;
 	}
+	
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
-		Long pid = translateForcedIdToPid(theId);
+		Long pid = translateForcedIdToPid(getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 
 		if (entity == null) {
@@ -794,7 +795,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected ResourceTable readEntityLatestVersion(IIdType theId) {
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, translateForcedIdToPid(theId));
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, translateForcedIdToPid(getResourceName(), theId.getIdPart()));
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -854,7 +855,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName(), getContext(), theParams.getRequestDetails());
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
@@ -880,7 +881,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao);
 		builder.setType(getResourceType(), getResourceName());
 		builder.searchForIdsWithAndOr(theParams, theLastUpdated);
 		return builder.doGetPids();

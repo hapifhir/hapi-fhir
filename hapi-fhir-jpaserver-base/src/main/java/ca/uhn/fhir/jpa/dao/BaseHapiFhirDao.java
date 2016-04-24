@@ -45,6 +45,7 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
@@ -52,6 +53,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
@@ -195,7 +197,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	protected EntityManager myEntityManager;
 
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected IForcedIdDao myForcedIdDao;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
@@ -216,15 +218,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
-	protected void createForcedIdIfNeeded(ResourceTable entity, IIdType id) {
-		if (id.isEmpty() == false && id.hasIdPart()) {
-			if (isValidPid(id)) {
+	protected void createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId) {
+		if (theId.isEmpty() == false && theId.hasIdPart()) {
+			if (isValidPid(theId)) {
 				return;
 			}
+			
 			ForcedId fid = new ForcedId();
-			fid.setForcedId(id.getIdPart());
-			fid.setResource(entity);
-			entity.setForcedId(fid);
+			fid.setResourceType(theEntity.getResourceType());
+			fid.setForcedId(theId.getIdPart());
+			fid.setResource(theEntity);
+			theEntity.setForcedId(fid);
 		}
 	}
 
@@ -309,7 +313,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						}
 						Long valueOf;
 						try {
-							valueOf = translateForcedIdToPid(nextValue.getReferenceElement());
+							valueOf = translateForcedIdToPid(typeString, id);
 						} catch (ResourceNotFoundException e) {
 							String resName = getContext().getResourceDefinition(type).getName();
 							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
@@ -496,7 +500,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (theResourceName != null) {
 				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
 				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), translateForcedIdToPid(theResourceId)));
+					cq.where(typePredicate, builder.equal(from.get("myResourceId"), translateForcedIdToPid(theResourceName, theResourceId.getIdPart())));
 				} else {
 					cq.where(typePredicate);
 				}
@@ -508,6 +512,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 	}
+
 
 	protected DaoConfig getConfig() {
 		return myConfig;
@@ -1083,16 +1088,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
 
-	protected Long translateForcedIdToPid(IIdType theId) {
-		return translateForcedIdToPid(theId, myEntityManager);
+	protected List<Long> translateForcedIdToPids(IIdType theId) {
+		return translateForcedIdToPids(theId, myForcedIdDao);
 	}
 
-	protected String translatePidIdToForcedId(Long theId) {
+	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao theForcedIdDao) {
+		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
+	}
+
+	protected Long translateForcedIdToPid(String theResourceName, String theResourceId) {
+		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
+	}
+
+	protected String translatePidIdToForcedId(String theResourceType, Long theId) {
 		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId);
 		if (forcedId != null) {
-			return forcedId.getForcedId();
+			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
 		} else {
-			return theId.toString();
+			return theResourceType + '/' + theId.toString();
 		}
 	}
 
@@ -1247,7 +1260,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 								throw new InvalidRequestException(msg);
 							}
 							Long next = matches.iterator().next();
-							String newId = resourceTypeString + '/' + translatePidIdToForcedId(next);
+							String newId = translatePidIdToForcedId(resourceTypeString, next);
 							ourLog.info("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 							nextRef.setReference(newId);
 						}
@@ -1557,15 +1570,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	static Long translateForcedIdToPid(IIdType theId, EntityManager entityManager) {
+	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {
+		Validate.isTrue(theId.hasIdPart());
+		
 		if (isValidPid(theId)) {
-			return theId.getIdPartAsLong();
+			return Collections.singletonList(theId.getIdPartAsLong());
 		} else {
-			TypedQuery<ForcedId> q = entityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
-			q.setParameter("ID", theId.getIdPart());
-			try {
-				return q.getSingleResult().getResourcePid();
-			} catch (NoResultException e) {
+			List<ForcedId> forcedId;
+			if (theId.hasResourceType()) {
+				forcedId = theForcedIdDao.findByTypeAndForcedId(theId.getResourceType(), theId.getIdPart());
+			} else {
+				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
+			}
+			
+			if (forcedId.isEmpty() == false) {
+				List<Long> retVal = new ArrayList<Long>(forcedId.size());
+				for (ForcedId next : forcedId) {
+					retVal.add(next.getResourcePid());
+				}
+				return retVal;
+			} else {
 				throw new ResourceNotFoundException(theId);
 			}
 		}

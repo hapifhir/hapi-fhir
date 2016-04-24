@@ -55,7 +55,6 @@ import com.google.common.collect.Sets;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -193,7 +192,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		Long pid = null;
 		if (theParams.get(BaseResource.SP_RES_ID) != null) {
 			StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
-			pid = BaseHapiFhirDao.translateForcedIdToPid(new IdDt(idParm.getValue()), myEntityManager);
+			pid = BaseHapiFhirDao.translateForcedIdToPid(theResourceName, idParm.getValue(), myForcedIdDao);
 		}
 
 		Long referencingPid = pid;
@@ -222,8 +221,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		IdDt contextId = new IdDt(contextParts[0], contextParts[1]);
-		Long pid = BaseHapiFhirDao.translateForcedIdToPid(contextId, myEntityManager);
+		Long pid = BaseHapiFhirDao.translateForcedIdToPid(contextParts[0], contextParts[1], myForcedIdDao);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

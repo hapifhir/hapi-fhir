@@ -27,10 +27,12 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
@@ -41,16 +43,36 @@ public class SearchReturningProfiledResourceDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static String ourLastMethod;
-	private static StringParam ourLastRef;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchReturningProfiledResourceDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
-	public void before() {
-		ourLastMethod = null;
-		ourLastRef = null;
+	@Test
+	public void testClientTypedRequest() throws Exception {
+		ourCtx = FhirContext.forDstu2();
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		Bundle bundle = client.search().forResource(PatientProfileDstu2.class).returnBundle(Bundle.class).execute();
+
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
+	}
+
+	@Test
+	public void testClientUntypedRequestWithHint() throws Exception {
+		ourCtx = FhirContext.forDstu2();
+		ourCtx.setDefaultTypeForProfile("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient", PatientProfileDstu2.class);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
+	}
+
+	@Test
+	public void testClientUntypedRequestWithoutHint() throws Exception {
+		ourCtx = FhirContext.forDstu2();
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+
+		assertEquals(Patient.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -60,12 +82,11 @@ public class SearchReturningProfiledResourceDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		
+
 		assertThat(responseContent, containsString("<profile value=\"http://foo\"/>"));
 		assertThat(responseContent, containsString("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>"));
-		
-	}
 
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -96,6 +117,11 @@ public class SearchReturningProfiledResourceDstu2Test {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
 		/**
 		 * Basic search, available for every resource. Allows search per id (use of read is better, though), fulltext
 		 * content
@@ -118,22 +144,17 @@ public class SearchReturningProfiledResourceDstu2Test {
 			//@formatter:on
 
 			List<Patient> result = new ArrayList<Patient>();
-			
+
 			PatientProfileDstu2 pp = new PatientProfileDstu2();
-			
+
 			ResourceMetadataKeyEnum.PROFILES.put(pp, Collections.singletonList(new IdDt("http://foo")));
-			
+
 			pp.setId("123");
 			pp.getOwningOrganization().setReference("Organization/456");
 			result.add(pp);
-			
+
 			ourLog.info("Search: Everything ok. Going to return results!");
 			return result;
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

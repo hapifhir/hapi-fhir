@@ -255,6 +255,25 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 	
+	@Test
+	public void testCreateDifferentTypesWithSameForcedId() {
+		String idName = "forcedId";
+
+		Patient pat = new Patient();
+		pat.setId(idName);
+		pat.addName().addFamily("FAM");
+		IIdType patId = myPatientDao.update(pat, mySrd).getId();
+		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
+		
+		Observation obs = new Observation();
+		obs.setId(idName);
+		obs.getCode().addCoding().setSystem("foo").setCode("testCreateDifferentTypesWithSameForcedId");
+		IIdType obsId = myObservationDao.update(obs, mySrd).getId();
+		assertEquals("Observation/" + idName, obsId.toUnqualifiedVersionless().getValue());
+		
+		pat = myPatientDao.read(patId.toUnqualifiedVersionless(), mySrd);
+		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
+	}
 	
 	@Test
 	public void testChoiceParamDateAlt() {
@@ -672,8 +691,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			p.getManagingOrganization().setReferenceElement(new IdType("Organization", id1.getIdPart()));
 			myPatientDao.create(p, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/testCreateWithIllegalReference but resource with ID testCreateWithIllegalReference is actually of type Observation", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 
 	}

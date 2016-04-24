@@ -113,7 +113,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
-	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
+	<B extends IBaseBundle> IClientExecutable<IQuery<B>, B> returnBundle(Class<B> theClass);
 
 	/**
 	 * {@inheritDoc}

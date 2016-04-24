@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -47,7 +48,7 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 		}
 
 		//@formatter:off
-		IQuery<Bundle> search = ourClient
+		IClientExecutable<IQuery<Bundle>, Bundle> search = ourClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.NAME.matches().value("Everything"))

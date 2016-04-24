@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -28,6 +30,12 @@ import ca.uhn.fhir.jpa.entity.ForcedId;
 
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	
+	@Query("SELECT f FROM ForcedId f WHERE myForcedId = :forced_id")
+	public List<ForcedId> findByForcedId(@Param("forced_id") String theForcedId);
+
+	@Query("SELECT f FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId = :forced_id")
+	public List<ForcedId> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
+
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
 	public ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
 	

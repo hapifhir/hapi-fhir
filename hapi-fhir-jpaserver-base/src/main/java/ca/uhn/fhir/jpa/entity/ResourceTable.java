@@ -246,8 +246,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Override
 	public IdDt getIdDt() {
-		Object id = getForcedId() == null ? myId : getForcedId().getForcedId();
-		return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		if (getForcedId() == null) {
+			Long id = myId;
+			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		} else {
+			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		}
 	}
 
 	public Long getIndexStatus() {

@@ -63,6 +63,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -77,6 +78,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -138,6 +140,7 @@ public class SearchBuilder {
 	private BaseHapiFhirDao<?> myCallingDao;
 	private FhirContext myContext;
 	private EntityManager myEntityManager;
+	private IForcedIdDao myForcedIdDao;
 	private SearchParameterMap myParams;
 	private Collection<Long> myPids;
 	private PlatformTransactionManager myPlatformTransactionManager;
@@ -149,7 +152,7 @@ public class SearchBuilder {
 	private ISearchResultDao mySearchResultDao;
 
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
-			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao) {
+			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
@@ -157,6 +160,7 @@ public class SearchBuilder {
 		mySearchResultDao = theSearchResultDao;
 		myCallingDao = theDao;
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
+		myForcedIdDao = theForcedIdDao;
 	}
 
 	private void addPredicateComposite(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -548,16 +552,13 @@ public class SearchBuilder {
 
 				if (isBlank(ref.getChain())) {
 					String resourceId = ref.getValueAsQueryToken(myContext);
-					if (resourceId.contains("/")) {
-						IIdType dt = new IdDt(resourceId);
-						resourceId = dt.getIdPart();
+					IIdType dt = new IdDt(resourceId);
+					List<Long> targetPid = myCallingDao.translateForcedIdToPids(dt);
+					for (Long next : targetPid) {
+						ourLog.debug("Searching for resource link with target PID: {}", next);
+						Predicate eq = builder.equal(from.get("myTargetResourcePid"), next);
+						codePredicates.add(eq);
 					}
-					Long targetPid = myCallingDao.translateForcedIdToPid(new IdDt(resourceId));
-					ourLog.debug("Searching for resource link with target PID: {}", targetPid);
-					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
-
-					codePredicates.add(eq);
-
 				} else {
 
 					String paramPath = myContext.getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
@@ -887,22 +888,6 @@ public class SearchBuilder {
 			doSetPids(pids);
 		}
 
-	}
-
-	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
-		Predicate typePrediate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
-		
-		List<Predicate> orPredicates = Lists.newArrayList();
-		for (Pair<String, String> next : theTokens) {
-			Predicate codePrediate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
-			if (isNotBlank(next.getLeft())) {
-				Predicate systemPrediate = theBuilder.equal(theDefJoin.get("mySystem"), next.getLeft());
-				orPredicates.add(theBuilder.and(typePrediate, systemPrediate, codePrediate));
-			} else {
-				orPredicates.add(theBuilder.and(typePrediate, codePrediate));
-			}
-		}
-		return orPredicates;
 	}
 
 	private void addPredicateToken(String theParamName, List<? extends IQueryParameterType> theList) {
@@ -1238,6 +1223,22 @@ public class SearchBuilder {
 		return singleCode;
 	}
 
+	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
+		Predicate typePrediate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
+		
+		List<Predicate> orPredicates = Lists.newArrayList();
+		for (Pair<String, String> next : theTokens) {
+			Predicate codePrediate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
+			if (isNotBlank(next.getLeft())) {
+				Predicate systemPrediate = theBuilder.equal(theDefJoin.get("mySystem"), next.getLeft());
+				orPredicates.add(theBuilder.and(typePrediate, systemPrediate, codePrediate));
+			} else {
+				orPredicates.add(theBuilder.and(typePrediate, codePrediate));
+			}
+		}
+		return orPredicates;
+	}
+
 	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
 			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
@@ -1441,30 +1442,6 @@ public class SearchBuilder {
 		}
 	}
 
-	private void reinitializeSearch() {
-		mySearchEntity = new Search();
-		mySearchEntity.setUuid(UUID.randomUUID().toString());
-		mySearchEntity.setCreated(new Date());
-		mySearchEntity.setTotalCount(-1);
-		mySearchEntity.setPreferredPageSize(myParams.getCount());
-		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
-
-		for (Include next : myParams.getIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
-		}
-		for (Include next : myParams.getRevIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
-		}
-		
-		if (myParams.isPersistResults()) {
-			myEntityManager.persist(mySearchEntity);
-			for (SearchInclude next : mySearchEntity.getIncludes()) {
-				myEntityManager.persist(next);
-			}
-		}
-	}
-
 	private IBundleProvider doReturnProvider() {
 		if (myParams.isPersistResults()) {
 			return new PersistedJpaBundleProvider(mySearchEntity.getUuid(), myCallingDao);
@@ -1575,6 +1552,30 @@ public class SearchBuilder {
 
 	}
 
+	private void reinitializeSearch() {
+		mySearchEntity = new Search();
+		mySearchEntity.setUuid(UUID.randomUUID().toString());
+		mySearchEntity.setCreated(new Date());
+		mySearchEntity.setTotalCount(-1);
+		mySearchEntity.setPreferredPageSize(myParams.getCount());
+		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+
+		for (Include next : myParams.getIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+		}
+		for (Include next : myParams.getRevIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
+		}
+		
+		if (myParams.isPersistResults()) {
+			myEntityManager.persist(mySearchEntity);
+			for (SearchInclude next : mySearchEntity.getIncludes()) {
+				myEntityManager.persist(next);
+			}
+		}
+	}
+	
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		myParams = theParams;
 		StopWatch w = new StopWatch();
@@ -1589,7 +1590,7 @@ public class SearchBuilder {
 			Long pid = null;
 			if (theParams.get(BaseResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
-				pid = BaseHapiFhirDao.translateForcedIdToPid(new IdDt(idParm.getValue()), myEntityManager);
+				pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 			}
 
 			if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {

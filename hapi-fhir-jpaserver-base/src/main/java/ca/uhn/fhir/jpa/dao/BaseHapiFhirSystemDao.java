@@ -42,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -60,6 +62,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -98,6 +103,18 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 				for (ResourceTable resourceTable : resources) {
 					try {
+						/*
+						 * This part is because from HAPI 1.5 - 1.6 we changed the format of
+						 * forced ID to be "type/id" instead of just "id"
+						 */
+						ForcedId forcedId = resourceTable.getForcedId();
+						if (forcedId != null) {
+							if (forcedId.getResourceType() == null) {
+								forcedId.setResourceType(resourceTable.getResourceType());
+								myForcedIdDao.save(forcedId);
+							}
+						}
+						
 						final IBaseResource resource = toResource(resourceTable, false);
 
 						@SuppressWarnings("rawtypes")
@@ -212,7 +229,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	protected ResourceTable tryToLoadEntity(IdDt nextId) {
 		ResourceTable entity;
 		try {
-			Long pid = translateForcedIdToPid(nextId);
+			Long pid = translateForcedIdToPid(nextId.getResourceType(), nextId.getIdPart());
 			entity = myEntityManager.find(ResourceTable.class, pid);
 		} catch (ResourceNotFoundException e) {
 			entity = null;
