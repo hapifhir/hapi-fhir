@@ -33,12 +33,14 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.EnumFactory;
 import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -56,6 +58,7 @@ import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
@@ -166,7 +169,7 @@ public class JsonParserDstu3Test {
 		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
 	}
-
+	
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
@@ -244,7 +247,6 @@ public class JsonParserDstu3Test {
 		assertEquals("sec_term2", tagList.get(1).getCode());
 		assertEquals("sec_label2", tagList.get(1).getDisplay());
 	}
-	
 
 	/**
 	 * See #336
@@ -299,6 +301,7 @@ public class JsonParserDstu3Test {
 		assertEquals(null, name.getFamily().get(2).getExtension().get(0).getId());
 
 	}
+	
 
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
@@ -377,7 +380,6 @@ public class JsonParserDstu3Test {
 		assertThat(val, not(containsString("text")));
 
 	}
-	
 
 	/**
 	 * See #326
@@ -415,6 +417,7 @@ public class JsonParserDstu3Test {
 		//@formatter:on
 	}
 	
+
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
 		Patient p = new Patient();
@@ -424,7 +427,6 @@ public class JsonParserDstu3Test {
 		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
-
 	
 	@Test
 	public void testEncodeEmptyBinary() {
@@ -432,7 +434,7 @@ public class JsonParserDstu3Test {
 		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
 
-
+	
 	/**
 	 * #158
 	 */
@@ -448,7 +450,8 @@ public class JsonParserDstu3Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
 	}
-	
+
+
 	/**
 	 * #158
 	 */
@@ -466,7 +469,6 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
 	}
-
 	
 	@Test
 	public void testEncodeExtensionInPrimitiveElement() {
@@ -496,6 +498,7 @@ public class JsonParserDstu3Test {
 		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"elements\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
+
 	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
@@ -533,7 +536,7 @@ public class JsonParserDstu3Test {
 		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
 		assertEquals("ext_url_value", ((StringType)obs.getExtension().get(0).getValue()).getValue());
 	}
-
+	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
 		Observation obs = new Observation();
@@ -629,7 +632,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-	
+
 	@Test
 	public void testEncodeSummary2() {
 		Patient patient = new Patient();
@@ -649,8 +652,7 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-
-
+	
 	/**
 	 * See #205
 	 */
@@ -667,6 +669,7 @@ public class JsonParserDstu3Test {
 		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}", enc);
 
 	}
+
 
 	/**
 	 * See #241
@@ -812,6 +815,33 @@ public class JsonParserDstu3Test {
 		str = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertEquals("{\"resourceType\":\"Patient\"}", str);
 
+	}
+
+	/**
+	 * See #341
+	 */
+	@Test
+	public void testExplanationOfBenefit() {
+		String input =
+				"{" +
+				"  \"resourceType\":\"ExplanationOfBenefit\"," +
+				"  \"coverage\": {\n" + 
+				"    \"coverageReference\": {\n" + 
+				"      \"reference\": \"Coverage/123\"\n" + 
+				"    }\n" +
+				"  },\n" +
+				"  \"relationship\": {\n" + 
+				"    \"system\": \"http://hl7.org/fhir/relationship\",\n" + 
+				"    \"code\": \"1\",\n" + 
+				"    \"display\": \"self\"\n" + 
+				"  }\n" + 
+				"}";
+		
+		ExplanationOfBenefit eob = ourCtx.newJsonParser().parseResource(ExplanationOfBenefit.class, input);
+		assertEquals(Reference.class, eob.getCoverage().getCoverage().getClass());
+		
+		Reference coverage = (Reference) eob.getCoverage().getCoverage();
+		assertEquals("Coverage/123", coverage.getReference());
 	}
 
 	@Test
