@@ -20,6 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -2090,6 +2091,9 @@ class ParserState<T> {
 			}
 
 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
+			if (!definition.getName().equals(theLocalPart) && definition.getName().equalsIgnoreCase(theLocalPart)) {
+				throw new DataFormatException("Unknown resource type '" + theLocalPart + "': Resource names are case sensitive, found similar name: '" + definition.getName() + "'");
+			}
 			myInstance = def.newInstance();
 
 			String resourceName = def.getName();

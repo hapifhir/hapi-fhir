@@ -82,6 +82,7 @@ import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SampledData;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -114,27 +115,10 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
-	/**
-	 * See #347
-	 */
-	@Test
-	public void testEncodeAndParseMedicationOrder() {
-		MedicationOrder mo = new MedicationOrder();
-		mo.getDateWrittenElement().setValueAsString("2015-10-05");
-		
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
-		ourLog.info(encoded);
-		
-		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, encoded);
-		assertEquals("2015-10-05", mo.getDateWrittenElement().getValueAsString());
-	}
-	
-	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
 		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <meta/>\n" + 
 			"   <base value=\"http://localhost:52788\"/>\n" + 
 			"   <total value=\"1\"/>\n" + 
 			"   <link>\n" + 
@@ -184,6 +168,8 @@ public class XmlParserDstu3Test {
 		assertEquals("ORG", o.getName());
 	}
 	
+	
+	
 	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
@@ -197,7 +183,7 @@ public class XmlParserDstu3Test {
 		assertThat(str, not(containsString("meta")));
 		assertThat(str, containsString("<length><value value=\"123\"/><unit value=\"day\"/></length>"));
 	}
-
+	
 	@Test
 	public void testEncodeAndParseBundleWithResourceRefs() {
 
@@ -234,7 +220,7 @@ public class XmlParserDstu3Test {
 		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
 		assertSame(org, pt.getManagingOrganization().getResource());
 	}
-
+	
 	@Test
 	public void testEncodeAndParseContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -461,6 +447,21 @@ public class XmlParserDstu3Test {
 		patient = ourCtx.newXmlParser().parseResource(Patient.class, out);
 		assertEquals("http://hl7.org/fhir/v2/0203", patient.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
 		assertEquals("MR", patient.getIdentifier().get(0).getType().getCoding().get(0).getCode());
+	}
+
+	/**
+	 * See #347
+	 */
+	@Test
+	public void testEncodeAndParseMedicationOrder() {
+		MedicationOrder mo = new MedicationOrder();
+		mo.getDateWrittenElement().setValueAsString("2015-10-05");
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
+		ourLog.info(encoded);
+		
+		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, encoded);
+		assertEquals("2015-10-05", mo.getDateWrittenElement().getValueAsString());
 	}
 
 	@Test
@@ -1213,8 +1214,6 @@ public class XmlParserDstu3Test {
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://hello.world\"><valueString value=\"Hello World\"/></extension></Patient>", xml);
 	}
 
-	
-
 	@Test
 	public void testEncodeReferenceUsingUnqualifiedResourceWorksCorrectly() {
 		
@@ -1251,6 +1250,8 @@ public class XmlParserDstu3Test {
 		assertThat(str, containsString("<reference value=\"Patient/phitcc_pat_normal\"/>"));
 		assertThat(str, containsString("<reference value=\"Observation/phitcc_obs_bp_dia\"/>"));
 	}
+
+	
 
 	@Test
 	public void testEncodeSummary() {
@@ -1290,7 +1291,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
 	}
-	
+
 	@Test
 	public void testEncodeUndeclaredExtensionWithEnumerationContent() {
 		IParser parser = ourCtx.newXmlParser();
@@ -1311,7 +1312,7 @@ public class XmlParserDstu3Test {
 		assertEquals("home", ref.getValue().toCode());
 
 	}
-
+	
 	@Test
 	public void testEncodeWithContained() {
 		List<Resource> contained = new ArrayList<Resource>();
@@ -2557,6 +2558,39 @@ public class XmlParserDstu3Test {
 
 		assertEquals("Patient", patient.getIdElement().getResourceType());
 		assertEquals("Patient", reincarnatedPatient.getIdElement().getResourceType());
+	}
+
+	/**
+	 * See #344
+	 */
+	@Test
+	public void testParserIsCaseSensitive() {
+		Observation obs = new Observation();
+		SampledData data = new SampledData();
+		data.setData("1 2 3");
+		data.setOrigin((SimpleQuantity) new SimpleQuantity().setValue(0L));
+		data.setPeriod(1000L);
+		obs.setValue(data);
+		
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true).setParserErrorHandler(new StrictErrorHandler());
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+		
+		p.parseResource(encoded);
+		
+		try {
+			p.parseResource(encoded.replace("Observation", "observation"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [1,1]]: Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
+		}
+
+		try {
+			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Unknown element 'valueSampleddata' found during parse", e.getMessage());
+		}
 	}
 
 	/**

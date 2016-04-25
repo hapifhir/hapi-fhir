@@ -27,10 +27,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -185,9 +183,12 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
-		return myNameToElementDefinition.get(theElementName);
+		return myNameToElementDefinition.get(theElementName.toLowerCase());
 	}
 	
 	/** For unit tests only */
@@ -275,23 +276,15 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
 		
-		String resourceName = theResourceName;
-
-		/*
-		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or
-		 * something so that we can detect names like diagnosticreport
-		 */
-		if (Character.isLowerCase(resourceName.charAt(0))) {
-			resourceName = WordUtils.capitalize(resourceName);
-		}
-
-		Validate.notBlank(resourceName, "Resource name must not be blank");
-
+		String resourceName = theResourceName.toLowerCase();
 		RuntimeResourceDefinition retVal = myNameToResourceDefinition.get(resourceName);
 
 		if (retVal == null) {

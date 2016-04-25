@@ -319,7 +319,7 @@ class ModelScanner {
 			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		myNameToElementDefinitions.put(resourceDef.getName(), resourceDef);
+		myNameToElementDefinitions.put(resourceDef.getName().toLowerCase(), resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
 
@@ -709,7 +709,7 @@ class ModelScanner {
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			if (resourceDef.getStructureVersion() == myVersion) {
-				myNameToResourceDefinitions.put(resourceName, resourceDef);
+				myNameToResourceDefinitions.put(resourceName.toLowerCase(), resourceDef);
 			}
 		}
 		scanCompositeElementForChildren(theClass, resourceDef);

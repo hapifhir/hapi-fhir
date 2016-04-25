@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -22,7 +24,28 @@ public class FhirContextDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
+
+	/**
+	 * See #344
+	 */
+	@Test
+	public void testGetElementDefinitionCaseInsensitive() {
+		assertEquals(Reference.class, ourCtx.getElementDefinition("reference").getImplementingClass());
+		assertEquals(Reference.class, ourCtx.getElementDefinition("Reference").getImplementingClass());
+		assertEquals(Reference.class, ourCtx.getElementDefinition("REFerence").getImplementingClass());
+	}
 	
+	/**
+	 * See #344
+	 */
+	@Test
+	public void testGetResourceDefinitionCaseInsensitive() {
+		assertEquals(Patient.class, ourCtx.getResourceDefinition("patient").getImplementingClass());
+		assertEquals(Patient.class, ourCtx.getResourceDefinition("Patient").getImplementingClass());
+		assertEquals(Patient.class, ourCtx.getResourceDefinition("PATient").getImplementingClass());
+		assertEquals(StructureDefinition.class, ourCtx.getResourceDefinition("structuredefinition").getImplementingClass());
+	}
+
 	@Test
 	public void testCustomTypeDoesntBecomeDefault() {
 		FhirContext ctx = FhirContext.forDstu3();

@@ -57,6 +57,8 @@ import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SampledData;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -85,6 +87,41 @@ public class JsonParserDstu3Test {
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
+	
+	/**
+	 * See #344
+	 */
+	@Test
+	public void testParserIsCaseSensitive() {
+		Observation obs = new Observation();
+		SampledData data = new SampledData();
+		data.setData("1 2 3");
+		data.setOrigin((SimpleQuantity) new SimpleQuantity().setValue(0L));
+		data.setPeriod(1000L);
+		obs.setValue(data);
+		
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true).setParserErrorHandler(new StrictErrorHandler());
+		String encoded = p.encodeResourceToString(obs);
+		ourLog.info(encoded);
+		
+		p.parseResource(encoded);
+		
+		try {
+			p.parseResource(encoded.replace("Observation", "observation"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
+		}
+
+		try {
+			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Unknown element 'valueSampleddata' found during parse", e.getMessage());
+		}
+	}
+	
+
 	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
