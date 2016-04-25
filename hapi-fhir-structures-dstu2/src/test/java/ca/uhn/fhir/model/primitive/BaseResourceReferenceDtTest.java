@@ -142,13 +142,14 @@ public class BaseResourceReferenceDtTest {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"Foo\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals("Unknown resource name \"foo\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/Sometype/123123").loadResource(client);
 			fail();
 		} catch (DataFormatException e) {
+			e.printStackTrace();
 			assertEquals("Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	

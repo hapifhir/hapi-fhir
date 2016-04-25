@@ -290,7 +290,7 @@ public class FhirContext {
 		if (retVal == null) {
 			Class<? extends IBaseResource> clazz = myNameToResourceType.get(resourceName.toLowerCase());
 			if (clazz == null) {
-				throw new DataFormatException(createUnknownResourceNameError(resourceName, myVersion.getVersion()));
+				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {
 				retVal = scanResourceType((Class<? extends IResource>) clazz);
