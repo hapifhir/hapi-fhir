@@ -51,6 +51,13 @@
 				Note that existing databases will need to modify index "IDX_FORCEDID" as
 				it is no longer unique, and perform a reindexing pass.
 			</action>
+			<action type="fix" issue="350">
+				When serializing/encoding custom types which replace exsting choice fields by
+				fixing the choice to a single type, the parser would forget that the
+				field was a choice and would use the wrong name (e.g. "abatement" instead of
+				"abatementDateType"). Thanks to Yaroslav Kovbas for reporting and
+				providing a unit test! 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

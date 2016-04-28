@@ -29,7 +29,7 @@ import ${import};
  * ${requirements}
  * </p> 
  */
-@DatatypeDef(name="${className}") 
+@DatatypeDef(name="${elementName}") 
 public class ${className}
         extends #{if}( ${className}=="ResourceReferenceDt" || ${className}=="IdentifierDt" || ${className}=="CodingDt" || ${className}=='QuantityDt' || ${className}=='HumanNameDt') Base${className} #{else} BaseIdentifiableElement #{end} 
         implements ICompositeDatatype#{if}(${className}=="MetaDt"), org.hl7.fhir.instance.model.api.IBaseMetaType #{end}#{if}(${className}=="CodingDt"), org.hl7.fhir.instance.model.api.IBaseCoding #{end} 

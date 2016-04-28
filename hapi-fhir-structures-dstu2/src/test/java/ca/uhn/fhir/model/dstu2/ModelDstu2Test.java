@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner.PractitionerRole;
@@ -24,6 +25,11 @@ public class ModelDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testCompositeNames() {
+		assertEquals(MetaDt.class, ourCtx.getElementDefinition("meta").getImplementingClass());
+	}
+	
 
 	/**
 	 * See #320
