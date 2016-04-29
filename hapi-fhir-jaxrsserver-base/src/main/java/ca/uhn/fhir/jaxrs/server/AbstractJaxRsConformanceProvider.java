@@ -39,12 +39,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.hapi.rest.server.ServerConformanceProvider;
+import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -56,7 +60,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
-import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
@@ -78,7 +81,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
     private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
     
     /** the conformance. It is created once during startup */
-    private Conformance myConformance;
+    private Conformance myDstu3Conformance;
+    private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
     
     /**
      * Constructor allowing the description, servername and server to be set
@@ -88,6 +92,21 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
      */
     protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
         serverConfiguration.setFhirContext(getFhirContext());
+        serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
+        serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+        serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+    }
+    
+    /**
+     * Constructor allowing the description, servername and server to be set
+     * @param ctx the {@link FhirContext} instance.
+     * @param implementationDescription the implementation description. If null, "" is used
+     * @param serverName the server name. If null, "" is used
+     * @param serverVersion the server version. If null, "" is used
+     */
+    protected AbstractJaxRsConformanceProvider(FhirContext ctx, String implementationDescription, String serverName, String serverVersion) {
+        super(ctx);
+        serverConfiguration.setFhirContext(ctx);
         serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
         serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
         serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
@@ -112,9 +131,15 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
         hardcodedServerAddressStrategy.setValue(getBaseForServer());
         serverConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
-        ServerConformanceProvider serverConformanceProvider = new ServerConformanceProvider(serverConfiguration);
-        serverConformanceProvider.initializeOperations();
-        myConformance = serverConformanceProvider.getServerConformance(null);
+        if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+            ServerConformanceProvider serverConformanceProvider = new ServerConformanceProvider(serverConfiguration);
+            serverConformanceProvider.initializeOperations();
+            myDstu3Conformance = serverConformanceProvider.getServerConformance(null);
+        } else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+            ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider serverConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(serverConfiguration);
+            serverConformanceProvider.initializeOperations();
+            myDstu2Conformance = serverConformanceProvider.getServerConformance(null);
+        }
     }
     
     /**
@@ -145,7 +170,12 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
         IRestfulResponse response = request.build().getResponse();
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
-		return (Response) response.returnResponse(ParseAction.create(myConformance), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
+		if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+		    return (Response) response.returnResponse(ParseAction.create(myDstu3Conformance), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
+		} else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+	        return (Response) response.returnResponse(ParseAction.create(myDstu2Conformance), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
+	    }
+		return (Response) response.returnResponse(null, Constants.STATUS_HTTP_500_INTERNAL_ERROR, true, null, getResourceType().getSimpleName());
     }
 
     /**
@@ -217,9 +247,15 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         return count;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Class<Conformance> getResourceType() {
-        return Conformance.class;
+    public Class<IBaseResource> getResourceType() {
+        if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+            return Class.class.cast(Conformance.class);
+        } else if (super.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+            return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
+        }
+        return null;
     }
     
 }

@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.client;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
@@ -58,7 +59,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Use {@link #fetchConformance()} instead
 	 */
 	@Deprecated
-	BaseConformance conformance();
+	IBaseConformance conformance();
 
 	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
