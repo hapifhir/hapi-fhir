@@ -470,6 +470,9 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class);
 			for (IBaseReference nextRef : allRefs) {
 				IIdType nextId = nextRef.getReferenceElement();
+				if (!nextId.hasIdPart()) {
+					continue;
+				}
 				if (idSubstitutions.containsKey(nextId)) {
 					IdType newId = idSubstitutions.get(nextId);
 					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);

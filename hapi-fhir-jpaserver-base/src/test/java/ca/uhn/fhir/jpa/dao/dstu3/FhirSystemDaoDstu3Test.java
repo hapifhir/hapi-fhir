@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
@@ -58,6 +59,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -75,6 +77,64 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@Test
+	public void testTransactionWithNullReference() {
+		Patient p = new Patient();
+		p.addName().addFamily("family");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		
+		Bundle inputBundle = new Bundle();
+
+		//@formatter:off
+		Patient app0 = new Patient();
+		app0.addName().addFamily("NEW PATIENT");
+		String placeholderId0 = IdDt.newRandomUuid().getValue();
+		inputBundle
+			.addEntry()
+				.setResource(app0)
+				.setFullUrl(placeholderId0)
+				.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Patient");
+		//@formatter:on
+		
+		//@formatter:off
+		Appointment app1 = new Appointment();
+		app1.addParticipant().getActor().setReference(id.getValue());
+		inputBundle
+			.addEntry()
+				.setResource(app1)
+				.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Appointment");
+		//@formatter:on
+
+		//@formatter:off
+		Appointment app2 = new Appointment();
+		app2.addParticipant().getActor().setDisplay("NO REF");
+		app2.addParticipant().getActor().setDisplay("YES REF").setReference(placeholderId0);
+		inputBundle
+			.addEntry()
+				.setResource(app2)
+				.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Appointment");
+		//@formatter:on
+
+		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+		
+		assertEquals(3, outputBundle.getEntry().size());
+		IdDt id0 = new IdDt(outputBundle.getEntry().get(0).getResponse().getLocation());
+		IdDt id2 = new IdDt(outputBundle.getEntry().get(2).getResponse().getLocation());
+		
+		app2 = myAppointmentDao.read(id2, mySrd);
+		assertEquals("NO REF", app2.getParticipant().get(0).getActor().getDisplay());
+		assertEquals(null, app2.getParticipant().get(0).getActor().getReference());
+		assertEquals("YES REF", app2.getParticipant().get(1).getActor().getDisplay());
+		assertEquals(id0.toUnqualifiedVersionless().getValue(), app2.getParticipant().get(1).getActor().getReference());
 	}
 
 

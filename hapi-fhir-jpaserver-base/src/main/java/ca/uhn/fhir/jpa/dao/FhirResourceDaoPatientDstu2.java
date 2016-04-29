@@ -42,6 +42,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 
 public class FhirResourceDaoPatientDstu2 extends FhirResourceDaoDstu2<Patient>implements IFhirResourceDaoPatient<Patient> {
 
+	public FhirResourceDaoPatientDstu2() {
+		super();
+	}
+	
 	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {

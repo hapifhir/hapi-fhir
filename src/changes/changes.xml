@@ -51,6 +51,11 @@
 				Note that existing databases will need to modify index "IDX_FORCEDID" as
 				it is no longer unique, and perform a reindexing pass.
 			</action>
+			<action type="fix">
+				JPA server transactions sometimes created an incorrect resource reference
+				if a resource being saved contained references that had a display value but
+				not an actual reference. Thanks to David Hay for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

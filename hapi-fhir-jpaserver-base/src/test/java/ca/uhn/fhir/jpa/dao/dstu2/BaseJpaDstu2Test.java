@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -41,6 +40,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
@@ -86,6 +86,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	@Qualifier("myAppointmentDaoDstu2")
+	protected IFhirResourceDao<Appointment> myAppointmentDao;
 	@Autowired
 	@Qualifier("myBundleDaoDstu2")
 	protected IFhirResourceDao<Bundle> myBundleDao;
