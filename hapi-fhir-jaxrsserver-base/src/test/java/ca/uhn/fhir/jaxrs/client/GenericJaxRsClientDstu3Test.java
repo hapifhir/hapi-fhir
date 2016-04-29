@@ -1329,9 +1329,7 @@ public class GenericJaxRsClientDstu3Test {
 				.execute();
 		//@formatter:on
 		
-		// FIXME ?
-//		assertEquals("2015-06-22T15:48:57.554-04:00", response.getMeta().getLastUpdated().toString());
-		assertEquals("Mon Jun 22 13:48:57 MDT 2015", response.getMeta().getLastUpdated().toString());
+		assertEquals("2015-06-22T15:48:57.554-04:00", response.getMeta().getLastUpdatedElement().getValueAsString());
 	}
 
 	@Test
