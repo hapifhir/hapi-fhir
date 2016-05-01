@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -506,6 +506,50 @@ public class SampledData extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // SimpleQuantity
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // DecimalType
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case 1209133370: /*lowerLimit*/ return this.lowerLimit == null ? new Base[0] : new Base[] {this.lowerLimit}; // DecimalType
+        case -1681713095: /*upperLimit*/ return this.upperLimit == null ? new Base[0] : new Base[] {this.upperLimit}; // DecimalType
+        case 414334925: /*dimensions*/ return this.dimensions == null ? new Base[0] : new Base[] {this.dimensions}; // PositiveIntType
+        case 3076010: /*data*/ return this.data == null ? new Base[0] : new Base[] {this.data}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1008619738: // origin
+          this.origin = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -991726143: // period
+          this.period = castToDecimal(value); // DecimalType
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case 1209133370: // lowerLimit
+          this.lowerLimit = castToDecimal(value); // DecimalType
+          break;
+        case -1681713095: // upperLimit
+          this.upperLimit = castToDecimal(value); // DecimalType
+          break;
+        case 414334925: // dimensions
+          this.dimensions = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 3076010: // data
+          this.data = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("origin"))
           this.origin = castToSimpleQuantity(value); // SimpleQuantity
@@ -523,6 +567,21 @@ public class SampledData extends Type implements ICompositeType {
           this.data = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1008619738:  return getOrigin(); // SimpleQuantity
+        case -991726143: throw new FHIRException("Cannot make property period as it is not a complex type"); // DecimalType
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case 1209133370: throw new FHIRException("Cannot make property lowerLimit as it is not a complex type"); // DecimalType
+        case -1681713095: throw new FHIRException("Cannot make property upperLimit as it is not a complex type"); // DecimalType
+        case 414334925: throw new FHIRException("Cannot make property dimensions as it is not a complex type"); // PositiveIntType
+        case 3076010: throw new FHIRException("Cannot make property data as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -600,8 +659,9 @@ public class SampledData extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( origin,  period,  factor,  lowerLimit
-          ,  upperLimit,  dimensions,  data);
+        return super.isEmpty() && (origin == null || origin.isEmpty()) && (period == null || period.isEmpty())
+           && (factor == null || factor.isEmpty()) && (lowerLimit == null || lowerLimit.isEmpty()) && (upperLimit == null || upperLimit.isEmpty())
+           && (dimensions == null || dimensions.isEmpty()) && (data == null || data.isEmpty());
       }
 
 

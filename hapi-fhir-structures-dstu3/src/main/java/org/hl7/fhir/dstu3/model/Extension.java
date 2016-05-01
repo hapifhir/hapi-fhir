@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -163,6 +163,30 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 111972721: // value
+          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -170,6 +194,16 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -351,7 +385,8 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  value);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
 

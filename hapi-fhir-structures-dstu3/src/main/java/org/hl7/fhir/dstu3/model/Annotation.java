@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -231,6 +231,34 @@ public class Annotation extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Type
+        case 3560141: /*time*/ return this.time == null ? new Base[0] : new Base[] {this.time}; // DateTimeType
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1406328437: // author
+          this.author = (Type) value; // Type
+          break;
+        case 3560141: // time
+          this.time = castToDateTime(value); // DateTimeType
+          break;
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("author[x]"))
           this.author = (Type) value; // Type
@@ -240,6 +268,17 @@ public class Annotation extends Type implements ICompositeType {
           this.text = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1475597077:  return getAuthor(); // Type
+        case 3560141: throw new FHIRException("Cannot make property time as it is not a complex type"); // DateTimeType
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -302,7 +341,8 @@ public class Annotation extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( author,  time,  text);
+        return super.isEmpty() && (author == null || author.isEmpty()) && (time == null || time.isEmpty())
+           && (text == null || text.isEmpty());
       }
 
 

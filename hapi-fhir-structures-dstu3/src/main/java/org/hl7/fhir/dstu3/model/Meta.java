@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -198,6 +198,24 @@ public class Meta extends Type implements IBaseMetaType {
       return this.profile;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #profile}, creating it if it does not already exist
+     */
+    public UriType getProfileFirstRep() { 
+      if (getProfile().isEmpty()) {
+        addProfileElement();
+      }
+      return getProfile().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Meta setProfile(List<UriType> theProfile) { 
+      this.profile = theProfile;
+      return this;
+    }
+
     public boolean hasProfile() { 
       if (this.profile == null)
         return false;
@@ -252,6 +270,24 @@ public class Meta extends Type implements IBaseMetaType {
       return this.security;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #security}, creating it if it does not already exist
+     */
+    public Coding getSecurityFirstRep() { 
+      if (getSecurity().isEmpty()) {
+        addSecurity();
+      }
+      return getSecurity().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Meta setSecurity(List<Coding> theSecurity) { 
+      this.security = theSecurity;
+      return this;
+    }
+
     public boolean hasSecurity() { 
       if (this.security == null)
         return false;
@@ -290,6 +326,24 @@ public class Meta extends Type implements IBaseMetaType {
       if (this.tag == null)
         this.tag = new ArrayList<Coding>();
       return this.tag;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #tag}, creating it if it does not already exist
+     */
+    public Coding getTagFirstRep() { 
+      if (getTag().isEmpty()) {
+        addTag();
+      }
+      return getTag().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Meta setTag(List<Coding> theTag) { 
+      this.tag = theTag;
+      return this;
     }
 
     public boolean hasTag() { 
@@ -382,6 +436,42 @@ public class Meta extends Type implements IBaseMetaType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1407102957: /*versionId*/ return this.versionId == null ? new Base[0] : new Base[] {this.versionId}; // IdType
+        case 1649733957: /*lastUpdated*/ return this.lastUpdated == null ? new Base[0] : new Base[] {this.lastUpdated}; // InstantType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // UriType
+        case 949122880: /*security*/ return this.security == null ? new Base[0] : this.security.toArray(new Base[this.security.size()]); // Coding
+        case 114586: /*tag*/ return this.tag == null ? new Base[0] : this.tag.toArray(new Base[this.tag.size()]); // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1407102957: // versionId
+          this.versionId = castToId(value); // IdType
+          break;
+        case 1649733957: // lastUpdated
+          this.lastUpdated = castToInstant(value); // InstantType
+          break;
+        case -309425751: // profile
+          this.getProfile().add(castToUri(value)); // UriType
+          break;
+        case 949122880: // security
+          this.getSecurity().add(castToCoding(value)); // Coding
+          break;
+        case 114586: // tag
+          this.getTag().add(castToCoding(value)); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("versionId"))
           this.versionId = castToId(value); // IdType
@@ -395,6 +485,19 @@ public class Meta extends Type implements IBaseMetaType {
           this.getTag().add(castToCoding(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1407102957: throw new FHIRException("Cannot make property versionId as it is not a complex type"); // IdType
+        case 1649733957: throw new FHIRException("Cannot make property lastUpdated as it is not a complex type"); // InstantType
+        case -309425751: throw new FHIRException("Cannot make property profile as it is not a complex type"); // UriType
+        case 949122880:  return addSecurity(); // Coding
+        case 114586:  return addTag(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -474,8 +577,9 @@ public class Meta extends Type implements IBaseMetaType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( versionId,  lastUpdated,  profile
-          ,  security,  tag);
+        return super.isEmpty() && (versionId == null || versionId.isEmpty()) && (lastUpdated == null || lastUpdated.isEmpty())
+           && (profile == null || profile.isEmpty()) && (security == null || security.isEmpty()) && (tag == null || tag.isEmpty())
+          ;
       }
 
 

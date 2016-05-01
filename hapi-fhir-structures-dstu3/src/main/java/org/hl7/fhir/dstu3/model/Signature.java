@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -107,6 +107,24 @@ public class Signature extends Type implements ICompositeType {
       if (this.type == null)
         this.type = new ArrayList<Coding>();
       return this.type;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public Coding getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Signature setType(List<Coding> theType) { 
+      this.type = theType;
+      return this;
     }
 
     public boolean hasType() { 
@@ -338,6 +356,42 @@ public class Signature extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // Coding
+        case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // InstantType
+        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Type
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // CodeType
+        case 3026845: /*blob*/ return this.blob == null ? new Base[0] : new Base[] {this.blob}; // Base64BinaryType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.getType().add(castToCoding(value)); // Coding
+          break;
+        case 3648314: // when
+          this.when = castToInstant(value); // InstantType
+          break;
+        case 117694: // who
+          this.who = (Type) value; // Type
+          break;
+        case -389131437: // contentType
+          this.contentType = castToCode(value); // CodeType
+          break;
+        case 3026845: // blob
+          this.blob = castToBase64Binary(value); // Base64BinaryType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.getType().add(castToCoding(value));
@@ -351,6 +405,19 @@ public class Signature extends Type implements ICompositeType {
           this.blob = castToBase64Binary(value); // Base64BinaryType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return addType(); // Coding
+        case 3648314: throw new FHIRException("Cannot make property when as it is not a complex type"); // InstantType
+        case -788654078:  return getWho(); // Type
+        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // CodeType
+        case 3026845: throw new FHIRException("Cannot make property blob as it is not a complex type"); // Base64BinaryType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -426,8 +493,9 @@ public class Signature extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  when,  who,  contentType
-          ,  blob);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (when == null || when.isEmpty())
+           && (who == null || who.isEmpty()) && (contentType == null || contentType.isEmpty()) && (blob == null || blob.isEmpty())
+          ;
       }
 
 

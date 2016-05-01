@@ -49,13 +49,14 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 
 	/**
 	 * Constructor
+	 * 
 	 * @deprecated This no-arg constructor is provided for serialization only - Do not use
 	 */
 	@Deprecated
 	public Enumeration() {
 		// nothing
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -113,7 +114,7 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readExternal(ObjectInput theIn) throws IOException, ClassNotFoundException {
@@ -121,10 +122,13 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		super.readExternal(theIn);
 	}
 
+	public String toSystem() {
+		return getEnumFactory().toSystem(getValue());
+	}
+
 	@Override
 	public void writeExternal(ObjectOutput theOut) throws IOException {
 		theOut.writeObject(myEnumFactory);
 		super.writeExternal(theOut);
 	}
-
 }

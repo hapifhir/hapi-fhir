@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -200,6 +200,24 @@ public class DataRequirement extends Type implements ICompositeType {
           return this.valueCode;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #valueCode}, creating it if it does not already exist
+         */
+        public CodeType getValueCodeFirstRep() { 
+          if (getValueCode().isEmpty()) {
+            addValueCodeElement();
+          }
+          return getValueCode().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DataRequirementCodeFilterComponent setValueCode(List<CodeType> theValueCode) { 
+          this.valueCode = theValueCode;
+          return this;
+        }
+
         public boolean hasValueCode() { 
           if (this.valueCode == null)
             return false;
@@ -254,6 +272,24 @@ public class DataRequirement extends Type implements ICompositeType {
           return this.valueCoding;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #valueCoding}, creating it if it does not already exist
+         */
+        public Coding getValueCodingFirstRep() { 
+          if (getValueCoding().isEmpty()) {
+            addValueCoding();
+          }
+          return getValueCoding().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DataRequirementCodeFilterComponent setValueCoding(List<Coding> theValueCoding) { 
+          this.valueCoding = theValueCoding;
+          return this;
+        }
+
         public boolean hasValueCoding() { 
           if (this.valueCoding == null)
             return false;
@@ -292,6 +328,24 @@ public class DataRequirement extends Type implements ICompositeType {
           if (this.valueCodeableConcept == null)
             this.valueCodeableConcept = new ArrayList<CodeableConcept>();
           return this.valueCodeableConcept;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #valueCodeableConcept}, creating it if it does not already exist
+         */
+        public CodeableConcept getValueCodeableConceptFirstRep() { 
+          if (getValueCodeableConcept().isEmpty()) {
+            addValueCodeableConcept();
+          }
+          return getValueCodeableConcept().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DataRequirementCodeFilterComponent setValueCodeableConcept(List<CodeableConcept> theValueCodeableConcept) { 
+          this.valueCodeableConcept = theValueCodeableConcept;
+          return this;
         }
 
         public boolean hasValueCodeableConcept() { 
@@ -335,6 +389,42 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : new Base[] {this.valueSet}; // Type
+        case -766209282: /*valueCode*/ return this.valueCode == null ? new Base[0] : this.valueCode.toArray(new Base[this.valueCode.size()]); // CodeType
+        case -1887705029: /*valueCoding*/ return this.valueCoding == null ? new Base[0] : this.valueCoding.toArray(new Base[this.valueCoding.size()]); // Coding
+        case 924902896: /*valueCodeableConcept*/ return this.valueCodeableConcept == null ? new Base[0] : this.valueCodeableConcept.toArray(new Base[this.valueCodeableConcept.size()]); // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          break;
+        case -1410174671: // valueSet
+          this.valueSet = (Type) value; // Type
+          break;
+        case -766209282: // valueCode
+          this.getValueCode().add(castToCode(value)); // CodeType
+          break;
+        case -1887705029: // valueCoding
+          this.getValueCoding().add(castToCoding(value)); // Coding
+          break;
+        case 924902896: // valueCodeableConcept
+          this.getValueCodeableConcept().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
@@ -348,6 +438,19 @@ public class DataRequirement extends Type implements ICompositeType {
           this.getValueCodeableConcept().add(castToCodeableConcept(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1438410321:  return getValueSet(); // Type
+        case -766209282: throw new FHIRException("Cannot make property valueCode as it is not a complex type"); // CodeType
+        case -1887705029:  return addValueCoding(); // Coding
+        case 924902896:  return addValueCodeableConcept(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -422,8 +525,9 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( path,  valueSet,  valueCode,  valueCoding
-          ,  valueCodeableConcept);
+        return super.isEmpty() && (path == null || path.isEmpty()) && (valueSet == null || valueSet.isEmpty())
+           && (valueCode == null || valueCode.isEmpty()) && (valueCoding == null || valueCoding.isEmpty())
+           && (valueCodeableConcept == null || valueCodeableConcept.isEmpty());
       }
 
   public String fhirType() {
@@ -563,6 +667,30 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
@@ -570,6 +698,16 @@ public class DataRequirement extends Type implements ICompositeType {
           this.value = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1410166417:  return getValue(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -618,7 +756,8 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( path,  value);
+        return super.isEmpty() && (path == null || path.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -783,6 +922,24 @@ public class DataRequirement extends Type implements ICompositeType {
       return this.mustSupport;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #mustSupport}, creating it if it does not already exist
+     */
+    public StringType getMustSupportFirstRep() { 
+      if (getMustSupport().isEmpty()) {
+        addMustSupportElement();
+      }
+      return getMustSupport().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataRequirement setMustSupport(List<StringType> theMustSupport) { 
+      this.mustSupport = theMustSupport;
+      return this;
+    }
+
     public boolean hasMustSupport() { 
       if (this.mustSupport == null)
         return false;
@@ -837,6 +994,24 @@ public class DataRequirement extends Type implements ICompositeType {
       return this.codeFilter;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #codeFilter}, creating it if it does not already exist
+     */
+    public DataRequirementCodeFilterComponent getCodeFilterFirstRep() { 
+      if (getCodeFilter().isEmpty()) {
+        addCodeFilter();
+      }
+      return getCodeFilter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataRequirement setCodeFilter(List<DataRequirementCodeFilterComponent> theCodeFilter) { 
+      this.codeFilter = theCodeFilter;
+      return this;
+    }
+
     public boolean hasCodeFilter() { 
       if (this.codeFilter == null)
         return false;
@@ -875,6 +1050,24 @@ public class DataRequirement extends Type implements ICompositeType {
       if (this.dateFilter == null)
         this.dateFilter = new ArrayList<DataRequirementDateFilterComponent>();
       return this.dateFilter;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dateFilter}, creating it if it does not already exist
+     */
+    public DataRequirementDateFilterComponent getDateFilterFirstRep() { 
+      if (getDateFilter().isEmpty()) {
+        addDateFilter();
+      }
+      return getDateFilter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataRequirement setDateFilter(List<DataRequirementDateFilterComponent> theDateFilter) { 
+      this.dateFilter = theDateFilter;
+      return this;
     }
 
     public boolean hasDateFilter() { 
@@ -918,6 +1111,42 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        case -1402857082: /*mustSupport*/ return this.mustSupport == null ? new Base[0] : this.mustSupport.toArray(new Base[this.mustSupport.size()]); // StringType
+        case -1303674939: /*codeFilter*/ return this.codeFilter == null ? new Base[0] : this.codeFilter.toArray(new Base[this.codeFilter.size()]); // DataRequirementCodeFilterComponent
+        case 149531846: /*dateFilter*/ return this.dateFilter == null ? new Base[0] : this.dateFilter.toArray(new Base[this.dateFilter.size()]); // DataRequirementDateFilterComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCode(value); // CodeType
+          break;
+        case -309425751: // profile
+          this.profile = castToReference(value); // Reference
+          break;
+        case -1402857082: // mustSupport
+          this.getMustSupport().add(castToString(value)); // StringType
+          break;
+        case -1303674939: // codeFilter
+          this.getCodeFilter().add((DataRequirementCodeFilterComponent) value); // DataRequirementCodeFilterComponent
+          break;
+        case 149531846: // dateFilter
+          this.getDateFilter().add((DataRequirementDateFilterComponent) value); // DataRequirementDateFilterComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCode(value); // CodeType
@@ -931,6 +1160,19 @@ public class DataRequirement extends Type implements ICompositeType {
           this.getDateFilter().add((DataRequirementDateFilterComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case -309425751:  return getProfile(); // Reference
+        case -1402857082: throw new FHIRException("Cannot make property mustSupport as it is not a complex type"); // StringType
+        case -1303674939:  return addCodeFilter(); // DataRequirementCodeFilterComponent
+        case 149531846:  return addDateFilter(); // DataRequirementDateFilterComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1009,8 +1251,9 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  profile,  mustSupport,  codeFilter
-          ,  dateFilter);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (profile == null || profile.isEmpty())
+           && (mustSupport == null || mustSupport.isEmpty()) && (codeFilter == null || codeFilter.isEmpty())
+           && (dateFilter == null || dateFilter.isEmpty());
       }
 
 
