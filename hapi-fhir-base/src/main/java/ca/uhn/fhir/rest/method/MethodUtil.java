@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -781,8 +782,8 @@ public class MethodUtil {
 				if (reader != null) {
 					IParser parser = ct.newParser(theContext);
 					IBaseResource outcome = parser.parseResource(reader);
-					if (outcome instanceof BaseOperationOutcome) {
-						retVal.setOperationOutcome((BaseOperationOutcome) outcome);
+					if (outcome instanceof IBaseOperationOutcome) {
+						retVal.setOperationOutcome((IBaseOperationOutcome) outcome);
 					} else {
 						retVal.setResource(outcome);
 					}

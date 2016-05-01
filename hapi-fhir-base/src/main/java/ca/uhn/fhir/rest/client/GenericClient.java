@@ -788,7 +788,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName, myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
@@ -1608,6 +1608,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private final String myResourceName;
+		private PreferReturnEnum myPrefer;
+
+		private OutcomeResponseHandler(String theResourceName, PreferReturnEnum thePrefer) {
+			this(theResourceName);
+			myPrefer = thePrefer;
+		}
 
 		private OutcomeResponseHandler(String theResourceName) {
 			myResourceName = theResourceName;
@@ -1619,6 +1625,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (theResponseStatusCode == Constants.STATUS_HTTP_201_CREATED) {
 				response.setCreated(true);
 			}
+			
+			if (myPrefer == PreferReturnEnum.REPRESENTATION) {
+				if (response.getResource() == null) {
+					if (response.getId() != null && isNotBlank(response.getId().getValue()) && response.getId().hasBaseUrl()) {
+						ourLog.info("Server did not return resource for Prefer-representation, going to fetch: {}", response.getId().getValue());
+						IBaseResource resource = read().resource(response.getId().getResourceType()).withUrl(response.getId()).execute();
+						response.setResource(resource);
+					}
+				}
+			}
+			
 			return response;
 		}
 	}
@@ -2242,7 +2259,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName, myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
