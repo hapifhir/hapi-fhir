@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -246,6 +246,30 @@ public class SupplyRequest extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : new Base[] {this.schedule}; // Timing
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -697920873: // schedule
+          this.schedule = castToTiming(value); // Timing
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -253,6 +277,16 @@ public class SupplyRequest extends DomainResource {
           this.schedule = castToTiming(value); // Timing
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // CodeableConcept
+        case -697920873:  return getSchedule(); // Timing
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -298,7 +332,8 @@ public class SupplyRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  schedule);
+        return super.isEmpty() && (code == null || code.isEmpty()) && (schedule == null || schedule.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -684,6 +719,24 @@ public class SupplyRequest extends DomainResource {
       return this.supplier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #supplier}, creating it if it does not already exist
+     */
+    public Reference getSupplierFirstRep() { 
+      if (getSupplier().isEmpty()) {
+        addSupplier();
+      }
+      return getSupplier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SupplyRequest setSupplier(List<Reference> theSupplier) { 
+      this.supplier = theSupplier;
+      return this;
+    }
+
     public boolean hasSupplier() { 
       if (this.supplier == null)
         return false;
@@ -820,6 +873,62 @@ public class SupplyRequest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SupplyRequestStatus>
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // CodeableConcept
+        case 2129914144: /*orderedItem*/ return this.orderedItem == null ? new Base[0] : new Base[] {this.orderedItem}; // Reference
+        case -1663305268: /*supplier*/ return this.supplier == null ? new Base[0] : this.supplier.toArray(new Base[this.supplier.size()]); // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // SupplyRequestWhenComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case -896505829: // source
+          this.source = castToReference(value); // Reference
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new SupplyRequestStatusEnumFactory().fromType(value); // Enumeration<SupplyRequestStatus>
+          break;
+        case 3292052: // kind
+          this.kind = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 2129914144: // orderedItem
+          this.orderedItem = castToReference(value); // Reference
+          break;
+        case -1663305268: // supplier
+          this.getSupplier().add(castToReference(value)); // Reference
+          break;
+        case -934964668: // reason
+          this.reason = (Type) value; // Type
+          break;
+        case 3648314: // when
+          this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
@@ -843,6 +952,24 @@ public class SupplyRequest extends DomainResource {
           this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -791418107:  return getPatient(); // Reference
+        case -896505829:  return getSource(); // Reference
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SupplyRequestStatus>
+        case 3292052:  return getKind(); // CodeableConcept
+        case 2129914144:  return getOrderedItem(); // Reference
+        case -1663305268:  return addSupplier(); // Reference
+        case -669418564:  return getReason(); // Type
+        case 3648314:  return getWhen(); // SupplyRequestWhenComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -945,8 +1072,10 @@ public class SupplyRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( patient,  source,  date,  identifier
-          ,  status,  kind,  orderedItem,  supplier,  reason,  when);
+        return super.isEmpty() && (patient == null || patient.isEmpty()) && (source == null || source.isEmpty())
+           && (date == null || date.isEmpty()) && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (kind == null || kind.isEmpty()) && (orderedItem == null || orderedItem.isEmpty()) && (supplier == null || supplier.isEmpty())
+           && (reason == null || reason.isEmpty()) && (when == null || when.isEmpty());
       }
 
   @Override
@@ -1022,7 +1151,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

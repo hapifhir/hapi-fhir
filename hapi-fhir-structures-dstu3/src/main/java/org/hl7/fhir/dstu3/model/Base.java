@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -84,9 +85,13 @@ private Map<String, Object> userData;
     return formatCommentsPost;
   }  
   
-	// these 2 allow evaluation engines to get access to primitive values
+	// these 3 allow evaluation engines to get access to primitive values
 	public boolean isPrimitive() {
 		return false;
+	}
+	
+	public boolean hasPrimitiveValue() {
+		return isPrimitive();
 	}
 	
 	public String primitiveValue() {
@@ -138,13 +143,26 @@ private Map<String, Object> userData;
     return null;
   }  
   
-  public List<Base> listChildrenByName(String name) {
-    List<Property> children = new ArrayList<Property>();
-    listChildren(children);
-    for (Property c : children)
-      if (c.getName().equals(name) || (c.getName().endsWith("[x]") && name.startsWith(c.getName())))
-        return c.getValues();
-    return new ArrayList<Base>();
+  public List<Base> listChildrenByName(String name) throws FHIRException {
+  	List<Base> result = new ArrayList<Base>();
+  	for (Base b : listChildrenByName(name, true))
+  		if (b != null)
+  		  result.add(b);
+  	return result;
+  }
+  
+  public Base[] listChildrenByName(String name, boolean checkValid) throws FHIRException {
+  	if (name.equals("*")) {
+  		List<Property> children = new ArrayList<Property>();
+  		listChildren(children);
+  		List<Base> result = new ArrayList<Base>();
+  		for (Property c : children)
+  			if (name.equals("*") || c.getName().equals(name) || (c.getName().endsWith("[x]") && c.getName().startsWith(name)))
+  				result.addAll(c.getValues());
+  		return result.toArray(new Base[result.size()]);
+  	}
+  	else
+    	return getProperty(name.hashCode(), name, checkValid);
   }
 
 	public boolean isEmpty() {
@@ -152,11 +170,11 @@ private Map<String, Object> userData;
   }
 
 	public boolean equalsDeep(Base other) {
-	  return other != null;
+	  return other == this;
   }  
   
 	public boolean equalsShallow(Base other) {
-	  return other != null;
+	  return other == this;
   }  
   
 	public static boolean compareDeep(List<? extends Base> e1, List<? extends Base> e2, boolean allowNull) {
@@ -178,14 +196,8 @@ private Map<String, Object> userData;
   }
 
 	public static boolean compareDeep(Base e1, Base e2, boolean allowNull) {
-		if (allowNull) {
-			boolean noLeft = e1 == null || e1.isEmpty();
-			boolean noRight = e2 == null || e2.isEmpty();
-			if (noLeft && noRight) {
-				return true;
-			}
-		}
-		
+		if (e1 == null && e2 == null && allowNull)
+			return true;
 		if (e1 == null || e2 == null)
 			return false;
 		if (e2.isMetadataBased() && !e1.isMetadataBased()) // respect existing order for debugging consistency; outcome must be the same either way
@@ -217,17 +229,11 @@ private Map<String, Object> userData;
 		return true;
 	}
 
-	public static boolean compareValues(PrimitiveType<?> e1, PrimitiveType<?> e2, boolean allowNull) {
-		boolean noLeft = e1 == null || e1.isEmpty();
-		boolean noRight = e2 == null || e2.isEmpty();
-		if (noLeft && noRight && allowNull) {
+	public static boolean compareValues(PrimitiveType e1, PrimitiveType e2, boolean allowNull) {
+		if (e1 == null && e2 == null && allowNull)
 			return true;
-		}
-		
-		if (e1 == null || e2 == null) {
+		if (e1 == null || e2 == null)
 			return false;
-		}
-		
 		return e1.equalsShallow(e2);
   }
 	
@@ -272,6 +278,8 @@ private Map<String, Object> userData;
 	public StringType castToString(Base b) throws FHIRException {
 		if (b instanceof StringType)
 			return (StringType) b;
+		else if (b.hasPrimitiveValue())
+			return new StringType(b.primitiveValue());
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a String");
 	}
@@ -279,20 +287,26 @@ private Map<String, Object> userData;
 	public UriType castToUri(Base b) throws FHIRException {
 		if (b instanceof UriType)
 			return (UriType) b;
-		else
+		else if (b.hasPrimitiveValue())
+			return new UriType(b.primitiveValue());
+		else 
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Uri");
 	}
 	
 	public DateType castToDate(Base b) throws FHIRException {
 		if (b instanceof DateType)
 			return (DateType) b;
-		else
+		else if (b.hasPrimitiveValue())
+			return new DateType(b.primitiveValue());
+		else	
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Date");
 	}
 	
 	public DateTimeType castToDateTime(Base b) throws FHIRException {
 		if (b instanceof DateTimeType)
 			return (DateTimeType) b;
+		else if (b.fhirType().equals("dateTime"))
+			return new DateTimeType(b.primitiveValue());
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a DateTime");
 	}
@@ -307,6 +321,8 @@ private Map<String, Object> userData;
 	public CodeType castToCode(Base b) throws FHIRException {
 		if (b instanceof CodeType)
 			return (CodeType) b;
+		else if (b.isPrimitive())
+			return new CodeType(b.primitiveValue());
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Code");
 	}
@@ -565,6 +581,29 @@ private Map<String, Object> userData;
 
 	protected boolean isMetadataBased() {
   	return false;
+	}
+
+	public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+		if (checkValid)
+			throw new FHIRException("Attempt to read invalid property '"+name+"' on type "+fhirType());
+  	return null; 
+	}
+
+	public void setProperty(int hash, String name, Base value) throws FHIRException {
+		throw new FHIRException("Attempt to write to invalid property '"+name+"' on type "+fhirType());
+	}
+
+	public Base makeProperty(int hash, String name) throws FHIRException {
+		throw new FHIRException("Attempt to make an invalid property '"+name+"' on type "+fhirType());
+	}
+
+	public static boolean equals(String v1, String v2) {
+  	if (v1 == null && v2 == null)
+  		return true;
+  	else if (v1 == null || v2 == null)
+    	return false;
+  	else
+  		return v1.equals(v2);
 	}
 	
 

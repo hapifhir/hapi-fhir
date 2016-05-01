@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -630,6 +630,30 @@ Not to be used when the patient is currently at the location
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EncounterState>
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -892481550: // status
+          this.status = new EncounterStateEnumFactory().fromType(value); // Enumeration<EncounterState>
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("status"))
           this.status = new EncounterStateEnumFactory().fromType(value); // Enumeration<EncounterState>
@@ -637,6 +661,16 @@ Not to be used when the patient is currently at the location
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EncounterState>
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -681,7 +715,8 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( status,  period);
+        return super.isEmpty() && (status == null || status.isEmpty()) && (period == null || period.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -735,6 +770,24 @@ Not to be used when the patient is currently at the location
           if (this.type == null)
             this.type = new ArrayList<CodeableConcept>();
           return this.type;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public CodeableConcept getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addType();
+          }
+          return getType().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterParticipantComponent setType(List<CodeableConcept> theType) { 
+          this.type = theType;
+          return this;
         }
 
         public boolean hasType() { 
@@ -839,6 +892,34 @@ Not to be used when the patient is currently at the location
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -46292327: /*individual*/ return this.individual == null ? new Base[0] : new Base[] {this.individual}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case -46292327: // individual
+          this.individual = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.getType().add(castToCodeableConcept(value));
@@ -848,6 +929,17 @@ Not to be used when the patient is currently at the location
           this.individual = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return addType(); // CodeableConcept
+        case -991726143:  return getPeriod(); // Period
+        case -46292327:  return getIndividual(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -902,7 +994,8 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  period,  individual);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (period == null || period.isEmpty())
+           && (individual == null || individual.isEmpty());
       }
 
   public String fhirType() {
@@ -1121,6 +1214,24 @@ Not to be used when the patient is currently at the location
           return this.admittingDiagnosis;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #admittingDiagnosis}, creating it if it does not already exist
+         */
+        public Reference getAdmittingDiagnosisFirstRep() { 
+          if (getAdmittingDiagnosis().isEmpty()) {
+            addAdmittingDiagnosis();
+          }
+          return getAdmittingDiagnosis().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterHospitalizationComponent setAdmittingDiagnosis(List<Reference> theAdmittingDiagnosis) { 
+          this.admittingDiagnosis = theAdmittingDiagnosis;
+          return this;
+        }
+
         public boolean hasAdmittingDiagnosis() { 
           if (this.admittingDiagnosis == null)
             return false;
@@ -1206,6 +1317,24 @@ Not to be used when the patient is currently at the location
           return this.dietPreference;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #dietPreference}, creating it if it does not already exist
+         */
+        public CodeableConcept getDietPreferenceFirstRep() { 
+          if (getDietPreference().isEmpty()) {
+            addDietPreference();
+          }
+          return getDietPreference().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterHospitalizationComponent setDietPreference(List<CodeableConcept> theDietPreference) { 
+          this.dietPreference = theDietPreference;
+          return this;
+        }
+
         public boolean hasDietPreference() { 
           if (this.dietPreference == null)
             return false;
@@ -1246,6 +1375,24 @@ Not to be used when the patient is currently at the location
           return this.specialCourtesy;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #specialCourtesy}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialCourtesyFirstRep() { 
+          if (getSpecialCourtesy().isEmpty()) {
+            addSpecialCourtesy();
+          }
+          return getSpecialCourtesy().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterHospitalizationComponent setSpecialCourtesy(List<CodeableConcept> theSpecialCourtesy) { 
+          this.specialCourtesy = theSpecialCourtesy;
+          return this;
+        }
+
         public boolean hasSpecialCourtesy() { 
           if (this.specialCourtesy == null)
             return false;
@@ -1284,6 +1431,24 @@ Not to be used when the patient is currently at the location
           if (this.specialArrangement == null)
             this.specialArrangement = new ArrayList<CodeableConcept>();
           return this.specialArrangement;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #specialArrangement}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialArrangementFirstRep() { 
+          if (getSpecialArrangement().isEmpty()) {
+            addSpecialArrangement();
+          }
+          return getSpecialArrangement().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterHospitalizationComponent setSpecialArrangement(List<CodeableConcept> theSpecialArrangement) { 
+          this.specialArrangement = theSpecialArrangement;
+          return this;
         }
 
         public boolean hasSpecialArrangement() { 
@@ -1394,6 +1559,24 @@ Not to be used when the patient is currently at the location
           return this.dischargeDiagnosis;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #dischargeDiagnosis}, creating it if it does not already exist
+         */
+        public Reference getDischargeDiagnosisFirstRep() { 
+          if (getDischargeDiagnosis().isEmpty()) {
+            addDischargeDiagnosis();
+          }
+          return getDischargeDiagnosis().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public EncounterHospitalizationComponent setDischargeDiagnosis(List<Reference> theDischargeDiagnosis) { 
+          this.dischargeDiagnosis = theDischargeDiagnosis;
+          return this;
+        }
+
         public boolean hasDischargeDiagnosis() { 
           if (this.dischargeDiagnosis == null)
             return false;
@@ -1462,6 +1645,66 @@ Not to be used when the patient is currently at the location
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -965394961: /*preAdmissionIdentifier*/ return this.preAdmissionIdentifier == null ? new Base[0] : new Base[] {this.preAdmissionIdentifier}; // Identifier
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // Reference
+        case 538887120: /*admitSource*/ return this.admitSource == null ? new Base[0] : new Base[] {this.admitSource}; // CodeableConcept
+        case 2048045678: /*admittingDiagnosis*/ return this.admittingDiagnosis == null ? new Base[0] : this.admittingDiagnosis.toArray(new Base[this.admittingDiagnosis.size()]); // Reference
+        case 669348630: /*reAdmission*/ return this.reAdmission == null ? new Base[0] : new Base[] {this.reAdmission}; // CodeableConcept
+        case -1360641041: /*dietPreference*/ return this.dietPreference == null ? new Base[0] : this.dietPreference.toArray(new Base[this.dietPreference.size()]); // CodeableConcept
+        case 1583588345: /*specialCourtesy*/ return this.specialCourtesy == null ? new Base[0] : this.specialCourtesy.toArray(new Base[this.specialCourtesy.size()]); // CodeableConcept
+        case 47410321: /*specialArrangement*/ return this.specialArrangement == null ? new Base[0] : this.specialArrangement.toArray(new Base[this.specialArrangement.size()]); // CodeableConcept
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // Reference
+        case 528065941: /*dischargeDisposition*/ return this.dischargeDisposition == null ? new Base[0] : new Base[] {this.dischargeDisposition}; // CodeableConcept
+        case -1985183665: /*dischargeDiagnosis*/ return this.dischargeDiagnosis == null ? new Base[0] : this.dischargeDiagnosis.toArray(new Base[this.dischargeDiagnosis.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -965394961: // preAdmissionIdentifier
+          this.preAdmissionIdentifier = castToIdentifier(value); // Identifier
+          break;
+        case -1008619738: // origin
+          this.origin = castToReference(value); // Reference
+          break;
+        case 538887120: // admitSource
+          this.admitSource = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 2048045678: // admittingDiagnosis
+          this.getAdmittingDiagnosis().add(castToReference(value)); // Reference
+          break;
+        case 669348630: // reAdmission
+          this.reAdmission = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1360641041: // dietPreference
+          this.getDietPreference().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1583588345: // specialCourtesy
+          this.getSpecialCourtesy().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 47410321: // specialArrangement
+          this.getSpecialArrangement().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1429847026: // destination
+          this.destination = castToReference(value); // Reference
+          break;
+        case 528065941: // dischargeDisposition
+          this.dischargeDisposition = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1985183665: // dischargeDiagnosis
+          this.getDischargeDiagnosis().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("preAdmissionIdentifier"))
           this.preAdmissionIdentifier = castToIdentifier(value); // Identifier
@@ -1487,6 +1730,25 @@ Not to be used when the patient is currently at the location
           this.getDischargeDiagnosis().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -965394961:  return getPreAdmissionIdentifier(); // Identifier
+        case -1008619738:  return getOrigin(); // Reference
+        case 538887120:  return getAdmitSource(); // CodeableConcept
+        case 2048045678:  return addAdmittingDiagnosis(); // Reference
+        case 669348630:  return getReAdmission(); // CodeableConcept
+        case -1360641041:  return addDietPreference(); // CodeableConcept
+        case 1583588345:  return addSpecialCourtesy(); // CodeableConcept
+        case 47410321:  return addSpecialArrangement(); // CodeableConcept
+        case -1429847026:  return getDestination(); // Reference
+        case 528065941:  return getDischargeDisposition(); // CodeableConcept
+        case -1985183665:  return addDischargeDiagnosis(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1597,9 +1859,13 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( preAdmissionIdentifier,  origin
-          ,  admitSource,  admittingDiagnosis,  reAdmission,  dietPreference,  specialCourtesy,  specialArrangement
-          ,  destination,  dischargeDisposition,  dischargeDiagnosis);
+        return super.isEmpty() && (preAdmissionIdentifier == null || preAdmissionIdentifier.isEmpty())
+           && (origin == null || origin.isEmpty()) && (admitSource == null || admitSource.isEmpty())
+           && (admittingDiagnosis == null || admittingDiagnosis.isEmpty()) && (reAdmission == null || reAdmission.isEmpty())
+           && (dietPreference == null || dietPreference.isEmpty()) && (specialCourtesy == null || specialCourtesy.isEmpty())
+           && (specialArrangement == null || specialArrangement.isEmpty()) && (destination == null || destination.isEmpty())
+           && (dischargeDisposition == null || dischargeDisposition.isEmpty()) && (dischargeDiagnosis == null || dischargeDiagnosis.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1779,6 +2045,34 @@ Not to be used when the patient is currently at the location
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EncounterLocationStatus>
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1901043637: // location
+          this.location = castToReference(value); // Reference
+          break;
+        case -892481550: // status
+          this.status = new EncounterLocationStatusEnumFactory().fromType(value); // Enumeration<EncounterLocationStatus>
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("location"))
           this.location = castToReference(value); // Reference
@@ -1788,6 +2082,17 @@ Not to be used when the patient is currently at the location
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1901043637:  return getLocation(); // Reference
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EncounterLocationStatus>
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1838,7 +2143,8 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( location,  status,  period);
+        return super.isEmpty() && (location == null || location.isEmpty()) && (status == null || status.isEmpty())
+           && (period == null || period.isEmpty());
       }
 
   public String fhirType() {
@@ -2042,6 +2348,24 @@ Not to be used when the patient is currently at the location
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -2125,6 +2449,24 @@ Not to be used when the patient is currently at the location
       if (this.statusHistory == null)
         this.statusHistory = new ArrayList<EncounterStatusHistoryComponent>();
       return this.statusHistory;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #statusHistory}, creating it if it does not already exist
+     */
+    public EncounterStatusHistoryComponent getStatusHistoryFirstRep() { 
+      if (getStatusHistory().isEmpty()) {
+        addStatusHistory();
+      }
+      return getStatusHistory().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setStatusHistory(List<EncounterStatusHistoryComponent> theStatusHistory) { 
+      this.statusHistory = theStatusHistory;
+      return this;
     }
 
     public boolean hasStatusHistory() { 
@@ -2214,6 +2556,24 @@ Not to be used when the patient is currently at the location
       if (this.type == null)
         this.type = new ArrayList<CodeableConcept>();
       return this.type;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setType(List<CodeableConcept> theType) { 
+      this.type = theType;
+      return this;
     }
 
     public boolean hasType() { 
@@ -2324,6 +2684,24 @@ Not to be used when the patient is currently at the location
       return this.episodeOfCare;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #episodeOfCare}, creating it if it does not already exist
+     */
+    public Reference getEpisodeOfCareFirstRep() { 
+      if (getEpisodeOfCare().isEmpty()) {
+        addEpisodeOfCare();
+      }
+      return getEpisodeOfCare().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setEpisodeOfCare(List<Reference> theEpisodeOfCare) { 
+      this.episodeOfCare = theEpisodeOfCare;
+      return this;
+    }
+
     public boolean hasEpisodeOfCare() { 
       if (this.episodeOfCare == null)
         return false;
@@ -2385,6 +2763,24 @@ Not to be used when the patient is currently at the location
       return this.incomingReferral;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #incomingReferral}, creating it if it does not already exist
+     */
+    public Reference getIncomingReferralFirstRep() { 
+      if (getIncomingReferral().isEmpty()) {
+        addIncomingReferral();
+      }
+      return getIncomingReferral().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setIncomingReferral(List<Reference> theIncomingReferral) { 
+      this.incomingReferral = theIncomingReferral;
+      return this;
+    }
+
     public boolean hasIncomingReferral() { 
       if (this.incomingReferral == null)
         return false;
@@ -2444,6 +2840,24 @@ Not to be used when the patient is currently at the location
       if (this.participant == null)
         this.participant = new ArrayList<EncounterParticipantComponent>();
       return this.participant;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     */
+    public EncounterParticipantComponent getParticipantFirstRep() { 
+      if (getParticipant().isEmpty()) {
+        addParticipant();
+      }
+      return getParticipant().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setParticipant(List<EncounterParticipantComponent> theParticipant) { 
+      this.participant = theParticipant;
+      return this;
     }
 
     public boolean hasParticipant() { 
@@ -2578,6 +2992,24 @@ Not to be used when the patient is currently at the location
       return this.reason;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setReason(List<CodeableConcept> theReason) { 
+      this.reason = theReason;
+      return this;
+    }
+
     public boolean hasReason() { 
       if (this.reason == null)
         return false;
@@ -2616,6 +3048,24 @@ Not to be used when the patient is currently at the location
       if (this.indication == null)
         this.indication = new ArrayList<Reference>();
       return this.indication;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
+     */
+    public Reference getIndicationFirstRep() { 
+      if (getIndication().isEmpty()) {
+        addIndication();
+      }
+      return getIndication().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setIndication(List<Reference> theIndication) { 
+      this.indication = theIndication;
+      return this;
     }
 
     public boolean hasIndication() { 
@@ -2689,6 +3139,24 @@ Not to be used when the patient is currently at the location
       if (this.location == null)
         this.location = new ArrayList<EncounterLocationComponent>();
       return this.location;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
+     */
+    public EncounterLocationComponent getLocationFirstRep() { 
+      if (getLocation().isEmpty()) {
+        addLocation();
+      }
+      return getLocation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setLocation(List<EncounterLocationComponent> theLocation) { 
+      this.location = theLocation;
+      return this;
     }
 
     public boolean hasLocation() { 
@@ -2834,6 +3302,98 @@ Not to be used when the patient is currently at the location
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EncounterState>
+        case -986695614: /*statusHistory*/ return this.statusHistory == null ? new Base[0] : this.statusHistory.toArray(new Base[this.statusHistory.size()]); // EncounterStatusHistoryComponent
+        case 94742904: /*class*/ return this.class_ == null ? new Base[0] : new Base[] {this.class_}; // Enumeration<EncounterClass>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -1892140189: /*episodeOfCare*/ return this.episodeOfCare == null ? new Base[0] : this.episodeOfCare.toArray(new Base[this.episodeOfCare.size()]); // Reference
+        case -1258204701: /*incomingReferral*/ return this.incomingReferral == null ? new Base[0] : this.incomingReferral.toArray(new Base[this.incomingReferral.size()]); // Reference
+        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // EncounterParticipantComponent
+        case -1474995297: /*appointment*/ return this.appointment == null ? new Base[0] : new Base[] {this.appointment}; // Reference
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -1106363674: /*length*/ return this.length == null ? new Base[0] : new Base[] {this.length}; // Duration
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case -597168804: /*indication*/ return this.indication == null ? new Base[0] : this.indication.toArray(new Base[this.indication.size()]); // Reference
+        case 1057894634: /*hospitalization*/ return this.hospitalization == null ? new Base[0] : new Base[] {this.hospitalization}; // EncounterHospitalizationComponent
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // EncounterLocationComponent
+        case 243182534: /*serviceProvider*/ return this.serviceProvider == null ? new Base[0] : new Base[] {this.serviceProvider}; // Reference
+        case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : new Base[] {this.partOf}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new EncounterStateEnumFactory().fromType(value); // Enumeration<EncounterState>
+          break;
+        case -986695614: // statusHistory
+          this.getStatusHistory().add((EncounterStatusHistoryComponent) value); // EncounterStatusHistoryComponent
+          break;
+        case 94742904: // class
+          this.class_ = new EncounterClassEnumFactory().fromType(value); // Enumeration<EncounterClass>
+          break;
+        case 3575610: // type
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1165461084: // priority
+          this.priority = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case -1892140189: // episodeOfCare
+          this.getEpisodeOfCare().add(castToReference(value)); // Reference
+          break;
+        case -1258204701: // incomingReferral
+          this.getIncomingReferral().add(castToReference(value)); // Reference
+          break;
+        case 767422259: // participant
+          this.getParticipant().add((EncounterParticipantComponent) value); // EncounterParticipantComponent
+          break;
+        case -1474995297: // appointment
+          this.appointment = castToReference(value); // Reference
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case -1106363674: // length
+          this.length = castToDuration(value); // Duration
+          break;
+        case -934964668: // reason
+          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -597168804: // indication
+          this.getIndication().add(castToReference(value)); // Reference
+          break;
+        case 1057894634: // hospitalization
+          this.hospitalization = (EncounterHospitalizationComponent) value; // EncounterHospitalizationComponent
+          break;
+        case 1901043637: // location
+          this.getLocation().add((EncounterLocationComponent) value); // EncounterLocationComponent
+          break;
+        case 243182534: // serviceProvider
+          this.serviceProvider = castToReference(value); // Reference
+          break;
+        case -995410646: // partOf
+          this.partOf = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -2875,6 +3435,33 @@ Not to be used when the patient is currently at the location
           this.partOf = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EncounterState>
+        case -986695614:  return addStatusHistory(); // EncounterStatusHistoryComponent
+        case 94742904: throw new FHIRException("Cannot make property class as it is not a complex type"); // Enumeration<EncounterClass>
+        case 3575610:  return addType(); // CodeableConcept
+        case -1165461084:  return getPriority(); // CodeableConcept
+        case -791418107:  return getPatient(); // Reference
+        case -1892140189:  return addEpisodeOfCare(); // Reference
+        case -1258204701:  return addIncomingReferral(); // Reference
+        case 767422259:  return addParticipant(); // EncounterParticipantComponent
+        case -1474995297:  return getAppointment(); // Reference
+        case -991726143:  return getPeriod(); // Period
+        case -1106363674:  return getLength(); // Duration
+        case -934964668:  return addReason(); // CodeableConcept
+        case -597168804:  return addIndication(); // Reference
+        case 1057894634:  return getHospitalization(); // EncounterHospitalizationComponent
+        case 1901043637:  return addLocation(); // EncounterLocationComponent
+        case 243182534:  return getServiceProvider(); // Reference
+        case -995410646:  return getPartOf(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3046,10 +3633,15 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  statusHistory
-          ,  class_,  type,  priority,  patient,  episodeOfCare,  incomingReferral,  participant,  appointment
-          ,  period,  length,  reason,  indication,  hospitalization,  location,  serviceProvider,  partOf
-          );
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (statusHistory == null || statusHistory.isEmpty()) && (class_ == null || class_.isEmpty())
+           && (type == null || type.isEmpty()) && (priority == null || priority.isEmpty()) && (patient == null || patient.isEmpty())
+           && (episodeOfCare == null || episodeOfCare.isEmpty()) && (incomingReferral == null || incomingReferral.isEmpty())
+           && (participant == null || participant.isEmpty()) && (appointment == null || appointment.isEmpty())
+           && (period == null || period.isEmpty()) && (length == null || length.isEmpty()) && (reason == null || reason.isEmpty())
+           && (indication == null || indication.isEmpty()) && (hospitalization == null || hospitalization.isEmpty())
+           && (location == null || location.isEmpty()) && (serviceProvider == null || serviceProvider.isEmpty())
+           && (partOf == null || partOf.isEmpty());
       }
 
   @Override
@@ -3197,7 +3789,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -3341,7 +3933,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -3393,7 +3985,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

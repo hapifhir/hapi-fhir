@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -266,6 +266,24 @@ public class CompartmentDefinition extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CompartmentDefinitionContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -304,6 +322,30 @@ public class CompartmentDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -311,6 +353,16 @@ public class CompartmentDefinition extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -358,7 +410,8 @@ public class CompartmentDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -460,6 +513,24 @@ public class CompartmentDefinition extends DomainResource {
           if (this.param == null)
             this.param = new ArrayList<StringType>();
           return this.param;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public StringType getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParamElement();
+          }
+          return getParam().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CompartmentDefinitionResourceComponent setParam(List<StringType> theParam) { 
+          this.param = theParam;
+          return this;
         }
 
         public boolean hasParam() { 
@@ -564,6 +635,34 @@ public class CompartmentDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // StringType
+        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          break;
+        case 106436749: // param
+          this.getParam().add(castToString(value)); // StringType
+          break;
+        case 1587405498: // documentation
+          this.documentation = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCode(value); // CodeType
@@ -573,6 +672,17 @@ public class CompartmentDefinition extends DomainResource {
           this.documentation = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case 106436749: throw new FHIRException("Cannot make property param as it is not a complex type"); // StringType
+        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -626,7 +736,8 @@ public class CompartmentDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  param,  documentation);
+        return super.isEmpty() && (code == null || code.isEmpty()) && (param == null || param.isEmpty())
+           && (documentation == null || documentation.isEmpty());
       }
 
   public String fhirType() {
@@ -982,6 +1093,24 @@ public class CompartmentDefinition extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public CompartmentDefinitionContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CompartmentDefinition setContact(List<CompartmentDefinitionContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1259,6 +1388,24 @@ public class CompartmentDefinition extends DomainResource {
       return this.resource;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #resource}, creating it if it does not already exist
+     */
+    public CompartmentDefinitionResourceComponent getResourceFirstRep() { 
+      if (getResource().isEmpty()) {
+        addResource();
+      }
+      return getResource().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CompartmentDefinition setResource(List<CompartmentDefinitionResourceComponent> theResource) { 
+      this.resource = theResource;
+      return this;
+    }
+
     public boolean hasResource() { 
       if (this.resource == null)
         return false;
@@ -1307,6 +1454,70 @@ public class CompartmentDefinition extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // CompartmentDefinitionContactComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<CompartmentType>
+        case -906336856: /*search*/ return this.search == null ? new Base[0] : new Base[] {this.search}; // BooleanType
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // CompartmentDefinitionResourceComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((CompartmentDefinitionContactComponent) value); // CompartmentDefinitionContactComponent
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 3059181: // code
+          this.code = new CompartmentTypeEnumFactory().fromType(value); // Enumeration<CompartmentType>
+          break;
+        case -906336856: // search
+          this.search = castToBoolean(value); // BooleanType
+          break;
+        case -341064690: // resource
+          this.getResource().add((CompartmentDefinitionResourceComponent) value); // CompartmentDefinitionResourceComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -1334,6 +1545,26 @@ public class CompartmentDefinition extends DomainResource {
           this.getResource().add((CompartmentDefinitionResourceComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // CompartmentDefinitionContactComponent
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<CompartmentType>
+        case -906336856: throw new FHIRException("Cannot make property search as it is not a complex type"); // BooleanType
+        case -341064690:  return addResource(); // CompartmentDefinitionResourceComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1441,8 +1672,12 @@ public class CompartmentDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  name,  status,  experimental
-          ,  publisher,  contact,  date,  description,  requirements,  code,  search,  resource);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (name == null || name.isEmpty())
+           && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
+           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty())
+           && (description == null || description.isEmpty()) && (requirements == null || requirements.isEmpty())
+           && (code == null || code.isEmpty()) && (search == null || search.isEmpty()) && (resource == null || resource.isEmpty())
+          ;
       }
 
   @Override

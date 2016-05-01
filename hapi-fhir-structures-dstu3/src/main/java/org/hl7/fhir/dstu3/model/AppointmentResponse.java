@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -138,6 +138,24 @@ public class AppointmentResponse extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public AppointmentResponse setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -322,6 +340,24 @@ public class AppointmentResponse extends DomainResource {
       return this.participantType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #participantType}, creating it if it does not already exist
+     */
+    public CodeableConcept getParticipantTypeFirstRep() { 
+      if (getParticipantType().isEmpty()) {
+        addParticipantType();
+      }
+      return getParticipantType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public AppointmentResponse setParticipantType(List<CodeableConcept> theParticipantType) { 
+      this.participantType = theParticipantType;
+      return this;
+    }
+
     public boolean hasParticipantType() { 
       if (this.participantType == null)
         return false;
@@ -499,6 +535,54 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1474995297: /*appointment*/ return this.appointment == null ? new Base[0] : new Base[] {this.appointment}; // Reference
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // InstantType
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // InstantType
+        case 841294093: /*participantType*/ return this.participantType == null ? new Base[0] : this.participantType.toArray(new Base[this.participantType.size()]); // CodeableConcept
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        case 996096261: /*participantStatus*/ return this.participantStatus == null ? new Base[0] : new Base[] {this.participantStatus}; // CodeType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1474995297: // appointment
+          this.appointment = castToReference(value); // Reference
+          break;
+        case 109757538: // start
+          this.start = castToInstant(value); // InstantType
+          break;
+        case 100571: // end
+          this.end = castToInstant(value); // InstantType
+          break;
+        case 841294093: // participantType
+          this.getParticipantType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          break;
+        case 996096261: // participantStatus
+          this.participantStatus = castToCode(value); // CodeType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -518,6 +602,22 @@ public class AppointmentResponse extends DomainResource {
           this.comment = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1474995297:  return getAppointment(); // Reference
+        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // InstantType
+        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // InstantType
+        case 841294093:  return addParticipantType(); // CodeableConcept
+        case 92645877:  return getActor(); // Reference
+        case 996096261: throw new FHIRException("Cannot make property participantStatus as it is not a complex type"); // CodeType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -608,8 +708,10 @@ public class AppointmentResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  appointment,  start
-          ,  end,  participantType,  actor,  participantStatus,  comment);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (appointment == null || appointment.isEmpty())
+           && (start == null || start.isEmpty()) && (end == null || end.isEmpty()) && (participantType == null || participantType.isEmpty())
+           && (actor == null || actor.isEmpty()) && (participantStatus == null || participantStatus.isEmpty())
+           && (comment == null || comment.isEmpty());
       }
 
   @Override
@@ -625,7 +727,7 @@ public class AppointmentResponse extends DomainResource {
    * Path: <b>AppointmentResponse.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference" )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>

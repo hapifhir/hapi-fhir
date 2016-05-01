@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -696,6 +696,24 @@ public class DeviceUseRequest extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseRequest setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -736,6 +754,24 @@ public class DeviceUseRequest extends DomainResource {
       return this.indication;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
+     */
+    public CodeableConcept getIndicationFirstRep() { 
+      if (getIndication().isEmpty()) {
+        addIndication();
+      }
+      return getIndication().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseRequest setIndication(List<CodeableConcept> theIndication) { 
+      this.indication = theIndication;
+      return this;
+    }
+
     public boolean hasIndication() { 
       if (this.indication == null)
         return false;
@@ -774,6 +810,24 @@ public class DeviceUseRequest extends DomainResource {
       if (this.notes == null)
         this.notes = new ArrayList<StringType>();
       return this.notes;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
+     */
+    public StringType getNotesFirstRep() { 
+      if (getNotes().isEmpty()) {
+        addNotesElement();
+      }
+      return getNotes().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseRequest setNotes(List<StringType> theNotes) { 
+      this.notes = theNotes;
+      return this;
     }
 
     public boolean hasNotes() { 
@@ -828,6 +882,24 @@ public class DeviceUseRequest extends DomainResource {
       if (this.prnReason == null)
         this.prnReason = new ArrayList<CodeableConcept>();
       return this.prnReason;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #prnReason}, creating it if it does not already exist
+     */
+    public CodeableConcept getPrnReasonFirstRep() { 
+      if (getPrnReason().isEmpty()) {
+        addPrnReason();
+      }
+      return getPrnReason().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceUseRequest setPrnReason(List<CodeableConcept> thePrnReason) { 
+      this.prnReason = thePrnReason;
+      return this;
     }
 
     public boolean hasPrnReason() { 
@@ -1128,6 +1200,74 @@ public class DeviceUseRequest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // Type
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DeviceUseRequestStatus>
+        case -1335157162: /*device*/ return this.device == null ? new Base[0] : new Base[] {this.device}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -597168804: /*indication*/ return this.indication == null ? new Base[0] : this.indication.toArray(new Base[this.indication.size()]); // CodeableConcept
+        case 105008833: /*notes*/ return this.notes == null ? new Base[0] : this.notes.toArray(new Base[this.notes.size()]); // StringType
+        case 1825472528: /*prnReason*/ return this.prnReason == null ? new Base[0] : this.prnReason.toArray(new Base[this.prnReason.size()]); // CodeableConcept
+        case -391079124: /*orderedOn*/ return this.orderedOn == null ? new Base[0] : new Base[] {this.orderedOn}; // DateTimeType
+        case 735397551: /*recordedOn*/ return this.recordedOn == null ? new Base[0] : new Base[] {this.recordedOn}; // DateTimeType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<DeviceUseRequestPriority>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1702620169: // bodySite
+          this.bodySite = (Type) value; // Type
+          break;
+        case -892481550: // status
+          this.status = new DeviceUseRequestStatusEnumFactory().fromType(value); // Enumeration<DeviceUseRequestStatus>
+          break;
+        case -1335157162: // device
+          this.device = castToReference(value); // Reference
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -597168804: // indication
+          this.getIndication().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 105008833: // notes
+          this.getNotes().add(castToString(value)); // StringType
+          break;
+        case 1825472528: // prnReason
+          this.getPrnReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -391079124: // orderedOn
+          this.orderedOn = castToDateTime(value); // DateTimeType
+          break;
+        case 735397551: // recordedOn
+          this.recordedOn = castToDateTime(value); // DateTimeType
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -873664438: // timing
+          this.timing = (Type) value; // Type
+          break;
+        case -1165461084: // priority
+          this.priority = new DeviceUseRequestPriorityEnumFactory().fromType(value); // Enumeration<DeviceUseRequestPriority>
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("bodySite[x]"))
           this.bodySite = (Type) value; // Type
@@ -1157,6 +1297,27 @@ public class DeviceUseRequest extends DomainResource {
           this.priority = new DeviceUseRequestPriorityEnumFactory().fromType(value); // Enumeration<DeviceUseRequestPriority>
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -806219817:  return getBodySite(); // Type
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DeviceUseRequestStatus>
+        case -1335157162:  return getDevice(); // Reference
+        case 1524132147:  return getEncounter(); // Reference
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -597168804:  return addIndication(); // CodeableConcept
+        case 105008833: throw new FHIRException("Cannot make property notes as it is not a complex type"); // StringType
+        case 1825472528:  return addPrnReason(); // CodeableConcept
+        case -391079124: throw new FHIRException("Cannot make property orderedOn as it is not a complex type"); // DateTimeType
+        case 735397551: throw new FHIRException("Cannot make property recordedOn as it is not a complex type"); // DateTimeType
+        case -1867885268:  return getSubject(); // Reference
+        case 164632566:  return getTiming(); // Type
+        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<DeviceUseRequestPriority>
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1291,9 +1452,12 @@ public class DeviceUseRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( bodySite,  status,  device,  encounter
-          ,  identifier,  indication,  notes,  prnReason,  orderedOn,  recordedOn,  subject,  timing,  priority
-          );
+        return super.isEmpty() && (bodySite == null || bodySite.isEmpty()) && (status == null || status.isEmpty())
+           && (device == null || device.isEmpty()) && (encounter == null || encounter.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (indication == null || indication.isEmpty()) && (notes == null || notes.isEmpty()) && (prnReason == null || prnReason.isEmpty())
+           && (orderedOn == null || orderedOn.isEmpty()) && (recordedOn == null || recordedOn.isEmpty())
+           && (subject == null || subject.isEmpty()) && (timing == null || timing.isEmpty()) && (priority == null || priority.isEmpty())
+          ;
       }
 
   @Override
@@ -1309,7 +1473,7 @@ public class DeviceUseRequest extends DomainResource {
    * Path: <b>DeviceUseRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1361,7 +1525,7 @@ public class DeviceUseRequest extends DomainResource {
    * Path: <b>DeviceUseRequest.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference" )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

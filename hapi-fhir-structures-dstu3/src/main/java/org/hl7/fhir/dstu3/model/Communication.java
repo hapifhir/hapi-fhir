@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -272,11 +272,40 @@ public class Communication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 951530617: // content
+          this.content = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
           this.content = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 264548711:  return getContent(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -325,7 +354,7 @@ public class Communication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( content);
+        return super.isEmpty() && (content == null || content.isEmpty());
       }
 
   public String fhirType() {
@@ -469,6 +498,24 @@ public class Communication extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Communication setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -572,6 +619,24 @@ public class Communication extends DomainResource {
       return this.recipient;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
+     */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Communication setRecipient(List<Reference> theRecipient) { 
+      this.recipient = theRecipient;
+      return this;
+    }
+
     public boolean hasRecipient() { 
       if (this.recipient == null)
         return false;
@@ -621,6 +686,24 @@ public class Communication extends DomainResource {
       return this.payload;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #payload}, creating it if it does not already exist
+     */
+    public CommunicationPayloadComponent getPayloadFirstRep() { 
+      if (getPayload().isEmpty()) {
+        addPayload();
+      }
+      return getPayload().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Communication setPayload(List<CommunicationPayloadComponent> thePayload) { 
+      this.payload = thePayload;
+      return this;
+    }
+
     public boolean hasPayload() { 
       if (this.payload == null)
         return false;
@@ -659,6 +742,24 @@ public class Communication extends DomainResource {
       if (this.medium == null)
         this.medium = new ArrayList<CodeableConcept>();
       return this.medium;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #medium}, creating it if it does not already exist
+     */
+    public CodeableConcept getMediumFirstRep() { 
+      if (getMedium().isEmpty()) {
+        addMedium();
+      }
+      return getMedium().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Communication setMedium(List<CodeableConcept> theMedium) { 
+      this.medium = theMedium;
+      return this;
     }
 
     public boolean hasMedium() { 
@@ -892,6 +993,24 @@ public class Communication extends DomainResource {
       return this.reason;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Communication setReason(List<CodeableConcept> theReason) { 
+      this.reason = theReason;
+      return this;
+    }
+
     public boolean hasReason() { 
       if (this.reason == null)
         return false;
@@ -1029,6 +1148,74 @@ public class Communication extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case -905962955: /*sender*/ return this.sender == null ? new Base[0] : new Base[] {this.sender}; // Reference
+        case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : this.recipient.toArray(new Base[this.recipient.size()]); // Reference
+        case -786701938: /*payload*/ return this.payload == null ? new Base[0] : this.payload.toArray(new Base[this.payload.size()]); // CommunicationPayloadComponent
+        case -1078030475: /*medium*/ return this.medium == null ? new Base[0] : this.medium.toArray(new Base[this.medium.size()]); // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<CommunicationStatus>
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case 3526552: /*sent*/ return this.sent == null ? new Base[0] : new Base[] {this.sent}; // DateTimeType
+        case -808719903: /*received*/ return this.received == null ? new Base[0] : new Base[] {this.received}; // DateTimeType
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 960204736: /*requestDetail*/ return this.requestDetail == null ? new Base[0] : new Base[] {this.requestDetail}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -905962955: // sender
+          this.sender = castToReference(value); // Reference
+          break;
+        case 820081177: // recipient
+          this.getRecipient().add(castToReference(value)); // Reference
+          break;
+        case -786701938: // payload
+          this.getPayload().add((CommunicationPayloadComponent) value); // CommunicationPayloadComponent
+          break;
+        case -1078030475: // medium
+          this.getMedium().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -892481550: // status
+          this.status = new CommunicationStatusEnumFactory().fromType(value); // Enumeration<CommunicationStatus>
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case 3526552: // sent
+          this.sent = castToDateTime(value); // DateTimeType
+          break;
+        case -808719903: // received
+          this.received = castToDateTime(value); // DateTimeType
+          break;
+        case -934964668: // reason
+          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 960204736: // requestDetail
+          this.requestDetail = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1058,6 +1245,27 @@ public class Communication extends DomainResource {
           this.requestDetail = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 50511102:  return getCategory(); // CodeableConcept
+        case -905962955:  return getSender(); // Reference
+        case 820081177:  return addRecipient(); // Reference
+        case -786701938:  return addPayload(); // CommunicationPayloadComponent
+        case -1078030475:  return addMedium(); // CodeableConcept
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<CommunicationStatus>
+        case 1524132147:  return getEncounter(); // Reference
+        case 3526552: throw new FHIRException("Cannot make property sent as it is not a complex type"); // DateTimeType
+        case -808719903: throw new FHIRException("Cannot make property received as it is not a complex type"); // DateTimeType
+        case -934964668:  return addReason(); // CodeableConcept
+        case -1867885268:  return getSubject(); // Reference
+        case 960204736:  return getRequestDetail(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1184,9 +1392,12 @@ public class Communication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  category,  sender
-          ,  recipient,  payload,  medium,  status,  encounter,  sent,  received,  reason,  subject,  requestDetail
-          );
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (category == null || category.isEmpty())
+           && (sender == null || sender.isEmpty()) && (recipient == null || recipient.isEmpty()) && (payload == null || payload.isEmpty())
+           && (medium == null || medium.isEmpty()) && (status == null || status.isEmpty()) && (encounter == null || encounter.isEmpty())
+           && (sent == null || sent.isEmpty()) && (received == null || received.isEmpty()) && (reason == null || reason.isEmpty())
+           && (subject == null || subject.isEmpty()) && (requestDetail == null || requestDetail.isEmpty())
+          ;
       }
 
   @Override
@@ -1248,7 +1459,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.sender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sender</b>
@@ -1274,7 +1485,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1326,7 +1537,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1392,7 +1603,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

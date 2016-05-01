@@ -1,16 +1,21 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Claim;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerPractitionerRoleComponent;
@@ -23,6 +28,15 @@ import ca.uhn.fhir.util.TestUtil;
 public class ModelDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
+
+	/**
+	 * See #354
+	 */
+	@Test
+	public void testSetters() {
+		Claim claim = new Claim();
+		claim.setIdentifier(new ArrayList<Identifier>()).setCondition(new ArrayList<Coding>());
+	}
 
 	/**
 	 * See #320

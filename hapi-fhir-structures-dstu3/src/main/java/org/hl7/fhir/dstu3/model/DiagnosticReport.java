@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -352,6 +352,30 @@ public class DiagnosticReport extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case 3321850: /*link*/ return this.link == null ? new Base[0] : new Base[] {this.link}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        case 3321850: // link
+          this.link = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("comment"))
           this.comment = castToString(value); // StringType
@@ -359,6 +383,16 @@ public class DiagnosticReport extends DomainResource {
           this.link = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case 3321850:  return getLink(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -403,7 +437,8 @@ public class DiagnosticReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( comment,  link);
+        return super.isEmpty() && (comment == null || comment.isEmpty()) && (link == null || link.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -596,6 +631,24 @@ public class DiagnosticReport extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -943,6 +996,24 @@ public class DiagnosticReport extends DomainResource {
       return this.request;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #request}, creating it if it does not already exist
+     */
+    public Reference getRequestFirstRep() { 
+      if (getRequest().isEmpty()) {
+        addRequest();
+      }
+      return getRequest().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setRequest(List<Reference> theRequest) { 
+      this.request = theRequest;
+      return this;
+    }
+
     public boolean hasRequest() { 
       if (this.request == null)
         return false;
@@ -990,6 +1061,24 @@ public class DiagnosticReport extends DomainResource {
       if (this.specimen == null)
         this.specimen = new ArrayList<Reference>();
       return this.specimen;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specimen}, creating it if it does not already exist
+     */
+    public Reference getSpecimenFirstRep() { 
+      if (getSpecimen().isEmpty()) {
+        addSpecimen();
+      }
+      return getSpecimen().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setSpecimen(List<Reference> theSpecimen) { 
+      this.specimen = theSpecimen;
+      return this;
     }
 
     public boolean hasSpecimen() { 
@@ -1053,6 +1142,24 @@ public class DiagnosticReport extends DomainResource {
       return this.result;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #result}, creating it if it does not already exist
+     */
+    public Reference getResultFirstRep() { 
+      if (getResult().isEmpty()) {
+        addResult();
+      }
+      return getResult().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setResult(List<Reference> theResult) { 
+      this.result = theResult;
+      return this;
+    }
+
     public boolean hasResult() { 
       if (this.result == null)
         return false;
@@ -1114,6 +1221,24 @@ public class DiagnosticReport extends DomainResource {
       return this.imagingStudy;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #imagingStudy}, creating it if it does not already exist
+     */
+    public Reference getImagingStudyFirstRep() { 
+      if (getImagingStudy().isEmpty()) {
+        addImagingStudy();
+      }
+      return getImagingStudy().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setImagingStudy(List<Reference> theImagingStudy) { 
+      this.imagingStudy = theImagingStudy;
+      return this;
+    }
+
     public boolean hasImagingStudy() { 
       if (this.imagingStudy == null)
         return false;
@@ -1161,6 +1286,24 @@ public class DiagnosticReport extends DomainResource {
       if (this.image == null)
         this.image = new ArrayList<DiagnosticReportImageComponent>();
       return this.image;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #image}, creating it if it does not already exist
+     */
+    public DiagnosticReportImageComponent getImageFirstRep() { 
+      if (getImage().isEmpty()) {
+        addImage();
+      }
+      return getImage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setImage(List<DiagnosticReportImageComponent> theImage) { 
+      this.image = theImage;
+      return this;
     }
 
     public boolean hasImage() { 
@@ -1252,6 +1395,24 @@ public class DiagnosticReport extends DomainResource {
       return this.codedDiagnosis;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #codedDiagnosis}, creating it if it does not already exist
+     */
+    public CodeableConcept getCodedDiagnosisFirstRep() { 
+      if (getCodedDiagnosis().isEmpty()) {
+        addCodedDiagnosis();
+      }
+      return getCodedDiagnosis().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setCodedDiagnosis(List<CodeableConcept> theCodedDiagnosis) { 
+      this.codedDiagnosis = theCodedDiagnosis;
+      return this;
+    }
+
     public boolean hasCodedDiagnosis() { 
       if (this.codedDiagnosis == null)
         return false;
@@ -1290,6 +1451,24 @@ public class DiagnosticReport extends DomainResource {
       if (this.presentedForm == null)
         this.presentedForm = new ArrayList<Attachment>();
       return this.presentedForm;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #presentedForm}, creating it if it does not already exist
+     */
+    public Attachment getPresentedFormFirstRep() { 
+      if (getPresentedForm().isEmpty()) {
+        addPresentedForm();
+      }
+      return getPresentedForm().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setPresentedForm(List<Attachment> thePresentedForm) { 
+      this.presentedForm = thePresentedForm;
+      return this;
     }
 
     public boolean hasPresentedForm() { 
@@ -1345,6 +1524,90 @@ public class DiagnosticReport extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DiagnosticReportStatus>
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
+        case -1179159893: /*issued*/ return this.issued == null ? new Base[0] : new Base[] {this.issued}; // InstantType
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : this.request.toArray(new Base[this.request.size()]); // Reference
+        case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : this.specimen.toArray(new Base[this.specimen.size()]); // Reference
+        case -934426595: /*result*/ return this.result == null ? new Base[0] : this.result.toArray(new Base[this.result.size()]); // Reference
+        case -814900911: /*imagingStudy*/ return this.imagingStudy == null ? new Base[0] : this.imagingStudy.toArray(new Base[this.imagingStudy.size()]); // Reference
+        case 100313435: /*image*/ return this.image == null ? new Base[0] : this.image.toArray(new Base[this.image.size()]); // DiagnosticReportImageComponent
+        case -1731259873: /*conclusion*/ return this.conclusion == null ? new Base[0] : new Base[] {this.conclusion}; // StringType
+        case -1364269926: /*codedDiagnosis*/ return this.codedDiagnosis == null ? new Base[0] : this.codedDiagnosis.toArray(new Base[this.codedDiagnosis.size()]); // CodeableConcept
+        case 230090366: /*presentedForm*/ return this.presentedForm == null ? new Base[0] : this.presentedForm.toArray(new Base[this.presentedForm.size()]); // Attachment
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new DiagnosticReportStatusEnumFactory().fromType(value); // Enumeration<DiagnosticReportStatus>
+          break;
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case -1468651097: // effective
+          this.effective = (Type) value; // Type
+          break;
+        case -1179159893: // issued
+          this.issued = castToInstant(value); // InstantType
+          break;
+        case 481140686: // performer
+          this.performer = castToReference(value); // Reference
+          break;
+        case 1095692943: // request
+          this.getRequest().add(castToReference(value)); // Reference
+          break;
+        case -2132868344: // specimen
+          this.getSpecimen().add(castToReference(value)); // Reference
+          break;
+        case -934426595: // result
+          this.getResult().add(castToReference(value)); // Reference
+          break;
+        case -814900911: // imagingStudy
+          this.getImagingStudy().add(castToReference(value)); // Reference
+          break;
+        case 100313435: // image
+          this.getImage().add((DiagnosticReportImageComponent) value); // DiagnosticReportImageComponent
+          break;
+        case -1731259873: // conclusion
+          this.conclusion = castToString(value); // StringType
+          break;
+        case -1364269926: // codedDiagnosis
+          this.getCodedDiagnosis().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 230090366: // presentedForm
+          this.getPresentedForm().add(castToAttachment(value)); // Attachment
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1382,6 +1645,31 @@ public class DiagnosticReport extends DomainResource {
           this.getPresentedForm().add(castToAttachment(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DiagnosticReportStatus>
+        case 50511102:  return getCategory(); // CodeableConcept
+        case 3059181:  return getCode(); // CodeableConcept
+        case -1867885268:  return getSubject(); // Reference
+        case 1524132147:  return getEncounter(); // Reference
+        case 247104889:  return getEffective(); // Type
+        case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // InstantType
+        case 481140686:  return getPerformer(); // Reference
+        case 1095692943:  return addRequest(); // Reference
+        case -2132868344:  return addSpecimen(); // Reference
+        case -934426595:  return addResult(); // Reference
+        case -814900911:  return addImagingStudy(); // Reference
+        case 100313435:  return addImage(); // DiagnosticReportImageComponent
+        case -1731259873: throw new FHIRException("Cannot make property conclusion as it is not a complex type"); // StringType
+        case -1364269926:  return addCodedDiagnosis(); // CodeableConcept
+        case 230090366:  return addPresentedForm(); // Attachment
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1543,9 +1831,13 @@ public class DiagnosticReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  category
-          ,  code,  subject,  encounter,  effective,  issued,  performer,  request,  specimen,  result
-          ,  imagingStudy,  image,  conclusion,  codedDiagnosis,  presentedForm);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (category == null || category.isEmpty()) && (code == null || code.isEmpty()) && (subject == null || subject.isEmpty())
+           && (encounter == null || encounter.isEmpty()) && (effective == null || effective.isEmpty())
+           && (issued == null || issued.isEmpty()) && (performer == null || performer.isEmpty()) && (request == null || request.isEmpty())
+           && (specimen == null || specimen.isEmpty()) && (result == null || result.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
+           && (image == null || image.isEmpty()) && (conclusion == null || conclusion.isEmpty()) && (codedDiagnosis == null || codedDiagnosis.isEmpty())
+           && (presentedForm == null || presentedForm.isEmpty());
       }
 
   @Override
@@ -1561,7 +1853,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DiagnosticReport.effective[x]", description="The clinically relevant time of the report", type="date" )
+  @SearchParamDefinition(name="date", path="DiagnosticReport.effective", description="The clinically relevant time of the report", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1653,7 +1945,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1699,7 +1991,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1745,7 +2037,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

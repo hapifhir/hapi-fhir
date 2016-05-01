@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -315,11 +315,40 @@ public class Goal extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -934426595: /*result*/ return this.result == null ? new Base[0] : new Base[] {this.result}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -934426595: // result
+          this.result = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("result[x]"))
           this.result = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1819555005:  return getResult(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -364,7 +393,7 @@ public class Goal extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( result);
+        return super.isEmpty() && (result == null || result.isEmpty());
       }
 
   public String fhirType() {
@@ -445,14 +474,14 @@ public class Goal extends DomainResource {
     /**
      * Indicates whose goal this is - patient goal, practitioner goal, etc.
      */
-    @Child(name = "author", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "expressedBy", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who's responsible for creating Goal?", formalDefinition="Indicates whose goal this is - patient goal, practitioner goal, etc." )
-    protected Reference author;
+    protected Reference expressedBy;
 
     /**
      * The actual object that is the target of the reference (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
-    protected Resource authorTarget;
+    protected Resource expressedByTarget;
 
     /**
      * Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.
@@ -487,7 +516,7 @@ public class Goal extends DomainResource {
     @Description(shortDefinition="What was end result of goal?", formalDefinition="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved." )
     protected List<GoalOutcomeComponent> outcome;
 
-    private static final long serialVersionUID = 2029459056L;
+    private static final long serialVersionUID = -475818230L;
 
   /**
    * Constructor
@@ -512,6 +541,24 @@ public class Goal extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Goal setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -681,6 +728,24 @@ public class Goal extends DomainResource {
       if (this.category == null)
         this.category = new ArrayList<CodeableConcept>();
       return this.category;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
+     */
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Goal setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
     }
 
     public boolean hasCategory() { 
@@ -878,41 +943,41 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     * @return {@link #expressedBy} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
-    public Reference getAuthor() { 
-      if (this.author == null)
+    public Reference getExpressedBy() { 
+      if (this.expressedBy == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Goal.author");
+          throw new Error("Attempt to auto-create Goal.expressedBy");
         else if (Configuration.doAutoCreate())
-          this.author = new Reference(); // cc
-      return this.author;
+          this.expressedBy = new Reference(); // cc
+      return this.expressedBy;
     }
 
-    public boolean hasAuthor() { 
-      return this.author != null && !this.author.isEmpty();
+    public boolean hasExpressedBy() { 
+      return this.expressedBy != null && !this.expressedBy.isEmpty();
     }
 
     /**
-     * @param value {@link #author} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     * @param value {@link #expressedBy} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
-    public Goal setAuthor(Reference value) { 
-      this.author = value;
+    public Goal setExpressedBy(Reference value) { 
+      this.expressedBy = value;
       return this;
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     * @return {@link #expressedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
-    public Resource getAuthorTarget() { 
-      return this.authorTarget;
+    public Resource getExpressedByTarget() { 
+      return this.expressedByTarget;
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     * @param value {@link #expressedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
-    public Goal setAuthorTarget(Resource value) { 
-      this.authorTarget = value;
+    public Goal setExpressedByTarget(Resource value) { 
+      this.expressedByTarget = value;
       return this;
     }
 
@@ -947,6 +1012,24 @@ public class Goal extends DomainResource {
       if (this.addresses == null)
         this.addresses = new ArrayList<Reference>();
       return this.addresses;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #addresses}, creating it if it does not already exist
+     */
+    public Reference getAddressesFirstRep() { 
+      if (getAddresses().isEmpty()) {
+        addAddresses();
+      }
+      return getAddresses().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Goal setAddresses(List<Reference> theAddresses) { 
+      this.addresses = theAddresses;
+      return this;
     }
 
     public boolean hasAddresses() { 
@@ -998,6 +1081,24 @@ public class Goal extends DomainResource {
       return this.note;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Goal setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
     public boolean hasNote() { 
       if (this.note == null)
         return false;
@@ -1036,6 +1137,24 @@ public class Goal extends DomainResource {
       if (this.outcome == null)
         this.outcome = new ArrayList<GoalOutcomeComponent>();
       return this.outcome;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #outcome}, creating it if it does not already exist
+     */
+    public GoalOutcomeComponent getOutcomeFirstRep() { 
+      if (getOutcome().isEmpty()) {
+        addOutcome();
+      }
+      return getOutcome().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Goal setOutcome(List<GoalOutcomeComponent> theOutcome) { 
+      this.outcome = theOutcome;
+      return this;
     }
 
     public boolean hasOutcome() { 
@@ -1080,11 +1199,83 @@ public class Goal extends DomainResource {
         childrenList.add(new Property("status", "code", "Indicates whether the goal has been reached and is still considered relevant.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("statusDate", "date", "Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.", 0, java.lang.Integer.MAX_VALUE, statusDate));
         childrenList.add(new Property("statusReason", "CodeableConcept", "Captures the reason for the current status.", 0, java.lang.Integer.MAX_VALUE, statusReason));
-        childrenList.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("expressedBy", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, java.lang.Integer.MAX_VALUE, expressedBy));
         childrenList.add(new Property("priority", "CodeableConcept", "Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses));
         childrenList.add(new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
+      }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // Type
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<GoalStatus>
+        case 247524032: /*statusDate*/ return this.statusDate == null ? new Base[0] : new Base[] {this.statusDate}; // DateType
+        case 2051346646: /*statusReason*/ return this.statusReason == null ? new Base[0] : new Base[] {this.statusReason}; // CodeableConcept
+        case 175423686: /*expressedBy*/ return this.expressedBy == null ? new Base[0] : new Base[] {this.expressedBy}; // Reference
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
+        case 874544034: /*addresses*/ return this.addresses == null ? new Base[0] : this.addresses.toArray(new Base[this.addresses.size()]); // Reference
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : this.outcome.toArray(new Base[this.outcome.size()]); // GoalOutcomeComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 109757538: // start
+          this.start = (Type) value; // Type
+          break;
+        case -880905839: // target
+          this.target = (Type) value; // Type
+          break;
+        case 50511102: // category
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new GoalStatusEnumFactory().fromType(value); // Enumeration<GoalStatus>
+          break;
+        case 247524032: // statusDate
+          this.statusDate = castToDate(value); // DateType
+          break;
+        case 2051346646: // statusReason
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 175423686: // expressedBy
+          this.expressedBy = castToReference(value); // Reference
+          break;
+        case -1165461084: // priority
+          this.priority = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 874544034: // addresses
+          this.getAddresses().add(castToReference(value)); // Reference
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        case -1106507950: // outcome
+          this.getOutcome().add((GoalOutcomeComponent) value); // GoalOutcomeComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
       }
 
       @Override
@@ -1107,8 +1298,8 @@ public class Goal extends DomainResource {
           this.statusDate = castToDate(value); // DateType
         else if (name.equals("statusReason"))
           this.statusReason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("author"))
-          this.author = castToReference(value); // Reference
+        else if (name.equals("expressedBy"))
+          this.expressedBy = castToReference(value); // Reference
         else if (name.equals("priority"))
           this.priority = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("addresses"))
@@ -1119,6 +1310,28 @@ public class Goal extends DomainResource {
           this.getOutcome().add((GoalOutcomeComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1867885268:  return getSubject(); // Reference
+        case 1316793566:  return getStart(); // Type
+        case -815579825:  return getTarget(); // Type
+        case 50511102:  return addCategory(); // CodeableConcept
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<GoalStatus>
+        case 247524032: throw new FHIRException("Cannot make property statusDate as it is not a complex type"); // DateType
+        case 2051346646:  return getStatusReason(); // CodeableConcept
+        case 175423686:  return getExpressedBy(); // Reference
+        case -1165461084:  return getPriority(); // CodeableConcept
+        case 874544034:  return addAddresses(); // Reference
+        case 3387378:  return addNote(); // Annotation
+        case -1106507950:  return addOutcome(); // GoalOutcomeComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1162,9 +1375,9 @@ public class Goal extends DomainResource {
           this.statusReason = new CodeableConcept();
           return this.statusReason;
         }
-        else if (name.equals("author")) {
-          this.author = new Reference();
-          return this.author;
+        else if (name.equals("expressedBy")) {
+          this.expressedBy = new Reference();
+          return this.expressedBy;
         }
         else if (name.equals("priority")) {
           this.priority = new CodeableConcept();
@@ -1208,7 +1421,7 @@ public class Goal extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.statusDate = statusDate == null ? null : statusDate.copy();
         dst.statusReason = statusReason == null ? null : statusReason.copy();
-        dst.author = author == null ? null : author.copy();
+        dst.expressedBy = expressedBy == null ? null : expressedBy.copy();
         dst.priority = priority == null ? null : priority.copy();
         if (addresses != null) {
           dst.addresses = new ArrayList<Reference>();
@@ -1242,7 +1455,7 @@ public class Goal extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(start, o.start, true)
            && compareDeep(target, o.target, true) && compareDeep(category, o.category, true) && compareDeep(description, o.description, true)
            && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(statusReason, o.statusReason, true)
-           && compareDeep(author, o.author, true) && compareDeep(priority, o.priority, true) && compareDeep(addresses, o.addresses, true)
+           && compareDeep(expressedBy, o.expressedBy, true) && compareDeep(priority, o.priority, true) && compareDeep(addresses, o.addresses, true)
            && compareDeep(note, o.note, true) && compareDeep(outcome, o.outcome, true);
       }
 
@@ -1258,9 +1471,13 @@ public class Goal extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  subject,  start,  target
-          ,  category,  description,  status,  statusDate,  statusReason,  author,  priority,  addresses
-          ,  note,  outcome);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
+           && (start == null || start.isEmpty()) && (target == null || target.isEmpty()) && (category == null || category.isEmpty())
+           && (description == null || description.isEmpty()) && (status == null || status.isEmpty())
+           && (statusDate == null || statusDate.isEmpty()) && (statusReason == null || statusReason.isEmpty())
+           && (expressedBy == null || expressedBy.isEmpty()) && (priority == null || priority.isEmpty())
+           && (addresses == null || addresses.isEmpty()) && (note == null || note.isEmpty()) && (outcome == null || outcome.isEmpty())
+          ;
       }
 
   @Override
@@ -1296,7 +1513,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1348,7 +1565,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.targetDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetdate", path="Goal.targetDate", description="Reach goal on or before", type="date" )
+  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date" )
   public static final String SP_TARGETDATE = "targetdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetdate</b>

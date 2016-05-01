@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -237,6 +237,24 @@ public class Account extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -636,6 +654,66 @@ public class Account extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<AccountStatus>
+        case 1325532263: /*activePeriod*/ return this.activePeriod == null ? new Base[0] : new Base[] {this.activePeriod}; // Period
+        case 575402001: /*currency*/ return this.currency == null ? new Base[0] : new Base[] {this.currency}; // Coding
+        case -339185956: /*balance*/ return this.balance == null ? new Base[0] : new Base[] {this.balance}; // Money
+        case 1024117193: /*coveragePeriod*/ return this.coveragePeriod == null ? new Base[0] : new Base[] {this.coveragePeriod}; // Period
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -892481550: // status
+          this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
+          break;
+        case 1325532263: // activePeriod
+          this.activePeriod = castToPeriod(value); // Period
+          break;
+        case 575402001: // currency
+          this.currency = castToCoding(value); // Coding
+          break;
+        case -339185956: // balance
+          this.balance = castToMoney(value); // Money
+          break;
+        case 1024117193: // coveragePeriod
+          this.coveragePeriod = castToPeriod(value); // Period
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 106164915: // owner
+          this.owner = castToReference(value); // Reference
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -661,6 +739,25 @@ public class Account extends DomainResource {
           this.description = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 3575610:  return getType(); // CodeableConcept
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<AccountStatus>
+        case 1325532263:  return getActivePeriod(); // Period
+        case 575402001:  return getCurrency(); // Coding
+        case -339185956:  return getBalance(); // Money
+        case 1024117193:  return getCoveragePeriod(); // Period
+        case -1867885268:  return getSubject(); // Reference
+        case 106164915:  return getOwner(); // Reference
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -765,8 +862,11 @@ public class Account extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  name,  type,  status
-          ,  activePeriod,  currency,  balance,  coveragePeriod,  subject,  owner,  description);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
+           && (type == null || type.isEmpty()) && (status == null || status.isEmpty()) && (activePeriod == null || activePeriod.isEmpty())
+           && (currency == null || currency.isEmpty()) && (balance == null || balance.isEmpty()) && (coveragePeriod == null || coveragePeriod.isEmpty())
+           && (subject == null || subject.isEmpty()) && (owner == null || owner.isEmpty()) && (description == null || description.isEmpty())
+          ;
       }
 
   @Override
@@ -868,7 +968,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

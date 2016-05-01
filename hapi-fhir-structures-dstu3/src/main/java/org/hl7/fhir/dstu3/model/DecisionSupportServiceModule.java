@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -116,6 +116,24 @@ public class DecisionSupportServiceModule extends DomainResource {
       return this.trigger;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #trigger}, creating it if it does not already exist
+     */
+    public TriggerDefinition getTriggerFirstRep() { 
+      if (getTrigger().isEmpty()) {
+        addTrigger();
+      }
+      return getTrigger().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DecisionSupportServiceModule setTrigger(List<TriggerDefinition> theTrigger) { 
+      this.trigger = theTrigger;
+      return this;
+    }
+
     public boolean hasTrigger() { 
       if (this.trigger == null)
         return false;
@@ -154,6 +172,24 @@ public class DecisionSupportServiceModule extends DomainResource {
       if (this.parameter == null)
         this.parameter = new ArrayList<ParameterDefinition>();
       return this.parameter;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParameterDefinition getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DecisionSupportServiceModule setParameter(List<ParameterDefinition> theParameter) { 
+      this.parameter = theParameter;
+      return this;
     }
 
     public boolean hasParameter() { 
@@ -196,6 +232,24 @@ public class DecisionSupportServiceModule extends DomainResource {
       return this.dataRequirement;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
+     */
+    public DataRequirement getDataRequirementFirstRep() { 
+      if (getDataRequirement().isEmpty()) {
+        addDataRequirement();
+      }
+      return getDataRequirement().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DecisionSupportServiceModule setDataRequirement(List<DataRequirement> theDataRequirement) { 
+      this.dataRequirement = theDataRequirement;
+      return this;
+    }
+
     public boolean hasDataRequirement() { 
       if (this.dataRequirement == null)
         return false;
@@ -236,6 +290,38 @@ public class DecisionSupportServiceModule extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 455891387: /*moduleMetadata*/ return this.moduleMetadata == null ? new Base[0] : new Base[] {this.moduleMetadata}; // ModuleMetadata
+        case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : this.trigger.toArray(new Base[this.trigger.size()]); // TriggerDefinition
+        case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // ParameterDefinition
+        case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 455891387: // moduleMetadata
+          this.moduleMetadata = castToModuleMetadata(value); // ModuleMetadata
+          break;
+        case -1059891784: // trigger
+          this.getTrigger().add(castToTriggerDefinition(value)); // TriggerDefinition
+          break;
+        case 1954460585: // parameter
+          this.getParameter().add(castToParameterDefinition(value)); // ParameterDefinition
+          break;
+        case 629147193: // dataRequirement
+          this.getDataRequirement().add(castToDataRequirement(value)); // DataRequirement
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("moduleMetadata"))
           this.moduleMetadata = castToModuleMetadata(value); // ModuleMetadata
@@ -247,6 +333,18 @@ public class DecisionSupportServiceModule extends DomainResource {
           this.getDataRequirement().add(castToDataRequirement(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 455891387:  return getModuleMetadata(); // ModuleMetadata
+        case -1059891784:  return addTrigger(); // TriggerDefinition
+        case 1954460585:  return addParameter(); // ParameterDefinition
+        case 629147193:  return addDataRequirement(); // DataRequirement
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -322,8 +420,9 @@ public class DecisionSupportServiceModule extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( moduleMetadata,  trigger,  parameter
-          ,  dataRequirement);
+        return super.isEmpty() && (moduleMetadata == null || moduleMetadata.isEmpty()) && (trigger == null || trigger.isEmpty())
+           && (parameter == null || parameter.isEmpty()) && (dataRequirement == null || dataRequirement.isEmpty())
+          ;
       }
 
   @Override

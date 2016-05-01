@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -767,6 +767,24 @@ public class TestScript extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -805,6 +823,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -812,6 +854,16 @@ public class TestScript extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -859,7 +911,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -979,6 +1032,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 100346066: /*index*/ return this.index == null ? new Base[0] : new Base[] {this.index}; // IntegerType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 100346066: // index
+          this.index = castToInteger(value); // IntegerType
+          break;
+        case -309425751: // profile
+          this.profile = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("index"))
           this.index = castToInteger(value); // IntegerType
@@ -986,6 +1063,16 @@ public class TestScript extends DomainResource {
           this.profile = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 100346066: throw new FHIRException("Cannot make property index as it is not a complex type"); // IntegerType
+        case -309425751:  return getProfile(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1030,7 +1117,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( index,  profile);
+        return super.isEmpty() && (index == null || index.isEmpty()) && (profile == null || profile.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1150,6 +1238,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 100346066: /*index*/ return this.index == null ? new Base[0] : new Base[] {this.index}; // IntegerType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 100346066: // index
+          this.index = castToInteger(value); // IntegerType
+          break;
+        case -309425751: // profile
+          this.profile = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("index"))
           this.index = castToInteger(value); // IntegerType
@@ -1157,6 +1269,16 @@ public class TestScript extends DomainResource {
           this.profile = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 100346066: throw new FHIRException("Cannot make property index as it is not a complex type"); // IntegerType
+        case -309425751:  return getProfile(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1201,7 +1323,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( index,  profile);
+        return super.isEmpty() && (index == null || index.isEmpty()) && (profile == null || profile.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1245,6 +1368,24 @@ public class TestScript extends DomainResource {
           return this.link;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
+         */
+        public TestScriptMetadataLinkComponent getLinkFirstRep() { 
+          if (getLink().isEmpty()) {
+            addLink();
+          }
+          return getLink().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptMetadataComponent setLink(List<TestScriptMetadataLinkComponent> theLink) { 
+          this.link = theLink;
+          return this;
+        }
+
         public boolean hasLink() { 
           if (this.link == null)
             return false;
@@ -1285,6 +1426,24 @@ public class TestScript extends DomainResource {
           return this.capability;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #capability}, creating it if it does not already exist
+         */
+        public TestScriptMetadataCapabilityComponent getCapabilityFirstRep() { 
+          if (getCapability().isEmpty()) {
+            addCapability();
+          }
+          return getCapability().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptMetadataComponent setCapability(List<TestScriptMetadataCapabilityComponent> theCapability) { 
+          this.capability = theCapability;
+          return this;
+        }
+
         public boolean hasCapability() { 
           if (this.capability == null)
             return false;
@@ -1323,6 +1482,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // TestScriptMetadataLinkComponent
+        case -783669992: /*capability*/ return this.capability == null ? new Base[0] : this.capability.toArray(new Base[this.capability.size()]); // TestScriptMetadataCapabilityComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3321850: // link
+          this.getLink().add((TestScriptMetadataLinkComponent) value); // TestScriptMetadataLinkComponent
+          break;
+        case -783669992: // capability
+          this.getCapability().add((TestScriptMetadataCapabilityComponent) value); // TestScriptMetadataCapabilityComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("link"))
           this.getLink().add((TestScriptMetadataLinkComponent) value);
@@ -1330,6 +1513,16 @@ public class TestScript extends DomainResource {
           this.getCapability().add((TestScriptMetadataCapabilityComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3321850:  return addLink(); // TestScriptMetadataLinkComponent
+        case -783669992:  return addCapability(); // TestScriptMetadataCapabilityComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1381,7 +1574,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( link,  capability);
+        return super.isEmpty() && (link == null || link.isEmpty()) && (capability == null || capability.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1525,6 +1719,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -1532,6 +1750,16 @@ public class TestScript extends DomainResource {
           this.description = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1575,7 +1803,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  description);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (description == null || description.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1806,6 +2035,24 @@ public class TestScript extends DomainResource {
           return this.origin;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #origin}, creating it if it does not already exist
+         */
+        public IntegerType getOriginFirstRep() { 
+          if (getOrigin().isEmpty()) {
+            addOriginElement();
+          }
+          return getOrigin().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptMetadataCapabilityComponent setOrigin(List<IntegerType> theOrigin) { 
+          this.origin = theOrigin;
+          return this;
+        }
+
         public boolean hasOrigin() { 
           if (this.origin == null)
             return false;
@@ -1903,6 +2150,24 @@ public class TestScript extends DomainResource {
           if (this.link == null)
             this.link = new ArrayList<UriType>();
           return this.link;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
+         */
+        public UriType getLinkFirstRep() { 
+          if (getLink().isEmpty()) {
+            addLinkElement();
+          }
+          return getLink().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptMetadataCapabilityComponent setLink(List<UriType> theLink) { 
+          this.link = theLink;
+          return this;
         }
 
         public boolean hasLink() { 
@@ -2006,6 +2271,50 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -393139297: /*required*/ return this.required == null ? new Base[0] : new Base[] {this.required}; // BooleanType
+        case -1109784050: /*validated*/ return this.validated == null ? new Base[0] : new Base[] {this.validated}; // BooleanType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : this.origin.toArray(new Base[this.origin.size()]); // IntegerType
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // IntegerType
+        case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // UriType
+        case 1374858133: /*conformance*/ return this.conformance == null ? new Base[0] : new Base[] {this.conformance}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -393139297: // required
+          this.required = castToBoolean(value); // BooleanType
+          break;
+        case -1109784050: // validated
+          this.validated = castToBoolean(value); // BooleanType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1008619738: // origin
+          this.getOrigin().add(castToInteger(value)); // IntegerType
+          break;
+        case -1429847026: // destination
+          this.destination = castToInteger(value); // IntegerType
+          break;
+        case 3321850: // link
+          this.getLink().add(castToUri(value)); // UriType
+          break;
+        case 1374858133: // conformance
+          this.conformance = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("required"))
           this.required = castToBoolean(value); // BooleanType
@@ -2023,6 +2332,21 @@ public class TestScript extends DomainResource {
           this.conformance = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -393139297: throw new FHIRException("Cannot make property required as it is not a complex type"); // BooleanType
+        case -1109784050: throw new FHIRException("Cannot make property validated as it is not a complex type"); // BooleanType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1008619738: throw new FHIRException("Cannot make property origin as it is not a complex type"); // IntegerType
+        case -1429847026: throw new FHIRException("Cannot make property destination as it is not a complex type"); // IntegerType
+        case 3321850: throw new FHIRException("Cannot make property link as it is not a complex type"); // UriType
+        case 1374858133:  return getConformance(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2099,8 +2423,10 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( required,  validated,  description
-          ,  origin,  destination,  link,  conformance);
+        return super.isEmpty() && (required == null || required.isEmpty()) && (validated == null || validated.isEmpty())
+           && (description == null || description.isEmpty()) && (origin == null || origin.isEmpty())
+           && (destination == null || destination.isEmpty()) && (link == null || link.isEmpty()) && (conformance == null || conformance.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -2284,6 +2610,34 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 73154411: /*autocreate*/ return this.autocreate == null ? new Base[0] : new Base[] {this.autocreate}; // BooleanType
+        case 89990170: /*autodelete*/ return this.autodelete == null ? new Base[0] : new Base[] {this.autodelete}; // BooleanType
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 73154411: // autocreate
+          this.autocreate = castToBoolean(value); // BooleanType
+          break;
+        case 89990170: // autodelete
+          this.autodelete = castToBoolean(value); // BooleanType
+          break;
+        case -341064690: // resource
+          this.resource = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("autocreate"))
           this.autocreate = castToBoolean(value); // BooleanType
@@ -2293,6 +2647,17 @@ public class TestScript extends DomainResource {
           this.resource = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 73154411: throw new FHIRException("Cannot make property autocreate as it is not a complex type"); // BooleanType
+        case 89990170: throw new FHIRException("Cannot make property autodelete as it is not a complex type"); // BooleanType
+        case -341064690:  return getResource(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2343,8 +2708,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( autocreate,  autodelete,  resource
-          );
+        return super.isEmpty() && (autocreate == null || autocreate.isEmpty()) && (autodelete == null || autodelete.isEmpty())
+           && (resource == null || resource.isEmpty());
       }
 
   public String fhirType() {
@@ -2659,6 +3024,42 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -659125328: /*defaultValue*/ return this.defaultValue == null ? new Base[0] : new Base[] {this.defaultValue}; // StringType
+        case 1160732269: /*headerField*/ return this.headerField == null ? new Base[0] : new Base[] {this.headerField}; // StringType
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case 1746327190: /*sourceId*/ return this.sourceId == null ? new Base[0] : new Base[] {this.sourceId}; // IdType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -659125328: // defaultValue
+          this.defaultValue = castToString(value); // StringType
+          break;
+        case 1160732269: // headerField
+          this.headerField = castToString(value); // StringType
+          break;
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          break;
+        case 1746327190: // sourceId
+          this.sourceId = castToId(value); // IdType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -2672,6 +3073,19 @@ public class TestScript extends DomainResource {
           this.sourceId = castToId(value); // IdType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -659125328: throw new FHIRException("Cannot make property defaultValue as it is not a complex type"); // StringType
+        case 1160732269: throw new FHIRException("Cannot make property headerField as it is not a complex type"); // StringType
+        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case 1746327190: throw new FHIRException("Cannot make property sourceId as it is not a complex type"); // IdType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2729,8 +3143,9 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  defaultValue,  headerField
-          ,  path,  sourceId);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (defaultValue == null || defaultValue.isEmpty())
+           && (headerField == null || headerField.isEmpty()) && (path == null || path.isEmpty()) && (sourceId == null || sourceId.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -2826,6 +3241,24 @@ public class TestScript extends DomainResource {
           return this.param;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public TestScriptRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptRuleComponent setParam(List<TestScriptRuleParamComponent> theParam) { 
+          this.param = theParam;
+          return this;
+        }
+
         public boolean hasParam() { 
           if (this.param == null)
             return false;
@@ -2864,6 +3297,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
+        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // TestScriptRuleParamComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -341064690: // resource
+          this.resource = castToReference(value); // Reference
+          break;
+        case 106436749: // param
+          this.getParam().add((TestScriptRuleParamComponent) value); // TestScriptRuleParamComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("resource"))
           this.resource = castToReference(value); // Reference
@@ -2871,6 +3328,16 @@ public class TestScript extends DomainResource {
           this.getParam().add((TestScriptRuleParamComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -341064690:  return getResource(); // Reference
+        case 106436749:  return addParam(); // TestScriptRuleParamComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2919,7 +3386,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( resource,  param);
+        return super.isEmpty() && (resource == null || resource.isEmpty()) && (param == null || param.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3063,6 +3531,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -3070,6 +3562,16 @@ public class TestScript extends DomainResource {
           this.value = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3113,7 +3615,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3138,10 +3641,10 @@ public class TestScript extends DomainResource {
         protected Resource resourceTarget;
 
         /**
-         * Id of the referenced rule within the external ruleset template.
+         * The referenced rule within the external ruleset template.
          */
         @Child(name = "rule", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        @Description(shortDefinition="The referenced rule within the ruleset", formalDefinition="The referenced rule within the external ruleset template." )
         protected List<TestScriptRulesetRuleComponent> rule;
 
         private static final long serialVersionUID = 5813554L;
@@ -3201,12 +3704,30 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         * @return {@link #rule} (The referenced rule within the external ruleset template.)
          */
         public List<TestScriptRulesetRuleComponent> getRule() { 
           if (this.rule == null)
             this.rule = new ArrayList<TestScriptRulesetRuleComponent>();
           return this.rule;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public TestScriptRulesetRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptRulesetComponent setRule(List<TestScriptRulesetRuleComponent> theRule) { 
+          this.rule = theRule;
+          return this;
         }
 
         public boolean hasRule() { 
@@ -3219,7 +3740,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         * @return {@link #rule} (The referenced rule within the external ruleset template.)
          */
     // syntactic sugar
         public TestScriptRulesetRuleComponent addRule() { //3
@@ -3243,8 +3764,32 @@ public class TestScript extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("rule", "", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+          childrenList.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
         }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
+        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // TestScriptRulesetRuleComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -341064690: // resource
+          this.resource = castToReference(value); // Reference
+          break;
+        case 3512060: // rule
+          this.getRule().add((TestScriptRulesetRuleComponent) value); // TestScriptRulesetRuleComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
@@ -3254,6 +3799,16 @@ public class TestScript extends DomainResource {
           this.getRule().add((TestScriptRulesetRuleComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -341064690:  return getResource(); // Reference
+        case 3512060:  return addRule(); // TestScriptRulesetRuleComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3302,7 +3857,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( resource,  rule);
+        return super.isEmpty() && (resource == null || resource.isEmpty()) && (rule == null || rule.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3315,13 +3871,20 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptRulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * Id of the referenced rule within the external ruleset template.
+         */
+        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        protected IdType ruleId;
+
+        /**
          * Each rule template can take one or more parameters for rule evaluation.
          */
-        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Ruleset rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
         protected List<TestScriptRulesetRuleParamComponent> param;
 
-        private static final long serialVersionUID = 1266281462L;
+        private static final long serialVersionUID = 155033950L;
 
     /**
      * Constructor
@@ -3330,6 +3893,59 @@ public class TestScript extends DomainResource {
         super();
       }
 
+    /**
+     * Constructor
+     */
+      public TestScriptRulesetRuleComponent(IdType ruleId) {
+        super();
+        this.ruleId = ruleId;
+      }
+
+        /**
+         * @return {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public IdType getRuleIdElement() { 
+          if (this.ruleId == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptRulesetRuleComponent.ruleId");
+            else if (Configuration.doAutoCreate())
+              this.ruleId = new IdType(); // bb
+          return this.ruleId;
+        }
+
+        public boolean hasRuleIdElement() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        public boolean hasRuleId() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        /**
+         * @param value {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public TestScriptRulesetRuleComponent setRuleIdElement(IdType value) { 
+          this.ruleId = value;
+          return this;
+        }
+
+        /**
+         * @return Id of the referenced rule within the external ruleset template.
+         */
+        public String getRuleId() { 
+          return this.ruleId == null ? null : this.ruleId.getValue();
+        }
+
+        /**
+         * @param value Id of the referenced rule within the external ruleset template.
+         */
+        public TestScriptRulesetRuleComponent setRuleId(String value) { 
+            if (this.ruleId == null)
+              this.ruleId = new IdType();
+            this.ruleId.setValue(value);
+          return this;
+        }
+
         /**
          * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
          */
@@ -3337,6 +3953,24 @@ public class TestScript extends DomainResource {
           if (this.param == null)
             this.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
           return this.param;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public TestScriptRulesetRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptRulesetRuleComponent setParam(List<TestScriptRulesetRuleParamComponent> theParam) { 
+          this.param = theParam;
+          return this;
         }
 
         public boolean hasParam() { 
@@ -3372,20 +4006,60 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, ruleId));
           childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
+        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // TestScriptRulesetRuleParamComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -919875273: // ruleId
+          this.ruleId = castToId(value); // IdType
+          break;
+        case 106436749: // param
+          this.getParam().add((TestScriptRulesetRuleParamComponent) value); // TestScriptRulesetRuleParamComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("param"))
+        if (name.equals("ruleId"))
+          this.ruleId = castToId(value); // IdType
+        else if (name.equals("param"))
           this.getParam().add((TestScriptRulesetRuleParamComponent) value);
         else
           super.setProperty(name, value);
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -919875273: throw new FHIRException("Cannot make property ruleId as it is not a complex type"); // IdType
+        case 106436749:  return addParam(); // TestScriptRulesetRuleParamComponent
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("param")) {
+        if (name.equals("ruleId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
+        }
+        else if (name.equals("param")) {
           return addParam();
         }
         else
@@ -3395,6 +4069,7 @@ public class TestScript extends DomainResource {
       public TestScriptRulesetRuleComponent copy() {
         TestScriptRulesetRuleComponent dst = new TestScriptRulesetRuleComponent();
         copyValues(dst);
+        dst.ruleId = ruleId == null ? null : ruleId.copy();
         if (param != null) {
           dst.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
           for (TestScriptRulesetRuleParamComponent i : param)
@@ -3410,7 +4085,7 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptRulesetRuleComponent))
           return false;
         TestScriptRulesetRuleComponent o = (TestScriptRulesetRuleComponent) other;
-        return compareDeep(param, o.param, true);
+        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
@@ -3420,11 +4095,12 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptRulesetRuleComponent))
           return false;
         TestScriptRulesetRuleComponent o = (TestScriptRulesetRuleComponent) other;
-        return true;
+        return compareValues(ruleId, o.ruleId, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+        return super.isEmpty() && (ruleId == null || ruleId.isEmpty()) && (param == null || param.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3568,6 +4244,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -3575,6 +4275,16 @@ public class TestScript extends DomainResource {
           this.value = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3618,7 +4328,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3686,6 +4397,24 @@ public class TestScript extends DomainResource {
           return this.action;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public SetupActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptSetupComponent setAction(List<SetupActionComponent> theAction) { 
+          this.action = theAction;
+          return this;
+        }
+
         public boolean hasAction() { 
           if (this.action == null)
             return false;
@@ -3724,6 +4453,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -450004177: /*metadata*/ return this.metadata == null ? new Base[0] : new Base[] {this.metadata}; // TestScriptMetadataComponent
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // SetupActionComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -450004177: // metadata
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+          break;
+        case -1422950858: // action
+          this.getAction().add((SetupActionComponent) value); // SetupActionComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("metadata"))
           this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
@@ -3731,6 +4484,16 @@ public class TestScript extends DomainResource {
           this.getAction().add((SetupActionComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -450004177:  return getMetadata(); // TestScriptMetadataComponent
+        case -1422950858:  return addAction(); // SetupActionComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3779,7 +4542,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( metadata,  action);
+        return super.isEmpty() && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -3869,6 +4633,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1662702951: /*operation*/ return this.operation == null ? new Base[0] : new Base[] {this.operation}; // SetupActionOperationComponent
+        case -1408208058: /*assert*/ return this.assert_ == null ? new Base[0] : new Base[] {this.assert_}; // SetupActionAssertComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1662702951: // operation
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
+          break;
+        case -1408208058: // assert
+          this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
           this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
@@ -3876,6 +4664,16 @@ public class TestScript extends DomainResource {
           this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1662702951:  return getOperation(); // SetupActionOperationComponent
+        case -1408208058:  return getAssert(); // SetupActionAssertComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3921,7 +4719,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation,  assert_);
+        return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -4509,6 +5308,24 @@ public class TestScript extends DomainResource {
           return this.requestHeader;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #requestHeader}, creating it if it does not already exist
+         */
+        public SetupActionOperationRequestHeaderComponent getRequestHeaderFirstRep() { 
+          if (getRequestHeader().isEmpty()) {
+            addRequestHeader();
+          }
+          return getRequestHeader().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SetupActionOperationComponent setRequestHeader(List<SetupActionOperationRequestHeaderComponent> theRequestHeader) { 
+          this.requestHeader = theRequestHeader;
+          return this;
+        }
+
         public boolean hasRequestHeader() { 
           if (this.requestHeader == null)
             return false;
@@ -4756,6 +5573,82 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CodeType
+        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1423461112: /*accept*/ return this.accept == null ? new Base[0] : new Base[] {this.accept}; // Enumeration<ContentType>
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // Enumeration<ContentType>
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // IntegerType
+        case -1760554218: /*encodeRequestUrl*/ return this.encodeRequestUrl == null ? new Base[0] : new Base[] {this.encodeRequestUrl}; // BooleanType
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // IntegerType
+        case -995427962: /*params*/ return this.params == null ? new Base[0] : new Base[] {this.params}; // StringType
+        case 1074158076: /*requestHeader*/ return this.requestHeader == null ? new Base[0] : this.requestHeader.toArray(new Base[this.requestHeader.size()]); // SetupActionOperationRequestHeaderComponent
+        case -633138884: /*responseId*/ return this.responseId == null ? new Base[0] : new Base[] {this.responseId}; // IdType
+        case 1746327190: /*sourceId*/ return this.sourceId == null ? new Base[0] : new Base[] {this.sourceId}; // IdType
+        case -441951604: /*targetId*/ return this.targetId == null ? new Base[0] : new Base[] {this.targetId}; // IdType
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case -341064690: // resource
+          this.resource = castToCode(value); // CodeType
+          break;
+        case 102727412: // label
+          this.label = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1423461112: // accept
+          this.accept = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+          break;
+        case -389131437: // contentType
+          this.contentType = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+          break;
+        case -1429847026: // destination
+          this.destination = castToInteger(value); // IntegerType
+          break;
+        case -1760554218: // encodeRequestUrl
+          this.encodeRequestUrl = castToBoolean(value); // BooleanType
+          break;
+        case -1008619738: // origin
+          this.origin = castToInteger(value); // IntegerType
+          break;
+        case -995427962: // params
+          this.params = castToString(value); // StringType
+          break;
+        case 1074158076: // requestHeader
+          this.getRequestHeader().add((SetupActionOperationRequestHeaderComponent) value); // SetupActionOperationRequestHeaderComponent
+          break;
+        case -633138884: // responseId
+          this.responseId = castToId(value); // IdType
+          break;
+        case 1746327190: // sourceId
+          this.sourceId = castToId(value); // IdType
+          break;
+        case -441951604: // targetId
+          this.targetId = castToId(value); // IdType
+          break;
+        case 116079: // url
+          this.url = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCoding(value); // Coding
@@ -4789,6 +5682,29 @@ public class TestScript extends DomainResource {
           this.url = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // CodeType
+        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1423461112: throw new FHIRException("Cannot make property accept as it is not a complex type"); // Enumeration<ContentType>
+        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // Enumeration<ContentType>
+        case -1429847026: throw new FHIRException("Cannot make property destination as it is not a complex type"); // IntegerType
+        case -1760554218: throw new FHIRException("Cannot make property encodeRequestUrl as it is not a complex type"); // BooleanType
+        case -1008619738: throw new FHIRException("Cannot make property origin as it is not a complex type"); // IntegerType
+        case -995427962: throw new FHIRException("Cannot make property params as it is not a complex type"); // StringType
+        case 1074158076:  return addRequestHeader(); // SetupActionOperationRequestHeaderComponent
+        case -633138884: throw new FHIRException("Cannot make property responseId as it is not a complex type"); // IdType
+        case 1746327190: throw new FHIRException("Cannot make property sourceId as it is not a complex type"); // IdType
+        case -441951604: throw new FHIRException("Cannot make property targetId as it is not a complex type"); // IdType
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -4898,9 +5814,13 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  resource,  label,  description
-          ,  accept,  contentType,  destination,  encodeRequestUrl,  origin,  params,  requestHeader,  responseId
-          ,  sourceId,  targetId,  url);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (resource == null || resource.isEmpty())
+           && (label == null || label.isEmpty()) && (description == null || description.isEmpty()) && (accept == null || accept.isEmpty())
+           && (contentType == null || contentType.isEmpty()) && (destination == null || destination.isEmpty())
+           && (encodeRequestUrl == null || encodeRequestUrl.isEmpty()) && (origin == null || origin.isEmpty())
+           && (params == null || params.isEmpty()) && (requestHeader == null || requestHeader.isEmpty())
+           && (responseId == null || responseId.isEmpty()) && (sourceId == null || sourceId.isEmpty())
+           && (targetId == null || targetId.isEmpty()) && (url == null || url.isEmpty());
       }
 
   public String fhirType() {
@@ -5041,6 +5961,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 97427706: /*field*/ return this.field == null ? new Base[0] : new Base[] {this.field}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 97427706: // field
+          this.field = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("field"))
           this.field = castToString(value); // StringType
@@ -5048,6 +5992,16 @@ public class TestScript extends DomainResource {
           this.value = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 97427706: throw new FHIRException("Cannot make property field as it is not a complex type"); // StringType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -5091,7 +6045,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( field,  value);
+        return super.isEmpty() && (field == null || field.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -5202,17 +6157,17 @@ public class TestScript extends DomainResource {
         protected StringType responseCode;
 
         /**
-         * The TestScript.rule id value this assert will evaluate.
+         * The TestScript.rule this assert will evaluate.
          */
         @Child(name = "rule", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of the TestScript.rule", formalDefinition="The TestScript.rule id value this assert will evaluate." )
+        @Description(shortDefinition="The reference to a TestScript.rule", formalDefinition="The TestScript.rule this assert will evaluate." )
         protected SetupActionAssertRuleComponent rule;
 
         /**
-         * The TestScript.ruleset id value this assert will evaluate.
+         * The TestScript.ruleset this assert will evaluate.
          */
         @Child(name = "ruleset", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of the TestScript.ruleset", formalDefinition="The TestScript.ruleset id value this assert will evaluate." )
+        @Description(shortDefinition="The reference to a TestScript.ruleset", formalDefinition="The TestScript.ruleset this assert will evaluate." )
         protected SetupActionAssertRulesetComponent ruleset;
 
         /**
@@ -5935,7 +6890,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #rule} (The TestScript.rule id value this assert will evaluate.)
+         * @return {@link #rule} (The TestScript.rule this assert will evaluate.)
          */
         public SetupActionAssertRuleComponent getRule() { 
           if (this.rule == null)
@@ -5951,7 +6906,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #rule} (The TestScript.rule id value this assert will evaluate.)
+         * @param value {@link #rule} (The TestScript.rule this assert will evaluate.)
          */
         public SetupActionAssertComponent setRule(SetupActionAssertRuleComponent value) { 
           this.rule = value;
@@ -5959,7 +6914,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #ruleset} (The TestScript.ruleset id value this assert will evaluate.)
+         * @return {@link #ruleset} (The TestScript.ruleset this assert will evaluate.)
          */
         public SetupActionAssertRulesetComponent getRuleset() { 
           if (this.ruleset == null)
@@ -5975,7 +6930,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #ruleset} (The TestScript.ruleset id value this assert will evaluate.)
+         * @param value {@link #ruleset} (The TestScript.ruleset this assert will evaluate.)
          */
         public SetupActionAssertComponent setRuleset(SetupActionAssertRulesetComponent value) { 
           this.ruleset = value;
@@ -6190,13 +7145,109 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, java.lang.Integer.MAX_VALUE, response));
           childrenList.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, java.lang.Integer.MAX_VALUE, responseCode));
-          childrenList.add(new Property("rule", "", "The TestScript.rule id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rule));
-          childrenList.add(new Property("ruleset", "", "The TestScript.ruleset id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleset));
+          childrenList.add(new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rule));
+          childrenList.add(new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleset));
           childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, java.lang.Integer.MAX_VALUE, sourceId));
           childrenList.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, java.lang.Integer.MAX_VALUE, validateProfileId));
           childrenList.add(new Property("value", "string", "The value to compare to.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, java.lang.Integer.MAX_VALUE, warningOnly));
         }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -962590849: /*direction*/ return this.direction == null ? new Base[0] : new Base[] {this.direction}; // Enumeration<AssertionDirectionType>
+        case 2081856758: /*compareToSourceId*/ return this.compareToSourceId == null ? new Base[0] : new Base[] {this.compareToSourceId}; // StringType
+        case -790206144: /*compareToSourcePath*/ return this.compareToSourcePath == null ? new Base[0] : new Base[] {this.compareToSourcePath}; // StringType
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // Enumeration<ContentType>
+        case 1160732269: /*headerField*/ return this.headerField == null ? new Base[0] : new Base[] {this.headerField}; // StringType
+        case 818925001: /*minimumId*/ return this.minimumId == null ? new Base[0] : new Base[] {this.minimumId}; // StringType
+        case 1001488901: /*navigationLinks*/ return this.navigationLinks == null ? new Base[0] : new Base[] {this.navigationLinks}; // BooleanType
+        case -500553564: /*operator*/ return this.operator == null ? new Base[0] : new Base[] {this.operator}; // Enumeration<AssertionOperatorType>
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CodeType
+        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Enumeration<AssertionResponseTypes>
+        case 1438723534: /*responseCode*/ return this.responseCode == null ? new Base[0] : new Base[] {this.responseCode}; // StringType
+        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : new Base[] {this.rule}; // SetupActionAssertRuleComponent
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // SetupActionAssertRulesetComponent
+        case 1746327190: /*sourceId*/ return this.sourceId == null ? new Base[0] : new Base[] {this.sourceId}; // IdType
+        case 1555541038: /*validateProfileId*/ return this.validateProfileId == null ? new Base[0] : new Base[] {this.validateProfileId}; // IdType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        case -481159832: /*warningOnly*/ return this.warningOnly == null ? new Base[0] : new Base[] {this.warningOnly}; // BooleanType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 102727412: // label
+          this.label = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -962590849: // direction
+          this.direction = new AssertionDirectionTypeEnumFactory().fromType(value); // Enumeration<AssertionDirectionType>
+          break;
+        case 2081856758: // compareToSourceId
+          this.compareToSourceId = castToString(value); // StringType
+          break;
+        case -790206144: // compareToSourcePath
+          this.compareToSourcePath = castToString(value); // StringType
+          break;
+        case -389131437: // contentType
+          this.contentType = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+          break;
+        case 1160732269: // headerField
+          this.headerField = castToString(value); // StringType
+          break;
+        case 818925001: // minimumId
+          this.minimumId = castToString(value); // StringType
+          break;
+        case 1001488901: // navigationLinks
+          this.navigationLinks = castToBoolean(value); // BooleanType
+          break;
+        case -500553564: // operator
+          this.operator = new AssertionOperatorTypeEnumFactory().fromType(value); // Enumeration<AssertionOperatorType>
+          break;
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          break;
+        case -341064690: // resource
+          this.resource = castToCode(value); // CodeType
+          break;
+        case -340323263: // response
+          this.response = new AssertionResponseTypesEnumFactory().fromType(value); // Enumeration<AssertionResponseTypes>
+          break;
+        case 1438723534: // responseCode
+          this.responseCode = castToString(value); // StringType
+          break;
+        case 3512060: // rule
+          this.rule = (SetupActionAssertRuleComponent) value; // SetupActionAssertRuleComponent
+          break;
+        case 1548678118: // ruleset
+          this.ruleset = (SetupActionAssertRulesetComponent) value; // SetupActionAssertRulesetComponent
+          break;
+        case 1746327190: // sourceId
+          this.sourceId = castToId(value); // IdType
+          break;
+        case 1555541038: // validateProfileId
+          this.validateProfileId = castToId(value); // IdType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        case -481159832: // warningOnly
+          this.warningOnly = castToBoolean(value); // BooleanType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
@@ -6242,6 +7293,34 @@ public class TestScript extends DomainResource {
           this.warningOnly = castToBoolean(value); // BooleanType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -962590849: throw new FHIRException("Cannot make property direction as it is not a complex type"); // Enumeration<AssertionDirectionType>
+        case 2081856758: throw new FHIRException("Cannot make property compareToSourceId as it is not a complex type"); // StringType
+        case -790206144: throw new FHIRException("Cannot make property compareToSourcePath as it is not a complex type"); // StringType
+        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // Enumeration<ContentType>
+        case 1160732269: throw new FHIRException("Cannot make property headerField as it is not a complex type"); // StringType
+        case 818925001: throw new FHIRException("Cannot make property minimumId as it is not a complex type"); // StringType
+        case 1001488901: throw new FHIRException("Cannot make property navigationLinks as it is not a complex type"); // BooleanType
+        case -500553564: throw new FHIRException("Cannot make property operator as it is not a complex type"); // Enumeration<AssertionOperatorType>
+        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // CodeType
+        case -340323263: throw new FHIRException("Cannot make property response as it is not a complex type"); // Enumeration<AssertionResponseTypes>
+        case 1438723534: throw new FHIRException("Cannot make property responseCode as it is not a complex type"); // StringType
+        case 3512060:  return getRule(); // SetupActionAssertRuleComponent
+        case 1548678118:  return getRuleset(); // SetupActionAssertRulesetComponent
+        case 1746327190: throw new FHIRException("Cannot make property sourceId as it is not a complex type"); // IdType
+        case 1555541038: throw new FHIRException("Cannot make property validateProfileId as it is not a complex type"); // IdType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        case -481159832: throw new FHIRException("Cannot make property warningOnly as it is not a complex type"); // BooleanType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -6373,10 +7452,15 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( label,  description,  direction
-          ,  compareToSourceId,  compareToSourcePath,  contentType,  headerField,  minimumId,  navigationLinks
-          ,  operator,  path,  resource,  response,  responseCode,  rule,  ruleset,  sourceId,  validateProfileId
-          ,  value,  warningOnly);
+        return super.isEmpty() && (label == null || label.isEmpty()) && (description == null || description.isEmpty())
+           && (direction == null || direction.isEmpty()) && (compareToSourceId == null || compareToSourceId.isEmpty())
+           && (compareToSourcePath == null || compareToSourcePath.isEmpty()) && (contentType == null || contentType.isEmpty())
+           && (headerField == null || headerField.isEmpty()) && (minimumId == null || minimumId.isEmpty())
+           && (navigationLinks == null || navigationLinks.isEmpty()) && (operator == null || operator.isEmpty())
+           && (path == null || path.isEmpty()) && (resource == null || resource.isEmpty()) && (response == null || response.isEmpty())
+           && (responseCode == null || responseCode.isEmpty()) && (rule == null || rule.isEmpty()) && (ruleset == null || ruleset.isEmpty())
+           && (sourceId == null || sourceId.isEmpty()) && (validateProfileId == null || validateProfileId.isEmpty())
+           && (value == null || value.isEmpty()) && (warningOnly == null || warningOnly.isEmpty());
       }
 
   public String fhirType() {
@@ -6389,13 +7473,20 @@ public class TestScript extends DomainResource {
     @Block()
     public static class SetupActionAssertRuleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * The TestScript.rule id value this assert will evaluate.
+         */
+        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of the TestScript.rule", formalDefinition="The TestScript.rule id value this assert will evaluate." )
+        protected IdType ruleId;
+
+        /**
          * Each rule template can take one or more parameters for rule evaluation.
          */
-        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
         protected List<SetupActionAssertRuleParamComponent> param;
 
-        private static final long serialVersionUID = 791319302L;
+        private static final long serialVersionUID = -319928210L;
 
     /**
      * Constructor
@@ -6404,6 +7495,59 @@ public class TestScript extends DomainResource {
         super();
       }
 
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRuleComponent(IdType ruleId) {
+        super();
+        this.ruleId = ruleId;
+      }
+
+        /**
+         * @return {@link #ruleId} (The TestScript.rule id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public IdType getRuleIdElement() { 
+          if (this.ruleId == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRuleComponent.ruleId");
+            else if (Configuration.doAutoCreate())
+              this.ruleId = new IdType(); // bb
+          return this.ruleId;
+        }
+
+        public boolean hasRuleIdElement() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        public boolean hasRuleId() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        /**
+         * @param value {@link #ruleId} (The TestScript.rule id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public SetupActionAssertRuleComponent setRuleIdElement(IdType value) { 
+          this.ruleId = value;
+          return this;
+        }
+
+        /**
+         * @return The TestScript.rule id value this assert will evaluate.
+         */
+        public String getRuleId() { 
+          return this.ruleId == null ? null : this.ruleId.getValue();
+        }
+
+        /**
+         * @param value The TestScript.rule id value this assert will evaluate.
+         */
+        public SetupActionAssertRuleComponent setRuleId(String value) { 
+            if (this.ruleId == null)
+              this.ruleId = new IdType();
+            this.ruleId.setValue(value);
+          return this;
+        }
+
         /**
          * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
          */
@@ -6411,6 +7555,24 @@ public class TestScript extends DomainResource {
           if (this.param == null)
             this.param = new ArrayList<SetupActionAssertRuleParamComponent>();
           return this.param;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public SetupActionAssertRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SetupActionAssertRuleComponent setParam(List<SetupActionAssertRuleParamComponent> theParam) { 
+          this.param = theParam;
+          return this;
         }
 
         public boolean hasParam() { 
@@ -6446,20 +7608,60 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleId));
           childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
+        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // SetupActionAssertRuleParamComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -919875273: // ruleId
+          this.ruleId = castToId(value); // IdType
+          break;
+        case 106436749: // param
+          this.getParam().add((SetupActionAssertRuleParamComponent) value); // SetupActionAssertRuleParamComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("param"))
+        if (name.equals("ruleId"))
+          this.ruleId = castToId(value); // IdType
+        else if (name.equals("param"))
           this.getParam().add((SetupActionAssertRuleParamComponent) value);
         else
           super.setProperty(name, value);
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -919875273: throw new FHIRException("Cannot make property ruleId as it is not a complex type"); // IdType
+        case 106436749:  return addParam(); // SetupActionAssertRuleParamComponent
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("param")) {
+        if (name.equals("ruleId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
+        }
+        else if (name.equals("param")) {
           return addParam();
         }
         else
@@ -6469,6 +7671,7 @@ public class TestScript extends DomainResource {
       public SetupActionAssertRuleComponent copy() {
         SetupActionAssertRuleComponent dst = new SetupActionAssertRuleComponent();
         copyValues(dst);
+        dst.ruleId = ruleId == null ? null : ruleId.copy();
         if (param != null) {
           dst.param = new ArrayList<SetupActionAssertRuleParamComponent>();
           for (SetupActionAssertRuleParamComponent i : param)
@@ -6484,7 +7687,7 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRuleComponent))
           return false;
         SetupActionAssertRuleComponent o = (SetupActionAssertRuleComponent) other;
-        return compareDeep(param, o.param, true);
+        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
@@ -6494,11 +7697,12 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRuleComponent))
           return false;
         SetupActionAssertRuleComponent o = (SetupActionAssertRuleComponent) other;
-        return true;
+        return compareValues(ruleId, o.ruleId, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+        return super.isEmpty() && (ruleId == null || ruleId.isEmpty()) && (param == null || param.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -6639,6 +7843,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -6646,6 +7874,16 @@ public class TestScript extends DomainResource {
           this.value = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -6689,7 +7927,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -6702,13 +7941,20 @@ public class TestScript extends DomainResource {
     @Block()
     public static class SetupActionAssertRulesetComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Id of the referenced rule within the external ruleset template.
+         * The TestScript.ruleset id value this assert will evaluate.
          */
-        @Child(name = "rule", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        @Child(name = "rulesetId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of the TestScript.ruleset", formalDefinition="The TestScript.ruleset id value this assert will evaluate." )
+        protected IdType rulesetId;
+
+        /**
+         * The referenced rule within the external ruleset template.
+         */
+        @Child(name = "rule", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="The referenced rule within the ruleset", formalDefinition="The referenced rule within the external ruleset template." )
         protected List<SetupActionAssertRulesetRuleComponent> rule;
 
-        private static final long serialVersionUID = 2134080946L;
+        private static final long serialVersionUID = 2070600738L;
 
     /**
      * Constructor
@@ -6717,13 +7963,84 @@ public class TestScript extends DomainResource {
         super();
       }
 
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetComponent(IdType rulesetId) {
+        super();
+        this.rulesetId = rulesetId;
+      }
+
         /**
-         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         * @return {@link #rulesetId} (The TestScript.ruleset id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRulesetId" gives direct access to the value
+         */
+        public IdType getRulesetIdElement() { 
+          if (this.rulesetId == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRulesetComponent.rulesetId");
+            else if (Configuration.doAutoCreate())
+              this.rulesetId = new IdType(); // bb
+          return this.rulesetId;
+        }
+
+        public boolean hasRulesetIdElement() { 
+          return this.rulesetId != null && !this.rulesetId.isEmpty();
+        }
+
+        public boolean hasRulesetId() { 
+          return this.rulesetId != null && !this.rulesetId.isEmpty();
+        }
+
+        /**
+         * @param value {@link #rulesetId} (The TestScript.ruleset id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRulesetId" gives direct access to the value
+         */
+        public SetupActionAssertRulesetComponent setRulesetIdElement(IdType value) { 
+          this.rulesetId = value;
+          return this;
+        }
+
+        /**
+         * @return The TestScript.ruleset id value this assert will evaluate.
+         */
+        public String getRulesetId() { 
+          return this.rulesetId == null ? null : this.rulesetId.getValue();
+        }
+
+        /**
+         * @param value The TestScript.ruleset id value this assert will evaluate.
+         */
+        public SetupActionAssertRulesetComponent setRulesetId(String value) { 
+            if (this.rulesetId == null)
+              this.rulesetId = new IdType();
+            this.rulesetId.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #rule} (The referenced rule within the external ruleset template.)
          */
         public List<SetupActionAssertRulesetRuleComponent> getRule() { 
           if (this.rule == null)
             this.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
           return this.rule;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public SetupActionAssertRulesetRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SetupActionAssertRulesetComponent setRule(List<SetupActionAssertRulesetRuleComponent> theRule) { 
+          this.rule = theRule;
+          return this;
         }
 
         public boolean hasRule() { 
@@ -6736,7 +8053,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #rule} (Id of the referenced rule within the external ruleset template.)
+         * @return {@link #rule} (The referenced rule within the external ruleset template.)
          */
     // syntactic sugar
         public SetupActionAssertRulesetRuleComponent addRule() { //3
@@ -6759,20 +8076,60 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("rule", "", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+          childrenList.add(new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rulesetId));
+          childrenList.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -2073977951: /*rulesetId*/ return this.rulesetId == null ? new Base[0] : new Base[] {this.rulesetId}; // IdType
+        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // SetupActionAssertRulesetRuleComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -2073977951: // rulesetId
+          this.rulesetId = castToId(value); // IdType
+          break;
+        case 3512060: // rule
+          this.getRule().add((SetupActionAssertRulesetRuleComponent) value); // SetupActionAssertRulesetRuleComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("rule"))
+        if (name.equals("rulesetId"))
+          this.rulesetId = castToId(value); // IdType
+        else if (name.equals("rule"))
           this.getRule().add((SetupActionAssertRulesetRuleComponent) value);
         else
           super.setProperty(name, value);
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -2073977951: throw new FHIRException("Cannot make property rulesetId as it is not a complex type"); // IdType
+        case 3512060:  return addRule(); // SetupActionAssertRulesetRuleComponent
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("rule")) {
+        if (name.equals("rulesetId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.rulesetId");
+        }
+        else if (name.equals("rule")) {
           return addRule();
         }
         else
@@ -6782,6 +8139,7 @@ public class TestScript extends DomainResource {
       public SetupActionAssertRulesetComponent copy() {
         SetupActionAssertRulesetComponent dst = new SetupActionAssertRulesetComponent();
         copyValues(dst);
+        dst.rulesetId = rulesetId == null ? null : rulesetId.copy();
         if (rule != null) {
           dst.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
           for (SetupActionAssertRulesetRuleComponent i : rule)
@@ -6797,7 +8155,7 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRulesetComponent))
           return false;
         SetupActionAssertRulesetComponent o = (SetupActionAssertRulesetComponent) other;
-        return compareDeep(rule, o.rule, true);
+        return compareDeep(rulesetId, o.rulesetId, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
@@ -6807,11 +8165,12 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRulesetComponent))
           return false;
         SetupActionAssertRulesetComponent o = (SetupActionAssertRulesetComponent) other;
-        return true;
+        return compareValues(rulesetId, o.rulesetId, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( rule);
+        return super.isEmpty() && (rulesetId == null || rulesetId.isEmpty()) && (rule == null || rule.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -6824,13 +8183,20 @@ public class TestScript extends DomainResource {
     @Block()
     public static class SetupActionAssertRulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * Id of the referenced rule within the external ruleset template.
+         */
+        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
+        protected IdType ruleId;
+
+        /**
          * Each rule template can take one or more parameters for rule evaluation.
          */
-        @Child(name = "param", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
         protected List<SetupActionAssertRulesetRuleParamComponent> param;
 
-        private static final long serialVersionUID = -905162350L;
+        private static final long serialVersionUID = 52246314L;
 
     /**
      * Constructor
@@ -6839,6 +8205,59 @@ public class TestScript extends DomainResource {
         super();
       }
 
+    /**
+     * Constructor
+     */
+      public SetupActionAssertRulesetRuleComponent(IdType ruleId) {
+        super();
+        this.ruleId = ruleId;
+      }
+
+        /**
+         * @return {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public IdType getRuleIdElement() { 
+          if (this.ruleId == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionAssertRulesetRuleComponent.ruleId");
+            else if (Configuration.doAutoCreate())
+              this.ruleId = new IdType(); // bb
+          return this.ruleId;
+        }
+
+        public boolean hasRuleIdElement() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        public boolean hasRuleId() { 
+          return this.ruleId != null && !this.ruleId.isEmpty();
+        }
+
+        /**
+         * @param value {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
+         */
+        public SetupActionAssertRulesetRuleComponent setRuleIdElement(IdType value) { 
+          this.ruleId = value;
+          return this;
+        }
+
+        /**
+         * @return Id of the referenced rule within the external ruleset template.
+         */
+        public String getRuleId() { 
+          return this.ruleId == null ? null : this.ruleId.getValue();
+        }
+
+        /**
+         * @param value Id of the referenced rule within the external ruleset template.
+         */
+        public SetupActionAssertRulesetRuleComponent setRuleId(String value) { 
+            if (this.ruleId == null)
+              this.ruleId = new IdType();
+            this.ruleId.setValue(value);
+          return this;
+        }
+
         /**
          * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
          */
@@ -6846,6 +8265,24 @@ public class TestScript extends DomainResource {
           if (this.param == null)
             this.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
           return this.param;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public SetupActionAssertRulesetRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SetupActionAssertRulesetRuleComponent setParam(List<SetupActionAssertRulesetRuleParamComponent> theParam) { 
+          this.param = theParam;
+          return this;
         }
 
         public boolean hasParam() { 
@@ -6881,20 +8318,60 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, ruleId));
           childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
+        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // SetupActionAssertRulesetRuleParamComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -919875273: // ruleId
+          this.ruleId = castToId(value); // IdType
+          break;
+        case 106436749: // param
+          this.getParam().add((SetupActionAssertRulesetRuleParamComponent) value); // SetupActionAssertRulesetRuleParamComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("param"))
+        if (name.equals("ruleId"))
+          this.ruleId = castToId(value); // IdType
+        else if (name.equals("param"))
           this.getParam().add((SetupActionAssertRulesetRuleParamComponent) value);
         else
           super.setProperty(name, value);
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -919875273: throw new FHIRException("Cannot make property ruleId as it is not a complex type"); // IdType
+        case 106436749:  return addParam(); // SetupActionAssertRulesetRuleParamComponent
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("param")) {
+        if (name.equals("ruleId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
+        }
+        else if (name.equals("param")) {
           return addParam();
         }
         else
@@ -6904,6 +8381,7 @@ public class TestScript extends DomainResource {
       public SetupActionAssertRulesetRuleComponent copy() {
         SetupActionAssertRulesetRuleComponent dst = new SetupActionAssertRulesetRuleComponent();
         copyValues(dst);
+        dst.ruleId = ruleId == null ? null : ruleId.copy();
         if (param != null) {
           dst.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
           for (SetupActionAssertRulesetRuleParamComponent i : param)
@@ -6919,7 +8397,7 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRulesetRuleComponent))
           return false;
         SetupActionAssertRulesetRuleComponent o = (SetupActionAssertRulesetRuleComponent) other;
-        return compareDeep(param, o.param, true);
+        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
@@ -6929,11 +8407,12 @@ public class TestScript extends DomainResource {
         if (!(other instanceof SetupActionAssertRulesetRuleComponent))
           return false;
         SetupActionAssertRulesetRuleComponent o = (SetupActionAssertRulesetRuleComponent) other;
-        return true;
+        return compareValues(ruleId, o.ruleId, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( param);
+        return super.isEmpty() && (ruleId == null || ruleId.isEmpty()) && (param == null || param.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -7074,6 +8553,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -7081,6 +8584,16 @@ public class TestScript extends DomainResource {
           this.value = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7124,7 +8637,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -7304,6 +8818,24 @@ public class TestScript extends DomainResource {
           return this.action;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public TestActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptTestComponent setAction(List<TestActionComponent> theAction) { 
+          this.action = theAction;
+          return this;
+        }
+
         public boolean hasAction() { 
           if (this.action == null)
             return false;
@@ -7344,6 +8876,38 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -450004177: /*metadata*/ return this.metadata == null ? new Base[0] : new Base[] {this.metadata}; // TestScriptMetadataComponent
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // TestActionComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -450004177: // metadata
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+          break;
+        case -1422950858: // action
+          this.getAction().add((TestActionComponent) value); // TestActionComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -7355,6 +8919,18 @@ public class TestScript extends DomainResource {
           this.getAction().add((TestActionComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -450004177:  return getMetadata(); // TestScriptMetadataComponent
+        case -1422950858:  return addAction(); // TestActionComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7412,8 +8988,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  description,  metadata,  action
-          );
+        return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
+           && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty());
       }
 
   public String fhirType() {
@@ -7503,6 +9079,30 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1662702951: /*operation*/ return this.operation == null ? new Base[0] : new Base[] {this.operation}; // SetupActionOperationComponent
+        case -1408208058: /*assert*/ return this.assert_ == null ? new Base[0] : new Base[] {this.assert_}; // SetupActionAssertComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1662702951: // operation
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
+          break;
+        case -1408208058: // assert
+          this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
           this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
@@ -7510,6 +9110,16 @@ public class TestScript extends DomainResource {
           this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1662702951:  return getOperation(); // SetupActionOperationComponent
+        case -1408208058:  return getAssert(); // SetupActionAssertComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7555,7 +9165,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation,  assert_);
+        return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -7590,6 +9201,24 @@ public class TestScript extends DomainResource {
           if (this.action == null)
             this.action = new ArrayList<TeardownActionComponent>();
           return this.action;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public TeardownActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TestScriptTeardownComponent setAction(List<TeardownActionComponent> theAction) { 
+          this.action = theAction;
+          return this;
         }
 
         public boolean hasAction() { 
@@ -7629,11 +9258,40 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // TeardownActionComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1422950858: // action
+          this.getAction().add((TeardownActionComponent) value); // TeardownActionComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("action"))
           this.getAction().add((TeardownActionComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422950858:  return addAction(); // TeardownActionComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7677,7 +9335,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( action);
+        return super.isEmpty() && (action == null || action.isEmpty());
       }
 
   public String fhirType() {
@@ -7735,11 +9393,40 @@ public class TestScript extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1662702951: /*operation*/ return this.operation == null ? new Base[0] : new Base[] {this.operation}; // SetupActionOperationComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1662702951: // operation
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
           this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1662702951:  return getOperation(); // SetupActionOperationComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7780,7 +9467,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( operation);
+        return super.isEmpty() && (operation == null || operation.isEmpty());
       }
 
   public String fhirType() {
@@ -8293,6 +9980,24 @@ public class TestScript extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public TestScriptContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setContact(List<TestScriptContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -8429,6 +10134,24 @@ public class TestScript extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -8569,6 +10292,24 @@ public class TestScript extends DomainResource {
       return this.origin;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #origin}, creating it if it does not already exist
+     */
+    public TestScriptOriginComponent getOriginFirstRep() { 
+      if (getOrigin().isEmpty()) {
+        addOrigin();
+      }
+      return getOrigin().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setOrigin(List<TestScriptOriginComponent> theOrigin) { 
+      this.origin = theOrigin;
+      return this;
+    }
+
     public boolean hasOrigin() { 
       if (this.origin == null)
         return false;
@@ -8607,6 +10348,24 @@ public class TestScript extends DomainResource {
       if (this.destination == null)
         this.destination = new ArrayList<TestScriptDestinationComponent>();
       return this.destination;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #destination}, creating it if it does not already exist
+     */
+    public TestScriptDestinationComponent getDestinationFirstRep() { 
+      if (getDestination().isEmpty()) {
+        addDestination();
+      }
+      return getDestination().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setDestination(List<TestScriptDestinationComponent> theDestination) { 
+      this.destination = theDestination;
+      return this;
     }
 
     public boolean hasDestination() { 
@@ -8673,6 +10432,24 @@ public class TestScript extends DomainResource {
       return this.fixture;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #fixture}, creating it if it does not already exist
+     */
+    public TestScriptFixtureComponent getFixtureFirstRep() { 
+      if (getFixture().isEmpty()) {
+        addFixture();
+      }
+      return getFixture().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setFixture(List<TestScriptFixtureComponent> theFixture) { 
+      this.fixture = theFixture;
+      return this;
+    }
+
     public boolean hasFixture() { 
       if (this.fixture == null)
         return false;
@@ -8711,6 +10488,24 @@ public class TestScript extends DomainResource {
       if (this.profile == null)
         this.profile = new ArrayList<Reference>();
       return this.profile;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #profile}, creating it if it does not already exist
+     */
+    public Reference getProfileFirstRep() { 
+      if (getProfile().isEmpty()) {
+        addProfile();
+      }
+      return getProfile().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setProfile(List<Reference> theProfile) { 
+      this.profile = theProfile;
+      return this;
     }
 
     public boolean hasProfile() { 
@@ -8762,6 +10557,24 @@ public class TestScript extends DomainResource {
       return this.variable;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #variable}, creating it if it does not already exist
+     */
+    public TestScriptVariableComponent getVariableFirstRep() { 
+      if (getVariable().isEmpty()) {
+        addVariable();
+      }
+      return getVariable().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setVariable(List<TestScriptVariableComponent> theVariable) { 
+      this.variable = theVariable;
+      return this;
+    }
+
     public boolean hasVariable() { 
       if (this.variable == null)
         return false;
@@ -8802,6 +10615,24 @@ public class TestScript extends DomainResource {
       return this.rule;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+     */
+    public TestScriptRuleComponent getRuleFirstRep() { 
+      if (getRule().isEmpty()) {
+        addRule();
+      }
+      return getRule().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setRule(List<TestScriptRuleComponent> theRule) { 
+      this.rule = theRule;
+      return this;
+    }
+
     public boolean hasRule() { 
       if (this.rule == null)
         return false;
@@ -8840,6 +10671,24 @@ public class TestScript extends DomainResource {
       if (this.ruleset == null)
         this.ruleset = new ArrayList<TestScriptRulesetComponent>();
       return this.ruleset;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #ruleset}, creating it if it does not already exist
+     */
+    public TestScriptRulesetComponent getRulesetFirstRep() { 
+      if (getRuleset().isEmpty()) {
+        addRuleset();
+      }
+      return getRuleset().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setRuleset(List<TestScriptRulesetComponent> theRuleset) { 
+      this.ruleset = theRuleset;
+      return this;
     }
 
     public boolean hasRuleset() { 
@@ -8904,6 +10753,24 @@ public class TestScript extends DomainResource {
       if (this.test == null)
         this.test = new ArrayList<TestScriptTestComponent>();
       return this.test;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #test}, creating it if it does not already exist
+     */
+    public TestScriptTestComponent getTestFirstRep() { 
+      if (getTest().isEmpty()) {
+        addTest();
+      }
+      return getTest().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TestScript setTest(List<TestScriptTestComponent> theTest) { 
+      this.test = theTest;
+      return this;
     }
 
     public boolean hasTest() { 
@@ -8990,6 +10857,118 @@ public class TestScript extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // TestScriptContactComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : this.origin.toArray(new Base[this.origin.size()]); // TestScriptOriginComponent
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : this.destination.toArray(new Base[this.destination.size()]); // TestScriptDestinationComponent
+        case -450004177: /*metadata*/ return this.metadata == null ? new Base[0] : new Base[] {this.metadata}; // TestScriptMetadataComponent
+        case -843449847: /*fixture*/ return this.fixture == null ? new Base[0] : this.fixture.toArray(new Base[this.fixture.size()]); // TestScriptFixtureComponent
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // Reference
+        case -1249586564: /*variable*/ return this.variable == null ? new Base[0] : this.variable.toArray(new Base[this.variable.size()]); // TestScriptVariableComponent
+        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // TestScriptRuleComponent
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : this.ruleset.toArray(new Base[this.ruleset.size()]); // TestScriptRulesetComponent
+        case 109329021: /*setup*/ return this.setup == null ? new Base[0] : new Base[] {this.setup}; // TestScriptSetupComponent
+        case 3556498: /*test*/ return this.test == null ? new Base[0] : this.test.toArray(new Base[this.test.size()]); // TestScriptTestComponent
+        case -1663474172: /*teardown*/ return this.teardown == null ? new Base[0] : new Base[] {this.teardown}; // TestScriptTeardownComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((TestScriptContactComponent) value); // TestScriptContactComponent
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case -1008619738: // origin
+          this.getOrigin().add((TestScriptOriginComponent) value); // TestScriptOriginComponent
+          break;
+        case -1429847026: // destination
+          this.getDestination().add((TestScriptDestinationComponent) value); // TestScriptDestinationComponent
+          break;
+        case -450004177: // metadata
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+          break;
+        case -843449847: // fixture
+          this.getFixture().add((TestScriptFixtureComponent) value); // TestScriptFixtureComponent
+          break;
+        case -309425751: // profile
+          this.getProfile().add(castToReference(value)); // Reference
+          break;
+        case -1249586564: // variable
+          this.getVariable().add((TestScriptVariableComponent) value); // TestScriptVariableComponent
+          break;
+        case 3512060: // rule
+          this.getRule().add((TestScriptRuleComponent) value); // TestScriptRuleComponent
+          break;
+        case 1548678118: // ruleset
+          this.getRuleset().add((TestScriptRulesetComponent) value); // TestScriptRulesetComponent
+          break;
+        case 109329021: // setup
+          this.setup = (TestScriptSetupComponent) value; // TestScriptSetupComponent
+          break;
+        case 3556498: // test
+          this.getTest().add((TestScriptTestComponent) value); // TestScriptTestComponent
+          break;
+        case -1663474172: // teardown
+          this.teardown = (TestScriptTeardownComponent) value; // TestScriptTeardownComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -9041,6 +11020,38 @@ public class TestScript extends DomainResource {
           this.teardown = (TestScriptTeardownComponent) value; // TestScriptTeardownComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // TestScriptContactComponent
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case -1008619738:  return addOrigin(); // TestScriptOriginComponent
+        case -1429847026:  return addDestination(); // TestScriptDestinationComponent
+        case -450004177:  return getMetadata(); // TestScriptMetadataComponent
+        case -843449847:  return addFixture(); // TestScriptFixtureComponent
+        case -309425751:  return addProfile(); // Reference
+        case -1249586564:  return addVariable(); // TestScriptVariableComponent
+        case 3512060:  return addRule(); // TestScriptRuleComponent
+        case 1548678118:  return addRuleset(); // TestScriptRulesetComponent
+        case 109329021:  return getSetup(); // TestScriptSetupComponent
+        case 3556498:  return addTest(); // TestScriptTestComponent
+        case -1663474172:  return getTeardown(); // TestScriptTeardownComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -9236,10 +11247,16 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  version,  name,  status,  identifier
-          ,  experimental,  publisher,  contact,  date,  description,  useContext,  requirements,  copyright
-          ,  origin,  destination,  metadata,  fixture,  profile,  variable,  rule,  ruleset,  setup,  test
-          ,  teardown);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
+           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
+           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
+           && (useContext == null || useContext.isEmpty()) && (requirements == null || requirements.isEmpty())
+           && (copyright == null || copyright.isEmpty()) && (origin == null || origin.isEmpty()) && (destination == null || destination.isEmpty())
+           && (metadata == null || metadata.isEmpty()) && (fixture == null || fixture.isEmpty()) && (profile == null || profile.isEmpty())
+           && (variable == null || variable.isEmpty()) && (rule == null || rule.isEmpty()) && (ruleset == null || ruleset.isEmpty())
+           && (setup == null || setup.isEmpty()) && (test == null || test.isEmpty()) && (teardown == null || teardown.isEmpty())
+          ;
       }
 
   @Override

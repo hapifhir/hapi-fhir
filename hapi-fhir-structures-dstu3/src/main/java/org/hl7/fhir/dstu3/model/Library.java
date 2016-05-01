@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -238,6 +238,34 @@ public class Library extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // StringType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToString(value); // StringType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -247,6 +275,17 @@ public class Library extends DomainResource {
           this.version = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1618432855: throw new FHIRException("Cannot make property identifier as it is not a complex type"); // StringType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -296,7 +335,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  identifier,  version);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (version == null || version.isEmpty());
       }
 
   public String fhirType() {
@@ -550,6 +590,38 @@ public class Library extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // StringType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToString(value); // StringType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 861720859: // document
+          this.document = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -561,6 +633,18 @@ public class Library extends DomainResource {
           this.document = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1618432855: throw new FHIRException("Cannot make property identifier as it is not a complex type"); // StringType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 506673541:  return getDocument(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -619,8 +703,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  identifier,  version,  document
-          );
+        return super.isEmpty() && (name == null || name.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (version == null || version.isEmpty()) && (document == null || document.isEmpty());
       }
 
   public String fhirType() {
@@ -821,6 +905,34 @@ public class Library extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // StringType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToString(value); // StringType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -830,6 +942,17 @@ public class Library extends DomainResource {
           this.version = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1618432855: throw new FHIRException("Cannot make property identifier as it is not a complex type"); // StringType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -879,7 +1002,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  identifier,  version);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (version == null || version.isEmpty());
       }
 
   public String fhirType() {
@@ -1088,6 +1212,24 @@ public class Library extends DomainResource {
           return this.codeSystem;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
+         */
+        public StringType getCodeSystemFirstRep() { 
+          if (getCodeSystem().isEmpty()) {
+            addCodeSystemElement();
+          }
+          return getCodeSystem().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public LibraryValueSetComponent setCodeSystem(List<StringType> theCodeSystem) { 
+          this.codeSystem = theCodeSystem;
+          return this;
+        }
+
         public boolean hasCodeSystem() { 
           if (this.codeSystem == null)
             return false;
@@ -1142,6 +1284,38 @@ public class Library extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // StringType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : this.codeSystem.toArray(new Base[this.codeSystem.size()]); // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToString(value); // StringType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case -916511108: // codeSystem
+          this.getCodeSystem().add(castToString(value)); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -1153,6 +1327,18 @@ public class Library extends DomainResource {
           this.getCodeSystem().add(castToString(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1618432855: throw new FHIRException("Cannot make property identifier as it is not a complex type"); // StringType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case -916511108: throw new FHIRException("Cannot make property codeSystem as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1210,8 +1396,9 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  identifier,  version,  codeSystem
-          );
+        return super.isEmpty() && (name == null || name.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (version == null || version.isEmpty()) && (codeSystem == null || codeSystem.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1327,6 +1514,24 @@ public class Library extends DomainResource {
       return this.model;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #model}, creating it if it does not already exist
+     */
+    public LibraryModelComponent getModelFirstRep() { 
+      if (getModel().isEmpty()) {
+        addModel();
+      }
+      return getModel().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setModel(List<LibraryModelComponent> theModel) { 
+      this.model = theModel;
+      return this;
+    }
+
     public boolean hasModel() { 
       if (this.model == null)
         return false;
@@ -1365,6 +1570,24 @@ public class Library extends DomainResource {
       if (this.library == null)
         this.library = new ArrayList<LibraryLibraryComponent>();
       return this.library;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
+     */
+    public LibraryLibraryComponent getLibraryFirstRep() { 
+      if (getLibrary().isEmpty()) {
+        addLibrary();
+      }
+      return getLibrary().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setLibrary(List<LibraryLibraryComponent> theLibrary) { 
+      this.library = theLibrary;
+      return this;
     }
 
     public boolean hasLibrary() { 
@@ -1407,6 +1630,24 @@ public class Library extends DomainResource {
       return this.codeSystem;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
+     */
+    public LibraryCodeSystemComponent getCodeSystemFirstRep() { 
+      if (getCodeSystem().isEmpty()) {
+        addCodeSystem();
+      }
+      return getCodeSystem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setCodeSystem(List<LibraryCodeSystemComponent> theCodeSystem) { 
+      this.codeSystem = theCodeSystem;
+      return this;
+    }
+
     public boolean hasCodeSystem() { 
       if (this.codeSystem == null)
         return false;
@@ -1445,6 +1686,24 @@ public class Library extends DomainResource {
       if (this.valueSet == null)
         this.valueSet = new ArrayList<LibraryValueSetComponent>();
       return this.valueSet;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #valueSet}, creating it if it does not already exist
+     */
+    public LibraryValueSetComponent getValueSetFirstRep() { 
+      if (getValueSet().isEmpty()) {
+        addValueSet();
+      }
+      return getValueSet().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setValueSet(List<LibraryValueSetComponent> theValueSet) { 
+      this.valueSet = theValueSet;
+      return this;
     }
 
     public boolean hasValueSet() { 
@@ -1487,6 +1746,24 @@ public class Library extends DomainResource {
       return this.parameter;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParameterDefinition getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setParameter(List<ParameterDefinition> theParameter) { 
+      this.parameter = theParameter;
+      return this;
+    }
+
     public boolean hasParameter() { 
       if (this.parameter == null)
         return false;
@@ -1525,6 +1802,24 @@ public class Library extends DomainResource {
       if (this.dataRequirement == null)
         this.dataRequirement = new ArrayList<DataRequirement>();
       return this.dataRequirement;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
+     */
+    public DataRequirement getDataRequirementFirstRep() { 
+      if (getDataRequirement().isEmpty()) {
+        addDataRequirement();
+      }
+      return getDataRequirement().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setDataRequirement(List<DataRequirement> theDataRequirement) { 
+      this.dataRequirement = theDataRequirement;
+      return this;
     }
 
     public boolean hasDataRequirement() { 
@@ -1595,6 +1890,54 @@ public class Library extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 455891387: /*moduleMetadata*/ return this.moduleMetadata == null ? new Base[0] : new Base[] {this.moduleMetadata}; // ModuleMetadata
+        case 104069929: /*model*/ return this.model == null ? new Base[0] : this.model.toArray(new Base[this.model.size()]); // LibraryModelComponent
+        case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // LibraryLibraryComponent
+        case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : this.codeSystem.toArray(new Base[this.codeSystem.size()]); // LibraryCodeSystemComponent
+        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : this.valueSet.toArray(new Base[this.valueSet.size()]); // LibraryValueSetComponent
+        case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // ParameterDefinition
+        case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
+        case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 455891387: // moduleMetadata
+          this.moduleMetadata = castToModuleMetadata(value); // ModuleMetadata
+          break;
+        case 104069929: // model
+          this.getModel().add((LibraryModelComponent) value); // LibraryModelComponent
+          break;
+        case 166208699: // library
+          this.getLibrary().add((LibraryLibraryComponent) value); // LibraryLibraryComponent
+          break;
+        case -916511108: // codeSystem
+          this.getCodeSystem().add((LibraryCodeSystemComponent) value); // LibraryCodeSystemComponent
+          break;
+        case -1410174671: // valueSet
+          this.getValueSet().add((LibraryValueSetComponent) value); // LibraryValueSetComponent
+          break;
+        case 1954460585: // parameter
+          this.getParameter().add(castToParameterDefinition(value)); // ParameterDefinition
+          break;
+        case 629147193: // dataRequirement
+          this.getDataRequirement().add(castToDataRequirement(value)); // DataRequirement
+          break;
+        case 861720859: // document
+          this.document = castToAttachment(value); // Attachment
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("moduleMetadata"))
           this.moduleMetadata = castToModuleMetadata(value); // ModuleMetadata
@@ -1614,6 +1957,22 @@ public class Library extends DomainResource {
           this.document = castToAttachment(value); // Attachment
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 455891387:  return getModuleMetadata(); // ModuleMetadata
+        case 104069929:  return addModel(); // LibraryModelComponent
+        case 166208699:  return addLibrary(); // LibraryLibraryComponent
+        case -916511108:  return addCodeSystem(); // LibraryCodeSystemComponent
+        case -1410174671:  return addValueSet(); // LibraryValueSetComponent
+        case 1954460585:  return addParameter(); // ParameterDefinition
+        case 629147193:  return addDataRequirement(); // DataRequirement
+        case 861720859:  return getDocument(); // Attachment
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1719,8 +2078,11 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( moduleMetadata,  model,  library
-          ,  codeSystem,  valueSet,  parameter,  dataRequirement,  document);
+        return super.isEmpty() && (moduleMetadata == null || moduleMetadata.isEmpty()) && (model == null || model.isEmpty())
+           && (library == null || library.isEmpty()) && (codeSystem == null || codeSystem.isEmpty())
+           && (valueSet == null || valueSet.isEmpty()) && (parameter == null || parameter.isEmpty())
+           && (dataRequirement == null || dataRequirement.isEmpty()) && (document == null || document.isEmpty())
+          ;
       }
 
   @Override

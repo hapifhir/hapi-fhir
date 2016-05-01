@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -247,6 +247,24 @@ public class Flag extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Flag setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -532,6 +550,54 @@ public class Flag extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<FlagStatus>
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -892481550: // status
+          this.status = new FlagStatusEnumFactory().fromType(value); // Enumeration<FlagStatus>
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case -1406328437: // author
+          this.author = castToReference(value); // Reference
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -551,6 +617,22 @@ public class Flag extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 50511102:  return getCategory(); // CodeableConcept
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<FlagStatus>
+        case -991726143:  return getPeriod(); // Period
+        case -1867885268:  return getSubject(); // Reference
+        case 1524132147:  return getEncounter(); // Reference
+        case -1406328437:  return getAuthor(); // Reference
+        case 3059181:  return getCode(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -639,8 +721,10 @@ public class Flag extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  category,  status
-          ,  period,  subject,  encounter,  author,  code);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (category == null || category.isEmpty())
+           && (status == null || status.isEmpty()) && (period == null || period.isEmpty()) && (subject == null || subject.isEmpty())
+           && (encounter == null || encounter.isEmpty()) && (author == null || author.isEmpty()) && (code == null || code.isEmpty())
+          ;
       }
 
   @Override
@@ -702,7 +786,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -728,7 +812,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

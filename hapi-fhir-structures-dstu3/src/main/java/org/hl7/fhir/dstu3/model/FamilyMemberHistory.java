@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -366,6 +366,38 @@ public class FamilyMemberHistory extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // Type
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : new Base[] {this.note}; // Annotation
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1106507950: // outcome
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 105901603: // onset
+          this.onset = (Type) value; // Type
+          break;
+        case 3387378: // note
+          this.note = castToAnnotation(value); // Annotation
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -377,6 +409,18 @@ public class FamilyMemberHistory extends DomainResource {
           this.note = castToAnnotation(value); // Annotation
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // CodeableConcept
+        case -1106507950:  return getOutcome(); // CodeableConcept
+        case -1886216323:  return getOnset(); // Type
+        case 3387378:  return getNote(); // Annotation
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -445,7 +489,8 @@ public class FamilyMemberHistory extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  outcome,  onset,  note);
+        return super.isEmpty() && (code == null || code.isEmpty()) && (outcome == null || outcome.isEmpty())
+           && (onset == null || onset.isEmpty()) && (note == null || note.isEmpty());
       }
 
   public String fhirType() {
@@ -570,6 +615,24 @@ public class FamilyMemberHistory extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public FamilyMemberHistory setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1096,6 +1159,24 @@ public class FamilyMemberHistory extends DomainResource {
       return this.condition;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
+     */
+    public FamilyMemberHistoryConditionComponent getConditionFirstRep() { 
+      if (getCondition().isEmpty()) {
+        addCondition();
+      }
+      return getCondition().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public FamilyMemberHistory setCondition(List<FamilyMemberHistoryConditionComponent> theCondition) { 
+      this.condition = theCondition;
+      return this;
+    }
+
     public boolean hasCondition() { 
       if (this.condition == null)
         return false;
@@ -1144,6 +1225,70 @@ public class FamilyMemberHistory extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<FamilyHistoryStatus>
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
+        case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // Enumeration<AdministrativeGender>
+        case 3029833: /*born*/ return this.born == null ? new Base[0] : new Base[] {this.born}; // Type
+        case 96511: /*age*/ return this.age == null ? new Base[0] : new Base[] {this.age}; // Type
+        case 561497972: /*deceased*/ return this.deceased == null ? new Base[0] : new Base[] {this.deceased}; // Type
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : new Base[] {this.note}; // Annotation
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // FamilyMemberHistoryConditionComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -892481550: // status
+          this.status = new FamilyHistoryStatusEnumFactory().fromType(value); // Enumeration<FamilyHistoryStatus>
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -261851592: // relationship
+          this.relationship = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1249512767: // gender
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+          break;
+        case 3029833: // born
+          this.born = (Type) value; // Type
+          break;
+        case 96511: // age
+          this.age = (Type) value; // Type
+          break;
+        case 561497972: // deceased
+          this.deceased = (Type) value; // Type
+          break;
+        case 3387378: // note
+          this.note = castToAnnotation(value); // Annotation
+          break;
+        case -861311717: // condition
+          this.getCondition().add((FamilyMemberHistoryConditionComponent) value); // FamilyMemberHistoryConditionComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1171,6 +1316,26 @@ public class FamilyMemberHistory extends DomainResource {
           this.getCondition().add((FamilyMemberHistoryConditionComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -791418107:  return getPatient(); // Reference
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<FamilyHistoryStatus>
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -261851592:  return getRelationship(); // CodeableConcept
+        case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
+        case 67532951:  return getBorn(); // Type
+        case -1419716831:  return getAge(); // Type
+        case -1311442804:  return getDeceased(); // Type
+        case 3387378:  return getNote(); // Annotation
+        case -861311717:  return addCondition(); // FamilyMemberHistoryConditionComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1314,8 +1479,11 @@ public class FamilyMemberHistory extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  patient,  date,  status
-          ,  name,  relationship,  gender,  born,  age,  deceased,  note,  condition);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
+           && (date == null || date.isEmpty()) && (status == null || status.isEmpty()) && (name == null || name.isEmpty())
+           && (relationship == null || relationship.isEmpty()) && (gender == null || gender.isEmpty())
+           && (born == null || born.isEmpty()) && (age == null || age.isEmpty()) && (deceased == null || deceased.isEmpty())
+           && (note == null || note.isEmpty()) && (condition == null || condition.isEmpty());
       }
 
   @Override
@@ -1411,7 +1579,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

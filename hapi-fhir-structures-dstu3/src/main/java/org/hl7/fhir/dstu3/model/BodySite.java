@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -164,6 +164,24 @@ public class BodySite extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public BodySite setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -226,6 +244,24 @@ public class BodySite extends DomainResource {
       if (this.modifier == null)
         this.modifier = new ArrayList<CodeableConcept>();
       return this.modifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+     */
+    public CodeableConcept getModifierFirstRep() { 
+      if (getModifier().isEmpty()) {
+        addModifier();
+      }
+      return getModifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public BodySite setModifier(List<CodeableConcept> theModifier) { 
+      this.modifier = theModifier;
+      return this;
     }
 
     public boolean hasModifier() { 
@@ -317,6 +353,24 @@ public class BodySite extends DomainResource {
       return this.image;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #image}, creating it if it does not already exist
+     */
+    public Attachment getImageFirstRep() { 
+      if (getImage().isEmpty()) {
+        addImage();
+      }
+      return getImage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public BodySite setImage(List<Attachment> theImage) { 
+      this.image = theImage;
+      return this;
+    }
+
     public boolean hasImage() { 
       if (this.image == null)
         return false;
@@ -359,6 +413,46 @@ public class BodySite extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 100313435: /*image*/ return this.image == null ? new Base[0] : this.image.toArray(new Base[this.image.size()]); // Attachment
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -615513385: // modifier
+          this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 100313435: // image
+          this.getImage().add(castToAttachment(value)); // Attachment
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
@@ -374,6 +468,20 @@ public class BodySite extends DomainResource {
           this.getImage().add(castToAttachment(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -791418107:  return getPatient(); // Reference
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 3059181:  return getCode(); // CodeableConcept
+        case -615513385:  return addModifier(); // CodeableConcept
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 100313435:  return addImage(); // Attachment
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -458,8 +566,9 @@ public class BodySite extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( patient,  identifier,  code,  modifier
-          ,  description,  image);
+        return super.isEmpty() && (patient == null || patient.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (code == null || code.isEmpty()) && (modifier == null || modifier.isEmpty()) && (description == null || description.isEmpty())
+           && (image == null || image.isEmpty());
       }
 
   @Override
@@ -515,7 +624,7 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

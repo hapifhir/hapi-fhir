@@ -63,6 +63,15 @@
 				will automatically fetch the resource before returning. Thanks
 				to Ewout Kramer for the idea!  
 			</action>
+			<action type="add" issue="354">
+				DSTU3 structures now have 
+				<![CDATA[<code>setFoo(List)</code>]]>
+				and 
+				<![CDATA[<code>setGetFooFirstRep()</code>]]>
+				methods, bringing them back to parity with the HAPI
+				DSTU2 structures. Thanks to Rahul Somasunderam and
+				Claude Nanjo for the suggestions! 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -179,6 +179,34 @@ public class CareTeam extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case -1077769574: /*member*/ return this.member == null ? new Base[0] : new Base[] {this.member}; // Reference
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3506294: // role
+          this.role = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1077769574: // member
+          this.member = castToReference(value); // Reference
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("role"))
           this.role = castToCodeableConcept(value); // CodeableConcept
@@ -188,6 +216,17 @@ public class CareTeam extends DomainResource {
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3506294:  return getRole(); // CodeableConcept
+        case -1077769574:  return getMember(); // Reference
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -239,7 +278,8 @@ public class CareTeam extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( role,  member,  period);
+        return super.isEmpty() && (role == null || role.isEmpty()) && (member == null || member.isEmpty())
+           && (period == null || period.isEmpty());
       }
 
   public String fhirType() {
@@ -333,6 +373,24 @@ public class CareTeam extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CareTeam setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -395,6 +453,24 @@ public class CareTeam extends DomainResource {
       if (this.type == null)
         this.type = new ArrayList<CodeableConcept>();
       return this.type;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CareTeam setType(List<CodeableConcept> theType) { 
+      this.type = theType;
+      return this;
     }
 
     public boolean hasType() { 
@@ -549,6 +625,24 @@ public class CareTeam extends DomainResource {
       return this.participant;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     */
+    public CareTeamParticipantComponent getParticipantFirstRep() { 
+      if (getParticipant().isEmpty()) {
+        addParticipant();
+      }
+      return getParticipant().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CareTeam setParticipant(List<CareTeamParticipantComponent> theParticipant) { 
+      this.participant = theParticipant;
+      return this;
+    }
+
     public boolean hasParticipant() { 
       if (this.participant == null)
         return false;
@@ -637,6 +731,54 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // CareTeamParticipantComponent
+        case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3575610: // type
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case 767422259: // participant
+          this.getParticipant().add((CareTeamParticipantComponent) value); // CareTeamParticipantComponent
+          break;
+        case -2058947787: // managingOrganization
+          this.managingOrganization = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -656,6 +798,22 @@ public class CareTeam extends DomainResource {
           this.managingOrganization = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550:  return getStatus(); // CodeableConcept
+        case 3575610:  return addType(); // CodeableConcept
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1867885268:  return getSubject(); // Reference
+        case -991726143:  return getPeriod(); // Period
+        case 767422259:  return addParticipant(); // CareTeamParticipantComponent
+        case -2058947787:  return getManagingOrganization(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -751,8 +909,10 @@ public class CareTeam extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  type,  name
-          ,  subject,  period,  participant,  managingOrganization);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (type == null || type.isEmpty()) && (name == null || name.isEmpty()) && (subject == null || subject.isEmpty())
+           && (period == null || period.isEmpty()) && (participant == null || participant.isEmpty())
+           && (managingOrganization == null || managingOrganization.isEmpty());
       }
 
   @Override
@@ -808,7 +968,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -880,7 +1040,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.participant.member</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference" )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>

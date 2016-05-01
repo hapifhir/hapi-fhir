@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -660,6 +660,38 @@ public class DiagnosticOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DiagnosticOrderStatus>
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // CodeableConcept
+        case 1792749467: /*dateTime*/ return this.dateTime == null ? new Base[0] : new Base[] {this.dateTime}; // DateTimeType
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -892481550: // status
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+          break;
+        case -1724546052: // description
+          this.description = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 1792749467: // dateTime
+          this.dateTime = castToDateTime(value); // DateTimeType
+          break;
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("status"))
           this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
@@ -671,6 +703,18 @@ public class DiagnosticOrder extends DomainResource {
           this.actor = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DiagnosticOrderStatus>
+        case -1724546052:  return getDescription(); // CodeableConcept
+        case 1792749467: throw new FHIRException("Cannot make property dateTime as it is not a complex type"); // DateTimeType
+        case 92645877:  return getActor(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -725,8 +769,8 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( status,  description,  dateTime
-          ,  actor);
+        return super.isEmpty() && (status == null || status.isEmpty()) && (description == null || description.isEmpty())
+           && (dateTime == null || dateTime.isEmpty()) && (actor == null || actor.isEmpty());
       }
 
   public String fhirType() {
@@ -826,6 +870,24 @@ public class DiagnosticOrder extends DomainResource {
           if (this.specimen == null)
             this.specimen = new ArrayList<Reference>();
           return this.specimen;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #specimen}, creating it if it does not already exist
+         */
+        public Reference getSpecimenFirstRep() { 
+          if (getSpecimen().isEmpty()) {
+            addSpecimen();
+          }
+          return getSpecimen().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DiagnosticOrderItemComponent setSpecimen(List<Reference> theSpecimen) { 
+          this.specimen = theSpecimen;
+          return this;
         }
 
         public boolean hasSpecimen() { 
@@ -962,6 +1024,24 @@ public class DiagnosticOrder extends DomainResource {
           return this.event;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
+         */
+        public DiagnosticOrderEventComponent getEventFirstRep() { 
+          if (getEvent().isEmpty()) {
+            addEvent();
+          }
+          return getEvent().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DiagnosticOrderItemComponent setEvent(List<DiagnosticOrderEventComponent> theEvent) { 
+          this.event = theEvent;
+          return this;
+        }
+
         public boolean hasEvent() { 
           if (this.event == null)
             return false;
@@ -1003,6 +1083,42 @@ public class DiagnosticOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : this.specimen.toArray(new Base[this.specimen.size()]); // Reference
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DiagnosticOrderStatus>
+        case 96891546: /*event*/ return this.event == null ? new Base[0] : this.event.toArray(new Base[this.event.size()]); // DiagnosticOrderEventComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -2132868344: // specimen
+          this.getSpecimen().add(castToReference(value)); // Reference
+          break;
+        case 1702620169: // bodySite
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -892481550: // status
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+          break;
+        case 96891546: // event
+          this.getEvent().add((DiagnosticOrderEventComponent) value); // DiagnosticOrderEventComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -1016,6 +1132,19 @@ public class DiagnosticOrder extends DomainResource {
           this.getEvent().add((DiagnosticOrderEventComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // CodeableConcept
+        case -2132868344:  return addSpecimen(); // Reference
+        case 1702620169:  return getBodySite(); // CodeableConcept
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DiagnosticOrderStatus>
+        case 96891546:  return addEvent(); // DiagnosticOrderEventComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1082,8 +1211,9 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  specimen,  bodySite,  status
-          ,  event);
+        return super.isEmpty() && (code == null || code.isEmpty()) && (specimen == null || specimen.isEmpty())
+           && (bodySite == null || bodySite.isEmpty()) && (status == null || status.isEmpty()) && (event == null || event.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1226,6 +1356,24 @@ public class DiagnosticOrder extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1493,6 +1641,24 @@ public class DiagnosticOrder extends DomainResource {
       return this.reason;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setReason(List<CodeableConcept> theReason) { 
+      this.reason = theReason;
+      return this;
+    }
+
     public boolean hasReason() { 
       if (this.reason == null)
         return false;
@@ -1531,6 +1697,24 @@ public class DiagnosticOrder extends DomainResource {
       if (this.supportingInformation == null)
         this.supportingInformation = new ArrayList<Reference>();
       return this.supportingInformation;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
+     */
+    public Reference getSupportingInformationFirstRep() { 
+      if (getSupportingInformation().isEmpty()) {
+        addSupportingInformation();
+      }
+      return getSupportingInformation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setSupportingInformation(List<Reference> theSupportingInformation) { 
+      this.supportingInformation = theSupportingInformation;
+      return this;
     }
 
     public boolean hasSupportingInformation() { 
@@ -1580,6 +1764,24 @@ public class DiagnosticOrder extends DomainResource {
       if (this.specimen == null)
         this.specimen = new ArrayList<Reference>();
       return this.specimen;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specimen}, creating it if it does not already exist
+     */
+    public Reference getSpecimenFirstRep() { 
+      if (getSpecimen().isEmpty()) {
+        addSpecimen();
+      }
+      return getSpecimen().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setSpecimen(List<Reference> theSpecimen) { 
+      this.specimen = theSpecimen;
+      return this;
     }
 
     public boolean hasSpecimen() { 
@@ -1643,6 +1845,24 @@ public class DiagnosticOrder extends DomainResource {
       return this.event;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
+     */
+    public DiagnosticOrderEventComponent getEventFirstRep() { 
+      if (getEvent().isEmpty()) {
+        addEvent();
+      }
+      return getEvent().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setEvent(List<DiagnosticOrderEventComponent> theEvent) { 
+      this.event = theEvent;
+      return this;
+    }
+
     public boolean hasEvent() { 
       if (this.event == null)
         return false;
@@ -1683,6 +1903,24 @@ public class DiagnosticOrder extends DomainResource {
       return this.item;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public DiagnosticOrderItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setItem(List<DiagnosticOrderItemComponent> theItem) { 
+      this.item = theItem;
+      return this;
+    }
+
     public boolean hasItem() { 
       if (this.item == null)
         return false;
@@ -1721,6 +1959,24 @@ public class DiagnosticOrder extends DomainResource {
       if (this.note == null)
         this.note = new ArrayList<Annotation>();
       return this.note;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticOrder setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
     }
 
     public boolean hasNote() { 
@@ -1771,6 +2027,70 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DiagnosticOrderStatus>
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<DiagnosticOrderPriority>
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case -1207109509: /*orderer*/ return this.orderer == null ? new Base[0] : new Base[] {this.orderer}; // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
+        case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : this.specimen.toArray(new Base[this.specimen.size()]); // Reference
+        case 96891546: /*event*/ return this.event == null ? new Base[0] : this.event.toArray(new Base[this.event.size()]); // DiagnosticOrderEventComponent
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // DiagnosticOrderItemComponent
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+          break;
+        case -1165461084: // priority
+          this.priority = new DiagnosticOrderPriorityEnumFactory().fromType(value); // Enumeration<DiagnosticOrderPriority>
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case -1207109509: // orderer
+          this.orderer = castToReference(value); // Reference
+          break;
+        case -934964668: // reason
+          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1248768647: // supportingInformation
+          this.getSupportingInformation().add(castToReference(value)); // Reference
+          break;
+        case -2132868344: // specimen
+          this.getSpecimen().add(castToReference(value)); // Reference
+          break;
+        case 96891546: // event
+          this.getEvent().add((DiagnosticOrderEventComponent) value); // DiagnosticOrderEventComponent
+          break;
+        case 3242771: // item
+          this.getItem().add((DiagnosticOrderItemComponent) value); // DiagnosticOrderItemComponent
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1798,6 +2118,26 @@ public class DiagnosticOrder extends DomainResource {
           this.getNote().add(castToAnnotation(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DiagnosticOrderStatus>
+        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<DiagnosticOrderPriority>
+        case -1867885268:  return getSubject(); // Reference
+        case 1524132147:  return getEncounter(); // Reference
+        case -1207109509:  return getOrderer(); // Reference
+        case -934964668:  return addReason(); // CodeableConcept
+        case -1248768647:  return addSupportingInformation(); // Reference
+        case -2132868344:  return addSpecimen(); // Reference
+        case 96891546:  return addEvent(); // DiagnosticOrderEventComponent
+        case 3242771:  return addItem(); // DiagnosticOrderItemComponent
+        case 3387378:  return addNote(); // Annotation
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1925,9 +2265,11 @@ public class DiagnosticOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  priority
-          ,  subject,  encounter,  orderer,  reason,  supportingInformation,  specimen,  event,  item
-          ,  note);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (priority == null || priority.isEmpty()) && (subject == null || subject.isEmpty()) && (encounter == null || encounter.isEmpty())
+           && (orderer == null || orderer.isEmpty()) && (reason == null || reason.isEmpty()) && (supportingInformation == null || supportingInformation.isEmpty())
+           && (specimen == null || specimen.isEmpty()) && (event == null || event.isEmpty()) && (item == null || item.isEmpty())
+           && (note == null || note.isEmpty());
       }
 
   @Override
@@ -2063,7 +2405,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2089,7 +2431,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2115,7 +2457,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2247,7 +2589,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
   public static final String SP_ORDERER = "orderer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>orderer</b>

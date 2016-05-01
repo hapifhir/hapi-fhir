@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -308,6 +308,24 @@ public class NutritionOrder extends DomainResource {
           return this.type;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public CodeableConcept getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addType();
+          }
+          return getType().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderOralDietComponent setType(List<CodeableConcept> theType) { 
+          this.type = theType;
+          return this;
+        }
+
         public boolean hasType() { 
           if (this.type == null)
             return false;
@@ -346,6 +364,24 @@ public class NutritionOrder extends DomainResource {
           if (this.schedule == null)
             this.schedule = new ArrayList<Timing>();
           return this.schedule;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #schedule}, creating it if it does not already exist
+         */
+        public Timing getScheduleFirstRep() { 
+          if (getSchedule().isEmpty()) {
+            addSchedule();
+          }
+          return getSchedule().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderOralDietComponent setSchedule(List<Timing> theSchedule) { 
+          this.schedule = theSchedule;
+          return this;
         }
 
         public boolean hasSchedule() { 
@@ -388,6 +424,24 @@ public class NutritionOrder extends DomainResource {
           return this.nutrient;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #nutrient}, creating it if it does not already exist
+         */
+        public NutritionOrderOralDietNutrientComponent getNutrientFirstRep() { 
+          if (getNutrient().isEmpty()) {
+            addNutrient();
+          }
+          return getNutrient().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderOralDietComponent setNutrient(List<NutritionOrderOralDietNutrientComponent> theNutrient) { 
+          this.nutrient = theNutrient;
+          return this;
+        }
+
         public boolean hasNutrient() { 
           if (this.nutrient == null)
             return false;
@@ -428,6 +482,24 @@ public class NutritionOrder extends DomainResource {
           return this.texture;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #texture}, creating it if it does not already exist
+         */
+        public NutritionOrderOralDietTextureComponent getTextureFirstRep() { 
+          if (getTexture().isEmpty()) {
+            addTexture();
+          }
+          return getTexture().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderOralDietComponent setTexture(List<NutritionOrderOralDietTextureComponent> theTexture) { 
+          this.texture = theTexture;
+          return this;
+        }
+
         public boolean hasTexture() { 
           if (this.texture == null)
             return false;
@@ -466,6 +538,24 @@ public class NutritionOrder extends DomainResource {
           if (this.fluidConsistencyType == null)
             this.fluidConsistencyType = new ArrayList<CodeableConcept>();
           return this.fluidConsistencyType;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #fluidConsistencyType}, creating it if it does not already exist
+         */
+        public CodeableConcept getFluidConsistencyTypeFirstRep() { 
+          if (getFluidConsistencyType().isEmpty()) {
+            addFluidConsistencyType();
+          }
+          return getFluidConsistencyType().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderOralDietComponent setFluidConsistencyType(List<CodeableConcept> theFluidConsistencyType) { 
+          this.fluidConsistencyType = theFluidConsistencyType;
+          return this;
         }
 
         public boolean hasFluidConsistencyType() { 
@@ -559,6 +649,46 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : this.schedule.toArray(new Base[this.schedule.size()]); // Timing
+        case -1671151641: /*nutrient*/ return this.nutrient == null ? new Base[0] : this.nutrient.toArray(new Base[this.nutrient.size()]); // NutritionOrderOralDietNutrientComponent
+        case -1417816805: /*texture*/ return this.texture == null ? new Base[0] : this.texture.toArray(new Base[this.texture.size()]); // NutritionOrderOralDietTextureComponent
+        case -525105592: /*fluidConsistencyType*/ return this.fluidConsistencyType == null ? new Base[0] : this.fluidConsistencyType.toArray(new Base[this.fluidConsistencyType.size()]); // CodeableConcept
+        case 301526158: /*instruction*/ return this.instruction == null ? new Base[0] : new Base[] {this.instruction}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -697920873: // schedule
+          this.getSchedule().add(castToTiming(value)); // Timing
+          break;
+        case -1671151641: // nutrient
+          this.getNutrient().add((NutritionOrderOralDietNutrientComponent) value); // NutritionOrderOralDietNutrientComponent
+          break;
+        case -1417816805: // texture
+          this.getTexture().add((NutritionOrderOralDietTextureComponent) value); // NutritionOrderOralDietTextureComponent
+          break;
+        case -525105592: // fluidConsistencyType
+          this.getFluidConsistencyType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 301526158: // instruction
+          this.instruction = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.getType().add(castToCodeableConcept(value));
@@ -574,6 +704,20 @@ public class NutritionOrder extends DomainResource {
           this.instruction = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return addType(); // CodeableConcept
+        case -697920873:  return addSchedule(); // Timing
+        case -1671151641:  return addNutrient(); // NutritionOrderOralDietNutrientComponent
+        case -1417816805:  return addTexture(); // NutritionOrderOralDietTextureComponent
+        case -525105592:  return addFluidConsistencyType(); // CodeableConcept
+        case 301526158: throw new FHIRException("Cannot make property instruction as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -655,8 +799,9 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  schedule,  nutrient,  texture
-          ,  fluidConsistencyType,  instruction);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (schedule == null || schedule.isEmpty())
+           && (nutrient == null || nutrient.isEmpty()) && (texture == null || texture.isEmpty()) && (fluidConsistencyType == null || fluidConsistencyType.isEmpty())
+           && (instruction == null || instruction.isEmpty());
       }
 
   public String fhirType() {
@@ -746,6 +891,30 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : new Base[] {this.modifier}; // CodeableConcept
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // SimpleQuantity
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -615513385: // modifier
+          this.modifier = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1413853096: // amount
+          this.amount = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("modifier"))
           this.modifier = castToCodeableConcept(value); // CodeableConcept
@@ -753,6 +922,16 @@ public class NutritionOrder extends DomainResource {
           this.amount = castToSimpleQuantity(value); // SimpleQuantity
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -615513385:  return getModifier(); // CodeableConcept
+        case -1413853096:  return getAmount(); // SimpleQuantity
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -798,7 +977,8 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( modifier,  amount);
+        return super.isEmpty() && (modifier == null || modifier.isEmpty()) && (amount == null || amount.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -888,6 +1068,30 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : new Base[] {this.modifier}; // CodeableConcept
+        case 379498680: /*foodType*/ return this.foodType == null ? new Base[0] : new Base[] {this.foodType}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -615513385: // modifier
+          this.modifier = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 379498680: // foodType
+          this.foodType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("modifier"))
           this.modifier = castToCodeableConcept(value); // CodeableConcept
@@ -895,6 +1099,16 @@ public class NutritionOrder extends DomainResource {
           this.foodType = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -615513385:  return getModifier(); // CodeableConcept
+        case 379498680:  return getFoodType(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -940,7 +1154,8 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( modifier,  foodType);
+        return super.isEmpty() && (modifier == null || modifier.isEmpty()) && (foodType == null || foodType.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1078,6 +1293,24 @@ public class NutritionOrder extends DomainResource {
           return this.schedule;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #schedule}, creating it if it does not already exist
+         */
+        public Timing getScheduleFirstRep() { 
+          if (getSchedule().isEmpty()) {
+            addSchedule();
+          }
+          return getSchedule().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderSupplementComponent setSchedule(List<Timing> theSchedule) { 
+          this.schedule = theSchedule;
+          return this;
+        }
+
         public boolean hasSchedule() { 
           if (this.schedule == null)
             return false;
@@ -1192,6 +1425,42 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1491817446: /*productName*/ return this.productName == null ? new Base[0] : new Base[] {this.productName}; // StringType
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : this.schedule.toArray(new Base[this.schedule.size()]); // Timing
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case 301526158: /*instruction*/ return this.instruction == null ? new Base[0] : new Base[] {this.instruction}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1491817446: // productName
+          this.productName = castToString(value); // StringType
+          break;
+        case -697920873: // schedule
+          this.getSchedule().add(castToTiming(value)); // Timing
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 301526158: // instruction
+          this.instruction = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -1205,6 +1474,19 @@ public class NutritionOrder extends DomainResource {
           this.instruction = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // CodeableConcept
+        case -1491817446: throw new FHIRException("Cannot make property productName as it is not a complex type"); // StringType
+        case -697920873:  return addSchedule(); // Timing
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case 301526158: throw new FHIRException("Cannot make property instruction as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1268,8 +1550,9 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  productName,  schedule,  quantity
-          ,  instruction);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (productName == null || productName.isEmpty())
+           && (schedule == null || schedule.isEmpty()) && (quantity == null || quantity.isEmpty()) && (instruction == null || instruction.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1556,6 +1839,24 @@ public class NutritionOrder extends DomainResource {
           return this.administration;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #administration}, creating it if it does not already exist
+         */
+        public NutritionOrderEnteralFormulaAdministrationComponent getAdministrationFirstRep() { 
+          if (getAdministration().isEmpty()) {
+            addAdministration();
+          }
+          return getAdministration().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NutritionOrderEnteralFormulaComponent setAdministration(List<NutritionOrderEnteralFormulaAdministrationComponent> theAdministration) { 
+          this.administration = theAdministration;
+          return this;
+        }
+
         public boolean hasAdministration() { 
           if (this.administration == null)
             return false;
@@ -1674,6 +1975,58 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -138930641: /*baseFormulaType*/ return this.baseFormulaType == null ? new Base[0] : new Base[] {this.baseFormulaType}; // CodeableConcept
+        case -1267705979: /*baseFormulaProductName*/ return this.baseFormulaProductName == null ? new Base[0] : new Base[] {this.baseFormulaProductName}; // StringType
+        case -470746842: /*additiveType*/ return this.additiveType == null ? new Base[0] : new Base[] {this.additiveType}; // CodeableConcept
+        case 488079534: /*additiveProductName*/ return this.additiveProductName == null ? new Base[0] : new Base[] {this.additiveProductName}; // StringType
+        case 186983261: /*caloricDensity*/ return this.caloricDensity == null ? new Base[0] : new Base[] {this.caloricDensity}; // SimpleQuantity
+        case -1710107042: /*routeofAdministration*/ return this.routeofAdministration == null ? new Base[0] : new Base[] {this.routeofAdministration}; // CodeableConcept
+        case 1255702622: /*administration*/ return this.administration == null ? new Base[0] : this.administration.toArray(new Base[this.administration.size()]); // NutritionOrderEnteralFormulaAdministrationComponent
+        case 2017924652: /*maxVolumeToDeliver*/ return this.maxVolumeToDeliver == null ? new Base[0] : new Base[] {this.maxVolumeToDeliver}; // SimpleQuantity
+        case 427085136: /*administrationInstruction*/ return this.administrationInstruction == null ? new Base[0] : new Base[] {this.administrationInstruction}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -138930641: // baseFormulaType
+          this.baseFormulaType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1267705979: // baseFormulaProductName
+          this.baseFormulaProductName = castToString(value); // StringType
+          break;
+        case -470746842: // additiveType
+          this.additiveType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 488079534: // additiveProductName
+          this.additiveProductName = castToString(value); // StringType
+          break;
+        case 186983261: // caloricDensity
+          this.caloricDensity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -1710107042: // routeofAdministration
+          this.routeofAdministration = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 1255702622: // administration
+          this.getAdministration().add((NutritionOrderEnteralFormulaAdministrationComponent) value); // NutritionOrderEnteralFormulaAdministrationComponent
+          break;
+        case 2017924652: // maxVolumeToDeliver
+          this.maxVolumeToDeliver = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 427085136: // administrationInstruction
+          this.administrationInstruction = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("baseFormulaType"))
           this.baseFormulaType = castToCodeableConcept(value); // CodeableConcept
@@ -1695,6 +2048,23 @@ public class NutritionOrder extends DomainResource {
           this.administrationInstruction = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -138930641:  return getBaseFormulaType(); // CodeableConcept
+        case -1267705979: throw new FHIRException("Cannot make property baseFormulaProductName as it is not a complex type"); // StringType
+        case -470746842:  return getAdditiveType(); // CodeableConcept
+        case 488079534: throw new FHIRException("Cannot make property additiveProductName as it is not a complex type"); // StringType
+        case 186983261:  return getCaloricDensity(); // SimpleQuantity
+        case -1710107042:  return getRouteofAdministration(); // CodeableConcept
+        case 1255702622:  return addAdministration(); // NutritionOrderEnteralFormulaAdministrationComponent
+        case 2017924652:  return getMaxVolumeToDeliver(); // SimpleQuantity
+        case 427085136: throw new FHIRException("Cannot make property administrationInstruction as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1780,9 +2150,11 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( baseFormulaType,  baseFormulaProductName
-          ,  additiveType,  additiveProductName,  caloricDensity,  routeofAdministration,  administration
-          ,  maxVolumeToDeliver,  administrationInstruction);
+        return super.isEmpty() && (baseFormulaType == null || baseFormulaType.isEmpty()) && (baseFormulaProductName == null || baseFormulaProductName.isEmpty())
+           && (additiveType == null || additiveType.isEmpty()) && (additiveProductName == null || additiveProductName.isEmpty())
+           && (caloricDensity == null || caloricDensity.isEmpty()) && (routeofAdministration == null || routeofAdministration.isEmpty())
+           && (administration == null || administration.isEmpty()) && (maxVolumeToDeliver == null || maxVolumeToDeliver.isEmpty())
+           && (administrationInstruction == null || administrationInstruction.isEmpty());
       }
 
   public String fhirType() {
@@ -1925,6 +2297,34 @@ public class NutritionOrder extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : new Base[] {this.schedule}; // Timing
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case 3493088: /*rate*/ return this.rate == null ? new Base[0] : new Base[] {this.rate}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -697920873: // schedule
+          this.schedule = castToTiming(value); // Timing
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 3493088: // rate
+          this.rate = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("schedule"))
           this.schedule = castToTiming(value); // Timing
@@ -1934,6 +2334,17 @@ public class NutritionOrder extends DomainResource {
           this.rate = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -697920873:  return getSchedule(); // Timing
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case 983460768:  return getRate(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1989,7 +2400,8 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( schedule,  quantity,  rate);
+        return super.isEmpty() && (schedule == null || schedule.isEmpty()) && (quantity == null || quantity.isEmpty())
+           && (rate == null || rate.isEmpty());
       }
 
   public String fhirType() {
@@ -2128,6 +2540,24 @@ public class NutritionOrder extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -2396,6 +2826,24 @@ public class NutritionOrder extends DomainResource {
       return this.allergyIntolerance;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #allergyIntolerance}, creating it if it does not already exist
+     */
+    public Reference getAllergyIntoleranceFirstRep() { 
+      if (getAllergyIntolerance().isEmpty()) {
+        addAllergyIntolerance();
+      }
+      return getAllergyIntolerance().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setAllergyIntolerance(List<Reference> theAllergyIntolerance) { 
+      this.allergyIntolerance = theAllergyIntolerance;
+      return this;
+    }
+
     public boolean hasAllergyIntolerance() { 
       if (this.allergyIntolerance == null)
         return false;
@@ -2457,6 +2905,24 @@ public class NutritionOrder extends DomainResource {
       return this.foodPreferenceModifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #foodPreferenceModifier}, creating it if it does not already exist
+     */
+    public CodeableConcept getFoodPreferenceModifierFirstRep() { 
+      if (getFoodPreferenceModifier().isEmpty()) {
+        addFoodPreferenceModifier();
+      }
+      return getFoodPreferenceModifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setFoodPreferenceModifier(List<CodeableConcept> theFoodPreferenceModifier) { 
+      this.foodPreferenceModifier = theFoodPreferenceModifier;
+      return this;
+    }
+
     public boolean hasFoodPreferenceModifier() { 
       if (this.foodPreferenceModifier == null)
         return false;
@@ -2495,6 +2961,24 @@ public class NutritionOrder extends DomainResource {
       if (this.excludeFoodModifier == null)
         this.excludeFoodModifier = new ArrayList<CodeableConcept>();
       return this.excludeFoodModifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #excludeFoodModifier}, creating it if it does not already exist
+     */
+    public CodeableConcept getExcludeFoodModifierFirstRep() { 
+      if (getExcludeFoodModifier().isEmpty()) {
+        addExcludeFoodModifier();
+      }
+      return getExcludeFoodModifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setExcludeFoodModifier(List<CodeableConcept> theExcludeFoodModifier) { 
+      this.excludeFoodModifier = theExcludeFoodModifier;
+      return this;
     }
 
     public boolean hasExcludeFoodModifier() { 
@@ -2559,6 +3043,24 @@ public class NutritionOrder extends DomainResource {
       if (this.supplement == null)
         this.supplement = new ArrayList<NutritionOrderSupplementComponent>();
       return this.supplement;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #supplement}, creating it if it does not already exist
+     */
+    public NutritionOrderSupplementComponent getSupplementFirstRep() { 
+      if (getSupplement().isEmpty()) {
+        addSupplement();
+      }
+      return getSupplement().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NutritionOrder setSupplement(List<NutritionOrderSupplementComponent> theSupplement) { 
+      this.supplement = theSupplement;
+      return this;
     }
 
     public boolean hasSupplement() { 
@@ -2633,6 +3135,70 @@ public class NutritionOrder extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NutritionOrderStatus>
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case 1792749467: /*dateTime*/ return this.dateTime == null ? new Base[0] : new Base[] {this.dateTime}; // DateTimeType
+        case -1207109509: /*orderer*/ return this.orderer == null ? new Base[0] : new Base[] {this.orderer}; // Reference
+        case -120164120: /*allergyIntolerance*/ return this.allergyIntolerance == null ? new Base[0] : this.allergyIntolerance.toArray(new Base[this.allergyIntolerance.size()]); // Reference
+        case 659473872: /*foodPreferenceModifier*/ return this.foodPreferenceModifier == null ? new Base[0] : this.foodPreferenceModifier.toArray(new Base[this.foodPreferenceModifier.size()]); // CodeableConcept
+        case 1760260175: /*excludeFoodModifier*/ return this.excludeFoodModifier == null ? new Base[0] : this.excludeFoodModifier.toArray(new Base[this.excludeFoodModifier.size()]); // CodeableConcept
+        case 1153521250: /*oralDiet*/ return this.oralDiet == null ? new Base[0] : new Base[] {this.oralDiet}; // NutritionOrderOralDietComponent
+        case -711993159: /*supplement*/ return this.supplement == null ? new Base[0] : this.supplement.toArray(new Base[this.supplement.size()]); // NutritionOrderSupplementComponent
+        case -671083805: /*enteralFormula*/ return this.enteralFormula == null ? new Base[0] : new Base[] {this.enteralFormula}; // NutritionOrderEnteralFormulaComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new NutritionOrderStatusEnumFactory().fromType(value); // Enumeration<NutritionOrderStatus>
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case 1792749467: // dateTime
+          this.dateTime = castToDateTime(value); // DateTimeType
+          break;
+        case -1207109509: // orderer
+          this.orderer = castToReference(value); // Reference
+          break;
+        case -120164120: // allergyIntolerance
+          this.getAllergyIntolerance().add(castToReference(value)); // Reference
+          break;
+        case 659473872: // foodPreferenceModifier
+          this.getFoodPreferenceModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1760260175: // excludeFoodModifier
+          this.getExcludeFoodModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1153521250: // oralDiet
+          this.oralDiet = (NutritionOrderOralDietComponent) value; // NutritionOrderOralDietComponent
+          break;
+        case -711993159: // supplement
+          this.getSupplement().add((NutritionOrderSupplementComponent) value); // NutritionOrderSupplementComponent
+          break;
+        case -671083805: // enteralFormula
+          this.enteralFormula = (NutritionOrderEnteralFormulaComponent) value; // NutritionOrderEnteralFormulaComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -2660,6 +3226,26 @@ public class NutritionOrder extends DomainResource {
           this.enteralFormula = (NutritionOrderEnteralFormulaComponent) value; // NutritionOrderEnteralFormulaComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<NutritionOrderStatus>
+        case -791418107:  return getPatient(); // Reference
+        case 1524132147:  return getEncounter(); // Reference
+        case 1792749467: throw new FHIRException("Cannot make property dateTime as it is not a complex type"); // DateTimeType
+        case -1207109509:  return getOrderer(); // Reference
+        case -120164120:  return addAllergyIntolerance(); // Reference
+        case 659473872:  return addFoodPreferenceModifier(); // CodeableConcept
+        case 1760260175:  return addExcludeFoodModifier(); // CodeableConcept
+        case 1153521250:  return getOralDiet(); // NutritionOrderOralDietComponent
+        case -711993159:  return addSupplement(); // NutritionOrderSupplementComponent
+        case -671083805:  return getEnteralFormula(); // NutritionOrderEnteralFormulaComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2782,9 +3368,12 @@ public class NutritionOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  patient,  encounter
-          ,  dateTime,  orderer,  allergyIntolerance,  foodPreferenceModifier,  excludeFoodModifier,  oralDiet
-          ,  supplement,  enteralFormula);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (patient == null || patient.isEmpty()) && (encounter == null || encounter.isEmpty()) && (dateTime == null || dateTime.isEmpty())
+           && (orderer == null || orderer.isEmpty()) && (allergyIntolerance == null || allergyIntolerance.isEmpty())
+           && (foodPreferenceModifier == null || foodPreferenceModifier.isEmpty()) && (excludeFoodModifier == null || excludeFoodModifier.isEmpty())
+           && (oralDiet == null || oralDiet.isEmpty()) && (supplement == null || supplement.isEmpty())
+           && (enteralFormula == null || enteralFormula.isEmpty());
       }
 
   @Override
@@ -2840,7 +3429,7 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference" )
   public static final String SP_PROVIDER = "provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provider</b>
@@ -2866,7 +3455,7 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2932,7 +3521,7 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

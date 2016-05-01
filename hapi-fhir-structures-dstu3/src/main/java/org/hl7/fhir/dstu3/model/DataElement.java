@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -282,6 +282,24 @@ public class DataElement extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DataElementContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -320,6 +338,30 @@ public class DataElement extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -327,6 +369,16 @@ public class DataElement extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -374,7 +426,8 @@ public class DataElement extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -632,6 +685,38 @@ public class DataElement extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -135761730: /*identity*/ return this.identity == null ? new Base[0] : new Base[] {this.identity}; // IdType
+        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // UriType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -135761730: // identity
+          this.identity = castToId(value); // IdType
+          break;
+        case 116076: // uri
+          this.uri = castToUri(value); // UriType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identity"))
           this.identity = castToId(value); // IdType
@@ -643,6 +728,18 @@ public class DataElement extends DomainResource {
           this.comment = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -135761730: throw new FHIRException("Cannot make property identity as it is not a complex type"); // IdType
+        case 116076: throw new FHIRException("Cannot make property uri as it is not a complex type"); // UriType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -696,8 +793,8 @@ public class DataElement extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identity,  uri,  name,  comment
-          );
+        return super.isEmpty() && (identity == null || identity.isEmpty()) && (uri == null || uri.isEmpty())
+           && (name == null || name.isEmpty()) && (comment == null || comment.isEmpty());
       }
 
   public String fhirType() {
@@ -878,6 +975,24 @@ public class DataElement extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataElement setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1206,6 +1321,24 @@ public class DataElement extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public DataElementContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataElement setContact(List<DataElementContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1244,6 +1377,24 @@ public class DataElement extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataElement setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -1384,6 +1535,24 @@ public class DataElement extends DomainResource {
       return this.mapping;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #mapping}, creating it if it does not already exist
+     */
+    public DataElementMappingComponent getMappingFirstRep() { 
+      if (getMapping().isEmpty()) {
+        addMapping();
+      }
+      return getMapping().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataElement setMapping(List<DataElementMappingComponent> theMapping) { 
+      this.mapping = theMapping;
+      return this;
+    }
+
     public boolean hasMapping() { 
       if (this.mapping == null)
         return false;
@@ -1422,6 +1591,24 @@ public class DataElement extends DomainResource {
       if (this.element == null)
         this.element = new ArrayList<ElementDefinition>();
       return this.element;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #element}, creating it if it does not already exist
+     */
+    public ElementDefinition getElementFirstRep() { 
+      if (getElement().isEmpty()) {
+        addElement();
+      }
+      return getElement().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataElement setElement(List<ElementDefinition> theElement) { 
+      this.element = theElement;
+      return this;
     }
 
     public boolean hasElement() { 
@@ -1474,6 +1661,78 @@ public class DataElement extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // DataElementContactComponent
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case -1572568464: /*stringency*/ return this.stringency == null ? new Base[0] : new Base[] {this.stringency}; // Enumeration<DataElementStringency>
+        case 837556430: /*mapping*/ return this.mapping == null ? new Base[0] : this.mapping.toArray(new Base[this.mapping.size()]); // DataElementMappingComponent
+        case -1662836996: /*element*/ return this.element == null ? new Base[0] : this.element.toArray(new Base[this.element.size()]); // ElementDefinition
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((DataElementContactComponent) value); // DataElementContactComponent
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case -1572568464: // stringency
+          this.stringency = new DataElementStringencyEnumFactory().fromType(value); // Enumeration<DataElementStringency>
+          break;
+        case 837556430: // mapping
+          this.getMapping().add((DataElementMappingComponent) value); // DataElementMappingComponent
+          break;
+        case -1662836996: // element
+          this.getElement().add(castToElementDefinition(value)); // ElementDefinition
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -1505,6 +1764,28 @@ public class DataElement extends DomainResource {
           this.getElement().add(castToElementDefinition(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // DataElementContactComponent
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case -1572568464: throw new FHIRException("Cannot make property stringency as it is not a complex type"); // Enumeration<DataElementStringency>
+        case 837556430:  return addMapping(); // DataElementMappingComponent
+        case -1662836996:  return addElement(); // ElementDefinition
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1632,9 +1913,12 @@ public class DataElement extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  status
-          ,  experimental,  publisher,  date,  name,  contact,  useContext,  copyright,  stringency,  mapping
-          ,  element);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (version == null || version.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
+           && (publisher == null || publisher.isEmpty()) && (date == null || date.isEmpty()) && (name == null || name.isEmpty())
+           && (contact == null || contact.isEmpty()) && (useContext == null || useContext.isEmpty())
+           && (copyright == null || copyright.isEmpty()) && (stringency == null || stringency.isEmpty())
+           && (mapping == null || mapping.isEmpty()) && (element == null || element.isEmpty());
       }
 
   @Override

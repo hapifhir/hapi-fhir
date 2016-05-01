@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -168,6 +168,24 @@ public class EnrollmentRequest extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EnrollmentRequest setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -557,6 +575,62 @@ public class EnrollmentRequest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
+        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1548678118: // ruleset
+          this.ruleset = castToCoding(value); // Coding
+          break;
+        case 1089373397: // originalRuleset
+          this.originalRuleset = castToCoding(value); // Coding
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case -880905839: // target
+          this.target = castToReference(value); // Reference
+          break;
+        case -987494927: // provider
+          this.provider = castToReference(value); // Reference
+          break;
+        case 1178922291: // organization
+          this.organization = castToReference(value); // Reference
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -351767064: // coverage
+          this.coverage = castToReference(value); // Reference
+          break;
+        case -261851592: // relationship
+          this.relationship = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -580,6 +654,24 @@ public class EnrollmentRequest extends DomainResource {
           this.relationship = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1548678118:  return getRuleset(); // Coding
+        case 1089373397:  return getOriginalRuleset(); // Coding
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case -880905839:  return getTarget(); // Reference
+        case -987494927:  return getProvider(); // Reference
+        case 1178922291:  return getOrganization(); // Reference
+        case -1867885268:  return getSubject(); // Reference
+        case -351767064:  return getCoverage(); // Reference
+        case -261851592:  return getRelationship(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -679,8 +771,11 @@ public class EnrollmentRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  ruleset,  originalRuleset
-          ,  created,  target,  provider,  organization,  subject,  coverage,  relationship);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ruleset == null || ruleset.isEmpty())
+           && (originalRuleset == null || originalRuleset.isEmpty()) && (created == null || created.isEmpty())
+           && (target == null || target.isEmpty()) && (provider == null || provider.isEmpty()) && (organization == null || organization.isEmpty())
+           && (subject == null || subject.isEmpty()) && (coverage == null || coverage.isEmpty()) && (relationship == null || relationship.isEmpty())
+          ;
       }
 
   @Override
@@ -716,7 +811,7 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

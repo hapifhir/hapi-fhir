@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -186,6 +186,24 @@ public class Parameters extends Resource implements IBaseParameters {
           return this.part;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #part}, creating it if it does not already exist
+         */
+        public ParametersParameterComponent getPartFirstRep() { 
+          if (getPart().isEmpty()) {
+            addPart();
+          }
+          return getPart().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ParametersParameterComponent setPart(List<ParametersParameterComponent> thePart) { 
+          this.part = thePart;
+          return this;
+        }
+
         public boolean hasPart() { 
           if (this.part == null)
             return false;
@@ -226,6 +244,38 @@ public class Parameters extends Resource implements IBaseParameters {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Resource
+        case 3433459: /*part*/ return this.part == null ? new Base[0] : this.part.toArray(new Base[this.part.size()]); // ParametersParameterComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          break;
+        case -341064690: // resource
+          this.resource = castToResource(value); // Resource
+          break;
+        case 3433459: // part
+          this.getPart().add((ParametersParameterComponent) value); // ParametersParameterComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -237,6 +287,18 @@ public class Parameters extends Resource implements IBaseParameters {
           this.getPart().add((ParametersParameterComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // Resource
+        case 3433459:  return addPart(); // ParametersParameterComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -422,8 +484,8 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value,  resource,  part
-          );
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+           && (resource == null || resource.isEmpty()) && (part == null || part.isEmpty());
       }
 
   public String fhirType() {
@@ -456,6 +518,24 @@ public class Parameters extends Resource implements IBaseParameters {
       if (this.parameter == null)
         this.parameter = new ArrayList<ParametersParameterComponent>();
       return this.parameter;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParametersParameterComponent getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Parameters setParameter(List<ParametersParameterComponent> theParameter) { 
+      this.parameter = theParameter;
+      return this;
     }
 
     public boolean hasParameter() { 
@@ -495,11 +575,40 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // ParametersParameterComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1954460585: // parameter
+          this.getParameter().add((ParametersParameterComponent) value); // ParametersParameterComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("parameter"))
           this.getParameter().add((ParametersParameterComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1954460585:  return addParameter(); // ParametersParameterComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -552,7 +661,7 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( parameter);
+        return super.isEmpty() && (parameter == null || parameter.isEmpty());
       }
 
   @Override

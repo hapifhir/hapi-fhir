@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -263,6 +263,38 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3355: /*id*/ return this.id == null ? new Base[0] : new Base[] {this.id}; // IdType
+        case 3347973: /*meta*/ return this.meta == null ? new Base[0] : new Base[] {this.meta}; // Meta
+        case -961826286: /*implicitRules*/ return this.implicitRules == null ? new Base[0] : new Base[] {this.implicitRules}; // UriType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // CodeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3355: // id
+          this.id = castToId(value); // IdType
+          break;
+        case 3347973: // meta
+          this.meta = castToMeta(value); // Meta
+          break;
+        case -961826286: // implicitRules
+          this.implicitRules = castToUri(value); // UriType
+          break;
+        case -1613589672: // language
+          this.language = castToCode(value); // CodeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("id"))
           this.id = castToId(value); // IdType
@@ -274,6 +306,18 @@ public abstract class Resource extends BaseResource implements IAnyResource {
           this.language = castToCode(value); // CodeType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3355: throw new FHIRException("Cannot make property id as it is not a complex type"); // IdType
+        case 3347973:  return getMeta(); // Meta
+        case -961826286: throw new FHIRException("Cannot make property implicitRules as it is not a complex type"); // UriType
+        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -332,8 +376,8 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( id,  meta,  implicitRules,  language
-          );
+        return super.isEmpty() && (id == null || id.isEmpty()) && (meta == null || meta.isEmpty()) && (implicitRules == null || implicitRules.isEmpty())
+           && (language == null || language.isEmpty());
       }
 
   public abstract ResourceType getResourceType();

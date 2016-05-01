@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -401,6 +401,24 @@ public class ImplementationGuide extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImplementationGuideContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -439,6 +457,30 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -446,6 +488,16 @@ public class ImplementationGuide extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -493,7 +545,8 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -634,6 +687,30 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<GuideDependencyType>
+        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // UriType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = new GuideDependencyTypeEnumFactory().fromType(value); // Enumeration<GuideDependencyType>
+          break;
+        case 116076: // uri
+          this.uri = castToUri(value); // UriType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new GuideDependencyTypeEnumFactory().fromType(value); // Enumeration<GuideDependencyType>
@@ -641,6 +718,16 @@ public class ImplementationGuide extends DomainResource {
           this.uri = castToUri(value); // UriType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<GuideDependencyType>
+        case 116076: throw new FHIRException("Cannot make property uri as it is not a complex type"); // UriType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -684,7 +771,8 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  uri);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (uri == null || uri.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -837,6 +925,24 @@ public class ImplementationGuide extends DomainResource {
           return this.resource;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #resource}, creating it if it does not already exist
+         */
+        public ImplementationGuidePackageResourceComponent getResourceFirstRep() { 
+          if (getResource().isEmpty()) {
+            addResource();
+          }
+          return getResource().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImplementationGuidePackageComponent setResource(List<ImplementationGuidePackageResourceComponent> theResource) { 
+          this.resource = theResource;
+          return this;
+        }
+
         public boolean hasResource() { 
           if (this.resource == null)
             return false;
@@ -876,6 +982,34 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // ImplementationGuidePackageResourceComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -341064690: // resource
+          this.getResource().add((ImplementationGuidePackageResourceComponent) value); // ImplementationGuidePackageResourceComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -885,6 +1019,17 @@ public class ImplementationGuide extends DomainResource {
           this.getResource().add((ImplementationGuidePackageResourceComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -341064690:  return addResource(); // ImplementationGuidePackageResourceComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -937,7 +1082,8 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  description,  resource);
+        return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
+           && (resource == null || resource.isEmpty());
       }
 
   public String fhirType() {
@@ -1306,6 +1452,46 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1322970774: /*example*/ return this.example == null ? new Base[0] : new Base[] {this.example}; // BooleanType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1163472445: /*acronym*/ return this.acronym == null ? new Base[0] : new Base[] {this.acronym}; // StringType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
+        case -2002349313: /*exampleFor*/ return this.exampleFor == null ? new Base[0] : new Base[] {this.exampleFor}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1322970774: // example
+          this.example = castToBoolean(value); // BooleanType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1163472445: // acronym
+          this.acronym = castToString(value); // StringType
+          break;
+        case -896505829: // source
+          this.source = (Type) value; // Type
+          break;
+        case -2002349313: // exampleFor
+          this.exampleFor = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("example"))
           this.example = castToBoolean(value); // BooleanType
@@ -1321,6 +1507,20 @@ public class ImplementationGuide extends DomainResource {
           this.exampleFor = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1322970774: throw new FHIRException("Cannot make property example as it is not a complex type"); // BooleanType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1163472445: throw new FHIRException("Cannot make property acronym as it is not a complex type"); // StringType
+        case -1698413947:  return getSource(); // Type
+        case -2002349313:  return getExampleFor(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1389,8 +1589,9 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( example,  name,  description,  acronym
-          ,  source,  exampleFor);
+        return super.isEmpty() && (example == null || example.isEmpty()) && (name == null || name.isEmpty())
+           && (description == null || description.isEmpty()) && (acronym == null || acronym.isEmpty())
+           && (source == null || source.isEmpty()) && (exampleFor == null || exampleFor.isEmpty());
       }
 
   public String fhirType() {
@@ -1535,6 +1736,30 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCode(value); // CodeType
+          break;
+        case -309425751: // profile
+          this.profile = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCode(value); // CodeType
@@ -1542,6 +1767,16 @@ public class ImplementationGuide extends DomainResource {
           this.profile = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case -309425751:  return getProfile(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1586,7 +1821,8 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  profile);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (profile == null || profile.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1810,6 +2046,24 @@ public class ImplementationGuide extends DomainResource {
           return this.type;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public CodeType getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addTypeElement();
+          }
+          return getType().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImplementationGuidePageComponent setType(List<CodeType> theType) { 
+          this.type = theType;
+          return this;
+        }
+
         public boolean hasType() { 
           if (this.type == null)
             return false;
@@ -1862,6 +2116,24 @@ public class ImplementationGuide extends DomainResource {
           if (this.package_ == null)
             this.package_ = new ArrayList<StringType>();
           return this.package_;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #package_}, creating it if it does not already exist
+         */
+        public StringType getPackageFirstRep() { 
+          if (getPackage().isEmpty()) {
+            addPackageElement();
+          }
+          return getPackage().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImplementationGuidePageComponent setPackage(List<StringType> thePackage) { 
+          this.package_ = thePackage;
+          return this;
         }
 
         public boolean hasPackage() { 
@@ -1967,6 +2239,24 @@ public class ImplementationGuide extends DomainResource {
           return this.page;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #page}, creating it if it does not already exist
+         */
+        public ImplementationGuidePageComponent getPageFirstRep() { 
+          if (getPage().isEmpty()) {
+            addPage();
+          }
+          return getPage().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImplementationGuidePageComponent setPage(List<ImplementationGuidePageComponent> thePage) { 
+          this.page = thePage;
+          return this;
+        }
+
         public boolean hasPage() { 
           if (this.page == null)
             return false;
@@ -2010,6 +2300,50 @@ public class ImplementationGuide extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // UriType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<GuidePageKind>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeType
+        case -807062458: /*package*/ return this.package_ == null ? new Base[0] : this.package_.toArray(new Base[this.package_.size()]); // StringType
+        case -1268779017: /*format*/ return this.format == null ? new Base[0] : new Base[] {this.format}; // CodeType
+        case 3433103: /*page*/ return this.page == null ? new Base[0] : this.page.toArray(new Base[this.page.size()]); // ImplementationGuidePageComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -896505829: // source
+          this.source = castToUri(value); // UriType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 3292052: // kind
+          this.kind = new GuidePageKindEnumFactory().fromType(value); // Enumeration<GuidePageKind>
+          break;
+        case 3575610: // type
+          this.getType().add(castToCode(value)); // CodeType
+          break;
+        case -807062458: // package
+          this.getPackage().add(castToString(value)); // StringType
+          break;
+        case -1268779017: // format
+          this.format = castToCode(value); // CodeType
+          break;
+        case 3433103: // page
+          this.getPage().add((ImplementationGuidePageComponent) value); // ImplementationGuidePageComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("source"))
           this.source = castToUri(value); // UriType
@@ -2027,6 +2361,21 @@ public class ImplementationGuide extends DomainResource {
           this.getPage().add((ImplementationGuidePageComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -896505829: throw new FHIRException("Cannot make property source as it is not a complex type"); // UriType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<GuidePageKind>
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case -807062458: throw new FHIRException("Cannot make property package as it is not a complex type"); // StringType
+        case -1268779017: throw new FHIRException("Cannot make property format as it is not a complex type"); // CodeType
+        case 3433103:  return addPage(); // ImplementationGuidePageComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2106,8 +2455,9 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( source,  name,  kind,  type,  package_
-          ,  format,  page);
+        return super.isEmpty() && (source == null || source.isEmpty()) && (name == null || name.isEmpty())
+           && (kind == null || kind.isEmpty()) && (type == null || type.isEmpty()) && (package_ == null || package_.isEmpty())
+           && (format == null || format.isEmpty()) && (page == null || page.isEmpty());
       }
 
   public String fhirType() {
@@ -2543,6 +2893,24 @@ public class ImplementationGuide extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ImplementationGuideContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setContact(List<ImplementationGuideContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -2679,6 +3047,24 @@ public class ImplementationGuide extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -2819,6 +3205,24 @@ public class ImplementationGuide extends DomainResource {
       return this.dependency;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #dependency}, creating it if it does not already exist
+     */
+    public ImplementationGuideDependencyComponent getDependencyFirstRep() { 
+      if (getDependency().isEmpty()) {
+        addDependency();
+      }
+      return getDependency().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setDependency(List<ImplementationGuideDependencyComponent> theDependency) { 
+      this.dependency = theDependency;
+      return this;
+    }
+
     public boolean hasDependency() { 
       if (this.dependency == null)
         return false;
@@ -2857,6 +3261,24 @@ public class ImplementationGuide extends DomainResource {
       if (this.package_ == null)
         this.package_ = new ArrayList<ImplementationGuidePackageComponent>();
       return this.package_;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #package_}, creating it if it does not already exist
+     */
+    public ImplementationGuidePackageComponent getPackageFirstRep() { 
+      if (getPackage().isEmpty()) {
+        addPackage();
+      }
+      return getPackage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setPackage(List<ImplementationGuidePackageComponent> thePackage) { 
+      this.package_ = thePackage;
+      return this;
     }
 
     public boolean hasPackage() { 
@@ -2899,6 +3321,24 @@ public class ImplementationGuide extends DomainResource {
       return this.global;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #global}, creating it if it does not already exist
+     */
+    public ImplementationGuideGlobalComponent getGlobalFirstRep() { 
+      if (getGlobal().isEmpty()) {
+        addGlobal();
+      }
+      return getGlobal().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setGlobal(List<ImplementationGuideGlobalComponent> theGlobal) { 
+      this.global = theGlobal;
+      return this;
+    }
+
     public boolean hasGlobal() { 
       if (this.global == null)
         return false;
@@ -2937,6 +3377,24 @@ public class ImplementationGuide extends DomainResource {
       if (this.binary == null)
         this.binary = new ArrayList<UriType>();
       return this.binary;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #binary}, creating it if it does not already exist
+     */
+    public UriType getBinaryFirstRep() { 
+      if (getBinary().isEmpty()) {
+        addBinaryElement();
+      }
+      return getBinary().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImplementationGuide setBinary(List<UriType> theBinary) { 
+      this.binary = theBinary;
+      return this;
     }
 
     public boolean hasBinary() { 
@@ -3030,6 +3488,90 @@ public class ImplementationGuide extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ImplementationGuideContactComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case 461006061: /*fhirVersion*/ return this.fhirVersion == null ? new Base[0] : new Base[] {this.fhirVersion}; // IdType
+        case -26291381: /*dependency*/ return this.dependency == null ? new Base[0] : this.dependency.toArray(new Base[this.dependency.size()]); // ImplementationGuideDependencyComponent
+        case -807062458: /*package*/ return this.package_ == null ? new Base[0] : this.package_.toArray(new Base[this.package_.size()]); // ImplementationGuidePackageComponent
+        case -1243020381: /*global*/ return this.global == null ? new Base[0] : this.global.toArray(new Base[this.global.size()]); // ImplementationGuideGlobalComponent
+        case -1388966911: /*binary*/ return this.binary == null ? new Base[0] : this.binary.toArray(new Base[this.binary.size()]); // UriType
+        case 3433103: /*page*/ return this.page == null ? new Base[0] : new Base[] {this.page}; // ImplementationGuidePageComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((ImplementationGuideContactComponent) value); // ImplementationGuideContactComponent
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case 461006061: // fhirVersion
+          this.fhirVersion = castToId(value); // IdType
+          break;
+        case -26291381: // dependency
+          this.getDependency().add((ImplementationGuideDependencyComponent) value); // ImplementationGuideDependencyComponent
+          break;
+        case -807062458: // package
+          this.getPackage().add((ImplementationGuidePackageComponent) value); // ImplementationGuidePackageComponent
+          break;
+        case -1243020381: // global
+          this.getGlobal().add((ImplementationGuideGlobalComponent) value); // ImplementationGuideGlobalComponent
+          break;
+        case -1388966911: // binary
+          this.getBinary().add(castToUri(value)); // UriType
+          break;
+        case 3433103: // page
+          this.page = (ImplementationGuidePageComponent) value; // ImplementationGuidePageComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -3067,6 +3609,31 @@ public class ImplementationGuide extends DomainResource {
           this.page = (ImplementationGuidePageComponent) value; // ImplementationGuidePageComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // ImplementationGuideContactComponent
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case 461006061: throw new FHIRException("Cannot make property fhirVersion as it is not a complex type"); // IdType
+        case -26291381:  return addDependency(); // ImplementationGuideDependencyComponent
+        case -807062458:  return addPackage(); // ImplementationGuidePackageComponent
+        case -1243020381:  return addGlobal(); // ImplementationGuideGlobalComponent
+        case -1388966911: throw new FHIRException("Cannot make property binary as it is not a complex type"); // UriType
+        case 3433103:  return getPage(); // ImplementationGuidePageComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3212,9 +3779,14 @@ public class ImplementationGuide extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  version,  name,  status,  experimental
-          ,  publisher,  contact,  date,  description,  useContext,  copyright,  fhirVersion,  dependency
-          ,  package_,  global,  binary,  page);
+        return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
+           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
+           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty())
+           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
+           && (copyright == null || copyright.isEmpty()) && (fhirVersion == null || fhirVersion.isEmpty())
+           && (dependency == null || dependency.isEmpty()) && (package_ == null || package_.isEmpty())
+           && (global == null || global.isEmpty()) && (binary == null || binary.isEmpty()) && (page == null || page.isEmpty())
+          ;
       }
 
   @Override
@@ -3270,7 +3842,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.package.resource.source[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="resource", path="ImplementationGuide.package.resource.source[x]", description="Location of the resource", type="reference" )
+  @SearchParamDefinition(name="resource", path="ImplementationGuide.package.resource.source", description="Location of the resource", type="reference" )
   public static final String SP_RESOURCE = "resource";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>resource</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -134,6 +134,24 @@ public class Contract extends DomainResource {
           return this.role;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
+         */
+        public CodeableConcept getRoleFirstRep() { 
+          if (getRole().isEmpty()) {
+            addRole();
+          }
+          return getRole().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AgentComponent setRole(List<CodeableConcept> theRole) { 
+          this.role = theRole;
+          return this;
+        }
+
         public boolean hasRole() { 
           if (this.role == null)
             return false;
@@ -172,6 +190,30 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : this.role.toArray(new Base[this.role.size()]); // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          break;
+        case 3506294: // role
+          this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("actor"))
           this.actor = castToReference(value); // Reference
@@ -179,6 +221,16 @@ public class Contract extends DomainResource {
           this.getRole().add(castToCodeableConcept(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 92645877:  return getActor(); // Reference
+        case 3506294:  return addRole(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -227,7 +279,8 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( actor,  role);
+        return super.isEmpty() && (actor == null || actor.isEmpty()) && (role == null || role.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -355,6 +408,24 @@ public class Contract extends DomainResource {
           return this.signature;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #signature}, creating it if it does not already exist
+         */
+        public Signature getSignatureFirstRep() { 
+          if (getSignature().isEmpty()) {
+            addSignature();
+          }
+          return getSignature().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SignatoryComponent setSignature(List<Signature> theSignature) { 
+          this.signature = theSignature;
+          return this;
+        }
+
         public boolean hasSignature() { 
           if (this.signature == null)
             return false;
@@ -394,6 +465,34 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Reference
+        case 1073584312: /*signature*/ return this.signature == null ? new Base[0] : this.signature.toArray(new Base[this.signature.size()]); // Signature
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 106437350: // party
+          this.party = castToReference(value); // Reference
+          break;
+        case 1073584312: // signature
+          this.getSignature().add(castToSignature(value)); // Signature
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCoding(value); // Coding
@@ -403,6 +502,17 @@ public class Contract extends DomainResource {
           this.getSignature().add(castToSignature(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case 106437350:  return getParty(); // Reference
+        case 1073584312:  return addSignature(); // Signature
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -457,7 +567,8 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  party,  signature);
+        return super.isEmpty() && (type == null || type.isEmpty()) && (party == null || party.isEmpty())
+           && (signature == null || signature.isEmpty());
       }
 
   public String fhirType() {
@@ -871,6 +982,54 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1298275357: /*entity*/ return this.entity == null ? new Base[0] : new Base[] {this.entity}; // Type
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -929905388: /*effectiveTime*/ return this.effectiveTime == null ? new Base[0] : new Base[] {this.effectiveTime}; // DateTimeType
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case -982754077: /*points*/ return this.points == null ? new Base[0] : new Base[] {this.points}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1298275357: // entity
+          this.entity = (Type) value; // Type
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -929905388: // effectiveTime
+          this.effectiveTime = castToDateTime(value); // DateTimeType
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case -982754077: // points
+          this.points = castToDecimal(value); // DecimalType
+          break;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("entity[x]"))
           this.entity = (Type) value; // Type
@@ -890,6 +1049,22 @@ public class Contract extends DomainResource {
           this.net = castToMoney(value); // Money
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -740568643:  return getEntity(); // Type
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -929905388: throw new FHIRException("Cannot make property effectiveTime as it is not a complex type"); // DateTimeType
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -486196699:  return getUnitPrice(); // Money
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
+        case 108957:  return getNet(); // Money
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -969,8 +1144,10 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( entity,  identifier,  effectiveTime
-          ,  quantity,  unitPrice,  factor,  points,  net);
+        return super.isEmpty() && (entity == null || entity.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (effectiveTime == null || effectiveTime.isEmpty()) && (quantity == null || quantity.isEmpty())
+           && (unitPrice == null || unitPrice.isEmpty()) && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty())
+           && (net == null || net.isEmpty());
       }
 
   public String fhirType() {
@@ -1234,6 +1411,24 @@ public class Contract extends DomainResource {
           return this.topic;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #topic}, creating it if it does not already exist
+         */
+        public Reference getTopicFirstRep() { 
+          if (getTopic().isEmpty()) {
+            addTopic();
+          }
+          return getTopic().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setTopic(List<Reference> theTopic) { 
+          this.topic = theTopic;
+          return this;
+        }
+
         public boolean hasTopic() { 
           if (this.topic == null)
             return false;
@@ -1283,6 +1478,24 @@ public class Contract extends DomainResource {
           return this.action;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public CodeableConcept getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setAction(List<CodeableConcept> theAction) { 
+          this.action = theAction;
+          return this;
+        }
+
         public boolean hasAction() { 
           if (this.action == null)
             return false;
@@ -1323,6 +1536,24 @@ public class Contract extends DomainResource {
           return this.actionReason;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #actionReason}, creating it if it does not already exist
+         */
+        public CodeableConcept getActionReasonFirstRep() { 
+          if (getActionReason().isEmpty()) {
+            addActionReason();
+          }
+          return getActionReason().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setActionReason(List<CodeableConcept> theActionReason) { 
+          this.actionReason = theActionReason;
+          return this;
+        }
+
         public boolean hasActionReason() { 
           if (this.actionReason == null)
             return false;
@@ -1361,6 +1592,24 @@ public class Contract extends DomainResource {
           if (this.agent == null)
             this.agent = new ArrayList<TermAgentComponent>();
           return this.agent;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
+         */
+        public TermAgentComponent getAgentFirstRep() { 
+          if (getAgent().isEmpty()) {
+            addAgent();
+          }
+          return getAgent().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setAgent(List<TermAgentComponent> theAgent) { 
+          this.agent = theAgent;
+          return this;
         }
 
         public boolean hasAgent() { 
@@ -1452,6 +1701,24 @@ public class Contract extends DomainResource {
           return this.valuedItem;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #valuedItem}, creating it if it does not already exist
+         */
+        public TermValuedItemComponent getValuedItemFirstRep() { 
+          if (getValuedItem().isEmpty()) {
+            addValuedItem();
+          }
+          return getValuedItem().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setValuedItem(List<TermValuedItemComponent> theValuedItem) { 
+          this.valuedItem = theValuedItem;
+          return this;
+        }
+
         public boolean hasValuedItem() { 
           if (this.valuedItem == null)
             return false;
@@ -1490,6 +1757,24 @@ public class Contract extends DomainResource {
           if (this.group == null)
             this.group = new ArrayList<TermComponent>();
           return this.group;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
+         */
+        public TermComponent getGroupFirstRep() { 
+          if (getGroup().isEmpty()) {
+            addGroup();
+          }
+          return getGroup().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setGroup(List<TermComponent> theGroup) { 
+          this.group = theGroup;
+          return this;
         }
 
         public boolean hasGroup() { 
@@ -1540,6 +1825,70 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1179159893: /*issued*/ return this.issued == null ? new Base[0] : new Base[] {this.issued}; // DateTimeType
+        case -793235316: /*applies*/ return this.applies == null ? new Base[0] : new Base[] {this.applies}; // Period
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : new Base[] {this.subType}; // CodeableConcept
+        case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // Reference
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // CodeableConcept
+        case 1465121818: /*actionReason*/ return this.actionReason == null ? new Base[0] : this.actionReason.toArray(new Base[this.actionReason.size()]); // CodeableConcept
+        case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // TermAgentComponent
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case 2046675654: /*valuedItem*/ return this.valuedItem == null ? new Base[0] : this.valuedItem.toArray(new Base[this.valuedItem.size()]); // TermValuedItemComponent
+        case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // TermComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -1179159893: // issued
+          this.issued = castToDateTime(value); // DateTimeType
+          break;
+        case -793235316: // applies
+          this.applies = castToPeriod(value); // Period
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1868521062: // subType
+          this.subType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 110546223: // topic
+          this.getTopic().add(castToReference(value)); // Reference
+          break;
+        case -1422950858: // action
+          this.getAction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1465121818: // actionReason
+          this.getActionReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 92750597: // agent
+          this.getAgent().add((TermAgentComponent) value); // TermAgentComponent
+          break;
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        case 2046675654: // valuedItem
+          this.getValuedItem().add((TermValuedItemComponent) value); // TermValuedItemComponent
+          break;
+        case 98629247: // group
+          this.getGroup().add((TermComponent) value); // TermComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -1567,6 +1916,26 @@ public class Contract extends DomainResource {
           this.getGroup().add((TermComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // DateTimeType
+        case -793235316:  return getApplies(); // Period
+        case 3575610:  return getType(); // CodeableConcept
+        case -1868521062:  return getSubType(); // CodeableConcept
+        case 110546223:  return addTopic(); // Reference
+        case -1422950858:  return addAction(); // CodeableConcept
+        case 1465121818:  return addActionReason(); // CodeableConcept
+        case 92750597:  return addAgent(); // TermAgentComponent
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case 2046675654:  return addValuedItem(); // TermValuedItemComponent
+        case 98629247:  return addGroup(); // TermComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1682,8 +2051,11 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  issued,  applies,  type
-          ,  subType,  topic,  action,  actionReason,  agent,  text,  valuedItem,  group);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (issued == null || issued.isEmpty())
+           && (applies == null || applies.isEmpty()) && (type == null || type.isEmpty()) && (subType == null || subType.isEmpty())
+           && (topic == null || topic.isEmpty()) && (action == null || action.isEmpty()) && (actionReason == null || actionReason.isEmpty())
+           && (agent == null || agent.isEmpty()) && (text == null || text.isEmpty()) && (valuedItem == null || valuedItem.isEmpty())
+           && (group == null || group.isEmpty());
       }
 
   public String fhirType() {
@@ -1779,6 +2151,24 @@ public class Contract extends DomainResource {
           return this.role;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
+         */
+        public CodeableConcept getRoleFirstRep() { 
+          if (getRole().isEmpty()) {
+            addRole();
+          }
+          return getRole().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermAgentComponent setRole(List<CodeableConcept> theRole) { 
+          this.role = theRole;
+          return this;
+        }
+
         public boolean hasRole() { 
           if (this.role == null)
             return false;
@@ -1817,6 +2207,30 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : this.role.toArray(new Base[this.role.size()]); // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          break;
+        case 3506294: // role
+          this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("actor"))
           this.actor = castToReference(value); // Reference
@@ -1824,6 +2238,16 @@ public class Contract extends DomainResource {
           this.getRole().add(castToCodeableConcept(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 92645877:  return getActor(); // Reference
+        case 3506294:  return addRole(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1872,7 +2296,8 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( actor,  role);
+        return super.isEmpty() && (actor == null || actor.isEmpty()) && (role == null || role.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -2286,6 +2711,54 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1298275357: /*entity*/ return this.entity == null ? new Base[0] : new Base[] {this.entity}; // Type
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -929905388: /*effectiveTime*/ return this.effectiveTime == null ? new Base[0] : new Base[] {this.effectiveTime}; // DateTimeType
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case -982754077: /*points*/ return this.points == null ? new Base[0] : new Base[] {this.points}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1298275357: // entity
+          this.entity = (Type) value; // Type
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -929905388: // effectiveTime
+          this.effectiveTime = castToDateTime(value); // DateTimeType
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case -982754077: // points
+          this.points = castToDecimal(value); // DecimalType
+          break;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("entity[x]"))
           this.entity = (Type) value; // Type
@@ -2305,6 +2778,22 @@ public class Contract extends DomainResource {
           this.net = castToMoney(value); // Money
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -740568643:  return getEntity(); // Type
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -929905388: throw new FHIRException("Cannot make property effectiveTime as it is not a complex type"); // DateTimeType
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -486196699:  return getUnitPrice(); // Money
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
+        case 108957:  return getNet(); // Money
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2384,8 +2873,10 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( entity,  identifier,  effectiveTime
-          ,  quantity,  unitPrice,  factor,  points,  net);
+        return super.isEmpty() && (entity == null || entity.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (effectiveTime == null || effectiveTime.isEmpty()) && (quantity == null || quantity.isEmpty())
+           && (unitPrice == null || unitPrice.isEmpty()) && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty())
+           && (net == null || net.isEmpty());
       }
 
   public String fhirType() {
@@ -2472,11 +2963,40 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 951530617: // content
+          this.content = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
           this.content = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 264548711:  return getContent(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2521,7 +3041,7 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( content);
+        return super.isEmpty() && (content == null || content.isEmpty());
       }
 
   public String fhirType() {
@@ -2608,11 +3128,40 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 951530617: // content
+          this.content = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
           this.content = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 264548711:  return getContent(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2657,7 +3206,7 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( content);
+        return super.isEmpty() && (content == null || content.isEmpty());
       }
 
   public String fhirType() {
@@ -2744,11 +3293,40 @@ public class Contract extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 951530617: // content
+          this.content = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
           this.content = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 264548711:  return getContent(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2793,7 +3371,7 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( content);
+        return super.isEmpty() && (content == null || content.isEmpty());
       }
 
   public String fhirType() {
@@ -3071,6 +3649,24 @@ public class Contract extends DomainResource {
       return this.subject;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #subject}, creating it if it does not already exist
+     */
+    public Reference getSubjectFirstRep() { 
+      if (getSubject().isEmpty()) {
+        addSubject();
+      }
+      return getSubject().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setSubject(List<Reference> theSubject) { 
+      this.subject = theSubject;
+      return this;
+    }
+
     public boolean hasSubject() { 
       if (this.subject == null)
         return false;
@@ -3120,6 +3716,24 @@ public class Contract extends DomainResource {
       return this.topic;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #topic}, creating it if it does not already exist
+     */
+    public Reference getTopicFirstRep() { 
+      if (getTopic().isEmpty()) {
+        addTopic();
+      }
+      return getTopic().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setTopic(List<Reference> theTopic) { 
+      this.topic = theTopic;
+      return this;
+    }
+
     public boolean hasTopic() { 
       if (this.topic == null)
         return false;
@@ -3167,6 +3781,24 @@ public class Contract extends DomainResource {
       if (this.authority == null)
         this.authority = new ArrayList<Reference>();
       return this.authority;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #authority}, creating it if it does not already exist
+     */
+    public Reference getAuthorityFirstRep() { 
+      if (getAuthority().isEmpty()) {
+        addAuthority();
+      }
+      return getAuthority().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setAuthority(List<Reference> theAuthority) { 
+      this.authority = theAuthority;
+      return this;
     }
 
     public boolean hasAuthority() { 
@@ -3228,6 +3860,24 @@ public class Contract extends DomainResource {
       if (this.domain == null)
         this.domain = new ArrayList<Reference>();
       return this.domain;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #domain}, creating it if it does not already exist
+     */
+    public Reference getDomainFirstRep() { 
+      if (getDomain().isEmpty()) {
+        addDomain();
+      }
+      return getDomain().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setDomain(List<Reference> theDomain) { 
+      this.domain = theDomain;
+      return this;
     }
 
     public boolean hasDomain() { 
@@ -3315,6 +3965,24 @@ public class Contract extends DomainResource {
       return this.subType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #subType}, creating it if it does not already exist
+     */
+    public CodeableConcept getSubTypeFirstRep() { 
+      if (getSubType().isEmpty()) {
+        addSubType();
+      }
+      return getSubType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setSubType(List<CodeableConcept> theSubType) { 
+      this.subType = theSubType;
+      return this;
+    }
+
     public boolean hasSubType() { 
       if (this.subType == null)
         return false;
@@ -3353,6 +4021,24 @@ public class Contract extends DomainResource {
       if (this.action == null)
         this.action = new ArrayList<CodeableConcept>();
       return this.action;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+     */
+    public CodeableConcept getActionFirstRep() { 
+      if (getAction().isEmpty()) {
+        addAction();
+      }
+      return getAction().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setAction(List<CodeableConcept> theAction) { 
+      this.action = theAction;
+      return this;
     }
 
     public boolean hasAction() { 
@@ -3395,6 +4081,24 @@ public class Contract extends DomainResource {
       return this.actionReason;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #actionReason}, creating it if it does not already exist
+     */
+    public CodeableConcept getActionReasonFirstRep() { 
+      if (getActionReason().isEmpty()) {
+        addActionReason();
+      }
+      return getActionReason().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setActionReason(List<CodeableConcept> theActionReason) { 
+      this.actionReason = theActionReason;
+      return this;
+    }
+
     public boolean hasActionReason() { 
       if (this.actionReason == null)
         return false;
@@ -3433,6 +4137,24 @@ public class Contract extends DomainResource {
       if (this.agent == null)
         this.agent = new ArrayList<AgentComponent>();
       return this.agent;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
+     */
+    public AgentComponent getAgentFirstRep() { 
+      if (getAgent().isEmpty()) {
+        addAgent();
+      }
+      return getAgent().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setAgent(List<AgentComponent> theAgent) { 
+      this.agent = theAgent;
+      return this;
     }
 
     public boolean hasAgent() { 
@@ -3475,6 +4197,24 @@ public class Contract extends DomainResource {
       return this.signer;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #signer}, creating it if it does not already exist
+     */
+    public SignatoryComponent getSignerFirstRep() { 
+      if (getSigner().isEmpty()) {
+        addSigner();
+      }
+      return getSigner().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setSigner(List<SignatoryComponent> theSigner) { 
+      this.signer = theSigner;
+      return this;
+    }
+
     public boolean hasSigner() { 
       if (this.signer == null)
         return false;
@@ -3515,6 +4255,24 @@ public class Contract extends DomainResource {
       return this.valuedItem;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #valuedItem}, creating it if it does not already exist
+     */
+    public ValuedItemComponent getValuedItemFirstRep() { 
+      if (getValuedItem().isEmpty()) {
+        addValuedItem();
+      }
+      return getValuedItem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setValuedItem(List<ValuedItemComponent> theValuedItem) { 
+      this.valuedItem = theValuedItem;
+      return this;
+    }
+
     public boolean hasValuedItem() { 
       if (this.valuedItem == null)
         return false;
@@ -3553,6 +4311,24 @@ public class Contract extends DomainResource {
       if (this.term == null)
         this.term = new ArrayList<TermComponent>();
       return this.term;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #term}, creating it if it does not already exist
+     */
+    public TermComponent getTermFirstRep() { 
+      if (getTerm().isEmpty()) {
+        addTerm();
+      }
+      return getTerm().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setTerm(List<TermComponent> theTerm) { 
+      this.term = theTerm;
+      return this;
     }
 
     public boolean hasTerm() { 
@@ -3640,6 +4416,24 @@ public class Contract extends DomainResource {
       return this.friendly;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #friendly}, creating it if it does not already exist
+     */
+    public FriendlyLanguageComponent getFriendlyFirstRep() { 
+      if (getFriendly().isEmpty()) {
+        addFriendly();
+      }
+      return getFriendly().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setFriendly(List<FriendlyLanguageComponent> theFriendly) { 
+      this.friendly = theFriendly;
+      return this;
+    }
+
     public boolean hasFriendly() { 
       if (this.friendly == null)
         return false;
@@ -3680,6 +4474,24 @@ public class Contract extends DomainResource {
       return this.legal;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #legal}, creating it if it does not already exist
+     */
+    public LegalLanguageComponent getLegalFirstRep() { 
+      if (getLegal().isEmpty()) {
+        addLegal();
+      }
+      return getLegal().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setLegal(List<LegalLanguageComponent> theLegal) { 
+      this.legal = theLegal;
+      return this;
+    }
+
     public boolean hasLegal() { 
       if (this.legal == null)
         return false;
@@ -3718,6 +4530,24 @@ public class Contract extends DomainResource {
       if (this.rule == null)
         this.rule = new ArrayList<ComputableLanguageComponent>();
       return this.rule;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+     */
+    public ComputableLanguageComponent getRuleFirstRep() { 
+      if (getRule().isEmpty()) {
+        addRule();
+      }
+      return getRule().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setRule(List<ComputableLanguageComponent> theRule) { 
+      this.rule = theRule;
+      return this;
     }
 
     public boolean hasRule() { 
@@ -3775,6 +4605,98 @@ public class Contract extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1179159893: /*issued*/ return this.issued == null ? new Base[0] : new Base[] {this.issued}; // DateTimeType
+        case -793235316: /*applies*/ return this.applies == null ? new Base[0] : new Base[] {this.applies}; // Period
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : this.subject.toArray(new Base[this.subject.size()]); // Reference
+        case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // Reference
+        case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : this.authority.toArray(new Base[this.authority.size()]); // Reference
+        case -1326197564: /*domain*/ return this.domain == null ? new Base[0] : this.domain.toArray(new Base[this.domain.size()]); // Reference
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : this.subType.toArray(new Base[this.subType.size()]); // CodeableConcept
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // CodeableConcept
+        case 1465121818: /*actionReason*/ return this.actionReason == null ? new Base[0] : this.actionReason.toArray(new Base[this.actionReason.size()]); // CodeableConcept
+        case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // AgentComponent
+        case -902467798: /*signer*/ return this.signer == null ? new Base[0] : this.signer.toArray(new Base[this.signer.size()]); // SignatoryComponent
+        case 2046675654: /*valuedItem*/ return this.valuedItem == null ? new Base[0] : this.valuedItem.toArray(new Base[this.valuedItem.size()]); // ValuedItemComponent
+        case 3556460: /*term*/ return this.term == null ? new Base[0] : this.term.toArray(new Base[this.term.size()]); // TermComponent
+        case -108220795: /*binding*/ return this.binding == null ? new Base[0] : new Base[] {this.binding}; // Type
+        case -1423054677: /*friendly*/ return this.friendly == null ? new Base[0] : this.friendly.toArray(new Base[this.friendly.size()]); // FriendlyLanguageComponent
+        case 102851257: /*legal*/ return this.legal == null ? new Base[0] : this.legal.toArray(new Base[this.legal.size()]); // LegalLanguageComponent
+        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // ComputableLanguageComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -1179159893: // issued
+          this.issued = castToDateTime(value); // DateTimeType
+          break;
+        case -793235316: // applies
+          this.applies = castToPeriod(value); // Period
+          break;
+        case -1867885268: // subject
+          this.getSubject().add(castToReference(value)); // Reference
+          break;
+        case 110546223: // topic
+          this.getTopic().add(castToReference(value)); // Reference
+          break;
+        case 1475610435: // authority
+          this.getAuthority().add(castToReference(value)); // Reference
+          break;
+        case -1326197564: // domain
+          this.getDomain().add(castToReference(value)); // Reference
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1868521062: // subType
+          this.getSubType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1422950858: // action
+          this.getAction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1465121818: // actionReason
+          this.getActionReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 92750597: // agent
+          this.getAgent().add((AgentComponent) value); // AgentComponent
+          break;
+        case -902467798: // signer
+          this.getSigner().add((SignatoryComponent) value); // SignatoryComponent
+          break;
+        case 2046675654: // valuedItem
+          this.getValuedItem().add((ValuedItemComponent) value); // ValuedItemComponent
+          break;
+        case 3556460: // term
+          this.getTerm().add((TermComponent) value); // TermComponent
+          break;
+        case -108220795: // binding
+          this.binding = (Type) value; // Type
+          break;
+        case -1423054677: // friendly
+          this.getFriendly().add((FriendlyLanguageComponent) value); // FriendlyLanguageComponent
+          break;
+        case 102851257: // legal
+          this.getLegal().add((LegalLanguageComponent) value); // LegalLanguageComponent
+          break;
+        case 3512060: // rule
+          this.getRule().add((ComputableLanguageComponent) value); // ComputableLanguageComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -3816,6 +4738,33 @@ public class Contract extends DomainResource {
           this.getRule().add((ComputableLanguageComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // DateTimeType
+        case -793235316:  return getApplies(); // Period
+        case -1867885268:  return addSubject(); // Reference
+        case 110546223:  return addTopic(); // Reference
+        case 1475610435:  return addAuthority(); // Reference
+        case -1326197564:  return addDomain(); // Reference
+        case 3575610:  return getType(); // CodeableConcept
+        case -1868521062:  return addSubType(); // CodeableConcept
+        case -1422950858:  return addAction(); // CodeableConcept
+        case 1465121818:  return addActionReason(); // CodeableConcept
+        case 92750597:  return addAgent(); // AgentComponent
+        case -902467798:  return addSigner(); // SignatoryComponent
+        case 2046675654:  return addValuedItem(); // ValuedItemComponent
+        case 3556460:  return addTerm(); // TermComponent
+        case 1514826715:  return getBinding(); // Type
+        case -1423054677:  return addFriendly(); // FriendlyLanguageComponent
+        case 102851257:  return addLegal(); // LegalLanguageComponent
+        case 3512060:  return addRule(); // ComputableLanguageComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -4006,9 +4955,13 @@ public class Contract extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  issued,  applies,  subject
-          ,  topic,  authority,  domain,  type,  subType,  action,  actionReason,  agent,  signer,  valuedItem
-          ,  term,  binding,  friendly,  legal,  rule);
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (issued == null || issued.isEmpty())
+           && (applies == null || applies.isEmpty()) && (subject == null || subject.isEmpty()) && (topic == null || topic.isEmpty())
+           && (authority == null || authority.isEmpty()) && (domain == null || domain.isEmpty()) && (type == null || type.isEmpty())
+           && (subType == null || subType.isEmpty()) && (action == null || action.isEmpty()) && (actionReason == null || actionReason.isEmpty())
+           && (agent == null || agent.isEmpty()) && (signer == null || signer.isEmpty()) && (valuedItem == null || valuedItem.isEmpty())
+           && (term == null || term.isEmpty()) && (binding == null || binding.isEmpty()) && (friendly == null || friendly.isEmpty())
+           && (legal == null || legal.isEmpty()) && (rule == null || rule.isEmpty());
       }
 
   @Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -919,6 +919,24 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return this.location;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
+         */
+        public StringType getLocationFirstRep() { 
+          if (getLocation().isEmpty()) {
+            addLocationElement();
+          }
+          return getLocation().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public OperationOutcomeIssueComponent setLocation(List<StringType> theLocation) { 
+          this.location = theLocation;
+          return this;
+        }
+
         public boolean hasLocation() { 
           if (this.location == null)
             return false;
@@ -971,6 +989,24 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           if (this.expression == null)
             this.expression = new ArrayList<StringType>();
           return this.expression;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #expression}, creating it if it does not already exist
+         */
+        public StringType getExpressionFirstRep() { 
+          if (getExpression().isEmpty()) {
+            addExpressionElement();
+          }
+          return getExpression().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public OperationOutcomeIssueComponent setExpression(List<StringType> theExpression) { 
+          this.expression = theExpression;
+          return this;
         }
 
         public boolean hasExpression() { 
@@ -1029,6 +1065,46 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1478300413: /*severity*/ return this.severity == null ? new Base[0] : new Base[] {this.severity}; // Enumeration<IssueSeverity>
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<IssueType>
+        case 1557721666: /*details*/ return this.details == null ? new Base[0] : new Base[] {this.details}; // CodeableConcept
+        case -740386388: /*diagnostics*/ return this.diagnostics == null ? new Base[0] : new Base[] {this.diagnostics}; // StringType
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // StringType
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : this.expression.toArray(new Base[this.expression.size()]); // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1478300413: // severity
+          this.severity = new IssueSeverityEnumFactory().fromType(value); // Enumeration<IssueSeverity>
+          break;
+        case 3059181: // code
+          this.code = new IssueTypeEnumFactory().fromType(value); // Enumeration<IssueType>
+          break;
+        case 1557721666: // details
+          this.details = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -740386388: // diagnostics
+          this.diagnostics = castToString(value); // StringType
+          break;
+        case 1901043637: // location
+          this.getLocation().add(castToString(value)); // StringType
+          break;
+        case -1795452264: // expression
+          this.getExpression().add(castToString(value)); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("severity"))
           this.severity = new IssueSeverityEnumFactory().fromType(value); // Enumeration<IssueSeverity>
@@ -1044,6 +1120,20 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           this.getExpression().add(castToString(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1478300413: throw new FHIRException("Cannot make property severity as it is not a complex type"); // Enumeration<IssueSeverity>
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<IssueType>
+        case 1557721666:  return getDetails(); // CodeableConcept
+        case -740386388: throw new FHIRException("Cannot make property diagnostics as it is not a complex type"); // StringType
+        case 1901043637: throw new FHIRException("Cannot make property location as it is not a complex type"); // StringType
+        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1115,8 +1205,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( severity,  code,  details,  diagnostics
-          ,  location,  expression);
+        return super.isEmpty() && (severity == null || severity.isEmpty()) && (code == null || code.isEmpty())
+           && (details == null || details.isEmpty()) && (diagnostics == null || diagnostics.isEmpty())
+           && (location == null || location.isEmpty()) && (expression == null || expression.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -1149,6 +1241,24 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       if (this.issue == null)
         this.issue = new ArrayList<OperationOutcomeIssueComponent>();
       return this.issue;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #issue}, creating it if it does not already exist
+     */
+    public OperationOutcomeIssueComponent getIssueFirstRep() { 
+      if (getIssue().isEmpty()) {
+        addIssue();
+      }
+      return getIssue().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationOutcome setIssue(List<OperationOutcomeIssueComponent> theIssue) { 
+      this.issue = theIssue;
+      return this;
     }
 
     public boolean hasIssue() { 
@@ -1188,11 +1298,40 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 100509913: /*issue*/ return this.issue == null ? new Base[0] : this.issue.toArray(new Base[this.issue.size()]); // OperationOutcomeIssueComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 100509913: // issue
+          this.getIssue().add((OperationOutcomeIssueComponent) value); // OperationOutcomeIssueComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("issue"))
           this.getIssue().add((OperationOutcomeIssueComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 100509913:  return addIssue(); // OperationOutcomeIssueComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1245,7 +1384,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( issue);
+        return super.isEmpty() && (issue == null || issue.isEmpty());
       }
 
   @Override
