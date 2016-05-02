@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,18 @@ public class ServerSearchDstu2Test {
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("param1value", ourLastRef.getValue());
 	}
+	
+	@Test
+	public void testSearchWithEncodedValue() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param1=" + URLEncoder.encode("Jernelöv", "UTF-8"));
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals("searchParam1", ourLastMethod);
+		assertEquals("Jernelöv", ourLastRef.getValue());
+	}
+
 	
 	@Test
 	public void testSearchParam2() throws Exception {

@@ -17,13 +17,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrlPattern;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -120,6 +123,35 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	
+	@Test
+	public void testSearchByExtendedChars() throws Exception {
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.addName().addFamily("Jernelöv");
+			p.addIdentifier().setValue("ID" + i);
+			myPatientDao.create(p, mySrd);
+		}
+		
+		String uri = ourServerBase + "/Patient?name=" + URLEncoder.encode("Jernelöv", "UTF-8") + "&_count=5&_pretty=true";
+		ourLog.info("URI: {}", uri);
+		HttpGet get = new HttpGet(uri);
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(resp.getEntity().getContent());
+			ourLog.info(output);
+			
+			assertThat(output, containsString("<url value=\"" + ourServerBase + "/Patient?name=Jernel%C3%B6v&amp;_pretty=true\"/>"));
+			assertThat(output, containsString("<family value=\"Jernelöv\"/>"));
+		} finally {
+			IOUtils.closeQuietly(resp.getEntity().getContent());
+		}
+		
+		
+	}
+	
+	
 	@Override
 	public void before() throws Exception {
 		super.before();
