@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -862,11 +862,8 @@ public class Account extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
-           && (type == null || type.isEmpty()) && (status == null || status.isEmpty()) && (activePeriod == null || activePeriod.isEmpty())
-           && (currency == null || currency.isEmpty()) && (balance == null || balance.isEmpty()) && (coveragePeriod == null || coveragePeriod.isEmpty())
-           && (subject == null || subject.isEmpty()) && (owner == null || owner.isEmpty()) && (description == null || description.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
+          , activePeriod, currency, balance, coveragePeriod, subject, owner, description);
       }
 
   @Override

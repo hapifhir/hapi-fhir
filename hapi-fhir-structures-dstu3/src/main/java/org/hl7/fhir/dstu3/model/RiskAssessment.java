@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -489,9 +489,8 @@ public class RiskAssessment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (outcome == null || outcome.isEmpty()) && (probability == null || probability.isEmpty())
-           && (relativeRisk == null || relativeRisk.isEmpty()) && (when == null || when.isEmpty()) && (rationale == null || rationale.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(outcome, probability, relativeRisk
+          , when, rationale);
       }
 
   public String fhirType() {
@@ -1255,11 +1254,8 @@ public class RiskAssessment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (subject == null || subject.isEmpty()) && (date == null || date.isEmpty())
-           && (condition == null || condition.isEmpty()) && (encounter == null || encounter.isEmpty())
-           && (performer == null || performer.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (method == null || method.isEmpty()) && (basis == null || basis.isEmpty()) && (prediction == null || prediction.isEmpty())
-           && (mitigation == null || mitigation.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, date, condition, encounter
+          , performer, identifier, method, basis, prediction, mitigation);
       }
 
   @Override

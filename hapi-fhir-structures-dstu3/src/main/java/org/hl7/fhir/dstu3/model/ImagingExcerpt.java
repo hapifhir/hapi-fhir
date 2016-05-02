@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -630,9 +630,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
-           && (dicom == null || dicom.isEmpty()) && (viewable == null || viewable.isEmpty()) && (series == null || series.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, dicom, viewable
+          , series);
       }
 
   public String fhirType() {
@@ -857,8 +856,7 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
       }
 
   public String fhirType() {
@@ -1475,10 +1473,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (contentType == null || contentType.isEmpty()) && (height == null || height.isEmpty())
-           && (width == null || width.isEmpty()) && (frames == null || frames.isEmpty()) && (duration == null || duration.isEmpty())
-           && (size == null || size.isEmpty()) && (title == null || title.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(contentType, height, width, frames
+          , duration, size, title, url);
       }
 
   public String fhirType() {
@@ -1801,8 +1797,7 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (dicom == null || dicom.isEmpty())
-           && (instance == null || instance.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, dicom, instance);
       }
 
   public String fhirType() {
@@ -2027,8 +2022,7 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
       }
 
   public String fhirType() {
@@ -2431,9 +2425,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (sopClass == null || sopClass.isEmpty()) && (uid == null || uid.isEmpty())
-           && (dicom == null || dicom.isEmpty()) && (frameNumbers == null || frameNumbers.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid, dicom, frameNumbers
+          );
       }
 
   public String fhirType() {
@@ -2658,8 +2651,7 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
       }
 
   public String fhirType() {
@@ -3225,10 +3217,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (patient == null || patient.isEmpty())
-           && (authoringTime == null || authoringTime.isEmpty()) && (author == null || author.isEmpty())
-           && (title == null || title.isEmpty()) && (description == null || description.isEmpty()) && (study == null || study.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime, author
+          , title, description, study);
       }
 
   @Override

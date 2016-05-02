@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -584,9 +584,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (collector == null || collector.isEmpty()) && (comment == null || comment.isEmpty())
-           && (collected == null || collected.isEmpty()) && (quantity == null || quantity.isEmpty())
-           && (method == null || method.isEmpty()) && (bodySite == null || bodySite.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(collector, comment, collected, quantity
+          , method, bodySite);
       }
 
   public String fhirType() {
@@ -894,8 +893,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (procedure == null || procedure.isEmpty())
-           && (additive == null || additive.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, procedure, additive
+          );
       }
 
   public String fhirType() {
@@ -1335,9 +1334,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (description == null || description.isEmpty())
-           && (type == null || type.isEmpty()) && (capacity == null || capacity.isEmpty()) && (specimenQuantity == null || specimenQuantity.isEmpty())
-           && (additive == null || additive.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, description, type, capacity
+          , specimenQuantity, additive);
       }
 
   public String fhirType() {
@@ -2125,11 +2123,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (accessionIdentifier == null || accessionIdentifier.isEmpty())
-           && (status == null || status.isEmpty()) && (type == null || type.isEmpty()) && (subject == null || subject.isEmpty())
-           && (receivedTime == null || receivedTime.isEmpty()) && (parent == null || parent.isEmpty())
-           && (collection == null || collection.isEmpty()) && (treatment == null || treatment.isEmpty())
-           && (container == null || container.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, accessionIdentifier
+          , status, type, subject, receivedTime, parent, collection, treatment, container);
       }
 
   @Override

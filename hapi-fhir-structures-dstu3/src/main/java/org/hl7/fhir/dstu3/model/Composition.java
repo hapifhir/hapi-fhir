@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -591,8 +591,7 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (mode == null || mode.isEmpty()) && (time == null || time.isEmpty())
-           && (party == null || party.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mode, time, party);
       }
 
   public String fhirType() {
@@ -901,8 +900,7 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (period == null || period.isEmpty())
-           && (detail == null || detail.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, period, detail);
       }
 
   public String fhirType() {
@@ -1480,10 +1478,8 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (title == null || title.isEmpty()) && (code == null || code.isEmpty())
-           && (text == null || text.isEmpty()) && (mode == null || mode.isEmpty()) && (orderedBy == null || orderedBy.isEmpty())
-           && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty()) && (section == null || section.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(title, code, text, mode, orderedBy
+          , entry, emptyReason, section);
       }
 
   public String fhirType() {
@@ -2528,12 +2524,9 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (date == null || date.isEmpty())
-           && (type == null || type.isEmpty()) && (class_ == null || class_.isEmpty()) && (title == null || title.isEmpty())
-           && (status == null || status.isEmpty()) && (confidentiality == null || confidentiality.isEmpty())
-           && (subject == null || subject.isEmpty()) && (author == null || author.isEmpty()) && (attester == null || attester.isEmpty())
-           && (custodian == null || custodian.isEmpty()) && (event == null || event.isEmpty()) && (encounter == null || encounter.isEmpty())
-           && (section == null || section.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, date, type, class_
+          , title, status, confidentiality, subject, author, attester, custodian, event, encounter, section
+          );
       }
 
   @Override

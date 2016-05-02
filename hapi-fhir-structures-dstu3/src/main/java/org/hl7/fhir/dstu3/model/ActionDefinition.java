@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -775,8 +775,8 @@ public class ActionDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (actionIdentifier == null || actionIdentifier.isEmpty()) && (relationship == null || relationship.isEmpty())
-           && (offset == null || offset.isEmpty()) && (anchor == null || anchor.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
+          , offset, anchor);
       }
 
   public String fhirType() {
@@ -961,8 +961,7 @@ public class ActionDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
       }
 
   public String fhirType() {
@@ -1187,8 +1186,7 @@ public class ActionDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (path == null || path.isEmpty()) && (expression == null || expression.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, expression);
       }
 
   public String fhirType() {
@@ -2364,13 +2362,9 @@ public class ActionDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (actionIdentifier == null || actionIdentifier.isEmpty()) && (label == null || label.isEmpty())
-           && (title == null || title.isEmpty()) && (description == null || description.isEmpty()) && (textEquivalent == null || textEquivalent.isEmpty())
-           && (concept == null || concept.isEmpty()) && (supportingEvidence == null || supportingEvidence.isEmpty())
-           && (documentation == null || documentation.isEmpty()) && (relatedAction == null || relatedAction.isEmpty())
-           && (participantType == null || participantType.isEmpty()) && (type == null || type.isEmpty())
-           && (behavior == null || behavior.isEmpty()) && (resource == null || resource.isEmpty()) && (customization == null || customization.isEmpty())
-           && (action == null || action.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
+          , description, textEquivalent, concept, supportingEvidence, documentation, relatedAction, participantType
+          , type, behavior, resource, customization, action);
       }
 
 

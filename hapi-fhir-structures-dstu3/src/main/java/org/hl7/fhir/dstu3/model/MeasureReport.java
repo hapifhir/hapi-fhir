@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -715,9 +715,8 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (population == null || population.isEmpty())
-           && (measureScore == null || measureScore.isEmpty()) && (stratifier == null || stratifier.isEmpty())
-           && (supplementalData == null || supplementalData.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, population, measureScore
+          , stratifier, supplementalData);
       }
 
   public String fhirType() {
@@ -1011,8 +1010,7 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (count == null || count.isEmpty())
-           && (patients == null || patients.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, count, patients);
       }
 
   public String fhirType() {
@@ -1233,8 +1231,7 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (group == null || group.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, group);
       }
 
   public String fhirType() {
@@ -1562,8 +1559,8 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (value == null || value.isEmpty()) && (population == null || population.isEmpty())
-           && (measureScore == null || measureScore.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, population, measureScore
+          );
       }
 
   public String fhirType() {
@@ -1857,8 +1854,7 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (count == null || count.isEmpty())
-           && (patients == null || patients.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, count, patients);
       }
 
   public String fhirType() {
@@ -2079,8 +2075,7 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (group == null || group.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, group);
       }
 
   public String fhirType() {
@@ -2374,8 +2369,7 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (value == null || value.isEmpty()) && (count == null || count.isEmpty())
-           && (patients == null || patients.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, count, patients);
       }
 
   public String fhirType() {
@@ -3082,11 +3076,8 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (measure == null || measure.isEmpty()) && (type == null || type.isEmpty())
-           && (patient == null || patient.isEmpty()) && (period == null || period.isEmpty()) && (status == null || status.isEmpty())
-           && (date == null || date.isEmpty()) && (reportingOrganization == null || reportingOrganization.isEmpty())
-           && (group == null || group.isEmpty()) && (evaluatedResources == null || evaluatedResources.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(measure, type, patient, period
+          , status, date, reportingOrganization, group, evaluatedResources);
       }
 
   @Override

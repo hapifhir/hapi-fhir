@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -743,10 +743,8 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (organization == null || organization.isEmpty()) && (role == null || role.isEmpty())
-           && (specialty == null || specialty.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (period == null || period.isEmpty()) && (location == null || location.isEmpty())
-           && (healthcareService == null || healthcareService.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty, identifier
+          , telecom, period, location, healthcareService);
       }
 
   public String fhirType() {
@@ -1081,8 +1079,8 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (code == null || code.isEmpty())
-           && (period == null || period.isEmpty()) && (issuer == null || issuer.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, period, issuer
+          );
       }
 
   public String fhirType() {
@@ -2033,11 +2031,8 @@ Work addresses are not typically entered in this property as they are usually ro
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (active == null || active.isEmpty())
-           && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty())
-           && (gender == null || gender.isEmpty()) && (birthDate == null || birthDate.isEmpty()) && (photo == null || photo.isEmpty())
-           && (practitionerRole == null || practitionerRole.isEmpty()) && (qualification == null || qualification.isEmpty())
-           && (communication == null || communication.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name, telecom
+          , address, gender, birthDate, photo, practitionerRole, qualification, communication);
       }
 
   @Override

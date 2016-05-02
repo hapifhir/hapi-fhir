@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -275,8 +275,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -651,8 +650,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (system == null || system.isEmpty()) && (version == null || version.isEmpty())
-           && (code == null || code.isEmpty()) && (target == null || target.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, code, target);
       }
 
   public String fhirType() {
@@ -1249,9 +1247,8 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (system == null || system.isEmpty()) && (version == null || version.isEmpty())
-           && (code == null || code.isEmpty()) && (equivalence == null || equivalence.isEmpty()) && (comments == null || comments.isEmpty())
-           && (dependsOn == null || dependsOn.isEmpty()) && (product == null || product.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, code, equivalence
+          , comments, dependsOn, product);
       }
 
   public String fhirType() {
@@ -1543,8 +1540,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (element == null || element.isEmpty()) && (system == null || system.isEmpty())
-           && (code == null || code.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(element, system, code);
       }
 
   public String fhirType() {
@@ -2755,13 +2751,9 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (version == null || version.isEmpty()) && (name == null || name.isEmpty()) && (status == null || status.isEmpty())
-           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
-           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
-           && (useContext == null || useContext.isEmpty()) && (requirements == null || requirements.isEmpty())
-           && (copyright == null || copyright.isEmpty()) && (source == null || source.isEmpty()) && (target == null || target.isEmpty())
-           && (element == null || element.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
+          , status, experimental, publisher, contact, date, description, useContext, requirements, copyright
+          , source, target, element);
       }
 
   @Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -270,8 +270,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (contentType == null || contentType.isEmpty()) && (content == null || content.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(contentType, content);
       }
 
   @Override

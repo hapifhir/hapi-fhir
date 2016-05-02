@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -937,11 +937,8 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (number == null || number.isEmpty())
-           && (modality == null || modality.isEmpty()) && (description == null || description.isEmpty())
-           && (numberOfInstances == null || numberOfInstances.isEmpty()) && (availability == null || availability.isEmpty())
-           && (url == null || url.isEmpty()) && (bodySite == null || bodySite.isEmpty()) && (laterality == null || laterality.isEmpty())
-           && (started == null || started.isEmpty()) && (instance == null || instance.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, modality, description
+          , numberOfInstances, availability, url, bodySite, laterality, started, instance);
       }
 
   public String fhirType() {
@@ -1450,9 +1447,8 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (number == null || number.isEmpty())
-           && (sopClass == null || sopClass.isEmpty()) && (type == null || type.isEmpty()) && (title == null || title.isEmpty())
-           && (content == null || content.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, sopClass, type, title
+          , content);
       }
 
   public String fhirType() {
@@ -2738,14 +2734,9 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (accession == null || accession.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (availability == null || availability.isEmpty())
-           && (modalityList == null || modalityList.isEmpty()) && (patient == null || patient.isEmpty())
-           && (started == null || started.isEmpty()) && (order == null || order.isEmpty()) && (referrer == null || referrer.isEmpty())
-           && (interpreter == null || interpreter.isEmpty()) && (url == null || url.isEmpty()) && (numberOfSeries == null || numberOfSeries.isEmpty())
-           && (numberOfInstances == null || numberOfInstances.isEmpty()) && (procedure == null || procedure.isEmpty())
-           && (description == null || description.isEmpty()) && (series == null || series.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, accession, identifier, availability
+          , modalityList, patient, started, order, referrer, interpreter, url, numberOfSeries, numberOfInstances
+          , procedure, description, series);
       }
 
   @Override

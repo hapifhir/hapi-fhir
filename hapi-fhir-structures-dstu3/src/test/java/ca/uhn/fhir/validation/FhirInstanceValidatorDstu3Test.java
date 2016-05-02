@@ -158,6 +158,14 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
+		when(myMockSupport.fetchAllStructureDefinitions(any(FhirContext.class))).thenAnswer(new Answer<List<StructureDefinition>>() {
+			@Override
+			public List<StructureDefinition> answer(InvocationOnMock theInvocation) throws Throwable {
+				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0]);
+				ourLog.info("fetchAllStructureDefinitions()", new Object[] { });
+				return retVal;
+			}
+		});
 
 	}
 	
@@ -239,16 +247,21 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateRawJsonResourceBadAttributes() {
-		// @formatter:off
-		String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"," + "\"foo\":\"123\"" + "}";
-		// @formatter:on
+		//@formatter:off
+		String input = 
+			"{" + 
+			"\"resourceType\":\"Patient\"," + 
+			"\"id\":\"123\"," +
+			"\"foo\":\"123\"" + 
+			"}";
+		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertEquals("/foo", output.getMessages().get(0).getLocationString());
-		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+		assertEquals("/Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -279,17 +292,17 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateRawXmlResourceBadAttributes() {
-		// @formatter:off
+		//@formatter:off
     String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"
         + "</Patient>";
-    // @formatter:on
+    	//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertEquals("/f:Patient/f:foo", output.getMessages().get(0).getLocationString());
-		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Undefined element 'foo\"", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -329,9 +342,9 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors.toString(), containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
-		assertThat(errors.toString(), containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("Element encounter @ Observation: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}
 
@@ -362,7 +375,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+		assertEquals("Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
 
 	}
 
@@ -387,7 +400,7 @@ public class FhirInstanceValidatorDstu3Test {
 				+ "</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(
-				"The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
+				"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
 				output.getMessages().get(0).getMessage());
 	}
 
@@ -465,7 +478,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
-		assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
+		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
 		assertEquals(
 				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code",
 				all.get(0).getMessage());

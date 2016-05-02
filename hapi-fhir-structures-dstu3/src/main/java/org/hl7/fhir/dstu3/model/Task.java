@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -683,8 +683,7 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
       }
 
   public String fhirType() {
@@ -1012,8 +1011,7 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
       }
 
   public String fhirType() {
@@ -2223,13 +2221,9 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (description == null || description.isEmpty()) && (performerType == null || performerType.isEmpty())
-           && (priority == null || priority.isEmpty()) && (status == null || status.isEmpty()) && (failureReason == null || failureReason.isEmpty())
-           && (subject == null || subject.isEmpty()) && (for_ == null || for_.isEmpty()) && (definition == null || definition.isEmpty())
-           && (created == null || created.isEmpty()) && (lastModified == null || lastModified.isEmpty())
-           && (creator == null || creator.isEmpty()) && (owner == null || owner.isEmpty()) && (parent == null || parent.isEmpty())
-           && (input == null || input.isEmpty()) && (output == null || output.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, description, performerType
+          , priority, status, failureReason, subject, for_, definition, created, lastModified, creator
+          , owner, parent, input, output);
       }
 
   @Override

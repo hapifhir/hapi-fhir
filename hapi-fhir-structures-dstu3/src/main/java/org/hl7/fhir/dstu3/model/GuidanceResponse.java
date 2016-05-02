@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1258,12 +1258,9 @@ public class GuidanceResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (actionIdentifier == null || actionIdentifier.isEmpty()) && (label == null || label.isEmpty())
-           && (title == null || title.isEmpty()) && (description == null || description.isEmpty()) && (textEquivalent == null || textEquivalent.isEmpty())
-           && (concept == null || concept.isEmpty()) && (supportingEvidence == null || supportingEvidence.isEmpty())
-           && (relatedAction == null || relatedAction.isEmpty()) && (documentation == null || documentation.isEmpty())
-           && (participant == null || participant.isEmpty()) && (type == null || type.isEmpty()) && (behavior == null || behavior.isEmpty())
-           && (resource == null || resource.isEmpty()) && (action == null || action.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
+          , description, textEquivalent, concept, supportingEvidence, relatedAction, documentation, participant
+          , type, behavior, resource, action);
       }
 
   public String fhirType() {
@@ -1606,8 +1603,8 @@ public class GuidanceResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (actionIdentifier == null || actionIdentifier.isEmpty()) && (relationship == null || relationship.isEmpty())
-           && (offset == null || offset.isEmpty()) && (anchor == null || anchor.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
+          , offset, anchor);
       }
 
   public String fhirType() {
@@ -1792,8 +1789,7 @@ public class GuidanceResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (value == null || value.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
       }
 
   public String fhirType() {
@@ -2434,10 +2430,8 @@ public class GuidanceResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (requestId == null || requestId.isEmpty()) && (module == null || module.isEmpty())
-           && (status == null || status.isEmpty()) && (evaluationMessage == null || evaluationMessage.isEmpty())
-           && (outputParameters == null || outputParameters.isEmpty()) && (action == null || action.isEmpty())
-           && (dataRequirement == null || dataRequirement.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, module, status, evaluationMessage
+          , outputParameters, action, dataRequirement);
       }
 
   @Override

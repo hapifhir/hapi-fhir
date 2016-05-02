@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1687,8 +1687,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -1986,8 +1985,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (version == null || version.isEmpty())
-           && (releaseDate == null || releaseDate.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, version, releaseDate);
       }
 
   public String fhirType() {
@@ -2215,8 +2213,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, url);
       }
 
   public String fhirType() {
@@ -2979,11 +2976,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (mode == null || mode.isEmpty()) && (documentation == null || documentation.isEmpty())
-           && (security == null || security.isEmpty()) && (resource == null || resource.isEmpty()) && (interaction == null || interaction.isEmpty())
-           && (transactionMode == null || transactionMode.isEmpty()) && (searchParam == null || searchParam.isEmpty())
-           && (operation == null || operation.isEmpty()) && (compartment == null || compartment.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mode, documentation, security, resource
+          , interaction, transactionMode, searchParam, operation, compartment);
       }
 
   public String fhirType() {
@@ -3366,9 +3360,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (cors == null || cors.isEmpty()) && (service == null || service.isEmpty())
-           && (description == null || description.isEmpty()) && (certificate == null || certificate.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(cors, service, description, certificate
+          );
       }
 
   public String fhirType() {
@@ -3592,8 +3585,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (blob == null || blob.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, blob);
       }
 
   public String fhirType() {
@@ -4575,13 +4567,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (profile == null || profile.isEmpty())
-           && (interaction == null || interaction.isEmpty()) && (versioning == null || versioning.isEmpty())
-           && (readHistory == null || readHistory.isEmpty()) && (updateCreate == null || updateCreate.isEmpty())
-           && (conditionalCreate == null || conditionalCreate.isEmpty()) && (conditionalUpdate == null || conditionalUpdate.isEmpty())
-           && (conditionalDelete == null || conditionalDelete.isEmpty()) && (searchInclude == null || searchInclude.isEmpty())
-           && (searchRevInclude == null || searchRevInclude.isEmpty()) && (searchParam == null || searchParam.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, interaction, versioning
+          , readHistory, updateCreate, conditionalCreate, conditionalUpdate, conditionalDelete, searchInclude
+          , searchRevInclude, searchParam);
       }
 
   public String fhirType() {
@@ -4809,8 +4797,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (documentation == null || documentation.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, documentation);
       }
 
   public String fhirType() {
@@ -5460,10 +5447,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (definition == null || definition.isEmpty())
-           && (type == null || type.isEmpty()) && (documentation == null || documentation.isEmpty())
-           && (target == null || target.isEmpty()) && (modifier == null || modifier.isEmpty()) && (chain == null || chain.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, definition, type, documentation
+          , target, modifier, chain);
       }
 
   public String fhirType() {
@@ -5691,8 +5676,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (documentation == null || documentation.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, documentation);
       }
 
   public String fhirType() {
@@ -5922,8 +5906,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (definition == null || definition.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, definition);
       }
 
   public String fhirType() {
@@ -6307,9 +6290,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (endpoint == null || endpoint.isEmpty()) && (reliableCache == null || reliableCache.isEmpty())
-           && (documentation == null || documentation.isEmpty()) && (event == null || event.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(endpoint, reliableCache, documentation
+          , event);
       }
 
   public String fhirType() {
@@ -6514,8 +6496,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (protocol == null || protocol.isEmpty()) && (address == null || address.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(protocol, address);
       }
 
   public String fhirType() {
@@ -7064,10 +7045,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (category == null || category.isEmpty())
-           && (mode == null || mode.isEmpty()) && (focus == null || focus.isEmpty()) && (request == null || request.isEmpty())
-           && (response == null || response.isEmpty()) && (documentation == null || documentation.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, category, mode, focus, request
+          , response, documentation);
       }
 
   public String fhirType() {
@@ -7366,8 +7345,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (mode == null || mode.isEmpty()) && (documentation == null || documentation.isEmpty())
-           && (profile == null || profile.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mode, documentation, profile);
       }
 
   public String fhirType() {
@@ -9041,16 +9019,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
-           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
-           && (date == null || date.isEmpty()) && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty())
-           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
-           && (requirements == null || requirements.isEmpty()) && (copyright == null || copyright.isEmpty())
-           && (kind == null || kind.isEmpty()) && (software == null || software.isEmpty()) && (implementation == null || implementation.isEmpty())
-           && (fhirVersion == null || fhirVersion.isEmpty()) && (acceptUnknown == null || acceptUnknown.isEmpty())
-           && (format == null || format.isEmpty()) && (profile == null || profile.isEmpty()) && (rest == null || rest.isEmpty())
-           && (messaging == null || messaging.isEmpty()) && (document == null || document.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, version, name, status, experimental
+          , date, publisher, contact, description, useContext, requirements, copyright, kind, software
+          , implementation, fhirVersion, acceptUnknown, format, profile, rest, messaging, document);
       }
 
   @Override

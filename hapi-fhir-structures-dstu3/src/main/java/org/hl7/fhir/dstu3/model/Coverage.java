@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1296,13 +1296,9 @@ public class Coverage extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (issuer == null || issuer.isEmpty()) && (bin == null || bin.isEmpty())
-           && (period == null || period.isEmpty()) && (type == null || type.isEmpty()) && (planholder == null || planholder.isEmpty())
-           && (beneficiary == null || beneficiary.isEmpty()) && (relationship == null || relationship.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (group == null || group.isEmpty()) && (plan == null || plan.isEmpty())
-           && (subPlan == null || subPlan.isEmpty()) && (dependent == null || dependent.isEmpty()) && (sequence == null || sequence.isEmpty())
-           && (exception == null || exception.isEmpty()) && (school == null || school.isEmpty()) && (network == null || network.isEmpty())
-           && (contract == null || contract.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(issuer, bin, period, type, planholder
+          , beneficiary, relationship, identifier, group, plan, subPlan, dependent, sequence, exception
+          , school, network, contract);
       }
 
   @Override

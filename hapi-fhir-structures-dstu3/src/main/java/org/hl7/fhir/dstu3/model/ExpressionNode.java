@@ -1,9 +1,13 @@
 package org.hl7.fhir.dstu3.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.model.ExpressionNode.CollectionStatus;
+import org.hl7.fhir.dstu3.model.ExpressionNode.TypeDetails;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ExpressionNode {
@@ -36,12 +40,14 @@ public class ExpressionNode {
 			return Integer.toString(line)+", "+Integer.toString(column);
 		}
 	}
-	public enum Function {
+  public enum Function {
+    Custom, 
+    
     Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
     First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
     Children, Descendents, MemberOf, Trace, Today, Now, Resolve, Extension;
 
-		public static Function fromCode(String name) {
+    public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
       if (name.equals("not")) return Function.Not;
       if (name.equals("exists")) return Function.Exists;
@@ -83,11 +89,11 @@ public class ExpressionNode {
       if (name.equals("now")) return Function.Now;
       if (name.equals("resolve")) return Function.Resolve;
       if (name.equals("extension")) return Function.Extension;
-			return null;
-		}
-		public String toCode() {
-			switch (this) {
-			case Empty : return "empty";
+      return null;
+    }
+    public String toCode() {
+      switch (this) {
+      case Empty : return "empty";
       case Not : return "not";
       case Exists : return "exists";
       case SubsetOf : return "subsetOf";
@@ -95,17 +101,17 @@ public class ExpressionNode {
       case IsDistinct : return "isDistinct";
       case Distinct : return "distinct";
       case Count : return "count";
-			case Where : return "where";
+      case Where : return "where";
       case Select : return "select";
-			case All : return "all";
+      case All : return "all";
       case Repeat : return "repeat";
       case Item : return "item";
       case As : return "as";
       case Is : return "is";
       case Single : return "single";
-			case First : return "first";
-			case Last : return "last";
-			case Tail : return "tail";
+      case First : return "first";
+      case Last : return "last";
+      case Tail : return "tail";
       case Skip : return "skip";
       case Take : return "take";
       case Iif : return "iif";
@@ -113,11 +119,11 @@ public class ExpressionNode {
       case ToDecimal : return "toDecimal";
       case ToString : return "toString";
       case Substring : return "substring";
-			case StartsWith : return "startsWith";
+      case StartsWith : return "startsWith";
       case EndsWith : return "endsWith";
-			case Matches : return "matches";
+      case Matches : return "matches";
       case ReplaceMatches : return "replaceMatches";
-			case Contains : return "contains";
+      case Contains : return "contains";
       case Replace : return "replace";
       case Length : return "length";
       case Children : return "children";
@@ -126,16 +132,16 @@ public class ExpressionNode {
       case Trace : return "trace";
       case Today : return "today";
       case Now : return "now";
-			case Resolve : return "resolve";
-			case Extension : return "extension";
-			default: return "??";
-			}
-		}
-	}
+      case Resolve : return "resolve";
+      case Extension : return "extension";
+      default: return "??";
+      }
+    }
+  }
 
 	public enum Operation {
 		Equals, Equivalent, NotEquals, NotEquivalent, LessThen, Greater, LessOrEqual, GreaterOrEqual, Is, As, Union, Or, And, Xor, Implies, 
-		Times, DivideBy, Plus, Minus, Div, Mod, In;
+		Times, DivideBy, Plus, Minus, Concatenate, Div, Mod, In, Contains;
 
 		public static Operation fromCode(String name) {
 			if (Utilities.noString(name))
@@ -174,8 +180,10 @@ public class ExpressionNode {
         return Operation.DivideBy;
 			if (name.equals("+"))
 				return Operation.Plus;
-			if (name.equals("-"))
-				return Operation.Minus;
+      if (name.equals("-"))
+        return Operation.Minus;
+      if (name.equals("&"))
+        return Operation.Concatenate;
 			if (name.equals("implies"))
 				return Operation.Implies;
       if (name.equals("div"))
@@ -184,6 +192,8 @@ public class ExpressionNode {
         return Operation.Mod;
       if (name.equals("in"))
         return Operation.In;
+      if (name.equals("contains"))
+        return Operation.Contains;
 			return null;
 
 		}
@@ -203,18 +213,102 @@ public class ExpressionNode {
 			case Xor : return "xor";
       case Times : return "*";
       case DivideBy : return "/";
-			case Plus : return "+";
-			case Minus : return "-";
+      case Plus : return "+";
+      case Minus : return "-";
+      case Concatenate : return "&";
 			case Implies : return "implies";
       case Is : return "is";
       case As : return "as";
       case Div : return "div";
       case Mod : return "mod";
       case In : return "in";
+      case Contains : return "contains";
 			default: return "??";
 			}
 		}
 	}
+
+  public enum CollectionStatus {
+    SINGLETON, ORDERED, UNORDERED
+  }
+
+  public static class TypeDetails {
+    private Set<String> types = new HashSet<String>();
+    private CollectionStatus collectionStatus;
+    public TypeDetails(CollectionStatus collectionStatus, String... names) {
+      super();
+      this.collectionStatus = collectionStatus;
+      for (String n : names)
+        this.types.add(n);
+    }
+    public TypeDetails(CollectionStatus collectionStatus, Set<String> names) {
+      super();
+      this.collectionStatus = collectionStatus;
+      for (String n : names)
+        this.types.add(n);
+    }
+    public void addType(String n) {
+      this.types.add(n);      
+    }
+    public void addTypes(Collection<String> n) {
+      this.types.addAll(n);      
+    }
+    public boolean hasType(String... tn) {
+      for (String t: tn)
+      if (types.contains(t))
+        return true;
+      return false;
+    }
+    public void update(TypeDetails source) {
+      types.addAll(source.types);
+      if (collectionStatus == null)
+        collectionStatus = source.collectionStatus;
+      else if (source.collectionStatus == CollectionStatus.UNORDERED)
+        collectionStatus = source.collectionStatus;
+      else
+        collectionStatus = CollectionStatus.ORDERED;
+    }
+    public TypeDetails union(TypeDetails right) {
+      TypeDetails result = new TypeDetails(null);
+      if (right.collectionStatus == CollectionStatus.UNORDERED || collectionStatus == CollectionStatus.UNORDERED)
+        result.collectionStatus = CollectionStatus.UNORDERED;
+      else 
+        result.collectionStatus = CollectionStatus.ORDERED;
+      result.types.addAll(types);
+      result.types.addAll(right.types);
+      return result;
+    }
+    
+    public boolean hasNoTypes() {
+      return types.isEmpty();
+    }
+    public Set<String> getTypes() {
+      return types;
+    }
+    public TypeDetails toSingleton() {
+      TypeDetails result = new TypeDetails(CollectionStatus.SINGLETON);
+      result.types.addAll(types);
+      return result;
+    }
+    public CollectionStatus getCollectionStatus() {
+      return collectionStatus;
+    }
+    public boolean hasType(Set<String> tn) {
+      for (String t: tn)
+      if (types.contains(t))
+        return true;
+      return false;
+    }
+    public String describe() {
+      return types.toString();
+    }
+    public String getType() {
+      for (String t : types)
+        return t;
+      return null;
+    }
+    
+  }
 
 
 	//the expression will have one of either name or constant
@@ -233,8 +327,8 @@ public class ExpressionNode {
 	private SourceLocation end;
 	private SourceLocation opStart;
 	private SourceLocation opEnd;
-	private Set<String> types;
-	private Set<String> opTypes;
+	private TypeDetails types;
+	private TypeDetails opTypes;
 
 
 	public ExpressionNode(int uniqueId) {
@@ -242,6 +336,55 @@ public class ExpressionNode {
 		this.uniqueId = Integer.toString(uniqueId);
 	}
 
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		switch (kind) {
+		case Name:
+			b.append(name);
+			break;
+		case Function:
+			if (function == Function.Item) 
+				b.append("[");
+			else {
+				b.append(name);
+				b.append("(");
+			}
+			boolean first = true;
+			for (ExpressionNode n : parameters) {
+				if (first)
+					first = false;
+				else
+					b.append(", ");
+				b.append(n.toString());
+			}
+			if (function == Function.Item) 
+				b.append("]");
+			else {
+				b.append(")");
+			}
+			break;
+		case Constant:
+  	  b.append(Utilities.escapeJava(constant));
+			break;
+		case Group:
+			b.append("(");
+			b.append(group.toString());
+			b.append(")");
+		}
+		if (inner != null) {
+			b.append(".");
+			b.append(inner.toString());
+		}
+		if (operation != null) {
+			b.append(" ");
+			b.append(operation.toCode());
+			b.append(" ");
+			b.append(opNext.toString());
+		}
+			
+		return b.toString();
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -290,13 +433,11 @@ public class ExpressionNode {
 	public List<ExpressionNode> getParameters() {
 		return parameters;
 	}
-	public boolean checkName(boolean mappingExtensions) {
+	public boolean checkName() {
 		if (!name.startsWith("$"))
 			return true;
-		else if (mappingExtensions && name.equals("$value"))
-			return true;
 		else
-			return name.equals("$context") || name.equals("$resource") || name.equals("$parent");  
+			return name.equals("$this");  
 	}
 
 	public Kind getKind() {
@@ -473,20 +614,20 @@ public class ExpressionNode {
 		return Integer.toString(start.line)+", "+Integer.toString(start.column);
 	}
 
-	public Set<String> getTypes() {
+	public TypeDetails getTypes() {
 		return types;
 	}
 
-	public void setTypes(Set<String> types) {
+	public void setTypes(TypeDetails types) {
 		this.types = types;
 	}
 
-	public Set<String> getOpTypes() {
+	public TypeDetails getOpTypes() {
 		return opTypes;
 	}
 
-	public void setOpTypes(Set<String> opTypes) {
+	public void setOpTypes(TypeDetails opTypes) {
 		this.opTypes = opTypes;
 	}
-	
+		
 }

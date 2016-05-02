@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -777,10 +777,8 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (text == null || text.isEmpty()) && (timing == null || timing.isEmpty())
-           && (asNeeded == null || asNeeded.isEmpty()) && (site == null || site.isEmpty()) && (route == null || route.isEmpty())
-           && (method == null || method.isEmpty()) && (quantity == null || quantity.isEmpty()) && (rate == null || rate.isEmpty())
-           && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, timing, asNeeded, site, route
+          , method, quantity, rate, maxDosePerPeriod);
       }
 
   public String fhirType() {
@@ -1965,13 +1963,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (medication == null || medication.isEmpty()) && (patient == null || patient.isEmpty())
-           && (effective == null || effective.isEmpty()) && (informationSource == null || informationSource.isEmpty())
-           && (supportingInformation == null || supportingInformation.isEmpty()) && (dateAsserted == null || dateAsserted.isEmpty())
-           && (wasNotTaken == null || wasNotTaken.isEmpty()) && (reasonNotTaken == null || reasonNotTaken.isEmpty())
-           && (reasonForUseCode == null || reasonForUseCode.isEmpty()) && (reasonForUseReference == null || reasonForUseReference.isEmpty())
-           && (note == null || note.isEmpty()) && (dosage == null || dosage.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
+          , patient, effective, informationSource, supportingInformation, dateAsserted, wasNotTaken, reasonNotTaken
+          , reasonForUseCode, reasonForUseReference, note, dosage);
       }
 
   @Override

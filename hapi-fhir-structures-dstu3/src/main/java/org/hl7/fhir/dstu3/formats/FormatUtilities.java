@@ -38,6 +38,7 @@ public abstract class FormatUtilities {
   public static final String ID_REGEX = "[A-Za-z0-9\\-\\.]{1,64}";
   public static final String FHIR_NS = "http://hl7.org/fhir";
   public static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
+  public static final String NS_XSI = "http://www.w3.org/2001/XMLSchema-instance";
  
   protected String toString(String value) {
     return value;

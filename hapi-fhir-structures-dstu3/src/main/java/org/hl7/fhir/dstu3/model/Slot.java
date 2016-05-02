@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -991,12 +991,8 @@ public class Slot extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (serviceCategory == null || serviceCategory.isEmpty())
-           && (serviceType == null || serviceType.isEmpty()) && (specialty == null || specialty.isEmpty())
-           && (appointmentType == null || appointmentType.isEmpty()) && (schedule == null || schedule.isEmpty())
-           && (status == null || status.isEmpty()) && (start == null || start.isEmpty()) && (end == null || end.isEmpty())
-           && (overbooked == null || overbooked.isEmpty()) && (comment == null || comment.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, serviceCategory, serviceType
+          , specialty, appointmentType, schedule, status, start, end, overbooked, comment);
       }
 
   @Override

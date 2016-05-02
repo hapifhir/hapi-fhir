@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -418,8 +418,7 @@ public class DetectedIssue extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (action == null || action.isEmpty()) && (date == null || date.isEmpty())
-           && (author == null || author.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(action, date, author);
       }
 
   public String fhirType() {
@@ -1187,11 +1186,8 @@ public class DetectedIssue extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (patient == null || patient.isEmpty()) && (category == null || category.isEmpty())
-           && (severity == null || severity.isEmpty()) && (implicated == null || implicated.isEmpty())
-           && (detail == null || detail.isEmpty()) && (date == null || date.isEmpty()) && (author == null || author.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (reference == null || reference.isEmpty())
-           && (mitigation == null || mitigation.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, category, severity, implicated
+          , detail, date, author, identifier, reference, mitigation);
       }
 
   @Override

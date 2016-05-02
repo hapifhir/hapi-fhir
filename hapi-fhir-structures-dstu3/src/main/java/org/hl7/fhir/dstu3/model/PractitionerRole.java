@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -422,9 +422,8 @@ public class PractitionerRole extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (daysOfWeek == null || daysOfWeek.isEmpty()) && (allDay == null || allDay.isEmpty())
-           && (availableStartTime == null || availableStartTime.isEmpty()) && (availableEndTime == null || availableEndTime.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(daysOfWeek, allDay, availableStartTime
+          , availableEndTime);
       }
 
   public String fhirType() {
@@ -628,8 +627,7 @@ public class PractitionerRole extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (during == null || during.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, during);
       }
 
   public String fhirType() {
@@ -1744,13 +1742,9 @@ public class PractitionerRole extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (active == null || active.isEmpty())
-           && (practitioner == null || practitioner.isEmpty()) && (organization == null || organization.isEmpty())
-           && (role == null || role.isEmpty()) && (specialty == null || specialty.isEmpty()) && (location == null || location.isEmpty())
-           && (healthcareService == null || healthcareService.isEmpty()) && (telecom == null || telecom.isEmpty())
-           && (period == null || period.isEmpty()) && (availableTime == null || availableTime.isEmpty())
-           && (notAvailable == null || notAvailable.isEmpty()) && (availabilityExceptions == null || availabilityExceptions.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, practitioner
+          , organization, role, specialty, location, healthcareService, telecom, period, availableTime
+          , notAvailable, availabilityExceptions);
       }
 
   @Override

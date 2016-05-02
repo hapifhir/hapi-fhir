@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -800,8 +800,7 @@ public class Appointment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (actor == null || actor.isEmpty())
-           && (required == null || required.isEmpty()) && (status == null || status.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, actor, required, status);
       }
 
   public String fhirType() {
@@ -2006,13 +2005,9 @@ public class Appointment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (serviceCategory == null || serviceCategory.isEmpty()) && (serviceType == null || serviceType.isEmpty())
-           && (specialty == null || specialty.isEmpty()) && (appointmentType == null || appointmentType.isEmpty())
-           && (reason == null || reason.isEmpty()) && (priority == null || priority.isEmpty()) && (description == null || description.isEmpty())
-           && (start == null || start.isEmpty()) && (end == null || end.isEmpty()) && (minutesDuration == null || minutesDuration.isEmpty())
-           && (slot == null || slot.isEmpty()) && (created == null || created.isEmpty()) && (comment == null || comment.isEmpty())
-           && (participant == null || participant.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, serviceCategory
+          , serviceType, specialty, appointmentType, reason, priority, description, start, end, minutesDuration
+          , slot, created, comment, participant);
       }
 
   @Override

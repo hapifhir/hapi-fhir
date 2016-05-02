@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -715,8 +715,7 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (status == null || status.isEmpty()) && (period == null || period.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, period);
       }
 
   public String fhirType() {
@@ -994,8 +993,7 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (period == null || period.isEmpty())
-           && (individual == null || individual.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, period, individual);
       }
 
   public String fhirType() {
@@ -1859,13 +1857,9 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (preAdmissionIdentifier == null || preAdmissionIdentifier.isEmpty())
-           && (origin == null || origin.isEmpty()) && (admitSource == null || admitSource.isEmpty())
-           && (admittingDiagnosis == null || admittingDiagnosis.isEmpty()) && (reAdmission == null || reAdmission.isEmpty())
-           && (dietPreference == null || dietPreference.isEmpty()) && (specialCourtesy == null || specialCourtesy.isEmpty())
-           && (specialArrangement == null || specialArrangement.isEmpty()) && (destination == null || destination.isEmpty())
-           && (dischargeDisposition == null || dischargeDisposition.isEmpty()) && (dischargeDiagnosis == null || dischargeDiagnosis.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(preAdmissionIdentifier, origin
+          , admitSource, admittingDiagnosis, reAdmission, dietPreference, specialCourtesy, specialArrangement
+          , destination, dischargeDisposition, dischargeDiagnosis);
       }
 
   public String fhirType() {
@@ -2143,8 +2137,7 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (location == null || location.isEmpty()) && (status == null || status.isEmpty())
-           && (period == null || period.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(location, status, period);
       }
 
   public String fhirType() {
@@ -3633,15 +3626,9 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (statusHistory == null || statusHistory.isEmpty()) && (class_ == null || class_.isEmpty())
-           && (type == null || type.isEmpty()) && (priority == null || priority.isEmpty()) && (patient == null || patient.isEmpty())
-           && (episodeOfCare == null || episodeOfCare.isEmpty()) && (incomingReferral == null || incomingReferral.isEmpty())
-           && (participant == null || participant.isEmpty()) && (appointment == null || appointment.isEmpty())
-           && (period == null || period.isEmpty()) && (length == null || length.isEmpty()) && (reason == null || reason.isEmpty())
-           && (indication == null || indication.isEmpty()) && (hospitalization == null || hospitalization.isEmpty())
-           && (location == null || location.isEmpty()) && (serviceProvider == null || serviceProvider.isEmpty())
-           && (partOf == null || partOf.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
+          , class_, type, priority, patient, episodeOfCare, incomingReferral, participant, appointment
+          , period, length, reason, indication, hospitalization, location, serviceProvider, partOf);
       }
 
   @Override

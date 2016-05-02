@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -577,8 +577,7 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (longitude == null || longitude.isEmpty()) && (latitude == null || latitude.isEmpty())
-           && (altitude == null || altitude.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(longitude, latitude, altitude);
       }
 
   public String fhirType() {
@@ -1426,12 +1425,8 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (name == null || name.isEmpty()) && (description == null || description.isEmpty()) && (mode == null || mode.isEmpty())
-           && (type == null || type.isEmpty()) && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty())
-           && (physicalType == null || physicalType.isEmpty()) && (position == null || position.isEmpty())
-           && (managingOrganization == null || managingOrganization.isEmpty()) && (partOf == null || partOf.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, name, description
+          , mode, type, telecom, address, physicalType, position, managingOrganization, partOf);
       }
 
   @Override

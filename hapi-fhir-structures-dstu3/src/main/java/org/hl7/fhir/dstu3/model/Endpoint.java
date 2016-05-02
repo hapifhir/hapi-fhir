@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1047,11 +1047,8 @@ public class Endpoint extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (status == null || status.isEmpty()) && (managingOrganization == null || managingOrganization.isEmpty())
-           && (contact == null || contact.isEmpty()) && (connectionType == null || connectionType.isEmpty())
-           && (method == null || method.isEmpty()) && (period == null || period.isEmpty()) && (address == null || address.isEmpty())
-           && (payloadFormat == null || payloadFormat.isEmpty()) && (payloadType == null || payloadType.isEmpty())
-           && (header == null || header.isEmpty()) && (publicKey == null || publicKey.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, managingOrganization, contact
+          , connectionType, method, period, address, payloadFormat, payloadType, header, publicKey);
       }
 
   @Override

@@ -29,21 +29,21 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.utilities.Utilities;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Base definition for all elements in a resource.
  */
-public abstract class Element extends Base implements IBaseHasExtensions {
+public abstract class Element extends Base implements IBaseHasExtensions, IBaseElement {
 
     /**
      * unique id for the element within a resource (for internal references).
@@ -306,8 +306,7 @@ public abstract class Element extends Base implements IBaseHasExtensions {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (id == null || id.isEmpty()) && (extension == null || extension.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(id, extension);
       }
 
 

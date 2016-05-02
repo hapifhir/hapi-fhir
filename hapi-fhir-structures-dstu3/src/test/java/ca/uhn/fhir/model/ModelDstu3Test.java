@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Claim;
+import org.hl7.fhir.dstu3.model.Claim.CoverageComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -35,7 +36,7 @@ public class ModelDstu3Test {
 	@Test
 	public void testSetters() {
 		Claim claim = new Claim();
-		claim.setIdentifier(new ArrayList<Identifier>()).setCondition(new ArrayList<Coding>());
+		claim.setIdentifier(new ArrayList<Identifier>()).setCoverage(new ArrayList<CoverageComponent>());
 	}
 
 	/**

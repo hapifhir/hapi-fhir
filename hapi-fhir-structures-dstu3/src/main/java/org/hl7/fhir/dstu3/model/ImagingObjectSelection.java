@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -416,8 +416,8 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (url == null || url.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
-           && (series == null || series.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, url, imagingStudy, series
+          );
       }
 
   public String fhirType() {
@@ -727,8 +727,7 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (url == null || url.isEmpty()) && (instance == null || instance.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, url, instance);
       }
 
   public String fhirType() {
@@ -1101,8 +1100,7 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (sopClass == null || sopClass.isEmpty()) && (uid == null || uid.isEmpty())
-           && (url == null || url.isEmpty()) && (frame == null || frame.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid, url, frame);
       }
 
   public String fhirType() {
@@ -1357,8 +1355,7 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (number == null || number.isEmpty()) && (url == null || url.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(number, url);
       }
 
   public String fhirType() {
@@ -1924,10 +1921,8 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (uid == null || uid.isEmpty()) && (patient == null || patient.isEmpty())
-           && (authoringTime == null || authoringTime.isEmpty()) && (author == null || author.isEmpty())
-           && (title == null || title.isEmpty()) && (description == null || description.isEmpty()) && (study == null || study.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime, author
+          , title, description, study);
       }
 
   @Override

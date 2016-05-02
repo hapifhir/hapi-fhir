@@ -34,4 +34,11 @@ public class XhtmlDocument extends XhtmlNode {
     super(NodeType.Document);
   }
 
+  public XhtmlNode getDocumentElement() {
+  	for (XhtmlNode n : getChildNodes()) {
+  		if (n.getNodeType() == NodeType.Element)
+  			return n;
+  	}
+  	return null;
+  }
 }

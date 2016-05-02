@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1334,13 +1334,9 @@ public class Device extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (udiCarrier == null || udiCarrier.isEmpty())
-           && (status == null || status.isEmpty()) && (type == null || type.isEmpty()) && (lotNumber == null || lotNumber.isEmpty())
-           && (manufacturer == null || manufacturer.isEmpty()) && (manufactureDate == null || manufactureDate.isEmpty())
-           && (expirationDate == null || expirationDate.isEmpty()) && (model == null || model.isEmpty())
-           && (version == null || version.isEmpty()) && (patient == null || patient.isEmpty()) && (owner == null || owner.isEmpty())
-           && (contact == null || contact.isEmpty()) && (location == null || location.isEmpty()) && (url == null || url.isEmpty())
-           && (note == null || note.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, udiCarrier, status
+          , type, lotNumber, manufacturer, manufactureDate, expirationDate, model, version, patient, owner
+          , contact, location, url, note);
       }
 
   @Override

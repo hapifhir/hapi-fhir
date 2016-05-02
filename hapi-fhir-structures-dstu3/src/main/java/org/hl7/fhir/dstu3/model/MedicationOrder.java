@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -942,11 +942,8 @@ public class MedicationOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (text == null || text.isEmpty()) && (additionalInstructions == null || additionalInstructions.isEmpty())
-           && (timing == null || timing.isEmpty()) && (asNeeded == null || asNeeded.isEmpty()) && (site == null || site.isEmpty())
-           && (route == null || route.isEmpty()) && (method == null || method.isEmpty()) && (dose == null || dose.isEmpty())
-           && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty()) && (maxDosePerAdministration == null || maxDosePerAdministration.isEmpty())
-           && (rate == null || rate.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, additionalInstructions, timing
+          , asNeeded, site, route, method, dose, maxDosePerPeriod, maxDosePerAdministration, rate);
       }
 
   public String fhirType() {
@@ -1301,9 +1298,8 @@ public class MedicationOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (medication == null || medication.isEmpty()) && (validityPeriod == null || validityPeriod.isEmpty())
-           && (numberOfRepeatsAllowed == null || numberOfRepeatsAllowed.isEmpty()) && (quantity == null || quantity.isEmpty())
-           && (expectedSupplyDuration == null || expectedSupplyDuration.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(medication, validityPeriod, numberOfRepeatsAllowed
+          , quantity, expectedSupplyDuration);
       }
 
   public String fhirType() {
@@ -1487,8 +1483,7 @@ public class MedicationOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (reason == null || reason.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, reason);
       }
 
   public String fhirType() {
@@ -2710,14 +2705,9 @@ public class MedicationOrder extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (medication == null || medication.isEmpty()) && (patient == null || patient.isEmpty())
-           && (encounter == null || encounter.isEmpty()) && (dateWritten == null || dateWritten.isEmpty())
-           && (prescriber == null || prescriber.isEmpty()) && (reasonCode == null || reasonCode.isEmpty())
-           && (reasonReference == null || reasonReference.isEmpty()) && (dateEnded == null || dateEnded.isEmpty())
-           && (reasonEnded == null || reasonEnded.isEmpty()) && (note == null || note.isEmpty()) && (dosageInstruction == null || dosageInstruction.isEmpty())
-           && (dispenseRequest == null || dispenseRequest.isEmpty()) && (substitution == null || substitution.isEmpty())
-           && (priorPrescription == null || priorPrescription.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
+          , patient, encounter, dateWritten, prescriber, reasonCode, reasonReference, dateEnded, reasonEnded
+          , note, dosageInstruction, dispenseRequest, substitution, priorPrescription);
       }
 
   @Override

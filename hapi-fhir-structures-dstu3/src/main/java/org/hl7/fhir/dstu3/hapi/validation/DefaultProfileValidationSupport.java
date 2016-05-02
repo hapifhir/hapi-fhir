@@ -4,8 +4,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,12 +55,13 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return (CodeSystem) fetchCodeSystemOrValueSet(theContext, theSystem, true);
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return new ArrayList<StructureDefinition>(provideStructureDefinitionMap(theContext).values());
 	}
 
-	ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+	@Override
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+		return (CodeSystem) fetchCodeSystemOrValueSet(theContext, theSystem, true);
 	}
 
 	private DomainResource fetchCodeSystemOrValueSet(FhirContext theContext, String theSystem, boolean codeSystem) {
@@ -129,6 +132,20 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl) {
+		return provideStructureDefinitionMap(theContext).get(theUrl);
+	}
+
+	ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+		return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+	}
+
+	public void flush() {
+		myCodeSystems = null;
+		myStructureDefinitions = null;
+	}
+
+	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		CodeSystem cs = fetchCodeSystem(theContext, theSystem);
 		return cs != null;
@@ -185,6 +202,20 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		}
 	}
 
+	private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
+		Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
+		if (structureDefinitions == null) {
+			structureDefinitions = new HashMap<String, StructureDefinition>();
+
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-resources.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-types.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-others.xml");
+
+			myStructureDefinitions = structureDefinitions;
+		}
+		return structureDefinitions;
+	}
+
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
@@ -197,27 +228,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		}
 
 		return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
-	}
-
-	public void flush() {
-		myCodeSystems = null;
-		myStructureDefinitions = null;
-	}
-
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl) {
-		Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
-		if (structureDefinitions == null) {
-			structureDefinitions = new HashMap<String, StructureDefinition>();
-
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-resources.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-types.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-others.xml");
-
-			myStructureDefinitions = structureDefinitions;
-		}
-
-		return structureDefinitions.get(theUrl);
 	}
 
 }

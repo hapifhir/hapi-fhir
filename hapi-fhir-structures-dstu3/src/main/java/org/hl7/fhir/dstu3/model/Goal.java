@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -393,7 +393,7 @@ public class Goal extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (result == null || result.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(result);
       }
 
   public String fhirType() {
@@ -1471,13 +1471,9 @@ public class Goal extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
-           && (start == null || start.isEmpty()) && (target == null || target.isEmpty()) && (category == null || category.isEmpty())
-           && (description == null || description.isEmpty()) && (status == null || status.isEmpty())
-           && (statusDate == null || statusDate.isEmpty()) && (statusReason == null || statusReason.isEmpty())
-           && (expressedBy == null || expressedBy.isEmpty()) && (priority == null || priority.isEmpty())
-           && (addresses == null || addresses.isEmpty()) && (note == null || note.isEmpty()) && (outcome == null || outcome.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, start, target
+          , category, description, status, statusDate, statusReason, expressedBy, priority, addresses
+          , note, outcome);
       }
 
   @Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -589,9 +589,8 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (daysOfWeek == null || daysOfWeek.isEmpty()) && (allDay == null || allDay.isEmpty())
-           && (availableStartTime == null || availableStartTime.isEmpty()) && (availableEndTime == null || availableEndTime.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(daysOfWeek, allDay, availableStartTime
+          , availableEndTime);
       }
 
   public String fhirType() {
@@ -795,8 +794,7 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (description == null || description.isEmpty()) && (during == null || during.isEmpty())
-          ;
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, during);
       }
 
   public String fhirType() {
@@ -2615,18 +2613,10 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (providedBy == null || providedBy.isEmpty())
-           && (serviceCategory == null || serviceCategory.isEmpty()) && (serviceType == null || serviceType.isEmpty())
-           && (specialty == null || specialty.isEmpty()) && (location == null || location.isEmpty())
-           && (serviceName == null || serviceName.isEmpty()) && (comment == null || comment.isEmpty())
-           && (extraDetails == null || extraDetails.isEmpty()) && (photo == null || photo.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (coverageArea == null || coverageArea.isEmpty())
-           && (serviceProvisionCode == null || serviceProvisionCode.isEmpty()) && (eligibility == null || eligibility.isEmpty())
-           && (eligibilityNote == null || eligibilityNote.isEmpty()) && (programName == null || programName.isEmpty())
-           && (characteristic == null || characteristic.isEmpty()) && (referralMethod == null || referralMethod.isEmpty())
-           && (publicKey == null || publicKey.isEmpty()) && (appointmentRequired == null || appointmentRequired.isEmpty())
-           && (availableTime == null || availableTime.isEmpty()) && (notAvailable == null || notAvailable.isEmpty())
-           && (availabilityExceptions == null || availabilityExceptions.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, providedBy, serviceCategory
+          , serviceType, specialty, location, serviceName, comment, extraDetails, photo, telecom, coverageArea
+          , serviceProvisionCode, eligibility, eligibilityNote, programName, characteristic, referralMethod
+          , publicKey, appointmentRequired, availableTime, notAvailable, availabilityExceptions);
       }
 
   @Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 08:42-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1332,10 +1332,8 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (substance == null || substance.isEmpty()) && (certainty == null || certainty.isEmpty())
-           && (manifestation == null || manifestation.isEmpty()) && (description == null || description.isEmpty())
-           && (onset == null || onset.isEmpty()) && (severity == null || severity.isEmpty()) && (exposureRoute == null || exposureRoute.isEmpty())
-           && (note == null || note.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(substance, certainty, manifestation
+          , description, onset, severity, exposureRoute, note);
       }
 
   public String fhirType() {
@@ -2405,12 +2403,9 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (type == null || type.isEmpty()) && (category == null || category.isEmpty()) && (criticality == null || criticality.isEmpty())
-           && (substance == null || substance.isEmpty()) && (patient == null || patient.isEmpty()) && (recordedDate == null || recordedDate.isEmpty())
-           && (recorder == null || recorder.isEmpty()) && (reporter == null || reporter.isEmpty()) && (onset == null || onset.isEmpty())
-           && (lastOccurence == null || lastOccurence.isEmpty()) && (note == null || note.isEmpty())
-           && (reaction == null || reaction.isEmpty());
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type, category
+          , criticality, substance, patient, recordedDate, recorder, reporter, onset, lastOccurence, note
+          , reaction);
       }
 
   @Override

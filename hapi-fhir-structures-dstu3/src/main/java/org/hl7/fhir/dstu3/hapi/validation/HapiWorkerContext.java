@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
@@ -38,8 +39,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
-	private IValidationSupport myValidationSupport;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
+	private IValidationSupport myValidationSupport;
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
 		myCtx = theCtx;
@@ -47,8 +48,33 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
+	public List<StructureDefinition> allStructures() {
+		return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expand(ValueSet theSource) {
+		ValueSetExpansionOutcome vso;
+		try {
+			vso = getExpander().expand(theSource);
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+		if (vso.getError() != null) {
+			throw new InvalidRequestException(vso.getError());
+		} else {
+			return vso;
+		}
+	}
+
+	@Override
 	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
 		return myValidationSupport.expandValueSet(myCtx, theInc);
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -78,6 +104,21 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
+	public List<ConceptMap> findMapsForSource(String theUrl) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getAbbreviation(String theName) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ValueSetExpander getExpander() {
+		return new ValueSetExpanderSimple(this, this);
+	}
+
+	@Override
 	public INarrativeGenerator getNarrativeGenerator(String thePrefix, String theBasePath) {
 		throw new UnsupportedOperationException();
 	}
@@ -90,6 +131,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public IParser getParser(String theType) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<String> getResourceNames() {
+		List<String> result = new ArrayList<String>();
+		for (ResourceType next : ResourceType.values()) {
+			result.add(next.name());
+		}
+		Collections.sort(result);
+		return result;
 	}
 
 	@Override
@@ -113,12 +164,43 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
+	public String oid2Uri(String theCode) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean supportsSystem(String theSystem) {
 		if (myValidationSupport == null) {
 			return false;
 		} else {
 			return myValidationSupport.isCodeSystemSupported(myCtx, theSystem);
 		}
+	}
+
+	@Override
+	public Set<String> typeTails() {
+		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code", "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity",
+				"SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint", "Timing", "Reference", "Annotation", "Signature", "Meta"));
+	}
+
+	@Override
+	public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
+		for (Coding next : theCode.getCoding()) {
+			ValidationResult retVal = validateCode(next, theVs);
+			if (retVal != null && retVal.isOk()) {
+				return retVal;
+			}
+		}
+
+		return new ValidationResult(null, null);
+	}
+
+	@Override
+	public ValidationResult validateCode(Coding theCode, ValueSet theVs) {
+		String system = theCode.getSystem();
+		String code = theCode.getCode();
+		String display = theCode.getDisplay();
+		return validateCode(system, code, display, theVs);
 	}
 
 	@Override
@@ -172,76 +254,5 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			}
 			return null;
 		}
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expand(ValueSet theSource) {
-		ValueSetExpansionOutcome vso;
-		try {
-			vso = getExpander().expand(theSource);
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
-		}
-		if (vso.getError() != null) {
-			throw new InvalidRequestException(vso.getError());
-		} else {
-			return vso;
-		}
-	}
-
-	@Override
-	public List<ConceptMap> findMapsForSource(String theUrl) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValidationResult validateCode(Coding theCode, ValueSet theVs) {
-		String system = theCode.getSystem();
-		String code = theCode.getCode();
-		String display = theCode.getDisplay();
-		return validateCode(system, code, display, theVs);
-	}
-
-	@Override
-	public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
-		for (Coding next : theCode.getCoding()) {
-			ValidationResult retVal = validateCode(next, theVs);
-			if (retVal != null && retVal.isOk()) {
-				return retVal;
-			}
-		}
-
-		return new ValidationResult(null, null);
-	}
-
-	@Override
-	public List<String> getResourceNames() {
-		List<String> result = new ArrayList<String>();
-		for (ResourceType next : ResourceType.values()) {
-			result.add(next.name());
-		}
-		Collections.sort(result);
-		return result;
-	}
-
-	@Override
-	public String getAbbreviation(String theName) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValueSetExpander getExpander() {
-		return new ValueSetExpanderSimple(this, this);
-	}
-
-	@Override
-	public Set<String> typeTails() {
-		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code", "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity",
-				"SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint", "Timing", "Reference", "Annotation", "Signature", "Meta"));
 	}
 }
