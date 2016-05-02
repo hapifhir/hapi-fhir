@@ -31,12 +31,13 @@ import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class BaseSearchParamExtractor {
+public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
+	protected static final Pattern SPLIT = Pattern.compile("\\||( or )");
 
 	@Autowired
 	private FhirContext myContext;
@@ -74,5 +75,21 @@ public class BaseSearchParamExtractor {
 		myContext = theContext;
 	}
 
-	
+	@Override
+	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
+		List<PathAndRef> refs = new ArrayList<PathAndRef>();
+		String[] nextPathsSplit = theNextSpDef.getPath().split("\\|");
+		for (String nextPath : nextPathsSplit) {
+			nextPath = nextPath.trim();
+			for (Object nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject == null) {
+					continue;
+				}
+				refs.add(new PathAndRef(nextPath, nextObject));
+			}
+		}
+		return refs;
+	}
+
+
 }

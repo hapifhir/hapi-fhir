@@ -1,5 +1,8 @@
 package ca.uhn.fhir.cli;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -59,6 +62,11 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
+	}
+
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return Collections.emptyList();
 	}
 
 }

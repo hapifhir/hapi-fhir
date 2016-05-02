@@ -45,7 +45,6 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
@@ -60,6 +59,7 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -74,6 +74,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -84,7 +86,6 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
@@ -224,7 +225,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (isValidPid(theId)) {
 				return;
 			}
-			
+
 			ForcedId fid = new ForcedId();
 			fid.setResourceType(theEntity.getResourceType());
 			fid.setForcedId(theId.getIdPart());
@@ -259,121 +260,121 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				multiType = true;
 			}
 
-			String[] nextPathsSplit = nextPathsUnsplit.split("\\|");
-			for (String nextPath : nextPathsSplit) {
-				nextPath = nextPath.trim();
+			List<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource, nextSpDef);
+			List<Class<? extends IBaseResource>> allowedTypesInField = null;
+			for (PathAndRef nextPathAndRef : refs) {
+				Object nextObject = nextPathAndRef.getRef();
 
-				List<Class<? extends IBaseResource>> allowedTypesInField = null;
-				for (Object nextObject : extractValues(nextPath, theResource)) {
-					if (nextObject == null) {
+				ResourceLink nextEntity;
+				if (nextObject instanceof IBaseReference) {
+					IBaseReference nextValue = (IBaseReference) nextObject;
+					if (nextValue.isEmpty()) {
+						continue;
+					}
+					if (nextValue.getReferenceElement().isEmpty() || nextValue.getReferenceElement().getValue().startsWith("#")) {
+						// This is a blank or contained resource reference
 						continue;
 					}
 
-					ResourceLink nextEntity;
-					if (nextObject instanceof IBaseReference) {
-						IBaseReference nextValue = (IBaseReference) nextObject;
-						if (nextValue.isEmpty()) {
-							continue;
-						}
-						if (nextValue.getReferenceElement().isEmpty() || nextValue.getReferenceElement().getValue().startsWith("#")) {
-							// This is a blank or contained resource reference
-							continue;
-						}
-
-						String typeString = nextValue.getReferenceElement().getResourceType();
-						if (isBlank(typeString)) {
-							throw new InvalidRequestException(
-									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReferenceElement().getValue());
-						}
-						RuntimeResourceDefinition resourceDefinition;
-						try {
-							resourceDefinition = getContext().getResourceDefinition(typeString);
-						} catch (DataFormatException e) {
-							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - "
-									+ nextValue.getReferenceElement().getValue());
-						}
-
-						Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
-						String id = nextValue.getReferenceElement().getIdPart();
-						if (StringUtils.isBlank(id)) {
-							throw new InvalidRequestException(
-									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReferenceElement().getValue());
-						}
-
-						IFhirResourceDao<?> dao = getDao(type);
-						if (dao == null) {
-							StringBuilder b = new StringBuilder();
-							b.append("This server (version ");
-							b.append(myContext.getVersion().getVersion());
-							b.append(") is not able to handle resources of type[");
-							b.append(nextValue.getReferenceElement().getResourceType());
-							b.append("] - Valid resource types for this server: ");
-							b.append(myResourceTypeToDao.keySet().toString());
-
-							throw new InvalidRequestException(b.toString());
-						}
-						Long valueOf;
-						try {
-							valueOf = translateForcedIdToPid(typeString, id);
-						} catch (ResourceNotFoundException e) {
-							String resName = getContext().getResourceDefinition(type).getName();
-							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
-						}
-						ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
-						RuntimeResourceDefinition targetResourceDef = getContext().getResourceDefinition(type);
-						if (target == null) {
-							String resName = targetResourceDef.getName();
-							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
-						}
-
-						if (!typeString.equals(target.getResourceType())) {
-							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReferenceElement().getValue() + " but resource with ID "
-									+ nextValue.getReferenceElement().getIdPart() + " is actually of type " + target.getResourceType());
-						}
-
-						/*
-						 * Is the target type an allowable type of resource for the path where it is referenced?
-						 */
-
-						if (allowedTypesInField == null) {
-							BaseRuntimeChildDefinition childDef = getContext().newTerser().getDefinition(theResource.getClass(), nextPath);
-							if (childDef instanceof RuntimeChildResourceDefinition) {
-								RuntimeChildResourceDefinition resRefDef = (RuntimeChildResourceDefinition) childDef;
-								allowedTypesInField = resRefDef.getResourceTypes();
-							} else {
-								allowedTypesInField = new ArrayList<Class<? extends IBaseResource>>();
-								allowedTypesInField.add(IBaseResource.class);
-							}
-						}
-
-						boolean acceptableLink = false;
-						for (Class<? extends IBaseResource> next : allowedTypesInField) {
-							if (next.isAssignableFrom(targetResourceDef.getImplementingClass())) {
-								acceptableLink = true;
-								break;
-							}
-						}
-
-						if (!acceptableLink) {
-							throw new UnprocessableEntityException("Invalid reference found at path '" + nextPath + "'. Resource type '" + targetResourceDef.getName() + "' is not valid for this path");
-						}
-
-						nextEntity = new ResourceLink(nextPath, theEntity, target);
-					} else {
-						if (!multiType) {
-							if (nextSpDef.getName().equals("sourceuri")) {
-								continue; // TODO: disable this eventually - ConceptMap:sourceuri is of type reference but points to a URI
-							}
-							throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-						} else {
-							continue;
-						}
+					String typeString = nextValue.getReferenceElement().getResourceType();
+					if (isBlank(typeString)) {
+						throw new InvalidRequestException(
+								"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReferenceElement().getValue());
 					}
-					if (nextEntity != null) {
-						retVal.add(nextEntity);
+					RuntimeResourceDefinition resourceDefinition;
+					try {
+						resourceDefinition = getContext().getResourceDefinition(typeString);
+					} catch (DataFormatException e) {
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - "
+								+ nextValue.getReferenceElement().getValue());
+					}
+
+					Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
+					String id = nextValue.getReferenceElement().getIdPart();
+					if (StringUtils.isBlank(id)) {
+						throw new InvalidRequestException(
+								"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReferenceElement().getValue());
+					}
+
+					IFhirResourceDao<?> dao = getDao(type);
+					if (dao == null) {
+						StringBuilder b = new StringBuilder();
+						b.append("This server (version ");
+						b.append(myContext.getVersion().getVersion());
+						b.append(") is not able to handle resources of type[");
+						b.append(nextValue.getReferenceElement().getResourceType());
+						b.append("] - Valid resource types for this server: ");
+						b.append(myResourceTypeToDao.keySet().toString());
+
+						throw new InvalidRequestException(b.toString());
+					}
+					Long valueOf;
+					try {
+						valueOf = translateForcedIdToPid(typeString, id);
+					} catch (ResourceNotFoundException e) {
+						String resName = getContext().getResourceDefinition(type).getName();
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
+					}
+					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
+					RuntimeResourceDefinition targetResourceDef = getContext().getResourceDefinition(type);
+					if (target == null) {
+						String resName = targetResourceDef.getName();
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
+					}
+
+					if (!typeString.equals(target.getResourceType())) {
+						throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReferenceElement().getValue() + " but resource with ID "
+								+ nextValue.getReferenceElement().getIdPart() + " is actually of type " + target.getResourceType());
+					}
+
+					if (nextSpDef.getTargets() != null && !nextSpDef.getTargets().contains(typeString)) {
+						continue;
+					}
+					
+//					/*
+//					 * Is the target type an allowable type of resource for the path where it is referenced?
+//					 */
+//
+//					if (allowedTypesInField == null) {
+//						BaseRuntimeChildDefinition childDef = getContext().newTerser().getDefinition(theResource.getClass(), nextPathAndRef.getPath());
+//						if (childDef instanceof RuntimeChildResourceDefinition) {
+//							RuntimeChildResourceDefinition resRefDef = (RuntimeChildResourceDefinition) childDef;
+//							allowedTypesInField = resRefDef.getResourceTypes();
+//						} else {
+//							allowedTypesInField = new ArrayList<Class<? extends IBaseResource>>();
+//							allowedTypesInField.add(IBaseResource.class);
+//						}
+//					}
+//
+//					boolean acceptableLink = false;
+//					for (Class<? extends IBaseResource> next : allowedTypesInField) {
+//						if (next.isAssignableFrom(targetResourceDef.getImplementingClass())) {
+//							acceptableLink = true;
+//							break;
+//						}
+//					}
+//
+//					if (!acceptableLink) {
+//						throw new UnprocessableEntityException(
+//								"Invalid reference found at path '" + nextPathAndRef.getPath() + "'. Resource type '" + targetResourceDef.getName() + "' is not valid for this path");
+//					}
+
+					nextEntity = new ResourceLink(nextPathAndRef.getPath(), theEntity, target);
+				} else {
+					if (!multiType) {
+						if (nextSpDef.getName().equals("sourceuri")) {
+							continue; // TODO: disable this eventually - ConceptMap:sourceuri is of type reference but points to a URI
+						}
+						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
+					} else {
+						continue;
 					}
 				}
+				if (nextEntity != null) {
+					retVal.add(nextEntity);
+				}
 			}
+
 		}
 
 		theEntity.setHasLinks(retVal.size() > 0);
@@ -518,7 +519,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return myConfig;
 	}
 
-
 	@Override
 	public FhirContext getContext() {
 		return myContext;
@@ -655,7 +655,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				search.setTotalCount(myResourceHistoryTableDao.countForResourceInstance(theId));
 			}
 		}
-		
+
 		search = mySearchDao.save(search);
 
 		return new PersistedJpaBundleProvider(search.getUuid(), this);
@@ -679,7 +679,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		requestDetails.notifyIncomingRequestPreHandled(theOperationType);
-		
+
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		if (interceptors == null) {
 			return;
@@ -877,7 +877,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
-		
+
 		if (theEntity.isHasTags()) {
 			for (BaseTag next : tags) {
 				switch (next.getTag().getTagType()) {
@@ -976,7 +976,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 	}
-
 
 	public void setEntityManager(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -1458,6 +1457,63 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (tag != null) {
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
+		
+		String resName = getContext().getResourceDefinition(theResource).getName();
+		validateChildReferences(theResource, resName);
+		
+	}
+
+	private void validateChildReferences(IBase theElement, String thePath) {
+		if (theElement == null) {
+			return;
+		}
+		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
+		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
+			return;
+		}
+		
+		BaseRuntimeElementCompositeDefinition<?> cdef = (BaseRuntimeElementCompositeDefinition<?>)def;
+		for (BaseRuntimeChildDefinition nextChildDef : cdef.getChildren()) {
+			
+			List<IBase> values = nextChildDef.getAccessor().getValues(theElement);
+			if (values == null || values.isEmpty()) {
+				continue;
+			}
+			
+			String newPath = thePath + "." + nextChildDef.getElementName();
+
+			for (IBase nextChild : values) {
+				validateChildReferences(nextChild, newPath);
+			}
+			
+			if (nextChildDef instanceof RuntimeChildResourceDefinition) {
+				RuntimeChildResourceDefinition nextChildDefRes = (RuntimeChildResourceDefinition)nextChildDef;
+				Set<String> validTypes = new HashSet<String>();
+				boolean allowAny = false;
+				for (Class<? extends IBaseResource> nextValidType : nextChildDefRes.getResourceTypes()) {
+					if (nextValidType.isInterface()) {
+						allowAny = true;
+						break;
+					}
+					validTypes.add(getContext().getResourceDefinition(nextValidType).getName());
+				}
+				
+				if (allowAny) {
+					continue;
+				}
+				
+				for (IBase nextChild : values) {
+					IBaseReference nextRef = (IBaseReference)nextChild;
+					if (!isBlank(nextRef.getReferenceElement().getResourceType())) {
+						if (!validTypes.contains(nextRef.getReferenceElement().getResourceType())) {
+						throw new UnprocessableEntityException(
+						"Invalid reference found at path '" + newPath + "'. Resource type '" + nextRef.getReferenceElement().getResourceType() + "' is not valid for this path");							
+						}
+					}
+				}
+
+			}
+		}
 	}
 
 	protected static boolean isValidPid(IIdType theId) {
@@ -1561,7 +1617,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {
 		Validate.isTrue(theId.hasIdPart());
-		
+
 		if (isValidPid(theId)) {
 			return Collections.singletonList(theId.getIdPartAsLong());
 		} else {
@@ -1571,7 +1627,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			} else {
 				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
 			}
-			
+
 			if (forcedId.isEmpty() == false) {
 				List<Long> retVal = new ArrayList<Long>(forcedId.size());
 				for (ForcedId next : forcedId) {

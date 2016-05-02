@@ -769,7 +769,7 @@ class ModelScanner {
 				}
 
 
-				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments);
+				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()));
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
@@ -789,9 +789,22 @@ class ModelScanner {
 				compositeOf.add(param);
 			}
 
-			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null);
+			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()));
 			theResourceDef.addSearchParam(param);
 		}
+	}
+
+	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {
+		HashSet<String> retVal = new HashSet<String>();
+		
+		for (Class<? extends IBaseResource> nextType : theTarget) {
+			ResourceDef resourceDef = nextType.getAnnotation(ResourceDef.class);
+			if (resourceDef != null) {
+				retVal.add(resourceDef.name());
+			}
+		}
+		
+		return retVal;
 	}
 
 	private static Class<?> getGenericCollectionTypeOfCodedField(Field next) {

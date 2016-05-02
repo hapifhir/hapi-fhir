@@ -715,7 +715,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testCreateWithInvalidReferenceFailsGracefully() {
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
-		patient.setManagingOrganization(new Reference("Patient/99999999"));
+		patient.setManagingOrganization(new Reference("Organization/99999999"));
 		try {
 			myPatientDao.create(patient, mySrd);
 			fail();
@@ -748,8 +748,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		try {
 			myPatientDao.create(p, mySrd);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Invalid resource reference"));
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Blah' is not valid for this path"));
 		}
 	}
 

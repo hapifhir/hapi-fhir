@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -24,6 +26,7 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -48,5 +51,7 @@ public interface ISearchParamExtractor {
 	public abstract Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource);
 
 	public abstract Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource);
+
+	public abstract List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef);
 
 }

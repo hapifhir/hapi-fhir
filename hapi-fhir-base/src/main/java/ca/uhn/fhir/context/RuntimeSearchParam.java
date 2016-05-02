@@ -30,15 +30,16 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class RuntimeSearchParam {
 
-	private List<RuntimeSearchParam> myCompositeOf;
-	private String myDescription;
-	private String myName;
-	private RestSearchParameterTypeEnum myParamType;
-	private String myPath;
-	private Set<String> myProvidesMembershipInCompartments;
+	private final List<RuntimeSearchParam> myCompositeOf;
+	private final String myDescription;
+	private final String myName;
+	private final RestSearchParameterTypeEnum myParamType;
+	private final String myPath;
+	private final Set<String> myTargets;
+	private final Set<String> myProvidesMembershipInCompartments;
 
 	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-			Set<String> theProvidesMembershipInCompartments) {
+			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
@@ -50,10 +51,19 @@ public class RuntimeSearchParam {
 		} else {
 			myProvidesMembershipInCompartments = null;
 		}
+		if (theTargets != null && theTargets.isEmpty() == false) {
+			myTargets = Collections.unmodifiableSet(theTargets);
+		} else {
+			myTargets = null;
+		}
 	}
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments) {
-		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments);
+	public Set<String> getTargets() {
+		return myTargets;
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
+		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {

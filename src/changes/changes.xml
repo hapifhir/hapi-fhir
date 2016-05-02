@@ -79,6 +79,11 @@
 				DSTU2 structures. Thanks to Rahul Somasunderam and
 				Claude Nanjo for the suggestions! 
 			</action>
+			<action type="add">
+				JPA server has now been refactored to use the
+				new FluentPath search parameter definitions
+				for DSTU3 resources.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Claim;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
@@ -22,11 +23,6 @@ import ca.uhn.fhir.util.TestUtil;
 public class ModelDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	@Test
 	public void testCompositeNames() {

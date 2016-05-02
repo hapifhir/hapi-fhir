@@ -83,7 +83,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 	public void testCreateWithInvalidReferenceFailsGracefully() {
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
-		patient.setManagingOrganization(new ResourceReferenceDt("Patient/99999999"));
+		patient.setManagingOrganization(new ResourceReferenceDt("Organization/99999999"));
 		try {
 			ourPatientDao.create(patient, mySrd);
 			fail();
