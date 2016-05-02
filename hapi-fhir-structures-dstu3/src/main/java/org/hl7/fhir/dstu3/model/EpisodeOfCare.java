@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1398,7 +1398,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="EpisodeOfCare.period", description="The provided date search value falls within the episode of care's period", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="EpisodeOfCare.period", description="The provided date search value falls within the episode of care's period", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1418,7 +1420,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) for the EpisodeOfCare", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) for the EpisodeOfCare", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1438,7 +1442,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference" )
+  // [Condition]
+  // [Condition]
+  @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class} )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -1464,7 +1470,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.referralRequest</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference" )
+  // [ReferralRequest]
+  // [ReferralRequest]
+  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference", target={ReferralRequest.class} )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
@@ -1490,7 +1498,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1516,7 +1526,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1542,7 +1554,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Type/class  - e.g. specialist referral, disease management", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Type/class  - e.g. specialist referral, disease management", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1562,7 +1576,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference", target={Practitioner.class} )
   public static final String SP_CARE_MANAGER = "care-manager";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-manager</b>
@@ -1588,7 +1604,9 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="EpisodeOfCare.status", description="The current status of the Episode of Care as provided (does not check the status history collection)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="EpisodeOfCare.status", description="The current status of the Episode of Care as provided (does not check the status history collection)", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

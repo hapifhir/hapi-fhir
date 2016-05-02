@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1727,7 +1727,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date", target={} )
   public static final String SP_AUTHORED = "authored";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authored</b>
@@ -1747,7 +1749,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.questionnaire</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
+  // [Questionnaire]
+  // [Questionnaire]
+  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference", target={Questionnaire.class} )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>questionnaire</b>
@@ -1773,6 +1777,8 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1799,7 +1805,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference" )
+  // [Practitioner, Device, Patient, RelatedPerson]
+  // [Practitioner, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1825,6 +1833,8 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Patient]
   @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1851,7 +1861,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1877,7 +1889,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference" )
+  // [Practitioner, Patient, RelatedPerson]
+  // [Practitioner, Patient, RelatedPerson]
+  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1903,7 +1917,9 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

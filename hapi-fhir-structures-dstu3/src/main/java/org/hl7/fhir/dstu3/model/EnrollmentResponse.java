@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -803,7 +803,9 @@ public class EnrollmentResponse extends DomainResource {
    * Path: <b>EnrollmentResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EnrollmentResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="EnrollmentResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>

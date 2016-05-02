@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1931,7 +1931,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.severity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token", target={} )
   public static final String SP_SEVERITY = "severity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>severity</b>
@@ -1951,7 +1953,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1971,7 +1975,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.clinicalStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token", target={} )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>clinicalstatus</b>
@@ -1991,7 +1997,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string", target={} )
   public static final String SP_ONSET_INFO = "onset-info";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset-info</b>
@@ -2011,7 +2019,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2031,7 +2041,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.evidence.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token", target={} )
   public static final String SP_EVIDENCE = "evidence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>evidence</b>
@@ -2051,7 +2063,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2077,7 +2091,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date", target={} )
   public static final String SP_ONSET = "onset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset</b>
@@ -2097,7 +2113,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.asserter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference" )
+  // [Practitioner, Patient]
+  // [Practitioner, Patient]
+  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", target={Practitioner.class, Patient.class} )
   public static final String SP_ASSERTER = "asserter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>asserter</b>
@@ -2123,7 +2141,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.dateRecorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date", target={} )
   public static final String SP_DATE_RECORDED = "date-recorded";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date-recorded</b>
@@ -2143,7 +2163,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.stage.summary</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token", target={} )
   public static final String SP_STAGE = "stage";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>stage</b>
@@ -2163,7 +2185,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2189,7 +2213,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2209,7 +2235,9 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token", target={} )
   public static final String SP_BODY_SITE = "body-site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>body-site</b>

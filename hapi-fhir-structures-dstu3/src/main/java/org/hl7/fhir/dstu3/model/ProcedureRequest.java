@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1474,7 +1474,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1494,7 +1496,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference" )
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1520,7 +1524,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference" )
+  // [Group, Patient]
+  // [Group, Patient]
+  @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1546,7 +1552,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference" )
+  // [Group, Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference", target={Group.class, Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1572,7 +1580,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference" )
+  // [Practitioner, Device, Patient, RelatedPerson]
+  // [Practitioner, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_ORDERER = "orderer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
@@ -1598,7 +1608,9 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

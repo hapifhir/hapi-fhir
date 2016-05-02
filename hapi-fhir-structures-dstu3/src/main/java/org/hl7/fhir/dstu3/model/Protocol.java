@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -4076,7 +4076,9 @@ public class Protocol extends DomainResource {
    * Path: <b>Protocol.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Protocol.identifier", description="The unique id for a particular protocol", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Protocol.identifier", description="The unique id for a particular protocol", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4096,7 +4098,9 @@ public class Protocol extends DomainResource {
    * Path: <b>Protocol.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference" )
+  // [Condition, Device, Medication]
+  // [Condition, Device, Medication]
+  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference", target={Condition.class, Device.class, Medication.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

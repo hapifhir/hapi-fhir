@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -83,9 +84,15 @@ public class BaseDstu3Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Primary
 	@Bean(autowire=Autowire.BY_NAME, name="myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
 		return new JpaValidationSupportChainDstu3();
 	}
 
+	@Bean(autowire=Autowire.BY_TYPE)
+	public SearchParamExtractorDstu3 searchParamExtractor() {
+		return new SearchParamExtractorDstu3();
+	}
+	
 }

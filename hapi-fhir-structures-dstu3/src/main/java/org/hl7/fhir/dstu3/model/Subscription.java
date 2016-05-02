@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1315,7 +1315,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string", target={} )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
@@ -1335,7 +1337,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.criteria</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string", target={} )
   public static final String SP_CRITERIA = "criteria";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criteria</b>
@@ -1355,7 +1359,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.contact</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token", target={} )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
@@ -1375,7 +1381,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.tag</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token", target={} )
   public static final String SP_TAG = "tag";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>tag</b>
@@ -1395,7 +1403,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1415,7 +1425,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1435,7 +1447,9 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

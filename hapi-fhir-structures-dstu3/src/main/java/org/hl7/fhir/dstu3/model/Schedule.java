@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -623,7 +623,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference" )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -649,7 +651,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.planningHorizon</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -669,7 +673,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -689,7 +695,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

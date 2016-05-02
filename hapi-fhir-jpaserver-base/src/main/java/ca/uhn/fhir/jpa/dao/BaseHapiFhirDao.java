@@ -213,6 +213,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private ISearchDao mySearchDao;
 
+	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	@Autowired
@@ -380,14 +381,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
+	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
+	}
+
 	// @Override
 	// public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
 	// myResourceDaos = theResourceDaos;
 	// }
-
-	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
-	}
 
 	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
@@ -513,10 +514,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-
 	protected DaoConfig getConfig() {
 		return myConfig;
 	}
+
 
 	@Override
 	public FhirContext getContext() {
@@ -949,6 +950,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		throw new NotImplementedException("");
 	}
 
+	public void setConfig(DaoConfig theConfig) {
+		myConfig = theConfig;
+	}
+
 	// protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
 	// MetaDt retVal = new MetaDt();
 	// for (TagDefinition next : tagDefinitions) {
@@ -967,27 +972,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	// return retVal;
 	// }
 
-	public void setConfig(DaoConfig theConfig) {
-		myConfig = theConfig;
-	}
-
 	@Autowired
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
-		switch (myContext.getVersion().getVersion()) {
-		case DSTU1:
-			mySearchParamExtractor = new SearchParamExtractorDstu1(theContext);
-			break;
-		case DSTU2:
-			mySearchParamExtractor = new SearchParamExtractorDstu2(theContext);
-			break;
-		case DSTU3:
-			mySearchParamExtractor = new SearchParamExtractorDstu3(theContext);
-			break;
-		case DSTU2_HL7ORG:
-			throw new IllegalStateException("Don't know how to handle version: " + myContext.getVersion().getVersion());
-		}
 	}
+
 
 	public void setEntityManager(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -1088,16 +1077,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
 
-	protected List<Long> translateForcedIdToPids(IIdType theId) {
-		return translateForcedIdToPids(theId, myForcedIdDao);
-	}
-
-	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao theForcedIdDao) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
-	}
-
 	protected Long translateForcedIdToPid(String theResourceName, String theResourceId) {
 		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
+	}
+
+	protected List<Long> translateForcedIdToPids(IIdType theId) {
+		return translateForcedIdToPids(theId, myForcedIdDao);
 	}
 
 	protected String translatePidIdToForcedId(String theResourceType, Long theId) {
@@ -1568,6 +1553,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			retVal.add((BaseCodingDt) next);
 		}
 		return retVal;
+	}
+
+	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao theForcedIdDao) {
+		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
 	}
 
 	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {

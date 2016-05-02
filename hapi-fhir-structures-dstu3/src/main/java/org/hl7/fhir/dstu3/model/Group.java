@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1547,7 +1547,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.actual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token", target={} )
   public static final String SP_ACTUAL = "actual";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actual</b>
@@ -1567,7 +1569,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1587,7 +1591,9 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"} )
+  // []
+  // []
+  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"}, target={} )
   public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>
@@ -1607,7 +1613,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1627,7 +1635,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.member.entity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference" )
+  // [Practitioner, Device, Medication, Patient, Substance]
+  // [Practitioner, Device, Medication, Patient, Substance]
+  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", target={Practitioner.class, Device.class, Medication.class, Patient.class, Substance.class} )
   public static final String SP_MEMBER = "member";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>member</b>
@@ -1653,7 +1663,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.exclude</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token", target={} )
   public static final String SP_EXCLUDE = "exclude";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>exclude</b>
@@ -1673,7 +1685,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1693,7 +1707,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value", path="Group.characteristic.value", description="Value held by characteristic", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="value", path="Group.characteristic.value", description="Value held by characteristic", type="token", target={} )
   public static final String SP_VALUE = "value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value</b>
@@ -1713,7 +1729,9 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token", target={} )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>

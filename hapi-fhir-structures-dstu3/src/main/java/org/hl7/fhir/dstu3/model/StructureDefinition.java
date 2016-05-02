@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3202,7 +3202,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="StructureDefinition.date", description="The profile publication date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="StructureDefinition.date", description="The profile publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3222,7 +3224,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3242,7 +3246,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3262,7 +3268,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.binding.valueSet[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet", description="A vocabulary binding reference", type="reference" )
+  // [ValueSet]
+  // [ValueSet]
+  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet", description="A vocabulary binding reference", type="reference", target={ValueSet.class} )
   public static final String SP_VALUESET = "valueset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>valueset</b>
@@ -3288,7 +3296,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="StructureDefinition.kind", description="datatype | resource | logical", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="kind", path="StructureDefinition.kind", description="datatype | resource | logical", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -3308,7 +3318,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.display</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string", target={} )
   public static final String SP_DISPLAY = "display";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>display</b>
@@ -3328,7 +3340,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -3348,7 +3362,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.experimental</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
@@ -3368,7 +3384,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.contextType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | extension", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | extension", type="token", target={} )
   public static final String SP_CONTEXT_TYPE = "context-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
@@ -3388,7 +3406,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.abstract</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token", target={} )
   public static final String SP_ABSTRACT = "abstract";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>abstract</b>
@@ -3408,7 +3428,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.baseType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="StructureDefinition.baseType", description="Any datatype or resource, including abstract ones", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="StructureDefinition.baseType", description="Any datatype or resource, including abstract ones", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -3428,7 +3450,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3448,7 +3472,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Absolute URL used to reference this StructureDefinition", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Absolute URL used to reference this StructureDefinition", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -3468,7 +3494,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.path, StructureDefinition.differential.element.path</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path | StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path | StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token", target={} )
   public static final String SP_PATH = "path";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>path</b>
@@ -3488,7 +3516,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string", target={} )
   public static final String SP_EXT_CONTEXT = "ext-context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ext-context</b>
@@ -3508,7 +3538,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3528,7 +3560,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3548,7 +3582,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.base.path, StructureDefinition.differential.element.base.path</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path | StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path | StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token", target={} )
   public static final String SP_BASE_PATH = "base-path";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base-path</b>
@@ -3568,7 +3604,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3588,7 +3626,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.derivation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="derivation", path="StructureDefinition.derivation", description="specialization | constraint - How relates to base definition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="derivation", path="StructureDefinition.derivation", description="specialization | constraint - How relates to base definition", type="token", target={} )
   public static final String SP_DERIVATION = "derivation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>derivation</b>
@@ -3608,7 +3648,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -3628,7 +3670,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.baseDefinition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="uri", target={} )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>

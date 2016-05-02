@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2752,7 +2752,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2772,7 +2774,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri", target={} )
   public static final String SP_UID = "uid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>uid</b>
@@ -2792,7 +2796,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri", target={} )
   public static final String SP_STUDY = "study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>study</b>
@@ -2812,7 +2818,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri", target={} )
   public static final String SP_DICOM_CLASS = "dicom-class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
@@ -2832,7 +2840,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.modality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token", target={} )
   public static final String SP_MODALITY = "modality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>modality</b>
@@ -2852,7 +2862,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -2872,7 +2884,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2898,7 +2912,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri", target={} )
   public static final String SP_SERIES = "series";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>series</b>
@@ -2918,7 +2934,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.started</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date", target={} )
   public static final String SP_STARTED = "started";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>started</b>
@@ -2938,7 +2956,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.accession</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token", target={} )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
@@ -2958,7 +2978,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.order</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
+  // [DiagnosticOrder]
+  // [DiagnosticOrder]
+  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference", target={DiagnosticOrder.class} )
   public static final String SP_ORDER = "order";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>order</b>

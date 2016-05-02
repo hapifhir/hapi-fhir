@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1008,7 +1008,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference" )
+  // [Schedule]
+  // [Schedule]
+  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference", target={Schedule.class} )
   public static final String SP_SCHEDULE = "schedule";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>schedule</b>
@@ -1034,7 +1036,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1054,7 +1058,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date", target={} )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
@@ -1074,7 +1080,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token", target={} )
   public static final String SP_SLOT_TYPE = "slot-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>slot-type</b>
@@ -1094,7 +1102,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

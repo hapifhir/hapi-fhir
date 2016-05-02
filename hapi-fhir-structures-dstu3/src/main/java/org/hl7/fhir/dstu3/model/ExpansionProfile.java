@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3560,7 +3560,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ExpansionProfile.date", description="The expansion profile publication date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="ExpansionProfile.date", description="The expansion profile publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3580,7 +3582,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ExpansionProfile.identifier", description="The identifier for the expansion profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ExpansionProfile.identifier", description="The identifier for the expansion profile", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3600,7 +3604,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ExpansionProfile.name", description="The name of the expansion profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="ExpansionProfile.name", description="The name of the expansion profile", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3620,7 +3626,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ExpansionProfile.publisher", description="Name of the publisher of the expansion profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="ExpansionProfile.publisher", description="Name of the publisher of the expansion profile", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3640,7 +3648,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ExpansionProfile.description", description="Text search in the description of the expansion profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="ExpansionProfile.description", description="Text search in the description of the expansion profile", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -3660,7 +3670,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ExpansionProfile.version", description="The version identifier of the expansion profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="ExpansionProfile.version", description="The version identifier of the expansion profile", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3680,7 +3692,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ExpansionProfile.url", description="The logical URL for the expansion profile", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="ExpansionProfile.url", description="The logical URL for the expansion profile", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -3700,7 +3714,9 @@ public class ExpansionProfile extends DomainResource {
    * Path: <b>ExpansionProfile.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ExpansionProfile.status", description="The status of the expansion profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="ExpansionProfile.status", description="The status of the expansion profile", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

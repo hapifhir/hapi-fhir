@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3234,7 +3234,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingExcerpt.uid", description="UID of key DICOM object selection", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ImagingExcerpt.uid", description="UID of key DICOM object selection", type="uri", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3254,7 +3256,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.authoringTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authoring-time", path="ImagingExcerpt.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="authoring-time", path="ImagingExcerpt.authoringTime", description="Time of key DICOM object selection authoring", type="date", target={} )
   public static final String SP_AUTHORING_TIME = "authoring-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
@@ -3274,7 +3278,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.study.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="selected-study", path="ImagingExcerpt.study.uid", description="Study selected in key DICOM object selection", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="selected-study", path="ImagingExcerpt.study.uid", description="Study selected in key DICOM object selection", type="uri", target={} )
   public static final String SP_SELECTED_STUDY = "selected-study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
@@ -3294,7 +3300,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="ImagingExcerpt.author", description="Author of key DICOM object selection", type="reference" )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="author", path="ImagingExcerpt.author", description="Author of key DICOM object selection", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -3320,7 +3328,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingExcerpt.patient", description="Subject of key DICOM object selection", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="ImagingExcerpt.patient", description="Subject of key DICOM object selection", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3346,7 +3356,9 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ImagingExcerpt.title", description="Title of key DICOM object selection", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="title", path="ImagingExcerpt.title", description="Title of key DICOM object selection", type="token", target={} )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>

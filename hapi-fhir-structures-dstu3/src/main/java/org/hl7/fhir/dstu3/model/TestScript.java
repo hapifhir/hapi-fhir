@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -11234,7 +11234,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -11254,7 +11256,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.test.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string", target={} )
   public static final String SP_TESTSCRIPT_TEST_CAPABILITY = "testscript-test-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-test-capability</b>
@@ -11274,7 +11278,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.setup.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string", target={} )
   public static final String SP_TESTSCRIPT_SETUP_CAPABILITY = "testscript-setup-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-setup-capability</b>
@@ -11294,7 +11300,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -11314,7 +11322,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -11334,7 +11344,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string", target={} )
   public static final String SP_TESTSCRIPT_CAPABILITY = "testscript-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-capability</b>
@@ -11354,7 +11366,9 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>

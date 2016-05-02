@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3912,7 +3912,9 @@ public class Sequence extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite", compositeOf={"chromosome", "start"} )
+  // []
+  // []
+  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite", compositeOf={"chromosome", "start"}, target={} )
   public static final String SP_COORDINATE = "coordinate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
@@ -3932,7 +3934,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.species</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="species", path="Sequence.species", description="The organism from which sample of the sequence was extracted.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="species", path="Sequence.species", description="The organism from which sample of the sequence was extracted.", type="token", target={} )
   public static final String SP_SPECIES = "species";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>species</b>
@@ -3952,7 +3956,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Sequence.patient", description="The subject that the observation is about", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Sequence.patient", description="The subject that the observation is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3978,7 +3984,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.referenceSeq.chromosome</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="chromosome", path="Sequence.referenceSeq.chromosome", description="Chromosome of the sequence", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="chromosome", path="Sequence.referenceSeq.chromosome", description="Chromosome of the sequence", type="token", target={} )
   public static final String SP_CHROMOSOME = "chromosome";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>chromosome</b>
@@ -3998,7 +4006,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.variation.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Sequence.variation.start", description="Start position (0-based inclusive) of the sequence", type="number" )
+  // []
+  // []
+  @SearchParamDefinition(name="start", path="Sequence.variation.start", description="Start position (0-based inclusive) of the sequence", type="number", target={} )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
@@ -4018,7 +4028,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.variation.end</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="end", path="Sequence.variation.end", description="End position (0-based exclusive) of the sequence", type="number" )
+  // []
+  // []
+  @SearchParamDefinition(name="end", path="Sequence.variation.end", description="End position (0-based exclusive) of the sequence", type="number", target={} )
   public static final String SP_END = "end";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>end</b>
@@ -4038,7 +4050,9 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Sequence.type", description="The type of the variant: Amino acid / cDNA transcript / RNA variation.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Sequence.type", description="The type of the variant: Amino acid / cDNA transcript / RNA variation.", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

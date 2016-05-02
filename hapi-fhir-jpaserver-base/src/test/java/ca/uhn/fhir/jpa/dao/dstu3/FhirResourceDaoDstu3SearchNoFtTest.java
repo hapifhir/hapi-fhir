@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
@@ -92,7 +93,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
@@ -432,6 +432,36 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
 		params.setLastUpdated(new DateRangeParam(new Date(betweenTime), null));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id2));
+
+	}
+
+	/**
+	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Understanding.20_include
+	 */
+	@Test
+	@Ignore
+	public void testSearchWithTypedInclude() {
+		IIdType patId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType practId;
+		{
+			Practitioner pract = new Practitioner();
+			pract.addIdentifier().setSystem("urn:system").setValue("001");
+			practId = myPractitionerDao.create(pract, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Appointment appt = new Appointment();
+		appt.addParticipant().getActor().setReference(patId.getValue());		
+		appt.addParticipant().getActor().setReference(practId.getValue());
+		IIdType apptId = myAppointmentDao.create(appt, mySrd).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap params = new SearchParameterMap();
+		params.addInclude(Appointment.INCLUDE_PATIENT);
+		assertThat(toUnqualifiedVersionlessIds(myAppointmentDao.search(params)), containsInAnyOrder(patId, apptId));
 
 	}
 

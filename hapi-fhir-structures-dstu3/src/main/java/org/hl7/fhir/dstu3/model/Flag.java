@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -738,7 +738,9 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -758,7 +760,9 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
+  // [Practitioner, Group, Organization, Patient, Location]
+  // [Practitioner, Group, Organization, Patient, Location]
+  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Practitioner.class, Group.class, Organization.class, Patient.class, Location.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -784,7 +788,9 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
+  // [Practitioner, Group, Organization, Patient, Location]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Practitioner.class, Group.class, Organization.class, Patient.class, Location.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -810,7 +816,9 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
+  // [Practitioner, Organization, Device, Patient]
+  // [Practitioner, Organization, Device, Patient]
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -836,7 +844,9 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

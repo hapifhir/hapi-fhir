@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -601,7 +601,9 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference" )
+  // []
+  // []
+  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference", target={} )
   public static final String SP_ITEM = "item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item</b>
@@ -627,7 +629,9 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference" )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -653,7 +657,9 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference" )
+  // []
+  // []
+  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference", target={} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

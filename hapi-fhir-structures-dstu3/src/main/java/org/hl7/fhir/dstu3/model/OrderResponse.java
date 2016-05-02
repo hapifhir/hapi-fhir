@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -869,7 +869,9 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -889,7 +891,9 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
+  // [Order]
+  // [Order]
+  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference", target={Order.class} )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -915,7 +919,9 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -935,7 +941,9 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.orderStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -955,6 +963,8 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.fulfillment</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )
   public static final String SP_FULFILLMENT = "fulfillment";
  /**
@@ -981,7 +991,9 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.who</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference" )
+  // [Practitioner, Organization, Device]
+  // [Practitioner, Organization, Device]
+  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference", target={Practitioner.class, Organization.class, Device.class} )
   public static final String SP_WHO = "who";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>who</b>

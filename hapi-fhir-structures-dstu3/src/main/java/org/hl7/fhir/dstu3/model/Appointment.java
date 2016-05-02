@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2023,7 +2023,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2043,7 +2045,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2069,7 +2073,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2089,7 +2095,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Practitioner]
+  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -2115,7 +2123,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token", target={} )
   public static final String SP_PART_STATUS = "part-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-status</b>
@@ -2135,7 +2145,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2161,7 +2173,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.appointmentType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token", target={} )
   public static final String SP_APPOINTMENT_TYPE = "appointment-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment-type</b>
@@ -2181,7 +2195,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token", target={} )
   public static final String SP_SERVICE_TYPE = "service-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
@@ -2201,7 +2217,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Location]
+  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2227,7 +2245,9 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

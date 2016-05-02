@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2723,7 +2723,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.prescriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the medication(s)", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the medication(s)", type="reference", target={Practitioner.class} )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescriber</b>
@@ -2749,7 +2751,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationOrder.identifier", description="Return prescriptions with this external identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="MedicationOrder.identifier", description="Return prescriptions with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2769,7 +2773,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationOrder.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="MedicationOrder.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2789,7 +2795,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationOrder.patient", description="The identity of a patient to list orders  for", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="MedicationOrder.patient", description="The identity of a patient to list orders  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2815,7 +2823,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.dateWritten</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="datewritten", path="MedicationOrder.dateWritten", description="Return prescriptions written on this date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="datewritten", path="MedicationOrder.dateWritten", description="Return prescriptions written on this date", type="date", target={} )
   public static final String SP_DATEWRITTEN = "datewritten";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>datewritten</b>
@@ -2835,7 +2845,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationOrder.medication.as(Reference)", description="Return administrations of this medication reference", type="reference" )
+  // [Medication]
+  // [Medication]
+  @SearchParamDefinition(name="medication", path="MedicationOrder.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2861,7 +2873,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="MedicationOrder.encounter", description="Return prescriptions with this encounter identifier", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="MedicationOrder.encounter", description="Return prescriptions with this encounter identifier", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2887,7 +2901,9 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationOrder.status", description="Status of the prescription", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="MedicationOrder.status", description="Status of the prescription", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -129,6 +132,12 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
 		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+	}
+
+
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return Collections.emptyList();
 	}
 
 }

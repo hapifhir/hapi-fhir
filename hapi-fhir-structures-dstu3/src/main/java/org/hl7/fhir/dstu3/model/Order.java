@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -875,7 +875,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -895,7 +897,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -915,7 +919,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
+  // [Group, Device, Patient, Substance]
+  // [Group, Device, Patient, Substance]
+  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -941,7 +947,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
+  // [Group, Device, Patient, Substance]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -967,7 +975,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -993,6 +1003,8 @@ public class Order extends DomainResource {
    * Path: <b>Order.detail</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
   public static final String SP_DETAIL = "detail";
  /**
@@ -1019,7 +1031,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date", target={} )
   public static final String SP_WHEN = "when";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when</b>
@@ -1039,7 +1053,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
+  // [Practitioner, Organization, Device]
+  // [Practitioner, Organization, Device]
+  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", target={Practitioner.class, Organization.class, Device.class} )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -1065,7 +1081,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token", target={} )
   public static final String SP_WHENCODE = "when_code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when_code</b>

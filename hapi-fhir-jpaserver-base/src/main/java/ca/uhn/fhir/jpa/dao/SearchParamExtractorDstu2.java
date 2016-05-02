@@ -82,10 +82,6 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu2.class);
 
-	public SearchParamExtractorDstu2(FhirContext theContext) {
-		super(theContext);
-	}
-
 	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
 		if (isBlank(searchTerm)) {
 			return;

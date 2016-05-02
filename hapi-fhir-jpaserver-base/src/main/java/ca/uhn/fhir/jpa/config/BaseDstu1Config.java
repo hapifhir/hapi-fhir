@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu1;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
@@ -53,4 +54,9 @@ public class BaseDstu1Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Bean(autowire=Autowire.BY_TYPE)
+	public SearchParamExtractorDstu1 searchParamExtractor() {
+		return new SearchParamExtractorDstu1();
+	}
+	
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1186,7 +1186,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestProviderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestprovideridentifier", path="ProcessResponse.requestProvider.as(Identifier)", description="The Provider who is responsible the request transaction", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestprovideridentifier", path="ProcessResponse.requestProvider.as(Identifier)", description="The Provider who is responsible the request transaction", type="token", target={} )
   public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
@@ -1206,7 +1208,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="ProcessResponse.requestOrganization.as(Identifier)", description="The Organization who is responsible the request transaction", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestorganizationidentifier", path="ProcessResponse.requestOrganization.as(Identifier)", description="The Organization who is responsible the request transaction", type="token", target={} )
   public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
@@ -1226,7 +1230,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1246,7 +1252,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="ProcessResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="organizationidentifier", path="ProcessResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1266,7 +1274,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="ProcessResponse.request.as(Identifier)", description="The reference to the claim", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestidentifier", path="ProcessResponse.request.as(Identifier)", description="The reference to the claim", type="token", target={} )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -1286,7 +1296,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="ProcessResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organizationreference", path="ProcessResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1312,7 +1324,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestProviderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestproviderreference", path="ProcessResponse.requestProvider.as(Reference)", description="The Provider who is responsible the request transaction", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="requestproviderreference", path="ProcessResponse.requestProvider.as(Reference)", description="The Provider who is responsible the request transaction", type="reference", target={Practitioner.class} )
   public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
@@ -1338,7 +1352,9 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestOrganizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationreference", path="ProcessResponse.requestOrganization.as(Reference)", description="The Organization who is responsible the request transaction", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="requestorganizationreference", path="ProcessResponse.requestOrganization.as(Reference)", description="The Organization who is responsible the request transaction", type="reference", target={Organization.class} )
   public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>
@@ -1364,6 +1380,8 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestReference</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="requestreference", path="ProcessResponse.request.as(Reference)", description="The reference to the claim", type="reference" )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**

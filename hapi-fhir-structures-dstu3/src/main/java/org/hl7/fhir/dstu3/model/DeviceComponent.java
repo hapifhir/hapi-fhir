@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1251,7 +1251,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference" )
+  // [DeviceComponent]
+  // [DeviceComponent]
+  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference", target={DeviceComponent.class} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1277,7 +1279,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference" )
+  // [Device]
+  // [Device]
+  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", target={Device.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1303,7 +1307,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

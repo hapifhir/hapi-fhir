@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2542,7 +2542,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2562,7 +2564,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2582,7 +2586,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -2602,6 +2608,8 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2628,7 +2636,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )
+  // [Practitioner, Device, Patient, RelatedPerson]
+  // [Practitioner, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2654,7 +2664,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.confidentiality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token", target={} )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
@@ -2674,7 +2686,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.section.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token", target={} )
   public static final String SP_SECTION = "section";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>section</b>
@@ -2694,7 +2708,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2720,7 +2736,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2740,7 +2758,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -2760,7 +2780,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.attester.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
+  // [Practitioner, Organization, Patient]
+  // [Practitioner, Organization, Patient]
+  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
   public static final String SP_ATTESTER = "attester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>attester</b>
@@ -2786,6 +2808,8 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.section.entry</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="entry", path="Composition.section.entry", description="A reference to data that supports this section", type="reference" )
   public static final String SP_ENTRY = "entry";
  /**
@@ -2812,6 +2836,8 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Patient]
   @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2838,7 +2864,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2858,7 +2886,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token", target={} )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
@@ -2878,7 +2908,9 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2684,7 +2684,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.birthDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date", target={} )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
@@ -2704,7 +2706,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceased[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token", target={} )
   public static final String SP_DECEASED = "deceased";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>deceased</b>
@@ -2724,7 +2728,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -2744,7 +2750,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -2764,7 +2772,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.species</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token", target={} )
   public static final String SP_ANIMAL_SPECIES = "animal-species";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-species</b>
@@ -2784,7 +2794,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.link.other</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", target={Patient.class} )
   public static final String SP_LINK = "link";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>link</b>
@@ -2810,7 +2822,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.communication.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token", target={} )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -2830,7 +2844,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.breed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token", target={} )
   public static final String SP_ANIMAL_BREED = "animal-breed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-breed</b>
@@ -2850,7 +2866,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -2870,7 +2888,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceasedDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date", target={} )
   public static final String SP_DEATH_DATE = "death-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
@@ -2890,7 +2910,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -2910,7 +2932,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -2930,7 +2954,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -2950,7 +2976,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>
@@ -2970,7 +2998,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2990,7 +3020,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.given</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string", target={} )
   public static final String SP_GIVEN = "given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>given</b>
@@ -3010,7 +3042,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -3030,7 +3064,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token", target={} )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
@@ -3050,7 +3086,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -3070,7 +3108,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.careProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference" )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_CAREPROVIDER = "careprovider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careprovider</b>
@@ -3096,7 +3136,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -3116,7 +3158,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -3142,7 +3186,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3162,7 +3208,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -3182,7 +3230,9 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.family</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string", target={} )
   public static final String SP_FAMILY = "family";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>family</b>

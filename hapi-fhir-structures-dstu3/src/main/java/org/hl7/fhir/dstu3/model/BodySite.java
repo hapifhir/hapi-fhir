@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -583,7 +583,9 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="BodySite.identifier", description="Identifier for this instance of the anatomical location", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="BodySite.identifier", description="Identifier for this instance of the anatomical location", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -603,7 +605,9 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -623,7 +627,9 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

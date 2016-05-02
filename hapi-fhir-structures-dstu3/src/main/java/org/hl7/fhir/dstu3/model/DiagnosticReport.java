@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1848,7 +1848,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DiagnosticReport.effective", description="The clinically relevant time of the report", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="DiagnosticReport.effective", description="The clinically relevant time of the report", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1868,7 +1870,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1888,7 +1892,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.image.link</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference" )
+  // [Media]
+  // [Media]
+  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference", target={Media.class} )
   public static final String SP_IMAGE = "image";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>image</b>
@@ -1914,7 +1920,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference" )
+  // [ReferralRequest, DiagnosticOrder, ProcedureRequest]
+  // [ReferralRequest, DiagnosticOrder, ProcedureRequest]
+  @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference", target={ReferralRequest.class, DiagnosticOrder.class, ProcedureRequest.class} )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -1940,7 +1948,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1966,7 +1976,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1986,7 +1998,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference" )
+  // [Group, Device, Patient, Location]
+  // [Group, Device, Patient, Location]
+  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2012,7 +2026,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token", target={} )
   public static final String SP_DIAGNOSIS = "diagnosis";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
@@ -2032,7 +2048,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2058,7 +2076,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.result</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference" )
+  // [Observation]
+  // [Observation]
+  @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference", target={Observation.class} )
   public static final String SP_RESULT = "result";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>result</b>
@@ -2084,7 +2104,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference" )
+  // [Group, Device, Patient, Location]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2110,7 +2132,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.specimen</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference" )
+  // [Specimen]
+  // [Specimen]
+  @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference", target={Specimen.class} )
   public static final String SP_SPECIMEN = "specimen";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
@@ -2136,7 +2160,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.issued</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date", target={} )
   public static final String SP_ISSUED = "issued";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issued</b>
@@ -2156,7 +2182,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2176,7 +2204,9 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

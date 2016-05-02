@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1760,7 +1760,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PractitionerRole.identifier", description="A practitioner's Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="PractitionerRole.identifier", description="A practitioner's Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1780,7 +1782,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="PractitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="specialty", path="PractitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token", target={} )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1800,7 +1804,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.role</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="PractitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="role", path="PractitionerRole.role", description="The practitioner can perform this role at for the organization", type="token", target={} )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
@@ -1820,7 +1826,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.practitioner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organation", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organation", type="reference", target={Practitioner.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -1846,7 +1854,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="PractitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="phone", path="PractitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -1866,7 +1876,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="PractitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="PractitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1892,7 +1904,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="PractitionerRole.telecom", description="The value in any kind of contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="telecom", path="PractitionerRole.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1912,7 +1926,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="PractitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="location", path="PractitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1938,7 +1954,9 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="PractitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="email", path="PractitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

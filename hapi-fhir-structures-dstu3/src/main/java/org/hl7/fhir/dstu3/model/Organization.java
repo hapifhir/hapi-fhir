@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1023,7 +1023,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1043,7 +1045,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference", target={Organization.class} )
   public static final String SP_PARTOF = "partof";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>partof</b>
@@ -1069,7 +1073,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -1089,7 +1095,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1109,7 +1117,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1129,7 +1139,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1149,7 +1161,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1169,7 +1183,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token", target={} )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
@@ -1189,7 +1205,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1209,7 +1227,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1229,7 +1249,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1249,7 +1271,9 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>

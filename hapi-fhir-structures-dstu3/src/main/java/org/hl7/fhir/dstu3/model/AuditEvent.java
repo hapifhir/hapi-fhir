@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3494,7 +3494,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.recorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event occurred on source", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event occurred on source", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3514,7 +3516,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-type", path="AuditEvent.entity.type", description="Type of object involved", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="entity-type", path="AuditEvent.entity.type", description="Type of object involved", type="token", target={} )
   public static final String SP_ENTITY_TYPE = "entity-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-type</b>
@@ -3534,7 +3538,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="AuditEvent.agent.reference", description="Direct reference to resource", type="reference" )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="agent", path="AuditEvent.agent.reference", description="Direct reference to resource", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -3560,7 +3566,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.network.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="AuditEvent.agent.network.address", description="Identifier for the network access point of the user device", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="AuditEvent.agent.network.address", description="Identifier for the network access point of the user device", type="token", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -3580,7 +3588,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.source.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="AuditEvent.source.identifier", description="The identity of source detecting the event", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="source", path="AuditEvent.source.identifier", description="The identity of source detecting the event", type="token", target={} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -3600,7 +3610,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="AuditEvent.type", description="Type/identifier of event", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="AuditEvent.type", description="Type/identifier of event", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -3620,7 +3632,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.altId</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="altid", path="AuditEvent.agent.altId", description="Alternative User id e.g. authentication", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="altid", path="AuditEvent.agent.altId", description="Alternative User id e.g. authentication", type="token", target={} )
   public static final String SP_ALTID = "altid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>altid</b>
@@ -3640,7 +3654,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.source.site</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="site", path="AuditEvent.source.site", description="Logical source location within the enterprise", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="site", path="AuditEvent.source.site", description="Logical source location within the enterprise", type="token", target={} )
   public static final String SP_SITE = "site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>site</b>
@@ -3660,7 +3676,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent-name", path="AuditEvent.agent.name", description="Human-meaningful name for the agent", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="agent-name", path="AuditEvent.agent.name", description="Human-meaningful name for the agent", type="string", target={} )
   public static final String SP_AGENT_NAME = "agent-name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent-name</b>
@@ -3680,7 +3698,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-name", path="AuditEvent.entity.name", description="Descriptor for entity", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="entity-name", path="AuditEvent.entity.name", description="Descriptor for entity", type="string", target={} )
   public static final String SP_ENTITY_NAME = "entity-name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-name</b>
@@ -3700,7 +3720,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.subtype</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subtype", path="AuditEvent.subtype", description="More specific type/id for the event", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="subtype", path="AuditEvent.subtype", description="More specific type/id for the event", type="token", target={} )
   public static final String SP_SUBTYPE = "subtype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
@@ -3720,6 +3742,8 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.reference, AuditEvent.entity.reference</b><br>
    * </p>
    */
+  // [Practitioner, Organization, Device, Patient, Any, RelatedPerson]
+  // [Patient]
   @SearchParamDefinition(name="patient", path="AuditEvent.agent.reference | AuditEvent.entity.reference", description="Direct reference to resource", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
@@ -3746,7 +3770,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="AuditEvent.action", description="Type of action performed during the event", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="action", path="AuditEvent.action", description="Type of action performed during the event", type="token", target={} )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -3766,7 +3792,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.userId</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="user", path="AuditEvent.agent.userId", description="Unique identifier for the user", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="user", path="AuditEvent.agent.userId", description="Unique identifier for the user", type="token", target={} )
   public static final String SP_USER = "user";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>user</b>
@@ -3786,6 +3814,8 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.reference</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="entity", path="AuditEvent.entity.reference", description="Specific instance of resource (e.g. versioned)", type="reference" )
   public static final String SP_ENTITY = "entity";
  /**
@@ -3812,7 +3842,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-id", path="AuditEvent.entity.identifier", description="Specific instance of object (e.g. versioned)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="entity-id", path="AuditEvent.entity.identifier", description="Specific instance of object (e.g. versioned)", type="token", target={} )
   public static final String SP_ENTITY_ID = "entity-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-id</b>
@@ -3832,7 +3864,9 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.policy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="policy", path="AuditEvent.agent.policy", description="Policy that authorized event", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="policy", path="AuditEvent.agent.policy", description="Policy that authorized event", type="uri", target={} )
   public static final String SP_POLICY = "policy";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>policy</b>

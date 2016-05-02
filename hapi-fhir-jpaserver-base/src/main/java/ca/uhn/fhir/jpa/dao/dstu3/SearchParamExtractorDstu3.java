@@ -34,7 +34,10 @@ import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BaseDateTimeType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -53,9 +56,15 @@ import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.omg.PortableServer.ThreadPolicyValue;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -74,13 +83,25 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu3.class);
-
-	public SearchParamExtractorDstu3(FhirContext theContext) {
-		super(theContext);
+	
+	@Autowired
+	private org.hl7.fhir.dstu3.hapi.validation.IValidationSupport myValidationSupport;
+	
+	/**
+	 * Constructor
+	 */
+	public SearchParamExtractorDstu3() {
+		super();
+	}
+	
+	public SearchParamExtractorDstu3(FhirContext theCtx, IValidationSupport theValidationSupport) {
+		super(theCtx);
+		myValidationSupport = theValidationSupport;
 	}
 
 	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
@@ -443,15 +464,15 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			List<String> systems = new ArrayList<String>();
 			List<String> codes = new ArrayList<String>();
 
-			String needContactPointSystem = null;
-			if (nextPath.contains(".where(system='phone')")) {
-				nextPath = nextPath.replace(".where(system='phone')", "");
-				needContactPointSystem = "phone";
-			}
-			if (nextPath.contains(".where(system='email')")) {
-				nextPath = nextPath.replace(".where(system='email')", "");
-				needContactPointSystem = "email";
-			}
+//			String needContactPointSystem = null;
+//			if (nextPath.contains(".where(system='phone')")) {
+//				nextPath = nextPath.replace(".where(system='phone')", "");
+//				needContactPointSystem = "phone";
+//			}
+//			if (nextPath.contains(".where(system='email')")) {
+//				nextPath = nextPath.replace(".where(system='email')", "");
+//				needContactPointSystem = "email";
+//			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 
@@ -481,11 +502,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					ContactPoint nextValue = (ContactPoint) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
-					}
-					if (isNotBlank(needContactPointSystem)) {
-						if (!needContactPointSystem.equals(nextValue.getSystemElement().getValueAsString())) {
-							continue;
-						}
 					}
 					systems.add(nextValue.getSystemElement().getValueAsString());
 					codes.add(nextValue.getValueElement().getValue());
@@ -623,6 +639,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		return retVal;
 	}
 
+	
 	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConcept theCodeableConcept, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
 		for (Coding nextCoding : theCodeableConcept.getCoding()) {
 			extractTokensFromCoding(theSystems, theCodes, theEntity, theListToPopulate, theParameterDef, nextCoding);
@@ -644,6 +661,28 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			}
 
 		}
+	}
+
+	/**
+	 * Override parent because we're using FHIRPath here
+	 */
+	@Override
+	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
+		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext(getContext(), myValidationSupport);
+		FHIRPathEngine fp = new FHIRPathEngine(worker);
+		
+		List<Object> values = new ArrayList<Object>();		
+		try {
+			values.addAll(fp.evaluate((Base)theResource, thePaths));
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+		return values;
+	}
+
+	@VisibleForTesting
+	void setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.validation.IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
 	}
 
 	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {

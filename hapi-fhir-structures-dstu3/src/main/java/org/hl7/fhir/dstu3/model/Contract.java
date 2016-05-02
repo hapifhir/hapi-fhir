@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -4963,7 +4963,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Contract.identifier", description="The identity of the contract", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Contract.identifier", description="The identity of the contract", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4983,7 +4985,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.agent.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Contract.agent.actor", description="Agent to the Contact", type="reference" )
+  // [Practitioner, Group, Organization, Device, Patient, Substance, Contract, RelatedPerson, Location]
+  // [Practitioner, Group, Organization, Device, Patient, Substance, Contract, RelatedPerson, Location]
+  @SearchParamDefinition(name="agent", path="Contract.agent.actor", description="Agent to the Contact", type="reference", target={Practitioner.class, Group.class, Organization.class, Device.class, Patient.class, Substance.class, Contract.class, RelatedPerson.class, Location.class} )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -5009,6 +5013,8 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.term.topic</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="ttopic", path="Contract.term.topic", description="The identity of the topic of the contract terms", type="reference" )
   public static final String SP_TTOPIC = "ttopic";
  /**
@@ -5035,6 +5041,8 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Patient]
   @SearchParamDefinition(name="patient", path="Contract.subject", description="The identity of the subject of the contract (if a patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
@@ -5061,6 +5069,8 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="subject", path="Contract.subject", description="The identity of the subject of the contract", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -5087,7 +5097,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.authority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authority", path="Contract.authority", description="The authority of the contract", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="authority", path="Contract.authority", description="The authority of the contract", type="reference", target={Organization.class} )
   public static final String SP_AUTHORITY = "authority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authority</b>
@@ -5113,7 +5125,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.domain</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="domain", path="Contract.domain", description="The domain of the contract", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="domain", path="Contract.domain", description="The domain of the contract", type="reference", target={Location.class} )
   public static final String SP_DOMAIN = "domain";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>domain</b>
@@ -5139,6 +5153,8 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.topic</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="topic", path="Contract.topic", description="The identity of the topic of the contract", type="reference" )
   public static final String SP_TOPIC = "topic";
  /**
@@ -5165,7 +5181,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.issued</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issued", path="Contract.issued", description="The date/time the contract was issued", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="issued", path="Contract.issued", description="The date/time the contract was issued", type="date", target={} )
   public static final String SP_ISSUED = "issued";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issued</b>
@@ -5185,7 +5203,9 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.signer.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="signer", path="Contract.signer.party", description="Contract Signatory Party", type="reference" )
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  @SearchParamDefinition(name="signer", path="Contract.signer.party", description="Contract Signatory Party", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SIGNER = "signer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>signer</b>

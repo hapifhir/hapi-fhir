@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1409,7 +1409,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Communication.identifier", description="Unique identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Communication.identifier", description="Unique identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1429,7 +1431,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.requestDetail</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="Communication.requestDetail", description="CommunicationRequest producing this message", type="reference" )
+  // [CommunicationRequest]
+  // [CommunicationRequest]
+  @SearchParamDefinition(name="request", path="Communication.requestDetail", description="CommunicationRequest producing this message", type="reference", target={CommunicationRequest.class} )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -1455,7 +1459,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.sender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference" )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SENDER = "sender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sender</b>
@@ -1481,7 +1487,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference", target={Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1507,7 +1515,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1533,7 +1543,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference" )
+  // [Practitioner, Group, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Group, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference", target={Practitioner.class, Group.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1559,7 +1571,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.received</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date", target={} )
   public static final String SP_RECEIVED = "received";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>received</b>
@@ -1579,7 +1593,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.medium</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medium", path="Communication.medium", description="A channel of communication", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="medium", path="Communication.medium", description="A channel of communication", type="token", target={} )
   public static final String SP_MEDIUM = "medium";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medium</b>
@@ -1599,7 +1615,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1625,7 +1643,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1645,7 +1665,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.sent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date", target={} )
   public static final String SP_SENT = "sent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sent</b>
@@ -1665,7 +1687,9 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Communication.status", description="in-progress | completed | suspended | rejected | failed", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Communication.status", description="in-progress | completed | suspended | rejected | failed", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

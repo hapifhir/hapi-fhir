@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2769,7 +2769,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2789,7 +2791,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="Additional identifier for the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="Additional identifier for the concept map", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2809,7 +2813,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.product.element</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="product", path="ConceptMap.element.target.product.element", description="Reference to element/field/ValueSet mapping depends on", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="product", path="ConceptMap.element.target.product.element", description="Reference to element/field/ValueSet mapping depends on", type="uri", target={} )
   public static final String SP_PRODUCT = "product";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>product</b>
@@ -2829,7 +2835,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-system", path="ConceptMap.element.target.system", description="System of the target (if necessary)", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="target-system", path="ConceptMap.element.target.system", description="System of the target (if necessary)", type="uri", target={} )
   public static final String SP_TARGET_SYSTEM = "target-system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-system</b>
@@ -2849,7 +2857,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.dependsOn.element</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependson", path="ConceptMap.element.target.dependsOn.element", description="Reference to element/field/ValueSet mapping depends on", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="dependson", path="ConceptMap.element.target.dependsOn.element", description="Reference to element/field/ValueSet mapping depends on", type="uri", target={} )
   public static final String SP_DEPENDSON = "dependson";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependson</b>
@@ -2869,7 +2879,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2889,7 +2901,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.sourceReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="ConceptMap.source.as(Reference)", description="Identifies the source of the concepts which are being mapped", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="source", path="ConceptMap.source.as(Reference)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2915,7 +2929,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2935,7 +2951,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ConceptMap.url", description="The URL of the concept map", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="ConceptMap.url", description="The URL of the concept map", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -2955,7 +2973,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.target[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="ConceptMap.target", description="Provides context to the mappings", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="target", path="ConceptMap.target", description="Provides context to the mappings", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -2981,7 +3001,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-code", path="ConceptMap.element.code", description="Identifies element being mapped", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="source-code", path="ConceptMap.element.code", description="Identifies element being mapped", type="token", target={} )
   public static final String SP_SOURCE_CODE = "source-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-code</b>
@@ -3001,7 +3023,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.sourceUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-uri</b>
@@ -3027,7 +3051,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3047,7 +3073,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3067,7 +3095,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3087,7 +3117,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-system", path="ConceptMap.element.system", description="Code System (if value set crosses code systems)", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="source-system", path="ConceptMap.element.system", description="Code System (if value set crosses code systems)", type="uri", target={} )
   public static final String SP_SOURCE_SYSTEM = "source-system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-system</b>
@@ -3107,7 +3139,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-code", path="ConceptMap.element.target.code", description="Code that identifies the target element", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="target-code", path="ConceptMap.element.target.code", description="Code that identifies the target element", type="token", target={} )
   public static final String SP_TARGET_CODE = "target-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-code</b>
@@ -3127,7 +3161,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

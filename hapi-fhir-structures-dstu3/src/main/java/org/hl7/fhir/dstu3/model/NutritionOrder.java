@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3379,7 +3379,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="NutritionOrder.identifier", description="Return nutrition orders with this external identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="NutritionOrder.identifier", description="Return nutrition orders with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3399,7 +3401,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.dateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="datetime", path="NutritionOrder.dateTime", description="Return nutrition orders requested on this date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="datetime", path="NutritionOrder.dateTime", description="Return nutrition orders requested on this date", type="date", target={} )
   public static final String SP_DATETIME = "datetime";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>datetime</b>
@@ -3419,7 +3423,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDER = "provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provider</b>
@@ -3445,7 +3451,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3471,7 +3479,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.supplement.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token", target={} )
   public static final String SP_SUPPLEMENT = "supplement";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplement</b>
@@ -3491,7 +3501,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.enteralFormula.baseFormulaType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="formula", path="NutritionOrder.enteralFormula.baseFormulaType", description="Type of enteral or infant formula", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="formula", path="NutritionOrder.enteralFormula.baseFormulaType", description="Type of enteral or infant formula", type="token", target={} )
   public static final String SP_FORMULA = "formula";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>formula</b>
@@ -3511,7 +3523,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -3537,7 +3551,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.oralDiet.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token", target={} )
   public static final String SP_ORALDIET = "oraldiet";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>oraldiet</b>
@@ -3557,7 +3573,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -3577,7 +3595,9 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.enteralFormula.additiveType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="additive", path="NutritionOrder.enteralFormula.additiveType", description="Type of module component to add to the feeding", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="additive", path="NutritionOrder.enteralFormula.additiveType", description="Type of module component to add to the feeding", type="token", target={} )
   public static final String SP_ADDITIVE = "additive";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>additive</b>
