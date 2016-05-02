@@ -9,7 +9,9 @@ import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,6 +25,16 @@ public class FhirPathEngineTest {
 	private static FHIRPathEngine ourEngine;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 
+	@Test
+	public void testAs() throws Exception {
+		Observation obs = new Observation();
+		obs.setValue(new StringType("FOO"));
+		
+		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
+		assertEquals(1, value.size());
+		assertEquals("FOO", ((StringType)value.get(0)).getValue());
+	}
+	
 	@Test
 	public void testExistsWithNoValue() throws FHIRException {
 		Patient patient = new Patient();

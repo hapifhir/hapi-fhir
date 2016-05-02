@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
@@ -43,6 +44,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	private IValidationSupport myValidationSupport;
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
+		Validate.notNull(theCtx, "theCtx must not be null");
+		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
 	}

@@ -42,8 +42,6 @@ import java.util.Set;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.utilities.xhtml.XhtmlParser.NSMap;
-import org.hl7.fhir.utilities.xhtml.XhtmlParser.QName;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -107,6 +105,7 @@ public class XhtmlParser {
   	public String getNs() {
   		return ns;
   	}
+  	
   }
 
 	private Set<String> elements = new HashSet<String>();
@@ -515,7 +514,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
           else
           {
             if (mustBeWellFormed)
-              throw new FHIRFormatError("Malformed XHTML: Found \"</"+n+">\" expecting \"</"+node.getName()+">\""+descLoc());
+              throw new FHIRFormatError("Malformed XHTML: Found \"</"+n.getName()+">\" expecting \"</"+node.getName()+">\""+descLoc());
             for (int i = parents.size() - 1; i >= 0; i--)
             {
               if (parents.get(i).getName().equals(n))
@@ -1106,6 +1105,12 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
     String n = readName().toLowerCase();
     readToTagEnd();
     XhtmlNode result = new XhtmlNode(NodeType.Element);
+    
+    int colonIndex = n.indexOf(':');
+    if (colonIndex != -1) {
+   	 n = n.substring(colonIndex + 1);
+    }
+    
     result.setName(n);
     unwindPoint = null;
     List<XhtmlNode> p = new ArrayList<XhtmlNode>();

@@ -1247,14 +1247,29 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
 	private boolean isParametersEntry(String path) {
 		String[] parts = path.split("\\.");
-		return parts.length > 2 && parts[parts.length - 1].equals("resource") && (parts[parts.length - 2].startsWith("parameter[") || parts[parts.length - 2].startsWith("part["));
+		return parts.length > 2 && parts[parts.length - 1].equals("resource") && (pathEntryHasName(parts[parts.length - 2], "parameter") || pathEntryHasName(parts[parts.length - 2], "part"));
 	}
 
 	private boolean isBundleEntry(String path) {
 		String[] parts = path.split("\\.");
-		return parts.length > 2 && parts[parts.length - 1].equals("resource") && parts[parts.length - 2].startsWith("entry[");
+		return parts.length > 2 && parts[parts.length - 1].equals("resource") && pathEntryHasName(parts[parts.length - 2], "entry");
 	}
 
+
+	private static boolean pathEntryHasName(String thePathEntry, String theName) {
+		if (thePathEntry.equals(theName)) {
+			return true;
+		}
+		if (thePathEntry.length() >= theName.length() + 3) {
+			if (thePathEntry.startsWith(theName)) {
+				if (thePathEntry.charAt(theName.length()) == '[') {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	private boolean isPrimitiveType(String type) {
 		return type.equalsIgnoreCase("boolean") || type.equalsIgnoreCase("integer") || type.equalsIgnoreCase("string") || type.equalsIgnoreCase("decimal") || type.equalsIgnoreCase("uri")
 				|| type.equalsIgnoreCase("base64Binary") || type.equalsIgnoreCase("instant") || type.equalsIgnoreCase("date") || type.equalsIgnoreCase("uuid") || type.equalsIgnoreCase("id")

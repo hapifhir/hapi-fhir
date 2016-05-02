@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,10 +25,13 @@ public class SearchParamExtractorDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-		ourValidationSupport = new DefaultProfileValidationSupport();
 	}
 
-
+	@BeforeClass
+	public static void beforeClass() {
+		ourValidationSupport = new DefaultProfileValidationSupport();
+	}
+	
 	@Test
 	public void testParamWithOrInPath() {
 		Observation obs = new Observation();

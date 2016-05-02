@@ -103,7 +103,7 @@ private Map<String, Object> userData;
 	public boolean hasType(String... name) {
 		String t = fhirType();
 		for (String n : name)
-		  if (n.equals(t))
+		  if (n.equalsIgnoreCase(t))
 		  	return true;
 		return false;
 	}

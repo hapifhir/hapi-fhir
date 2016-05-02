@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.metamodel;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -320,6 +322,19 @@ public class Element extends Base {
 		this.xhtml = xhtml;
 		return this;
  	}
+
+	@Override
+	public boolean isEmpty() {
+		if (isNotBlank(value)) {
+			return false;
+		}
+		for (Element next : getChildren()) {
+			if (!next.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 
 }

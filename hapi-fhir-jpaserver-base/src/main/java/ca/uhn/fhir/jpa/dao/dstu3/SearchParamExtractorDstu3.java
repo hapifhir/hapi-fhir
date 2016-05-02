@@ -666,7 +666,10 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 		List<Object> values = new ArrayList<Object>();
 		try {
-			values.addAll(fp.evaluate((Base) theResource, thePaths));
+			String[] nextPathsSplit = SPLIT.split(thePaths);
+			for (String nextPath : nextPathsSplit) {
+				values.addAll(fp.evaluate((Base) theResource, nextPath));
+			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

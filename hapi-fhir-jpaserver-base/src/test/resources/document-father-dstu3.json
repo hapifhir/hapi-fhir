@@ -10,13 +10,11 @@
     ]
   },
   "type": "document",
-  "base": "http://fhir.healthintersections.com.au/open",
   "entry": [
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57",
       "resource": {
         "resourceType": "Composition",
-        "id": "180f219f-97a8-486d-99d9-ed631fe4fc57",
         "meta": {
           "lastUpdated": "2013-05-28T22:12:21Z"
         },
@@ -197,10 +195,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a",
       "resource": {
         "resourceType": "List",
-        "id": "d0dd51d3-3ab2-4c84-b697-a630c3e40e7a",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },
@@ -233,10 +230,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:541a72a8-df75-4484-ac89-ac4923f03b81",
       "resource": {
         "resourceType": "Observation",
-        "id": "541a72a8-df75-4484-ac89-ac4923f03b81",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },
@@ -259,10 +255,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1",
       "resource": {
         "resourceType": "List",
-        "id": "673f8db5-0ffd-4395-9657-6da00420bbc1",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },
@@ -322,10 +317,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:124a6916-5d84-4b8c-b250-10cefb8e6e86",
       "resource": {
         "resourceType": "MedicationOrder",
-        "id": "124a6916-5d84-4b8c-b250-10cefb8e6e86",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },
@@ -395,10 +389,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "fullUrl": "urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b",
       "resource": {
         "resourceType": "List",
-        "id": "68f86194-e6e1-4f65-b64a-5314256f8d7b",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },
@@ -431,10 +424,9 @@
       }
     },
     {
-      "base": "urn:uuid:",
+      "base": "urn:uuid:47600e0f-b6b5-4308-84b5-5dec157f7637",
       "resource": {
         "resourceType": "AllergyIntolerance",
-        "id": "47600e0f-b6b5-4308-84b5-5dec157f7637",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"
         },

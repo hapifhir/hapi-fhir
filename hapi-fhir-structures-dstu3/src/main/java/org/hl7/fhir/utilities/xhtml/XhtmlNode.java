@@ -75,6 +75,7 @@ public class XhtmlNode implements IBaseXhtml {
   }
 
   public void setName(String name) {
+    assert name.contains(":") == false : "Name should not contain any : but was " + name;
     this.name = name;
   }
 

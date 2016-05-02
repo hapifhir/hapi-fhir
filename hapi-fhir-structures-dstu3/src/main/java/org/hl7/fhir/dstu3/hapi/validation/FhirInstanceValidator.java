@@ -12,6 +12,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.dstu3.validation.IResourceValidator.IdStatus;
 import org.hl7.fhir.dstu3.validation.InstanceValidator;
 import org.hl7.fhir.dstu3.validation.ValidationMessage;
 import org.w3c.dom.Document;
@@ -32,7 +33,6 @@ import ca.uhn.fhir.validation.IValidatorModule;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
-	private static FhirContext ourHl7OrgCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private DocumentBuilderFactory myDocBuilderFactory;
@@ -139,6 +139,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
 		v.setAnyExtensionsAllowed(true);
+		v.setResourceIdRule(IdStatus.OPTIONAL);
 
 		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 

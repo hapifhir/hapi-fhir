@@ -146,6 +146,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return retVal;
 	}
 
+	// Y
 	@Test
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = ourClient;
@@ -2515,14 +2516,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, stringContainsInOrder(">ERROR<", "/f:Patient/f:contact", "<pre>SHALL at least contain a contact's details or a reference to an organization</pre>", "<issue><severity value=\"error\"/>", "<code value=\"processing\"/>",
-					"<diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization\"/>", "<location value=\"/f:Patient/f:contact\"/>"));
+			assertThat(resp, stringContainsInOrder(">ERROR<", "[Patient.contact]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
 		}
 	}
 
+	// Y
 	@Test
 	public void testValidateResourceHuge() throws IOException {
 
@@ -2555,6 +2556,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testValidateResourceWithId() throws IOException {
 
 		Patient patient = new Patient();
+		patient.setId("123");
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
@@ -2578,6 +2580,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+	// Y
 	@Test
 	public void testValidateResourceWithNoIdParameters() throws IOException {
 
