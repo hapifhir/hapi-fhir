@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -468,6 +468,24 @@ public class ReferralRequest extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ReferralRequest setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -506,6 +524,24 @@ public class ReferralRequest extends DomainResource {
       if (this.basedOn == null)
         this.basedOn = new ArrayList<Reference>();
       return this.basedOn;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ReferralRequest setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
+      return this;
     }
 
     public boolean hasBasedOn() { 
@@ -938,6 +974,24 @@ public class ReferralRequest extends DomainResource {
       return this.recipient;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
+     */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ReferralRequest setRecipient(List<Reference> theRecipient) { 
+      this.recipient = theRecipient;
+      return this;
+    }
+
     public boolean hasRecipient() { 
       if (this.recipient == null)
         return false;
@@ -1060,6 +1114,24 @@ public class ReferralRequest extends DomainResource {
       return this.serviceRequested;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #serviceRequested}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceRequestedFirstRep() { 
+      if (getServiceRequested().isEmpty()) {
+        addServiceRequested();
+      }
+      return getServiceRequested().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ReferralRequest setServiceRequested(List<CodeableConcept> theServiceRequested) { 
+      this.serviceRequested = theServiceRequested;
+      return this;
+    }
+
     public boolean hasServiceRequested() { 
       if (this.serviceRequested == null)
         return false;
@@ -1098,6 +1170,24 @@ public class ReferralRequest extends DomainResource {
       if (this.supportingInformation == null)
         this.supportingInformation = new ArrayList<Reference>();
       return this.supportingInformation;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
+     */
+    public Reference getSupportingInformationFirstRep() { 
+      if (getSupportingInformation().isEmpty()) {
+        addSupportingInformation();
+      }
+      return getSupportingInformation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ReferralRequest setSupportingInformation(List<Reference> theSupportingInformation) { 
+      this.supportingInformation = theSupportingInformation;
+      return this;
     }
 
     public boolean hasSupportingInformation() { 
@@ -1163,6 +1253,94 @@ public class ReferralRequest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ReferralStatus>
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<ReferralCategory>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1098185163: /*fulfillmentTime*/ return this.fulfillmentTime == null ? new Base[0] : new Base[] {this.fulfillmentTime}; // Period
+        case 1433073514: /*authored*/ return this.authored == null ? new Base[0] : new Base[] {this.authored}; // DateTimeType
+        case 693933948: /*requester*/ return this.requester == null ? new Base[0] : new Base[] {this.requester}; // Reference
+        case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : new Base[] {this.specialty}; // CodeableConcept
+        case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : this.recipient.toArray(new Base[this.recipient.size()]); // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 190229561: /*serviceRequested*/ return this.serviceRequested == null ? new Base[0] : this.serviceRequested.toArray(new Base[this.serviceRequested.size()]); // CodeableConcept
+        case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
+          break;
+        case -995424086: // parent
+          this.parent = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new ReferralStatusEnumFactory().fromType(value); // Enumeration<ReferralStatus>
+          break;
+        case 50511102: // category
+          this.category = new ReferralCategoryEnumFactory().fromType(value); // Enumeration<ReferralCategory>
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1165461084: // priority
+          this.priority = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
+          break;
+        case 1098185163: // fulfillmentTime
+          this.fulfillmentTime = castToPeriod(value); // Period
+          break;
+        case 1433073514: // authored
+          this.authored = castToDateTime(value); // DateTimeType
+          break;
+        case 693933948: // requester
+          this.requester = castToReference(value); // Reference
+          break;
+        case -1694759682: // specialty
+          this.specialty = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 820081177: // recipient
+          this.getRecipient().add(castToReference(value)); // Reference
+          break;
+        case -934964668: // reason
+          this.reason = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 190229561: // serviceRequested
+          this.getServiceRequested().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1248768647: // supportingInformation
+          this.getSupportingInformation().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1202,6 +1380,32 @@ public class ReferralRequest extends DomainResource {
           this.getSupportingInformation().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -332612366:  return addBasedOn(); // Reference
+        case -995424086:  return getParent(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ReferralStatus>
+        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<ReferralCategory>
+        case 3575610:  return getType(); // CodeableConcept
+        case -1165461084:  return getPriority(); // CodeableConcept
+        case -791418107:  return getPatient(); // Reference
+        case 951530927:  return getContext(); // Reference
+        case 1098185163:  return getFulfillmentTime(); // Period
+        case 1433073514: throw new FHIRException("Cannot make property authored as it is not a complex type"); // DateTimeType
+        case 693933948:  return getRequester(); // Reference
+        case -1694759682:  return getSpecialty(); // CodeableConcept
+        case 820081177:  return addRecipient(); // Reference
+        case -934964668:  return getReason(); // CodeableConcept
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 190229561:  return addServiceRequested(); // CodeableConcept
+        case -1248768647:  return addSupportingInformation(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1354,9 +1558,9 @@ public class ReferralRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  basedOn,  parent,  status
-          ,  category,  type,  priority,  patient,  context,  fulfillmentTime,  authored,  requester,  specialty
-          ,  recipient,  reason,  description,  serviceRequested,  supportingInformation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent, status
+          , category, type, priority, patient, context, fulfillmentTime, authored, requester, specialty
+          , recipient, reason, description, serviceRequested, supportingInformation);
       }
 
   @Override
@@ -1372,7 +1576,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1392,7 +1598,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization, Patient]
+  // [Practitioner, Organization, Patient]
+  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -1418,7 +1626,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token", target={} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1438,7 +1648,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token", target={} )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1458,7 +1670,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1484,7 +1698,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1510,7 +1726,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference" )
+  // [EpisodeOfCare, Encounter]
+  // [EpisodeOfCare, Encounter]
+  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference", target={EpisodeOfCare.class, Encounter.class} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1536,7 +1754,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1556,7 +1776,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -1576,7 +1798,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1596,7 +1820,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference" )
+  // [ReferralRequest, CarePlan, DiagnosticOrder, ProcedureRequest]
+  // [ReferralRequest, CarePlan, DiagnosticOrder, ProcedureRequest]
+  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={ReferralRequest.class, CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class} )
   public static final String SP_BASEDON = "basedon";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
@@ -1622,7 +1848,9 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

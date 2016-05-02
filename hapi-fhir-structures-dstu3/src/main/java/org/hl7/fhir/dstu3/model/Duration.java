@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -81,8 +81,8 @@ public class Duration extends Quantity {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( value,  comparator,  unit,  system
-          ,  code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, comparator, unit, system
+          , code);
       }
 
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -262,6 +262,24 @@ public class HealthcareService extends DomainResource {
           return this.daysOfWeek;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #daysOfWeek}, creating it if it does not already exist
+         */
+        public Enumeration<DaysOfWeek> getDaysOfWeekFirstRep() { 
+          if (getDaysOfWeek().isEmpty()) {
+            addDaysOfWeekElement();
+          }
+          return getDaysOfWeek().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public HealthcareServiceAvailableTimeComponent setDaysOfWeek(List<Enumeration<DaysOfWeek>> theDaysOfWeek) { 
+          this.daysOfWeek = theDaysOfWeek;
+          return this;
+        }
+
         public boolean hasDaysOfWeek() { 
           if (this.daysOfWeek == null)
             return false;
@@ -302,7 +320,7 @@ public class HealthcareService extends DomainResource {
           if (this.daysOfWeek == null)
             return false;
           for (Enumeration<DaysOfWeek> v : this.daysOfWeek)
-            if (v.equals(value)) // code
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -459,6 +477,38 @@ public class HealthcareService extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 68050338: /*daysOfWeek*/ return this.daysOfWeek == null ? new Base[0] : this.daysOfWeek.toArray(new Base[this.daysOfWeek.size()]); // Enumeration<DaysOfWeek>
+        case -1414913477: /*allDay*/ return this.allDay == null ? new Base[0] : new Base[] {this.allDay}; // BooleanType
+        case -1039453818: /*availableStartTime*/ return this.availableStartTime == null ? new Base[0] : new Base[] {this.availableStartTime}; // TimeType
+        case 101151551: /*availableEndTime*/ return this.availableEndTime == null ? new Base[0] : new Base[] {this.availableEndTime}; // TimeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 68050338: // daysOfWeek
+          this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value)); // Enumeration<DaysOfWeek>
+          break;
+        case -1414913477: // allDay
+          this.allDay = castToBoolean(value); // BooleanType
+          break;
+        case -1039453818: // availableStartTime
+          this.availableStartTime = castToTime(value); // TimeType
+          break;
+        case 101151551: // availableEndTime
+          this.availableEndTime = castToTime(value); // TimeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("daysOfWeek"))
           this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value));
@@ -470,6 +520,18 @@ public class HealthcareService extends DomainResource {
           this.availableEndTime = castToTime(value); // TimeType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 68050338: throw new FHIRException("Cannot make property daysOfWeek as it is not a complex type"); // Enumeration<DaysOfWeek>
+        case -1414913477: throw new FHIRException("Cannot make property allDay as it is not a complex type"); // BooleanType
+        case -1039453818: throw new FHIRException("Cannot make property availableStartTime as it is not a complex type"); // TimeType
+        case 101151551: throw new FHIRException("Cannot make property availableEndTime as it is not a complex type"); // TimeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -527,8 +589,8 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( daysOfWeek,  allDay,  availableStartTime
-          ,  availableEndTime);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(daysOfWeek, allDay, availableStartTime
+          , availableEndTime);
       }
 
   public String fhirType() {
@@ -647,6 +709,30 @@ public class HealthcareService extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1320499647: /*during*/ return this.during == null ? new Base[0] : new Base[] {this.during}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1320499647: // during
+          this.during = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("description"))
           this.description = castToString(value); // StringType
@@ -654,6 +740,16 @@ public class HealthcareService extends DomainResource {
           this.during = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1320499647:  return getDuring(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -698,7 +794,7 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( description,  during);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, during);
       }
 
   public String fhirType() {
@@ -902,6 +998,24 @@ public class HealthcareService extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -1010,6 +1124,24 @@ public class HealthcareService extends DomainResource {
       return this.serviceType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #serviceType}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceTypeFirstRep() { 
+      if (getServiceType().isEmpty()) {
+        addServiceType();
+      }
+      return getServiceType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setServiceType(List<CodeableConcept> theServiceType) { 
+      this.serviceType = theServiceType;
+      return this;
+    }
+
     public boolean hasServiceType() { 
       if (this.serviceType == null)
         return false;
@@ -1050,6 +1182,24 @@ public class HealthcareService extends DomainResource {
       return this.specialty;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+     */
+    public CodeableConcept getSpecialtyFirstRep() { 
+      if (getSpecialty().isEmpty()) {
+        addSpecialty();
+      }
+      return getSpecialty().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setSpecialty(List<CodeableConcept> theSpecialty) { 
+      this.specialty = theSpecialty;
+      return this;
+    }
+
     public boolean hasSpecialty() { 
       if (this.specialty == null)
         return false;
@@ -1088,6 +1238,24 @@ public class HealthcareService extends DomainResource {
       if (this.location == null)
         this.location = new ArrayList<Reference>();
       return this.location;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
+     */
+    public Reference getLocationFirstRep() { 
+      if (getLocation().isEmpty()) {
+        addLocation();
+      }
+      return getLocation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setLocation(List<Reference> theLocation) { 
+      this.location = theLocation;
+      return this;
     }
 
     public boolean hasLocation() { 
@@ -1322,6 +1490,24 @@ public class HealthcareService extends DomainResource {
       return this.telecom;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setTelecom(List<ContactPoint> theTelecom) { 
+      this.telecom = theTelecom;
+      return this;
+    }
+
     public boolean hasTelecom() { 
       if (this.telecom == null)
         return false;
@@ -1360,6 +1546,24 @@ public class HealthcareService extends DomainResource {
       if (this.coverageArea == null)
         this.coverageArea = new ArrayList<Reference>();
       return this.coverageArea;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coverageArea}, creating it if it does not already exist
+     */
+    public Reference getCoverageAreaFirstRep() { 
+      if (getCoverageArea().isEmpty()) {
+        addCoverageArea();
+      }
+      return getCoverageArea().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setCoverageArea(List<Reference> theCoverageArea) { 
+      this.coverageArea = theCoverageArea;
+      return this;
     }
 
     public boolean hasCoverageArea() { 
@@ -1421,6 +1625,24 @@ public class HealthcareService extends DomainResource {
       if (this.serviceProvisionCode == null)
         this.serviceProvisionCode = new ArrayList<CodeableConcept>();
       return this.serviceProvisionCode;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #serviceProvisionCode}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceProvisionCodeFirstRep() { 
+      if (getServiceProvisionCode().isEmpty()) {
+        addServiceProvisionCode();
+      }
+      return getServiceProvisionCode().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setServiceProvisionCode(List<CodeableConcept> theServiceProvisionCode) { 
+      this.serviceProvisionCode = theServiceProvisionCode;
+      return this;
     }
 
     public boolean hasServiceProvisionCode() { 
@@ -1536,6 +1758,24 @@ public class HealthcareService extends DomainResource {
       return this.programName;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #programName}, creating it if it does not already exist
+     */
+    public StringType getProgramNameFirstRep() { 
+      if (getProgramName().isEmpty()) {
+        addProgramNameElement();
+      }
+      return getProgramName().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setProgramName(List<StringType> theProgramName) { 
+      this.programName = theProgramName;
+      return this;
+    }
+
     public boolean hasProgramName() { 
       if (this.programName == null)
         return false;
@@ -1590,6 +1830,24 @@ public class HealthcareService extends DomainResource {
       return this.characteristic;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #characteristic}, creating it if it does not already exist
+     */
+    public CodeableConcept getCharacteristicFirstRep() { 
+      if (getCharacteristic().isEmpty()) {
+        addCharacteristic();
+      }
+      return getCharacteristic().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setCharacteristic(List<CodeableConcept> theCharacteristic) { 
+      this.characteristic = theCharacteristic;
+      return this;
+    }
+
     public boolean hasCharacteristic() { 
       if (this.characteristic == null)
         return false;
@@ -1628,6 +1886,24 @@ public class HealthcareService extends DomainResource {
       if (this.referralMethod == null)
         this.referralMethod = new ArrayList<CodeableConcept>();
       return this.referralMethod;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #referralMethod}, creating it if it does not already exist
+     */
+    public CodeableConcept getReferralMethodFirstRep() { 
+      if (getReferralMethod().isEmpty()) {
+        addReferralMethod();
+      }
+      return getReferralMethod().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setReferralMethod(List<CodeableConcept> theReferralMethod) { 
+      this.referralMethod = theReferralMethod;
+      return this;
     }
 
     public boolean hasReferralMethod() { 
@@ -1764,6 +2040,24 @@ public class HealthcareService extends DomainResource {
       return this.availableTime;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #availableTime}, creating it if it does not already exist
+     */
+    public HealthcareServiceAvailableTimeComponent getAvailableTimeFirstRep() { 
+      if (getAvailableTime().isEmpty()) {
+        addAvailableTime();
+      }
+      return getAvailableTime().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setAvailableTime(List<HealthcareServiceAvailableTimeComponent> theAvailableTime) { 
+      this.availableTime = theAvailableTime;
+      return this;
+    }
+
     public boolean hasAvailableTime() { 
       if (this.availableTime == null)
         return false;
@@ -1802,6 +2096,24 @@ public class HealthcareService extends DomainResource {
       if (this.notAvailable == null)
         this.notAvailable = new ArrayList<HealthcareServiceNotAvailableComponent>();
       return this.notAvailable;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #notAvailable}, creating it if it does not already exist
+     */
+    public HealthcareServiceNotAvailableComponent getNotAvailableFirstRep() { 
+      if (getNotAvailable().isEmpty()) {
+        addNotAvailable();
+      }
+      return getNotAvailable().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setNotAvailable(List<HealthcareServiceNotAvailableComponent> theNotAvailable) { 
+      this.notAvailable = theNotAvailable;
+      return this;
     }
 
     public boolean hasNotAvailable() { 
@@ -1912,6 +2224,114 @@ public class HealthcareService extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 205136282: /*providedBy*/ return this.providedBy == null ? new Base[0] : new Base[] {this.providedBy}; // Reference
+        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
+        case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
+        case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
+        case -1928572192: /*serviceName*/ return this.serviceName == null ? new Base[0] : new Base[] {this.serviceName}; // StringType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case -1469168622: /*extraDetails*/ return this.extraDetails == null ? new Base[0] : new Base[] {this.extraDetails}; // StringType
+        case 106642994: /*photo*/ return this.photo == null ? new Base[0] : new Base[] {this.photo}; // Attachment
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -1532328299: /*coverageArea*/ return this.coverageArea == null ? new Base[0] : this.coverageArea.toArray(new Base[this.coverageArea.size()]); // Reference
+        case 1504575405: /*serviceProvisionCode*/ return this.serviceProvisionCode == null ? new Base[0] : this.serviceProvisionCode.toArray(new Base[this.serviceProvisionCode.size()]); // CodeableConcept
+        case -930847859: /*eligibility*/ return this.eligibility == null ? new Base[0] : new Base[] {this.eligibility}; // CodeableConcept
+        case 1635973407: /*eligibilityNote*/ return this.eligibilityNote == null ? new Base[0] : new Base[] {this.eligibilityNote}; // StringType
+        case 1010379567: /*programName*/ return this.programName == null ? new Base[0] : this.programName.toArray(new Base[this.programName.size()]); // StringType
+        case 366313883: /*characteristic*/ return this.characteristic == null ? new Base[0] : this.characteristic.toArray(new Base[this.characteristic.size()]); // CodeableConcept
+        case -2092740898: /*referralMethod*/ return this.referralMethod == null ? new Base[0] : this.referralMethod.toArray(new Base[this.referralMethod.size()]); // CodeableConcept
+        case 1446899510: /*publicKey*/ return this.publicKey == null ? new Base[0] : new Base[] {this.publicKey}; // StringType
+        case 427220062: /*appointmentRequired*/ return this.appointmentRequired == null ? new Base[0] : new Base[] {this.appointmentRequired}; // BooleanType
+        case 1873069366: /*availableTime*/ return this.availableTime == null ? new Base[0] : this.availableTime.toArray(new Base[this.availableTime.size()]); // HealthcareServiceAvailableTimeComponent
+        case -629572298: /*notAvailable*/ return this.notAvailable == null ? new Base[0] : this.notAvailable.toArray(new Base[this.notAvailable.size()]); // HealthcareServiceNotAvailableComponent
+        case -1149143617: /*availabilityExceptions*/ return this.availabilityExceptions == null ? new Base[0] : new Base[] {this.availabilityExceptions}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 205136282: // providedBy
+          this.providedBy = castToReference(value); // Reference
+          break;
+        case 1281188563: // serviceCategory
+          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1928370289: // serviceType
+          this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1694759682: // specialty
+          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1901043637: // location
+          this.getLocation().add(castToReference(value)); // Reference
+          break;
+        case -1928572192: // serviceName
+          this.serviceName = castToString(value); // StringType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        case -1469168622: // extraDetails
+          this.extraDetails = castToString(value); // StringType
+          break;
+        case 106642994: // photo
+          this.photo = castToAttachment(value); // Attachment
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -1532328299: // coverageArea
+          this.getCoverageArea().add(castToReference(value)); // Reference
+          break;
+        case 1504575405: // serviceProvisionCode
+          this.getServiceProvisionCode().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -930847859: // eligibility
+          this.eligibility = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 1635973407: // eligibilityNote
+          this.eligibilityNote = castToString(value); // StringType
+          break;
+        case 1010379567: // programName
+          this.getProgramName().add(castToString(value)); // StringType
+          break;
+        case 366313883: // characteristic
+          this.getCharacteristic().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -2092740898: // referralMethod
+          this.getReferralMethod().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1446899510: // publicKey
+          this.publicKey = castToString(value); // StringType
+          break;
+        case 427220062: // appointmentRequired
+          this.appointmentRequired = castToBoolean(value); // BooleanType
+          break;
+        case 1873069366: // availableTime
+          this.getAvailableTime().add((HealthcareServiceAvailableTimeComponent) value); // HealthcareServiceAvailableTimeComponent
+          break;
+        case -629572298: // notAvailable
+          this.getNotAvailable().add((HealthcareServiceNotAvailableComponent) value); // HealthcareServiceNotAvailableComponent
+          break;
+        case -1149143617: // availabilityExceptions
+          this.availabilityExceptions = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1961,6 +2381,37 @@ public class HealthcareService extends DomainResource {
           this.availabilityExceptions = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 205136282:  return getProvidedBy(); // Reference
+        case 1281188563:  return getServiceCategory(); // CodeableConcept
+        case -1928370289:  return addServiceType(); // CodeableConcept
+        case -1694759682:  return addSpecialty(); // CodeableConcept
+        case 1901043637:  return addLocation(); // Reference
+        case -1928572192: throw new FHIRException("Cannot make property serviceName as it is not a complex type"); // StringType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -1469168622: throw new FHIRException("Cannot make property extraDetails as it is not a complex type"); // StringType
+        case 106642994:  return getPhoto(); // Attachment
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -1532328299:  return addCoverageArea(); // Reference
+        case 1504575405:  return addServiceProvisionCode(); // CodeableConcept
+        case -930847859:  return getEligibility(); // CodeableConcept
+        case 1635973407: throw new FHIRException("Cannot make property eligibilityNote as it is not a complex type"); // StringType
+        case 1010379567: throw new FHIRException("Cannot make property programName as it is not a complex type"); // StringType
+        case 366313883:  return addCharacteristic(); // CodeableConcept
+        case -2092740898:  return addReferralMethod(); // CodeableConcept
+        case 1446899510: throw new FHIRException("Cannot make property publicKey as it is not a complex type"); // StringType
+        case 427220062: throw new FHIRException("Cannot make property appointmentRequired as it is not a complex type"); // BooleanType
+        case 1873069366:  return addAvailableTime(); // HealthcareServiceAvailableTimeComponent
+        case -629572298:  return addNotAvailable(); // HealthcareServiceNotAvailableComponent
+        case -1149143617: throw new FHIRException("Cannot make property availabilityExceptions as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2162,11 +2613,10 @@ public class HealthcareService extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  providedBy,  serviceCategory
-          ,  serviceType,  specialty,  location,  serviceName,  comment,  extraDetails,  photo,  telecom
-          ,  coverageArea,  serviceProvisionCode,  eligibility,  eligibilityNote,  programName,  characteristic
-          ,  referralMethod,  publicKey,  appointmentRequired,  availableTime,  notAvailable,  availabilityExceptions
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, providedBy, serviceCategory
+          , serviceType, specialty, location, serviceName, comment, extraDetails, photo, telecom, coverageArea
+          , serviceProvisionCode, eligibility, eligibilityNote, programName, characteristic, referralMethod
+          , publicKey, appointmentRequired, availableTime, notAvailable, availabilityExceptions);
       }
 
   @Override
@@ -2182,7 +2632,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2202,7 +2654,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceCategory</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token", target={} )
   public static final String SP_SERVICECATEGORY = "servicecategory";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>servicecategory</b>
@@ -2222,7 +2676,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token", target={} )
   public static final String SP_SERVICETYPE = "servicetype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>servicetype</b>
@@ -2242,7 +2698,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.providedBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -2268,7 +2726,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceName</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2288,7 +2748,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.programName</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string", target={} )
   public static final String SP_PROGRAMNAME = "programname";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>programname</b>
@@ -2308,7 +2770,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2334,7 +2798,9 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.characteristic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token", target={} )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>

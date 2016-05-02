@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -378,6 +378,24 @@ public class HumanName extends Type implements ICompositeType {
       return this.family;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #family}, creating it if it does not already exist
+     */
+    public StringType getFamilyFirstRep() { 
+      if (getFamily().isEmpty()) {
+        addFamilyElement();
+      }
+      return getFamily().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HumanName setFamily(List<StringType> theFamily) { 
+      this.family = theFamily;
+      return this;
+    }
+
     public boolean hasFamily() { 
       if (this.family == null)
         return false;
@@ -430,6 +448,24 @@ public class HumanName extends Type implements ICompositeType {
       if (this.given == null)
         this.given = new ArrayList<StringType>();
       return this.given;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #given}, creating it if it does not already exist
+     */
+    public StringType getGivenFirstRep() { 
+      if (getGiven().isEmpty()) {
+        addGivenElement();
+      }
+      return getGiven().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HumanName setGiven(List<StringType> theGiven) { 
+      this.given = theGiven;
+      return this;
     }
 
     public boolean hasGiven() { 
@@ -486,6 +522,24 @@ public class HumanName extends Type implements ICompositeType {
       return this.prefix;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #prefix}, creating it if it does not already exist
+     */
+    public StringType getPrefixFirstRep() { 
+      if (getPrefix().isEmpty()) {
+        addPrefixElement();
+      }
+      return getPrefix().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HumanName setPrefix(List<StringType> thePrefix) { 
+      this.prefix = thePrefix;
+      return this;
+    }
+
     public boolean hasPrefix() { 
       if (this.prefix == null)
         return false;
@@ -538,6 +592,24 @@ public class HumanName extends Type implements ICompositeType {
       if (this.suffix == null)
         this.suffix = new ArrayList<StringType>();
       return this.suffix;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #suffix}, creating it if it does not already exist
+     */
+    public StringType getSuffixFirstRep() { 
+      if (getSuffix().isEmpty()) {
+        addSuffixElement();
+      }
+      return getSuffix().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HumanName setSuffix(List<StringType> theSuffix) { 
+      this.suffix = theSuffix;
+      return this;
     }
 
     public boolean hasSuffix() { 
@@ -695,6 +767,50 @@ public class HumanName extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<NameUse>
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case -1281860764: /*family*/ return this.family == null ? new Base[0] : this.family.toArray(new Base[this.family.size()]); // StringType
+        case 98367357: /*given*/ return this.given == null ? new Base[0] : this.given.toArray(new Base[this.given.size()]); // StringType
+        case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : this.prefix.toArray(new Base[this.prefix.size()]); // StringType
+        case -891422895: /*suffix*/ return this.suffix == null ? new Base[0] : this.suffix.toArray(new Base[this.suffix.size()]); // StringType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116103: // use
+          this.use = new NameUseEnumFactory().fromType(value); // Enumeration<NameUse>
+          break;
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        case -1281860764: // family
+          this.getFamily().add(castToString(value)); // StringType
+          break;
+        case 98367357: // given
+          this.getGiven().add(castToString(value)); // StringType
+          break;
+        case -980110702: // prefix
+          this.getPrefix().add(castToString(value)); // StringType
+          break;
+        case -891422895: // suffix
+          this.getSuffix().add(castToString(value)); // StringType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("use"))
           this.use = new NameUseEnumFactory().fromType(value); // Enumeration<NameUse>
@@ -712,6 +828,21 @@ public class HumanName extends Type implements ICompositeType {
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<NameUse>
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case -1281860764: throw new FHIRException("Cannot make property family as it is not a complex type"); // StringType
+        case 98367357: throw new FHIRException("Cannot make property given as it is not a complex type"); // StringType
+        case -980110702: throw new FHIRException("Cannot make property prefix as it is not a complex type"); // StringType
+        case -891422895: throw new FHIRException("Cannot make property suffix as it is not a complex type"); // StringType
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -805,8 +936,8 @@ public class HumanName extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( use,  text,  family,  given,  prefix
-          ,  suffix,  period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, text, family, given, prefix
+          , suffix, period);
       }
 
 

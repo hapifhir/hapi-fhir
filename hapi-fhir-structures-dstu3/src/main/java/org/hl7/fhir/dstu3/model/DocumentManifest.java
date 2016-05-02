@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -53,7 +53,7 @@ public class DocumentManifest extends DomainResource {
         /**
          * The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
-   	  @Child(name = "p", type = {Attachment.class, ValueSet.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "p", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed." )
         protected Type p;
 
@@ -125,11 +125,40 @@ public class DocumentManifest extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 112: /*p*/ return this.p == null ? new Base[0] : new Base[] {this.p}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 112: // p
+          this.p = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("p[x]"))
           this.p = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3427856:  return getP(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -174,7 +203,7 @@ public class DocumentManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( p);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(p);
       }
 
   public String fhirType() {
@@ -284,6 +313,30 @@ public class DocumentManifest extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 112787: /*ref*/ return this.ref == null ? new Base[0] : new Base[] {this.ref}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case 112787: // ref
+          this.ref = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -291,6 +344,16 @@ public class DocumentManifest extends DomainResource {
           this.ref = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case 112787:  return getRef(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -336,7 +399,7 @@ public class DocumentManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  ref);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, ref);
       }
 
   public String fhirType() {
@@ -495,6 +558,24 @@ public class DocumentManifest extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentManifest setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -574,6 +655,24 @@ public class DocumentManifest extends DomainResource {
       return this.recipient;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
+     */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentManifest setRecipient(List<Reference> theRecipient) { 
+      this.recipient = theRecipient;
+      return this;
+    }
+
     public boolean hasRecipient() { 
       if (this.recipient == null)
         return false;
@@ -645,6 +744,24 @@ public class DocumentManifest extends DomainResource {
       if (this.author == null)
         this.author = new ArrayList<Reference>();
       return this.author;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
+     */
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
+      }
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentManifest setAuthor(List<Reference> theAuthor) { 
+      this.author = theAuthor;
+      return this;
     }
 
     public boolean hasAuthor() { 
@@ -888,6 +1005,24 @@ public class DocumentManifest extends DomainResource {
       return this.content;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+     */
+    public DocumentManifestContentComponent getContentFirstRep() { 
+      if (getContent().isEmpty()) {
+        addContent();
+      }
+      return getContent().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentManifest setContent(List<DocumentManifestContentComponent> theContent) { 
+      this.content = theContent;
+      return this;
+    }
+
     public boolean hasContent() { 
       if (this.content == null)
         return false;
@@ -926,6 +1061,24 @@ public class DocumentManifest extends DomainResource {
       if (this.related == null)
         this.related = new ArrayList<DocumentManifestRelatedComponent>();
       return this.related;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
+     */
+    public DocumentManifestRelatedComponent getRelatedFirstRep() { 
+      if (getRelated().isEmpty()) {
+        addRelated();
+      }
+      return getRelated().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentManifest setRelated(List<DocumentManifestRelatedComponent> theRelated) { 
+      this.related = theRelated;
+      return this;
     }
 
     public boolean hasRelated() { 
@@ -976,6 +1129,70 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 243769515: /*masterIdentifier*/ return this.masterIdentifier == null ? new Base[0] : new Base[] {this.masterIdentifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : this.recipient.toArray(new Base[this.recipient.size()]); // Reference
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // UriType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DocumentReferenceStatus>
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : this.content.toArray(new Base[this.content.size()]); // DocumentManifestContentComponent
+        case 1090493483: /*related*/ return this.related == null ? new Base[0] : this.related.toArray(new Base[this.related.size()]); // DocumentManifestRelatedComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 243769515: // masterIdentifier
+          this.masterIdentifier = castToIdentifier(value); // Identifier
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 820081177: // recipient
+          this.getRecipient().add(castToReference(value)); // Reference
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1406328437: // author
+          this.getAuthor().add(castToReference(value)); // Reference
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case -896505829: // source
+          this.source = castToUri(value); // UriType
+          break;
+        case -892481550: // status
+          this.status = new DocumentReferenceStatusEnumFactory().fromType(value); // Enumeration<DocumentReferenceStatus>
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 951530617: // content
+          this.getContent().add((DocumentManifestContentComponent) value); // DocumentManifestContentComponent
+          break;
+        case 1090493483: // related
+          this.getRelated().add((DocumentManifestRelatedComponent) value); // DocumentManifestRelatedComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("masterIdentifier"))
           this.masterIdentifier = castToIdentifier(value); // Identifier
@@ -1003,6 +1220,26 @@ public class DocumentManifest extends DomainResource {
           this.getRelated().add((DocumentManifestRelatedComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 243769515:  return getMasterIdentifier(); // Identifier
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1867885268:  return getSubject(); // Reference
+        case 820081177:  return addRecipient(); // Reference
+        case 3575610:  return getType(); // CodeableConcept
+        case -1406328437:  return addAuthor(); // Reference
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case -896505829: throw new FHIRException("Cannot make property source as it is not a complex type"); // UriType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DocumentReferenceStatus>
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 951530617:  return addContent(); // DocumentManifestContentComponent
+        case 1090493483:  return addRelated(); // DocumentManifestRelatedComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1123,8 +1360,8 @@ public class DocumentManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( masterIdentifier,  identifier,  subject
-          ,  recipient,  type,  author,  created,  source,  status,  description,  content,  related);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier, subject
+          , recipient, type, author, created, source, status, description, content, related);
       }
 
   @Override
@@ -1140,7 +1377,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1160,7 +1399,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token", target={} )
   public static final String SP_RELATED_ID = "related-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
@@ -1180,7 +1421,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.content.pReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
+  // [Any]
+  // [Any]
+  @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.p.as(Reference)", description="Contents of this set of documents", type="reference" )
   public static final String SP_CONTENT_REF = "content-ref";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>content-ref</b>
@@ -1206,7 +1449,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Group, Device, Patient]
+  // [Practitioner, Group, Device, Patient]
+  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1232,7 +1477,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1258,7 +1505,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1278,7 +1527,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1298,7 +1549,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri", target={} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1318,7 +1571,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1338,6 +1593,8 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.ref</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="related-ref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATED_REF = "related-ref";
  /**
@@ -1364,7 +1621,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
+  // [Practitioner, Group, Device, Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1390,7 +1649,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  // [Practitioner, Organization, Patient, RelatedPerson]
+  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1416,7 +1677,9 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

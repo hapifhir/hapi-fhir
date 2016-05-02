@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -457,6 +457,50 @@ public class ParameterDefinition extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // CodeType
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // CodeType
+        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // IntegerType
+        case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
+        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToCode(value); // CodeType
+          break;
+        case 116103: // use
+          this.use = castToCode(value); // CodeType
+          break;
+        case 108114: // min
+          this.min = castToInteger(value); // IntegerType
+          break;
+        case 107876: // max
+          this.max = castToString(value); // StringType
+          break;
+        case 1587405498: // documentation
+          this.documentation = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = castToCode(value); // CodeType
+          break;
+        case -309425751: // profile
+          this.profile = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToCode(value); // CodeType
@@ -474,6 +518,21 @@ public class ParameterDefinition extends Type implements ICompositeType {
           this.profile = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
+        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // CodeType
+        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
+        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
+        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case -309425751:  return getProfile(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -551,8 +610,8 @@ public class ParameterDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  use,  min,  max,  documentation
-          ,  type,  profile);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, use, min, max, documentation
+          , type, profile);
       }
 
 

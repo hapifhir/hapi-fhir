@@ -25,14 +25,15 @@ import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.util.VersionUtil;
 
 public class RestulfulServerConfiguration {
     
     private Collection<ResourceBinding> resourceBindings;
     private List<BaseMethodBinding<?>> serverBindings;
     private String implementationDescription;
-    private String serverVersion;
-    private String serverName;
+    private String serverVersion = VersionUtil.getVersion();
+    private String serverName = "HAPI FHIR";
     private FhirContext fhirContext;
     private IServerAddressStrategy serverAddressStrategy;
     private String conformanceDate;

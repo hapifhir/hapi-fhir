@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -470,6 +470,30 @@ public class Task extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -477,6 +501,16 @@ public class Task extends DomainResource {
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -649,7 +683,7 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
       }
 
   public String fhirType() {
@@ -764,6 +798,30 @@ public class Task extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -771,6 +829,16 @@ public class Task extends DomainResource {
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -943,7 +1011,7 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
       }
 
   public String fhirType() {
@@ -1221,6 +1289,24 @@ public class Task extends DomainResource {
       if (this.performerType == null)
         this.performerType = new ArrayList<Coding>();
       return this.performerType;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #performerType}, creating it if it does not already exist
+     */
+    public Coding getPerformerTypeFirstRep() { 
+      if (getPerformerType().isEmpty()) {
+        addPerformerType();
+      }
+      return getPerformerType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Task setPerformerType(List<Coding> thePerformerType) { 
+      this.performerType = thePerformerType;
+      return this;
     }
 
     public boolean hasPerformerType() { 
@@ -1720,6 +1806,24 @@ public class Task extends DomainResource {
       return this.input;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
+     */
+    public ParameterComponent getInputFirstRep() { 
+      if (getInput().isEmpty()) {
+        addInput();
+      }
+      return getInput().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Task setInput(List<ParameterComponent> theInput) { 
+      this.input = theInput;
+      return this;
+    }
+
     public boolean hasInput() { 
       if (this.input == null)
         return false;
@@ -1758,6 +1862,24 @@ public class Task extends DomainResource {
       if (this.output == null)
         this.output = new ArrayList<TaskOutputComponent>();
       return this.output;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #output}, creating it if it does not already exist
+     */
+    public TaskOutputComponent getOutputFirstRep() { 
+      if (getOutput().isEmpty()) {
+        addOutput();
+      }
+      return getOutput().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Task setOutput(List<TaskOutputComponent> theOutput) { 
+      this.output = theOutput;
+      return this;
     }
 
     public boolean hasOutput() { 
@@ -1813,6 +1935,90 @@ public class Task extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -901444568: /*performerType*/ return this.performerType == null ? new Base[0] : this.performerType.toArray(new Base[this.performerType.size()]); // Coding
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<TaskPriority>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<TaskStatus>
+        case -1990598546: /*failureReason*/ return this.failureReason == null ? new Base[0] : new Base[] {this.failureReason}; // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 101577: /*for*/ return this.for_ == null ? new Base[0] : new Base[] {this.for_}; // Reference
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case 1959003007: /*lastModified*/ return this.lastModified == null ? new Base[0] : new Base[] {this.lastModified}; // DateTimeType
+        case 1028554796: /*creator*/ return this.creator == null ? new Base[0] : new Base[] {this.creator}; // Reference
+        case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
+        case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // ParameterComponent
+        case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // TaskOutputComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -901444568: // performerType
+          this.getPerformerType().add(castToCoding(value)); // Coding
+          break;
+        case -1165461084: // priority
+          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
+          break;
+        case -892481550: // status
+          this.status = new TaskStatusEnumFactory().fromType(value); // Enumeration<TaskStatus>
+          break;
+        case -1990598546: // failureReason
+          this.failureReason = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 101577: // for
+          this.for_ = castToReference(value); // Reference
+          break;
+        case -1014418093: // definition
+          this.definition = castToUri(value); // UriType
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case 1959003007: // lastModified
+          this.lastModified = castToDateTime(value); // DateTimeType
+          break;
+        case 1028554796: // creator
+          this.creator = castToReference(value); // Reference
+          break;
+        case 106164915: // owner
+          this.owner = castToReference(value); // Reference
+          break;
+        case -995424086: // parent
+          this.parent = castToReference(value); // Reference
+          break;
+        case 100358090: // input
+          this.getInput().add((ParameterComponent) value); // ParameterComponent
+          break;
+        case -1005512447: // output
+          this.getOutput().add((TaskOutputComponent) value); // TaskOutputComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -1850,6 +2056,31 @@ public class Task extends DomainResource {
           this.getOutput().add((TaskOutputComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case 3575610:  return getType(); // CodeableConcept
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -901444568:  return addPerformerType(); // Coding
+        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<TaskPriority>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<TaskStatus>
+        case -1990598546:  return getFailureReason(); // CodeableConcept
+        case -1867885268:  return getSubject(); // Reference
+        case 101577:  return getFor(); // Reference
+        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case 1959003007: throw new FHIRException("Cannot make property lastModified as it is not a complex type"); // DateTimeType
+        case 1028554796:  return getCreator(); // Reference
+        case 106164915:  return getOwner(); // Reference
+        case -995424086:  return getParent(); // Reference
+        case 100358090:  return addInput(); // ParameterComponent
+        case -1005512447:  return addOutput(); // TaskOutputComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1990,9 +2221,9 @@ public class Task extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  type,  description
-          ,  performerType,  priority,  status,  failureReason,  subject,  for_,  definition,  created
-          ,  lastModified,  creator,  owner,  parent,  input,  output);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, description, performerType
+          , priority, status, failureReason, subject, for_, definition, created, lastModified, creator
+          , owner, parent, input, output);
       }
 
   @Override
@@ -2008,7 +2239,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="owner", path="Task.owner", description="Search by task owner", type="reference" )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="owner", path="Task.owner", description="Search by task owner", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_OWNER = "owner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>owner</b>
@@ -2034,7 +2267,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Task.identifier", description="Search for a task instance by its business identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Task.identifier", description="Search for a task instance by its business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2054,7 +2289,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="Task.parent", description="Search by parent task", type="reference" )
+  // [Task]
+  // [Task]
+  @SearchParamDefinition(name="parent", path="Task.parent", description="Search by parent task", type="reference", target={Task.class} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -2080,7 +2317,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.creator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="creator", path="Task.creator", description="Search by task creator", type="reference" )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="creator", path="Task.creator", description="Search by task creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_CREATOR = "creator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>creator</b>
@@ -2106,7 +2345,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.performerType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Task.performerType", description="Search by recommended type of performer (e.g., Requester, Performer, Scheduler).", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="performer", path="Task.performerType", description="Search by recommended type of performer (e.g., Requester, Performer, Scheduler).", type="token", target={} )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2126,6 +2367,8 @@ public class Task extends DomainResource {
    * Path: <b>Task.subject</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="subject", path="Task.subject", description="Search by task subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2152,7 +2395,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Task.created", description="Search by creation date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="created", path="Task.created", description="Search by creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -2172,7 +2417,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Task.type", description="Search by task type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Task.type", description="Search by task type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2192,7 +2439,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="Task.priority", description="Search by task priority", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="priority", path="Task.priority", description="Search by task priority", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -2212,7 +2461,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.failureReason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="failure", path="Task.failureReason", description="Search by failure reason", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="failure", path="Task.failureReason", description="Search by failure reason", type="token", target={} )
   public static final String SP_FAILURE = "failure";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>failure</b>
@@ -2232,7 +2483,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.lastModified</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="modified", path="Task.lastModified", description="Search by last modification date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="modified", path="Task.lastModified", description="Search by last modification date", type="date", target={} )
   public static final String SP_MODIFIED = "modified";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>modified</b>
@@ -2252,7 +2505,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.definition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="definition", path="Task.definition", description="Search by task definition", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="definition", path="Task.definition", description="Search by task definition", type="uri", target={} )
   public static final String SP_DEFINITION = "definition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>definition</b>
@@ -2272,7 +2527,9 @@ public class Task extends DomainResource {
    * Path: <b>Task.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Task.status", description="Search by task status", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Task.status", description="Search by task status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

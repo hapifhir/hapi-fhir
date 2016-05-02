@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -300,6 +300,30 @@ public class Person extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
+        case 1771900717: /*assurance*/ return this.assurance == null ? new Base[0] : new Base[] {this.assurance}; // Enumeration<IdentityAssuranceLevel>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -880905839: // target
+          this.target = castToReference(value); // Reference
+          break;
+        case 1771900717: // assurance
+          this.assurance = new IdentityAssuranceLevelEnumFactory().fromType(value); // Enumeration<IdentityAssuranceLevel>
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("target"))
           this.target = castToReference(value); // Reference
@@ -307,6 +331,16 @@ public class Person extends DomainResource {
           this.assurance = new IdentityAssuranceLevelEnumFactory().fromType(value); // Enumeration<IdentityAssuranceLevel>
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -880905839:  return getTarget(); // Reference
+        case 1771900717: throw new FHIRException("Cannot make property assurance as it is not a complex type"); // Enumeration<IdentityAssuranceLevel>
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -351,7 +385,7 @@ public class Person extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( target,  assurance);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(target, assurance);
       }
 
   public String fhirType() {
@@ -454,6 +488,24 @@ public class Person extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Person setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -494,6 +546,24 @@ public class Person extends DomainResource {
       return this.name;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
+     */
+    public HumanName getNameFirstRep() { 
+      if (getName().isEmpty()) {
+        addName();
+      }
+      return getName().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Person setName(List<HumanName> theName) { 
+      this.name = theName;
+      return this;
+    }
+
     public boolean hasName() { 
       if (this.name == null)
         return false;
@@ -532,6 +602,24 @@ public class Person extends DomainResource {
       if (this.telecom == null)
         this.telecom = new ArrayList<ContactPoint>();
       return this.telecom;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Person setTelecom(List<ContactPoint> theTelecom) { 
+      this.telecom = theTelecom;
+      return this;
     }
 
     public boolean hasTelecom() { 
@@ -670,6 +758,24 @@ public class Person extends DomainResource {
       if (this.address == null)
         this.address = new ArrayList<Address>();
       return this.address;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Person setAddress(List<Address> theAddress) { 
+      this.address = theAddress;
+      return this;
     }
 
     public boolean hasAddress() { 
@@ -825,6 +931,24 @@ public class Person extends DomainResource {
       return this.link;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
+     */
+    public PersonLinkComponent getLinkFirstRep() { 
+      if (getLink().isEmpty()) {
+        addLink();
+      }
+      return getLink().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Person setLink(List<PersonLinkComponent> theLink) { 
+      this.link = theLink;
+      return this;
+    }
+
     public boolean hasLink() { 
       if (this.link == null)
         return false;
@@ -871,6 +995,62 @@ public class Person extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : this.name.toArray(new Base[this.name.size()]); // HumanName
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // Enumeration<AdministrativeGender>
+        case -1210031859: /*birthDate*/ return this.birthDate == null ? new Base[0] : new Base[] {this.birthDate}; // DateType
+        case -1147692044: /*address*/ return this.address == null ? new Base[0] : this.address.toArray(new Base[this.address.size()]); // Address
+        case 106642994: /*photo*/ return this.photo == null ? new Base[0] : new Base[] {this.photo}; // Attachment
+        case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
+        case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // PersonLinkComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 3373707: // name
+          this.getName().add(castToHumanName(value)); // HumanName
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -1249512767: // gender
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+          break;
+        case -1210031859: // birthDate
+          this.birthDate = castToDate(value); // DateType
+          break;
+        case -1147692044: // address
+          this.getAddress().add(castToAddress(value)); // Address
+          break;
+        case 106642994: // photo
+          this.photo = castToAttachment(value); // Attachment
+          break;
+        case -2058947787: // managingOrganization
+          this.managingOrganization = castToReference(value); // Reference
+          break;
+        case -1422950650: // active
+          this.active = castToBoolean(value); // BooleanType
+          break;
+        case 3321850: // link
+          this.getLink().add((PersonLinkComponent) value); // PersonLinkComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -894,6 +1074,24 @@ public class Person extends DomainResource {
           this.getLink().add((PersonLinkComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 3373707:  return addName(); // HumanName
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
+        case -1210031859: throw new FHIRException("Cannot make property birthDate as it is not a complex type"); // DateType
+        case -1147692044:  return addAddress(); // Address
+        case 106642994:  return getPhoto(); // Attachment
+        case -2058947787:  return getManagingOrganization(); // Reference
+        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
+        case 3321850:  return addLink(); // PersonLinkComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1004,8 +1202,8 @@ public class Person extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  name,  telecom,  gender
-          ,  birthDate,  address,  photo,  managingOrganization,  active,  link);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, telecom, gender
+          , birthDate, address, photo, managingOrganization, active, link);
       }
 
   @Override
@@ -1021,7 +1219,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1041,7 +1241,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1061,7 +1263,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.birthDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date", target={} )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
@@ -1081,7 +1285,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Person.address.state", description="A state specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-state", path="Person.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1101,7 +1307,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -1121,7 +1329,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Patient, Person, RelatedPerson]
+  // [Practitioner]
+  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -1147,7 +1357,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  // [Practitioner, Patient, Person, RelatedPerson]
+  // [Practitioner, Patient, Person, RelatedPerson]
+  @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
   public static final String SP_LINK = "link";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>link</b>
@@ -1173,7 +1385,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference" )
+  // [Practitioner, Patient, Person, RelatedPerson]
+  // [RelatedPerson]
+  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
   public static final String SP_RELATEDPERSON = "relatedperson";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedperson</b>
@@ -1199,7 +1413,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Person.address.postalCode", description="A postal code specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-postalcode", path="Person.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1219,7 +1435,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -1239,7 +1457,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -1259,7 +1479,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Person.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="phone", path="Person.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -1279,7 +1501,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Practitioner, Patient, Person, RelatedPerson]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1305,7 +1529,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1331,7 +1557,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1351,7 +1579,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Person.address.use", description="A use code specified in an address", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-use", path="Person.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1371,7 +1601,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1391,7 +1623,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1411,7 +1645,9 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Person.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="email", path="Person.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

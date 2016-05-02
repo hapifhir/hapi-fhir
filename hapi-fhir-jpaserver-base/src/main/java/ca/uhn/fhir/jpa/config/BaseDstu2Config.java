@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu2;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
@@ -66,4 +67,10 @@ public class BaseDstu2Config extends BaseConfig {
 		retVal.setDao(systemDaoDstu2());
 		return retVal;
 	}
+	
+	@Bean(autowire=Autowire.BY_TYPE)
+	public SearchParamExtractorDstu2 searchParamExtractor() {
+		return new SearchParamExtractorDstu2();
+	}
+	
 }

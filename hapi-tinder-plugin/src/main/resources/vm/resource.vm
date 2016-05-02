@@ -59,6 +59,10 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 #{if} ($param.compartments.size() > 0), providesMembershipIn={
 #{foreach} ($compartment in $param.compartments) @Compartment(name="$compartment") #{if}($foreach.hasNext), #{end}#{end}
 	}
+#{end}
+#{if} ($param.targetTypes.size() > 0), target={
+#{foreach} ($target in $param.targetTypes) ${packageBase}.resource.${target}.class #{if}($foreach.hasNext), #{end}#{end}
+	}
 #{end} )
 	public static final String $param.constantName = "${param.name}";
 

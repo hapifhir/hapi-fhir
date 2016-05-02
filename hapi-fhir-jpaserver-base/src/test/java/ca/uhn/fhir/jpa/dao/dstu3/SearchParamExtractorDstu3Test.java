@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -17,10 +19,12 @@ import ca.uhn.fhir.util.TestUtil;
 public class SearchParamExtractorDstu3Test {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static IValidationSupport ourValidationSupport;
 
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+		ourValidationSupport = new DefaultProfileValidationSupport();
 	}
 
 
@@ -29,7 +33,7 @@ public class SearchParamExtractorDstu3Test {
 		Observation obs = new Observation();
 		obs.getCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 		
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(ourCtx);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(ourCtx, ourValidationSupport);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();

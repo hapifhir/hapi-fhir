@@ -70,10 +70,6 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	public SearchParamExtractorDstu1(FhirContext theContext) {
-		super(theContext);
-	}
-
 	@Override
 	public Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
 		return Collections.emptySet();

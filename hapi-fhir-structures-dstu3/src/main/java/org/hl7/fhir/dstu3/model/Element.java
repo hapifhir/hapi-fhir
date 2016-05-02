@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.utilities.Utilities;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Base definition for all elements in a resource.
  */
@@ -126,6 +126,24 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       return this.extension;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #extension}, creating it if it does not already exist
+     */
+    public Extension getExtensionFirstRep() { 
+      if (getExtension().isEmpty()) {
+        addExtension();
+      }
+      return getExtension().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Element setExtension(List<Extension> theExtension) { 
+      this.extension = theExtension;
+      return this;
+    }
+
     public boolean hasExtension() { 
       if (this.extension == null)
         return false;
@@ -196,6 +214,30 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3355: /*id*/ return this.id == null ? new Base[0] : new Base[] {this.id}; // IdType
+        case -612557761: /*extension*/ return this.extension == null ? new Base[0] : this.extension.toArray(new Base[this.extension.size()]); // Extension
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3355: // id
+          this.id = castToId(value); // IdType
+          break;
+        case -612557761: // extension
+          this.getExtension().add(castToExtension(value)); // Extension
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("id"))
           this.id = castToId(value); // IdType
@@ -203,6 +245,16 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
           this.getExtension().add(castToExtension(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3355: throw new FHIRException("Cannot make property id as it is not a complex type"); // IdType
+        case -612557761:  return addExtension(); // Extension
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -254,7 +306,7 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( id,  extension);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(id, extension);
       }
 
 

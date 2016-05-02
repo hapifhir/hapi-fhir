@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -320,6 +320,34 @@ public class DetectedIssue extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : new Base[] {this.action}; // CodeableConcept
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1422950858: // action
+          this.action = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1406328437: // author
+          this.author = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("action"))
           this.action = castToCodeableConcept(value); // CodeableConcept
@@ -329,6 +357,17 @@ public class DetectedIssue extends DomainResource {
           this.author = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422950858:  return getAction(); // CodeableConcept
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1406328437:  return getAuthor(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -379,7 +418,7 @@ public class DetectedIssue extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( action,  date,  author);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(action, date, author);
       }
 
   public String fhirType() {
@@ -607,6 +646,24 @@ public class DetectedIssue extends DomainResource {
       if (this.implicated == null)
         this.implicated = new ArrayList<Reference>();
       return this.implicated;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #implicated}, creating it if it does not already exist
+     */
+    public Reference getImplicatedFirstRep() { 
+      if (getImplicated().isEmpty()) {
+        addImplicated();
+      }
+      return getImplicated().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DetectedIssue setImplicated(List<Reference> theImplicated) { 
+      this.implicated = theImplicated;
+      return this;
     }
 
     public boolean hasImplicated() { 
@@ -868,6 +925,24 @@ public class DetectedIssue extends DomainResource {
       return this.mitigation;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #mitigation}, creating it if it does not already exist
+     */
+    public DetectedIssueMitigationComponent getMitigationFirstRep() { 
+      if (getMitigation().isEmpty()) {
+        addMitigation();
+      }
+      return getMitigation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DetectedIssue setMitigation(List<DetectedIssueMitigationComponent> theMitigation) { 
+      this.mitigation = theMitigation;
+      return this;
+    }
+
     public boolean hasMitigation() { 
       if (this.mitigation == null)
         return false;
@@ -914,6 +989,62 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 1478300413: /*severity*/ return this.severity == null ? new Base[0] : new Base[] {this.severity}; // Enumeration<DetectedIssueSeverity>
+        case -810216884: /*implicated*/ return this.implicated == null ? new Base[0] : this.implicated.toArray(new Base[this.implicated.size()]); // Reference
+        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : new Base[] {this.detail}; // StringType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // UriType
+        case 1293793087: /*mitigation*/ return this.mitigation == null ? new Base[0] : this.mitigation.toArray(new Base[this.mitigation.size()]); // DetectedIssueMitigationComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 1478300413: // severity
+          this.severity = new DetectedIssueSeverityEnumFactory().fromType(value); // Enumeration<DetectedIssueSeverity>
+          break;
+        case -810216884: // implicated
+          this.getImplicated().add(castToReference(value)); // Reference
+          break;
+        case -1335224239: // detail
+          this.detail = castToString(value); // StringType
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1406328437: // author
+          this.author = castToReference(value); // Reference
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -925155509: // reference
+          this.reference = castToUri(value); // UriType
+          break;
+        case 1293793087: // mitigation
+          this.getMitigation().add((DetectedIssueMitigationComponent) value); // DetectedIssueMitigationComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
@@ -937,6 +1068,24 @@ public class DetectedIssue extends DomainResource {
           this.getMitigation().add((DetectedIssueMitigationComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -791418107:  return getPatient(); // Reference
+        case 50511102:  return getCategory(); // CodeableConcept
+        case 1478300413: throw new FHIRException("Cannot make property severity as it is not a complex type"); // Enumeration<DetectedIssueSeverity>
+        case -810216884:  return addImplicated(); // Reference
+        case -1335224239: throw new FHIRException("Cannot make property detail as it is not a complex type"); // StringType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1406328437:  return getAuthor(); // Reference
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // UriType
+        case 1293793087:  return addMitigation(); // DetectedIssueMitigationComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1037,8 +1186,8 @@ public class DetectedIssue extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( patient,  category,  severity,  implicated
-          ,  detail,  date,  author,  identifier,  reference,  mitigation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, category, severity, implicated
+          , detail, date, author, identifier, reference, mitigation);
       }
 
   @Override
@@ -1054,7 +1203,9 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1074,7 +1225,9 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1094,7 +1247,9 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1120,7 +1275,9 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Device]
+  // [Practitioner, Device]
+  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", target={Practitioner.class, Device.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1146,6 +1303,8 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.implicated</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="implicated", path="DetectedIssue.implicated", description="Problem resource", type="reference" )
   public static final String SP_IMPLICATED = "implicated";
  /**
@@ -1172,7 +1331,9 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

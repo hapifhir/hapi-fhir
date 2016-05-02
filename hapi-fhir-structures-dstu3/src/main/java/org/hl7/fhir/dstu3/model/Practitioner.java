@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -207,6 +207,24 @@ public class Practitioner extends DomainResource {
           return this.specialty;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialtyFirstRep() { 
+          if (getSpecialty().isEmpty()) {
+            addSpecialty();
+          }
+          return getSpecialty().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setSpecialty(List<CodeableConcept> theSpecialty) { 
+          this.specialty = theSpecialty;
+          return this;
+        }
+
         public boolean hasSpecialty() { 
           if (this.specialty == null)
             return false;
@@ -247,6 +265,24 @@ public class Practitioner extends DomainResource {
           return this.identifier;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setIdentifier(List<Identifier> theIdentifier) { 
+          this.identifier = theIdentifier;
+          return this;
+        }
+
         public boolean hasIdentifier() { 
           if (this.identifier == null)
             return false;
@@ -285,6 +321,24 @@ public class Practitioner extends DomainResource {
           if (this.telecom == null)
             this.telecom = new ArrayList<ContactPoint>();
           return this.telecom;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
         }
 
         public boolean hasTelecom() { 
@@ -351,6 +405,24 @@ public class Practitioner extends DomainResource {
           return this.location;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
+         */
+        public Reference getLocationFirstRep() { 
+          if (getLocation().isEmpty()) {
+            addLocation();
+          }
+          return getLocation().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setLocation(List<Reference> theLocation) { 
+          this.location = theLocation;
+          return this;
+        }
+
         public boolean hasLocation() { 
           if (this.location == null)
             return false;
@@ -410,6 +482,24 @@ public class Practitioner extends DomainResource {
           if (this.healthcareService == null)
             this.healthcareService = new ArrayList<Reference>();
           return this.healthcareService;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #healthcareService}, creating it if it does not already exist
+         */
+        public Reference getHealthcareServiceFirstRep() { 
+          if (getHealthcareService().isEmpty()) {
+            addHealthcareService();
+          }
+          return getHealthcareService().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setHealthcareService(List<Reference> theHealthcareService) { 
+          this.healthcareService = theHealthcareService;
+          return this;
         }
 
         public boolean hasHealthcareService() { 
@@ -477,6 +567,54 @@ public class Practitioner extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
+        case 1289661064: /*healthcareService*/ return this.healthcareService == null ? new Base[0] : this.healthcareService.toArray(new Base[this.healthcareService.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1178922291: // organization
+          this.organization = castToReference(value); // Reference
+          break;
+        case 3506294: // role
+          this.role = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1694759682: // specialty
+          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case 1901043637: // location
+          this.getLocation().add(castToReference(value)); // Reference
+          break;
+        case 1289661064: // healthcareService
+          this.getHealthcareService().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("organization"))
           this.organization = castToReference(value); // Reference
@@ -496,6 +634,22 @@ public class Practitioner extends DomainResource {
           this.getHealthcareService().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1178922291:  return getOrganization(); // Reference
+        case 3506294:  return getRole(); // CodeableConcept
+        case -1694759682:  return addSpecialty(); // CodeableConcept
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -991726143:  return getPeriod(); // Period
+        case 1901043637:  return addLocation(); // Reference
+        case 1289661064:  return addHealthcareService(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -589,8 +743,8 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( organization,  role,  specialty
-          ,  identifier,  telecom,  period,  location,  healthcareService);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty, identifier
+          , telecom, period, location, healthcareService);
       }
 
   public String fhirType() {
@@ -659,6 +813,24 @@ public class Practitioner extends DomainResource {
           if (this.identifier == null)
             this.identifier = new ArrayList<Identifier>();
           return this.identifier;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerQualificationComponent setIdentifier(List<Identifier> theIdentifier) { 
+          this.identifier = theIdentifier;
+          return this;
         }
 
         public boolean hasIdentifier() { 
@@ -793,6 +965,38 @@ public class Practitioner extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -1179159879: /*issuer*/ return this.issuer == null ? new Base[0] : new Base[] {this.issuer}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case -1179159879: // issuer
+          this.issuer = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -804,6 +1008,18 @@ public class Practitioner extends DomainResource {
           this.issuer = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 3059181:  return getCode(); // CodeableConcept
+        case -991726143:  return getPeriod(); // Period
+        case -1179159879:  return getIssuer(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -863,7 +1079,7 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  code,  period,  issuer
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, period, issuer
           );
       }
 
@@ -970,6 +1186,24 @@ Work addresses are not typically entered in this property as they are usually ro
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -1055,6 +1289,24 @@ Work addresses are not typically entered in this property as they are usually ro
       return this.name;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
+     */
+    public HumanName getNameFirstRep() { 
+      if (getName().isEmpty()) {
+        addName();
+      }
+      return getName().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setName(List<HumanName> theName) { 
+      this.name = theName;
+      return this;
+    }
+
     public boolean hasName() { 
       if (this.name == null)
         return false;
@@ -1093,6 +1345,24 @@ Work addresses are not typically entered in this property as they are usually ro
       if (this.telecom == null)
         this.telecom = new ArrayList<ContactPoint>();
       return this.telecom;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setTelecom(List<ContactPoint> theTelecom) { 
+      this.telecom = theTelecom;
+      return this;
     }
 
     public boolean hasTelecom() { 
@@ -1134,6 +1404,24 @@ Work addresses are not typically entered in this property as they are usually ro
       if (this.address == null)
         this.address = new ArrayList<Address>();
       return this.address;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setAddress(List<Address> theAddress) { 
+      this.address = theAddress;
+      return this;
     }
 
     public boolean hasAddress() { 
@@ -1275,6 +1563,24 @@ Work addresses are not typically entered in this property as they are usually ro
       return this.photo;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
+     */
+    public Attachment getPhotoFirstRep() { 
+      if (getPhoto().isEmpty()) {
+        addPhoto();
+      }
+      return getPhoto().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setPhoto(List<Attachment> thePhoto) { 
+      this.photo = thePhoto;
+      return this;
+    }
+
     public boolean hasPhoto() { 
       if (this.photo == null)
         return false;
@@ -1313,6 +1619,24 @@ Work addresses are not typically entered in this property as they are usually ro
       if (this.practitionerRole == null)
         this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
       return this.practitionerRole;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #practitionerRole}, creating it if it does not already exist
+     */
+    public PractitionerPractitionerRoleComponent getPractitionerRoleFirstRep() { 
+      if (getPractitionerRole().isEmpty()) {
+        addPractitionerRole();
+      }
+      return getPractitionerRole().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setPractitionerRole(List<PractitionerPractitionerRoleComponent> thePractitionerRole) { 
+      this.practitionerRole = thePractitionerRole;
+      return this;
     }
 
     public boolean hasPractitionerRole() { 
@@ -1355,6 +1679,24 @@ Work addresses are not typically entered in this property as they are usually ro
       return this.qualification;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #qualification}, creating it if it does not already exist
+     */
+    public PractitionerQualificationComponent getQualificationFirstRep() { 
+      if (getQualification().isEmpty()) {
+        addQualification();
+      }
+      return getQualification().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setQualification(List<PractitionerQualificationComponent> theQualification) { 
+      this.qualification = theQualification;
+      return this;
+    }
+
     public boolean hasQualification() { 
       if (this.qualification == null)
         return false;
@@ -1393,6 +1735,24 @@ Work addresses are not typically entered in this property as they are usually ro
       if (this.communication == null)
         this.communication = new ArrayList<CodeableConcept>();
       return this.communication;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
+     */
+    public CodeableConcept getCommunicationFirstRep() { 
+      if (getCommunication().isEmpty()) {
+        addCommunication();
+      }
+      return getCommunication().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Practitioner setCommunication(List<CodeableConcept> theCommunication) { 
+      this.communication = theCommunication;
+      return this;
     }
 
     public boolean hasCommunication() { 
@@ -1442,6 +1802,66 @@ Work addresses are not typically entered in this property as they are usually ro
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : this.name.toArray(new Base[this.name.size()]); // HumanName
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -1147692044: /*address*/ return this.address == null ? new Base[0] : this.address.toArray(new Base[this.address.size()]); // Address
+        case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // Enumeration<AdministrativeGender>
+        case -1210031859: /*birthDate*/ return this.birthDate == null ? new Base[0] : new Base[] {this.birthDate}; // DateType
+        case 106642994: /*photo*/ return this.photo == null ? new Base[0] : this.photo.toArray(new Base[this.photo.size()]); // Attachment
+        case 221717168: /*practitionerRole*/ return this.practitionerRole == null ? new Base[0] : this.practitionerRole.toArray(new Base[this.practitionerRole.size()]); // PractitionerPractitionerRoleComponent
+        case -631333393: /*qualification*/ return this.qualification == null ? new Base[0] : this.qualification.toArray(new Base[this.qualification.size()]); // PractitionerQualificationComponent
+        case -1035284522: /*communication*/ return this.communication == null ? new Base[0] : this.communication.toArray(new Base[this.communication.size()]); // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1422950650: // active
+          this.active = castToBoolean(value); // BooleanType
+          break;
+        case 3373707: // name
+          this.getName().add(castToHumanName(value)); // HumanName
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -1147692044: // address
+          this.getAddress().add(castToAddress(value)); // Address
+          break;
+        case -1249512767: // gender
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+          break;
+        case -1210031859: // birthDate
+          this.birthDate = castToDate(value); // DateType
+          break;
+        case 106642994: // photo
+          this.getPhoto().add(castToAttachment(value)); // Attachment
+          break;
+        case 221717168: // practitionerRole
+          this.getPractitionerRole().add((PractitionerPractitionerRoleComponent) value); // PractitionerPractitionerRoleComponent
+          break;
+        case -631333393: // qualification
+          this.getQualification().add((PractitionerQualificationComponent) value); // PractitionerQualificationComponent
+          break;
+        case -1035284522: // communication
+          this.getCommunication().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1467,6 +1887,25 @@ Work addresses are not typically entered in this property as they are usually ro
           this.getCommunication().add(castToCodeableConcept(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
+        case 3373707:  return addName(); // HumanName
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -1147692044:  return addAddress(); // Address
+        case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
+        case -1210031859: throw new FHIRException("Cannot make property birthDate as it is not a complex type"); // DateType
+        case 106642994:  return addPhoto(); // Attachment
+        case 221717168:  return addPractitionerRole(); // PractitionerPractitionerRoleComponent
+        case -631333393:  return addQualification(); // PractitionerQualificationComponent
+        case -1035284522:  return addCommunication(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1592,8 +2031,8 @@ Work addresses are not typically entered in this property as they are usually ro
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  active,  name,  telecom
-          ,  address,  gender,  birthDate,  photo,  practitionerRole,  qualification,  communication);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name, telecom
+          , address, gender, birthDate, photo, practitionerRole, qualification, communication);
       }
 
   @Override
@@ -1609,7 +2048,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.identifier, Practitioner.practitionerRole.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1629,7 +2070,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.given</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string", target={} )
   public static final String SP_GIVEN = "given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>given</b>
@@ -1649,7 +2092,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token", target={} )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1669,7 +2114,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1689,7 +2136,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.role</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token", target={} )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
@@ -1709,7 +2158,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1729,7 +2180,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -1749,7 +2202,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1769,7 +2224,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -1789,7 +2246,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -1809,7 +2268,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=phone), Practitioner.practitionerRole.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -1829,7 +2290,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1855,7 +2318,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1875,7 +2340,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1895,7 +2362,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom, Practitioner.practitionerRole.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1915,7 +2384,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1941,7 +2412,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.family</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string", target={} )
   public static final String SP_FAMILY = "family";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>family</b>
@@ -1961,7 +2434,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1981,7 +2456,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.communication</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token", target={} )
   public static final String SP_COMMUNICATION = "communication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>communication</b>
@@ -2001,7 +2478,9 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=email), Practitioner.practitionerRole.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

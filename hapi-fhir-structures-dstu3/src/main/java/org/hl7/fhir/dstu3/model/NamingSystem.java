@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -353,6 +353,24 @@ public class NamingSystem extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public NamingSystemContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -391,6 +409,30 @@ public class NamingSystem extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -398,6 +440,16 @@ public class NamingSystem extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -445,7 +497,7 @@ public class NamingSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -671,6 +723,38 @@ public class NamingSystem extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<NamingSystemIdentifierType>
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
+        case -1294005119: /*preferred*/ return this.preferred == null ? new Base[0] : new Base[] {this.preferred}; // BooleanType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = new NamingSystemIdentifierTypeEnumFactory().fromType(value); // Enumeration<NamingSystemIdentifierType>
+          break;
+        case 111972721: // value
+          this.value = castToString(value); // StringType
+          break;
+        case -1294005119: // preferred
+          this.preferred = castToBoolean(value); // BooleanType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new NamingSystemIdentifierTypeEnumFactory().fromType(value); // Enumeration<NamingSystemIdentifierType>
@@ -682,6 +766,18 @@ public class NamingSystem extends DomainResource {
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<NamingSystemIdentifierType>
+        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        case -1294005119: throw new FHIRException("Cannot make property preferred as it is not a complex type"); // BooleanType
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -736,7 +832,7 @@ public class NamingSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  value,  preferred,  period
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value, preferred, period
           );
       }
 
@@ -1101,6 +1197,24 @@ public class NamingSystem extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public NamingSystemContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NamingSystem setContact(List<NamingSystemContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1263,6 +1377,24 @@ public class NamingSystem extends DomainResource {
       return this.useContext;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NamingSystem setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
     public boolean hasUseContext() { 
       if (this.useContext == null)
         return false;
@@ -1350,6 +1482,24 @@ public class NamingSystem extends DomainResource {
       if (this.uniqueId == null)
         this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
       return this.uniqueId;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #uniqueId}, creating it if it does not already exist
+     */
+    public NamingSystemUniqueIdComponent getUniqueIdFirstRep() { 
+      if (getUniqueId().isEmpty()) {
+        addUniqueId();
+      }
+      return getUniqueId().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NamingSystem setUniqueId(List<NamingSystemUniqueIdComponent> theUniqueId) { 
+      this.uniqueId = theUniqueId;
+      return this;
     }
 
     public boolean hasUniqueId() { 
@@ -1445,6 +1595,74 @@ public class NamingSystem extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<NamingSystemType>
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // NamingSystemContactComponent
+        case 1847674614: /*responsible*/ return this.responsible == null ? new Base[0] : new Base[] {this.responsible}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
+        case -294460212: /*uniqueId*/ return this.uniqueId == null ? new Base[0] : this.uniqueId.toArray(new Base[this.uniqueId.size()]); // NamingSystemUniqueIdComponent
+        case -1233035097: /*replacedBy*/ return this.replacedBy == null ? new Base[0] : new Base[] {this.replacedBy}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case 3292052: // kind
+          this.kind = new NamingSystemTypeEnumFactory().fromType(value); // Enumeration<NamingSystemType>
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((NamingSystemContactComponent) value); // NamingSystemContactComponent
+          break;
+        case 1847674614: // responsible
+          this.responsible = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 111574433: // usage
+          this.usage = castToString(value); // StringType
+          break;
+        case -294460212: // uniqueId
+          this.getUniqueId().add((NamingSystemUniqueIdComponent) value); // NamingSystemUniqueIdComponent
+          break;
+        case -1233035097: // replacedBy
+          this.replacedBy = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -1474,6 +1692,27 @@ public class NamingSystem extends DomainResource {
           this.replacedBy = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<NamingSystemType>
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // NamingSystemContactComponent
+        case 1847674614: throw new FHIRException("Cannot make property responsible as it is not a complex type"); // StringType
+        case 3575610:  return getType(); // CodeableConcept
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
+        case -294460212:  return addUniqueId(); // NamingSystemUniqueIdComponent
+        case -1233035097:  return getReplacedBy(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1590,8 +1829,8 @@ public class NamingSystem extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  status,  kind,  date,  publisher
-          ,  contact,  responsible,  type,  description,  useContext,  usage,  uniqueId,  replacedBy);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, status, kind, date, publisher
+          , contact, responsible, type, description, useContext, usage, uniqueId, replacedBy);
       }
 
   @Override
@@ -1607,7 +1846,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1627,7 +1868,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -1647,7 +1890,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -1667,7 +1912,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1687,7 +1934,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token", target={} )
   public static final String SP_ID_TYPE = "id-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>id-type</b>
@@ -1707,7 +1956,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.responsible</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string", target={} )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
@@ -1727,7 +1978,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.contact.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of an individual to contact", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of an individual to contact", type="string", target={} )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
@@ -1747,7 +2000,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1767,7 +2022,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1787,7 +2044,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -1807,7 +2066,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.contact.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1827,7 +2088,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.value</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string", target={} )
   public static final String SP_VALUE = "value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value</b>
@@ -1847,7 +2110,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.replacedBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
+  // [NamingSystem]
+  // [NamingSystem]
+  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference", target={NamingSystem.class} )
   public static final String SP_REPLACED_BY = "replaced-by";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>replaced-by</b>
@@ -1873,7 +2138,9 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -98,15 +98,24 @@ public class Utilities {
     }
     
   
-  	public static boolean isInteger(String string) {
-  		try {
-  			int i = Integer.parseInt(string);
-  			return i != i+1;
-  		} catch (Exception e) {
-  			return false;
-  		}
-  	}
-  	
+    public static boolean isInteger(String string) {
+      try {
+        int i = Integer.parseInt(string);
+        return i != i+1;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
+    public static boolean isHex(String string) {
+      try {
+        int i = Integer.parseInt(string, 16);
+        return i != i+1;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
   	public static boolean isDecimal(String string) {
   		try {
   			float r = Float.parseFloat(string);
@@ -149,7 +158,7 @@ public class Utilities {
 		
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
-	
+	  
   public static void copyDirectory(String sourceFolder, String destFolder, FileNotifier notifier) throws IOException, FHIRException  {
     CSFile src = new CSFile(sourceFolder);
     if (!src.exists())
@@ -673,9 +682,25 @@ public class Utilities {
   }
 
 
+  public static boolean charInSet(char value, char... array) {
+    for (int i : array)
+      if (value == i)
+          return true;
+    return false;
+  }
+
   public static boolean existsInList(String value, String... array) {
+    if (value == null)
+      return false;
     for (String s : array)
       if (value.equals(s))
+          return true;
+    return false;
+  }
+
+  public static boolean existsInList(int value, int... array) {
+    for (int i : array)
+      if (value == i)
           return true;
     return false;
   }
@@ -910,6 +935,26 @@ public class Utilities {
 
   public static boolean isAbsoluteUrl(String ref) {
     return ref.startsWith("http:") || ref.startsWith("https:") || ref.startsWith("urn:uuid:") || ref.startsWith("urn:oid:") ;
+  }
+
+
+  public static boolean equivalent(String l, String r) {
+    if (Utilities.noString(l) && Utilities.noString(r))
+      return true;
+    if (Utilities.noString(l) || Utilities.noString(r))
+      return false;
+    return l.toLowerCase().equals(r.toLowerCase());
+  }
+
+
+  public static boolean equivalentNumber(String l, String r) {
+    if (Utilities.noString(l) && Utilities.noString(r))
+      return true;
+    if (Utilities.noString(l) || Utilities.noString(r))
+      return false;
+    l = l.toLowerCase().trim();
+    r = r.toLowerCase().trim(); // not that this should make any difference
+    return l.startsWith(r) || r.startsWith(l);
   }
 
 

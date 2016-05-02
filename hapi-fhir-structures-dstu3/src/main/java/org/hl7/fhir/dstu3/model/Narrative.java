@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -273,11 +273,40 @@ public class Narrative extends BaseNarrative implements INarrative {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NarrativeStatus>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -892481550: // status
+          this.status = new NarrativeStatusEnumFactory().fromType(value); // Enumeration<NarrativeStatus>
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("status"))
           this.status = new NarrativeStatusEnumFactory().fromType(value); // Enumeration<NarrativeStatus>
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<NarrativeStatus>
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -327,7 +356,7 @@ public class Narrative extends BaseNarrative implements INarrative {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( status,  div);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, div);
       }
 
 

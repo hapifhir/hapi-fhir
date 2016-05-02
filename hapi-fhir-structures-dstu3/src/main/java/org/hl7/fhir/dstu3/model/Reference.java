@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -217,6 +217,30 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // StringType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -925155509: // reference
+          this.reference = castToString(value); // StringType
+          break;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("reference"))
           this.reference = castToString(value); // StringType
@@ -224,6 +248,16 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
           this.display = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // StringType
+        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -276,7 +310,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( reference,  display);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(reference, display);
       }
 
 

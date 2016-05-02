@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -137,6 +138,7 @@ public interface IWorkerContext {
   // -- profile services ---------------------------------------------------------
   
   public List<String> getResourceNames();
+  public List<StructureDefinition> allStructures();
   
   // -- Terminology services ------------------------------------------------------
 
@@ -290,6 +292,8 @@ public interface IWorkerContext {
 
   // return a set of types that have tails
   public Set<String> typeTails();
+
+	public String oid2Uri(String code);
 
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -123,6 +123,30 @@ public class Ratio extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1747334793: /*numerator*/ return this.numerator == null ? new Base[0] : new Base[] {this.numerator}; // Quantity
+        case -1983274394: /*denominator*/ return this.denominator == null ? new Base[0] : new Base[] {this.denominator}; // Quantity
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1747334793: // numerator
+          this.numerator = castToQuantity(value); // Quantity
+          break;
+        case -1983274394: // denominator
+          this.denominator = castToQuantity(value); // Quantity
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("numerator"))
           this.numerator = castToQuantity(value); // Quantity
@@ -130,6 +154,16 @@ public class Ratio extends Type implements ICompositeType {
           this.denominator = castToQuantity(value); // Quantity
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1747334793:  return getNumerator(); // Quantity
+        case -1983274394:  return getDenominator(); // Quantity
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -185,7 +219,7 @@ public class Ratio extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( numerator,  denominator);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(numerator, denominator);
       }
 
 

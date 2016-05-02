@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -643,6 +643,30 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 97604824: /*focus*/ return this.focus == null ? new Base[0] : new Base[] {this.focus}; // Coding
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 97604824: // focus
+          this.focus = castToCoding(value); // Coding
+          break;
+        case 111972721: // value
+          this.value = castToCodeableConcept(value); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("focus"))
           this.focus = castToCoding(value); // Coding
@@ -650,6 +674,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.value = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 97604824:  return getFocus(); // Coding
+        case 111972721:  return getValue(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -695,7 +729,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( focus,  value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(focus, value);
       }
 
   public String fhirType() {
@@ -845,6 +879,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return this.contact;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+         */
+        public ModuleMetadataContributorContactComponent getContactFirstRep() { 
+          if (getContact().isEmpty()) {
+            addContact();
+          }
+          return getContact().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ModuleMetadataContributorComponent setContact(List<ModuleMetadataContributorContactComponent> theContact) { 
+          this.contact = theContact;
+          return this;
+        }
+
         public boolean hasContact() { 
           if (this.contact == null)
             return false;
@@ -884,6 +936,34 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ModuleMetadataContributorType>
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ModuleMetadataContributorContactComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = new ModuleMetadataContributorTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataContributorType>
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((ModuleMetadataContributorContactComponent) value); // ModuleMetadataContributorContactComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new ModuleMetadataContributorTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataContributorType>
@@ -893,6 +973,17 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.getContact().add((ModuleMetadataContributorContactComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ModuleMetadataContributorType>
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // ModuleMetadataContributorContactComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -945,7 +1036,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  name,  contact);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, name, contact);
       }
 
   public String fhirType() {
@@ -1038,6 +1129,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ModuleMetadataContributorContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -1076,6 +1185,30 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -1083,6 +1216,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1130,7 +1273,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -1223,6 +1366,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ModuleMetadataContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -1261,6 +1422,30 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -1268,6 +1453,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1315,7 +1510,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -1486,6 +1681,34 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ModuleMetadataResourceType>
+        case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = new ModuleMetadataResourceTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataResourceType>
+          break;
+        case 861720859: // document
+          this.document = castToAttachment(value); // Attachment
+          break;
+        case -341064690: // resource
+          this.resource = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new ModuleMetadataResourceTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataResourceType>
@@ -1495,6 +1718,17 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.resource = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ModuleMetadataResourceType>
+        case 861720859:  return getDocument(); // Attachment
+        case -341064690:  return getResource(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1545,7 +1779,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  document,  resource);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, document, resource);
       }
 
   public String fhirType() {
@@ -1776,6 +2010,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -2369,6 +2621,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return this.coverage;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public ModuleMetadataCoverageComponent getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setCoverage(List<ModuleMetadataCoverageComponent> theCoverage) { 
+      this.coverage = theCoverage;
+      return this;
+    }
+
     public boolean hasCoverage() { 
       if (this.coverage == null)
         return false;
@@ -2409,6 +2679,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return this.topic;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #topic}, creating it if it does not already exist
+     */
+    public CodeableConcept getTopicFirstRep() { 
+      if (getTopic().isEmpty()) {
+        addTopic();
+      }
+      return getTopic().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setTopic(List<CodeableConcept> theTopic) { 
+      this.topic = theTopic;
+      return this;
+    }
+
     public boolean hasTopic() { 
       if (this.topic == null)
         return false;
@@ -2447,6 +2735,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       if (this.contributor == null)
         this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
       return this.contributor;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contributor}, creating it if it does not already exist
+     */
+    public ModuleMetadataContributorComponent getContributorFirstRep() { 
+      if (getContributor().isEmpty()) {
+        addContributor();
+      }
+      return getContributor().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setContributor(List<ModuleMetadataContributorComponent> theContributor) { 
+      this.contributor = theContributor;
+      return this;
     }
 
     public boolean hasContributor() { 
@@ -2538,6 +2844,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ModuleMetadataContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setContact(List<ModuleMetadataContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -2627,6 +2951,24 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return this.relatedResource;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
+     */
+    public ModuleMetadataRelatedResourceComponent getRelatedResourceFirstRep() { 
+      if (getRelatedResource().isEmpty()) {
+        addRelatedResource();
+      }
+      return getRelatedResource().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ModuleMetadata setRelatedResource(List<ModuleMetadataRelatedResourceComponent> theRelatedResource) { 
+      this.relatedResource = theRelatedResource;
+      return this;
+    }
+
     public boolean hasRelatedResource() { 
       if (this.relatedResource == null)
         return false;
@@ -2684,6 +3026,106 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ModuleMetadataType>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ModuleMetadataStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // StringType
+        case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
+        case 1470566394: /*publicationDate*/ return this.publicationDate == null ? new Base[0] : new Base[] {this.publicationDate}; // DateType
+        case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
+        case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // ModuleMetadataCoverageComponent
+        case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
+        case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // ModuleMetadataContributorComponent
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ModuleMetadataContactComponent
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case 1554540889: /*relatedResource*/ return this.relatedResource == null ? new Base[0] : this.relatedResource.toArray(new Base[this.relatedResource.size()]); // ModuleMetadataRelatedResourceComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 110371416: // title
+          this.title = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = new ModuleMetadataTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataType>
+          break;
+        case -892481550: // status
+          this.status = new ModuleMetadataStatusEnumFactory().fromType(value); // Enumeration<ModuleMetadataStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -220463842: // purpose
+          this.purpose = castToString(value); // StringType
+          break;
+        case 111574433: // usage
+          this.usage = castToString(value); // StringType
+          break;
+        case 1470566394: // publicationDate
+          this.publicationDate = castToDate(value); // DateType
+          break;
+        case -1687512484: // lastReviewDate
+          this.lastReviewDate = castToDate(value); // DateType
+          break;
+        case -403934648: // effectivePeriod
+          this.effectivePeriod = castToPeriod(value); // Period
+          break;
+        case -351767064: // coverage
+          this.getCoverage().add((ModuleMetadataCoverageComponent) value); // ModuleMetadataCoverageComponent
+          break;
+        case 110546223: // topic
+          this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1895276325: // contributor
+          this.getContributor().add((ModuleMetadataContributorComponent) value); // ModuleMetadataContributorComponent
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((ModuleMetadataContactComponent) value); // ModuleMetadataContactComponent
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case 1554540889: // relatedResource
+          this.getRelatedResource().add((ModuleMetadataRelatedResourceComponent) value); // ModuleMetadataRelatedResourceComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -2729,6 +3171,35 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.getRelatedResource().add((ModuleMetadataRelatedResourceComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ModuleMetadataType>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ModuleMetadataStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // StringType
+        case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
+        case 1470566394: throw new FHIRException("Cannot make property publicationDate as it is not a complex type"); // DateType
+        case -1687512484: throw new FHIRException("Cannot make property lastReviewDate as it is not a complex type"); // DateType
+        case -403934648:  return getEffectivePeriod(); // Period
+        case -351767064:  return addCoverage(); // ModuleMetadataCoverageComponent
+        case 110546223:  return addTopic(); // CodeableConcept
+        case -1895276325:  return addContributor(); // ModuleMetadataContributorComponent
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // ModuleMetadataContactComponent
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case 1554540889:  return addRelatedResource(); // ModuleMetadataRelatedResourceComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2894,9 +3365,9 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  name
-          ,  title,  type,  status,  experimental,  description,  purpose,  usage,  publicationDate,  lastReviewDate
-          ,  effectivePeriod,  coverage,  topic,  contributor,  publisher,  contact,  copyright,  relatedResource
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
+          , title, type, status, experimental, description, purpose, usage, publicationDate, lastReviewDate
+          , effectivePeriod, coverage, topic, contributor, publisher, contact, copyright, relatedResource
           );
       }
 

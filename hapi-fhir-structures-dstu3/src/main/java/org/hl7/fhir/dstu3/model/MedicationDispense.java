@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -194,9 +194,9 @@ public class MedicationDispense extends DomainResource {
         /**
          * Additional instructions such as "Swallow with plenty of water" which may or may not be coded.
          */
-        @Child(name = "additionalInstructions", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "additionalInstructions", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="E.g. \"Take with food\"", formalDefinition="Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded." )
-        protected CodeableConcept additionalInstructions;
+        protected List<CodeableConcept> additionalInstructions;
 
         /**
          * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions.  For example, "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
@@ -256,7 +256,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         @Description(shortDefinition="Upper limit on medication per unit of time", formalDefinition="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours." )
         protected Ratio maxDosePerPeriod;
 
-        private static final long serialVersionUID = -1470136646L;
+        private static final long serialVersionUID = -1640641324L;
 
     /**
      * Constructor
@@ -317,24 +317,58 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         /**
          * @return {@link #additionalInstructions} (Additional instructions such as "Swallow with plenty of water" which may or may not be coded.)
          */
-        public CodeableConcept getAdditionalInstructions() { 
+        public List<CodeableConcept> getAdditionalInstructions() { 
           if (this.additionalInstructions == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationDispenseDosageInstructionComponent.additionalInstructions");
-            else if (Configuration.doAutoCreate())
-              this.additionalInstructions = new CodeableConcept(); // cc
+            this.additionalInstructions = new ArrayList<CodeableConcept>();
           return this.additionalInstructions;
         }
 
-        public boolean hasAdditionalInstructions() { 
-          return this.additionalInstructions != null && !this.additionalInstructions.isEmpty();
+        /**
+         * @return The first repetition of repeating field {@link #additionalInstructions}, creating it if it does not already exist
+         */
+        public CodeableConcept getAdditionalInstructionsFirstRep() { 
+          if (getAdditionalInstructions().isEmpty()) {
+            addAdditionalInstructions();
+          }
+          return getAdditionalInstructions().get(0);
         }
 
         /**
-         * @param value {@link #additionalInstructions} (Additional instructions such as "Swallow with plenty of water" which may or may not be coded.)
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public MedicationDispenseDosageInstructionComponent setAdditionalInstructions(CodeableConcept value) { 
-          this.additionalInstructions = value;
+        public MedicationDispenseDosageInstructionComponent setAdditionalInstructions(List<CodeableConcept> theAdditionalInstructions) { 
+          this.additionalInstructions = theAdditionalInstructions;
+          return this;
+        }
+
+        public boolean hasAdditionalInstructions() { 
+          if (this.additionalInstructions == null)
+            return false;
+          for (CodeableConcept item : this.additionalInstructions)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #additionalInstructions} (Additional instructions such as "Swallow with plenty of water" which may or may not be coded.)
+         */
+    // syntactic sugar
+        public CodeableConcept addAdditionalInstructions() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.additionalInstructions == null)
+            this.additionalInstructions = new ArrayList<CodeableConcept>();
+          this.additionalInstructions.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public MedicationDispenseDosageInstructionComponent addAdditionalInstructions(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.additionalInstructions == null)
+            this.additionalInstructions = new ArrayList<CodeableConcept>();
+          this.additionalInstructions.add(t);
           return this;
         }
 
@@ -637,11 +671,67 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case -1206718612: /*additionalInstructions*/ return this.additionalInstructions == null ? new Base[0] : this.additionalInstructions.toArray(new Base[this.additionalInstructions.size()]); // CodeableConcept
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Timing
+        case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
+        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // Type
+        case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
+        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
+        case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // Type
+        case 3493088: /*rate*/ return this.rate == null ? new Base[0] : new Base[] {this.rate}; // Type
+        case 1506263709: /*maxDosePerPeriod*/ return this.maxDosePerPeriod == null ? new Base[0] : new Base[] {this.maxDosePerPeriod}; // Ratio
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        case -1206718612: // additionalInstructions
+          this.getAdditionalInstructions().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -873664438: // timing
+          this.timing = castToTiming(value); // Timing
+          break;
+        case -1432923513: // asNeeded
+          this.asNeeded = (Type) value; // Type
+          break;
+        case 3530567: // site
+          this.site = (Type) value; // Type
+          break;
+        case 108704329: // route
+          this.route = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1077554975: // method
+          this.method = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3089437: // dose
+          this.dose = (Type) value; // Type
+          break;
+        case 3493088: // rate
+          this.rate = (Type) value; // Type
+          break;
+        case 1506263709: // maxDosePerPeriod
+          this.maxDosePerPeriod = castToRatio(value); // Ratio
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("text"))
           this.text = castToString(value); // StringType
         else if (name.equals("additionalInstructions"))
-          this.additionalInstructions = castToCodeableConcept(value); // CodeableConcept
+          this.getAdditionalInstructions().add(castToCodeableConcept(value));
         else if (name.equals("timing"))
           this.timing = castToTiming(value); // Timing
         else if (name.equals("asNeeded[x]"))
@@ -663,13 +753,30 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case -1206718612:  return addAdditionalInstructions(); // CodeableConcept
+        case -873664438:  return getTiming(); // Timing
+        case -544329575:  return getAsNeeded(); // Type
+        case 2099997657:  return getSite(); // Type
+        case 108704329:  return getRoute(); // CodeableConcept
+        case -1077554975:  return getMethod(); // CodeableConcept
+        case 1843195715:  return getDose(); // Type
+        case 983460768:  return getRate(); // Type
+        case 1506263709:  return getMaxDosePerPeriod(); // Ratio
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationDispense.text");
         }
         else if (name.equals("additionalInstructions")) {
-          this.additionalInstructions = new CodeableConcept();
-          return this.additionalInstructions;
+          return addAdditionalInstructions();
         }
         else if (name.equals("timing")) {
           this.timing = new Timing();
@@ -727,7 +834,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         MedicationDispenseDosageInstructionComponent dst = new MedicationDispenseDosageInstructionComponent();
         copyValues(dst);
         dst.text = text == null ? null : text.copy();
-        dst.additionalInstructions = additionalInstructions == null ? null : additionalInstructions.copy();
+        if (additionalInstructions != null) {
+          dst.additionalInstructions = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : additionalInstructions)
+            dst.additionalInstructions.add(i.copy());
+        };
         dst.timing = timing == null ? null : timing.copy();
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
         dst.site = site == null ? null : site.copy();
@@ -763,8 +874,8 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( text,  additionalInstructions,  timing
-          ,  asNeeded,  site,  route,  method,  dose,  rate,  maxDosePerPeriod);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, additionalInstructions, timing
+          , asNeeded, site, route, method, dose, rate, maxDosePerPeriod);
       }
 
   public String fhirType() {
@@ -852,6 +963,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           return this.reason;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+         */
+        public CodeableConcept getReasonFirstRep() { 
+          if (getReason().isEmpty()) {
+            addReason();
+          }
+          return getReason().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicationDispenseSubstitutionComponent setReason(List<CodeableConcept> theReason) { 
+          this.reason = theReason;
+          return this;
+        }
+
         public boolean hasReason() { 
           if (this.reason == null)
             return false;
@@ -890,6 +1019,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           if (this.responsibleParty == null)
             this.responsibleParty = new ArrayList<Reference>();
           return this.responsibleParty;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #responsibleParty}, creating it if it does not already exist
+         */
+        public Reference getResponsiblePartyFirstRep() { 
+          if (getResponsibleParty().isEmpty()) {
+            addResponsibleParty();
+          }
+          return getResponsibleParty().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicationDispenseSubstitutionComponent setResponsibleParty(List<Reference> theResponsibleParty) { 
+          this.responsibleParty = theResponsibleParty;
+          return this;
         }
 
         public boolean hasResponsibleParty() { 
@@ -952,6 +1099,34 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case 1511509392: /*responsibleParty*/ return this.responsibleParty == null ? new Base[0] : this.responsibleParty.toArray(new Base[this.responsibleParty.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -934964668: // reason
+          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1511509392: // responsibleParty
+          this.getResponsibleParty().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -961,6 +1136,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.getResponsibleParty().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // CodeableConcept
+        case -934964668:  return addReason(); // CodeableConcept
+        case 1511509392:  return addResponsibleParty(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1018,7 +1204,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  reason,  responsibleParty
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, reason, responsibleParty
           );
       }
 
@@ -1398,6 +1584,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       return this.authorizingPrescription;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #authorizingPrescription}, creating it if it does not already exist
+     */
+    public Reference getAuthorizingPrescriptionFirstRep() { 
+      if (getAuthorizingPrescription().isEmpty()) {
+        addAuthorizingPrescription();
+      }
+      return getAuthorizingPrescription().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationDispense setAuthorizingPrescription(List<Reference> theAuthorizingPrescription) { 
+      this.authorizingPrescription = theAuthorizingPrescription;
+      return this;
+    }
+
     public boolean hasAuthorizingPrescription() { 
       if (this.authorizingPrescription == null)
         return false;
@@ -1673,6 +1877,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       return this.receiver;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #receiver}, creating it if it does not already exist
+     */
+    public Reference getReceiverFirstRep() { 
+      if (getReceiver().isEmpty()) {
+        addReceiver();
+      }
+      return getReceiver().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationDispense setReceiver(List<Reference> theReceiver) { 
+      this.receiver = theReceiver;
+      return this;
+    }
+
     public boolean hasReceiver() { 
       if (this.receiver == null)
         return false;
@@ -1722,6 +1944,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       return this.note;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationDispense setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
     public boolean hasNote() { 
       if (this.note == null)
         return false;
@@ -1760,6 +2000,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       if (this.dosageInstruction == null)
         this.dosageInstruction = new ArrayList<MedicationDispenseDosageInstructionComponent>();
       return this.dosageInstruction;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dosageInstruction}, creating it if it does not already exist
+     */
+    public MedicationDispenseDosageInstructionComponent getDosageInstructionFirstRep() { 
+      if (getDosageInstruction().isEmpty()) {
+        addDosageInstruction();
+      }
+      return getDosageInstruction().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationDispense setDosageInstruction(List<MedicationDispenseDosageInstructionComponent> theDosageInstruction) { 
+      this.dosageInstruction = theDosageInstruction;
+      return this;
     }
 
     public boolean hasDosageInstruction() { 
@@ -1838,6 +2096,86 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MedicationDispenseStatus>
+        case 1998965455: /*medication*/ return this.medication == null ? new Base[0] : new Base[] {this.medication}; // Type
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 241511093: /*dispenser*/ return this.dispenser == null ? new Base[0] : new Base[] {this.dispenser}; // Reference
+        case -1237557856: /*authorizingPrescription*/ return this.authorizingPrescription == null ? new Base[0] : this.authorizingPrescription.toArray(new Base[this.authorizingPrescription.size()]); // Reference
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case 197175334: /*daysSupply*/ return this.daysSupply == null ? new Base[0] : new Base[] {this.daysSupply}; // SimpleQuantity
+        case -562837097: /*whenPrepared*/ return this.whenPrepared == null ? new Base[0] : new Base[] {this.whenPrepared}; // DateTimeType
+        case -940241380: /*whenHandedOver*/ return this.whenHandedOver == null ? new Base[0] : new Base[] {this.whenHandedOver}; // DateTimeType
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // Reference
+        case -808719889: /*receiver*/ return this.receiver == null ? new Base[0] : this.receiver.toArray(new Base[this.receiver.size()]); // Reference
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case -1201373865: /*dosageInstruction*/ return this.dosageInstruction == null ? new Base[0] : this.dosageInstruction.toArray(new Base[this.dosageInstruction.size()]); // MedicationDispenseDosageInstructionComponent
+        case 826147581: /*substitution*/ return this.substitution == null ? new Base[0] : new Base[] {this.substitution}; // MedicationDispenseSubstitutionComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new MedicationDispenseStatusEnumFactory().fromType(value); // Enumeration<MedicationDispenseStatus>
+          break;
+        case 1998965455: // medication
+          this.medication = (Type) value; // Type
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 241511093: // dispenser
+          this.dispenser = castToReference(value); // Reference
+          break;
+        case -1237557856: // authorizingPrescription
+          this.getAuthorizingPrescription().add(castToReference(value)); // Reference
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 197175334: // daysSupply
+          this.daysSupply = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -562837097: // whenPrepared
+          this.whenPrepared = castToDateTime(value); // DateTimeType
+          break;
+        case -940241380: // whenHandedOver
+          this.whenHandedOver = castToDateTime(value); // DateTimeType
+          break;
+        case -1429847026: // destination
+          this.destination = castToReference(value); // Reference
+          break;
+        case -808719889: // receiver
+          this.getReceiver().add(castToReference(value)); // Reference
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        case -1201373865: // dosageInstruction
+          this.getDosageInstruction().add((MedicationDispenseDosageInstructionComponent) value); // MedicationDispenseDosageInstructionComponent
+          break;
+        case 826147581: // substitution
+          this.substitution = (MedicationDispenseSubstitutionComponent) value; // MedicationDispenseSubstitutionComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -1873,6 +2211,30 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.substitution = (MedicationDispenseSubstitutionComponent) value; // MedicationDispenseSubstitutionComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<MedicationDispenseStatus>
+        case 1458402129:  return getMedication(); // Type
+        case -791418107:  return getPatient(); // Reference
+        case 241511093:  return getDispenser(); // Reference
+        case -1237557856:  return addAuthorizingPrescription(); // Reference
+        case 3575610:  return getType(); // CodeableConcept
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case 197175334:  return getDaysSupply(); // SimpleQuantity
+        case -562837097: throw new FHIRException("Cannot make property whenPrepared as it is not a complex type"); // DateTimeType
+        case -940241380: throw new FHIRException("Cannot make property whenHandedOver as it is not a complex type"); // DateTimeType
+        case -1429847026:  return getDestination(); // Reference
+        case -808719889:  return addReceiver(); // Reference
+        case 3387378:  return addNote(); // Annotation
+        case -1201373865:  return addDosageInstruction(); // MedicationDispenseDosageInstructionComponent
+        case 826147581:  return getSubstitution(); // MedicationDispenseSubstitutionComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2017,9 +2379,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  medication
-          ,  patient,  dispenser,  authorizingPrescription,  type,  quantity,  daysSupply,  whenPrepared
-          ,  whenHandedOver,  destination,  receiver,  note,  dosageInstruction,  substitution);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
+          , patient, dispenser, authorizingPrescription, type, quantity, daysSupply, whenPrepared, whenHandedOver
+          , destination, receiver, note, dosageInstruction, substitution);
       }
 
   @Override
@@ -2035,7 +2397,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2055,7 +2419,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationDispense.medicationCodeableConcept", description="Return dispenses of this medicine code", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="MedicationDispense.medication.as(CodeableConcept)", description="Return dispenses of this medicine code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2075,7 +2441,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Patient]
+  // [Practitioner, Patient]
+  @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference", target={Practitioner.class, Patient.class} )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -2101,7 +2469,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.destination</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference", target={Location.class} )
   public static final String SP_DESTINATION = "destination";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>destination</b>
@@ -2127,7 +2497,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationDispense.medicationReference", description="Return dispenses of this medicine resource", type="reference" )
+  // [Medication]
+  // [Medication]
+  @SearchParamDefinition(name="medication", path="MedicationDispense.medication.as(Reference)", description="Return dispenses of this medicine resource", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2153,7 +2525,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference", target={Practitioner.class} )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
@@ -2179,7 +2553,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2199,7 +2575,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.whenHandedOver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date", target={} )
   public static final String SP_WHENHANDEDOVER = "whenhandedover";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>whenhandedover</b>
@@ -2219,7 +2597,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.whenPrepared</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date", target={} )
   public static final String SP_WHENPREPARED = "whenprepared";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>whenprepared</b>
@@ -2239,7 +2619,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.dispenser</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference", target={Practitioner.class} )
   public static final String SP_DISPENSER = "dispenser";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dispenser</b>
@@ -2265,7 +2647,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.authorizingPrescription</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference" )
+  // [MedicationOrder]
+  // [MedicationOrder]
+  @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference", target={MedicationOrder.class} )
   public static final String SP_PRESCRIPTION = "prescription";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
@@ -2291,7 +2675,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2317,7 +2703,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -674,6 +674,24 @@ public class Questionnaire extends DomainResource {
           return this.concept;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+         */
+        public Coding getConceptFirstRep() { 
+          if (getConcept().isEmpty()) {
+            addConcept();
+          }
+          return getConcept().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public QuestionnaireItemComponent setConcept(List<Coding> theConcept) { 
+          this.concept = theConcept;
+          return this;
+        }
+
         public boolean hasConcept() { 
           if (this.concept == null)
             return false;
@@ -855,6 +873,24 @@ public class Questionnaire extends DomainResource {
           if (this.enableWhen == null)
             this.enableWhen = new ArrayList<QuestionnaireItemEnableWhenComponent>();
           return this.enableWhen;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #enableWhen}, creating it if it does not already exist
+         */
+        public QuestionnaireItemEnableWhenComponent getEnableWhenFirstRep() { 
+          if (getEnableWhen().isEmpty()) {
+            addEnableWhen();
+          }
+          return getEnableWhen().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public QuestionnaireItemComponent setEnableWhen(List<QuestionnaireItemEnableWhenComponent> theEnableWhen) { 
+          this.enableWhen = theEnableWhen;
+          return this;
         }
 
         public boolean hasEnableWhen() { 
@@ -1121,6 +1157,24 @@ public class Questionnaire extends DomainResource {
           return this.option;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #option}, creating it if it does not already exist
+         */
+        public QuestionnaireItemOptionComponent getOptionFirstRep() { 
+          if (getOption().isEmpty()) {
+            addOption();
+          }
+          return getOption().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public QuestionnaireItemComponent setOption(List<QuestionnaireItemOptionComponent> theOption) { 
+          this.option = theOption;
+          return this;
+        }
+
         public boolean hasOption() { 
           if (this.option == null)
             return false;
@@ -1349,6 +1403,24 @@ public class Questionnaire extends DomainResource {
           return this.item;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public QuestionnaireItemComponent setItem(List<QuestionnaireItemComponent> theItem) { 
+          this.item = theItem;
+          return this;
+        }
+
         public boolean hasItem() { 
           if (this.item == null)
             return false;
@@ -1399,6 +1471,78 @@ public class Questionnaire extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1102667083: /*linkId*/ return this.linkId == null ? new Base[0] : new Base[] {this.linkId}; // StringType
+        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // Coding
+        case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : new Base[] {this.prefix}; // StringType
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<QuestionnaireItemType>
+        case 1893321565: /*enableWhen*/ return this.enableWhen == null ? new Base[0] : this.enableWhen.toArray(new Base[this.enableWhen.size()]); // QuestionnaireItemEnableWhenComponent
+        case -393139297: /*required*/ return this.required == null ? new Base[0] : new Base[] {this.required}; // BooleanType
+        case 1094288952: /*repeats*/ return this.repeats == null ? new Base[0] : new Base[] {this.repeats}; // BooleanType
+        case -867683742: /*readOnly*/ return this.readOnly == null ? new Base[0] : new Base[] {this.readOnly}; // BooleanType
+        case -791400086: /*maxLength*/ return this.maxLength == null ? new Base[0] : new Base[] {this.maxLength}; // IntegerType
+        case -1249474914: /*options*/ return this.options == null ? new Base[0] : new Base[] {this.options}; // Reference
+        case -1010136971: /*option*/ return this.option == null ? new Base[0] : this.option.toArray(new Base[this.option.size()]); // QuestionnaireItemOptionComponent
+        case 1948342084: /*initial*/ return this.initial == null ? new Base[0] : new Base[] {this.initial}; // Type
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // QuestionnaireItemComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1102667083: // linkId
+          this.linkId = castToString(value); // StringType
+          break;
+        case 951024232: // concept
+          this.getConcept().add(castToCoding(value)); // Coding
+          break;
+        case -980110702: // prefix
+          this.prefix = castToString(value); // StringType
+          break;
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = new QuestionnaireItemTypeEnumFactory().fromType(value); // Enumeration<QuestionnaireItemType>
+          break;
+        case 1893321565: // enableWhen
+          this.getEnableWhen().add((QuestionnaireItemEnableWhenComponent) value); // QuestionnaireItemEnableWhenComponent
+          break;
+        case -393139297: // required
+          this.required = castToBoolean(value); // BooleanType
+          break;
+        case 1094288952: // repeats
+          this.repeats = castToBoolean(value); // BooleanType
+          break;
+        case -867683742: // readOnly
+          this.readOnly = castToBoolean(value); // BooleanType
+          break;
+        case -791400086: // maxLength
+          this.maxLength = castToInteger(value); // IntegerType
+          break;
+        case -1249474914: // options
+          this.options = castToReference(value); // Reference
+          break;
+        case -1010136971: // option
+          this.getOption().add((QuestionnaireItemOptionComponent) value); // QuestionnaireItemOptionComponent
+          break;
+        case 1948342084: // initial
+          this.initial = (Type) value; // Type
+          break;
+        case 3242771: // item
+          this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("linkId"))
           this.linkId = castToString(value); // StringType
@@ -1430,6 +1574,28 @@ public class Questionnaire extends DomainResource {
           this.getItem().add((QuestionnaireItemComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1102667083: throw new FHIRException("Cannot make property linkId as it is not a complex type"); // StringType
+        case 951024232:  return addConcept(); // Coding
+        case -980110702: throw new FHIRException("Cannot make property prefix as it is not a complex type"); // StringType
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<QuestionnaireItemType>
+        case 1893321565:  return addEnableWhen(); // QuestionnaireItemEnableWhenComponent
+        case -393139297: throw new FHIRException("Cannot make property required as it is not a complex type"); // BooleanType
+        case 1094288952: throw new FHIRException("Cannot make property repeats as it is not a complex type"); // BooleanType
+        case -867683742: throw new FHIRException("Cannot make property readOnly as it is not a complex type"); // BooleanType
+        case -791400086: throw new FHIRException("Cannot make property maxLength as it is not a complex type"); // IntegerType
+        case -1249474914:  return getOptions(); // Reference
+        case -1010136971:  return addOption(); // QuestionnaireItemOptionComponent
+        case 871077564:  return getInitial(); // Type
+        case 3242771:  return addItem(); // QuestionnaireItemComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1593,9 +1759,8 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( linkId,  concept,  prefix,  text
-          ,  type,  enableWhen,  required,  repeats,  readOnly,  maxLength,  options,  option,  initial
-          ,  item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, concept, prefix, text, type
+          , enableWhen, required, repeats, readOnly, maxLength, options, option, initial, item);
       }
 
   public String fhirType() {
@@ -1617,9 +1782,9 @@ public class Questionnaire extends DomainResource {
         /**
          * If present, indicates that this item should be enabled only if the specified question is answered or not answered.
          */
-        @Child(name = "answered", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "hasAnswer", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Enable when answered or not", formalDefinition="If present, indicates that this item should be enabled only if the specified question is answered or not answered." )
-        protected BooleanType answered;
+        protected BooleanType hasAnswer;
 
         /**
          * If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.
@@ -1628,7 +1793,7 @@ public class Questionnaire extends DomainResource {
         @Description(shortDefinition="Value question must have", formalDefinition="If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer." )
         protected Type answer;
 
-        private static final long serialVersionUID = 903205698L;
+        private static final long serialVersionUID = -300241115L;
 
     /**
      * Constructor
@@ -1691,47 +1856,47 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #answered} (If present, indicates that this item should be enabled only if the specified question is answered or not answered.). This is the underlying object with id, value and extensions. The accessor "getAnswered" gives direct access to the value
+         * @return {@link #hasAnswer} (If present, indicates that this item should be enabled only if the specified question is answered or not answered.). This is the underlying object with id, value and extensions. The accessor "getHasAnswer" gives direct access to the value
          */
-        public BooleanType getAnsweredElement() { 
-          if (this.answered == null)
+        public BooleanType getHasAnswerElement() { 
+          if (this.hasAnswer == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create QuestionnaireItemEnableWhenComponent.answered");
+              throw new Error("Attempt to auto-create QuestionnaireItemEnableWhenComponent.hasAnswer");
             else if (Configuration.doAutoCreate())
-              this.answered = new BooleanType(); // bb
-          return this.answered;
+              this.hasAnswer = new BooleanType(); // bb
+          return this.hasAnswer;
         }
 
-        public boolean hasAnsweredElement() { 
-          return this.answered != null && !this.answered.isEmpty();
+        public boolean hasHasAnswerElement() { 
+          return this.hasAnswer != null && !this.hasAnswer.isEmpty();
         }
 
-        public boolean hasAnswered() { 
-          return this.answered != null && !this.answered.isEmpty();
+        public boolean hasHasAnswer() { 
+          return this.hasAnswer != null && !this.hasAnswer.isEmpty();
         }
 
         /**
-         * @param value {@link #answered} (If present, indicates that this item should be enabled only if the specified question is answered or not answered.). This is the underlying object with id, value and extensions. The accessor "getAnswered" gives direct access to the value
+         * @param value {@link #hasAnswer} (If present, indicates that this item should be enabled only if the specified question is answered or not answered.). This is the underlying object with id, value and extensions. The accessor "getHasAnswer" gives direct access to the value
          */
-        public QuestionnaireItemEnableWhenComponent setAnsweredElement(BooleanType value) { 
-          this.answered = value;
+        public QuestionnaireItemEnableWhenComponent setHasAnswerElement(BooleanType value) { 
+          this.hasAnswer = value;
           return this;
         }
 
         /**
          * @return If present, indicates that this item should be enabled only if the specified question is answered or not answered.
          */
-        public boolean getAnswered() { 
-          return this.answered == null || this.answered.isEmpty() ? false : this.answered.getValue();
+        public boolean getHasAnswer() { 
+          return this.hasAnswer == null || this.hasAnswer.isEmpty() ? false : this.hasAnswer.getValue();
         }
 
         /**
          * @param value If present, indicates that this item should be enabled only if the specified question is answered or not answered.
          */
-        public QuestionnaireItemEnableWhenComponent setAnswered(boolean value) { 
-            if (this.answered == null)
-              this.answered = new BooleanType();
-            this.answered.setValue(value);
+        public QuestionnaireItemEnableWhenComponent setHasAnswer(boolean value) { 
+            if (this.hasAnswer == null)
+              this.hasAnswer = new BooleanType();
+            this.hasAnswer.setValue(value);
           return this;
         }
 
@@ -1926,16 +2091,44 @@ public class Questionnaire extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("question", "string", "The linkId for the question whose answer (or lack of answer) governs whether this item is enabled.", 0, java.lang.Integer.MAX_VALUE, question));
-          childrenList.add(new Property("answered", "boolean", "If present, indicates that this item should be enabled only if the specified question is answered or not answered.", 0, java.lang.Integer.MAX_VALUE, answered));
+          childrenList.add(new Property("hasAnswer", "boolean", "If present, indicates that this item should be enabled only if the specified question is answered or not answered.", 0, java.lang.Integer.MAX_VALUE, hasAnswer));
           childrenList.add(new Property("answer[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.", 0, java.lang.Integer.MAX_VALUE, answer));
         }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1165870106: /*question*/ return this.question == null ? new Base[0] : new Base[] {this.question}; // StringType
+        case -793058568: /*hasAnswer*/ return this.hasAnswer == null ? new Base[0] : new Base[] {this.hasAnswer}; // BooleanType
+        case -1412808770: /*answer*/ return this.answer == null ? new Base[0] : new Base[] {this.answer}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1165870106: // question
+          this.question = castToString(value); // StringType
+          break;
+        case -793058568: // hasAnswer
+          this.hasAnswer = castToBoolean(value); // BooleanType
+          break;
+        case -1412808770: // answer
+          this.answer = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("question"))
           this.question = castToString(value); // StringType
-        else if (name.equals("answered"))
-          this.answered = castToBoolean(value); // BooleanType
+        else if (name.equals("hasAnswer"))
+          this.hasAnswer = castToBoolean(value); // BooleanType
         else if (name.equals("answer[x]"))
           this.answer = (Type) value; // Type
         else
@@ -1943,12 +2136,23 @@ public class Questionnaire extends DomainResource {
       }
 
       @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1165870106: throw new FHIRException("Cannot make property question as it is not a complex type"); // StringType
+        case -793058568: throw new FHIRException("Cannot make property hasAnswer as it is not a complex type"); // BooleanType
+        case 1693524994:  return getAnswer(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("question")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.question");
         }
-        else if (name.equals("answered")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.answered");
+        else if (name.equals("hasAnswer")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.hasAnswer");
         }
         else if (name.equals("answerBoolean")) {
           this.answer = new BooleanType();
@@ -2010,7 +2214,7 @@ public class Questionnaire extends DomainResource {
         QuestionnaireItemEnableWhenComponent dst = new QuestionnaireItemEnableWhenComponent();
         copyValues(dst);
         dst.question = question == null ? null : question.copy();
-        dst.answered = answered == null ? null : answered.copy();
+        dst.hasAnswer = hasAnswer == null ? null : hasAnswer.copy();
         dst.answer = answer == null ? null : answer.copy();
         return dst;
       }
@@ -2022,7 +2226,7 @@ public class Questionnaire extends DomainResource {
         if (!(other instanceof QuestionnaireItemEnableWhenComponent))
           return false;
         QuestionnaireItemEnableWhenComponent o = (QuestionnaireItemEnableWhenComponent) other;
-        return compareDeep(question, o.question, true) && compareDeep(answered, o.answered, true) && compareDeep(answer, o.answer, true)
+        return compareDeep(question, o.question, true) && compareDeep(hasAnswer, o.hasAnswer, true) && compareDeep(answer, o.answer, true)
           ;
       }
 
@@ -2033,11 +2237,11 @@ public class Questionnaire extends DomainResource {
         if (!(other instanceof QuestionnaireItemEnableWhenComponent))
           return false;
         QuestionnaireItemEnableWhenComponent o = (QuestionnaireItemEnableWhenComponent) other;
-        return compareValues(question, o.question, true) && compareValues(answered, o.answered, true);
+        return compareValues(question, o.question, true) && compareValues(hasAnswer, o.hasAnswer, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( question,  answered,  answer);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(question, hasAnswer, answer);
       }
 
   public String fhirType() {
@@ -2163,11 +2367,40 @@ public class Questionnaire extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 111972721: // value
+          this.value = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
           this.value = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1410166417:  return getValue(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2224,7 +2457,7 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value);
       }
 
   public String fhirType() {
@@ -2391,6 +2624,24 @@ public class Questionnaire extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -2625,6 +2876,24 @@ public class Questionnaire extends DomainResource {
       return this.telecom;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setTelecom(List<ContactPoint> theTelecom) { 
+      this.telecom = theTelecom;
+      return this;
+    }
+
     public boolean hasTelecom() { 
       if (this.telecom == null)
         return false;
@@ -2663,6 +2932,24 @@ public class Questionnaire extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -2754,6 +3041,24 @@ public class Questionnaire extends DomainResource {
       return this.concept;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+     */
+    public Coding getConceptFirstRep() { 
+      if (getConcept().isEmpty()) {
+        addConcept();
+      }
+      return getConcept().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setConcept(List<Coding> theConcept) { 
+      this.concept = theConcept;
+      return this;
+    }
+
     public boolean hasConcept() { 
       if (this.concept == null)
         return false;
@@ -2792,6 +3097,24 @@ public class Questionnaire extends DomainResource {
       if (this.subjectType == null)
         this.subjectType = new ArrayList<CodeType>();
       return this.subjectType;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #subjectType}, creating it if it does not already exist
+     */
+    public CodeType getSubjectTypeFirstRep() { 
+      if (getSubjectType().isEmpty()) {
+        addSubjectTypeElement();
+      }
+      return getSubjectType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setSubjectType(List<CodeType> theSubjectType) { 
+      this.subjectType = theSubjectType;
+      return this;
     }
 
     public boolean hasSubjectType() { 
@@ -2848,6 +3171,24 @@ public class Questionnaire extends DomainResource {
       return this.item;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public QuestionnaireItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Questionnaire setItem(List<QuestionnaireItemComponent> theItem) { 
+      this.item = theItem;
+      return this;
+    }
+
     public boolean hasItem() { 
       if (this.item == null)
         return false;
@@ -2896,6 +3237,70 @@ public class Questionnaire extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<QuestionnaireStatus>
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // Coding
+        case -603200890: /*subjectType*/ return this.subjectType == null ? new Base[0] : this.subjectType.toArray(new Base[this.subjectType.size()]); // CodeType
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // QuestionnaireItemComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new QuestionnaireStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireStatus>
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 110371416: // title
+          this.title = castToString(value); // StringType
+          break;
+        case 951024232: // concept
+          this.getConcept().add(castToCoding(value)); // Coding
+          break;
+        case -603200890: // subjectType
+          this.getSubjectType().add(castToCode(value)); // CodeType
+          break;
+        case 3242771: // item
+          this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -2923,6 +3328,26 @@ public class Questionnaire extends DomainResource {
           this.getItem().add((QuestionnaireItemComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<QuestionnaireStatus>
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
+        case 951024232:  return addConcept(); // Coding
+        case -603200890: throw new FHIRException("Cannot make property subjectType as it is not a complex type"); // CodeType
+        case 3242771:  return addItem(); // QuestionnaireItemComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3045,8 +3470,8 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  status
-          ,  date,  publisher,  telecom,  useContext,  title,  concept,  subjectType,  item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, status
+          , date, publisher, telecom, useContext, title, concept, subjectType, item);
       }
 
   @Override
@@ -3062,7 +3487,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3082,7 +3509,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3102,7 +3531,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.item.concept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3122,7 +3553,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3142,7 +3575,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3162,7 +3597,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -3182,7 +3619,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3202,7 +3641,9 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

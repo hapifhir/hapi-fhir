@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -676,6 +676,24 @@ public class ImagingStudy extends DomainResource {
           return this.instance;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #instance}, creating it if it does not already exist
+         */
+        public ImagingStudySeriesInstanceComponent getInstanceFirstRep() { 
+          if (getInstance().isEmpty()) {
+            addInstance();
+          }
+          return getInstance().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImagingStudySeriesComponent setInstance(List<ImagingStudySeriesInstanceComponent> theInstance) { 
+          this.instance = theInstance;
+          return this;
+        }
+
         public boolean hasInstance() { 
           if (this.instance == null)
             return false;
@@ -723,6 +741,66 @@ public class ImagingStudy extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // UnsignedIntType
+        case -622722335: /*modality*/ return this.modality == null ? new Base[0] : new Base[] {this.modality}; // Coding
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
+        case 1997542747: /*availability*/ return this.availability == null ? new Base[0] : new Base[] {this.availability}; // Enumeration<InstanceAvailability>
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // Coding
+        case -170291817: /*laterality*/ return this.laterality == null ? new Base[0] : new Base[] {this.laterality}; // Coding
+        case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
+        case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // ImagingStudySeriesInstanceComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 115792: // uid
+          this.uid = castToOid(value); // OidType
+          break;
+        case -1034364087: // number
+          this.number = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case -622722335: // modality
+          this.modality = castToCoding(value); // Coding
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1043544226: // numberOfInstances
+          this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case 1997542747: // availability
+          this.availability = new InstanceAvailabilityEnumFactory().fromType(value); // Enumeration<InstanceAvailability>
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 1702620169: // bodySite
+          this.bodySite = castToCoding(value); // Coding
+          break;
+        case -170291817: // laterality
+          this.laterality = castToCoding(value); // Coding
+          break;
+        case -1897185151: // started
+          this.started = castToDateTime(value); // DateTimeType
+          break;
+        case 555127957: // instance
+          this.getInstance().add((ImagingStudySeriesInstanceComponent) value); // ImagingStudySeriesInstanceComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
@@ -748,6 +826,25 @@ public class ImagingStudy extends DomainResource {
           this.getInstance().add((ImagingStudySeriesInstanceComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
+        case -1034364087: throw new FHIRException("Cannot make property number as it is not a complex type"); // UnsignedIntType
+        case -622722335:  return getModality(); // Coding
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1043544226: throw new FHIRException("Cannot make property numberOfInstances as it is not a complex type"); // UnsignedIntType
+        case 1997542747: throw new FHIRException("Cannot make property availability as it is not a complex type"); // Enumeration<InstanceAvailability>
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 1702620169:  return getBodySite(); // Coding
+        case -170291817:  return getLaterality(); // Coding
+        case -1897185151: throw new FHIRException("Cannot make property started as it is not a complex type"); // DateTimeType
+        case 555127957:  return addInstance(); // ImagingStudySeriesInstanceComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -840,8 +937,8 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( uid,  number,  modality,  description
-          ,  numberOfInstances,  availability,  url,  bodySite,  laterality,  started,  instance);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, modality, description
+          , numberOfInstances, availability, url, bodySite, laterality, started, instance);
       }
 
   public String fhirType() {
@@ -1155,6 +1252,24 @@ public class ImagingStudy extends DomainResource {
           return this.content;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+         */
+        public Attachment getContentFirstRep() { 
+          if (getContent().isEmpty()) {
+            addContent();
+          }
+          return getContent().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ImagingStudySeriesInstanceComponent setContent(List<Attachment> theContent) { 
+          this.content = theContent;
+          return this;
+        }
+
         public boolean hasContent() { 
           if (this.content == null)
             return false;
@@ -1197,6 +1312,46 @@ public class ImagingStudy extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // UnsignedIntType
+        case 1560041540: /*sopClass*/ return this.sopClass == null ? new Base[0] : new Base[] {this.sopClass}; // OidType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // StringType
+        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : this.content.toArray(new Base[this.content.size()]); // Attachment
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 115792: // uid
+          this.uid = castToOid(value); // OidType
+          break;
+        case -1034364087: // number
+          this.number = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case 1560041540: // sopClass
+          this.sopClass = castToOid(value); // OidType
+          break;
+        case 3575610: // type
+          this.type = castToString(value); // StringType
+          break;
+        case 110371416: // title
+          this.title = castToString(value); // StringType
+          break;
+        case 951530617: // content
+          this.getContent().add(castToAttachment(value)); // Attachment
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
@@ -1212,6 +1367,20 @@ public class ImagingStudy extends DomainResource {
           this.getContent().add(castToAttachment(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
+        case -1034364087: throw new FHIRException("Cannot make property number as it is not a complex type"); // UnsignedIntType
+        case 1560041540: throw new FHIRException("Cannot make property sopClass as it is not a complex type"); // OidType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // StringType
+        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
+        case 951530617:  return addContent(); // Attachment
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1278,8 +1447,8 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( uid,  number,  sopClass,  type
-          ,  title,  content);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, sopClass, type, title
+          , content);
       }
 
   public String fhirType() {
@@ -1524,6 +1693,24 @@ public class ImagingStudy extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -1611,6 +1798,24 @@ public class ImagingStudy extends DomainResource {
       if (this.modalityList == null)
         this.modalityList = new ArrayList<Coding>();
       return this.modalityList;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #modalityList}, creating it if it does not already exist
+     */
+    public Coding getModalityListFirstRep() { 
+      if (getModalityList().isEmpty()) {
+        addModalityList();
+      }
+      return getModalityList().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setModalityList(List<Coding> theModalityList) { 
+      this.modalityList = theModalityList;
+      return this;
     }
 
     public boolean hasModalityList() { 
@@ -1744,6 +1949,24 @@ public class ImagingStudy extends DomainResource {
       if (this.order == null)
         this.order = new ArrayList<Reference>();
       return this.order;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #order}, creating it if it does not already exist
+     */
+    public Reference getOrderFirstRep() { 
+      if (getOrder().isEmpty()) {
+        addOrder();
+      }
+      return getOrder().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setOrder(List<Reference> theOrder) { 
+      this.order = theOrder;
+      return this;
     }
 
     public boolean hasOrder() { 
@@ -2034,6 +2257,24 @@ public class ImagingStudy extends DomainResource {
       return this.procedure;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #procedure}, creating it if it does not already exist
+     */
+    public Reference getProcedureFirstRep() { 
+      if (getProcedure().isEmpty()) {
+        addProcedure();
+      }
+      return getProcedure().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setProcedure(List<Reference> theProcedure) { 
+      this.procedure = theProcedure;
+      return this;
+    }
+
     public boolean hasProcedure() { 
       if (this.procedure == null)
         return false;
@@ -2144,6 +2385,24 @@ public class ImagingStudy extends DomainResource {
       return this.series;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #series}, creating it if it does not already exist
+     */
+    public ImagingStudySeriesComponent getSeriesFirstRep() { 
+      if (getSeries().isEmpty()) {
+        addSeries();
+      }
+      return getSeries().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setSeries(List<ImagingStudySeriesComponent> theSeries) { 
+      this.series = theSeries;
+      return this;
+    }
+
     public boolean hasSeries() { 
       if (this.series == null)
         return false;
@@ -2196,6 +2455,86 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -2115028956: /*accession*/ return this.accession == null ? new Base[0] : new Base[] {this.accession}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1997542747: /*availability*/ return this.availability == null ? new Base[0] : new Base[] {this.availability}; // Enumeration<InstanceAvailability>
+        case -1030238433: /*modalityList*/ return this.modalityList == null ? new Base[0] : this.modalityList.toArray(new Base[this.modalityList.size()]); // Coding
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
+        case 106006350: /*order*/ return this.order == null ? new Base[0] : this.order.toArray(new Base[this.order.size()]); // Reference
+        case -722568161: /*referrer*/ return this.referrer == null ? new Base[0] : new Base[] {this.referrer}; // Reference
+        case -2008009094: /*interpreter*/ return this.interpreter == null ? new Base[0] : new Base[] {this.interpreter}; // Reference
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 1920000407: /*numberOfSeries*/ return this.numberOfSeries == null ? new Base[0] : new Base[] {this.numberOfSeries}; // UnsignedIntType
+        case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
+        case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : this.procedure.toArray(new Base[this.procedure.size()]); // Reference
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // ImagingStudySeriesComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 115792: // uid
+          this.uid = castToOid(value); // OidType
+          break;
+        case -2115028956: // accession
+          this.accession = castToIdentifier(value); // Identifier
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1997542747: // availability
+          this.availability = new InstanceAvailabilityEnumFactory().fromType(value); // Enumeration<InstanceAvailability>
+          break;
+        case -1030238433: // modalityList
+          this.getModalityList().add(castToCoding(value)); // Coding
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case -1897185151: // started
+          this.started = castToDateTime(value); // DateTimeType
+          break;
+        case 106006350: // order
+          this.getOrder().add(castToReference(value)); // Reference
+          break;
+        case -722568161: // referrer
+          this.referrer = castToReference(value); // Reference
+          break;
+        case -2008009094: // interpreter
+          this.interpreter = castToReference(value); // Reference
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 1920000407: // numberOfSeries
+          this.numberOfSeries = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case -1043544226: // numberOfInstances
+          this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case -1095204141: // procedure
+          this.getProcedure().add(castToReference(value)); // Reference
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -905838985: // series
+          this.getSeries().add((ImagingStudySeriesComponent) value); // ImagingStudySeriesComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
@@ -2231,6 +2570,30 @@ public class ImagingStudy extends DomainResource {
           this.getSeries().add((ImagingStudySeriesComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
+        case -2115028956:  return getAccession(); // Identifier
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1997542747: throw new FHIRException("Cannot make property availability as it is not a complex type"); // Enumeration<InstanceAvailability>
+        case -1030238433:  return addModalityList(); // Coding
+        case -791418107:  return getPatient(); // Reference
+        case -1897185151: throw new FHIRException("Cannot make property started as it is not a complex type"); // DateTimeType
+        case 106006350:  return addOrder(); // Reference
+        case -722568161:  return getReferrer(); // Reference
+        case -2008009094:  return getInterpreter(); // Reference
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 1920000407: throw new FHIRException("Cannot make property numberOfSeries as it is not a complex type"); // UnsignedIntType
+        case -1043544226: throw new FHIRException("Cannot make property numberOfInstances as it is not a complex type"); // UnsignedIntType
+        case -1095204141:  return addProcedure(); // Reference
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -905838985:  return addSeries(); // ImagingStudySeriesComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2371,9 +2734,9 @@ public class ImagingStudy extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( uid,  accession,  identifier,  availability
-          ,  modalityList,  patient,  started,  order,  referrer,  interpreter,  url,  numberOfSeries
-          ,  numberOfInstances,  procedure,  description,  series);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, accession, identifier, availability
+          , modalityList, patient, started, order, referrer, interpreter, url, numberOfSeries, numberOfInstances
+          , procedure, description, series);
       }
 
   @Override
@@ -2389,7 +2752,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2409,7 +2774,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri", target={} )
   public static final String SP_UID = "uid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>uid</b>
@@ -2429,7 +2796,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri", target={} )
   public static final String SP_STUDY = "study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>study</b>
@@ -2449,7 +2818,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri", target={} )
   public static final String SP_DICOM_CLASS = "dicom-class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
@@ -2469,7 +2840,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.modality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token", target={} )
   public static final String SP_MODALITY = "modality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>modality</b>
@@ -2489,7 +2862,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -2509,7 +2884,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2535,7 +2912,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri", target={} )
   public static final String SP_SERIES = "series";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>series</b>
@@ -2555,7 +2934,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.started</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date", target={} )
   public static final String SP_STARTED = "started";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>started</b>
@@ -2575,7 +2956,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.accession</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token", target={} )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
@@ -2595,7 +2978,9 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.order</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
+  // [DiagnosticOrder]
+  // [DiagnosticOrder]
+  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference", target={DiagnosticOrder.class} )
   public static final String SP_ORDER = "order";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>order</b>

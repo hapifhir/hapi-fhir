@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -266,6 +266,24 @@ public class SearchParameter extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SearchParameterContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -304,6 +322,30 @@ public class SearchParameter extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -311,6 +353,16 @@ public class SearchParameter extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -358,7 +410,7 @@ public class SearchParameter extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -800,6 +852,24 @@ public class SearchParameter extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public SearchParameterContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setContact(List<SearchParameterContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -838,6 +908,24 @@ public class SearchParameter extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -1256,6 +1344,24 @@ public class SearchParameter extends DomainResource {
       return this.target;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #target}, creating it if it does not already exist
+     */
+    public CodeType getTargetFirstRep() { 
+      if (getTarget().isEmpty()) {
+        addTargetElement();
+      }
+      return getTarget().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setTarget(List<CodeType> theTarget) { 
+      this.target = theTarget;
+      return this;
+    }
+
     public boolean hasTarget() { 
       if (this.target == null)
         return false;
@@ -1323,6 +1429,90 @@ public class SearchParameter extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // SearchParameterContactComponent
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // CodeType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SearchParamType>
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
+        case 114256029: /*xpath*/ return this.xpath == null ? new Base[0] : new Base[] {this.xpath}; // StringType
+        case 1801322244: /*xpathUsage*/ return this.xpathUsage == null ? new Base[0] : new Base[] {this.xpathUsage}; // Enumeration<XPathUsageType>
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // CodeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((SearchParameterContactComponent) value); // SearchParameterContactComponent
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          break;
+        case 3016401: // base
+          this.base = castToCode(value); // CodeType
+          break;
+        case 3575610: // type
+          this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1795452264: // expression
+          this.expression = castToString(value); // StringType
+          break;
+        case 114256029: // xpath
+          this.xpath = castToString(value); // StringType
+          break;
+        case 1801322244: // xpathUsage
+          this.xpathUsage = new XPathUsageTypeEnumFactory().fromType(value); // Enumeration<XPathUsageType>
+          break;
+        case -880905839: // target
+          this.getTarget().add(castToCode(value)); // CodeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -1360,6 +1550,31 @@ public class SearchParameter extends DomainResource {
           this.getTarget().add(castToCode(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // SearchParameterContactComponent
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case 3016401: throw new FHIRException("Cannot make property base as it is not a complex type"); // CodeType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SearchParamType>
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        case 114256029: throw new FHIRException("Cannot make property xpath as it is not a complex type"); // StringType
+        case 1801322244: throw new FHIRException("Cannot make property xpathUsage as it is not a complex type"); // Enumeration<XPathUsageType>
+        case -880905839: throw new FHIRException("Cannot make property target as it is not a complex type"); // CodeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1495,9 +1710,9 @@ public class SearchParameter extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  name,  status,  experimental
-          ,  date,  publisher,  contact,  useContext,  requirements,  code,  base,  type,  description
-          ,  expression,  xpath,  xpathUsage,  target);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, name, status, experimental
+          , date, publisher, contact, useContext, requirements, code, base, type, description, expression
+          , xpath, xpathUsage, target);
       }
 
   @Override
@@ -1513,7 +1728,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1533,7 +1750,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1553,7 +1772,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="SearchParameter.useContext", description="A use context assigned to the search parameter", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="SearchParameter.useContext", description="A use context assigned to the search parameter", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1573,7 +1794,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1593,7 +1816,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1613,7 +1838,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1633,7 +1860,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.base</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token", target={} )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>
@@ -1653,7 +1882,9 @@ public class SearchParameter extends DomainResource {
    * Path: <b>SearchParameter.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token", target={} )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -127,6 +127,24 @@ public class Schedule extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Schedule setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -191,6 +209,24 @@ public class Schedule extends DomainResource {
       return this.serviceType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #serviceType}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceTypeFirstRep() { 
+      if (getServiceType().isEmpty()) {
+        addServiceType();
+      }
+      return getServiceType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Schedule setServiceType(List<CodeableConcept> theServiceType) { 
+      this.serviceType = theServiceType;
+      return this;
+    }
+
     public boolean hasServiceType() { 
       if (this.serviceType == null)
         return false;
@@ -229,6 +265,24 @@ public class Schedule extends DomainResource {
       if (this.specialty == null)
         this.specialty = new ArrayList<CodeableConcept>();
       return this.specialty;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+     */
+    public CodeableConcept getSpecialtyFirstRep() { 
+      if (getSpecialty().isEmpty()) {
+        addSpecialty();
+      }
+      return getSpecialty().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Schedule setSpecialty(List<CodeableConcept> theSpecialty) { 
+      this.specialty = theSpecialty;
+      return this;
     }
 
     public boolean hasSpecialty() { 
@@ -386,6 +440,50 @@ public class Schedule extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
+        case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
+        case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        case -1718507650: /*planningHorizon*/ return this.planningHorizon == null ? new Base[0] : new Base[] {this.planningHorizon}; // Period
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1281188563: // serviceCategory
+          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1928370289: // serviceType
+          this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1694759682: // specialty
+          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          break;
+        case -1718507650: // planningHorizon
+          this.planningHorizon = castToPeriod(value); // Period
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -403,6 +501,21 @@ public class Schedule extends DomainResource {
           this.comment = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1281188563:  return getServiceCategory(); // CodeableConcept
+        case -1928370289:  return addServiceType(); // CodeableConcept
+        case -1694759682:  return addSpecialty(); // CodeableConcept
+        case 92645877:  return getActor(); // Reference
+        case -1718507650:  return getPlanningHorizon(); // Period
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -493,8 +606,8 @@ public class Schedule extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  serviceCategory,  serviceType
-          ,  specialty,  actor,  planningHorizon,  comment);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, serviceCategory, serviceType
+          , specialty, actor, planningHorizon, comment);
       }
 
   @Override
@@ -510,7 +623,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
+  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -536,7 +651,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.planningHorizon</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -556,7 +673,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -576,7 +695,9 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

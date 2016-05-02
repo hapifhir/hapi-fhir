@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import java.util.List;
+
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
@@ -22,6 +24,12 @@ public interface IValidationSupport {
   ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude);
 
   /**
+   * Load and return all possible structure definitions
+   */
+  List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext);
+
+  
+  /**
    * Fetch a code system by ID
    * 
    * @param theSystem
@@ -30,7 +38,6 @@ public interface IValidationSupport {
    */
   CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem);
 
-  
   /**
    * Loads a resource needed by the validation (a StructureDefinition, or a
    * ValueSet)
@@ -59,7 +66,7 @@ public interface IValidationSupport {
    */
   boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
-  /**
+/**
    * Validates that the given code exists and if possible returns a display
    * name. This method is called to check codes which are found in "example"
    * binding fields (e.g. <code>Observation.code</code> in the default profile.
@@ -74,46 +81,46 @@ public interface IValidationSupport {
    */
   CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-public class CodeValidationResult {
-    private ConceptDefinitionComponent definition;
-    private String message;
-    private IssueSeverity severity;
-
-    public CodeValidationResult(ConceptDefinitionComponent theNext) {
-      this.definition = theNext;
-    }
-
-    public CodeValidationResult(IssueSeverity severity, String message) {
-      this.severity = severity;
-      this.message = message;
-    }
-
-    public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
-      this.severity = severity;
-      this.message = message;
-      this.definition = definition;
-    }
-
-    public ConceptDefinitionComponent asConceptDefinition() {
-      return definition;
-    }
-
-    public String getDisplay() {
-      return definition == null ? "??" : definition.getDisplay();
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public IssueSeverity getSeverity() {
-      return severity;
-    }
-
-    public boolean isOk() {
-      return definition != null;
-    }
-
-  }
+	public class CodeValidationResult {
+	    private ConceptDefinitionComponent definition;
+	    private String message;
+	    private IssueSeverity severity;
+	
+	    public CodeValidationResult(ConceptDefinitionComponent theNext) {
+	      this.definition = theNext;
+	    }
+	
+	    public CodeValidationResult(IssueSeverity severity, String message) {
+	      this.severity = severity;
+	      this.message = message;
+	    }
+	
+	    public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
+	      this.severity = severity;
+	      this.message = message;
+	      this.definition = definition;
+	    }
+	
+	    public ConceptDefinitionComponent asConceptDefinition() {
+	      return definition;
+	    }
+	
+	    public String getDisplay() {
+	      return definition == null ? "??" : definition.getDisplay();
+	    }
+	
+	    public String getMessage() {
+	      return message;
+	    }
+	
+	    public IssueSeverity getSeverity() {
+	      return severity;
+	    }
+	
+	    public boolean isOk() {
+	      return definition != null;
+	    }
+	
+	  }
 
 }

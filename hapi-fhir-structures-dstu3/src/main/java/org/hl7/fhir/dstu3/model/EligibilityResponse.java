@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -238,6 +238,24 @@ public class EligibilityResponse extends DomainResource {
           return this.financial;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #financial}, creating it if it does not already exist
+         */
+        public BenefitComponent getFinancialFirstRep() { 
+          if (getFinancial().isEmpty()) {
+            addFinancial();
+          }
+          return getFinancial().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public BenefitsComponent setFinancial(List<BenefitComponent> theFinancial) { 
+          this.financial = theFinancial;
+          return this;
+        }
+
         public boolean hasFinancial() { 
           if (this.financial == null)
             return false;
@@ -280,6 +298,46 @@ public class EligibilityResponse extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Coding
+        case 1365024606: /*subCategory*/ return this.subCategory == null ? new Base[0] : new Base[] {this.subCategory}; // Coding
+        case 1843485230: /*network*/ return this.network == null ? new Base[0] : new Base[] {this.network}; // Coding
+        case 3594628: /*unit*/ return this.unit == null ? new Base[0] : new Base[] {this.unit}; // Coding
+        case 3556460: /*term*/ return this.term == null ? new Base[0] : new Base[] {this.term}; // Coding
+        case 357555337: /*financial*/ return this.financial == null ? new Base[0] : this.financial.toArray(new Base[this.financial.size()]); // BenefitComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 50511102: // category
+          this.category = castToCoding(value); // Coding
+          break;
+        case 1365024606: // subCategory
+          this.subCategory = castToCoding(value); // Coding
+          break;
+        case 1843485230: // network
+          this.network = castToCoding(value); // Coding
+          break;
+        case 3594628: // unit
+          this.unit = castToCoding(value); // Coding
+          break;
+        case 3556460: // term
+          this.term = castToCoding(value); // Coding
+          break;
+        case 357555337: // financial
+          this.getFinancial().add((BenefitComponent) value); // BenefitComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("category"))
           this.category = castToCoding(value); // Coding
@@ -295,6 +353,20 @@ public class EligibilityResponse extends DomainResource {
           this.getFinancial().add((BenefitComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102:  return getCategory(); // Coding
+        case 1365024606:  return getSubCategory(); // Coding
+        case 1843485230:  return getNetwork(); // Coding
+        case 3594628:  return getUnit(); // Coding
+        case 3556460:  return getTerm(); // Coding
+        case 357555337:  return addFinancial(); // BenefitComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -365,8 +437,8 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( category,  subCategory,  network
-          ,  unit,  term,  financial);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, subCategory, network
+          , unit, term, financial);
       }
 
   public String fhirType() {
@@ -538,6 +610,34 @@ public class EligibilityResponse extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case -222710633: /*benefit*/ return this.benefit == null ? new Base[0] : new Base[] {this.benefit}; // Type
+        case -549981964: /*benefitUsed*/ return this.benefitUsed == null ? new Base[0] : new Base[] {this.benefitUsed}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case -222710633: // benefit
+          this.benefit = (Type) value; // Type
+          break;
+        case -549981964: // benefitUsed
+          this.benefitUsed = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCoding(value); // Coding
@@ -547,6 +647,17 @@ public class EligibilityResponse extends DomainResource {
           this.benefitUsed = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case 952095881:  return getBenefit(); // Type
+        case 787635980:  return getBenefitUsed(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -606,7 +717,7 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  benefit,  benefitUsed);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, benefit, benefitUsed);
       }
 
   public String fhirType() {
@@ -672,11 +783,40 @@ public class EligibilityResponse extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -717,7 +857,7 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code);
       }
 
   public String fhirType() {
@@ -853,6 +993,24 @@ public class EligibilityResponse extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EligibilityResponse setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1383,6 +1541,24 @@ public class EligibilityResponse extends DomainResource {
       return this.benefitBalance;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #benefitBalance}, creating it if it does not already exist
+     */
+    public BenefitsComponent getBenefitBalanceFirstRep() { 
+      if (getBenefitBalance().isEmpty()) {
+        addBenefitBalance();
+      }
+      return getBenefitBalance().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EligibilityResponse setBenefitBalance(List<BenefitsComponent> theBenefitBalance) { 
+      this.benefitBalance = theBenefitBalance;
+      return this;
+    }
+
     public boolean hasBenefitBalance() { 
       if (this.benefitBalance == null)
         return false;
@@ -1421,6 +1597,24 @@ public class EligibilityResponse extends DomainResource {
       if (this.error == null)
         this.error = new ArrayList<ErrorsComponent>();
       return this.error;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #error}, creating it if it does not already exist
+     */
+    public ErrorsComponent getErrorFirstRep() { 
+      if (getError().isEmpty()) {
+        addError();
+      }
+      return getError().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public EligibilityResponse setError(List<ErrorsComponent> theError) { 
+      this.error = theError;
+      return this;
     }
 
     public boolean hasError() { 
@@ -1474,6 +1668,82 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
+        case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
+        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
+        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Type
+        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Type
+        case 1945431270: /*inforce*/ return this.inforce == null ? new Base[0] : new Base[] {this.inforce}; // BooleanType
+        case -566947566: /*contract*/ return this.contract == null ? new Base[0] : new Base[] {this.contract}; // Reference
+        case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // Coding
+        case 596003397: /*benefitBalance*/ return this.benefitBalance == null ? new Base[0] : this.benefitBalance.toArray(new Base[this.benefitBalance.size()]); // BenefitsComponent
+        case 96784904: /*error*/ return this.error == null ? new Base[0] : this.error.toArray(new Base[this.error.size()]); // ErrorsComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1095692943: // request
+          this.request = (Type) value; // Type
+          break;
+        case -1106507950: // outcome
+          this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
+          break;
+        case 583380919: // disposition
+          this.disposition = castToString(value); // StringType
+          break;
+        case 1548678118: // ruleset
+          this.ruleset = castToCoding(value); // Coding
+          break;
+        case 1089373397: // originalRuleset
+          this.originalRuleset = castToCoding(value); // Coding
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case 1178922291: // organization
+          this.organization = (Type) value; // Type
+          break;
+        case 1601527200: // requestProvider
+          this.requestProvider = (Type) value; // Type
+          break;
+        case 599053666: // requestOrganization
+          this.requestOrganization = (Type) value; // Type
+          break;
+        case 1945431270: // inforce
+          this.inforce = castToBoolean(value); // BooleanType
+          break;
+        case -566947566: // contract
+          this.contract = castToReference(value); // Reference
+          break;
+        case 3148996: // form
+          this.form = castToCoding(value); // Coding
+          break;
+        case 596003397: // benefitBalance
+          this.getBenefitBalance().add((BenefitsComponent) value); // BenefitsComponent
+          break;
+        case 96784904: // error
+          this.getError().add((ErrorsComponent) value); // ErrorsComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1507,6 +1777,29 @@ public class EligibilityResponse extends DomainResource {
           this.getError().add((ErrorsComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 37106577:  return getRequest(); // Type
+        case -1106507950: throw new FHIRException("Cannot make property outcome as it is not a complex type"); // Enumeration<RemittanceOutcome>
+        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
+        case 1548678118:  return getRuleset(); // Coding
+        case 1089373397:  return getOriginalRuleset(); // Coding
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case 1326483053:  return getOrganization(); // Type
+        case -1694784800:  return getRequestProvider(); // Type
+        case 818740190:  return getRequestOrganization(); // Type
+        case 1945431270: throw new FHIRException("Cannot make property inforce as it is not a complex type"); // BooleanType
+        case -566947566:  return getContract(); // Reference
+        case 3148996:  return getForm(); // Coding
+        case 596003397:  return addBenefitBalance(); // BenefitsComponent
+        case 96784904:  return addError(); // ErrorsComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1653,9 +1946,9 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  request,  outcome
-          ,  disposition,  ruleset,  originalRuleset,  created,  organization,  requestProvider,  requestOrganization
-          ,  inforce,  contract,  form,  benefitBalance,  error);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, outcome, disposition
+          , ruleset, originalRuleset, created, organization, requestProvider, requestOrganization, inforce
+          , contract, form, benefitBalance, error);
       }
 
   @Override
@@ -1671,7 +1964,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestprovideridentifier", path="EligibilityResponse.requestProviderIdentifier", description="The EligibilityRequest provider", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestprovideridentifier", path="EligibilityResponse.requestProvider.as(Identifier)", description="The EligibilityRequest provider", type="token", target={} )
   public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
@@ -1691,7 +1986,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="EligibilityResponse.requestOrganizationIdentifier", description="The EligibilityRequest organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestorganizationidentifier", path="EligibilityResponse.requestOrganization.as(Identifier)", description="The EligibilityRequest organization", type="token", target={} )
   public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
@@ -1711,7 +2008,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EligibilityResponse.identifier", description="The business identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="EligibilityResponse.identifier", description="The business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1731,7 +2030,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.disposition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="disposition", path="EligibilityResponse.disposition", description="The contents of the disposition message", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="disposition", path="EligibilityResponse.disposition", description="The contents of the disposition message", type="string", target={} )
   public static final String SP_DISPOSITION = "disposition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>disposition</b>
@@ -1751,7 +2052,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="EligibilityResponse.organizationIdentifier", description="The organization which generated this resource", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="organizationidentifier", path="EligibilityResponse.organization.as(Identifier)", description="The organization which generated this resource", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1771,7 +2074,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="EligibilityResponse.created", description="The creation date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="created", path="EligibilityResponse.created", description="The creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1791,7 +2096,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="EligibilityResponse.requestIdentifier", description="The EligibilityRequest reference", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="requestidentifier", path="EligibilityResponse.request.as(Identifier)", description="The EligibilityRequest reference", type="token", target={} )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -1811,7 +2118,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="EligibilityResponse.organizationReference", description="The organization which generated this resource", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organizationreference", path="EligibilityResponse.organization.as(Reference)", description="The organization which generated this resource", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1837,7 +2146,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestproviderreference", path="EligibilityResponse.requestProviderReference", description="The EligibilityRequest provider", type="reference" )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="requestproviderreference", path="EligibilityResponse.requestProvider.as(Reference)", description="The EligibilityRequest provider", type="reference", target={Practitioner.class} )
   public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
@@ -1863,7 +2174,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationreference", path="EligibilityResponse.requestOrganizationReference", description="The EligibilityRequest organization", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="requestorganizationreference", path="EligibilityResponse.requestOrganization.as(Reference)", description="The EligibilityRequest organization", type="reference", target={Organization.class} )
   public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>
@@ -1889,7 +2202,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestreference", path="EligibilityResponse.requestReference", description="The EligibilityRequest reference", type="reference" )
+  // [EligibilityRequest]
+  // [EligibilityRequest]
+  @SearchParamDefinition(name="requestreference", path="EligibilityResponse.request.as(Reference)", description="The EligibilityRequest reference", type="reference", target={EligibilityRequest.class} )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
@@ -1915,7 +2230,9 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.outcome</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="outcome", path="EligibilityResponse.outcome", description="The processing outcome", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="outcome", path="EligibilityResponse.outcome", description="The processing outcome", type="token", target={} )
   public static final String SP_OUTCOME = "outcome";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>outcome</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -244,11 +244,40 @@ public class ProcessRequest extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return this.sequenceLinkId == null ? new Base[0] : new Base[] {this.sequenceLinkId}; // IntegerType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1422298666: // sequenceLinkId
+          this.sequenceLinkId = castToInteger(value); // IntegerType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequenceLinkId"))
           this.sequenceLinkId = castToInteger(value); // IntegerType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // IntegerType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -288,7 +317,7 @@ public class ProcessRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequenceLinkId);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequenceLinkId);
       }
 
   public String fhirType() {
@@ -479,6 +508,24 @@ public class ProcessRequest extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProcessRequest setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -937,6 +984,24 @@ public class ProcessRequest extends DomainResource {
       return this.item;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public ItemsComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProcessRequest setItem(List<ItemsComponent> theItem) { 
+      this.item = theItem;
+      return this;
+    }
+
     public boolean hasItem() { 
       if (this.item == null)
         return false;
@@ -975,6 +1040,24 @@ public class ProcessRequest extends DomainResource {
       if (this.include == null)
         this.include = new ArrayList<StringType>();
       return this.include;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #include}, creating it if it does not already exist
+     */
+    public StringType getIncludeFirstRep() { 
+      if (getInclude().isEmpty()) {
+        addIncludeElement();
+      }
+      return getInclude().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProcessRequest setInclude(List<StringType> theInclude) { 
+      this.include = theInclude;
+      return this;
     }
 
     public boolean hasInclude() { 
@@ -1029,6 +1112,24 @@ public class ProcessRequest extends DomainResource {
       if (this.exclude == null)
         this.exclude = new ArrayList<StringType>();
       return this.exclude;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #exclude}, creating it if it does not already exist
+     */
+    public StringType getExcludeFirstRep() { 
+      if (getExclude().isEmpty()) {
+        addExcludeElement();
+      }
+      return getExclude().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProcessRequest setExclude(List<StringType> theExclude) { 
+      this.exclude = theExclude;
+      return this;
     }
 
     public boolean hasExclude() { 
@@ -1121,6 +1222,86 @@ public class ProcessRequest extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : new Base[] {this.action}; // Enumeration<ActionList>
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
+        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
+        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Type
+        case -2001137643: /*nullify*/ return this.nullify == null ? new Base[0] : new Base[] {this.nullify}; // BooleanType
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // StringType
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemsComponent
+        case 1942574248: /*include*/ return this.include == null ? new Base[0] : this.include.toArray(new Base[this.include.size()]); // StringType
+        case -1321148966: /*exclude*/ return this.exclude == null ? new Base[0] : this.exclude.toArray(new Base[this.exclude.size()]); // StringType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1422950858: // action
+          this.action = new ActionListEnumFactory().fromType(value); // Enumeration<ActionList>
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1548678118: // ruleset
+          this.ruleset = castToCoding(value); // Coding
+          break;
+        case 1089373397: // originalRuleset
+          this.originalRuleset = castToCoding(value); // Coding
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case -880905839: // target
+          this.target = (Type) value; // Type
+          break;
+        case -987494927: // provider
+          this.provider = (Type) value; // Type
+          break;
+        case 1178922291: // organization
+          this.organization = (Type) value; // Type
+          break;
+        case 1095692943: // request
+          this.request = (Type) value; // Type
+          break;
+        case -340323263: // response
+          this.response = (Type) value; // Type
+          break;
+        case -2001137643: // nullify
+          this.nullify = castToBoolean(value); // BooleanType
+          break;
+        case -925155509: // reference
+          this.reference = castToString(value); // StringType
+          break;
+        case 3242771: // item
+          this.getItem().add((ItemsComponent) value); // ItemsComponent
+          break;
+        case 1942574248: // include
+          this.getInclude().add(castToString(value)); // StringType
+          break;
+        case -1321148966: // exclude
+          this.getExclude().add(castToString(value)); // StringType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("action"))
           this.action = new ActionListEnumFactory().fromType(value); // Enumeration<ActionList>
@@ -1156,6 +1337,30 @@ public class ProcessRequest extends DomainResource {
           this.period = castToPeriod(value); // Period
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422950858: throw new FHIRException("Cannot make property action as it is not a complex type"); // Enumeration<ActionList>
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1548678118:  return getRuleset(); // Coding
+        case 1089373397:  return getOriginalRuleset(); // Coding
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case -815579825:  return getTarget(); // Type
+        case 2064698607:  return getProvider(); // Type
+        case 1326483053:  return getOrganization(); // Type
+        case 37106577:  return getRequest(); // Type
+        case 1847549087:  return getResponse(); // Type
+        case -2001137643: throw new FHIRException("Cannot make property nullify as it is not a complex type"); // BooleanType
+        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // StringType
+        case 3242771:  return addItem(); // ItemsComponent
+        case 1942574248: throw new FHIRException("Cannot make property include as it is not a complex type"); // StringType
+        case -1321148966: throw new FHIRException("Cannot make property exclude as it is not a complex type"); // StringType
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1315,9 +1520,9 @@ public class ProcessRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( action,  identifier,  ruleset,  originalRuleset
-          ,  created,  target,  provider,  organization,  request,  response,  nullify,  reference,  item
-          ,  include,  exclude,  period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(action, identifier, ruleset, originalRuleset
+          , created, target, provider, organization, request, response, nullify, reference, item, include
+          , exclude, period);
       }
 
   @Override
@@ -1333,7 +1538,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcessRequest.identifier", description="The business identifier of the ProcessRequest", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ProcessRequest.identifier", description="The business identifier of the ProcessRequest", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1353,7 +1560,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="ProcessRequest.organizationIdentifier", description="The organization who generated this request", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="organizationidentifier", path="ProcessRequest.organization.as(Identifier)", description="The organization who generated this request", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1373,7 +1582,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ProcessRequest.action", description="The action requested by this resource", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="action", path="ProcessRequest.action", description="The action requested by this resource", type="token", target={} )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -1393,7 +1604,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="ProcessRequest.organizationReference", description="The organization who generated this request", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organizationreference", path="ProcessRequest.organization.as(Reference)", description="The organization who generated this request", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1419,7 +1632,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="ProcessRequest.providerReference", description="The provider who regenerated this request", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="providerreference", path="ProcessRequest.provider.as(Reference)", description="The provider who regenerated this request", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -1445,7 +1660,9 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="ProcessRequest.providerIdentifier", description="The provider who regenerated this request", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="provideridentifier", path="ProcessRequest.provider.as(Identifier)", description="The provider who regenerated this request", type="token", target={} )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>

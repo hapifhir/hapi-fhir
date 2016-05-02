@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -115,6 +115,14 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return this.contained;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DomainResource setContained(List<Resource> theContained) { 
+      this.contained = theContained;
+      return this;
+    }
+
     public boolean hasContained() { 
       if (this.contained == null)
         return false;
@@ -144,6 +152,24 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       if (this.extension == null)
         this.extension = new ArrayList<Extension>();
       return this.extension;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #extension}, creating it if it does not already exist
+     */
+    public Extension getExtensionFirstRep() { 
+      if (getExtension().isEmpty()) {
+        addExtension();
+      }
+      return getExtension().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DomainResource setExtension(List<Extension> theExtension) { 
+      this.extension = theExtension;
+      return this;
     }
 
     public boolean hasExtension() { 
@@ -184,6 +210,24 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       if (this.modifierExtension == null)
         this.modifierExtension = new ArrayList<Extension>();
       return this.modifierExtension;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #modifierExtension}, creating it if it does not already exist
+     */
+    public Extension getModifierExtensionFirstRep() { 
+      if (getModifierExtension().isEmpty()) {
+        addModifierExtension();
+      }
+      return getModifierExtension().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DomainResource setModifierExtension(List<Extension> theModifierExtension) { 
+      this.modifierExtension = theModifierExtension;
+      return this;
     }
 
     public boolean hasModifierExtension() { 
@@ -255,6 +299,38 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // Narrative
+        case -410956685: /*contained*/ return this.contained == null ? new Base[0] : this.contained.toArray(new Base[this.contained.size()]); // Resource
+        case -612557761: /*extension*/ return this.extension == null ? new Base[0] : this.extension.toArray(new Base[this.extension.size()]); // Extension
+        case -298878168: /*modifierExtension*/ return this.modifierExtension == null ? new Base[0] : this.modifierExtension.toArray(new Base[this.modifierExtension.size()]); // Extension
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3556653: // text
+          this.text = castToNarrative(value); // Narrative
+          break;
+        case -410956685: // contained
+          this.getContained().add(castToResource(value)); // Resource
+          break;
+        case -612557761: // extension
+          this.getExtension().add(castToExtension(value)); // Extension
+          break;
+        case -298878168: // modifierExtension
+          this.getModifierExtension().add(castToExtension(value)); // Extension
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("text"))
           this.text = castToNarrative(value); // Narrative
@@ -266,6 +342,18 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
           this.getModifierExtension().add(castToExtension(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3556653:  return getText(); // Narrative
+        case -410956685: throw new FHIRException("Cannot make property contained as it is not a complex type"); // Resource
+        case -612557761:  return addExtension(); // Extension
+        case -298878168:  return addModifierExtension(); // Extension
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -335,7 +423,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( text,  contained,  extension,  modifierExtension
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, contained, extension, modifierExtension
           );
       }
 

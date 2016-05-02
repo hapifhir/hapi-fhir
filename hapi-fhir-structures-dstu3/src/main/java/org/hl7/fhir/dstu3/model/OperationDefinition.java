@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -305,6 +305,24 @@ public class OperationDefinition extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public OperationDefinitionContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -343,6 +361,30 @@ public class OperationDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -350,6 +392,16 @@ public class OperationDefinition extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -397,7 +449,7 @@ public class OperationDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -908,6 +960,24 @@ public class OperationDefinition extends DomainResource {
           return this.part;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #part}, creating it if it does not already exist
+         */
+        public OperationDefinitionParameterComponent getPartFirstRep() { 
+          if (getPart().isEmpty()) {
+            addPart();
+          }
+          return getPart().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public OperationDefinitionParameterComponent setPart(List<OperationDefinitionParameterComponent> thePart) { 
+          this.part = thePart;
+          return this;
+        }
+
         public boolean hasPart() { 
           if (this.part == null)
             return false;
@@ -954,6 +1024,62 @@ public class OperationDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // CodeType
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<OperationParameterUse>
+        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // IntegerType
+        case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
+        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
+        case -710454014: /*searchType*/ return this.searchType == null ? new Base[0] : new Base[] {this.searchType}; // Enumeration<SearchParamType>
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        case -108220795: /*binding*/ return this.binding == null ? new Base[0] : new Base[] {this.binding}; // OperationDefinitionParameterBindingComponent
+        case 3433459: /*part*/ return this.part == null ? new Base[0] : this.part.toArray(new Base[this.part.size()]); // OperationDefinitionParameterComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToCode(value); // CodeType
+          break;
+        case 116103: // use
+          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
+          break;
+        case 108114: // min
+          this.min = castToInteger(value); // IntegerType
+          break;
+        case 107876: // max
+          this.max = castToString(value); // StringType
+          break;
+        case 1587405498: // documentation
+          this.documentation = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = castToCode(value); // CodeType
+          break;
+        case -710454014: // searchType
+          this.searchType = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
+          break;
+        case -309425751: // profile
+          this.profile = castToReference(value); // Reference
+          break;
+        case -108220795: // binding
+          this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
+          break;
+        case 3433459: // part
+          this.getPart().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToCode(value); // CodeType
@@ -977,6 +1103,24 @@ public class OperationDefinition extends DomainResource {
           this.getPart().add((OperationDefinitionParameterComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
+        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<OperationParameterUse>
+        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
+        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
+        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case -710454014: throw new FHIRException("Cannot make property searchType as it is not a complex type"); // Enumeration<SearchParamType>
+        case -309425751:  return getProfile(); // Reference
+        case -108220795:  return getBinding(); // OperationDefinitionParameterBindingComponent
+        case 3433459:  return addPart(); // OperationDefinitionParameterComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1063,8 +1207,8 @@ public class OperationDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  use,  min,  max,  documentation
-          ,  type,  searchType,  profile,  binding,  part);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, use, min, max, documentation
+          , type, searchType, profile, binding, part);
       }
 
   public String fhirType() {
@@ -1205,6 +1349,30 @@ public class OperationDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1791316033: /*strength*/ return this.strength == null ? new Base[0] : new Base[] {this.strength}; // Enumeration<BindingStrength>
+        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : new Base[] {this.valueSet}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1791316033: // strength
+          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
+          break;
+        case -1410174671: // valueSet
+          this.valueSet = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("strength"))
           this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
@@ -1212,6 +1380,16 @@ public class OperationDefinition extends DomainResource {
           this.valueSet = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1791316033: throw new FHIRException("Cannot make property strength as it is not a complex type"); // Enumeration<BindingStrength>
+        case -1438410321:  return getValueSet(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1260,7 +1438,7 @@ public class OperationDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( strength,  valueSet);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(strength, valueSet);
       }
 
   public String fhirType() {
@@ -1822,6 +2000,24 @@ public class OperationDefinition extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public OperationDefinitionContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setContact(List<OperationDefinitionContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1909,6 +2105,24 @@ public class OperationDefinition extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -2228,6 +2442,24 @@ public class OperationDefinition extends DomainResource {
       return this.type;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeType getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addTypeElement();
+      }
+      return getType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setType(List<CodeType> theType) { 
+      this.type = theType;
+      return this;
+    }
+
     public boolean hasType() { 
       if (this.type == null)
         return false;
@@ -2327,6 +2559,24 @@ public class OperationDefinition extends DomainResource {
       return this.parameter;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public OperationDefinitionParameterComponent getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setParameter(List<OperationDefinitionParameterComponent> theParameter) { 
+      this.parameter = theParameter;
+      return this;
+    }
+
     public boolean hasParameter() { 
       if (this.parameter == null)
         return false;
@@ -2383,6 +2633,102 @@ public class OperationDefinition extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<OperationKind>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // OperationDefinitionContactComponent
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 1680468793: /*idempotent*/ return this.idempotent == null ? new Base[0] : new Base[] {this.idempotent}; // BooleanType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Reference
+        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // BooleanType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeType
+        case 555127957: /*instance*/ return this.instance == null ? new Base[0] : new Base[] {this.instance}; // BooleanType
+        case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // OperationDefinitionParameterComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case 3292052: // kind
+          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((OperationDefinitionContactComponent) value); // OperationDefinitionContactComponent
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 1680468793: // idempotent
+          this.idempotent = castToBoolean(value); // BooleanType
+          break;
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        case 3016401: // base
+          this.base = castToReference(value); // Reference
+          break;
+        case -887328209: // system
+          this.system = castToBoolean(value); // BooleanType
+          break;
+        case 3575610: // type
+          this.getType().add(castToCode(value)); // CodeType
+          break;
+        case 555127957: // instance
+          this.instance = castToBoolean(value); // BooleanType
+          break;
+        case 1954460585: // parameter
+          this.getParameter().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -2426,6 +2772,34 @@ public class OperationDefinition extends DomainResource {
           this.getParameter().add((OperationDefinitionParameterComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<OperationKind>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // OperationDefinitionContactComponent
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 1680468793: throw new FHIRException("Cannot make property idempotent as it is not a complex type"); // BooleanType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case 3016401:  return getBase(); // Reference
+        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // BooleanType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case 555127957: throw new FHIRException("Cannot make property instance as it is not a complex type"); // BooleanType
+        case 1954460585:  return addParameter(); // OperationDefinitionParameterComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2579,9 +2953,9 @@ public class OperationDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  version,  name,  status,  kind
-          ,  experimental,  date,  publisher,  contact,  description,  useContext,  requirements,  idempotent
-          ,  code,  comment,  base,  system,  type,  instance,  parameter);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, version, name, status, kind
+          , experimental, date, publisher, contact, description, useContext, requirements, idempotent
+          , code, comment, base, system, type, instance, parameter);
       }
 
   @Override
@@ -2597,7 +2971,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2617,7 +2993,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2637,7 +3015,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.instance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token", target={} )
   public static final String SP_INSTANCE = "instance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>instance</b>
@@ -2657,7 +3037,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -2677,7 +3059,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2697,7 +3081,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2717,7 +3103,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.parameter.profile</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
+  // [StructureDefinition]
+  // [StructureDefinition]
+  @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference", target={StructureDefinition.class} )
   public static final String SP_PARAMPROFILE = "paramprofile";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>paramprofile</b>
@@ -2743,7 +3131,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -2763,7 +3153,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token", target={} )
   public static final String SP_SYSTEM = "system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>system</b>
@@ -2783,7 +3175,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2803,7 +3197,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2823,7 +3219,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -2843,7 +3241,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -2863,7 +3263,9 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.base</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
+  // [OperationDefinition]
+  // [OperationDefinition]
+  @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference", target={OperationDefinition.class} )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>

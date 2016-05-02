@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -436,6 +436,34 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 94742588: /*claim*/ return this.claim == null ? new Base[0] : new Base[] {this.claim}; // Type
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Coding
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // Identifier
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 94742588: // claim
+          this.claim = (Type) value; // Type
+          break;
+        case -261851592: // relationship
+          this.relationship = castToCoding(value); // Coding
+          break;
+        case -925155509: // reference
+          this.reference = castToIdentifier(value); // Identifier
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("claim[x]"))
           this.claim = (Type) value; // Type
@@ -445,6 +473,17 @@ public class Claim extends DomainResource {
           this.reference = castToIdentifier(value); // Identifier
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 683016900:  return getClaim(); // Type
+        case -261851592:  return getRelationship(); // Coding
+        case -925155509:  return getReference(); // Identifier
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -500,7 +539,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( claim,  relationship,  reference
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(claim, relationship, reference
           );
       }
 
@@ -620,6 +659,30 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 106437350: // party
+          this.party = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCoding(value); // Coding
@@ -627,6 +690,16 @@ public class Claim extends DomainResource {
           this.party = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case 1189320666:  return getParty(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -676,7 +749,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  party);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, party);
       }
 
   public String fhirType() {
@@ -796,6 +869,30 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 1196993265: /*diagnosis*/ return this.diagnosis == null ? new Base[0] : new Base[] {this.diagnosis}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 1196993265: // diagnosis
+          this.diagnosis = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -803,6 +900,16 @@ public class Claim extends DomainResource {
           this.diagnosis = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 1196993265:  return getDiagnosis(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -847,7 +954,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  diagnosis);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, diagnosis);
       }
 
   public String fhirType() {
@@ -1045,6 +1152,34 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : new Base[] {this.procedure}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1095204141: // procedure
+          this.procedure = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -1054,6 +1189,17 @@ public class Claim extends DomainResource {
           this.procedure = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 1640074445:  return getProcedure(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1107,7 +1253,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  date,  procedure);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, date, procedure);
       }
 
   public String fhirType() {
@@ -1385,6 +1531,24 @@ public class Claim extends DomainResource {
           return this.preAuthRef;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #preAuthRef}, creating it if it does not already exist
+         */
+        public StringType getPreAuthRefFirstRep() { 
+          if (getPreAuthRef().isEmpty()) {
+            addPreAuthRefElement();
+          }
+          return getPreAuthRef().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CoverageComponent setPreAuthRef(List<StringType> thePreAuthRef) { 
+          this.preAuthRef = thePreAuthRef;
+          return this;
+        }
+
         public boolean hasPreAuthRef() { 
           if (this.preAuthRef == null)
             return false;
@@ -1510,6 +1674,50 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 97604197: /*focal*/ return this.focal == null ? new Base[0] : new Base[] {this.focal}; // BooleanType
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Type
+        case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
+        case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : this.preAuthRef.toArray(new Base[this.preAuthRef.size()]); // StringType
+        case 689513629: /*claimResponse*/ return this.claimResponse == null ? new Base[0] : new Base[] {this.claimResponse}; // Reference
+        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 97604197: // focal
+          this.focal = castToBoolean(value); // BooleanType
+          break;
+        case -351767064: // coverage
+          this.coverage = (Type) value; // Type
+          break;
+        case 259920682: // businessArrangement
+          this.businessArrangement = castToString(value); // StringType
+          break;
+        case 522246568: // preAuthRef
+          this.getPreAuthRef().add(castToString(value)); // StringType
+          break;
+        case 689513629: // claimResponse
+          this.claimResponse = castToReference(value); // Reference
+          break;
+        case 1089373397: // originalRuleset
+          this.originalRuleset = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -1527,6 +1735,21 @@ public class Claim extends DomainResource {
           this.originalRuleset = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 97604197: throw new FHIRException("Cannot make property focal as it is not a complex type"); // BooleanType
+        case 227689880:  return getCoverage(); // Type
+        case 259920682: throw new FHIRException("Cannot make property businessArrangement as it is not a complex type"); // StringType
+        case 522246568: throw new FHIRException("Cannot make property preAuthRef as it is not a complex type"); // StringType
+        case 689513629:  return getClaimResponse(); // Reference
+        case 1089373397:  return getOriginalRuleset(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1605,8 +1828,8 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  focal,  coverage,  businessArrangement
-          ,  preAuthRef,  claimResponse,  originalRuleset);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, focal, coverage, businessArrangement
+          , preAuthRef, claimResponse, originalRuleset);
       }
 
   public String fhirType() {
@@ -1717,6 +1940,30 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3560141: /*time*/ return this.time == null ? new Base[0] : new Base[] {this.time}; // Type
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3560141: // time
+          this.time = (Type) value; // Type
+          break;
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("time[x]"))
           this.time = (Type) value; // Type
@@ -1724,6 +1971,16 @@ public class Claim extends DomainResource {
           this.type = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1313930605:  return getTime(); // Type
+        case 3575610:  return getType(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1773,7 +2030,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( time,  type);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(time, type);
       }
 
   public String fhirType() {
@@ -2155,6 +2412,24 @@ public class Claim extends DomainResource {
           return this.diagnosisLinkId;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #diagnosisLinkId}, creating it if it does not already exist
+         */
+        public PositiveIntType getDiagnosisLinkIdFirstRep() { 
+          if (getDiagnosisLinkId().isEmpty()) {
+            addDiagnosisLinkIdElement();
+          }
+          return getDiagnosisLinkId().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setDiagnosisLinkId(List<PositiveIntType> theDiagnosisLinkId) { 
+          this.diagnosisLinkId = theDiagnosisLinkId;
+          return this;
+        }
+
         public boolean hasDiagnosisLinkId() { 
           if (this.diagnosisLinkId == null)
             return false;
@@ -2233,6 +2508,24 @@ public class Claim extends DomainResource {
           return this.serviceModifier;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #serviceModifier}, creating it if it does not already exist
+         */
+        public Coding getServiceModifierFirstRep() { 
+          if (getServiceModifier().isEmpty()) {
+            addServiceModifier();
+          }
+          return getServiceModifier().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setServiceModifier(List<Coding> theServiceModifier) { 
+          this.serviceModifier = theServiceModifier;
+          return this;
+        }
+
         public boolean hasServiceModifier() { 
           if (this.serviceModifier == null)
             return false;
@@ -2273,6 +2566,24 @@ public class Claim extends DomainResource {
           return this.modifier;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+         */
+        public Coding getModifierFirstRep() { 
+          if (getModifier().isEmpty()) {
+            addModifier();
+          }
+          return getModifier().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setModifier(List<Coding> theModifier) { 
+          this.modifier = theModifier;
+          return this;
+        }
+
         public boolean hasModifier() { 
           if (this.modifier == null)
             return false;
@@ -2311,6 +2622,24 @@ public class Claim extends DomainResource {
           if (this.programCode == null)
             this.programCode = new ArrayList<Coding>();
           return this.programCode;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #programCode}, creating it if it does not already exist
+         */
+        public Coding getProgramCodeFirstRep() { 
+          if (getProgramCode().isEmpty()) {
+            addProgramCode();
+          }
+          return getProgramCode().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setProgramCode(List<Coding> theProgramCode) { 
+          this.programCode = theProgramCode;
+          return this;
         }
 
         public boolean hasProgramCode() { 
@@ -2628,6 +2957,24 @@ public class Claim extends DomainResource {
           return this.udi;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #udi}, creating it if it does not already exist
+         */
+        public Reference getUdiFirstRep() { 
+          if (getUdi().isEmpty()) {
+            addUdi();
+          }
+          return getUdi().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setUdi(List<Reference> theUdi) { 
+          this.udi = theUdi;
+          return this;
+        }
+
         public boolean hasUdi() { 
           if (this.udi == null)
             return false;
@@ -2713,6 +3060,24 @@ public class Claim extends DomainResource {
           return this.subSite;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #subSite}, creating it if it does not already exist
+         */
+        public Coding getSubSiteFirstRep() { 
+          if (getSubSite().isEmpty()) {
+            addSubSite();
+          }
+          return getSubSite().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setSubSite(List<Coding> theSubSite) { 
+          this.subSite = theSubSite;
+          return this;
+        }
+
         public boolean hasSubSite() { 
           if (this.subSite == null)
             return false;
@@ -2751,6 +3116,24 @@ public class Claim extends DomainResource {
           if (this.detail == null)
             this.detail = new ArrayList<DetailComponent>();
           return this.detail;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
+         */
+        public DetailComponent getDetailFirstRep() { 
+          if (getDetail().isEmpty()) {
+            addDetail();
+          }
+          return getDetail().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ItemsComponent setDetail(List<DetailComponent> theDetail) { 
+          this.detail = theDetail;
+          return this;
         }
 
         public boolean hasDetail() { 
@@ -2835,6 +3218,110 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
+        case -1697229976: /*supervisor*/ return this.supervisor == null ? new Base[0] : new Base[] {this.supervisor}; // Type
+        case -1240156290: /*providerQualification*/ return this.providerQualification == null ? new Base[0] : new Base[] {this.providerQualification}; // Coding
+        case -1659207418: /*diagnosisLinkId*/ return this.diagnosisLinkId == null ? new Base[0] : this.diagnosisLinkId.toArray(new Base[this.diagnosisLinkId.size()]); // PositiveIntType
+        case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // Coding
+        case 615164076: /*serviceModifier*/ return this.serviceModifier == null ? new Base[0] : this.serviceModifier.toArray(new Base[this.serviceModifier.size()]); // Coding
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // Coding
+        case 1010065041: /*programCode*/ return this.programCode == null ? new Base[0] : this.programCode.toArray(new Base[this.programCode.size()]); // Coding
+        case 1379209295: /*serviced*/ return this.serviced == null ? new Base[0] : new Base[] {this.serviced}; // Type
+        case 106748167: /*place*/ return this.place == null ? new Base[0] : new Base[] {this.place}; // Coding
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case -982754077: /*points*/ return this.points == null ? new Base[0] : new Base[] {this.points}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case 115642: /*udi*/ return this.udi == null ? new Base[0] : this.udi.toArray(new Base[this.udi.size()]); // Reference
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // Coding
+        case -1868566105: /*subSite*/ return this.subSite == null ? new Base[0] : this.subSite.toArray(new Base[this.subSite.size()]); // Coding
+        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // DetailComponent
+        case -2138744398: /*prosthesis*/ return this.prosthesis == null ? new Base[0] : new Base[] {this.prosthesis}; // ProsthesisComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case -987494927: // provider
+          this.provider = (Type) value; // Type
+          break;
+        case -1697229976: // supervisor
+          this.supervisor = (Type) value; // Type
+          break;
+        case -1240156290: // providerQualification
+          this.providerQualification = castToCoding(value); // Coding
+          break;
+        case -1659207418: // diagnosisLinkId
+          this.getDiagnosisLinkId().add(castToPositiveInt(value)); // PositiveIntType
+          break;
+        case 1984153269: // service
+          this.service = castToCoding(value); // Coding
+          break;
+        case 615164076: // serviceModifier
+          this.getServiceModifier().add(castToCoding(value)); // Coding
+          break;
+        case -615513385: // modifier
+          this.getModifier().add(castToCoding(value)); // Coding
+          break;
+        case 1010065041: // programCode
+          this.getProgramCode().add(castToCoding(value)); // Coding
+          break;
+        case 1379209295: // serviced
+          this.serviced = (Type) value; // Type
+          break;
+        case 106748167: // place
+          this.place = castToCoding(value); // Coding
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case -982754077: // points
+          this.points = castToDecimal(value); // DecimalType
+          break;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          break;
+        case 115642: // udi
+          this.getUdi().add(castToReference(value)); // Reference
+          break;
+        case 1702620169: // bodySite
+          this.bodySite = castToCoding(value); // Coding
+          break;
+        case -1868566105: // subSite
+          this.getSubSite().add(castToCoding(value)); // Coding
+          break;
+        case -1335224239: // detail
+          this.getDetail().add((DetailComponent) value); // DetailComponent
+          break;
+        case -2138744398: // prosthesis
+          this.prosthesis = (ProsthesisComponent) value; // ProsthesisComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -2882,6 +3369,36 @@ public class Claim extends DomainResource {
           this.prosthesis = (ProsthesisComponent) value; // ProsthesisComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 3575610:  return getType(); // Coding
+        case 2064698607:  return getProvider(); // Type
+        case -1823115240:  return getSupervisor(); // Type
+        case -1240156290:  return getProviderQualification(); // Coding
+        case -1659207418: throw new FHIRException("Cannot make property diagnosisLinkId as it is not a complex type"); // PositiveIntType
+        case 1984153269:  return getService(); // Coding
+        case 615164076:  return addServiceModifier(); // Coding
+        case -615513385:  return addModifier(); // Coding
+        case 1010065041:  return addProgramCode(); // Coding
+        case -1927922223:  return getServiced(); // Type
+        case 106748167:  return getPlace(); // Coding
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -486196699:  return getUnitPrice(); // Money
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
+        case 108957:  return getNet(); // Money
+        case 115642:  return addUdi(); // Reference
+        case 1702620169:  return getBodySite(); // Coding
+        case -1868566105:  return addSubSite(); // Coding
+        case -1335224239:  return addDetail(); // DetailComponent
+        case -2138744398:  return getProsthesis(); // ProsthesisComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3066,10 +3583,10 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  type,  provider,  supervisor
-          ,  providerQualification,  diagnosisLinkId,  service,  serviceModifier,  modifier,  programCode
-          ,  serviced,  place,  quantity,  unitPrice,  factor,  points,  net,  udi,  bodySite,  subSite
-          ,  detail,  prosthesis);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, type, provider, supervisor
+          , providerQualification, diagnosisLinkId, service, serviceModifier, modifier, programCode, serviced
+          , place, quantity, unitPrice, factor, points, net, udi, bodySite, subSite, detail, prosthesis
+          );
       }
 
   public String fhirType() {
@@ -3282,6 +3799,24 @@ public class Claim extends DomainResource {
           if (this.programCode == null)
             this.programCode = new ArrayList<Coding>();
           return this.programCode;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #programCode}, creating it if it does not already exist
+         */
+        public Coding getProgramCodeFirstRep() { 
+          if (getProgramCode().isEmpty()) {
+            addProgramCode();
+          }
+          return getProgramCode().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DetailComponent setProgramCode(List<Coding> theProgramCode) { 
+          this.programCode = theProgramCode;
+          return this;
         }
 
         public boolean hasProgramCode() { 
@@ -3530,6 +4065,24 @@ public class Claim extends DomainResource {
           return this.udi;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #udi}, creating it if it does not already exist
+         */
+        public Reference getUdiFirstRep() { 
+          if (getUdi().isEmpty()) {
+            addUdi();
+          }
+          return getUdi().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DetailComponent setUdi(List<Reference> theUdi) { 
+          this.udi = theUdi;
+          return this;
+        }
+
         public boolean hasUdi() { 
           if (this.udi == null)
             return false;
@@ -3591,6 +4144,24 @@ public class Claim extends DomainResource {
           return this.subDetail;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #subDetail}, creating it if it does not already exist
+         */
+        public SubDetailComponent getSubDetailFirstRep() { 
+          if (getSubDetail().isEmpty()) {
+            addSubDetail();
+          }
+          return getSubDetail().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DetailComponent setSubDetail(List<SubDetailComponent> theSubDetail) { 
+          this.subDetail = theSubDetail;
+          return this;
+        }
+
         public boolean hasSubDetail() { 
           if (this.subDetail == null)
             return false;
@@ -3638,6 +4209,66 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // Coding
+        case 1010065041: /*programCode*/ return this.programCode == null ? new Base[0] : this.programCode.toArray(new Base[this.programCode.size()]); // Coding
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case -982754077: /*points*/ return this.points == null ? new Base[0] : new Base[] {this.points}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case 115642: /*udi*/ return this.udi == null ? new Base[0] : this.udi.toArray(new Base[this.udi.size()]); // Reference
+        case -828829007: /*subDetail*/ return this.subDetail == null ? new Base[0] : this.subDetail.toArray(new Base[this.subDetail.size()]); // SubDetailComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 1984153269: // service
+          this.service = castToCoding(value); // Coding
+          break;
+        case 1010065041: // programCode
+          this.getProgramCode().add(castToCoding(value)); // Coding
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case -982754077: // points
+          this.points = castToDecimal(value); // DecimalType
+          break;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          break;
+        case 115642: // udi
+          this.getUdi().add(castToReference(value)); // Reference
+          break;
+        case -828829007: // subDetail
+          this.getSubDetail().add((SubDetailComponent) value); // SubDetailComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -3663,6 +4294,25 @@ public class Claim extends DomainResource {
           this.getSubDetail().add((SubDetailComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 3575610:  return getType(); // Coding
+        case 1984153269:  return getService(); // Coding
+        case 1010065041:  return addProgramCode(); // Coding
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -486196699:  return getUnitPrice(); // Money
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
+        case 108957:  return getNet(); // Money
+        case 115642:  return addUdi(); // Reference
+        case -828829007:  return addSubDetail(); // SubDetailComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -3763,8 +4413,8 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  type,  service,  programCode
-          ,  quantity,  unitPrice,  factor,  points,  net,  udi,  subDetail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, type, service, programCode
+          , quantity, unitPrice, factor, points, net, udi, subDetail);
       }
 
   public String fhirType() {
@@ -3970,6 +4620,24 @@ public class Claim extends DomainResource {
           if (this.programCode == null)
             this.programCode = new ArrayList<Coding>();
           return this.programCode;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #programCode}, creating it if it does not already exist
+         */
+        public Coding getProgramCodeFirstRep() { 
+          if (getProgramCode().isEmpty()) {
+            addProgramCode();
+          }
+          return getProgramCode().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubDetailComponent setProgramCode(List<Coding> theProgramCode) { 
+          this.programCode = theProgramCode;
+          return this;
         }
 
         public boolean hasProgramCode() { 
@@ -4218,6 +4886,24 @@ public class Claim extends DomainResource {
           return this.udi;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #udi}, creating it if it does not already exist
+         */
+        public Reference getUdiFirstRep() { 
+          if (getUdi().isEmpty()) {
+            addUdi();
+          }
+          return getUdi().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubDetailComponent setUdi(List<Reference> theUdi) { 
+          this.udi = theUdi;
+          return this;
+        }
+
         public boolean hasUdi() { 
           if (this.udi == null)
             return false;
@@ -4285,6 +4971,62 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // Coding
+        case 1010065041: /*programCode*/ return this.programCode == null ? new Base[0] : this.programCode.toArray(new Base[this.programCode.size()]); // Coding
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case -982754077: /*points*/ return this.points == null ? new Base[0] : new Base[] {this.points}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case 115642: /*udi*/ return this.udi == null ? new Base[0] : this.udi.toArray(new Base[this.udi.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 1984153269: // service
+          this.service = castToCoding(value); // Coding
+          break;
+        case 1010065041: // programCode
+          this.getProgramCode().add(castToCoding(value)); // Coding
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          break;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          break;
+        case -982754077: // points
+          this.points = castToDecimal(value); // DecimalType
+          break;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          break;
+        case 115642: // udi
+          this.getUdi().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
@@ -4308,6 +5050,24 @@ public class Claim extends DomainResource {
           this.getUdi().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 3575610:  return getType(); // Coding
+        case 1984153269:  return getService(); // Coding
+        case 1010065041:  return addProgramCode(); // Coding
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -486196699:  return getUnitPrice(); // Money
+        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
+        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
+        case 108957:  return getNet(); // Money
+        case 115642:  return addUdi(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -4400,8 +5160,8 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( sequence,  type,  service,  programCode
-          ,  quantity,  unitPrice,  factor,  points,  net,  udi);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, type, service, programCode
+          , quantity, unitPrice, factor, points, net, udi);
       }
 
   public String fhirType() {
@@ -4569,6 +5329,34 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1948342084: /*initial*/ return this.initial == null ? new Base[0] : new Base[] {this.initial}; // BooleanType
+        case -1770675816: /*priorDate*/ return this.priorDate == null ? new Base[0] : new Base[] {this.priorDate}; // DateType
+        case -532999663: /*priorMaterial*/ return this.priorMaterial == null ? new Base[0] : new Base[] {this.priorMaterial}; // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1948342084: // initial
+          this.initial = castToBoolean(value); // BooleanType
+          break;
+        case -1770675816: // priorDate
+          this.priorDate = castToDate(value); // DateType
+          break;
+        case -532999663: // priorMaterial
+          this.priorMaterial = castToCoding(value); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("initial"))
           this.initial = castToBoolean(value); // BooleanType
@@ -4578,6 +5366,17 @@ public class Claim extends DomainResource {
           this.priorMaterial = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1948342084: throw new FHIRException("Cannot make property initial as it is not a complex type"); // BooleanType
+        case -1770675816: throw new FHIRException("Cannot make property priorDate as it is not a complex type"); // DateType
+        case -532999663:  return getPriorMaterial(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -4627,7 +5426,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( initial,  priorDate,  priorMaterial
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(initial, priorDate, priorMaterial
           );
       }
 
@@ -4783,6 +5582,34 @@ public class Claim extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 110545608: /*tooth*/ return this.tooth == null ? new Base[0] : new Base[] {this.tooth}; // Coding
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Coding
+        case 580646965: /*extractionDate*/ return this.extractionDate == null ? new Base[0] : new Base[] {this.extractionDate}; // DateType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 110545608: // tooth
+          this.tooth = castToCoding(value); // Coding
+          break;
+        case -934964668: // reason
+          this.reason = castToCoding(value); // Coding
+          break;
+        case 580646965: // extractionDate
+          this.extractionDate = castToDate(value); // DateType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("tooth"))
           this.tooth = castToCoding(value); // Coding
@@ -4792,6 +5619,17 @@ public class Claim extends DomainResource {
           this.extractionDate = castToDate(value); // DateType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 110545608:  return getTooth(); // Coding
+        case -934964668:  return getReason(); // Coding
+        case 580646965: throw new FHIRException("Cannot make property extractionDate as it is not a complex type"); // DateType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -4842,8 +5680,7 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( tooth,  reason,  extractionDate
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(tooth, reason, extractionDate);
       }
 
   public String fhirType() {
@@ -5198,6 +6035,24 @@ public class Claim extends DomainResource {
       return this.subType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #subType}, creating it if it does not already exist
+     */
+    public Coding getSubTypeFirstRep() { 
+      if (getSubType().isEmpty()) {
+        addSubType();
+      }
+      return getSubType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setSubType(List<Coding> theSubType) { 
+      this.subType = theSubType;
+      return this;
+    }
+
     public boolean hasSubType() { 
       if (this.subType == null)
         return false;
@@ -5236,6 +6091,24 @@ public class Claim extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -5721,6 +6594,24 @@ public class Claim extends DomainResource {
       return this.related;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
+     */
+    public RelatedClaimsComponent getRelatedFirstRep() { 
+      if (getRelated().isEmpty()) {
+        addRelated();
+      }
+      return getRelated().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setRelated(List<RelatedClaimsComponent> theRelated) { 
+      this.related = theRelated;
+      return this;
+    }
+
     public boolean hasRelated() { 
       if (this.related == null)
         return false;
@@ -5920,6 +6811,24 @@ public class Claim extends DomainResource {
       return this.occurrenceCode;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #occurrenceCode}, creating it if it does not already exist
+     */
+    public Coding getOccurrenceCodeFirstRep() { 
+      if (getOccurrenceCode().isEmpty()) {
+        addOccurrenceCode();
+      }
+      return getOccurrenceCode().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setOccurrenceCode(List<Coding> theOccurrenceCode) { 
+      this.occurrenceCode = theOccurrenceCode;
+      return this;
+    }
+
     public boolean hasOccurrenceCode() { 
       if (this.occurrenceCode == null)
         return false;
@@ -5958,6 +6867,24 @@ public class Claim extends DomainResource {
       if (this.occurenceSpanCode == null)
         this.occurenceSpanCode = new ArrayList<Coding>();
       return this.occurenceSpanCode;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #occurenceSpanCode}, creating it if it does not already exist
+     */
+    public Coding getOccurenceSpanCodeFirstRep() { 
+      if (getOccurenceSpanCode().isEmpty()) {
+        addOccurenceSpanCode();
+      }
+      return getOccurenceSpanCode().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setOccurenceSpanCode(List<Coding> theOccurenceSpanCode) { 
+      this.occurenceSpanCode = theOccurenceSpanCode;
+      return this;
     }
 
     public boolean hasOccurenceSpanCode() { 
@@ -6000,6 +6927,24 @@ public class Claim extends DomainResource {
       return this.valueCode;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #valueCode}, creating it if it does not already exist
+     */
+    public Coding getValueCodeFirstRep() { 
+      if (getValueCode().isEmpty()) {
+        addValueCode();
+      }
+      return getValueCode().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setValueCode(List<Coding> theValueCode) { 
+      this.valueCode = theValueCode;
+      return this;
+    }
+
     public boolean hasValueCode() { 
       if (this.valueCode == null)
         return false;
@@ -6038,6 +6983,24 @@ public class Claim extends DomainResource {
       if (this.diagnosis == null)
         this.diagnosis = new ArrayList<DiagnosisComponent>();
       return this.diagnosis;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #diagnosis}, creating it if it does not already exist
+     */
+    public DiagnosisComponent getDiagnosisFirstRep() { 
+      if (getDiagnosis().isEmpty()) {
+        addDiagnosis();
+      }
+      return getDiagnosis().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setDiagnosis(List<DiagnosisComponent> theDiagnosis) { 
+      this.diagnosis = theDiagnosis;
+      return this;
     }
 
     public boolean hasDiagnosis() { 
@@ -6080,6 +7043,24 @@ public class Claim extends DomainResource {
       return this.procedure;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #procedure}, creating it if it does not already exist
+     */
+    public ProcedureComponent getProcedureFirstRep() { 
+      if (getProcedure().isEmpty()) {
+        addProcedure();
+      }
+      return getProcedure().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setProcedure(List<ProcedureComponent> theProcedure) { 
+      this.procedure = theProcedure;
+      return this;
+    }
+
     public boolean hasProcedure() { 
       if (this.procedure == null)
         return false;
@@ -6118,6 +7099,24 @@ public class Claim extends DomainResource {
       if (this.specialCondition == null)
         this.specialCondition = new ArrayList<Coding>();
       return this.specialCondition;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specialCondition}, creating it if it does not already exist
+     */
+    public Coding getSpecialConditionFirstRep() { 
+      if (getSpecialCondition().isEmpty()) {
+        addSpecialCondition();
+      }
+      return getSpecialCondition().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setSpecialCondition(List<Coding> theSpecialCondition) { 
+      this.specialCondition = theSpecialCondition;
+      return this;
     }
 
     public boolean hasSpecialCondition() { 
@@ -6203,6 +7202,24 @@ public class Claim extends DomainResource {
       if (this.coverage == null)
         this.coverage = new ArrayList<CoverageComponent>();
       return this.coverage;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public CoverageComponent getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setCoverage(List<CoverageComponent> theCoverage) { 
+      this.coverage = theCoverage;
+      return this;
     }
 
     public boolean hasCoverage() { 
@@ -6363,6 +7380,24 @@ public class Claim extends DomainResource {
       return this.interventionException;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #interventionException}, creating it if it does not already exist
+     */
+    public Coding getInterventionExceptionFirstRep() { 
+      if (getInterventionException().isEmpty()) {
+        addInterventionException();
+      }
+      return getInterventionException().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setInterventionException(List<Coding> theInterventionException) { 
+      this.interventionException = theInterventionException;
+      return this;
+    }
+
     public boolean hasInterventionException() { 
       if (this.interventionException == null)
         return false;
@@ -6401,6 +7436,24 @@ public class Claim extends DomainResource {
       if (this.onset == null)
         this.onset = new ArrayList<OnsetComponent>();
       return this.onset;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #onset}, creating it if it does not already exist
+     */
+    public OnsetComponent getOnsetFirstRep() { 
+      if (getOnset().isEmpty()) {
+        addOnset();
+      }
+      return getOnset().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setOnset(List<OnsetComponent> theOnset) { 
+      this.onset = theOnset;
+      return this;
     }
 
     public boolean hasOnset() { 
@@ -6491,6 +7544,24 @@ public class Claim extends DomainResource {
       return this.item;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public ItemsComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setItem(List<ItemsComponent> theItem) { 
+      this.item = theItem;
+      return this;
+    }
+
     public boolean hasItem() { 
       if (this.item == null)
         return false;
@@ -6555,6 +7626,24 @@ public class Claim extends DomainResource {
       return this.additionalMaterial;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #additionalMaterial}, creating it if it does not already exist
+     */
+    public Coding getAdditionalMaterialFirstRep() { 
+      if (getAdditionalMaterial().isEmpty()) {
+        addAdditionalMaterial();
+      }
+      return getAdditionalMaterial().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setAdditionalMaterial(List<Coding> theAdditionalMaterial) { 
+      this.additionalMaterial = theAdditionalMaterial;
+      return this;
+    }
+
     public boolean hasAdditionalMaterial() { 
       if (this.additionalMaterial == null)
         return false;
@@ -6593,6 +7682,24 @@ public class Claim extends DomainResource {
       if (this.missingTeeth == null)
         this.missingTeeth = new ArrayList<MissingTeethComponent>();
       return this.missingTeeth;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #missingTeeth}, creating it if it does not already exist
+     */
+    public MissingTeethComponent getMissingTeethFirstRep() { 
+      if (getMissingTeeth().isEmpty()) {
+        addMissingTeeth();
+      }
+      return getMissingTeeth().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Claim setMissingTeeth(List<MissingTeethComponent> theMissingTeeth) { 
+      this.missingTeeth = theMissingTeeth;
+      return this;
     }
 
     public boolean hasMissingTeeth() { 
@@ -6667,6 +7774,178 @@ public class Claim extends DomainResource {
         childrenList.add(new Property("total", "Money", "The total value of the claim.", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("additionalMaterial", "Coding", "Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission.", 0, java.lang.Integer.MAX_VALUE, additionalMaterial));
         childrenList.add(new Property("missingTeeth", "", "A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons.", 0, java.lang.Integer.MAX_VALUE, missingTeeth));
+      }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ClaimType>
+        case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : this.subType.toArray(new Base[this.subType.size()]); // Coding
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
+        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case -332066046: /*billablePeriod*/ return this.billablePeriod == null ? new Base[0] : new Base[] {this.billablePeriod}; // Period
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<Use>
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Coding
+        case 1314609806: /*fundsReserve*/ return this.fundsReserve == null ? new Base[0] : new Base[] {this.fundsReserve}; // Coding
+        case -1591951995: /*enterer*/ return this.enterer == null ? new Base[0] : new Base[] {this.enterer}; // Type
+        case 501116579: /*facility*/ return this.facility == null ? new Base[0] : new Base[] {this.facility}; // Type
+        case 1090493483: /*related*/ return this.related == null ? new Base[0] : this.related.toArray(new Base[this.related.size()]); // RelatedClaimsComponent
+        case 460301338: /*prescription*/ return this.prescription == null ? new Base[0] : new Base[] {this.prescription}; // Type
+        case -1814015861: /*originalPrescription*/ return this.originalPrescription == null ? new Base[0] : new Base[] {this.originalPrescription}; // Type
+        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // PayeeComponent
+        case -722568291: /*referral*/ return this.referral == null ? new Base[0] : new Base[] {this.referral}; // Type
+        case 1721744222: /*occurrenceCode*/ return this.occurrenceCode == null ? new Base[0] : this.occurrenceCode.toArray(new Base[this.occurrenceCode.size()]); // Coding
+        case -556690898: /*occurenceSpanCode*/ return this.occurenceSpanCode == null ? new Base[0] : this.occurenceSpanCode.toArray(new Base[this.occurenceSpanCode.size()]); // Coding
+        case -766209282: /*valueCode*/ return this.valueCode == null ? new Base[0] : this.valueCode.toArray(new Base[this.valueCode.size()]); // Coding
+        case 1196993265: /*diagnosis*/ return this.diagnosis == null ? new Base[0] : this.diagnosis.toArray(new Base[this.diagnosis.size()]); // DiagnosisComponent
+        case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : this.procedure.toArray(new Base[this.procedure.size()]); // ProcedureComponent
+        case -481489822: /*specialCondition*/ return this.specialCondition == null ? new Base[0] : this.specialCondition.toArray(new Base[this.specialCondition.size()]); // Coding
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Type
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // CoverageComponent
+        case -63170979: /*accidentDate*/ return this.accidentDate == null ? new Base[0] : new Base[] {this.accidentDate}; // DateType
+        case -62671383: /*accidentType*/ return this.accidentType == null ? new Base[0] : new Base[] {this.accidentType}; // Coding
+        case -1074014492: /*accidentLocation*/ return this.accidentLocation == null ? new Base[0] : new Base[] {this.accidentLocation}; // Type
+        case 1753076536: /*interventionException*/ return this.interventionException == null ? new Base[0] : this.interventionException.toArray(new Base[this.interventionException.size()]); // Coding
+        case 105901603: /*onset*/ return this.onset == null ? new Base[0] : this.onset.toArray(new Base[this.onset.size()]); // OnsetComponent
+        case 1051487345: /*employmentImpacted*/ return this.employmentImpacted == null ? new Base[0] : new Base[] {this.employmentImpacted}; // Period
+        case 1057894634: /*hospitalization*/ return this.hospitalization == null ? new Base[0] : new Base[] {this.hospitalization}; // Period
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemsComponent
+        case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // Money
+        case -1534875026: /*additionalMaterial*/ return this.additionalMaterial == null ? new Base[0] : this.additionalMaterial.toArray(new Base[this.additionalMaterial.size()]); // Coding
+        case -1157130302: /*missingTeeth*/ return this.missingTeeth == null ? new Base[0] : this.missingTeeth.toArray(new Base[this.missingTeeth.size()]); // MissingTeethComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = new ClaimTypeEnumFactory().fromType(value); // Enumeration<ClaimType>
+          break;
+        case -1868521062: // subType
+          this.getSubType().add(castToCoding(value)); // Coding
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1548678118: // ruleset
+          this.ruleset = castToCoding(value); // Coding
+          break;
+        case 1089373397: // originalRuleset
+          this.originalRuleset = castToCoding(value); // Coding
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case -332066046: // billablePeriod
+          this.billablePeriod = castToPeriod(value); // Period
+          break;
+        case -880905839: // target
+          this.target = (Type) value; // Type
+          break;
+        case -987494927: // provider
+          this.provider = (Type) value; // Type
+          break;
+        case 1178922291: // organization
+          this.organization = (Type) value; // Type
+          break;
+        case 116103: // use
+          this.use = new UseEnumFactory().fromType(value); // Enumeration<Use>
+          break;
+        case -1165461084: // priority
+          this.priority = castToCoding(value); // Coding
+          break;
+        case 1314609806: // fundsReserve
+          this.fundsReserve = castToCoding(value); // Coding
+          break;
+        case -1591951995: // enterer
+          this.enterer = (Type) value; // Type
+          break;
+        case 501116579: // facility
+          this.facility = (Type) value; // Type
+          break;
+        case 1090493483: // related
+          this.getRelated().add((RelatedClaimsComponent) value); // RelatedClaimsComponent
+          break;
+        case 460301338: // prescription
+          this.prescription = (Type) value; // Type
+          break;
+        case -1814015861: // originalPrescription
+          this.originalPrescription = (Type) value; // Type
+          break;
+        case 106443592: // payee
+          this.payee = (PayeeComponent) value; // PayeeComponent
+          break;
+        case -722568291: // referral
+          this.referral = (Type) value; // Type
+          break;
+        case 1721744222: // occurrenceCode
+          this.getOccurrenceCode().add(castToCoding(value)); // Coding
+          break;
+        case -556690898: // occurenceSpanCode
+          this.getOccurenceSpanCode().add(castToCoding(value)); // Coding
+          break;
+        case -766209282: // valueCode
+          this.getValueCode().add(castToCoding(value)); // Coding
+          break;
+        case 1196993265: // diagnosis
+          this.getDiagnosis().add((DiagnosisComponent) value); // DiagnosisComponent
+          break;
+        case -1095204141: // procedure
+          this.getProcedure().add((ProcedureComponent) value); // ProcedureComponent
+          break;
+        case -481489822: // specialCondition
+          this.getSpecialCondition().add(castToCoding(value)); // Coding
+          break;
+        case -791418107: // patient
+          this.patient = (Type) value; // Type
+          break;
+        case -351767064: // coverage
+          this.getCoverage().add((CoverageComponent) value); // CoverageComponent
+          break;
+        case -63170979: // accidentDate
+          this.accidentDate = castToDate(value); // DateType
+          break;
+        case -62671383: // accidentType
+          this.accidentType = castToCoding(value); // Coding
+          break;
+        case -1074014492: // accidentLocation
+          this.accidentLocation = (Type) value; // Type
+          break;
+        case 1753076536: // interventionException
+          this.getInterventionException().add(castToCoding(value)); // Coding
+          break;
+        case 105901603: // onset
+          this.getOnset().add((OnsetComponent) value); // OnsetComponent
+          break;
+        case 1051487345: // employmentImpacted
+          this.employmentImpacted = castToPeriod(value); // Period
+          break;
+        case 1057894634: // hospitalization
+          this.hospitalization = castToPeriod(value); // Period
+          break;
+        case 3242771: // item
+          this.getItem().add((ItemsComponent) value); // ItemsComponent
+          break;
+        case 110549828: // total
+          this.total = castToMoney(value); // Money
+          break;
+        case -1534875026: // additionalMaterial
+          this.getAdditionalMaterial().add(castToCoding(value)); // Coding
+          break;
+        case -1157130302: // missingTeeth
+          this.getMissingTeeth().add((MissingTeethComponent) value); // MissingTeethComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
       }
 
       @Override
@@ -6751,6 +8030,53 @@ public class Claim extends DomainResource {
           this.getMissingTeeth().add((MissingTeethComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ClaimType>
+        case -1868521062:  return addSubType(); // Coding
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1548678118:  return getRuleset(); // Coding
+        case 1089373397:  return getOriginalRuleset(); // Coding
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case -332066046:  return getBillablePeriod(); // Period
+        case -815579825:  return getTarget(); // Type
+        case 2064698607:  return getProvider(); // Type
+        case 1326483053:  return getOrganization(); // Type
+        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<Use>
+        case -1165461084:  return getPriority(); // Coding
+        case 1314609806:  return getFundsReserve(); // Coding
+        case -812909349:  return getEnterer(); // Type
+        case -542224643:  return getFacility(); // Type
+        case 1090493483:  return addRelated(); // RelatedClaimsComponent
+        case -993324506:  return getPrescription(); // Type
+        case -2067905515:  return getOriginalPrescription(); // Type
+        case 106443592:  return getPayee(); // PayeeComponent
+        case 344221635:  return getReferral(); // Type
+        case 1721744222:  return addOccurrenceCode(); // Coding
+        case -556690898:  return addOccurenceSpanCode(); // Coding
+        case -766209282:  return addValueCode(); // Coding
+        case 1196993265:  return addDiagnosis(); // DiagnosisComponent
+        case -1095204141:  return addProcedure(); // ProcedureComponent
+        case -481489822:  return addSpecialCondition(); // Coding
+        case -2061246629:  return getPatient(); // Type
+        case -351767064:  return addCoverage(); // CoverageComponent
+        case -63170979: throw new FHIRException("Cannot make property accidentDate as it is not a complex type"); // DateType
+        case -62671383:  return getAccidentType(); // Coding
+        case 1540715292:  return getAccidentLocation(); // Type
+        case 1753076536:  return addInterventionException(); // Coding
+        case 105901603:  return addOnset(); // OnsetComponent
+        case 1051487345:  return getEmploymentImpacted(); // Period
+        case 1057894634:  return getHospitalization(); // Period
+        case 3242771:  return addItem(); // ItemsComponent
+        case 110549828:  return getTotal(); // Money
+        case -1534875026:  return addAdditionalMaterial(); // Coding
+        case -1157130302:  return addMissingTeeth(); // MissingTeethComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -7087,13 +8413,12 @@ public class Claim extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  subType,  identifier,  ruleset
-          ,  originalRuleset,  created,  billablePeriod,  target,  provider,  organization,  use,  priority
-          ,  fundsReserve,  enterer,  facility,  related,  prescription,  originalPrescription,  payee
-          ,  referral,  occurrenceCode,  occurenceSpanCode,  valueCode,  diagnosis,  procedure,  specialCondition
-          ,  patient,  coverage,  accidentDate,  accidentType,  accidentLocation,  interventionException
-          ,  onset,  employmentImpacted,  hospitalization,  item,  total,  additionalMaterial,  missingTeeth
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, subType, identifier, ruleset
+          , originalRuleset, created, billablePeriod, target, provider, organization, use, priority, fundsReserve
+          , enterer, facility, related, prescription, originalPrescription, payee, referral, occurrenceCode
+          , occurenceSpanCode, valueCode, diagnosis, procedure, specialCondition, patient, coverage, accidentDate
+          , accidentType, accidentLocation, interventionException, onset, employmentImpacted, hospitalization
+          , item, total, additionalMaterial, missingTeeth);
       }
 
   @Override
@@ -7109,7 +8434,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Claim.identifier", description="The primary identifier of the financial resource", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Claim.identifier", description="The primary identifier of the financial resource", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -7129,7 +8456,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientidentifier", path="Claim.patientIdentifier", description="Patient receiving the services", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // []
+  // []
+  @SearchParamDefinition(name="patientidentifier", path="Claim.patient.as(Identifier)", description="Patient receiving the services", type="token", target={} )
   public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientidentifier</b>
@@ -7149,7 +8478,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="Claim.organizationIdentifier", description="The reference to the providing organization", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="organizationidentifier", path="Claim.organization.as(Identifier)", description="The reference to the providing organization", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -7169,7 +8500,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="use", path="Claim.use", description="The kind of financial resource", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="use", path="Claim.use", description="The kind of financial resource", type="token", target={} )
   public static final String SP_USE = "use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>use</b>
@@ -7189,7 +8522,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Claim.created", description="The creation date for the Claim", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="created", path="Claim.created", description="The creation date for the Claim", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -7209,7 +8544,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientreference", path="Claim.patientReference", description="Patient receiving the services", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patientreference", path="Claim.patient.as(Reference)", description="Patient receiving the services", type="reference", target={Patient.class} )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientreference</b>
@@ -7235,7 +8572,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="Claim.providerReference", description="Provider responsible for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="providerreference", path="Claim.provider.as(Reference)", description="Provider responsible for the Claim", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -7261,7 +8600,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="Claim.organizationReference", description="The reference to the providing organization", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organizationreference", path="Claim.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -7287,7 +8628,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="Claim.priority", description="Processing priority requested", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="priority", path="Claim.priority", description="Processing priority requested", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -7307,7 +8650,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="Claim.providerIdentifier", description="Provider responsible for the Claim", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // []
+  // []
+  @SearchParamDefinition(name="provideridentifier", path="Claim.provider.as(Identifier)", description="Provider responsible for the Claim", type="token", target={} )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>
@@ -7327,7 +8672,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetidentifier", path="Claim.targetIdentifier", description="The target payor/insurer for the Claim", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="targetidentifier", path="Claim.target.as(Identifier)", description="The target payor/insurer for the Claim", type="token", target={} )
   public static final String SP_TARGETIDENTIFIER = "targetidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetidentifier</b>
@@ -7347,7 +8694,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityreference", path="Claim.facilityReference", description="Facility responsible for the goods and services", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="facilityreference", path="Claim.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class} )
   public static final String SP_FACILITYREFERENCE = "facilityreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityreference</b>
@@ -7373,7 +8722,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetreference", path="Claim.targetReference", description="The target payor/insurer for the Claim", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="targetreference", path="Claim.target.as(Reference)", description="The target payor/insurer for the Claim", type="reference", target={Organization.class} )
   public static final String SP_TARGETREFERENCE = "targetreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetreference</b>
@@ -7399,7 +8750,9 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityidentifier", path="Claim.facilityIdentifier", description="Facility responsible for the goods and services", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="facilityidentifier", path="Claim.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token", target={} )
   public static final String SP_FACILITYIDENTIFIER = "facilityidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityidentifier</b>

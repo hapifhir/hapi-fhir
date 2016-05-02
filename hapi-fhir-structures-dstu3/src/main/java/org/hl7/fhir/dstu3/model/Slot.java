@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -277,6 +277,24 @@ public class Slot extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Slot setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -341,6 +359,24 @@ public class Slot extends DomainResource {
       return this.serviceType;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #serviceType}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceTypeFirstRep() { 
+      if (getServiceType().isEmpty()) {
+        addServiceType();
+      }
+      return getServiceType().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Slot setServiceType(List<CodeableConcept> theServiceType) { 
+      this.serviceType = theServiceType;
+      return this;
+    }
+
     public boolean hasServiceType() { 
       if (this.serviceType == null)
         return false;
@@ -379,6 +415,24 @@ public class Slot extends DomainResource {
       if (this.specialty == null)
         this.specialty = new ArrayList<CodeableConcept>();
       return this.specialty;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+     */
+    public CodeableConcept getSpecialtyFirstRep() { 
+      if (getSpecialty().isEmpty()) {
+        addSpecialty();
+      }
+      return getSpecialty().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Slot setSpecialty(List<CodeableConcept> theSpecialty) { 
+      this.specialty = theSpecialty;
+      return this;
     }
 
     public boolean hasSpecialty() { 
@@ -725,6 +779,66 @@ public class Slot extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
+        case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
+        case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
+        case -1596426375: /*appointmentType*/ return this.appointmentType == null ? new Base[0] : new Base[] {this.appointmentType}; // CodeableConcept
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : new Base[] {this.schedule}; // Reference
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SlotStatus>
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // InstantType
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // InstantType
+        case 2068545308: /*overbooked*/ return this.overbooked == null ? new Base[0] : new Base[] {this.overbooked}; // BooleanType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 1281188563: // serviceCategory
+          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1928370289: // serviceType
+          this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1694759682: // specialty
+          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1596426375: // appointmentType
+          this.appointmentType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -697920873: // schedule
+          this.schedule = castToReference(value); // Reference
+          break;
+        case -892481550: // status
+          this.status = new SlotStatusEnumFactory().fromType(value); // Enumeration<SlotStatus>
+          break;
+        case 109757538: // start
+          this.start = castToInstant(value); // InstantType
+          break;
+        case 100571: // end
+          this.end = castToInstant(value); // InstantType
+          break;
+        case 2068545308: // overbooked
+          this.overbooked = castToBoolean(value); // BooleanType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -750,6 +864,25 @@ public class Slot extends DomainResource {
           this.comment = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 1281188563:  return getServiceCategory(); // CodeableConcept
+        case -1928370289:  return addServiceType(); // CodeableConcept
+        case -1694759682:  return addSpecialty(); // CodeableConcept
+        case -1596426375:  return getAppointmentType(); // CodeableConcept
+        case -697920873:  return getSchedule(); // Reference
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SlotStatus>
+        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // InstantType
+        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // InstantType
+        case 2068545308: throw new FHIRException("Cannot make property overbooked as it is not a complex type"); // BooleanType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -858,8 +991,8 @@ public class Slot extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  serviceCategory,  serviceType
-          ,  specialty,  appointmentType,  schedule,  status,  start,  end,  overbooked,  comment);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, serviceCategory, serviceType
+          , specialty, appointmentType, schedule, status, start, end, overbooked, comment);
       }
 
   @Override
@@ -875,7 +1008,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference" )
+  // [Schedule]
+  // [Schedule]
+  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference", target={Schedule.class} )
   public static final String SP_SCHEDULE = "schedule";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>schedule</b>
@@ -901,7 +1036,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -921,7 +1058,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date", target={} )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
@@ -941,7 +1080,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token", target={} )
   public static final String SP_SLOT_TYPE = "slot-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>slot-type</b>
@@ -961,7 +1102,9 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

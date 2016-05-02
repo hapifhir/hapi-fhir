@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -589,6 +589,58 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Timing
+        case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
+        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // Type
+        case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
+        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Type
+        case 3493088: /*rate*/ return this.rate == null ? new Base[0] : new Base[] {this.rate}; // Type
+        case 1506263709: /*maxDosePerPeriod*/ return this.maxDosePerPeriod == null ? new Base[0] : new Base[] {this.maxDosePerPeriod}; // Ratio
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3556653: // text
+          this.text = castToString(value); // StringType
+          break;
+        case -873664438: // timing
+          this.timing = castToTiming(value); // Timing
+          break;
+        case -1432923513: // asNeeded
+          this.asNeeded = (Type) value; // Type
+          break;
+        case 3530567: // site
+          this.site = (Type) value; // Type
+          break;
+        case 108704329: // route
+          this.route = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1077554975: // method
+          this.method = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1285004149: // quantity
+          this.quantity = (Type) value; // Type
+          break;
+        case 3493088: // rate
+          this.rate = (Type) value; // Type
+          break;
+        case 1506263709: // maxDosePerPeriod
+          this.maxDosePerPeriod = castToRatio(value); // Ratio
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("text"))
           this.text = castToString(value); // StringType
@@ -610,6 +662,23 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.maxDosePerPeriod = castToRatio(value); // Ratio
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case -873664438:  return getTiming(); // Timing
+        case -544329575:  return getAsNeeded(); // Type
+        case 2099997657:  return getSite(); // Type
+        case 108704329:  return getRoute(); // CodeableConcept
+        case -1077554975:  return getMethod(); // CodeableConcept
+        case -515002347:  return getQuantity(); // Type
+        case 983460768:  return getRate(); // Type
+        case 1506263709:  return getMaxDosePerPeriod(); // Ratio
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -708,8 +777,8 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( text,  timing,  asNeeded,  site
-          ,  route,  method,  quantity,  rate,  maxDosePerPeriod);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, timing, asNeeded, site, route
+          , method, quantity, rate, maxDosePerPeriod);
       }
 
   public String fhirType() {
@@ -807,25 +876,37 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * A reason for why the medication is being/was taken.
      */
-    @Child(name = "reasonForUse", type = {CodeableConcept.class, Condition.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="A reason for why the medication is being/was taken." )
-    protected Type reasonForUse;
+    @Child(name = "reasonForUseCode", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Reason for why the medication is being/was taken", formalDefinition="A reason for why the medication is being/was taken." )
+    protected List<CodeableConcept> reasonForUseCode;
+
+    /**
+     * Condition that supports why the medication is being/was taken.
+     */
+    @Child(name = "reasonForUseReference", type = {Condition.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Condition that supports why the medication is being/was taken", formalDefinition="Condition that supports why the medication is being/was taken." )
+    protected List<Reference> reasonForUseReference;
+    /**
+     * The actual objects that are the target of the reference (Condition that supports why the medication is being/was taken.)
+     */
+    protected List<Condition> reasonForUseReferenceTarget;
+
 
     /**
      * Provides extra information about the medication statement that is not conveyed by the other attributes.
      */
-    @Child(name = "note", type = {Annotation.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "note", type = {Annotation.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Further information about the statement", formalDefinition="Provides extra information about the medication statement that is not conveyed by the other attributes." )
     protected List<Annotation> note;
 
     /**
      * Indicates how the medication is/was used by the patient.
      */
-    @Child(name = "dosage", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "dosage", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
     protected List<MedicationStatementDosageComponent> dosage;
 
-    private static final long serialVersionUID = -425948910L;
+    private static final long serialVersionUID = -1877669139L;
 
   /**
    * Constructor
@@ -851,6 +932,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1111,6 +1210,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       return this.supportingInformation;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
+     */
+    public Reference getSupportingInformationFirstRep() { 
+      if (getSupportingInformation().isEmpty()) {
+        addSupportingInformation();
+      }
+      return getSupportingInformation().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setSupportingInformation(List<Reference> theSupportingInformation) { 
+      this.supportingInformation = theSupportingInformation;
+      return this;
+    }
+
     public boolean hasSupportingInformation() { 
       if (this.supportingInformation == null)
         return false;
@@ -1254,6 +1371,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       return this.reasonNotTaken;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #reasonNotTaken}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonNotTakenFirstRep() { 
+      if (getReasonNotTaken().isEmpty()) {
+        addReasonNotTaken();
+      }
+      return getReasonNotTaken().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setReasonNotTaken(List<CodeableConcept> theReasonNotTaken) { 
+      this.reasonNotTaken = theReasonNotTaken;
+      return this;
+    }
+
     public boolean hasReasonNotTaken() { 
       if (this.reasonNotTaken == null)
         return false;
@@ -1286,48 +1421,140 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     }
 
     /**
-     * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
+     * @return {@link #reasonForUseCode} (A reason for why the medication is being/was taken.)
      */
-    public Type getReasonForUse() { 
-      return this.reasonForUse;
+    public List<CodeableConcept> getReasonForUseCode() { 
+      if (this.reasonForUseCode == null)
+        this.reasonForUseCode = new ArrayList<CodeableConcept>();
+      return this.reasonForUseCode;
     }
 
     /**
-     * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
+     * @return The first repetition of repeating field {@link #reasonForUseCode}, creating it if it does not already exist
      */
-    public CodeableConcept getReasonForUseCodeableConcept() throws FHIRException { 
-      if (!(this.reasonForUse instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.reasonForUse;
-    }
-
-    public boolean hasReasonForUseCodeableConcept() { 
-      return this.reasonForUse instanceof CodeableConcept;
+    public CodeableConcept getReasonForUseCodeFirstRep() { 
+      if (getReasonForUseCode().isEmpty()) {
+        addReasonForUseCode();
+      }
+      return getReasonForUseCode().get(0);
     }
 
     /**
-     * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Reference getReasonForUseReference() throws FHIRException { 
-      if (!(this.reasonForUse instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
-      return (Reference) this.reasonForUse;
+    public MedicationStatement setReasonForUseCode(List<CodeableConcept> theReasonForUseCode) { 
+      this.reasonForUseCode = theReasonForUseCode;
+      return this;
+    }
+
+    public boolean hasReasonForUseCode() { 
+      if (this.reasonForUseCode == null)
+        return false;
+      for (CodeableConcept item : this.reasonForUseCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #reasonForUseCode} (A reason for why the medication is being/was taken.)
+     */
+    // syntactic sugar
+    public CodeableConcept addReasonForUseCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reasonForUseCode == null)
+        this.reasonForUseCode = new ArrayList<CodeableConcept>();
+      this.reasonForUseCode.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public MedicationStatement addReasonForUseCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonForUseCode == null)
+        this.reasonForUseCode = new ArrayList<CodeableConcept>();
+      this.reasonForUseCode.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #reasonForUseReference} (Condition that supports why the medication is being/was taken.)
+     */
+    public List<Reference> getReasonForUseReference() { 
+      if (this.reasonForUseReference == null)
+        this.reasonForUseReference = new ArrayList<Reference>();
+      return this.reasonForUseReference;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonForUseReference}, creating it if it does not already exist
+     */
+    public Reference getReasonForUseReferenceFirstRep() { 
+      if (getReasonForUseReference().isEmpty()) {
+        addReasonForUseReference();
+      }
+      return getReasonForUseReference().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setReasonForUseReference(List<Reference> theReasonForUseReference) { 
+      this.reasonForUseReference = theReasonForUseReference;
+      return this;
     }
 
     public boolean hasReasonForUseReference() { 
-      return this.reasonForUse instanceof Reference;
-    }
-
-    public boolean hasReasonForUse() { 
-      return this.reasonForUse != null && !this.reasonForUse.isEmpty();
+      if (this.reasonForUseReference == null)
+        return false;
+      for (Reference item : this.reasonForUseReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #reasonForUse} (A reason for why the medication is being/was taken.)
+     * @return {@link #reasonForUseReference} (Condition that supports why the medication is being/was taken.)
      */
-    public MedicationStatement setReasonForUse(Type value) { 
-      this.reasonForUse = value;
+    // syntactic sugar
+    public Reference addReasonForUseReference() { //3
+      Reference t = new Reference();
+      if (this.reasonForUseReference == null)
+        this.reasonForUseReference = new ArrayList<Reference>();
+      this.reasonForUseReference.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public MedicationStatement addReasonForUseReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonForUseReference == null)
+        this.reasonForUseReference = new ArrayList<Reference>();
+      this.reasonForUseReference.add(t);
       return this;
+    }
+
+    /**
+     * @return {@link #reasonForUseReference} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Condition that supports why the medication is being/was taken.)
+     */
+    public List<Condition> getReasonForUseReferenceTarget() { 
+      if (this.reasonForUseReferenceTarget == null)
+        this.reasonForUseReferenceTarget = new ArrayList<Condition>();
+      return this.reasonForUseReferenceTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #reasonForUseReference} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Condition that supports why the medication is being/was taken.)
+     */
+    public Condition addReasonForUseReferenceTarget() { 
+      Condition r = new Condition();
+      if (this.reasonForUseReferenceTarget == null)
+        this.reasonForUseReferenceTarget = new ArrayList<Condition>();
+      this.reasonForUseReferenceTarget.add(r);
+      return r;
     }
 
     /**
@@ -1337,6 +1564,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       if (this.note == null)
         this.note = new ArrayList<Annotation>();
       return this.note;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
     }
 
     public boolean hasNote() { 
@@ -1377,6 +1622,24 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       if (this.dosage == null)
         this.dosage = new ArrayList<MedicationStatementDosageComponent>();
       return this.dosage;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dosage}, creating it if it does not already exist
+     */
+    public MedicationStatementDosageComponent getDosageFirstRep() { 
+      if (getDosage().isEmpty()) {
+        addDosage();
+      }
+      return getDosage().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicationStatement setDosage(List<MedicationStatementDosageComponent> theDosage) { 
+      this.dosage = theDosage;
+      return this;
     }
 
     public boolean hasDosage() { 
@@ -1422,9 +1685,82 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         childrenList.add(new Property("dateAsserted", "dateTime", "The date when the medication statement was asserted by the information source.", 0, java.lang.Integer.MAX_VALUE, dateAsserted));
         childrenList.add(new Property("wasNotTaken", "boolean", "Set this to true if the record is saying that the medication was NOT taken.", 0, java.lang.Integer.MAX_VALUE, wasNotTaken));
         childrenList.add(new Property("reasonNotTaken", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, reasonNotTaken));
-        childrenList.add(new Property("reasonForUse[x]", "CodeableConcept|Reference(Condition)", "A reason for why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUse));
+        childrenList.add(new Property("reasonForUseCode", "CodeableConcept", "A reason for why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUseCode));
+        childrenList.add(new Property("reasonForUseReference", "Reference(Condition)", "Condition that supports why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUseReference));
         childrenList.add(new Property("note", "Annotation", "Provides extra information about the medication statement that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("dosage", "", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
+      }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MedicationStatementStatus>
+        case 1998965455: /*medication*/ return this.medication == null ? new Base[0] : new Base[] {this.medication}; // Type
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
+        case -2123220889: /*informationSource*/ return this.informationSource == null ? new Base[0] : new Base[] {this.informationSource}; // Reference
+        case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
+        case -1980855245: /*dateAsserted*/ return this.dateAsserted == null ? new Base[0] : new Base[] {this.dateAsserted}; // DateTimeType
+        case -1039154243: /*wasNotTaken*/ return this.wasNotTaken == null ? new Base[0] : new Base[] {this.wasNotTaken}; // BooleanType
+        case 2112880664: /*reasonNotTaken*/ return this.reasonNotTaken == null ? new Base[0] : this.reasonNotTaken.toArray(new Base[this.reasonNotTaken.size()]); // CodeableConcept
+        case -1558446993: /*reasonForUseCode*/ return this.reasonForUseCode == null ? new Base[0] : this.reasonForUseCode.toArray(new Base[this.reasonForUseCode.size()]); // CodeableConcept
+        case -370888183: /*reasonForUseReference*/ return this.reasonForUseReference == null ? new Base[0] : this.reasonForUseReference.toArray(new Base[this.reasonForUseReference.size()]); // Reference
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case -1326018889: /*dosage*/ return this.dosage == null ? new Base[0] : this.dosage.toArray(new Base[this.dosage.size()]); // MedicationStatementDosageComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new MedicationStatementStatusEnumFactory().fromType(value); // Enumeration<MedicationStatementStatus>
+          break;
+        case 1998965455: // medication
+          this.medication = (Type) value; // Type
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case -1468651097: // effective
+          this.effective = (Type) value; // Type
+          break;
+        case -2123220889: // informationSource
+          this.informationSource = castToReference(value); // Reference
+          break;
+        case -1248768647: // supportingInformation
+          this.getSupportingInformation().add(castToReference(value)); // Reference
+          break;
+        case -1980855245: // dateAsserted
+          this.dateAsserted = castToDateTime(value); // DateTimeType
+          break;
+        case -1039154243: // wasNotTaken
+          this.wasNotTaken = castToBoolean(value); // BooleanType
+          break;
+        case 2112880664: // reasonNotTaken
+          this.getReasonNotTaken().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1558446993: // reasonForUseCode
+          this.getReasonForUseCode().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -370888183: // reasonForUseReference
+          this.getReasonForUseReference().add(castToReference(value)); // Reference
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        case -1326018889: // dosage
+          this.getDosage().add((MedicationStatementDosageComponent) value); // MedicationStatementDosageComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
       }
 
       @Override
@@ -1449,14 +1785,38 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.wasNotTaken = castToBoolean(value); // BooleanType
         else if (name.equals("reasonNotTaken"))
           this.getReasonNotTaken().add(castToCodeableConcept(value));
-        else if (name.equals("reasonForUse[x]"))
-          this.reasonForUse = (Type) value; // Type
+        else if (name.equals("reasonForUseCode"))
+          this.getReasonForUseCode().add(castToCodeableConcept(value));
+        else if (name.equals("reasonForUseReference"))
+          this.getReasonForUseReference().add(castToReference(value));
         else if (name.equals("note"))
           this.getNote().add(castToAnnotation(value));
         else if (name.equals("dosage"))
           this.getDosage().add((MedicationStatementDosageComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<MedicationStatementStatus>
+        case 1458402129:  return getMedication(); // Type
+        case -791418107:  return getPatient(); // Reference
+        case 247104889:  return getEffective(); // Type
+        case -2123220889:  return getInformationSource(); // Reference
+        case -1248768647:  return addSupportingInformation(); // Reference
+        case -1980855245: throw new FHIRException("Cannot make property dateAsserted as it is not a complex type"); // DateTimeType
+        case -1039154243: throw new FHIRException("Cannot make property wasNotTaken as it is not a complex type"); // BooleanType
+        case 2112880664:  return addReasonNotTaken(); // CodeableConcept
+        case -1558446993:  return addReasonForUseCode(); // CodeableConcept
+        case -370888183:  return addReasonForUseReference(); // Reference
+        case 3387378:  return addNote(); // Annotation
+        case -1326018889:  return addDosage(); // MedicationStatementDosageComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1503,13 +1863,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         else if (name.equals("reasonNotTaken")) {
           return addReasonNotTaken();
         }
-        else if (name.equals("reasonForUseCodeableConcept")) {
-          this.reasonForUse = new CodeableConcept();
-          return this.reasonForUse;
+        else if (name.equals("reasonForUseCode")) {
+          return addReasonForUseCode();
         }
         else if (name.equals("reasonForUseReference")) {
-          this.reasonForUse = new Reference();
-          return this.reasonForUse;
+          return addReasonForUseReference();
         }
         else if (name.equals("note")) {
           return addNote();
@@ -1551,7 +1909,16 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           for (CodeableConcept i : reasonNotTaken)
             dst.reasonNotTaken.add(i.copy());
         };
-        dst.reasonForUse = reasonForUse == null ? null : reasonForUse.copy();
+        if (reasonForUseCode != null) {
+          dst.reasonForUseCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonForUseCode)
+            dst.reasonForUseCode.add(i.copy());
+        };
+        if (reasonForUseReference != null) {
+          dst.reasonForUseReference = new ArrayList<Reference>();
+          for (Reference i : reasonForUseReference)
+            dst.reasonForUseReference.add(i.copy());
+        };
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
@@ -1580,8 +1947,8 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
            && compareDeep(patient, o.patient, true) && compareDeep(effective, o.effective, true) && compareDeep(informationSource, o.informationSource, true)
            && compareDeep(supportingInformation, o.supportingInformation, true) && compareDeep(dateAsserted, o.dateAsserted, true)
            && compareDeep(wasNotTaken, o.wasNotTaken, true) && compareDeep(reasonNotTaken, o.reasonNotTaken, true)
-           && compareDeep(reasonForUse, o.reasonForUse, true) && compareDeep(note, o.note, true) && compareDeep(dosage, o.dosage, true)
-          ;
+           && compareDeep(reasonForUseCode, o.reasonForUseCode, true) && compareDeep(reasonForUseReference, o.reasonForUseReference, true)
+           && compareDeep(note, o.note, true) && compareDeep(dosage, o.dosage, true);
       }
 
       @Override
@@ -1596,9 +1963,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  medication
-          ,  patient,  effective,  informationSource,  supportingInformation,  dateAsserted,  wasNotTaken
-          ,  reasonNotTaken,  reasonForUse,  note,  dosage);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
+          , patient, effective, informationSource, supportingInformation, dateAsserted, wasNotTaken, reasonNotTaken
+          , reasonForUseCode, reasonForUseReference, note, dosage);
       }
 
   @Override
@@ -1614,7 +1981,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1634,7 +2003,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective", path="MedicationStatement.effective[x]", description="Date when patient was taking (or not taking) the medication", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date", target={} )
   public static final String SP_EFFECTIVE = "effective";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>effective</b>
@@ -1654,7 +2025,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationStatement.medicationCodeableConcept", description="Return administrations of this medication code", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1674,7 +2047,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1700,7 +2075,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medicationReference", description="Return administrations of this medication reference", type="reference" )
+  // [Medication]
+  // [Medication]
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -1726,7 +2103,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  // [Practitioner, Patient, RelatedPerson]
+  // [Practitioner, Patient, RelatedPerson]
+  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1752,7 +2131,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -424,6 +424,24 @@ public class StructureDefinition extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public StructureDefinitionContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -462,6 +480,30 @@ public class StructureDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -469,6 +511,16 @@ public class StructureDefinition extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -516,7 +568,7 @@ public class StructureDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -774,6 +826,38 @@ public class StructureDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -135761730: /*identity*/ return this.identity == null ? new Base[0] : new Base[] {this.identity}; // IdType
+        case 116076: /*uri*/ return this.uri == null ? new Base[0] : new Base[] {this.uri}; // UriType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -602415628: /*comments*/ return this.comments == null ? new Base[0] : new Base[] {this.comments}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -135761730: // identity
+          this.identity = castToId(value); // IdType
+          break;
+        case 116076: // uri
+          this.uri = castToUri(value); // UriType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -602415628: // comments
+          this.comments = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identity"))
           this.identity = castToId(value); // IdType
@@ -785,6 +869,18 @@ public class StructureDefinition extends DomainResource {
           this.comments = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -135761730: throw new FHIRException("Cannot make property identity as it is not a complex type"); // IdType
+        case 116076: throw new FHIRException("Cannot make property uri as it is not a complex type"); // UriType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -602415628: throw new FHIRException("Cannot make property comments as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -838,8 +934,7 @@ public class StructureDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identity,  uri,  name,  comments
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identity, uri, name, comments);
       }
 
   public String fhirType() {
@@ -874,6 +969,24 @@ public class StructureDefinition extends DomainResource {
           if (this.element == null)
             this.element = new ArrayList<ElementDefinition>();
           return this.element;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #element}, creating it if it does not already exist
+         */
+        public ElementDefinition getElementFirstRep() { 
+          if (getElement().isEmpty()) {
+            addElement();
+          }
+          return getElement().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public StructureDefinitionSnapshotComponent setElement(List<ElementDefinition> theElement) { 
+          this.element = theElement;
+          return this;
         }
 
         public boolean hasElement() { 
@@ -913,11 +1026,40 @@ public class StructureDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1662836996: /*element*/ return this.element == null ? new Base[0] : this.element.toArray(new Base[this.element.size()]); // ElementDefinition
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1662836996: // element
+          this.getElement().add(castToElementDefinition(value)); // ElementDefinition
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("element"))
           this.getElement().add(castToElementDefinition(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1662836996:  return addElement(); // ElementDefinition
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -961,7 +1103,7 @@ public class StructureDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( element);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(element);
       }
 
   public String fhirType() {
@@ -996,6 +1138,24 @@ public class StructureDefinition extends DomainResource {
           if (this.element == null)
             this.element = new ArrayList<ElementDefinition>();
           return this.element;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #element}, creating it if it does not already exist
+         */
+        public ElementDefinition getElementFirstRep() { 
+          if (getElement().isEmpty()) {
+            addElement();
+          }
+          return getElement().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public StructureDefinitionDifferentialComponent setElement(List<ElementDefinition> theElement) { 
+          this.element = theElement;
+          return this;
         }
 
         public boolean hasElement() { 
@@ -1035,11 +1195,40 @@ public class StructureDefinition extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1662836996: /*element*/ return this.element == null ? new Base[0] : this.element.toArray(new Base[this.element.size()]); // ElementDefinition
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1662836996: // element
+          this.getElement().add(castToElementDefinition(value)); // ElementDefinition
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("element"))
           this.getElement().add(castToElementDefinition(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1662836996:  return addElement(); // ElementDefinition
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1083,7 +1272,7 @@ public class StructureDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( element);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(element);
       }
 
   public String fhirType() {
@@ -1348,6 +1537,24 @@ public class StructureDefinition extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1672,6 +1879,24 @@ public class StructureDefinition extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public StructureDefinitionContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setContact(List<StructureDefinitionContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1808,6 +2033,24 @@ public class StructureDefinition extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -1948,6 +2191,24 @@ public class StructureDefinition extends DomainResource {
       return this.code;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
+     */
+    public Coding getCodeFirstRep() { 
+      if (getCode().isEmpty()) {
+        addCode();
+      }
+      return getCode().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setCode(List<Coding> theCode) { 
+      this.code = theCode;
+      return this;
+    }
+
     public boolean hasCode() { 
       if (this.code == null)
         return false;
@@ -2035,6 +2296,24 @@ public class StructureDefinition extends DomainResource {
       if (this.mapping == null)
         this.mapping = new ArrayList<StructureDefinitionMappingComponent>();
       return this.mapping;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #mapping}, creating it if it does not already exist
+     */
+    public StructureDefinitionMappingComponent getMappingFirstRep() { 
+      if (getMapping().isEmpty()) {
+        addMapping();
+      }
+      return getMapping().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setMapping(List<StructureDefinitionMappingComponent> theMapping) { 
+      this.mapping = theMapping;
+      return this;
     }
 
     public boolean hasMapping() { 
@@ -2214,6 +2493,24 @@ public class StructureDefinition extends DomainResource {
       if (this.context == null)
         this.context = new ArrayList<StringType>();
       return this.context;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #context}, creating it if it does not already exist
+     */
+    public StringType getContextFirstRep() { 
+      if (getContext().isEmpty()) {
+        addContextElement();
+      }
+      return getContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureDefinition setContext(List<StringType> theContext) { 
+      this.context = theContext;
+      return this;
     }
 
     public boolean hasContext() { 
@@ -2487,6 +2784,126 @@ public class StructureDefinition extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // StructureDefinitionContactComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // Coding
+        case 461006061: /*fhirVersion*/ return this.fhirVersion == null ? new Base[0] : new Base[] {this.fhirVersion}; // IdType
+        case 837556430: /*mapping*/ return this.mapping == null ? new Base[0] : this.mapping.toArray(new Base[this.mapping.size()]); // StructureDefinitionMappingComponent
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<StructureDefinitionKind>
+        case 1732898850: /*abstract*/ return this.abstract_ == null ? new Base[0] : new Base[] {this.abstract_}; // BooleanType
+        case -102839927: /*contextType*/ return this.contextType == null ? new Base[0] : new Base[] {this.contextType}; // Enumeration<ExtensionContext>
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : this.context.toArray(new Base[this.context.size()]); // StringType
+        case -1721484885: /*baseType*/ return this.baseType == null ? new Base[0] : new Base[] {this.baseType}; // CodeType
+        case 1139771140: /*baseDefinition*/ return this.baseDefinition == null ? new Base[0] : new Base[] {this.baseDefinition}; // UriType
+        case -1353885513: /*derivation*/ return this.derivation == null ? new Base[0] : new Base[] {this.derivation}; // Enumeration<TypeDerivationRule>
+        case 284874180: /*snapshot*/ return this.snapshot == null ? new Base[0] : new Base[] {this.snapshot}; // StructureDefinitionSnapshotComponent
+        case -1196150917: /*differential*/ return this.differential == null ? new Base[0] : new Base[] {this.differential}; // StructureDefinitionDifferentialComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((StructureDefinitionContactComponent) value); // StructureDefinitionContactComponent
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case 3059181: // code
+          this.getCode().add(castToCoding(value)); // Coding
+          break;
+        case 461006061: // fhirVersion
+          this.fhirVersion = castToId(value); // IdType
+          break;
+        case 837556430: // mapping
+          this.getMapping().add((StructureDefinitionMappingComponent) value); // StructureDefinitionMappingComponent
+          break;
+        case 3292052: // kind
+          this.kind = new StructureDefinitionKindEnumFactory().fromType(value); // Enumeration<StructureDefinitionKind>
+          break;
+        case 1732898850: // abstract
+          this.abstract_ = castToBoolean(value); // BooleanType
+          break;
+        case -102839927: // contextType
+          this.contextType = new ExtensionContextEnumFactory().fromType(value); // Enumeration<ExtensionContext>
+          break;
+        case 951530927: // context
+          this.getContext().add(castToString(value)); // StringType
+          break;
+        case -1721484885: // baseType
+          this.baseType = castToCode(value); // CodeType
+          break;
+        case 1139771140: // baseDefinition
+          this.baseDefinition = castToUri(value); // UriType
+          break;
+        case -1353885513: // derivation
+          this.derivation = new TypeDerivationRuleEnumFactory().fromType(value); // Enumeration<TypeDerivationRule>
+          break;
+        case 284874180: // snapshot
+          this.snapshot = (StructureDefinitionSnapshotComponent) value; // StructureDefinitionSnapshotComponent
+          break;
+        case -1196150917: // differential
+          this.differential = (StructureDefinitionDifferentialComponent) value; // StructureDefinitionDifferentialComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -2542,6 +2959,40 @@ public class StructureDefinition extends DomainResource {
           this.differential = (StructureDefinitionDifferentialComponent) value; // StructureDefinitionDifferentialComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // StructureDefinitionContactComponent
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case 3059181:  return addCode(); // Coding
+        case 461006061: throw new FHIRException("Cannot make property fhirVersion as it is not a complex type"); // IdType
+        case 837556430:  return addMapping(); // StructureDefinitionMappingComponent
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<StructureDefinitionKind>
+        case 1732898850: throw new FHIRException("Cannot make property abstract as it is not a complex type"); // BooleanType
+        case -102839927: throw new FHIRException("Cannot make property contextType as it is not a complex type"); // Enumeration<ExtensionContext>
+        case 951530927: throw new FHIRException("Cannot make property context as it is not a complex type"); // StringType
+        case -1721484885: throw new FHIRException("Cannot make property baseType as it is not a complex type"); // CodeType
+        case 1139771140: throw new FHIRException("Cannot make property baseDefinition as it is not a complex type"); // UriType
+        case -1353885513: throw new FHIRException("Cannot make property derivation as it is not a complex type"); // Enumeration<TypeDerivationRule>
+        case 284874180:  return getSnapshot(); // StructureDefinitionSnapshotComponent
+        case -1196150917:  return getDifferential(); // StructureDefinitionDifferentialComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2732,10 +3183,10 @@ public class StructureDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  name
-          ,  display,  status,  experimental,  publisher,  contact,  date,  description,  useContext,  requirements
-          ,  copyright,  code,  fhirVersion,  mapping,  kind,  abstract_,  contextType,  context,  baseType
-          ,  baseDefinition,  derivation,  snapshot,  differential);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
+          , display, status, experimental, publisher, contact, date, description, useContext, requirements
+          , copyright, code, fhirVersion, mapping, kind, abstract_, contextType, context, baseType, baseDefinition
+          , derivation, snapshot, differential);
       }
 
   @Override
@@ -2751,7 +3202,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="StructureDefinition.date", description="The profile publication date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="StructureDefinition.date", description="The profile publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2771,7 +3224,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2791,7 +3246,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2811,7 +3268,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.binding.valueSet[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet[x]", description="A vocabulary binding reference", type="reference" )
+  // [ValueSet]
+  // [ValueSet]
+  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet", description="A vocabulary binding reference", type="reference", target={ValueSet.class} )
   public static final String SP_VALUESET = "valueset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>valueset</b>
@@ -2837,7 +3296,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="StructureDefinition.kind", description="datatype | resource | logical", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="kind", path="StructureDefinition.kind", description="datatype | resource | logical", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -2857,7 +3318,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.display</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string", target={} )
   public static final String SP_DISPLAY = "display";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>display</b>
@@ -2877,7 +3340,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2897,7 +3362,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.experimental</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
@@ -2917,7 +3384,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.contextType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | extension", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | extension", type="token", target={} )
   public static final String SP_CONTEXT_TYPE = "context-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
@@ -2937,7 +3406,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.abstract</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token", target={} )
   public static final String SP_ABSTRACT = "abstract";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>abstract</b>
@@ -2957,7 +3428,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.baseType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="StructureDefinition.baseType", description="Any datatype or resource, including abstract ones", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="StructureDefinition.baseType", description="Any datatype or resource, including abstract ones", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2977,7 +3450,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2997,7 +3472,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Absolute URL used to reference this StructureDefinition", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Absolute URL used to reference this StructureDefinition", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -3017,7 +3494,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.path, StructureDefinition.differential.element.path</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path | StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path | StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token", target={} )
   public static final String SP_PATH = "path";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>path</b>
@@ -3037,7 +3516,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string", target={} )
   public static final String SP_EXT_CONTEXT = "ext-context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ext-context</b>
@@ -3057,7 +3538,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3077,7 +3560,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3097,7 +3582,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.snapshot.element.base.path, StructureDefinition.differential.element.base.path</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path | StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path | StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token", target={} )
   public static final String SP_BASE_PATH = "base-path";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base-path</b>
@@ -3117,7 +3604,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3137,7 +3626,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.derivation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="derivation", path="StructureDefinition.derivation", description="specialization | constraint - How relates to base definition", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="derivation", path="StructureDefinition.derivation", description="specialization | constraint - How relates to base definition", type="token", target={} )
   public static final String SP_DERIVATION = "derivation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>derivation</b>
@@ -3157,7 +3648,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -3177,7 +3670,9 @@ public class StructureDefinition extends DomainResource {
    * Path: <b>StructureDefinition.baseDefinition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="uri", target={} )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>

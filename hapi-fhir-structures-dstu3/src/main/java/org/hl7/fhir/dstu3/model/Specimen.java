@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -445,6 +445,46 @@ public class Specimen extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1883491469: /*collector*/ return this.collector == null ? new Base[0] : new Base[] {this.collector}; // Reference
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case 1883491145: /*collected*/ return this.collected == null ? new Base[0] : new Base[] {this.collected}; // Type
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1883491469: // collector
+          this.collector = castToReference(value); // Reference
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        case 1883491145: // collected
+          this.collected = (Type) value; // Type
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -1077554975: // method
+          this.method = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 1702620169: // bodySite
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("collector"))
           this.collector = castToReference(value); // Reference
@@ -460,6 +500,20 @@ public class Specimen extends DomainResource {
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1883491469:  return getCollector(); // Reference
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case 1632037015:  return getCollected(); // Type
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case -1077554975:  return getMethod(); // CodeableConcept
+        case 1702620169:  return getBodySite(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -530,8 +584,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( collector,  comment,  collected
-          ,  quantity,  method,  bodySite);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(collector, comment, collected, quantity
+          , method, bodySite);
       }
 
   public String fhirType() {
@@ -660,6 +714,24 @@ public class Specimen extends DomainResource {
           return this.additive;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #additive}, creating it if it does not already exist
+         */
+        public Reference getAdditiveFirstRep() { 
+          if (getAdditive().isEmpty()) {
+            addAdditive();
+          }
+          return getAdditive().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SpecimenTreatmentComponent setAdditive(List<Reference> theAdditive) { 
+          this.additive = theAdditive;
+          return this;
+        }
+
         public boolean hasAdditive() { 
           if (this.additive == null)
             return false;
@@ -720,6 +792,34 @@ public class Specimen extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : new Base[] {this.procedure}; // CodeableConcept
+        case -1226589236: /*additive*/ return this.additive == null ? new Base[0] : this.additive.toArray(new Base[this.additive.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1095204141: // procedure
+          this.procedure = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1226589236: // additive
+          this.getAdditive().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("description"))
           this.description = castToString(value); // StringType
@@ -729,6 +829,17 @@ public class Specimen extends DomainResource {
           this.getAdditive().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1095204141:  return getProcedure(); // CodeableConcept
+        case -1226589236:  return addAdditive(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -782,7 +893,7 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( description,  procedure,  additive
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, procedure, additive
           );
       }
 
@@ -853,6 +964,24 @@ public class Specimen extends DomainResource {
           if (this.identifier == null)
             this.identifier = new ArrayList<Identifier>();
           return this.identifier;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SpecimenContainerComponent setIdentifier(List<Identifier> theIdentifier) { 
+          this.identifier = theIdentifier;
+          return this;
         }
 
         public boolean hasIdentifier() { 
@@ -1063,6 +1192,46 @@ public class Specimen extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -67824454: /*capacity*/ return this.capacity == null ? new Base[0] : new Base[] {this.capacity}; // SimpleQuantity
+        case 1485980595: /*specimenQuantity*/ return this.specimenQuantity == null ? new Base[0] : new Base[] {this.specimenQuantity}; // SimpleQuantity
+        case -1226589236: /*additive*/ return this.additive == null ? new Base[0] : new Base[] {this.additive}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -67824454: // capacity
+          this.capacity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 1485980595: // specimenQuantity
+          this.specimenQuantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case -1226589236: // additive
+          this.additive = (Type) value; // Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1078,6 +1247,20 @@ public class Specimen extends DomainResource {
           this.additive = (Type) value; // Type
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 3575610:  return getType(); // CodeableConcept
+        case -67824454:  return getCapacity(); // SimpleQuantity
+        case 1485980595:  return getSpecimenQuantity(); // SimpleQuantity
+        case 261915956:  return getAdditive(); // Type
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1151,8 +1334,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  description,  type
-          ,  capacity,  specimenQuantity,  additive);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, description, type, capacity
+          , specimenQuantity, additive);
       }
 
   public String fhirType() {
@@ -1266,6 +1449,24 @@ public class Specimen extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Specimen setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -1493,6 +1694,24 @@ public class Specimen extends DomainResource {
       return this.parent;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #parent}, creating it if it does not already exist
+     */
+    public Reference getParentFirstRep() { 
+      if (getParent().isEmpty()) {
+        addParent();
+      }
+      return getParent().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Specimen setParent(List<Reference> theParent) { 
+      this.parent = theParent;
+      return this;
+    }
+
     public boolean hasParent() { 
       if (this.parent == null)
         return false;
@@ -1578,6 +1797,24 @@ public class Specimen extends DomainResource {
       return this.treatment;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #treatment}, creating it if it does not already exist
+     */
+    public SpecimenTreatmentComponent getTreatmentFirstRep() { 
+      if (getTreatment().isEmpty()) {
+        addTreatment();
+      }
+      return getTreatment().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Specimen setTreatment(List<SpecimenTreatmentComponent> theTreatment) { 
+      this.treatment = theTreatment;
+      return this;
+    }
+
     public boolean hasTreatment() { 
       if (this.treatment == null)
         return false;
@@ -1616,6 +1853,24 @@ public class Specimen extends DomainResource {
       if (this.container == null)
         this.container = new ArrayList<SpecimenContainerComponent>();
       return this.container;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #container}, creating it if it does not already exist
+     */
+    public SpecimenContainerComponent getContainerFirstRep() { 
+      if (getContainer().isEmpty()) {
+        addContainer();
+      }
+      return getContainer().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Specimen setContainer(List<SpecimenContainerComponent> theContainer) { 
+      this.container = theContainer;
+      return this;
     }
 
     public boolean hasContainer() { 
@@ -1664,6 +1919,62 @@ public class Specimen extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 818734061: /*accessionIdentifier*/ return this.accessionIdentifier == null ? new Base[0] : new Base[] {this.accessionIdentifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SpecimenStatus>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -767961010: /*receivedTime*/ return this.receivedTime == null ? new Base[0] : new Base[] {this.receivedTime}; // DateTimeType
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // Reference
+        case -1741312354: /*collection*/ return this.collection == null ? new Base[0] : new Base[] {this.collection}; // SpecimenCollectionComponent
+        case -63342472: /*treatment*/ return this.treatment == null ? new Base[0] : this.treatment.toArray(new Base[this.treatment.size()]); // SpecimenTreatmentComponent
+        case -410956671: /*container*/ return this.container == null ? new Base[0] : this.container.toArray(new Base[this.container.size()]); // SpecimenContainerComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 818734061: // accessionIdentifier
+          this.accessionIdentifier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new SpecimenStatusEnumFactory().fromType(value); // Enumeration<SpecimenStatus>
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -767961010: // receivedTime
+          this.receivedTime = castToDateTime(value); // DateTimeType
+          break;
+        case -995424086: // parent
+          this.getParent().add(castToReference(value)); // Reference
+          break;
+        case -1741312354: // collection
+          this.collection = (SpecimenCollectionComponent) value; // SpecimenCollectionComponent
+          break;
+        case -63342472: // treatment
+          this.getTreatment().add((SpecimenTreatmentComponent) value); // SpecimenTreatmentComponent
+          break;
+        case -410956671: // container
+          this.getContainer().add((SpecimenContainerComponent) value); // SpecimenContainerComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1687,6 +1998,24 @@ public class Specimen extends DomainResource {
           this.getContainer().add((SpecimenContainerComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 818734061:  return getAccessionIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SpecimenStatus>
+        case 3575610:  return getType(); // CodeableConcept
+        case -1867885268:  return getSubject(); // Reference
+        case -767961010: throw new FHIRException("Cannot make property receivedTime as it is not a complex type"); // DateTimeType
+        case -995424086:  return addParent(); // Reference
+        case -1741312354:  return getCollection(); // SpecimenCollectionComponent
+        case -63342472:  return addTreatment(); // SpecimenTreatmentComponent
+        case -410956671:  return addContainer(); // SpecimenContainerComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1794,8 +2123,8 @@ public class Specimen extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  accessionIdentifier
-          ,  status,  type,  subject,  receivedTime,  parent,  collection,  treatment,  container);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, accessionIdentifier
+          , status, type, subject, receivedTime, parent, collection, treatment, container);
       }
 
   @Override
@@ -1811,7 +2140,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token", target={} )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
@@ -1831,7 +2162,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1851,7 +2184,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
+  // [Specimen]
+  // [Specimen]
+  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference", target={Specimen.class} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1877,7 +2212,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token", target={} )
   public static final String SP_CONTAINER_ID = "container-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container-id</b>
@@ -1897,7 +2234,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -1917,7 +2256,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Group, Device, Patient, Substance]
+  // [Group, Device, Patient, Substance]
+  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1943,7 +2284,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
+  // [Group, Device, Patient, Substance]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1969,7 +2312,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collected[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="collected", path="Specimen.collection.collected", description="The date the specimen was collected", type="date", target={} )
   public static final String SP_COLLECTED = "collected";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>collected</b>
@@ -1989,7 +2334,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.accessionIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token", target={} )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
@@ -2009,7 +2356,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2029,7 +2378,9 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collector</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference", target={Practitioner.class} )
   public static final String SP_COLLECTOR = "collector";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>collector</b>

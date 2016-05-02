@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -131,6 +131,24 @@ public class ConceptMap extends DomainResource {
           return this.telecom;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ConceptMapContactComponent setTelecom(List<ContactPoint> theTelecom) { 
+          this.telecom = theTelecom;
+          return this;
+        }
+
         public boolean hasTelecom() { 
           if (this.telecom == null)
             return false;
@@ -169,6 +187,30 @@ public class ConceptMap extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
@@ -176,6 +218,16 @@ public class ConceptMap extends DomainResource {
           this.getTelecom().add(castToContactPoint(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1429363305:  return addTelecom(); // ContactPoint
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -223,7 +275,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( name,  telecom);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
       }
 
   public String fhirType() {
@@ -428,6 +480,24 @@ public class ConceptMap extends DomainResource {
           return this.target;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #target}, creating it if it does not already exist
+         */
+        public TargetElementComponent getTargetFirstRep() { 
+          if (getTarget().isEmpty()) {
+            addTarget();
+          }
+          return getTarget().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SourceElementComponent setTarget(List<TargetElementComponent> theTarget) { 
+          this.target = theTarget;
+          return this;
+        }
+
         public boolean hasTarget() { 
           if (this.target == null)
             return false;
@@ -468,6 +538,38 @@ public class ConceptMap extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // TargetElementComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -887328209: // system
+          this.system = castToUri(value); // UriType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          break;
+        case -880905839: // target
+          this.getTarget().add((TargetElementComponent) value); // TargetElementComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("system"))
           this.system = castToUri(value); // UriType
@@ -479,6 +581,18 @@ public class ConceptMap extends DomainResource {
           this.getTarget().add((TargetElementComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case -880905839:  return addTarget(); // TargetElementComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -536,8 +650,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( system,  version,  code,  target
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, code, target);
       }
 
   public String fhirType() {
@@ -865,6 +978,24 @@ public class ConceptMap extends DomainResource {
           return this.dependsOn;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #dependsOn}, creating it if it does not already exist
+         */
+        public OtherElementComponent getDependsOnFirstRep() { 
+          if (getDependsOn().isEmpty()) {
+            addDependsOn();
+          }
+          return getDependsOn().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TargetElementComponent setDependsOn(List<OtherElementComponent> theDependsOn) { 
+          this.dependsOn = theDependsOn;
+          return this;
+        }
+
         public boolean hasDependsOn() { 
           if (this.dependsOn == null)
             return false;
@@ -903,6 +1034,24 @@ public class ConceptMap extends DomainResource {
           if (this.product == null)
             this.product = new ArrayList<OtherElementComponent>();
           return this.product;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #product}, creating it if it does not already exist
+         */
+        public OtherElementComponent getProductFirstRep() { 
+          if (getProduct().isEmpty()) {
+            addProduct();
+          }
+          return getProduct().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TargetElementComponent setProduct(List<OtherElementComponent> theProduct) { 
+          this.product = theProduct;
+          return this;
         }
 
         public boolean hasProduct() { 
@@ -948,6 +1097,50 @@ public class ConceptMap extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case -15828692: /*equivalence*/ return this.equivalence == null ? new Base[0] : new Base[] {this.equivalence}; // Enumeration<ConceptMapEquivalence>
+        case -602415628: /*comments*/ return this.comments == null ? new Base[0] : new Base[] {this.comments}; // StringType
+        case -1109214266: /*dependsOn*/ return this.dependsOn == null ? new Base[0] : this.dependsOn.toArray(new Base[this.dependsOn.size()]); // OtherElementComponent
+        case -309474065: /*product*/ return this.product == null ? new Base[0] : this.product.toArray(new Base[this.product.size()]); // OtherElementComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -887328209: // system
+          this.system = castToUri(value); // UriType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          break;
+        case -15828692: // equivalence
+          this.equivalence = new ConceptMapEquivalenceEnumFactory().fromType(value); // Enumeration<ConceptMapEquivalence>
+          break;
+        case -602415628: // comments
+          this.comments = castToString(value); // StringType
+          break;
+        case -1109214266: // dependsOn
+          this.getDependsOn().add((OtherElementComponent) value); // OtherElementComponent
+          break;
+        case -309474065: // product
+          this.getProduct().add((OtherElementComponent) value); // OtherElementComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("system"))
           this.system = castToUri(value); // UriType
@@ -965,6 +1158,21 @@ public class ConceptMap extends DomainResource {
           this.getProduct().add((OtherElementComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case -15828692: throw new FHIRException("Cannot make property equivalence as it is not a complex type"); // Enumeration<ConceptMapEquivalence>
+        case -602415628: throw new FHIRException("Cannot make property comments as it is not a complex type"); // StringType
+        case -1109214266:  return addDependsOn(); // OtherElementComponent
+        case -309474065:  return addProduct(); // OtherElementComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1039,8 +1247,8 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( system,  version,  code,  equivalence
-          ,  comments,  dependsOn,  product);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, code, equivalence
+          , comments, dependsOn, product);
       }
 
   public String fhirType() {
@@ -1235,6 +1443,34 @@ public class ConceptMap extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1662836996: /*element*/ return this.element == null ? new Base[0] : new Base[] {this.element}; // UriType
+        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1662836996: // element
+          this.element = castToUri(value); // UriType
+          break;
+        case -887328209: // system
+          this.system = castToUri(value); // UriType
+          break;
+        case 3059181: // code
+          this.code = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("element"))
           this.element = castToUri(value); // UriType
@@ -1244,6 +1480,17 @@ public class ConceptMap extends DomainResource {
           this.code = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1662836996: throw new FHIRException("Cannot make property element as it is not a complex type"); // UriType
+        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1293,7 +1540,7 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( element,  system,  code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(element, system, code);
       }
 
   public String fhirType() {
@@ -1753,6 +2000,24 @@ public class ConceptMap extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ConceptMapContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ConceptMap setContact(List<ConceptMapContactComponent> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -1889,6 +2154,24 @@ public class ConceptMap extends DomainResource {
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ConceptMap setUseContext(List<CodeableConcept> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
     }
 
     public boolean hasUseContext() { 
@@ -2119,6 +2402,24 @@ public class ConceptMap extends DomainResource {
       return this.element;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #element}, creating it if it does not already exist
+     */
+    public SourceElementComponent getElementFirstRep() { 
+      if (getElement().isEmpty()) {
+        addElement();
+      }
+      return getElement().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ConceptMap setElement(List<SourceElementComponent> theElement) { 
+      this.element = theElement;
+      return this;
+    }
+
     public boolean hasElement() { 
       if (this.element == null)
         return false;
@@ -2171,6 +2472,86 @@ public class ConceptMap extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ConceptMapContactComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
+        case -1662836996: /*element*/ return this.element == null ? new Base[0] : this.element.toArray(new Base[this.element.size()]); // SourceElementComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -892481550: // status
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          break;
+        case -404562712: // experimental
+          this.experimental = castToBoolean(value); // BooleanType
+          break;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          break;
+        case 951526432: // contact
+          this.getContact().add((ConceptMapContactComponent) value); // ConceptMapContactComponent
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -669707736: // useContext
+          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -1619874672: // requirements
+          this.requirements = castToString(value); // StringType
+          break;
+        case 1522889671: // copyright
+          this.copyright = castToString(value); // StringType
+          break;
+        case -896505829: // source
+          this.source = (Type) value; // Type
+          break;
+        case -880905839: // target
+          this.target = (Type) value; // Type
+          break;
+        case -1662836996: // element
+          this.getElement().add((SourceElementComponent) value); // SourceElementComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
@@ -2206,6 +2587,30 @@ public class ConceptMap extends DomainResource {
           this.getElement().add((SourceElementComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1618432855:  return getIdentifier(); // Identifier
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
+        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
+        case 951526432:  return addContact(); // ConceptMapContactComponent
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // CodeableConcept
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case -1698413947:  return getSource(); // Type
+        case -815579825:  return getTarget(); // Type
+        case -1662836996:  return addElement(); // SourceElementComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2346,9 +2751,9 @@ public class ConceptMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( url,  identifier,  version,  name
-          ,  status,  experimental,  publisher,  contact,  date,  description,  useContext,  requirements
-          ,  copyright,  source,  target,  element);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
+          , status, experimental, publisher, contact, date, description, useContext, requirements, copyright
+          , source, target, element);
       }
 
   @Override
@@ -2364,7 +2769,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2384,7 +2791,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="Additional identifier for the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="Additional identifier for the concept map", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2404,7 +2813,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.product.element</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="product", path="ConceptMap.element.target.product.element", description="Reference to element/field/ValueSet mapping depends on", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="product", path="ConceptMap.element.target.product.element", description="Reference to element/field/ValueSet mapping depends on", type="uri", target={} )
   public static final String SP_PRODUCT = "product";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>product</b>
@@ -2424,7 +2835,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-system", path="ConceptMap.element.target.system", description="System of the target (if necessary)", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="target-system", path="ConceptMap.element.target.system", description="System of the target (if necessary)", type="uri", target={} )
   public static final String SP_TARGET_SYSTEM = "target-system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-system</b>
@@ -2444,7 +2857,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.dependsOn.element</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependson", path="ConceptMap.element.target.dependsOn.element", description="Reference to element/field/ValueSet mapping depends on", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="dependson", path="ConceptMap.element.target.dependsOn.element", description="Reference to element/field/ValueSet mapping depends on", type="uri", target={} )
   public static final String SP_DEPENDSON = "dependson";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependson</b>
@@ -2464,7 +2879,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2484,7 +2901,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.sourceReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="ConceptMap.sourceReference", description="Identifies the source of the concepts which are being mapped", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="source", path="ConceptMap.source.as(Reference)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2510,7 +2929,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2530,7 +2951,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ConceptMap.url", description="The URL of the concept map", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="ConceptMap.url", description="The URL of the concept map", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -2550,7 +2973,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.target[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="ConceptMap.target[x]", description="Provides context to the mappings", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="target", path="ConceptMap.target", description="Provides context to the mappings", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -2576,7 +3001,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-code", path="ConceptMap.element.code", description="Identifies element being mapped", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="source-code", path="ConceptMap.element.code", description="Identifies element being mapped", type="token", target={} )
   public static final String SP_SOURCE_CODE = "source-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-code</b>
@@ -2596,7 +3023,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.sourceUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-uri", path="ConceptMap.sourceUri", description="Identifies the source of the concepts which are being mapped", type="reference" )
+  // [StructureDefinition, ValueSet]
+  // [StructureDefinition, ValueSet]
+  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class} )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-uri</b>
@@ -2622,7 +3051,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2642,7 +3073,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2662,7 +3095,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -2682,7 +3117,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-system", path="ConceptMap.element.system", description="Code System (if value set crosses code systems)", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="source-system", path="ConceptMap.element.system", description="Code System (if value set crosses code systems)", type="uri", target={} )
   public static final String SP_SOURCE_SYSTEM = "source-system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-system</b>
@@ -2702,7 +3139,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.element.target.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-code", path="ConceptMap.element.target.code", description="Code that identifies the target element", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="target-code", path="ConceptMap.element.target.code", description="Code that identifies the target element", type="token", target={} )
   public static final String SP_TARGET_CODE = "target-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-code</b>
@@ -2722,7 +3161,9 @@ public class ConceptMap extends DomainResource {
    * Path: <b>ConceptMap.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

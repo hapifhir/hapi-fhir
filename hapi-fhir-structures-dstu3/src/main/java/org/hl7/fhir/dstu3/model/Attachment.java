@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -513,6 +513,54 @@ public class Attachment extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // CodeType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // CodeType
+        case 3076010: /*data*/ return this.data == null ? new Base[0] : new Base[] {this.data}; // Base64BinaryType
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 3530753: /*size*/ return this.size == null ? new Base[0] : new Base[] {this.size}; // UnsignedIntType
+        case 3195150: /*hash*/ return this.hash == null ? new Base[0] : new Base[] {this.hash}; // Base64BinaryType
+        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case 1820421855: /*creation*/ return this.creation == null ? new Base[0] : new Base[] {this.creation}; // DateTimeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -389131437: // contentType
+          this.contentType = castToCode(value); // CodeType
+          break;
+        case -1613589672: // language
+          this.language = castToCode(value); // CodeType
+          break;
+        case 3076010: // data
+          this.data = castToBase64Binary(value); // Base64BinaryType
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 3530753: // size
+          this.size = castToUnsignedInt(value); // UnsignedIntType
+          break;
+        case 3195150: // hash
+          this.hash = castToBase64Binary(value); // Base64BinaryType
+          break;
+        case 110371416: // title
+          this.title = castToString(value); // StringType
+          break;
+        case 1820421855: // creation
+          this.creation = castToDateTime(value); // DateTimeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("contentType"))
           this.contentType = castToCode(value); // CodeType
@@ -532,6 +580,22 @@ public class Attachment extends Type implements ICompositeType {
           this.creation = castToDateTime(value); // DateTimeType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // CodeType
+        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
+        case 3076010: throw new FHIRException("Cannot make property data as it is not a complex type"); // Base64BinaryType
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 3530753: throw new FHIRException("Cannot make property size as it is not a complex type"); // UnsignedIntType
+        case 3195150: throw new FHIRException("Cannot make property hash as it is not a complex type"); // Base64BinaryType
+        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
+        case 1820421855: throw new FHIRException("Cannot make property creation as it is not a complex type"); // DateTimeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -614,8 +678,8 @@ public class Attachment extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( contentType,  language,  data,  url
-          ,  size,  hash,  title,  creation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(contentType, language, data, url
+          , size, hash, title, creation);
       }
 
 

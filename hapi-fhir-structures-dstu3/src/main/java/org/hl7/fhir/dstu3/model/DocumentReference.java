@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -302,6 +302,30 @@ public class DocumentReference extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<DocumentRelationshipType>
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = new DocumentRelationshipTypeEnumFactory().fromType(value); // Enumeration<DocumentRelationshipType>
+          break;
+        case -880905839: // target
+          this.target = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = new DocumentRelationshipTypeEnumFactory().fromType(value); // Enumeration<DocumentRelationshipType>
@@ -309,6 +333,16 @@ public class DocumentReference extends DomainResource {
           this.target = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<DocumentRelationshipType>
+        case -880905839:  return getTarget(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -353,7 +387,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  target);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, target);
       }
 
   public String fhirType() {
@@ -429,6 +463,24 @@ public class DocumentReference extends DomainResource {
           return this.format;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #format}, creating it if it does not already exist
+         */
+        public Coding getFormatFirstRep() { 
+          if (getFormat().isEmpty()) {
+            addFormat();
+          }
+          return getFormat().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DocumentReferenceContentComponent setFormat(List<Coding> theFormat) { 
+          this.format = theFormat;
+          return this;
+        }
+
         public boolean hasFormat() { 
           if (this.format == null)
             return false;
@@ -467,6 +519,30 @@ public class DocumentReference extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1963501277: /*attachment*/ return this.attachment == null ? new Base[0] : new Base[] {this.attachment}; // Attachment
+        case -1268779017: /*format*/ return this.format == null ? new Base[0] : this.format.toArray(new Base[this.format.size()]); // Coding
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1963501277: // attachment
+          this.attachment = castToAttachment(value); // Attachment
+          break;
+        case -1268779017: // format
+          this.getFormat().add(castToCoding(value)); // Coding
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("attachment"))
           this.attachment = castToAttachment(value); // Attachment
@@ -474,6 +550,16 @@ public class DocumentReference extends DomainResource {
           this.getFormat().add(castToCoding(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1963501277:  return getAttachment(); // Attachment
+        case -1268779017:  return addFormat(); // Coding
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -522,7 +608,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( attachment,  format);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(attachment, format);
       }
 
   public String fhirType() {
@@ -653,6 +739,24 @@ public class DocumentReference extends DomainResource {
           if (this.event == null)
             this.event = new ArrayList<CodeableConcept>();
           return this.event;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
+         */
+        public CodeableConcept getEventFirstRep() { 
+          if (getEvent().isEmpty()) {
+            addEvent();
+          }
+          return getEvent().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DocumentReferenceContextComponent setEvent(List<CodeableConcept> theEvent) { 
+          this.event = theEvent;
+          return this;
         }
 
         public boolean hasEvent() { 
@@ -811,6 +915,24 @@ public class DocumentReference extends DomainResource {
           return this.related;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
+         */
+        public DocumentReferenceContextRelatedComponent getRelatedFirstRep() { 
+          if (getRelated().isEmpty()) {
+            addRelated();
+          }
+          return getRelated().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public DocumentReferenceContextComponent setRelated(List<DocumentReferenceContextRelatedComponent> theRelated) { 
+          this.related = theRelated;
+          return this;
+        }
+
         public boolean hasRelated() { 
           if (this.related == null)
             return false;
@@ -854,6 +976,50 @@ public class DocumentReference extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
+        case 96891546: /*event*/ return this.event == null ? new Base[0] : this.event.toArray(new Base[this.event.size()]); // CodeableConcept
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case 370698365: /*facilityType*/ return this.facilityType == null ? new Base[0] : new Base[] {this.facilityType}; // CodeableConcept
+        case 331373717: /*practiceSetting*/ return this.practiceSetting == null ? new Base[0] : new Base[] {this.practiceSetting}; // CodeableConcept
+        case 2031381048: /*sourcePatientInfo*/ return this.sourcePatientInfo == null ? new Base[0] : new Base[] {this.sourcePatientInfo}; // Reference
+        case 1090493483: /*related*/ return this.related == null ? new Base[0] : this.related.toArray(new Base[this.related.size()]); // DocumentReferenceContextRelatedComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
+          break;
+        case 96891546: // event
+          this.getEvent().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case 370698365: // facilityType
+          this.facilityType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 331373717: // practiceSetting
+          this.practiceSetting = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 2031381048: // sourcePatientInfo
+          this.sourcePatientInfo = castToReference(value); // Reference
+          break;
+        case 1090493483: // related
+          this.getRelated().add((DocumentReferenceContextRelatedComponent) value); // DocumentReferenceContextRelatedComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
@@ -871,6 +1037,21 @@ public class DocumentReference extends DomainResource {
           this.getRelated().add((DocumentReferenceContextRelatedComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1524132147:  return getEncounter(); // Reference
+        case 96891546:  return addEvent(); // CodeableConcept
+        case -991726143:  return getPeriod(); // Period
+        case 370698365:  return getFacilityType(); // CodeableConcept
+        case 331373717:  return getPracticeSetting(); // CodeableConcept
+        case 2031381048:  return getSourcePatientInfo(); // Reference
+        case 1090493483:  return addRelated(); // DocumentReferenceContextRelatedComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -950,8 +1131,8 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( encounter,  event,  period,  facilityType
-          ,  practiceSetting,  sourcePatientInfo,  related);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(encounter, event, period, facilityType
+          , practiceSetting, sourcePatientInfo, related);
       }
 
   public String fhirType() {
@@ -1061,6 +1242,30 @@ public class DocumentReference extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 112787: /*ref*/ return this.ref == null ? new Base[0] : new Base[] {this.ref}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case 112787: // ref
+          this.ref = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -1068,6 +1273,16 @@ public class DocumentReference extends DomainResource {
           this.ref = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case 112787:  return getRef(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1113,7 +1328,7 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  ref);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, ref);
       }
 
   public String fhirType() {
@@ -1314,6 +1529,24 @@ public class DocumentReference extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentReference setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -1439,6 +1672,24 @@ public class DocumentReference extends DomainResource {
       if (this.author == null)
         this.author = new ArrayList<Reference>();
       return this.author;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
+     */
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
+      }
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentReference setAuthor(List<Reference> theAuthor) { 
+      this.author = theAuthor;
+      return this;
     }
 
     public boolean hasAuthor() { 
@@ -1736,6 +1987,24 @@ public class DocumentReference extends DomainResource {
       return this.relatesTo;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #relatesTo}, creating it if it does not already exist
+     */
+    public DocumentReferenceRelatesToComponent getRelatesToFirstRep() { 
+      if (getRelatesTo().isEmpty()) {
+        addRelatesTo();
+      }
+      return getRelatesTo().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentReference setRelatesTo(List<DocumentReferenceRelatesToComponent> theRelatesTo) { 
+      this.relatesTo = theRelatesTo;
+      return this;
+    }
+
     public boolean hasRelatesTo() { 
       if (this.relatesTo == null)
         return false;
@@ -1825,6 +2094,24 @@ public class DocumentReference extends DomainResource {
       return this.securityLabel;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
+     */
+    public CodeableConcept getSecurityLabelFirstRep() { 
+      if (getSecurityLabel().isEmpty()) {
+        addSecurityLabel();
+      }
+      return getSecurityLabel().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentReference setSecurityLabel(List<CodeableConcept> theSecurityLabel) { 
+      this.securityLabel = theSecurityLabel;
+      return this;
+    }
+
     public boolean hasSecurityLabel() { 
       if (this.securityLabel == null)
         return false;
@@ -1863,6 +2150,24 @@ public class DocumentReference extends DomainResource {
       if (this.content == null)
         this.content = new ArrayList<DocumentReferenceContentComponent>();
       return this.content;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+     */
+    public DocumentReferenceContentComponent getContentFirstRep() { 
+      if (getContent().isEmpty()) {
+        addContent();
+      }
+      return getContent().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DocumentReference setContent(List<DocumentReferenceContentComponent> theContent) { 
+      this.content = theContent;
+      return this;
     }
 
     public boolean hasContent() { 
@@ -1942,6 +2247,90 @@ public class DocumentReference extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 243769515: /*masterIdentifier*/ return this.masterIdentifier == null ? new Base[0] : new Base[] {this.masterIdentifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 94742904: /*class*/ return this.class_ == null ? new Base[0] : new Base[] {this.class_}; // CodeableConcept
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
+        case 1611297262: /*custodian*/ return this.custodian == null ? new Base[0] : new Base[] {this.custodian}; // Reference
+        case 1815000435: /*authenticator*/ return this.authenticator == null ? new Base[0] : new Base[] {this.authenticator}; // Reference
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case 1943292145: /*indexed*/ return this.indexed == null ? new Base[0] : new Base[] {this.indexed}; // InstantType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DocumentReferenceStatus>
+        case -23496886: /*docStatus*/ return this.docStatus == null ? new Base[0] : new Base[] {this.docStatus}; // CodeableConcept
+        case -7765931: /*relatesTo*/ return this.relatesTo == null ? new Base[0] : this.relatesTo.toArray(new Base[this.relatesTo.size()]); // DocumentReferenceRelatesToComponent
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -722296940: /*securityLabel*/ return this.securityLabel == null ? new Base[0] : this.securityLabel.toArray(new Base[this.securityLabel.size()]); // CodeableConcept
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : this.content.toArray(new Base[this.content.size()]); // DocumentReferenceContentComponent
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // DocumentReferenceContextComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 243769515: // masterIdentifier
+          this.masterIdentifier = castToIdentifier(value); // Identifier
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 94742904: // class
+          this.class_ = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1406328437: // author
+          this.getAuthor().add(castToReference(value)); // Reference
+          break;
+        case 1611297262: // custodian
+          this.custodian = castToReference(value); // Reference
+          break;
+        case 1815000435: // authenticator
+          this.authenticator = castToReference(value); // Reference
+          break;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          break;
+        case 1943292145: // indexed
+          this.indexed = castToInstant(value); // InstantType
+          break;
+        case -892481550: // status
+          this.status = new DocumentReferenceStatusEnumFactory().fromType(value); // Enumeration<DocumentReferenceStatus>
+          break;
+        case -23496886: // docStatus
+          this.docStatus = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -7765931: // relatesTo
+          this.getRelatesTo().add((DocumentReferenceRelatesToComponent) value); // DocumentReferenceRelatesToComponent
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -722296940: // securityLabel
+          this.getSecurityLabel().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 951530617: // content
+          this.getContent().add((DocumentReferenceContentComponent) value); // DocumentReferenceContentComponent
+          break;
+        case 951530927: // context
+          this.context = (DocumentReferenceContextComponent) value; // DocumentReferenceContextComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("masterIdentifier"))
           this.masterIdentifier = castToIdentifier(value); // Identifier
@@ -1979,6 +2368,31 @@ public class DocumentReference extends DomainResource {
           this.context = (DocumentReferenceContextComponent) value; // DocumentReferenceContextComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 243769515:  return getMasterIdentifier(); // Identifier
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1867885268:  return getSubject(); // Reference
+        case 3575610:  return getType(); // CodeableConcept
+        case 94742904:  return getClass_(); // CodeableConcept
+        case -1406328437:  return addAuthor(); // Reference
+        case 1611297262:  return getCustodian(); // Reference
+        case 1815000435:  return getAuthenticator(); // Reference
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case 1943292145: throw new FHIRException("Cannot make property indexed as it is not a complex type"); // InstantType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DocumentReferenceStatus>
+        case -23496886:  return getDocStatus(); // CodeableConcept
+        case -7765931:  return addRelatesTo(); // DocumentReferenceRelatesToComponent
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -722296940:  return addSecurityLabel(); // CodeableConcept
+        case 951530617:  return addContent(); // DocumentReferenceContentComponent
+        case 951530927:  return getContext(); // DocumentReferenceContextComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -2126,9 +2540,9 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( masterIdentifier,  identifier,  subject
-          ,  type,  class_,  author,  custodian,  authenticator,  created,  indexed,  status,  docStatus
-          ,  relatesTo,  description,  securityLabel,  content,  context);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier, subject
+          , type, class_, author, custodian, authenticator, created, indexed, status, docStatus, relatesTo
+          , description, securityLabel, content, context);
       }
 
   @Override
@@ -2144,7 +2558,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.securityLabel</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token", target={} )
   public static final String SP_SECURITYLABEL = "securitylabel";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>securitylabel</b>
@@ -2164,7 +2580,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Group, Device, Patient]
+  // [Practitioner, Group, Device, Patient]
+  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2190,7 +2608,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2210,7 +2630,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token", target={} )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -2230,7 +2652,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2250,7 +2674,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token", target={} )
   public static final String SP_RELATION = "relation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relation</b>
@@ -2270,7 +2696,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.practiceSetting</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token", target={} )
   public static final String SP_SETTING = "setting";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>setting</b>
@@ -2290,7 +2718,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
+  // [Practitioner, Group, Device, Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2316,7 +2746,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"} )
+  // []
+  // []
+  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"}, target={} )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>
@@ -2336,7 +2768,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.event</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token", target={} )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
@@ -2356,7 +2790,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="DocumentReference.class", description="Categorization of document", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="class", path="DocumentReference.class", description="Categorization of document", type="token", target={} )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
@@ -2376,7 +2812,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.authenticator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_AUTHENTICATOR = "authenticator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authenticator</b>
@@ -2402,7 +2840,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.masterIdentifier, DocumentReference.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2422,7 +2862,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -2442,7 +2884,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.related.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token", target={} )
   public static final String SP_RELATED_ID = "related-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
@@ -2462,7 +2906,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.custodian</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference", target={Organization.class} )
   public static final String SP_CUSTODIAN = "custodian";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>custodian</b>
@@ -2488,7 +2934,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.indexed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date", target={} )
   public static final String SP_INDEXED = "indexed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
@@ -2508,7 +2956,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  // [Practitioner, Organization, Device, Patient, RelatedPerson]
+  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2534,7 +2984,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -2554,7 +3006,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.format</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token", target={} )
   public static final String SP_FORMAT = "format";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>format</b>
@@ -2574,7 +3028,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference" )
+  // [Encounter]
+  // [Encounter]
+  @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2600,6 +3056,8 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.related.ref</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="related-ref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATED_REF = "related-ref";
  /**
@@ -2626,7 +3084,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri", target={} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2646,7 +3106,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference" )
+  // [DocumentReference]
+  // [DocumentReference]
+  @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference", target={DocumentReference.class} )
   public static final String SP_RELATESTO = "relatesto";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatesto</b>
@@ -2672,7 +3134,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.facilityType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token", target={} )
   public static final String SP_FACILITY = "facility";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facility</b>
@@ -2692,7 +3156,9 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

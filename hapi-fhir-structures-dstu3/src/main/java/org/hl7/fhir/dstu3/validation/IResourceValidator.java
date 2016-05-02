@@ -1,23 +1,23 @@
 package org.hl7.fhir.dstu3.validation;
 
+import java.io.InputStream;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.metamodel.Manager.FhirFormat;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import com.google.gson.JsonObject;
 
-public interface IResourceValidator {
-
   /**
-   * whether the validator should enforce best practice guidelines
-   * as defined by various HL7 committees 
-   *  
+ * Interface to the instance validator. This takes a resource, in one of many forms, and 
+ * checks whether it is valid
    *  
    * @author Grahame Grieve
    *
    */
+public interface IResourceValidator {
+
   public enum BestPracticeWarningLevel {
     Ignore,
     Hint,
@@ -33,22 +33,18 @@ public interface IResourceValidator {
     CheckSpace
   }
 
+  enum IdStatus {
+    OPTIONAL, REQUIRED, PROHIBITED
+  }
+  
+
   /**
    * how much to check displays for coded elements 
    * @return
    */
   CheckDisplayOption getCheckDisplay();
-
-  /**
-   * how much to check displays for coded elements 
-   * @return
-   */
   void setCheckDisplay(CheckDisplayOption checkDisplay);
 
-	enum IdStatus {
-		OPTIONAL, REQUIRED, PROHIBITED
-	}
-	
   /**
    * whether the resource must have an id or not (depends on context)
    * 
@@ -58,195 +54,42 @@ public interface IResourceValidator {
 	IdStatus getResourceIdRule();
 	void setResourceIdRule(IdStatus resourceIdRule);
   
+  /**
+   * whether the validator should enforce best practice guidelines
+   * as defined by various HL7 committees 
+   *  
+   */
   BestPracticeWarningLevel getBasePracticeWarningLevel();
   void setBestPracticeWarningLevel(BestPracticeWarningLevel value);
-  
-  
-  /**
-   * Given a DOM element, return a list of errors in the resource
-   * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Element element) throws Exception;
 
   /**
-   * Given a JSON Object, return a list of errors in the resource
+   * Validate suite
+   *  
+   * you can validate one of the following representations of resources:
+   *  
+   * stream - provide a format
+   * a native resource
+   * a metamodel resource 
+   * a DOM element or Document
+   * a Json Object 
    * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
    */
+  void validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format) throws Exception;
+  void validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, StructureDefinition profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, StructureDefinition profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element, StructureDefinition profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Element element) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Element element, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Element element, StructureDefinition profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Document document) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Document document, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.w3c.dom.Document document, StructureDefinition profile) throws Exception;
   void validate(List<ValidationMessage> errors, JsonObject object) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource
-   * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(Element element) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource
-   * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(JsonObject object) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Element element, String profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-	List<ValidationMessage> validate(Element element, String profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(JsonObject object, StructureDefinition profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(JsonObject object, String profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile 
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Element element, StructureDefinition profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile 
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, JsonObject object, StructureDefinition profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile 
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
   void validate(List<ValidationMessage> errors, JsonObject object, String profile) throws Exception;
-
-  /**
-   * Given a DOM element, return a list of errors in the resource 
-   * with regard to the specified profile
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(Element element, StructureDefinition profile) throws Exception;
-
-
-  /**
-   * Given a DOM document, return a list of errors in the resource
-   * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Document document) throws Exception;
-
-  /**
-   * Given a DOM document, return a list of errors in the resource
-   * 
-   * @param errors
-   * @param elem
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(Document document) throws Exception;
-
-  /**
-   * Given a DOM document, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Document document, String profile) throws Exception;
-
-  /**
-   * Given a DOM document, return a list of errors in the resource 
-   * with regard to the specified profile (by logical identifier)
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails, or the profile can't be found (not if the resource is invalid)
-   */
-	List<ValidationMessage> validate(Document document, String profile) throws Exception;
-
-  /**
-   * Given a DOM document, return a list of errors in the resource 
-   * with regard to the specified profile 
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  void validate(List<ValidationMessage> errors, Document document, StructureDefinition profile) throws Exception;
-
-  /**
-   * Given a DOM document, return a list of errors in the resource 
-   * with regard to the specified profile
-   *  
-   * @param errors
-   * @param element
-   * @param profile
-   * @- if the underlying infrastructure fails (not if the resource is invalid)
-   */
-  List<ValidationMessage> validate(Document document, StructureDefinition profile) throws Exception;
-
+  void validate(List<ValidationMessage> errors, JsonObject object, StructureDefinition profile) throws Exception; 
 }

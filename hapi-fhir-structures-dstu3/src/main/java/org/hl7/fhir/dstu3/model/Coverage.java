@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -457,6 +457,24 @@ public class Coverage extends DomainResource {
       return this.identifier;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Coverage setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
       if (this.identifier == null)
         return false;
@@ -734,6 +752,24 @@ public class Coverage extends DomainResource {
       return this.exception;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #exception}, creating it if it does not already exist
+     */
+    public Coding getExceptionFirstRep() { 
+      if (getException().isEmpty()) {
+        addException();
+      }
+      return getException().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Coverage setException(List<Coding> theException) { 
+      this.exception = theException;
+      return this;
+    }
+
     public boolean hasException() { 
       if (this.exception == null)
         return false;
@@ -872,6 +908,24 @@ public class Coverage extends DomainResource {
       return this.contract;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contract}, creating it if it does not already exist
+     */
+    public Reference getContractFirstRep() { 
+      if (getContract().isEmpty()) {
+        addContract();
+      }
+      return getContract().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Coverage setContract(List<Reference> theContract) { 
+      this.contract = theContract;
+      return this;
+    }
+
     public boolean hasContract() { 
       if (this.contract == null)
         return false;
@@ -946,6 +1000,90 @@ public class Coverage extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1179159879: /*issuer*/ return this.issuer == null ? new Base[0] : new Base[] {this.issuer}; // Type
+        case 97543: /*bin*/ return this.bin == null ? new Base[0] : new Base[] {this.bin}; // StringType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 1007064597: /*planholder*/ return this.planholder == null ? new Base[0] : new Base[] {this.planholder}; // Type
+        case -565102875: /*beneficiary*/ return this.beneficiary == null ? new Base[0] : new Base[] {this.beneficiary}; // Type
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Coding
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 98629247: /*group*/ return this.group == null ? new Base[0] : new Base[] {this.group}; // StringType
+        case 3443497: /*plan*/ return this.plan == null ? new Base[0] : new Base[] {this.plan}; // StringType
+        case -1868653175: /*subPlan*/ return this.subPlan == null ? new Base[0] : new Base[] {this.subPlan}; // StringType
+        case -1109226753: /*dependent*/ return this.dependent == null ? new Base[0] : new Base[] {this.dependent}; // PositiveIntType
+        case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
+        case 1481625679: /*exception*/ return this.exception == null ? new Base[0] : this.exception.toArray(new Base[this.exception.size()]); // Coding
+        case -907977868: /*school*/ return this.school == null ? new Base[0] : new Base[] {this.school}; // StringType
+        case 1843485230: /*network*/ return this.network == null ? new Base[0] : new Base[] {this.network}; // StringType
+        case -566947566: /*contract*/ return this.contract == null ? new Base[0] : this.contract.toArray(new Base[this.contract.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1179159879: // issuer
+          this.issuer = (Type) value; // Type
+          break;
+        case 97543: // bin
+          this.bin = castToString(value); // StringType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 1007064597: // planholder
+          this.planholder = (Type) value; // Type
+          break;
+        case -565102875: // beneficiary
+          this.beneficiary = (Type) value; // Type
+          break;
+        case -261851592: // relationship
+          this.relationship = castToCoding(value); // Coding
+          break;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 98629247: // group
+          this.group = castToString(value); // StringType
+          break;
+        case 3443497: // plan
+          this.plan = castToString(value); // StringType
+          break;
+        case -1868653175: // subPlan
+          this.subPlan = castToString(value); // StringType
+          break;
+        case -1109226753: // dependent
+          this.dependent = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 1349547969: // sequence
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+          break;
+        case 1481625679: // exception
+          this.getException().add(castToCoding(value)); // Coding
+          break;
+        case -907977868: // school
+          this.school = castToString(value); // StringType
+          break;
+        case 1843485230: // network
+          this.network = castToString(value); // StringType
+          break;
+        case -566947566: // contract
+          this.getContract().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("issuer[x]"))
           this.issuer = (Type) value; // Type
@@ -983,6 +1121,31 @@ public class Coverage extends DomainResource {
           this.getContract().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 185649959:  return getIssuer(); // Type
+        case 97543: throw new FHIRException("Cannot make property bin as it is not a complex type"); // StringType
+        case -991726143:  return getPeriod(); // Period
+        case 3575610:  return getType(); // Coding
+        case 1114937931:  return getPlanholder(); // Type
+        case 1292142459:  return getBeneficiary(); // Type
+        case -261851592:  return getRelationship(); // Coding
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 98629247: throw new FHIRException("Cannot make property group as it is not a complex type"); // StringType
+        case 3443497: throw new FHIRException("Cannot make property plan as it is not a complex type"); // StringType
+        case -1868653175: throw new FHIRException("Cannot make property subPlan as it is not a complex type"); // StringType
+        case -1109226753: throw new FHIRException("Cannot make property dependent as it is not a complex type"); // PositiveIntType
+        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
+        case 1481625679:  return addException(); // Coding
+        case -907977868: throw new FHIRException("Cannot make property school as it is not a complex type"); // StringType
+        case 1843485230: throw new FHIRException("Cannot make property network as it is not a complex type"); // StringType
+        case -566947566:  return addContract(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1133,9 +1296,9 @@ public class Coverage extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( issuer,  bin,  period,  type,  planholder
-          ,  beneficiary,  relationship,  identifier,  group,  plan,  subPlan,  dependent,  sequence,  exception
-          ,  school,  network,  contract);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(issuer, bin, period, type, planholder
+          , beneficiary, relationship, identifier, group, plan, subPlan, dependent, sequence, exception
+          , school, network, contract);
       }
 
   @Override
@@ -1151,7 +1314,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured and the coverage", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured and the coverage", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1171,7 +1336,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issuerreference", path="Coverage.issuerReference", description="The identity of the insurer", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="issuerreference", path="Coverage.issuer.as(Reference)", description="The identity of the insurer", type="reference", target={Organization.class} )
   public static final String SP_ISSUERREFERENCE = "issuerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issuerreference</b>
@@ -1197,7 +1364,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.subPlan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token", target={} )
   public static final String SP_SUBPLAN = "subplan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subplan</b>
@@ -1217,7 +1386,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage (health plan, auto, Workers Compensation)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage (health plan, auto, Workers Compensation)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1237,7 +1408,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="beneficiaryidentifier", path="Coverage.beneficiaryIdentifier", description="Covered party", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="beneficiaryidentifier", path="Coverage.beneficiary.as(Identifier)", description="Covered party", type="token", target={} )
   public static final String SP_BENEFICIARYIDENTIFIER = "beneficiaryidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>beneficiaryidentifier</b>
@@ -1257,7 +1430,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="planholderidentifier", path="Coverage.planholderIdentifier", description="Reference to the planholder", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="planholderidentifier", path="Coverage.planholder.as(Identifier)", description="Reference to the planholder", type="token", target={} )
   public static final String SP_PLANHOLDERIDENTIFIER = "planholderidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>planholderidentifier</b>
@@ -1277,7 +1452,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.sequence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token", target={} )
   public static final String SP_SEQUENCE = "sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sequence</b>
@@ -1297,7 +1474,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="planholderreference", path="Coverage.planholderReference", description="Reference to the planholder", type="reference" )
+  // [Organization, Patient]
+  // [Organization, Patient]
+  @SearchParamDefinition(name="planholderreference", path="Coverage.planholder.as(Reference)", description="Reference to the planholder", type="reference", target={Organization.class, Patient.class} )
   public static final String SP_PLANHOLDERREFERENCE = "planholderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>planholderreference</b>
@@ -1323,7 +1502,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issueridentifier", path="Coverage.issuerIdentifier", description="The identity of the insurer", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="issueridentifier", path="Coverage.issuer.as(Identifier)", description="The identity of the insurer", type="token", target={} )
   public static final String SP_ISSUERIDENTIFIER = "issueridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issueridentifier</b>
@@ -1343,7 +1524,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token", target={} )
   public static final String SP_PLAN = "plan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>plan</b>
@@ -1363,7 +1546,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.dependent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token", target={} )
   public static final String SP_DEPENDENT = "dependent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependent</b>
@@ -1383,7 +1568,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="beneficiaryreference", path="Coverage.beneficiaryReference", description="Covered party", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="beneficiaryreference", path="Coverage.beneficiary.as(Reference)", description="Covered party", type="reference", target={Patient.class} )
   public static final String SP_BENEFICIARYREFERENCE = "beneficiaryreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>beneficiaryreference</b>
@@ -1409,7 +1596,9 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.group</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token", target={} )
   public static final String SP_GROUP = "group";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>group</b>

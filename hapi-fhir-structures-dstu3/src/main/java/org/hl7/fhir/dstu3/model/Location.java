@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -480,6 +480,34 @@ public class Location extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 137365935: /*longitude*/ return this.longitude == null ? new Base[0] : new Base[] {this.longitude}; // DecimalType
+        case -1439978388: /*latitude*/ return this.latitude == null ? new Base[0] : new Base[] {this.latitude}; // DecimalType
+        case 2036550306: /*altitude*/ return this.altitude == null ? new Base[0] : new Base[] {this.altitude}; // DecimalType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 137365935: // longitude
+          this.longitude = castToDecimal(value); // DecimalType
+          break;
+        case -1439978388: // latitude
+          this.latitude = castToDecimal(value); // DecimalType
+          break;
+        case 2036550306: // altitude
+          this.altitude = castToDecimal(value); // DecimalType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("longitude"))
           this.longitude = castToDecimal(value); // DecimalType
@@ -489,6 +517,17 @@ public class Location extends DomainResource {
           this.altitude = castToDecimal(value); // DecimalType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 137365935: throw new FHIRException("Cannot make property longitude as it is not a complex type"); // DecimalType
+        case -1439978388: throw new FHIRException("Cannot make property latitude as it is not a complex type"); // DecimalType
+        case 2036550306: throw new FHIRException("Cannot make property altitude as it is not a complex type"); // DecimalType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -538,8 +577,7 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( longitude,  latitude,  altitude
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(longitude, latitude, altitude);
       }
 
   public String fhirType() {
@@ -659,6 +697,24 @@ public class Location extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -921,6 +977,24 @@ public class Location extends DomainResource {
       return this.telecom;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setTelecom(List<ContactPoint> theTelecom) { 
+      this.telecom = theTelecom;
+      return this;
+    }
+
     public boolean hasTelecom() { 
       if (this.telecom == null)
         return false;
@@ -1129,6 +1203,70 @@ public class Location extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<LocationStatus>
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<LocationMode>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
+        case -1147692044: /*address*/ return this.address == null ? new Base[0] : new Base[] {this.address}; // Address
+        case -1474715471: /*physicalType*/ return this.physicalType == null ? new Base[0] : new Base[] {this.physicalType}; // CodeableConcept
+        case 747804969: /*position*/ return this.position == null ? new Base[0] : new Base[] {this.position}; // LocationPositionComponent
+        case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
+        case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : new Base[] {this.partOf}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new LocationStatusEnumFactory().fromType(value); // Enumeration<LocationStatus>
+          break;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 3357091: // mode
+          this.mode = new LocationModeEnumFactory().fromType(value); // Enumeration<LocationMode>
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case -1147692044: // address
+          this.address = castToAddress(value); // Address
+          break;
+        case -1474715471: // physicalType
+          this.physicalType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 747804969: // position
+          this.position = (LocationPositionComponent) value; // LocationPositionComponent
+          break;
+        case -2058947787: // managingOrganization
+          this.managingOrganization = castToReference(value); // Reference
+          break;
+        case -995410646: // partOf
+          this.partOf = castToReference(value); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1156,6 +1294,26 @@ public class Location extends DomainResource {
           this.partOf = castToReference(value); // Reference
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<LocationStatus>
+        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<LocationMode>
+        case 3575610:  return getType(); // CodeableConcept
+        case -1429363305:  return addTelecom(); // ContactPoint
+        case -1147692044:  return getAddress(); // Address
+        case -1474715471:  return getPhysicalType(); // CodeableConcept
+        case 747804969:  return getPosition(); // LocationPositionComponent
+        case -2058947787:  return getManagingOrganization(); // Reference
+        case -995410646:  return getPartOf(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1267,9 +1425,8 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  name,  description
-          ,  mode,  type,  telecom,  address,  physicalType,  position,  managingOrganization,  partOf
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, name, description
+          , mode, type, telecom, address, physicalType, position, managingOrganization, partOf);
       }
 
   @Override
@@ -1285,7 +1442,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1305,7 +1464,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference", target={Location.class} )
   public static final String SP_PARTOF = "partof";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>partof</b>
@@ -1331,7 +1492,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance", type="token", target={} )
   public static final String SP_NEAR_DISTANCE = "near-distance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
@@ -1351,7 +1514,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1371,7 +1536,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1391,7 +1558,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1411,7 +1580,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postal code specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1431,7 +1602,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -1451,7 +1624,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1477,7 +1652,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1497,7 +1674,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1517,7 +1696,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token", target={} )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
@@ -1537,7 +1718,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1557,7 +1740,9 @@ public class Location extends DomainResource {
    * Path: <b>Location.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

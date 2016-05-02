@@ -1,7 +1,11 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -100,6 +104,20 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+	}
+
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
+		Set<String> urls= new HashSet<String>();
+		for (IValidationSupport nextSupport : myChain) {
+			for (StructureDefinition next : nextSupport.fetchAllStructureDefinitions(theContext)) {
+				if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
+					retVal.add(next);
+				}
+			}
+		}
+		return retVal;
 	}
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -112,6 +112,24 @@ public class Medication extends DomainResource {
           return this.ingredient;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #ingredient}, creating it if it does not already exist
+         */
+        public MedicationProductIngredientComponent getIngredientFirstRep() { 
+          if (getIngredient().isEmpty()) {
+            addIngredient();
+          }
+          return getIngredient().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicationProductComponent setIngredient(List<MedicationProductIngredientComponent> theIngredient) { 
+          this.ingredient = theIngredient;
+          return this;
+        }
+
         public boolean hasIngredient() { 
           if (this.ingredient == null)
             return false;
@@ -150,6 +168,24 @@ public class Medication extends DomainResource {
           if (this.batch == null)
             this.batch = new ArrayList<MedicationProductBatchComponent>();
           return this.batch;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #batch}, creating it if it does not already exist
+         */
+        public MedicationProductBatchComponent getBatchFirstRep() { 
+          if (getBatch().isEmpty()) {
+            addBatch();
+          }
+          return getBatch().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicationProductComponent setBatch(List<MedicationProductBatchComponent> theBatch) { 
+          this.batch = theBatch;
+          return this;
         }
 
         public boolean hasBatch() { 
@@ -191,6 +227,34 @@ public class Medication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
+        case -206409263: /*ingredient*/ return this.ingredient == null ? new Base[0] : this.ingredient.toArray(new Base[this.ingredient.size()]); // MedicationProductIngredientComponent
+        case 93509434: /*batch*/ return this.batch == null ? new Base[0] : this.batch.toArray(new Base[this.batch.size()]); // MedicationProductBatchComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3148996: // form
+          this.form = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -206409263: // ingredient
+          this.getIngredient().add((MedicationProductIngredientComponent) value); // MedicationProductIngredientComponent
+          break;
+        case 93509434: // batch
+          this.getBatch().add((MedicationProductBatchComponent) value); // MedicationProductBatchComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("form"))
           this.form = castToCodeableConcept(value); // CodeableConcept
@@ -200,6 +264,17 @@ public class Medication extends DomainResource {
           this.getBatch().add((MedicationProductBatchComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3148996:  return getForm(); // CodeableConcept
+        case -206409263:  return addIngredient(); // MedicationProductIngredientComponent
+        case 93509434:  return addBatch(); // MedicationProductBatchComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -257,7 +332,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( form,  ingredient,  batch);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(form, ingredient, batch);
       }
 
   public String fhirType() {
@@ -376,6 +451,30 @@ public class Medication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Ratio
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3242771: // item
+          this.item = (Type) value; // Type
+          break;
+        case -1413853096: // amount
+          this.amount = castToRatio(value); // Ratio
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("item[x]"))
           this.item = (Type) value; // Type
@@ -383,6 +482,16 @@ public class Medication extends DomainResource {
           this.amount = castToRatio(value); // Ratio
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2116201613:  return getItem(); // Type
+        case -1413853096:  return getAmount(); // Ratio
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -432,7 +541,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  amount);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, amount);
       }
 
   public String fhirType() {
@@ -572,6 +681,30 @@ public class Medication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 462547450: /*lotNumber*/ return this.lotNumber == null ? new Base[0] : new Base[] {this.lotNumber}; // StringType
+        case -668811523: /*expirationDate*/ return this.expirationDate == null ? new Base[0] : new Base[] {this.expirationDate}; // DateTimeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 462547450: // lotNumber
+          this.lotNumber = castToString(value); // StringType
+          break;
+        case -668811523: // expirationDate
+          this.expirationDate = castToDateTime(value); // DateTimeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("lotNumber"))
           this.lotNumber = castToString(value); // StringType
@@ -579,6 +712,16 @@ public class Medication extends DomainResource {
           this.expirationDate = castToDateTime(value); // DateTimeType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 462547450: throw new FHIRException("Cannot make property lotNumber as it is not a complex type"); // StringType
+        case -668811523: throw new FHIRException("Cannot make property expirationDate as it is not a complex type"); // DateTimeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -624,7 +767,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( lotNumber,  expirationDate);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lotNumber, expirationDate);
       }
 
   public String fhirType() {
@@ -692,6 +835,24 @@ public class Medication extends DomainResource {
           return this.content;
         }
 
+        /**
+         * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+         */
+        public MedicationPackageContentComponent getContentFirstRep() { 
+          if (getContent().isEmpty()) {
+            addContent();
+          }
+          return getContent().get(0);
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicationPackageComponent setContent(List<MedicationPackageContentComponent> theContent) { 
+          this.content = theContent;
+          return this;
+        }
+
         public boolean hasContent() { 
           if (this.content == null)
             return false;
@@ -730,6 +891,30 @@ public class Medication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -410956671: /*container*/ return this.container == null ? new Base[0] : new Base[] {this.container}; // CodeableConcept
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : this.content.toArray(new Base[this.content.size()]); // MedicationPackageContentComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -410956671: // container
+          this.container = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 951530617: // content
+          this.getContent().add((MedicationPackageContentComponent) value); // MedicationPackageContentComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("container"))
           this.container = castToCodeableConcept(value); // CodeableConcept
@@ -737,6 +922,16 @@ public class Medication extends DomainResource {
           this.getContent().add((MedicationPackageContentComponent) value);
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -410956671:  return getContainer(); // CodeableConcept
+        case 951530617:  return addContent(); // MedicationPackageContentComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -785,7 +980,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( container,  content);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(container, content);
       }
 
   public String fhirType() {
@@ -904,6 +1099,30 @@ public class Medication extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // SimpleQuantity
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3242771: // item
+          this.item = (Type) value; // Type
+          break;
+        case -1413853096: // amount
+          this.amount = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("item[x]"))
           this.item = (Type) value; // Type
@@ -911,6 +1130,16 @@ public class Medication extends DomainResource {
           this.amount = castToSimpleQuantity(value); // SimpleQuantity
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2116201613:  return getItem(); // Type
+        case -1413853096:  return getAmount(); // SimpleQuantity
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -960,7 +1189,7 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( item,  amount);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, amount);
       }
 
   public String fhirType() {
@@ -1190,6 +1419,42 @@ public class Medication extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case 2055403645: /*isBrand*/ return this.isBrand == null ? new Base[0] : new Base[] {this.isBrand}; // BooleanType
+        case -1969347631: /*manufacturer*/ return this.manufacturer == null ? new Base[0] : new Base[] {this.manufacturer}; // Reference
+        case -309474065: /*product*/ return this.product == null ? new Base[0] : new Base[] {this.product}; // MedicationProductComponent
+        case -807062458: /*package*/ return this.package_ == null ? new Base[0] : new Base[] {this.package_}; // MedicationPackageComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 2055403645: // isBrand
+          this.isBrand = castToBoolean(value); // BooleanType
+          break;
+        case -1969347631: // manufacturer
+          this.manufacturer = castToReference(value); // Reference
+          break;
+        case -309474065: // product
+          this.product = (MedicationProductComponent) value; // MedicationProductComponent
+          break;
+        case -807062458: // package
+          this.package_ = (MedicationPackageComponent) value; // MedicationPackageComponent
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -1203,6 +1468,19 @@ public class Medication extends DomainResource {
           this.package_ = (MedicationPackageComponent) value; // MedicationPackageComponent
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // CodeableConcept
+        case 2055403645: throw new FHIRException("Cannot make property isBrand as it is not a complex type"); // BooleanType
+        case -1969347631:  return getManufacturer(); // Reference
+        case -309474065:  return getProduct(); // MedicationProductComponent
+        case -807062458:  return getPackage(); // MedicationPackageComponent
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1272,8 +1550,8 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  isBrand,  manufacturer,  product
-          ,  package_);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, isBrand, manufacturer, product
+          , package_);
       }
 
   @Override
@@ -1289,7 +1567,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.itemCodeableConcept", description="The product contained", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.item.as(CodeableConcept)", description="The product contained", type="token", target={} )
   public static final String SP_INGREDIENT_CODE = "ingredient-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient-code</b>
@@ -1309,7 +1589,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.container</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token", target={} )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
@@ -1329,7 +1611,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item", path="Medication.package.content.itemReference", description="The item in the package", type="reference" )
+  // [Medication]
+  // [Medication]
+  @SearchParamDefinition(name="package-item", path="Medication.package.content.item.as(Reference)", description="The item in the package", type="reference", target={Medication.class} )
   public static final String SP_PACKAGE_ITEM = "package-item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item</b>
@@ -1355,7 +1639,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1375,7 +1661,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.itemReference", description="The product contained", type="reference" )
+  // [Medication, Substance]
+  // [Medication, Substance]
+  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item.as(Reference)", description="The product contained", type="reference", target={Medication.class, Substance.class} )
   public static final String SP_INGREDIENT = "ingredient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
@@ -1401,7 +1689,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.form</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token", target={} )
   public static final String SP_FORM = "form";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>form</b>
@@ -1421,7 +1711,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.itemCodeableConcept", description="The item in the package", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.item.as(CodeableConcept)", description="The item in the package", type="token", target={} )
   public static final String SP_PACKAGE_ITEM_CODE = "package-item-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item-code</b>
@@ -1441,7 +1733,9 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference", target={Organization.class} )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -416,6 +416,34 @@ public class DeviceComponent extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -2133482091: /*specType*/ return this.specType == null ? new Base[0] : new Base[] {this.specType}; // CodeableConcept
+        case -985933064: /*componentId*/ return this.componentId == null ? new Base[0] : new Base[] {this.componentId}; // Identifier
+        case 182147092: /*productionSpec*/ return this.productionSpec == null ? new Base[0] : new Base[] {this.productionSpec}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -2133482091: // specType
+          this.specType = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -985933064: // componentId
+          this.componentId = castToIdentifier(value); // Identifier
+          break;
+        case 182147092: // productionSpec
+          this.productionSpec = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("specType"))
           this.specType = castToCodeableConcept(value); // CodeableConcept
@@ -425,6 +453,17 @@ public class DeviceComponent extends DomainResource {
           this.productionSpec = castToString(value); // StringType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -2133482091:  return getSpecType(); // CodeableConcept
+        case -985933064:  return getComponentId(); // Identifier
+        case 182147092: throw new FHIRException("Cannot make property productionSpec as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -475,7 +514,7 @@ public class DeviceComponent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( specType,  componentId,  productionSpec
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(specType, componentId, productionSpec
           );
       }
 
@@ -775,6 +814,24 @@ public class DeviceComponent extends DomainResource {
       return this.operationalStatus;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #operationalStatus}, creating it if it does not already exist
+     */
+    public CodeableConcept getOperationalStatusFirstRep() { 
+      if (getOperationalStatus().isEmpty()) {
+        addOperationalStatus();
+      }
+      return getOperationalStatus().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceComponent setOperationalStatus(List<CodeableConcept> theOperationalStatus) { 
+      this.operationalStatus = theOperationalStatus;
+      return this;
+    }
+
     public boolean hasOperationalStatus() { 
       if (this.operationalStatus == null)
         return false;
@@ -888,6 +945,24 @@ public class DeviceComponent extends DomainResource {
       return this.productionSpecification;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #productionSpecification}, creating it if it does not already exist
+     */
+    public DeviceComponentProductionSpecificationComponent getProductionSpecificationFirstRep() { 
+      if (getProductionSpecification().isEmpty()) {
+        addProductionSpecification();
+      }
+      return getProductionSpecification().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceComponent setProductionSpecification(List<DeviceComponentProductionSpecificationComponent> theProductionSpecification) { 
+      this.productionSpecification = theProductionSpecification;
+      return this;
+    }
+
     public boolean hasProductionSpecification() { 
       if (this.productionSpecification == null)
         return false;
@@ -958,6 +1033,62 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -2072475531: /*lastSystemChange*/ return this.lastSystemChange == null ? new Base[0] : new Base[] {this.lastSystemChange}; // InstantType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
+        case -2103166364: /*operationalStatus*/ return this.operationalStatus == null ? new Base[0] : this.operationalStatus.toArray(new Base[this.operationalStatus.size()]); // CodeableConcept
+        case 1111110742: /*parameterGroup*/ return this.parameterGroup == null ? new Base[0] : new Base[] {this.parameterGroup}; // CodeableConcept
+        case 24324384: /*measurementPrinciple*/ return this.measurementPrinciple == null ? new Base[0] : new Base[] {this.measurementPrinciple}; // Enumeration<MeasmntPrinciple>
+        case -455527222: /*productionSpecification*/ return this.productionSpecification == null ? new Base[0] : this.productionSpecification.toArray(new Base[this.productionSpecification.size()]); // DeviceComponentProductionSpecificationComponent
+        case -2092349083: /*languageCode*/ return this.languageCode == null ? new Base[0] : new Base[] {this.languageCode}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -2072475531: // lastSystemChange
+          this.lastSystemChange = castToInstant(value); // InstantType
+          break;
+        case -896505829: // source
+          this.source = castToReference(value); // Reference
+          break;
+        case -995424086: // parent
+          this.parent = castToReference(value); // Reference
+          break;
+        case -2103166364: // operationalStatus
+          this.getOperationalStatus().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 1111110742: // parameterGroup
+          this.parameterGroup = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 24324384: // measurementPrinciple
+          this.measurementPrinciple = new MeasmntPrincipleEnumFactory().fromType(value); // Enumeration<MeasmntPrinciple>
+          break;
+        case -455527222: // productionSpecification
+          this.getProductionSpecification().add((DeviceComponentProductionSpecificationComponent) value); // DeviceComponentProductionSpecificationComponent
+          break;
+        case -2092349083: // languageCode
+          this.languageCode = castToCodeableConcept(value); // CodeableConcept
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -981,6 +1112,24 @@ public class DeviceComponent extends DomainResource {
           this.languageCode = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // CodeableConcept
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -2072475531: throw new FHIRException("Cannot make property lastSystemChange as it is not a complex type"); // InstantType
+        case -896505829:  return getSource(); // Reference
+        case -995424086:  return getParent(); // Reference
+        case -2103166364:  return addOperationalStatus(); // CodeableConcept
+        case 1111110742:  return getParameterGroup(); // CodeableConcept
+        case 24324384: throw new FHIRException("Cannot make property measurementPrinciple as it is not a complex type"); // Enumeration<MeasmntPrinciple>
+        case -455527222:  return addProductionSpecification(); // DeviceComponentProductionSpecificationComponent
+        case -2092349083:  return getLanguageCode(); // CodeableConcept
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1084,9 +1233,9 @@ public class DeviceComponent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( type,  identifier,  lastSystemChange
-          ,  source,  parent,  operationalStatus,  parameterGroup,  measurementPrinciple,  productionSpecification
-          ,  languageCode);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, identifier, lastSystemChange
+          , source, parent, operationalStatus, parameterGroup, measurementPrinciple, productionSpecification
+          , languageCode);
       }
 
   @Override
@@ -1102,7 +1251,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference" )
+  // [DeviceComponent]
+  // [DeviceComponent]
+  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference", target={DeviceComponent.class} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1128,7 +1279,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  // [Device]
+  // [Device]
+  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", target={Device.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1154,7 +1307,9 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

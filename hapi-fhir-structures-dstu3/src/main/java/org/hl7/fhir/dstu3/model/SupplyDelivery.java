@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -635,6 +635,24 @@ public class SupplyDelivery extends DomainResource {
       return this.receiver;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #receiver}, creating it if it does not already exist
+     */
+    public Reference getReceiverFirstRep() { 
+      if (getReceiver().isEmpty()) {
+        addReceiver();
+      }
+      return getReceiver().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SupplyDelivery setReceiver(List<Reference> theReceiver) { 
+      this.receiver = theReceiver;
+      return this;
+    }
+
     public boolean hasReceiver() { 
       if (this.receiver == null)
         return false;
@@ -703,6 +721,66 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SupplyDeliveryStatus>
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case 1993333233: /*suppliedItem*/ return this.suppliedItem == null ? new Base[0] : new Base[] {this.suppliedItem}; // Reference
+        case -1663305268: /*supplier*/ return this.supplier == null ? new Base[0] : new Base[] {this.supplier}; // Reference
+        case -562837097: /*whenPrepared*/ return this.whenPrepared == null ? new Base[0] : new Base[] {this.whenPrepared}; // Period
+        case 3560141: /*time*/ return this.time == null ? new Base[0] : new Base[] {this.time}; // DateTimeType
+        case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // Reference
+        case -808719889: /*receiver*/ return this.receiver == null ? new Base[0] : this.receiver.toArray(new Base[this.receiver.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new SupplyDeliveryStatusEnumFactory().fromType(value); // Enumeration<SupplyDeliveryStatus>
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1285004149: // quantity
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          break;
+        case 1993333233: // suppliedItem
+          this.suppliedItem = castToReference(value); // Reference
+          break;
+        case -1663305268: // supplier
+          this.supplier = castToReference(value); // Reference
+          break;
+        case -562837097: // whenPrepared
+          this.whenPrepared = castToPeriod(value); // Period
+          break;
+        case 3560141: // time
+          this.time = castToDateTime(value); // DateTimeType
+          break;
+        case -1429847026: // destination
+          this.destination = castToReference(value); // Reference
+          break;
+        case -808719889: // receiver
+          this.getReceiver().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
@@ -728,6 +806,25 @@ public class SupplyDelivery extends DomainResource {
           this.getReceiver().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return getIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SupplyDeliveryStatus>
+        case -791418107:  return getPatient(); // Reference
+        case 3575610:  return getType(); // CodeableConcept
+        case -1285004149:  return getQuantity(); // SimpleQuantity
+        case 1993333233:  return getSuppliedItem(); // Reference
+        case -1663305268:  return getSupplier(); // Reference
+        case -562837097:  return getWhenPrepared(); // Period
+        case 3560141: throw new FHIRException("Cannot make property time as it is not a complex type"); // DateTimeType
+        case -1429847026:  return getDestination(); // Reference
+        case -808719889:  return addReceiver(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -831,8 +928,8 @@ public class SupplyDelivery extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  status,  patient,  type
-          ,  quantity,  suppliedItem,  supplier,  whenPrepared,  time,  destination,  receiver);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, patient, type
+          , quantity, suppliedItem, supplier, whenPrepared, time, destination, receiver);
       }
 
   @Override
@@ -848,7 +945,9 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="SupplyDelivery.identifier", description="External identifier", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="SupplyDelivery.identifier", description="External identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -868,7 +967,9 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference", target={Practitioner.class} )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -894,7 +995,9 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -920,7 +1023,9 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner]
+  // [Practitioner]
+  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", target={Practitioner.class} )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
@@ -946,7 +1051,9 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

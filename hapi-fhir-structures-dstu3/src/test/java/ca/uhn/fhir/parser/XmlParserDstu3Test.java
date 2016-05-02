@@ -598,6 +598,10 @@ public class XmlParserDstu3Test {
 		
 		output = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(p);
 		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patid\"/><name id=\"nameid\"><family id=\"f0\"><extension url=\"http://foo\"><valueString value=\"FOOEXT0\"/></extension></family><family id=\"f1\" value=\"V1\"><extension id=\"ext1id\" url=\"http://foo\"><valueString value=\"FOOEXT1\"/></extension></family><family><extension url=\"http://foo\"><valueString value=\"FOOEXT3\"/></extension></family></name></Patient>";
+		
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", output);
+		
 		assertEquals(expected, output);
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, output);
@@ -1195,6 +1199,22 @@ public class XmlParserDstu3Test {
 		
 	}
 
+	/**
+	 * See #312
+	 */
+	@Test
+	public void testEncodeNullElement() {
+		Patient patient = new Patient();
+		patient.addName().getFamily().add(null);
+	
+		IParser parser = ourCtx.newXmlParser();
+		String xml = parser.encodeResourceToString(patient);
+		
+		ourLog.info(xml);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"/>", xml);
+	}
+
+	
 	/**
 	 * See #312
 	 */

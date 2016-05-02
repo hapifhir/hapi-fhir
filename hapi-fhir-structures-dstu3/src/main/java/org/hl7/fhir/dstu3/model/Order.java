@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -126,6 +126,30 @@ public class Order extends DomainResource {
         }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -697920873: /*schedule*/ return this.schedule == null ? new Base[0] : new Base[] {this.schedule}; // Timing
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -697920873: // schedule
+          this.schedule = castToTiming(value); // Timing
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -133,6 +157,16 @@ public class Order extends DomainResource {
           this.schedule = castToTiming(value); // Timing
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); // CodeableConcept
+        case -697920873:  return getSchedule(); // Timing
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -178,7 +212,7 @@ public class Order extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( code,  schedule);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, schedule);
       }
 
   public String fhirType() {
@@ -280,6 +314,24 @@ public class Order extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Order setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -557,6 +609,24 @@ public class Order extends DomainResource {
       return this.detail;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
+     */
+    public Reference getDetailFirstRep() { 
+      if (getDetail().isEmpty()) {
+        addDetail();
+      }
+      return getDetail().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Order setDetail(List<Reference> theDetail) { 
+      this.detail = theDetail;
+      return this;
+    }
+
     public boolean hasDetail() { 
       if (this.detail == null)
         return false;
@@ -610,6 +680,54 @@ public class Order extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // OrderWhenComponent
+        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -896505829: // source
+          this.source = castToReference(value); // Reference
+          break;
+        case -880905839: // target
+          this.target = castToReference(value); // Reference
+          break;
+        case -934964668: // reason
+          this.reason = (Type) value; // Type
+          break;
+        case 3648314: // when
+          this.when = (OrderWhenComponent) value; // OrderWhenComponent
+          break;
+        case -1335224239: // detail
+          this.getDetail().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -629,6 +747,22 @@ public class Order extends DomainResource {
           this.getDetail().add(castToReference(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1867885268:  return getSubject(); // Reference
+        case -896505829:  return getSource(); // Reference
+        case -880905839:  return getTarget(); // Reference
+        case -669418564:  return getReason(); // Type
+        case 3648314:  return getWhen(); // OrderWhenComponent
+        case -1335224239:  return addDetail(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -724,8 +858,8 @@ public class Order extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  date,  subject,  source
-          ,  target,  reason,  when,  detail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, date, subject, source
+          , target, reason, when, detail);
       }
 
   @Override
@@ -741,7 +875,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -761,7 +897,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -781,7 +919,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  // [Group, Device, Patient, Substance]
+  // [Group, Device, Patient, Substance]
+  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -807,7 +947,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
+  // [Group, Device, Patient, Substance]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -833,7 +975,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization]
+  // [Practitioner, Organization]
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -859,6 +1003,8 @@ public class Order extends DomainResource {
    * Path: <b>Order.detail</b><br>
    * </p>
    */
+  // [Any]
+  // [Any]
   @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
   public static final String SP_DETAIL = "detail";
  /**
@@ -885,7 +1031,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
+  // []
+  // []
+  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date", target={} )
   public static final String SP_WHEN = "when";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when</b>
@@ -905,7 +1053,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  // [Practitioner, Organization, Device]
+  // [Practitioner, Organization, Device]
+  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", target={Practitioner.class, Organization.class, Device.class} )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -931,7 +1081,9 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token", target={} )
   public static final String SP_WHENCODE = "when_code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when_code</b>

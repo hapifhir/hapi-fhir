@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -301,6 +301,24 @@ public class Device extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Device setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
     public boolean hasIdentifier() { 
@@ -822,6 +840,24 @@ public class Device extends DomainResource {
       return this.contact;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactPoint getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Device setContact(List<ContactPoint> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
@@ -955,6 +991,24 @@ public class Device extends DomainResource {
       return this.note;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Device setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
     public boolean hasNote() { 
       if (this.note == null)
         return false;
@@ -1007,6 +1061,86 @@ public class Device extends DomainResource {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1343558178: /*udiCarrier*/ return this.udiCarrier == null ? new Base[0] : new Base[] {this.udiCarrier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DeviceStatus>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 462547450: /*lotNumber*/ return this.lotNumber == null ? new Base[0] : new Base[] {this.lotNumber}; // StringType
+        case -1969347631: /*manufacturer*/ return this.manufacturer == null ? new Base[0] : new Base[] {this.manufacturer}; // StringType
+        case 416714767: /*manufactureDate*/ return this.manufactureDate == null ? new Base[0] : new Base[] {this.manufactureDate}; // DateTimeType
+        case -668811523: /*expirationDate*/ return this.expirationDate == null ? new Base[0] : new Base[] {this.expirationDate}; // DateTimeType
+        case 104069929: /*model*/ return this.model == null ? new Base[0] : new Base[] {this.model}; // StringType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactPoint
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1343558178: // udiCarrier
+          this.udiCarrier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new DeviceStatusEnumFactory().fromType(value); // Enumeration<DeviceStatus>
+          break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 462547450: // lotNumber
+          this.lotNumber = castToString(value); // StringType
+          break;
+        case -1969347631: // manufacturer
+          this.manufacturer = castToString(value); // StringType
+          break;
+        case 416714767: // manufactureDate
+          this.manufactureDate = castToDateTime(value); // DateTimeType
+          break;
+        case -668811523: // expirationDate
+          this.expirationDate = castToDateTime(value); // DateTimeType
+          break;
+        case 104069929: // model
+          this.model = castToString(value); // StringType
+          break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          break;
+        case 106164915: // owner
+          this.owner = castToReference(value); // Reference
+          break;
+        case 951526432: // contact
+          this.getContact().add(castToContactPoint(value)); // ContactPoint
+          break;
+        case 1901043637: // location
+          this.location = castToReference(value); // Reference
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
@@ -1042,6 +1176,30 @@ public class Device extends DomainResource {
           this.getNote().add(castToAnnotation(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
+        case -1343558178:  return getUdiCarrier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DeviceStatus>
+        case 3575610:  return getType(); // CodeableConcept
+        case 462547450: throw new FHIRException("Cannot make property lotNumber as it is not a complex type"); // StringType
+        case -1969347631: throw new FHIRException("Cannot make property manufacturer as it is not a complex type"); // StringType
+        case 416714767: throw new FHIRException("Cannot make property manufactureDate as it is not a complex type"); // DateTimeType
+        case -668811523: throw new FHIRException("Cannot make property expirationDate as it is not a complex type"); // DateTimeType
+        case 104069929: throw new FHIRException("Cannot make property model as it is not a complex type"); // StringType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case -791418107:  return getPatient(); // Reference
+        case 106164915:  return getOwner(); // Reference
+        case 951526432:  return addContact(); // ContactPoint
+        case 1901043637:  return getLocation(); // Reference
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 3387378:  return addNote(); // Annotation
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -1176,9 +1334,9 @@ public class Device extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( identifier,  udiCarrier,  status
-          ,  type,  lotNumber,  manufacturer,  manufactureDate,  expirationDate,  model,  version,  patient
-          ,  owner,  contact,  location,  url,  note);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, udiCarrier, status
+          , type, lotNumber, manufacturer, manufactureDate, expirationDate, model, version, patient, owner
+          , contact, location, url, note);
       }
 
   @Override
@@ -1194,7 +1352,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1214,7 +1374,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference" )
+  // [Patient]
+  // [Patient]
+  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1240,7 +1402,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference" )
+  // [Organization]
+  // [Organization]
+  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1266,7 +1430,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.model</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string", target={} )
   public static final String SP_MODEL = "model";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>model</b>
@@ -1286,7 +1452,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
+  // [Location]
+  // [Location]
+  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1312,7 +1480,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1332,7 +1502,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token" )
+  // []
+  // []
+  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token", target={} )
   public static final String SP_UDICARRIER = "udicarrier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>udicarrier</b>
@@ -1352,7 +1524,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri" )
+  // []
+  // []
+  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1372,7 +1546,9 @@ public class Device extends DomainResource {
    * Path: <b>Device.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string" )
+  // []
+  // []
+  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string", target={} )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

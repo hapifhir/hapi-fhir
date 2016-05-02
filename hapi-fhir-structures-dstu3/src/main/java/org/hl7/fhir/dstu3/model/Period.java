@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -199,6 +199,30 @@ public class Period extends Type implements ICompositeType {
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // DateTimeType
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // DateTimeType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 109757538: // start
+          this.start = castToDateTime(value); // DateTimeType
+          break;
+        case 100571: // end
+          this.end = castToDateTime(value); // DateTimeType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("start"))
           this.start = castToDateTime(value); // DateTimeType
@@ -206,6 +230,16 @@ public class Period extends Type implements ICompositeType {
           this.end = castToDateTime(value); // DateTimeType
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // DateTimeType
+        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // DateTimeType
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -258,7 +292,7 @@ public class Period extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( start,  end);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end);
       }
 
 

@@ -58,6 +58,27 @@
 				"abatementDateType"). Thanks to Yaroslav Kovbas for reporting and
 				providing a unit test! 
 			</action>
+			<action type="fix">
+				JPA server transactions sometimes created an incorrect resource reference
+				if a resource being saved contained references that had a display value but
+				not an actual reference. Thanks to David Hay for reporting!
+			</action>
+			<action type="add" issue="352">
+				When performing a REST Client create or update with
+				<![CDATA[<code>Prefer: return=representation</code>]]> set,
+				if the server does not honour the Prefer header, the client
+				will automatically fetch the resource before returning. Thanks
+				to Ewout Kramer for the idea!  
+			</action>
+			<action type="add" issue="354">
+				DSTU3 structures now have 
+				<![CDATA[<code>setFoo(List)</code>]]>
+				and 
+				<![CDATA[<code>setGetFooFirstRep()</code>]]>
+				methods, bringing them back to parity with the HAPI
+				DSTU2 structures. Thanks to Rahul Somasunderam and
+				Claude Nanjo for the suggestions! 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

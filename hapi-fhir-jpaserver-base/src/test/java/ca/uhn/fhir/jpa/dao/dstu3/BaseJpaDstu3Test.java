@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -90,11 +91,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 
 	@Autowired
-	@Qualifier("myCodeSystemDaoDstu3")
-	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Qualifier("myAppointmentDaoDstu3")
+	protected IFhirResourceDao<Appointment> myAppointmentDao;
 	@Autowired
 	@Qualifier("myBundleDaoDstu3")
 	protected IFhirResourceDao<Bundle> myBundleDao;
+	@Autowired
+	@Qualifier("myCodeSystemDaoDstu3")
+	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
@@ -139,14 +143,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-	@Autowired
-	@Qualifier("myObservationDaoDstu3")
-	protected IFhirResourceDao<Observation> myObservationDao;
 	
 @Autowired
-@Qualifier("myOrganizationDaoDstu3")
-protected IFhirResourceDao<Organization> myOrganizationDao;
+@Qualifier("myObservationDaoDstu3")
+protected IFhirResourceDao<Observation> myObservationDao;
 	
+	@Autowired
+	@Qualifier("myOrganizationDaoDstu3")
+	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;

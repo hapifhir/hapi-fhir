@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -70,6 +70,24 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       return this.modifierExtension;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #modifierExtension}, creating it if it does not already exist
+     */
+    public Extension getModifierExtensionFirstRep() { 
+      if (getModifierExtension().isEmpty()) {
+        addModifierExtension();
+      }
+      return getModifierExtension().get(0);
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public BackboneElement setModifierExtension(List<Extension> theModifierExtension) { 
+      this.modifierExtension = theModifierExtension;
+      return this;
+    }
+
     public boolean hasModifierExtension() { 
       if (this.modifierExtension == null)
         return false;
@@ -106,11 +124,40 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       }
 
       @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -298878168: /*modifierExtension*/ return this.modifierExtension == null ? new Base[0] : this.modifierExtension.toArray(new Base[this.modifierExtension.size()]); // Extension
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -298878168: // modifierExtension
+          this.getModifierExtension().add(castToExtension(value)); // Extension
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("modifierExtension"))
           this.getModifierExtension().add(castToExtension(value));
         else
           super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -298878168:  return addModifierExtension(); // Extension
+        default: return super.makeProperty(hash, name);
+        }
+
       }
 
       @Override
@@ -158,7 +205,7 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( modifierExtension);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(modifierExtension);
       }
 
 
