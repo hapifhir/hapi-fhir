@@ -131,7 +131,9 @@ public class GenericClientDstu3Test {
 		assertEquals(CustomTypeDstu3Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
+
 	
+
 	@Test
 	public void testExplicitCustomTypeHistoryType() throws Exception {
 		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
