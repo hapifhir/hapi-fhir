@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1203,8 +1203,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1225,8 +1223,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1247,8 +1243,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1275,8 +1269,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.author</b><br>
    * </p>
    */
-  // [Practitioner, Device]
-  // [Practitioner, Device]
   @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", target={Practitioner.class, Device.class} )
   public static final String SP_AUTHOR = "author";
  /**
@@ -1303,8 +1295,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.implicated</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="implicated", path="DetectedIssue.implicated", description="Problem resource", type="reference" )
   public static final String SP_IMPLICATED = "implicated";
  /**
@@ -1331,8 +1321,6 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1547,8 +1547,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.actual</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token", target={} )
   public static final String SP_ACTUAL = "actual";
  /**
@@ -1569,8 +1567,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1591,8 +1587,6 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"}, target={} )
   public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
  /**
@@ -1613,8 +1607,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1635,8 +1627,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.member.entity</b><br>
    * </p>
    */
-  // [Practitioner, Device, Medication, Patient, Substance]
-  // [Practitioner, Device, Medication, Patient, Substance]
   @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", target={Practitioner.class, Device.class, Medication.class, Patient.class, Substance.class} )
   public static final String SP_MEMBER = "member";
  /**
@@ -1663,8 +1653,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.exclude</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token", target={} )
   public static final String SP_EXCLUDE = "exclude";
  /**
@@ -1685,8 +1673,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1707,8 +1693,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.value[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="value", path="Group.characteristic.value", description="Value held by characteristic", type="token", target={} )
   public static final String SP_VALUE = "value";
  /**
@@ -1729,8 +1713,6 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token", target={} )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**

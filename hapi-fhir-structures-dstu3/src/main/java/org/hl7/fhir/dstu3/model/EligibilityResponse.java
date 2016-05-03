@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1964,8 +1964,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="requestprovideridentifier", path="EligibilityResponse.requestProvider.as(Identifier)", description="The EligibilityRequest provider", type="token", target={} )
   public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
  /**
@@ -1986,8 +1984,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="requestorganizationidentifier", path="EligibilityResponse.requestOrganization.as(Identifier)", description="The EligibilityRequest organization", type="token", target={} )
   public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
  /**
@@ -2008,8 +2004,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="EligibilityResponse.identifier", description="The business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2030,8 +2024,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.disposition</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="disposition", path="EligibilityResponse.disposition", description="The contents of the disposition message", type="string", target={} )
   public static final String SP_DISPOSITION = "disposition";
  /**
@@ -2052,8 +2044,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="organizationidentifier", path="EligibilityResponse.organization.as(Identifier)", description="The organization which generated this resource", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
@@ -2074,8 +2064,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="EligibilityResponse.created", description="The creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -2096,8 +2084,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="requestidentifier", path="EligibilityResponse.request.as(Identifier)", description="The EligibilityRequest reference", type="token", target={} )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
@@ -2118,8 +2104,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organizationreference", path="EligibilityResponse.organization.as(Reference)", description="The organization which generated this resource", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
@@ -2146,8 +2130,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderReference</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="requestproviderreference", path="EligibilityResponse.requestProvider.as(Reference)", description="The EligibilityRequest provider", type="reference", target={Practitioner.class} )
   public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
  /**
@@ -2174,8 +2156,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="requestorganizationreference", path="EligibilityResponse.requestOrganization.as(Reference)", description="The EligibilityRequest organization", type="reference", target={Organization.class} )
   public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
  /**
@@ -2202,8 +2182,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestReference</b><br>
    * </p>
    */
-  // [EligibilityRequest]
-  // [EligibilityRequest]
   @SearchParamDefinition(name="requestreference", path="EligibilityResponse.request.as(Reference)", description="The EligibilityRequest reference", type="reference", target={EligibilityRequest.class} )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**
@@ -2230,8 +2208,6 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.outcome</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="outcome", path="EligibilityResponse.outcome", description="The processing outcome", type="token", target={} )
   public static final String SP_OUTCOME = "outcome";
  /**

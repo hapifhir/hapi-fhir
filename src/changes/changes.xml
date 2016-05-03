@@ -522,6 +522,11 @@
 				Remove invalid resource type "Documentation" from DSTU2
 				structures.
 			</action>
+			<action type="fix">
+				JPA server did not respect target types for search parameters. E.g. Appointment:patient has
+				a path of "Appointment.participant.actor" and a target type of "Patient". The search path
+				was being correctly handled, but the target type was being ignored.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

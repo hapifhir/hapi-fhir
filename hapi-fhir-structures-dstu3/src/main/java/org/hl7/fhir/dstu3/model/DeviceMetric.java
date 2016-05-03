@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1695,8 +1695,6 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.parent</b><br>
    * </p>
    */
-  // [DeviceComponent]
-  // [DeviceComponent]
   @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference", target={DeviceComponent.class} )
   public static final String SP_PARENT = "parent";
  /**
@@ -1723,8 +1721,6 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1745,8 +1741,6 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.source</b><br>
    * </p>
    */
-  // [Device]
-  // [Device]
   @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", target={Device.class} )
   public static final String SP_SOURCE = "source";
  /**
@@ -1773,8 +1767,6 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1795,8 +1787,6 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**

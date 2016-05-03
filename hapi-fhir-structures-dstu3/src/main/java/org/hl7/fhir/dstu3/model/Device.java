@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1352,8 +1352,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1374,8 +1372,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1402,8 +1398,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.owner</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
@@ -1430,8 +1424,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.model</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string", target={} )
   public static final String SP_MODEL = "model";
  /**
@@ -1452,8 +1444,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -1480,8 +1470,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1502,8 +1490,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token", target={} )
   public static final String SP_UDICARRIER = "udicarrier";
  /**
@@ -1524,8 +1510,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -1546,8 +1530,6 @@ public class Device extends DomainResource {
    * Path: <b>Device.manufacturer</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string", target={} )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**

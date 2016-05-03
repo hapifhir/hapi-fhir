@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1951,8 +1951,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.signature.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="sig", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token", target={} )
   public static final String SP_SIG = "sig";
  /**
@@ -1973,8 +1971,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.entity.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="entity-type", path="Provenance.entity.type", description="The type of resource in this entity", type="token", target={} )
   public static final String SP_ENTITY_TYPE = "entity-type";
  /**
@@ -1995,8 +1991,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.agent.actor</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AGENT = "agent";
  /**
@@ -2023,9 +2017,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.target</b><br>
    * </p>
    */
-  // [Any]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
+  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2051,8 +2043,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.period.start</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date", target={} )
   public static final String SP_START = "start";
  /**
@@ -2073,8 +2063,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.period.end</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="end", path="Provenance.period.end", description="End time with inclusive boundary, if not ongoing", type="date", target={} )
   public static final String SP_END = "end";
  /**
@@ -2095,8 +2083,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="Provenance.location", description="Where the activity occurred, if relevant", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -2123,8 +2109,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.agent.userId</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token", target={} )
   public static final String SP_USERID = "userid";
  /**
@@ -2145,8 +2129,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.entity.reference</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri", target={} )
   public static final String SP_ENTITY = "entity";
  /**
@@ -2167,8 +2149,6 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.target</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="target", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_TARGET = "target";
  /**

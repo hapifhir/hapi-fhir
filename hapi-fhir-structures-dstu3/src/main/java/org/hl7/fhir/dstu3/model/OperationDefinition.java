@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2971,8 +2971,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -2993,8 +2991,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -3015,8 +3011,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.instance</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token", target={} )
   public static final String SP_INSTANCE = "instance";
  /**
@@ -3037,8 +3031,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.kind</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
@@ -3059,8 +3051,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -3081,8 +3071,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -3103,8 +3091,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.parameter.profile</b><br>
    * </p>
    */
-  // [StructureDefinition]
-  // [StructureDefinition]
   @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference", target={StructureDefinition.class} )
   public static final String SP_PARAMPROFILE = "paramprofile";
  /**
@@ -3131,8 +3117,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -3153,8 +3137,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.system</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token", target={} )
   public static final String SP_SYSTEM = "system";
  /**
@@ -3175,8 +3157,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -3197,8 +3177,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -3219,8 +3197,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -3241,8 +3217,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
@@ -3263,8 +3237,6 @@ public class OperationDefinition extends DomainResource {
    * Path: <b>OperationDefinition.base</b><br>
    * </p>
    */
-  // [OperationDefinition]
-  // [OperationDefinition]
   @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference", target={OperationDefinition.class} )
   public static final String SP_BASE = "base";
  /**

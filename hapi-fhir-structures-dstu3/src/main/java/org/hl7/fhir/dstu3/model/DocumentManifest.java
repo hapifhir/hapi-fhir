@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1377,8 +1377,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1399,8 +1397,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token", target={} )
   public static final String SP_RELATED_ID = "related-id";
  /**
@@ -1421,8 +1417,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.content.pReference</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.p.as(Reference)", description="Contents of this set of documents", type="reference" )
   public static final String SP_CONTENT_REF = "content-ref";
  /**
@@ -1449,8 +1443,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Device, Patient]
-  // [Practitioner, Group, Device, Patient]
   @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1477,8 +1469,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.author</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
@@ -1505,8 +1495,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -1527,8 +1515,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -1549,8 +1535,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.source</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri", target={} )
   public static final String SP_SOURCE = "source";
  /**
@@ -1571,8 +1555,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1593,8 +1575,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.ref</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="related-ref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATED_REF = "related-ref";
  /**
@@ -1621,9 +1601,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Device, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1649,8 +1627,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.recipient</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient, RelatedPerson]
-  // [Practitioner, Organization, Patient, RelatedPerson]
   @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
@@ -1677,8 +1653,6 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

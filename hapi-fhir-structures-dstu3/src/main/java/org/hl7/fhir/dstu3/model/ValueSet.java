@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -4657,8 +4657,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -4679,8 +4677,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.compose.include.system</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri", target={} )
   public static final String SP_REFERENCE = "reference";
  /**
@@ -4701,8 +4697,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -4723,8 +4717,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -4745,8 +4737,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -4767,8 +4757,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -4789,8 +4777,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -4811,8 +4797,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -4833,8 +4817,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -4855,8 +4837,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
@@ -4877,8 +4857,6 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.expansion.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri", target={} )
   public static final String SP_EXPANSION = "expansion";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1088,8 +1088,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1110,8 +1108,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1132,8 +1128,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.kind</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
@@ -1154,8 +1148,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1182,8 +1174,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.supplier</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference", target={Organization.class} )
   public static final String SP_SUPPLIER = "supplier";
  /**
@@ -1210,8 +1200,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.source</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient]
-  // [Practitioner, Organization, Patient]
   @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
   public static final String SP_SOURCE = "source";
  /**
@@ -1238,8 +1226,6 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -945,8 +945,6 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="SupplyDelivery.identifier", description="External identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -967,8 +965,6 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.receiver</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference", target={Practitioner.class} )
   public static final String SP_RECEIVER = "receiver";
  /**
@@ -995,8 +991,6 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1023,8 +1017,6 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.supplier</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", target={Practitioner.class} )
   public static final String SP_SUPPLIER = "supplier";
  /**
@@ -1051,8 +1043,6 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

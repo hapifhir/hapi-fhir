@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -8434,8 +8434,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Claim.identifier", description="The primary identifier of the financial resource", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -8456,8 +8454,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="patientidentifier", path="Claim.patient.as(Identifier)", description="Patient receiving the services", type="token", target={} )
   public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
  /**
@@ -8478,8 +8474,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="organizationidentifier", path="Claim.organization.as(Identifier)", description="The reference to the providing organization", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
@@ -8500,8 +8494,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.use</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="use", path="Claim.use", description="The kind of financial resource", type="token", target={} )
   public static final String SP_USE = "use";
  /**
@@ -8522,8 +8514,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="Claim.created", description="The creation date for the Claim", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -8544,8 +8534,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientReference</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patientreference", path="Claim.patient.as(Reference)", description="Patient receiving the services", type="reference", target={Patient.class} )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
@@ -8572,8 +8560,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerReference</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="providerreference", path="Claim.provider.as(Reference)", description="Provider responsible for the Claim", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
@@ -8600,8 +8586,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organizationreference", path="Claim.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
@@ -8628,8 +8612,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.priority</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="priority", path="Claim.priority", description="Processing priority requested", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
@@ -8650,8 +8632,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="provideridentifier", path="Claim.provider.as(Identifier)", description="Provider responsible for the Claim", type="token", target={} )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
@@ -8672,8 +8652,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="targetidentifier", path="Claim.target.as(Identifier)", description="The target payor/insurer for the Claim", type="token", target={} )
   public static final String SP_TARGETIDENTIFIER = "targetidentifier";
  /**
@@ -8694,8 +8672,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityReference</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="facilityreference", path="Claim.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class} )
   public static final String SP_FACILITYREFERENCE = "facilityreference";
  /**
@@ -8722,8 +8698,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="targetreference", path="Claim.target.as(Reference)", description="The target payor/insurer for the Claim", type="reference", target={Organization.class} )
   public static final String SP_TARGETREFERENCE = "targetreference";
  /**
@@ -8750,8 +8724,6 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="facilityidentifier", path="Claim.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token", target={} )
   public static final String SP_FACILITYIDENTIFIER = "facilityidentifier";
  /**

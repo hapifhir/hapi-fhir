@@ -170,22 +170,22 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			postProcess(resource);
 			
-			for (SearchParameter nextParam : resource.getSearchParameters()) {
-				if (nextParam.getType().equals("reference")) {
-					String path = nextParam.getPath();
-					List<String> targetTypes = pathToResourceTypes.get(path);
-					if (targetTypes != null) {
-						targetTypes = new ArrayList<String>(targetTypes);
-						for (Iterator<String> iter = targetTypes.iterator(); iter.hasNext();) {
-							String next = iter.next();
-							if (next.equals("Any") || next.endsWith("Dt")) {
-								iter.remove();
-							}
-						}
-					}
-					nextParam.setTargetTypes(targetTypes);
-				}
-			}
+//			for (SearchParameter nextParam : resource.getSearchParameters()) {
+//				if (nextParam.getType().equals("reference")) {
+//					String path = nextParam.getPath();
+//					List<String> targetTypes = pathToResourceTypes.get(path);
+//					if (targetTypes != null) {
+//						targetTypes = new ArrayList<String>(targetTypes);
+//						for (Iterator<String> iter = targetTypes.iterator(); iter.hasNext();) {
+//							String next = iter.next();
+//							if (next.equals("Any") || next.endsWith("Dt")) {
+//								iter.remove();
+//							}
+//						}
+//					}
+//					nextParam.setTargetTypes(targetTypes);
+//				}
+//			}
 
 			index++;
 		}
@@ -244,6 +244,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				int colDesc = 0;
 				int colType = 0;
 				int colPath = 0;
+				int colTargetTypes = 0;
 				for (int j = 0; j < 20; j++) {
 					String nextName = cellValue(defRow, j);
 					if (nextName == null) {
@@ -258,6 +259,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						colType = j;
 					} else if ("path".equals(nextName)) {
 						colPath = j;
+					} else if ("target types".equals(nextName)) {
+						colTargetTypes = j;
 					}
 				}
 
@@ -277,6 +280,17 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 							compositeParams.add(sp);
 						} else {
 							theResource.addSearchParameter(getVersion(), sp);
+						}
+					}
+					
+					String targetTypes = cellValue(nextRow, colTargetTypes);
+					if (isNotBlank(targetTypes)) {
+						for (String next : targetTypes.trim().split("\\s*,\\s*")) {
+							if (isNotBlank(next)) {
+								if (Character.isUpperCase(next.charAt(0))) {
+									sp.addTargetType(next);
+								}
+							}
 						}
 					}
 				}

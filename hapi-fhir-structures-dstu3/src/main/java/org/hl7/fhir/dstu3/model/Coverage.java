@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1314,8 +1314,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured and the coverage", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1336,8 +1334,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="issuerreference", path="Coverage.issuer.as(Reference)", description="The identity of the insurer", type="reference", target={Organization.class} )
   public static final String SP_ISSUERREFERENCE = "issuerreference";
  /**
@@ -1364,8 +1360,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.subPlan</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token", target={} )
   public static final String SP_SUBPLAN = "subplan";
  /**
@@ -1386,8 +1380,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage (health plan, auto, Workers Compensation)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1408,8 +1400,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="beneficiaryidentifier", path="Coverage.beneficiary.as(Identifier)", description="Covered party", type="token", target={} )
   public static final String SP_BENEFICIARYIDENTIFIER = "beneficiaryidentifier";
  /**
@@ -1430,8 +1420,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="planholderidentifier", path="Coverage.planholder.as(Identifier)", description="Reference to the planholder", type="token", target={} )
   public static final String SP_PLANHOLDERIDENTIFIER = "planholderidentifier";
  /**
@@ -1452,8 +1440,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.sequence</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token", target={} )
   public static final String SP_SEQUENCE = "sequence";
  /**
@@ -1474,8 +1460,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderReference</b><br>
    * </p>
    */
-  // [Organization, Patient]
-  // [Organization, Patient]
   @SearchParamDefinition(name="planholderreference", path="Coverage.planholder.as(Reference)", description="Reference to the planholder", type="reference", target={Organization.class, Patient.class} )
   public static final String SP_PLANHOLDERREFERENCE = "planholderreference";
  /**
@@ -1502,8 +1486,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="issueridentifier", path="Coverage.issuer.as(Identifier)", description="The identity of the insurer", type="token", target={} )
   public static final String SP_ISSUERIDENTIFIER = "issueridentifier";
  /**
@@ -1524,8 +1506,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.plan</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token", target={} )
   public static final String SP_PLAN = "plan";
  /**
@@ -1546,8 +1526,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.dependent</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token", target={} )
   public static final String SP_DEPENDENT = "dependent";
  /**
@@ -1568,8 +1546,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryReference</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="beneficiaryreference", path="Coverage.beneficiary.as(Reference)", description="Covered party", type="reference", target={Patient.class} )
   public static final String SP_BENEFICIARYREFERENCE = "beneficiaryreference";
  /**
@@ -1596,8 +1572,6 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.group</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token", target={} )
   public static final String SP_GROUP = "group";
  /**

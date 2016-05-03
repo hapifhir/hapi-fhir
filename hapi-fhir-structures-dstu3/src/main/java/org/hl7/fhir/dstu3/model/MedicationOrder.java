@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2723,8 +2723,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.prescriber</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the medication(s)", type="reference", target={Practitioner.class} )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
@@ -2751,8 +2749,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="MedicationOrder.identifier", description="Return prescriptions with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2773,8 +2769,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.medicationCodeableConcept</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="MedicationOrder.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -2795,8 +2789,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="MedicationOrder.patient", description="The identity of a patient to list orders  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2823,8 +2815,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.dateWritten</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="datewritten", path="MedicationOrder.dateWritten", description="Return prescriptions written on this date", type="date", target={} )
   public static final String SP_DATEWRITTEN = "datewritten";
  /**
@@ -2845,8 +2835,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.medicationReference</b><br>
    * </p>
    */
-  // [Medication]
-  // [Medication]
   @SearchParamDefinition(name="medication", path="MedicationOrder.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
@@ -2873,8 +2861,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="MedicationOrder.encounter", description="Return prescriptions with this encounter identifier", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -2901,8 +2887,6 @@ public class MedicationOrder extends DomainResource {
    * Path: <b>MedicationOrder.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="MedicationOrder.status", description="Status of the prescription", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

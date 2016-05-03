@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1929,8 +1929,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1951,8 +1949,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1973,8 +1969,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.element.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1995,8 +1989,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.stringency</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="stringency", path="DataElement.stringency", description="The stringency of the data element definition", type="token", target={} )
   public static final String SP_STRINGENCY = "stringency";
  /**
@@ -2017,8 +2009,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -2039,8 +2029,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -2061,8 +2049,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -2083,8 +2069,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.element.definition</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -2105,8 +2089,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -2127,8 +2109,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -2149,8 +2129,6 @@ public class DataElement extends DomainResource {
    * Path: <b>DataElement.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

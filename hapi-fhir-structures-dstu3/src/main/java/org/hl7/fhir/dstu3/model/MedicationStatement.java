@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1981,8 +1981,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2003,8 +2001,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.effective[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date", target={} )
   public static final String SP_EFFECTIVE = "effective";
  /**
@@ -2025,8 +2021,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -2047,8 +2041,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2075,8 +2067,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  // [Medication]
-  // [Medication]
   @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
@@ -2103,8 +2093,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>
    */
-  // [Practitioner, Patient, RelatedPerson]
-  // [Practitioner, Patient, RelatedPerson]
   @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SOURCE = "source";
  /**
@@ -2131,8 +2119,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1049,8 +1049,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1071,8 +1069,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token", target={} )
   public static final String SP_CONTAINER_IDENTIFIER = "container-identifier";
  /**
@@ -1093,8 +1089,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Substance.code", description="The code of the substance", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1115,8 +1109,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.quantity</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="quantity", target={} )
   public static final String SP_QUANTITY = "quantity";
  /**
@@ -1137,8 +1129,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.ingredient.substance</b><br>
    * </p>
    */
-  // [Substance]
-  // [Substance]
   @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference", target={Substance.class} )
   public static final String SP_SUBSTANCE = "substance";
  /**
@@ -1165,8 +1155,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.expiry</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date", target={} )
   public static final String SP_EXPIRY = "expiry";
  /**
@@ -1187,8 +1175,6 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**

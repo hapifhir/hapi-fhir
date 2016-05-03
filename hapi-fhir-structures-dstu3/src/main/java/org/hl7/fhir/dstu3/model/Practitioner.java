@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2048,8 +2048,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.identifier, Practitioner.practitionerRole.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2070,8 +2068,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.given</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string", target={} )
   public static final String SP_GIVEN = "given";
  /**
@@ -2092,8 +2088,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.specialty</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token", target={} )
   public static final String SP_SPECIALTY = "specialty";
  /**
@@ -2114,8 +2108,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
@@ -2136,8 +2128,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.role</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token", target={} )
   public static final String SP_ROLE = "role";
  /**
@@ -2158,8 +2148,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.state</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
@@ -2180,8 +2168,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.gender</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
@@ -2202,8 +2188,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.postalCode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
@@ -2224,8 +2208,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.country</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
@@ -2246,8 +2228,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
@@ -2268,8 +2248,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=phone), Practitioner.practitionerRole.telecom(system=phone)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
@@ -2290,8 +2268,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.organization</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
@@ -2318,8 +2294,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -2340,8 +2314,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.use</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
@@ -2362,8 +2334,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom, Practitioner.practitionerRole.telecom</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
@@ -2384,8 +2354,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -2412,8 +2380,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.family</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string", target={} )
   public static final String SP_FAMILY = "family";
  /**
@@ -2434,8 +2400,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.city</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
@@ -2456,8 +2420,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.communication</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token", target={} )
   public static final String SP_COMMUNICATION = "communication";
  /**
@@ -2478,8 +2440,6 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=email), Practitioner.practitionerRole.telecom(system=email)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**

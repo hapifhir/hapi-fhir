@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2239,8 +2239,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.owner</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="owner", path="Task.owner", description="Search by task owner", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_OWNER = "owner";
  /**
@@ -2267,8 +2265,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Task.identifier", description="Search for a task instance by its business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2289,8 +2285,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.parent</b><br>
    * </p>
    */
-  // [Task]
-  // [Task]
   @SearchParamDefinition(name="parent", path="Task.parent", description="Search by parent task", type="reference", target={Task.class} )
   public static final String SP_PARENT = "parent";
  /**
@@ -2317,8 +2311,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.creator</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="creator", path="Task.creator", description="Search by task creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_CREATOR = "creator";
  /**
@@ -2345,8 +2337,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.performerType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="performer", path="Task.performerType", description="Search by recommended type of performer (e.g., Requester, Performer, Scheduler).", type="token", target={} )
   public static final String SP_PERFORMER = "performer";
  /**
@@ -2367,8 +2357,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.subject</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="subject", path="Task.subject", description="Search by task subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2395,8 +2383,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="Task.created", description="Search by creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -2417,8 +2403,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Task.type", description="Search by task type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -2439,8 +2423,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.priority</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="priority", path="Task.priority", description="Search by task priority", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
@@ -2461,8 +2443,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.failureReason</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="failure", path="Task.failureReason", description="Search by failure reason", type="token", target={} )
   public static final String SP_FAILURE = "failure";
  /**
@@ -2483,8 +2463,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.lastModified</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="modified", path="Task.lastModified", description="Search by last modification date", type="date", target={} )
   public static final String SP_MODIFIED = "modified";
  /**
@@ -2505,8 +2483,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.definition</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="definition", path="Task.definition", description="Search by task definition", type="uri", target={} )
   public static final String SP_DEFINITION = "definition";
  /**
@@ -2527,8 +2503,6 @@ public class Task extends DomainResource {
    * Path: <b>Task.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Task.status", description="Search by task status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

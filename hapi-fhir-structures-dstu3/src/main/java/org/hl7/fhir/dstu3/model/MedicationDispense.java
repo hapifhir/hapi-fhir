@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2397,8 +2397,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2419,8 +2417,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="MedicationDispense.medication.as(CodeableConcept)", description="Return dispenses of this medicine code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -2441,8 +2437,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.receiver</b><br>
    * </p>
    */
-  // [Practitioner, Patient]
-  // [Practitioner, Patient]
   @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference", target={Practitioner.class, Patient.class} )
   public static final String SP_RECEIVER = "receiver";
  /**
@@ -2469,8 +2463,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.destination</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference", target={Location.class} )
   public static final String SP_DESTINATION = "destination";
  /**
@@ -2497,8 +2489,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.medicationReference</b><br>
    * </p>
    */
-  // [Medication]
-  // [Medication]
   @SearchParamDefinition(name="medication", path="MedicationDispense.medication.as(Reference)", description="Return dispenses of this medicine resource", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
@@ -2525,8 +2515,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference", target={Practitioner.class} )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
  /**
@@ -2553,8 +2541,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -2575,8 +2561,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.whenHandedOver</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date", target={} )
   public static final String SP_WHENHANDEDOVER = "whenhandedover";
  /**
@@ -2597,8 +2581,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.whenPrepared</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date", target={} )
   public static final String SP_WHENPREPARED = "whenprepared";
  /**
@@ -2619,8 +2601,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.dispenser</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference", target={Practitioner.class} )
   public static final String SP_DISPENSER = "dispenser";
  /**
@@ -2647,8 +2627,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.authorizingPrescription</b><br>
    * </p>
    */
-  // [MedicationOrder]
-  // [MedicationOrder]
   @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference", target={MedicationOrder.class} )
   public static final String SP_PRESCRIPTION = "prescription";
  /**
@@ -2675,8 +2653,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2703,8 +2679,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationDispense.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

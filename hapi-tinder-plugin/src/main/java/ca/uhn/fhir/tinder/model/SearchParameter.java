@@ -140,8 +140,11 @@ public class SearchParameter {
 		myPath = thePath;
 	}
 
-	public void setTargetTypes(List<String> theTargetTypes) {
-		myTargetTypes = theTargetTypes;
+	public void addTargetType(String theTargetType) {
+		if (myTargetTypes == null) {
+			myTargetTypes = new ArrayList<String>();
+		}
+		myTargetTypes.add(theTargetType);
 	}
 
 	public void setType(String theType) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1952,8 +1952,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.response.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="MessageHeader.response.code", description="ok | transient-error | fatal-error", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1974,8 +1972,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.data</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="data", path="MessageHeader.data", description="The actual content of the message", type="reference" )
   public static final String SP_DATA = "data";
  /**
@@ -2002,8 +1998,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.receiver</b><br>
    * </p>
    */
-  // [Practitioner, Organization]
-  // [Practitioner, Organization]
   @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_RECEIVER = "receiver";
  /**
@@ -2030,8 +2024,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.author</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", target={Practitioner.class} )
   public static final String SP_AUTHOR = "author";
  /**
@@ -2058,8 +2050,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string", target={} )
   public static final String SP_DESTINATION = "destination";
  /**
@@ -2080,8 +2070,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.source.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="source", path="MessageHeader.source.name", description="Name of system", type="string", target={} )
   public static final String SP_SOURCE = "source";
  /**
@@ -2102,8 +2090,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.target</b><br>
    * </p>
    */
-  // [Device]
-  // [Device]
   @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference", target={Device.class} )
   public static final String SP_TARGET = "target";
  /**
@@ -2130,8 +2116,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.endpoint</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri", target={} )
   public static final String SP_DESTINATION_URI = "destination-uri";
  /**
@@ -2152,8 +2136,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.source.endpoint</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri", target={} )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
@@ -2174,8 +2156,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.responsible</b><br>
    * </p>
    */
-  // [Practitioner, Organization]
-  // [Practitioner, Organization]
   @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
@@ -2202,8 +2182,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.response.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token", target={} )
   public static final String SP_RESPONSE_ID = "response-id";
  /**
@@ -2224,8 +2202,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.enterer</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", target={Practitioner.class} )
   public static final String SP_ENTERER = "enterer";
  /**
@@ -2252,8 +2228,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.event</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token", target={} )
   public static final String SP_EVENT = "event";
  /**
@@ -2274,8 +2248,6 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.timestamp</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date", target={} )
   public static final String SP_TIMESTAMP = "timestamp";
  /**

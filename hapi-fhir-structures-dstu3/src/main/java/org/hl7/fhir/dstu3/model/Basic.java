@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -478,8 +478,6 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Basic.identifier", description="Business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -500,8 +498,6 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -522,8 +518,6 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.subject</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="subject", path="Basic.subject", description="Identifies the focus of this resource", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -550,8 +544,6 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -572,9 +564,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.subject</b><br>
    * </p>
    */
-  // [Any]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference" )
+  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -600,8 +590,6 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.author</b><br>
    * </p>
    */
-  // [Practitioner, Patient, RelatedPerson]
-  // [Practitioner, Patient, RelatedPerson]
   @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**

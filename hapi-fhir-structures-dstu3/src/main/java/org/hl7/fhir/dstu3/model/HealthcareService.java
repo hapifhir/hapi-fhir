@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2632,8 +2632,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2654,8 +2652,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceCategory</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token", target={} )
   public static final String SP_SERVICECATEGORY = "servicecategory";
  /**
@@ -2676,8 +2672,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token", target={} )
   public static final String SP_SERVICETYPE = "servicetype";
  /**
@@ -2698,8 +2692,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.providedBy</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
@@ -2726,8 +2718,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceName</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -2748,8 +2738,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.programName</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string", target={} )
   public static final String SP_PROGRAMNAME = "programname";
  /**
@@ -2770,8 +2758,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -2798,8 +2784,6 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.characteristic</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token", target={} )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**

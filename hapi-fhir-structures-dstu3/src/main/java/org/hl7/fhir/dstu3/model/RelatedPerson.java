@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -822,8 +822,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -844,8 +842,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
@@ -866,8 +862,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.birthDate</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="birthdate", path="RelatedPerson.birthDate", description="The Related Person's date of birth", type="date", target={} )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
@@ -888,8 +882,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.state</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-state", path="RelatedPerson.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
@@ -910,8 +902,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.gender</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
@@ -932,8 +922,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.postalCode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-postalcode", path="RelatedPerson.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
@@ -954,8 +942,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.country</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-country", path="RelatedPerson.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
@@ -976,8 +962,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phonetic", path="RelatedPerson.name", description="A portion of name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
@@ -998,8 +982,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom(system=phone)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phone", path="RelatedPerson.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
@@ -1020,8 +1002,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1048,8 +1028,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -1070,8 +1048,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.use</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-use", path="RelatedPerson.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
@@ -1092,8 +1068,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
@@ -1114,8 +1088,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.city</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
@@ -1136,8 +1108,6 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom(system=email)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="email", path="RelatedPerson.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**

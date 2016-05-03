@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1931,8 +1931,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.severity</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token", target={} )
   public static final String SP_SEVERITY = "severity";
  /**
@@ -1953,8 +1951,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1975,8 +1971,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.clinicalStatus</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token", target={} )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
  /**
@@ -1997,8 +1991,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string", target={} )
   public static final String SP_ONSET_INFO = "onset-info";
  /**
@@ -2019,8 +2011,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -2041,8 +2031,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.evidence.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token", target={} )
   public static final String SP_EVIDENCE = "evidence";
  /**
@@ -2063,8 +2051,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -2091,8 +2077,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date", target={} )
   public static final String SP_ONSET = "onset";
  /**
@@ -2113,8 +2097,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.asserter</b><br>
    * </p>
    */
-  // [Practitioner, Patient]
-  // [Practitioner, Patient]
   @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", target={Practitioner.class, Patient.class} )
   public static final String SP_ASSERTER = "asserter";
  /**
@@ -2141,8 +2123,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.dateRecorded</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date", target={} )
   public static final String SP_DATE_RECORDED = "date-recorded";
  /**
@@ -2163,8 +2143,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.stage.summary</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token", target={} )
   public static final String SP_STAGE = "stage";
  /**
@@ -2185,8 +2163,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2213,8 +2189,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
@@ -2235,8 +2209,6 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.bodySite</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token", target={} )
   public static final String SP_BODY_SITE = "body-site";
  /**

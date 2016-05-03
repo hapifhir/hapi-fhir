@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1219,8 +1219,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1241,8 +1239,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
@@ -1263,8 +1259,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.birthDate</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date", target={} )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
@@ -1285,8 +1279,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.state</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-state", path="Person.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
@@ -1307,8 +1299,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.gender</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
@@ -1329,9 +1319,7 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  // [Practitioner, Patient, Person, RelatedPerson]
-  // [Practitioner]
-  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference", target={Practitioner.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -1357,8 +1345,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  // [Practitioner, Patient, Person, RelatedPerson]
-  // [Practitioner, Patient, Person, RelatedPerson]
   @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
   public static final String SP_LINK = "link";
  /**
@@ -1385,9 +1371,7 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  // [Practitioner, Patient, Person, RelatedPerson]
-  // [RelatedPerson]
-  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference", target={RelatedPerson.class} )
   public static final String SP_RELATEDPERSON = "relatedperson";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedperson</b>
@@ -1413,8 +1397,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.postalCode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-postalcode", path="Person.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
@@ -1435,8 +1417,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.country</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
@@ -1457,8 +1437,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
@@ -1479,8 +1457,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom(system=phone)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phone", path="Person.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
   public static final String SP_PHONE = "phone";
  /**
@@ -1501,9 +1477,7 @@ public class Person extends DomainResource {
    * Path: <b>Person.link.target</b><br>
    * </p>
    */
-  // [Practitioner, Patient, Person, RelatedPerson]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference", target={Practitioner.class, Patient.class, Person.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1529,8 +1503,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.managingOrganization</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
@@ -1557,8 +1529,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -1579,8 +1549,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.use</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-use", path="Person.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
@@ -1601,8 +1569,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
@@ -1623,8 +1589,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.address.city</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
@@ -1645,8 +1609,6 @@ public class Person extends DomainResource {
    * Path: <b>Person.telecom(system=email)</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="email", path="Person.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
   public static final String SP_EMAIL = "email";
  /**

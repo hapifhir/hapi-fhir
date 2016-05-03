@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1687,8 +1687,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="CompartmentDefinition.date", description="Publication Date(/time)", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1709,8 +1707,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="CompartmentDefinition.code", description="Patient | Encounter | RelatedPerson | Practitioner | Device", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1731,8 +1727,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.resource.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="resource", path="CompartmentDefinition.resource.code", description="Name of resource type", type="token", target={} )
   public static final String SP_RESOURCE = "resource";
  /**
@@ -1753,8 +1747,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="CompartmentDefinition.name", description="Informal name for this compartment definition", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -1775,8 +1767,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="CompartmentDefinition.url", description="Absolute URL used to reference this compartment definition", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -1797,8 +1787,6 @@ public class CompartmentDefinition extends DomainResource {
    * Path: <b>CompartmentDefinition.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="CompartmentDefinition.status", description="draft | active | retired", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

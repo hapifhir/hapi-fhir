@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1576,8 +1576,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.authored</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1598,8 +1596,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.requester</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient]
-  // [Practitioner, Organization, Patient]
   @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
   public static final String SP_REQUESTER = "requester";
  /**
@@ -1626,8 +1622,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.parent</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token", target={} )
   public static final String SP_PARENT = "parent";
  /**
@@ -1648,8 +1642,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.specialty</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token", target={} )
   public static final String SP_SPECIALTY = "specialty";
  /**
@@ -1670,8 +1662,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1698,8 +1688,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.recipient</b><br>
    * </p>
    */
-  // [Practitioner, Organization]
-  // [Practitioner, Organization]
   @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
@@ -1726,8 +1714,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.context</b><br>
    * </p>
    */
-  // [EpisodeOfCare, Encounter]
-  // [EpisodeOfCare, Encounter]
   @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference", target={EpisodeOfCare.class, Encounter.class} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -1754,8 +1740,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1776,8 +1760,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.priority</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
@@ -1798,8 +1780,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
@@ -1820,8 +1800,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.basedOn</b><br>
    * </p>
    */
-  // [ReferralRequest, CarePlan, DiagnosticOrder, ProcedureRequest]
-  // [ReferralRequest, CarePlan, DiagnosticOrder, ProcedureRequest]
   @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={ReferralRequest.class, CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class} )
   public static final String SP_BASEDON = "basedon";
  /**
@@ -1848,8 +1826,6 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

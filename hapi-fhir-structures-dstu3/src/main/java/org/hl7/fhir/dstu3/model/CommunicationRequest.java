@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1529,8 +1529,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.requester</b><br>
    * </p>
    */
-  // [Practitioner, Patient, RelatedPerson]
-  // [Practitioner, Patient, RelatedPerson]
   @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_REQUESTER = "requester";
  /**
@@ -1557,8 +1555,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1579,8 +1575,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.subject</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference", target={Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1607,8 +1601,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.medium</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token", target={} )
   public static final String SP_MEDIUM = "medium";
  /**
@@ -1629,8 +1621,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -1657,8 +1647,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.priority</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
@@ -1679,8 +1667,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.requestedOn</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date", target={} )
   public static final String SP_REQUESTED = "requested";
  /**
@@ -1701,8 +1687,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.sender</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_SENDER = "sender";
  /**
@@ -1729,8 +1713,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.subject</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1757,8 +1739,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.recipient</b><br>
    * </p>
    */
-  // [Practitioner, Group, Organization, CareTeam, Device, Patient, RelatedPerson]
-  // [Practitioner, Group, Organization, CareTeam, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference", target={Practitioner.class, Group.class, Organization.class, CareTeam.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_RECIPIENT = "recipient";
  /**
@@ -1785,8 +1765,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.scheduledDateTime</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="time", path="CommunicationRequest.scheduled.as(DateTime)", description="When scheduled", type="date", target={} )
   public static final String SP_TIME = "time";
  /**
@@ -1807,8 +1785,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
@@ -1829,8 +1805,6 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

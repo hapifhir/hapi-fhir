@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1315,8 +1315,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string", target={} )
   public static final String SP_PAYLOAD = "payload";
  /**
@@ -1337,8 +1335,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.criteria</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string", target={} )
   public static final String SP_CRITERIA = "criteria";
  /**
@@ -1359,8 +1355,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.contact</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token", target={} )
   public static final String SP_CONTACT = "contact";
  /**
@@ -1381,8 +1375,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.tag</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token", target={} )
   public static final String SP_TAG = "tag";
  /**
@@ -1403,8 +1395,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1425,8 +1415,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -1447,8 +1435,6 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

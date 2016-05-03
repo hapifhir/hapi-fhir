@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1023,8 +1023,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1045,8 +1043,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.partOf</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference", target={Organization.class} )
   public static final String SP_PARTOF = "partof";
  /**
@@ -1073,8 +1069,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string", target={} )
   public static final String SP_PHONETIC = "phonetic";
  /**
@@ -1095,8 +1089,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string", target={} )
   public static final String SP_ADDRESS = "address";
  /**
@@ -1117,8 +1109,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.state</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
@@ -1139,8 +1129,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -1161,8 +1149,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.use</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token", target={} )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
@@ -1183,8 +1169,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.active</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token", target={} )
   public static final String SP_ACTIVE = "active";
  /**
@@ -1205,8 +1189,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1227,8 +1209,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.city</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
@@ -1249,8 +1229,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.postalCode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
@@ -1271,8 +1249,6 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.country</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string", target={} )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**

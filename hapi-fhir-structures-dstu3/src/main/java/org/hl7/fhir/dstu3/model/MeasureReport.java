@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3093,8 +3093,6 @@ public class MeasureReport extends DomainResource {
    * Path: <b>MeasureReport.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="MeasureReport.patient", description="The identity of a patient to search for individual measure report results for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -879,8 +879,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.owner</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference", target={Organization.class} )
   public static final String SP_OWNER = "owner";
  /**
@@ -907,8 +905,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -929,8 +925,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.coveragePeriod</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
@@ -951,8 +945,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.balance</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity", target={} )
   public static final String SP_BALANCE = "balance";
  /**
@@ -973,8 +965,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, HealthcareService, Location]
-  // [Practitioner, Organization, Device, Patient, HealthcareService, Location]
   @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, HealthcareService.class, Location.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1001,9 +991,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, HealthcareService, Location]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, HealthcareService.class, Location.class} )
+  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1029,8 +1017,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -1051,8 +1037,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1073,8 +1057,6 @@ public class Account extends DomainResource {
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

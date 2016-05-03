@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2752,8 +2752,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2774,8 +2772,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.uid</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri", target={} )
   public static final String SP_UID = "uid";
  /**
@@ -2796,8 +2792,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.uid</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri", target={} )
   public static final String SP_STUDY = "study";
  /**
@@ -2818,8 +2812,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri", target={} )
   public static final String SP_DICOM_CLASS = "dicom-class";
  /**
@@ -2840,8 +2832,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.modality</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token", target={} )
   public static final String SP_MODALITY = "modality";
  /**
@@ -2862,8 +2852,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.bodySite</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
@@ -2884,8 +2872,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2912,8 +2898,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.uid</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri", target={} )
   public static final String SP_SERIES = "series";
  /**
@@ -2934,8 +2918,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.started</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date", target={} )
   public static final String SP_STARTED = "started";
  /**
@@ -2956,8 +2938,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.accession</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token", target={} )
   public static final String SP_ACCESSION = "accession";
  /**
@@ -2978,8 +2958,6 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.order</b><br>
    * </p>
    */
-  // [DiagnosticOrder]
-  // [DiagnosticOrder]
   @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference", target={DiagnosticOrder.class} )
   public static final String SP_ORDER = "order";
  /**

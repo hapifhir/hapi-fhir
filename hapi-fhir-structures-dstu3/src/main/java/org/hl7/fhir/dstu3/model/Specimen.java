@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2140,8 +2140,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token", target={} )
   public static final String SP_CONTAINER = "container";
  /**
@@ -2162,8 +2160,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2184,8 +2180,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.parent</b><br>
    * </p>
    */
-  // [Specimen]
-  // [Specimen]
   @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference", target={Specimen.class} )
   public static final String SP_PARENT = "parent";
  /**
@@ -2212,8 +2206,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token", target={} )
   public static final String SP_CONTAINER_ID = "container-id";
  /**
@@ -2234,8 +2226,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.bodySite</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
@@ -2256,8 +2246,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  // [Group, Device, Patient, Substance]
-  // [Group, Device, Patient, Substance]
   @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2284,9 +2272,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  // [Group, Device, Patient, Substance]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
+  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2312,8 +2298,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collected[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="collected", path="Specimen.collection.collected", description="The date the specimen was collected", type="date", target={} )
   public static final String SP_COLLECTED = "collected";
  /**
@@ -2334,8 +2318,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.accessionIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token", target={} )
   public static final String SP_ACCESSION = "accession";
  /**
@@ -2356,8 +2338,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -2378,8 +2358,6 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collector</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference", target={Practitioner.class} )
   public static final String SP_COLLECTOR = "collector";
  /**

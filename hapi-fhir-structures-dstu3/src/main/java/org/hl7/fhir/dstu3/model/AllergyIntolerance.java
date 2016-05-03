@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2421,8 +2421,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.severity</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="severity", path="AllergyIntolerance.reaction.severity", description="mild | moderate | severe (of event as a whole)", type="token", target={} )
   public static final String SP_SEVERITY = "severity";
  /**
@@ -2443,8 +2441,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recordedDate</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -2465,8 +2461,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External ids for this item", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2487,8 +2481,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.manifestation</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.reaction.manifestation", description="Clinical symptoms/signs associated with the Event", type="token", target={} )
   public static final String SP_MANIFESTATION = "manifestation";
  /**
@@ -2509,8 +2501,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recorder</b><br>
    * </p>
    */
-  // [Practitioner, Patient]
-  // [Practitioner, Patient]
   @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference", target={Practitioner.class, Patient.class} )
   public static final String SP_RECORDER = "recorder";
  /**
@@ -2537,8 +2527,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.substance, AllergyIntolerance.reaction.substance</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token", target={} )
   public static final String SP_SUBSTANCE = "substance";
  /**
@@ -2559,8 +2547,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.criticality</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unable-to-assess", type="token", target={} )
   public static final String SP_CRITICALITY = "criticality";
  /**
@@ -2581,8 +2567,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reporter</b><br>
    * </p>
    */
-  // [Practitioner, Patient, RelatedPerson]
-  // [Practitioner, Patient, RelatedPerson]
   @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_REPORTER = "reporter";
  /**
@@ -2609,8 +2593,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -2631,8 +2613,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.onset</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date", target={} )
   public static final String SP_ONSET = "onset";
  /**
@@ -2653,8 +2633,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.exposureRoute</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="route", path="AllergyIntolerance.reaction.exposureRoute", description="How the subject was exposed to the substance", type="token", target={} )
   public static final String SP_ROUTE = "route";
  /**
@@ -2675,8 +2653,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -2703,8 +2679,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
@@ -2725,8 +2699,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.lastOccurence</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date", target={} )
   public static final String SP_LAST_DATE = "last-date";
  /**
@@ -2747,8 +2719,6 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

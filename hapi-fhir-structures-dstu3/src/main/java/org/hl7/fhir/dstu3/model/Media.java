@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1001,8 +1001,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1023,8 +1021,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.view</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="view", path="Media.view", description="Imaging view, e.g. Lateral or Antero-posterior", type="token", target={} )
   public static final String SP_VIEW = "view";
  /**
@@ -1045,8 +1041,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.subtype</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token", target={} )
   public static final String SP_SUBTYPE = "subtype";
  /**
@@ -1067,8 +1061,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.content.creation</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="Media.content.creation", description="Date attachment was first created", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -1089,8 +1081,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Specimen, Device, Patient]
-  // [Practitioner, Group, Specimen, Device, Patient]
   @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Practitioner.class, Group.class, Specimen.class, Device.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1117,9 +1107,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Specimen, Device, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Practitioner.class, Group.class, Specimen.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1145,8 +1133,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1167,8 +1153,6 @@ public class Media extends DomainResource {
    * Path: <b>Media.operator</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference", target={Practitioner.class} )
   public static final String SP_OPERATOR = "operator";
  /**

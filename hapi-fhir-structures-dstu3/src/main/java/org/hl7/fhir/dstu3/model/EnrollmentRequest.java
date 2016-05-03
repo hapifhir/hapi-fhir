@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -788,8 +788,6 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="EnrollmentRequest.identifier", description="The business identifier of the Enrollment", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -810,8 +808,6 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subject</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="subject", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference", target={Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -838,8 +834,6 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subject</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="EnrollmentRequest.subject", description="The party to be enrolled", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**

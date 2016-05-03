@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3791,8 +3791,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="ImplementationGuide.date", description="The implementation guide publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -3813,8 +3811,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.dependency.uri</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="dependency", path="ImplementationGuide.dependency.uri", description="Where to find dependency", type="uri", target={} )
   public static final String SP_DEPENDENCY = "dependency";
  /**
@@ -3835,8 +3831,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.package.resource.source[x]</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="resource", path="ImplementationGuide.package.resource.source", description="Location of the resource", type="reference" )
   public static final String SP_RESOURCE = "resource";
  /**
@@ -3863,8 +3857,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="ImplementationGuide.name", description="Name of the implementation guide", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -3885,8 +3877,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="ImplementationGuide.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -3907,8 +3897,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="ImplementationGuide.publisher", description="Name of the publisher of the implementation guide", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -3929,8 +3917,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="ImplementationGuide.description", description="Text search in the description of the implementation guide", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -3951,8 +3937,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.experimental</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="experimental", path="ImplementationGuide.experimental", description="If for testing purposes, not real usage", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
@@ -3973,8 +3957,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="ImplementationGuide.version", description="The version identifier of the implementation guide", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -3995,8 +3977,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="ImplementationGuide.url", description="Absolute URL used to reference this Implementation Guide", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -4017,8 +3997,6 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="ImplementationGuide.status", description="The current status of the implementation guide", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

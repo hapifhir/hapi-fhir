@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1846,8 +1846,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1868,8 +1866,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.period</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
@@ -1890,8 +1886,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.kind</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
@@ -1912,8 +1906,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -1934,8 +1926,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token", target={} )
   public static final String SP_ID_TYPE = "id-type";
  /**
@@ -1956,8 +1946,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.responsible</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string", target={} )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
@@ -1978,8 +1966,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.contact.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of an individual to contact", type="string", target={} )
   public static final String SP_CONTACT = "contact";
  /**
@@ -2000,8 +1986,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -2022,8 +2006,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -2044,8 +2026,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -2066,8 +2046,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.contact.telecom</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token", target={} )
   public static final String SP_TELECOM = "telecom";
  /**
@@ -2088,8 +2066,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.uniqueId.value</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string", target={} )
   public static final String SP_VALUE = "value";
  /**
@@ -2110,8 +2086,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.replacedBy</b><br>
    * </p>
    */
-  // [NamingSystem]
-  // [NamingSystem]
   @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference", target={NamingSystem.class} )
   public static final String SP_REPLACED_BY = "replaced-by";
  /**
@@ -2138,8 +2112,6 @@ public class NamingSystem extends DomainResource {
    * Path: <b>NamingSystem.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

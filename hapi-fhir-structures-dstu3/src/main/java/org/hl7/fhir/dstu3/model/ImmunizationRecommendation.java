@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1599,8 +1599,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="Date recommendation created", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1621,8 +1619,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1643,8 +1639,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number", target={} )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
@@ -1665,8 +1659,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1693,8 +1685,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.vaccineCode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token", target={} )
   public static final String SP_VACCINE_TYPE = "vaccine-type";
  /**
@@ -1715,8 +1705,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number", target={} )
   public static final String SP_DOSE_NUMBER = "dose-number";
  /**
@@ -1737,8 +1725,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br>
    * </p>
    */
-  // [AllergyIntolerance, Observation]
-  // [AllergyIntolerance, Observation]
   @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference", target={AllergyIntolerance.class, Observation.class} )
   public static final String SP_INFORMATION = "information";
  /**
@@ -1765,8 +1751,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br>
    * </p>
    */
-  // [Immunization]
-  // [Immunization]
   @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference", target={Immunization.class} )
   public static final String SP_SUPPORT = "support";
  /**
@@ -1793,8 +1777,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

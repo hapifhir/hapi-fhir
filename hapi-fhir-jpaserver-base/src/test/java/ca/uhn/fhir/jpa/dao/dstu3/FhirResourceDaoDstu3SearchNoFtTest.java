@@ -442,7 +442,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Understanding.20_include
 	 */
 	@Test
-	@Ignore
 	public void testSearchWithTypedInclude() {
 		IIdType patId;
 		{

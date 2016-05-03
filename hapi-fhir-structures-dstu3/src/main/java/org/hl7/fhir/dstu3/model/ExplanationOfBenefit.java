@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -12191,8 +12191,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="ExplanationOfBenefit.identifier", description="The business identifier of the Explanation of Benefit", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -12213,8 +12211,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.patientIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="patientidentifier", path="ExplanationOfBenefit.patient.as(Identifier)", description="The reference to the patient", type="token", target={} )
   public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
  /**
@@ -12235,8 +12231,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.organizationIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="organizationidentifier", path="ExplanationOfBenefit.organization.as(Identifier)", description="The reference to the providing organization", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
@@ -12257,8 +12251,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.claimReference</b><br>
    * </p>
    */
-  // [Claim]
-  // [Claim]
   @SearchParamDefinition(name="claimreference", path="ExplanationOfBenefit.claim.as(Reference)", description="The reference to the claim", type="reference", target={Claim.class} )
   public static final String SP_CLAIMREFERENCE = "claimreference";
  /**
@@ -12285,8 +12277,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="ExplanationOfBenefit.created", description="The creation date for the EOB", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -12307,8 +12297,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.patientReference</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patientreference", path="ExplanationOfBenefit.patient.as(Reference)", description="The reference to the patient", type="reference", target={Patient.class} )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
@@ -12335,8 +12323,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.providerReference</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="providerreference", path="ExplanationOfBenefit.provider.as(Reference)", description="The reference to the provider", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
@@ -12363,8 +12349,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.organizationReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organizationreference", path="ExplanationOfBenefit.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
@@ -12391,8 +12375,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.providerIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="provideridentifier", path="ExplanationOfBenefit.provider.as(Identifier)", description="The reference to the provider", type="token", target={} )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
@@ -12413,8 +12395,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.disposition</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="disposition", path="ExplanationOfBenefit.disposition", description="The contents of the disposition message", type="string", target={} )
   public static final String SP_DISPOSITION = "disposition";
  /**
@@ -12435,8 +12415,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.facilityReference</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="facilityreference", path="ExplanationOfBenefit.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class} )
   public static final String SP_FACILITYREFERENCE = "facilityreference";
  /**
@@ -12463,8 +12441,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.claimIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="claimindentifier", path="ExplanationOfBenefit.claim.as(Identifier)", description="The reference to the claim", type="token", target={} )
   public static final String SP_CLAIMINDENTIFIER = "claimindentifier";
  /**
@@ -12485,8 +12461,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * Path: <b>ExplanationOfBenefit.facilityIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="facilityidentifier", path="ExplanationOfBenefit.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token", target={} )
   public static final String SP_FACILITYIDENTIFIER = "facilityidentifier";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1717,8 +1717,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="MedicationAdministration.identifier", description="Return administrations with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1739,8 +1737,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationCodeableConcept</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="MedicationAdministration.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1761,8 +1757,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.prescription</b><br>
    * </p>
    */
-  // [MedicationOrder]
-  // [MedicationOrder]
   @SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from", type="reference", target={MedicationOrder.class} )
   public static final String SP_PRESCRIPTION = "prescription";
  /**
@@ -1789,8 +1783,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.effectiveTime[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="effectivetime", path="MedicationAdministration.effectiveTime", description="Date administration happened (or did not happen)", type="date", target={} )
   public static final String SP_EFFECTIVETIME = "effectivetime";
  /**
@@ -1811,8 +1803,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.practitioner</b><br>
    * </p>
    */
-  // [Practitioner, Patient, RelatedPerson]
-  // [Practitioner, Patient, RelatedPerson]
   @SearchParamDefinition(name="practitioner", path="MedicationAdministration.practitioner", description="Who administered substance", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
@@ -1839,8 +1829,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -1867,8 +1855,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.wasNotGiven</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="wasnotgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made", type="token", target={} )
   public static final String SP_WASNOTGIVEN = "wasnotgiven";
  /**
@@ -1889,8 +1875,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationReference</b><br>
    * </p>
    */
-  // [Medication]
-  // [Medication]
   @SearchParamDefinition(name="medication", path="MedicationAdministration.medication.as(Reference)", description="Return administrations of this medication resource", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
@@ -1917,8 +1901,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -1945,8 +1927,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.device</b><br>
    * </p>
    */
-  // [Device]
-  // [Device]
   @SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity", type="reference", target={Device.class} )
   public static final String SP_DEVICE = "device";
  /**
@@ -1973,8 +1953,6 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3487,8 +3487,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -3509,8 +3507,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -3531,8 +3527,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.item.concept</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -3553,8 +3547,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -3575,8 +3567,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -3597,8 +3587,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.title</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
@@ -3619,8 +3607,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -3641,8 +3627,6 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

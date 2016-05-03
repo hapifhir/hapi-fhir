@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3991,8 +3991,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="CodeSystem.date", description="The code system publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -4013,8 +4011,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="CodeSystem.identifier", description="The identifier for the code system", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -4035,8 +4031,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.concept.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="CodeSystem.concept.code", description="A code defined in the code system", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -4057,8 +4051,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="CodeSystem.description", description="Text search in the description of the code system", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -4079,8 +4071,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.concept.designation.language</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="language", path="CodeSystem.concept.designation.language", description="A language in which a designation is provided", type="token", target={} )
   public static final String SP_LANGUAGE = "language";
  /**
@@ -4101,8 +4091,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="CodeSystem.version", description="The version identifier of the code system", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -4123,8 +4111,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="CodeSystem.url", description="The logical URL for the code system", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -4145,8 +4131,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.content</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="content", path="CodeSystem.content", description="not-present | examplar | fragment | complete", type="token", target={} )
   public static final String SP_CONTENT = "content";
  /**
@@ -4167,8 +4151,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="system", path="CodeSystem.url", description="The system for any codes defined by this code system (same as 'url')", type="uri", target={} )
   public static final String SP_SYSTEM = "system";
  /**
@@ -4189,8 +4171,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="CodeSystem.name", description="The name of the code system", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -4211,8 +4191,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="CodeSystem.useContext", description="A use context assigned to the code system", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -4233,8 +4211,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="CodeSystem.publisher", description="Name of the publisher of the code system", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -4255,8 +4231,6 @@ public class CodeSystem extends DomainResource {
    * Path: <b>CodeSystem.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="CodeSystem.status", description="The status of the code system", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

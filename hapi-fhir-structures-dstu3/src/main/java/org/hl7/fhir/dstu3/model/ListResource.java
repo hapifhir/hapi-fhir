@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1542,8 +1542,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1564,8 +1562,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1586,8 +1582,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.entry.item</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="item", path="List.entry.item", description="Actual entry", type="reference" )
   public static final String SP_ITEM = "item";
  /**
@@ -1614,8 +1608,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.emptyReason</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token", target={} )
   public static final String SP_EMPTY_REASON = "empty-reason";
  /**
@@ -1636,8 +1628,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -1658,8 +1648,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.note.text</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="notes", path="List.note.text", description="The annotation  - text content", type="string", target={} )
   public static final String SP_NOTES = "notes";
  /**
@@ -1680,8 +1668,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  // [Group, Device, Patient, Location]
-  // [Group, Device, Patient, Location]
   @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1708,9 +1694,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  // [Group, Device, Patient, Location]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
+  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1736,8 +1720,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.source</b><br>
    * </p>
    */
-  // [Practitioner, Device, Patient]
-  // [Practitioner, Device, Patient]
   @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference", target={Practitioner.class, Device.class, Patient.class} )
   public static final String SP_SOURCE = "source";
  /**
@@ -1764,8 +1746,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -1792,8 +1772,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.title</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
@@ -1814,8 +1792,6 @@ public class ListResource extends DomainResource {
    * Path: <b>List.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

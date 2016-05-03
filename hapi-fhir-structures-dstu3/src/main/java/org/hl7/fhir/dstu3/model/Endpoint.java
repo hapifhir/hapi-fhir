@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1064,8 +1064,6 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.payloadType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="payload-type", path="Endpoint.payloadType", description="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", type="token", target={} )
   public static final String SP_PAYLOAD_TYPE = "payload-type";
  /**
@@ -1086,8 +1084,6 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.managingOrganization</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is exposing the endpoint", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
@@ -1114,8 +1110,6 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Endpoint.status", description="The current status of the Endpoint (usually expected to be active)", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

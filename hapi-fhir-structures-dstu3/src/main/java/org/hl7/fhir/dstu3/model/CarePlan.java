@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3719,8 +3719,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.period</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -3741,8 +3739,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token", target={} )
   public static final String SP_ACTIVITYCODE = "activitycode";
  /**
@@ -3763,8 +3759,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.scheduled[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date", target={} )
   public static final String SP_ACTIVITYDATE = "activitydate";
  /**
@@ -3785,8 +3779,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.reference</b><br>
    * </p>
    */
-  // [Appointment, Order, ReferralRequest, ProcessRequest, NutritionOrder, VisionPrescription, DiagnosticOrder, ProcedureRequest, DeviceUseRequest, MedicationOrder, CommunicationRequest, SupplyRequest]
-  // [Appointment, Order, ReferralRequest, ProcessRequest, NutritionOrder, VisionPrescription, DiagnosticOrder, ProcedureRequest, DeviceUseRequest, MedicationOrder, CommunicationRequest, SupplyRequest]
   @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference", target={Appointment.class, Order.class, ReferralRequest.class, ProcessRequest.class, NutritionOrder.class, VisionPrescription.class, DiagnosticOrder.class, ProcedureRequest.class, DeviceUseRequest.class, MedicationOrder.class, CommunicationRequest.class, SupplyRequest.class} )
   public static final String SP_ACTIVITYREFERENCE = "activityreference";
  /**
@@ -3813,8 +3805,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.performer</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient, RelatedPerson]
-  // [Practitioner, Organization, Patient, RelatedPerson]
   @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_PERFORMER = "performer";
  /**
@@ -3841,8 +3831,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.goal</b><br>
    * </p>
    */
-  // [Goal]
-  // [Goal]
   @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference", target={Goal.class} )
   public static final String SP_GOAL = "goal";
  /**
@@ -3869,8 +3857,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Group, Patient]
   @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -3897,8 +3883,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token", target={} )
   public static final String SP_RELATEDCODE = "relatedcode";
  /**
@@ -3919,8 +3903,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.participant.member</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient, RelatedPerson]
-  // [Practitioner, Organization, Patient, RelatedPerson]
   @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_PARTICIPANT = "participant";
  /**
@@ -3947,8 +3929,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.plan</b><br>
    * </p>
    */
-  // [CarePlan]
-  // [CarePlan]
   @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference", target={CarePlan.class} )
   public static final String SP_RELATEDPLAN = "relatedplan";
  /**
@@ -3975,8 +3955,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.addresses</b><br>
    * </p>
    */
-  // [Condition]
-  // [Condition]
   @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference", target={Condition.class} )
   public static final String SP_CONDITION = "condition";
  /**
@@ -4003,8 +3981,6 @@ public class CarePlan extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"}, target={} )
   public static final String SP_RELATED = "related";
  /**
@@ -4025,9 +4001,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -4053,8 +4027,6 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="CarePlan.category", description="Type of plan", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -5673,8 +5673,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -5695,8 +5693,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -5717,8 +5713,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -5739,8 +5733,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -5761,8 +5753,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -5783,8 +5773,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -5805,8 +5793,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.experimental</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
@@ -5827,8 +5813,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -5849,8 +5833,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -5871,8 +5853,6 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

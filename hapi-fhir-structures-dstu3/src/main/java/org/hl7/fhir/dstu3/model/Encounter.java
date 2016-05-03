@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3644,8 +3644,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.period</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -3666,8 +3664,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -3688,8 +3684,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.reason</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token", target={} )
   public static final String SP_REASON = "reason";
  /**
@@ -3710,8 +3704,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.episodeOfCare</b><br>
    * </p>
    */
-  // [EpisodeOfCare]
-  // [EpisodeOfCare]
   @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class} )
   public static final String SP_EPISODEOFCARE = "episodeofcare";
  /**
@@ -3738,8 +3730,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token", target={} )
   public static final String SP_PARTICIPANT_TYPE = "participant-type";
  /**
@@ -3760,8 +3750,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.incomingReferral</b><br>
    * </p>
    */
-  // [ReferralRequest]
-  // [ReferralRequest]
   @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ReferralRequest that initiated this encounter", type="reference", target={ReferralRequest.class} )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
  /**
@@ -3788,9 +3776,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  // [Practitioner, RelatedPerson]
-  // [Practitioner]
-  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", target={Practitioner.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", target={Practitioner.class} )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -3816,8 +3802,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.length</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number", target={} )
   public static final String SP_LENGTH = "length";
  /**
@@ -3838,8 +3822,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.appointment</b><br>
    * </p>
    */
-  // [Appointment]
-  // [Appointment]
   @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class} )
   public static final String SP_APPOINTMENT = "appointment";
  /**
@@ -3866,8 +3848,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.partOf</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class} )
   public static final String SP_PART_OF = "part-of";
  /**
@@ -3894,9 +3874,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  // [Condition, Procedure]
-  // [Procedure]
-  @SearchParamDefinition(name="procedure", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class, Procedure.class} )
+  @SearchParamDefinition(name="procedure", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Procedure.class} )
   public static final String SP_PROCEDURE = "procedure";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>procedure</b>
@@ -3922,8 +3900,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -3944,8 +3920,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  // [Practitioner, RelatedPerson]
-  // [Practitioner, RelatedPerson]
   @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", target={Practitioner.class, RelatedPerson.class} )
   public static final String SP_PARTICIPANT = "participant";
  /**
@@ -3972,9 +3946,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  // [Condition, Procedure]
-  // [Condition]
-  @SearchParamDefinition(name="condition", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class, Procedure.class} )
+  @SearchParamDefinition(name="condition", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class} )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -4000,8 +3972,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -4028,8 +3998,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.location.period</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date", target={} )
   public static final String SP_LOCATION_PERIOD = "location-period";
  /**
@@ -4050,8 +4018,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.location.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -4078,8 +4044,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  // [Condition, Procedure]
-  // [Condition, Procedure]
   @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class, Procedure.class} )
   public static final String SP_INDICATION = "indication";
  /**
@@ -4106,8 +4070,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.hospitalization.specialArrangement</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc.", type="token", target={} )
   public static final String SP_SPECIAL_ARRANGEMENT = "special-arrangement";
  /**
@@ -4128,8 +4090,6 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

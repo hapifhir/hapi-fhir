@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -623,8 +623,6 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.actor</b><br>
    * </p>
    */
-  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
-  // [Practitioner, Device, Patient, HealthcareService, RelatedPerson, Location]
   @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
   public static final String SP_ACTOR = "actor";
  /**
@@ -651,8 +649,6 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.planningHorizon</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -673,8 +669,6 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -695,8 +689,6 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.serviceType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**

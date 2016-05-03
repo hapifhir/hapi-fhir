@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -437,8 +437,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DecisionSupportServiceModule.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -459,8 +457,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.topic</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="topic", path="DecisionSupportServiceModule.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
   public static final String SP_TOPIC = "topic";
  /**
@@ -481,8 +477,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="DecisionSupportServiceModule.moduleMetadata.description", description="Text search against the description", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -503,8 +497,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.title</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="title", path="DecisionSupportServiceModule.moduleMetadata.title", description="Text search against the title", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
@@ -525,8 +517,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="DecisionSupportServiceModule.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -547,8 +537,6 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="DecisionSupportServiceModule.moduleMetadata.status", description="Status of the module", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2092,8 +2092,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Library.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2114,8 +2112,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.topic</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="topic", path="Library.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
   public static final String SP_TOPIC = "topic";
  /**
@@ -2136,8 +2132,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="Library.moduleMetadata.description", description="Text search against the description", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -2158,8 +2152,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.title</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="title", path="Library.moduleMetadata.title", description="Text search against the title", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
@@ -2180,8 +2172,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="Library.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -2202,8 +2192,6 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Library.moduleMetadata.status", description="Status of the module", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

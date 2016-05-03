@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -6230,8 +6230,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the insurer", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -6252,8 +6250,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.disposition</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="disposition", path="ClaimResponse.disposition", description="The contents of the disposition message", type="string", target={} )
   public static final String SP_DISPOSITION = "disposition";
  /**
@@ -6274,8 +6270,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.paymentDate</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="paymentdate", path="ClaimResponse.paymentDate", description="The expected paymentDate", type="date", target={} )
   public static final String SP_PAYMENTDATE = "paymentdate";
  /**
@@ -6296,8 +6290,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.organizationIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="organizationidentifier", path="ClaimResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
@@ -6318,8 +6310,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="ClaimResponse.created", description="The creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -6340,8 +6330,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.requestIdentifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="requestidentifier", path="ClaimResponse.request.as(Identifier)", description="The claim reference", type="token", target={} )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
@@ -6362,8 +6350,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.organizationReference</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="organizationreference", path="ClaimResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
@@ -6390,8 +6376,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.requestReference</b><br>
    * </p>
    */
-  // [Claim]
-  // [Claim]
   @SearchParamDefinition(name="requestreference", path="ClaimResponse.request.as(Reference)", description="The claim reference", type="reference", target={Claim.class} )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**
@@ -6418,8 +6402,6 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.outcome</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="outcome", path="ClaimResponse.outcome", description="The processing outcome", type="token", target={} )
   public static final String SP_OUTCOME = "outcome";
  /**

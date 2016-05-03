@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2558,8 +2558,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.securityLabel</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token", target={} )
   public static final String SP_SECURITYLABEL = "securitylabel";
  /**
@@ -2580,8 +2578,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Device, Patient]
-  // [Practitioner, Group, Device, Patient]
   @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2608,8 +2604,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -2630,8 +2624,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.language</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token", target={} )
   public static final String SP_LANGUAGE = "language";
  /**
@@ -2652,8 +2644,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
@@ -2674,8 +2664,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token", target={} )
   public static final String SP_RELATION = "relation";
  /**
@@ -2696,8 +2684,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.practiceSetting</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token", target={} )
   public static final String SP_SETTING = "setting";
  /**
@@ -2718,9 +2704,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  // [Practitioner, Group, Device, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2746,8 +2730,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"}, target={} )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
@@ -2768,8 +2750,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.event</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token", target={} )
   public static final String SP_EVENT = "event";
  /**
@@ -2790,8 +2770,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.class</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="class", path="DocumentReference.class", description="Categorization of document", type="token", target={} )
   public static final String SP_CLASS = "class";
  /**
@@ -2812,8 +2790,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.authenticator</b><br>
    * </p>
    */
-  // [Practitioner, Organization]
-  // [Practitioner, Organization]
   @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", target={Practitioner.class, Organization.class} )
   public static final String SP_AUTHENTICATOR = "authenticator";
  /**
@@ -2840,8 +2816,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.masterIdentifier, DocumentReference.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2862,8 +2836,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.period</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date", target={} )
   public static final String SP_PERIOD = "period";
  /**
@@ -2884,8 +2856,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.related.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token", target={} )
   public static final String SP_RELATED_ID = "related-id";
  /**
@@ -2906,8 +2876,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.custodian</b><br>
    * </p>
    */
-  // [Organization]
-  // [Organization]
   @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference", target={Organization.class} )
   public static final String SP_CUSTODIAN = "custodian";
  /**
@@ -2934,8 +2902,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.indexed</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date", target={} )
   public static final String SP_INDEXED = "indexed";
  /**
@@ -2956,8 +2922,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.author</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
-  // [Practitioner, Organization, Device, Patient, RelatedPerson]
   @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AUTHOR = "author";
  /**
@@ -2984,8 +2948,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.created</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
@@ -3006,8 +2968,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.format</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token", target={} )
   public static final String SP_FORMAT = "format";
  /**
@@ -3028,8 +2988,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -3056,8 +3014,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.related.ref</b><br>
    * </p>
    */
-  // [Any]
-  // [Any]
   @SearchParamDefinition(name="related-ref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATED_REF = "related-ref";
  /**
@@ -3084,8 +3040,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri", target={} )
   public static final String SP_LOCATION = "location";
  /**
@@ -3106,8 +3060,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.target</b><br>
    * </p>
    */
-  // [DocumentReference]
-  // [DocumentReference]
   @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference", target={DocumentReference.class} )
   public static final String SP_RELATESTO = "relatesto";
  /**
@@ -3134,8 +3086,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.facilityType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token", target={} )
   public static final String SP_FACILITY = "facility";
  /**
@@ -3156,8 +3106,6 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2205,8 +2205,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performed[x]</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -2227,8 +2225,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -2249,8 +2245,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
@@ -2271,8 +2265,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performer.actor</b><br>
    * </p>
    */
-  // [Practitioner, Organization, Patient, RelatedPerson]
-  // [Practitioner, Organization, Patient, RelatedPerson]
   @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
   public static final String SP_PERFORMER = "performer";
  /**
@@ -2299,8 +2291,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Group, Patient]
   @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -2327,9 +2317,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2355,8 +2343,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.location</b><br>
    * </p>
    */
-  // [Location]
-  // [Location]
   @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
@@ -2383,8 +2369,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -2411,8 +2395,6 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.category</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**

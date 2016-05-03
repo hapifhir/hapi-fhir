@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1271,8 +1271,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="RiskAssessment.date", description="When was assessment made?", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -1293,8 +1291,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="RiskAssessment.identifier", description="Unique identifier for the assessment", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -1315,8 +1311,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.condition</b><br>
    * </p>
    */
-  // [Condition]
-  // [Condition]
   @SearchParamDefinition(name="condition", path="RiskAssessment.condition", description="Condition assessed", type="reference", target={Condition.class} )
   public static final String SP_CONDITION = "condition";
  /**
@@ -1343,8 +1337,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.performer</b><br>
    * </p>
    */
-  // [Practitioner, Device]
-  // [Practitioner, Device]
   @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference", target={Practitioner.class, Device.class} )
   public static final String SP_PERFORMER = "performer";
  /**
@@ -1371,8 +1363,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.method</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="method", path="RiskAssessment.method", description="Evaluation mechanism", type="token", target={} )
   public static final String SP_METHOD = "method";
  /**
@@ -1393,8 +1383,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Group, Patient]
   @SearchParamDefinition(name="subject", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
@@ -1421,9 +1409,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.subject</b><br>
    * </p>
    */
-  // [Group, Patient]
-  // [Patient]
-  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1449,8 +1435,6 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**

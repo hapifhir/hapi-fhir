@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3379,8 +3379,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.identifier</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="identifier", path="NutritionOrder.identifier", description="Return nutrition orders with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
@@ -3401,8 +3399,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.dateTime</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="datetime", path="NutritionOrder.dateTime", description="Return nutrition orders requested on this date", type="date", target={} )
   public static final String SP_DATETIME = "datetime";
  /**
@@ -3423,8 +3419,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.orderer</b><br>
    * </p>
    */
-  // [Practitioner]
-  // [Practitioner]
   @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference", target={Practitioner.class} )
   public static final String SP_PROVIDER = "provider";
  /**
@@ -3451,8 +3445,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.patient</b><br>
    * </p>
    */
-  // [Patient]
-  // [Patient]
   @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
@@ -3479,8 +3471,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.supplement.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token", target={} )
   public static final String SP_SUPPLEMENT = "supplement";
  /**
@@ -3501,8 +3491,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.enteralFormula.baseFormulaType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="formula", path="NutritionOrder.enteralFormula.baseFormulaType", description="Type of enteral or infant formula", type="token", target={} )
   public static final String SP_FORMULA = "formula";
  /**
@@ -3523,8 +3511,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.encounter</b><br>
    * </p>
    */
-  // [Encounter]
-  // [Encounter]
   @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference", target={Encounter.class} )
   public static final String SP_ENCOUNTER = "encounter";
  /**
@@ -3551,8 +3537,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.oralDiet.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token", target={} )
   public static final String SP_ORALDIET = "oraldiet";
  /**
@@ -3573,8 +3557,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
@@ -3595,8 +3577,6 @@ public class NutritionOrder extends DomainResource {
    * Path: <b>NutritionOrder.enteralFormula.additiveType</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="additive", path="NutritionOrder.enteralFormula.additiveType", description="Type of module component to add to the feeding", type="token", target={} )
   public static final String SP_ADDITIVE = "additive";
  /**

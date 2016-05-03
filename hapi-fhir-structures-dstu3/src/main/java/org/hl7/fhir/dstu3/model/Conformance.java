@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 06:53-0400 for FHIR v1.4.0
+// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -9037,8 +9037,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.date</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
@@ -9059,8 +9057,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.software.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application", type="string", target={} )
   public static final String SP_SOFTWARE = "software";
  /**
@@ -9081,8 +9077,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.rest.resource.type</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token", target={} )
   public static final String SP_RESOURCE = "resource";
  /**
@@ -9103,8 +9097,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.format</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="format", path="Conformance.format", description="formats supported (xml | json | mime type)", type="token", target={} )
   public static final String SP_FORMAT = "format";
  /**
@@ -9125,8 +9117,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.description</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
@@ -9147,8 +9137,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token", target={} )
   public static final String SP_FHIRVERSION = "fhirversion";
  /**
@@ -9169,8 +9157,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.version</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
@@ -9191,8 +9177,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.rest.security.service</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="securityservice", path="Conformance.rest.security.service", description="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", type="token", target={} )
   public static final String SP_SECURITYSERVICE = "securityservice";
  /**
@@ -9213,8 +9197,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.url</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="url", path="Conformance.url", description="The uri that identifies the conformance statement", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
@@ -9235,8 +9217,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.profile</b><br>
    * </p>
    */
-  // [StructureDefinition]
-  // [StructureDefinition]
   @SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="Profiles for use cases supported", type="reference", target={StructureDefinition.class} )
   public static final String SP_SUPPORTED_PROFILE = "supported-profile";
  /**
@@ -9263,8 +9243,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.rest.mode</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token", target={} )
   public static final String SP_MODE = "mode";
  /**
@@ -9285,8 +9263,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.rest.resource.profile</b><br>
    * </p>
    */
-  // [StructureDefinition]
-  // [StructureDefinition]
   @SearchParamDefinition(name="resourceprofile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference", target={StructureDefinition.class} )
   public static final String SP_RESOURCEPROFILE = "resourceprofile";
  /**
@@ -9313,8 +9289,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.name</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
@@ -9335,8 +9309,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.useContext</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="context", path="Conformance.useContext", description="A use context assigned to the conformance statement", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
@@ -9357,8 +9329,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.publisher</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
@@ -9379,8 +9349,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.messaging.event.code</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token", target={} )
   public static final String SP_EVENT = "event";
  /**
@@ -9401,8 +9369,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * Path: <b>Conformance.status</b><br>
    * </p>
    */
-  // []
-  // []
   @SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
