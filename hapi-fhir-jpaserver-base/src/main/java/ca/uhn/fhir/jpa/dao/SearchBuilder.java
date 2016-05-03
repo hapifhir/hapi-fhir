@@ -2071,8 +2071,11 @@ public class SearchBuilder {
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
 						String sql;
+						boolean haveTargetTypesDefinedByParam = param != null && param.getTargets() != null && param.getTargets().isEmpty() == false;
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+						} else if (haveTargetTypesDefinedByParam) {
+							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
 						} else {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
@@ -2081,21 +2084,11 @@ public class SearchBuilder {
 						q.setParameter("target_pids", nextRoundMatches);
 						if (targetResourceType != null) {
 							q.setParameter("target_resource_type", targetResourceType);
+						} else if (haveTargetTypesDefinedByParam) {
+							q.setParameter("target_resource_types", param.getTargets());
 						}
 						List<ResourceLink> results = q.getResultList();
 						for (ResourceLink resourceLink : results) {
-							if (param != null && param.getTargets() != null && param.getTargets().isEmpty() == false) {
-								String type;
-								if (theReverseMode) {
-									type = resourceLink.getSourceResource().getResourceType();
-								} else {
-									type = resourceLink.getTargetResource().getResourceType();
-								}
-								if (!param.getTargets().contains(type)) {
-									continue;
-								}
-							}
-							
 							if (theReverseMode) {
 								Long pid = resourceLink.getSourceResourcePid();
 								pidsToInclude.add(pid);
