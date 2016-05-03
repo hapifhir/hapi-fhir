@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -100,6 +102,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
+	private boolean myIgnoreServerParsedRequestParameters = true;
 	private String myImplementationDescription;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
 	private IPagingProvider myPagingProvider;
@@ -118,6 +121,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<String, IResourceProvider>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
+	
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or through {@link #setFhirContext(FhirContext)}) the server will determine which
 	 * version of FHIR to support through classpath scanning. This is brittle, and it is highly recommended to explicitly specify a FHIR version.
@@ -562,9 +566,27 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			fhirServerBase = getServerBaseForRequest(theRequest);
 
-			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
+			String completeUrl;
+			Map<String, String[]> params = null;
+			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
+				completeUrl = requestUrl + "?" + theRequest.getQueryString();
+				if (isIgnoreServerParsedRequestParameters()) {
+					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+					if (theRequestType == RequestTypeEnum.POST && isNotBlank(contentType) && contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
+						String requestBody = new String(requestDetails.loadRequestContents(), Charsets.UTF_8);
+						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
+					} else if (theRequestType == RequestTypeEnum.GET) {
+						params = UrlUtil.parseQueryString(theRequest.getQueryString());
+					}
+				}
+			} else {
+				completeUrl = requestUrl.toString();
+			}
+			
+			if (params == null) {
+				params = new HashMap<String, String[]>(theRequest.getParameterMap());
+			}
 
-			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 			requestDetails.setParameters(params);
 
 			IIdType id;
@@ -850,6 +872,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@Override
 	public boolean isDefaultPrettyPrint() {
 		return myDefaultPrettyPrint;
+	}
+
+	/**
+	 * If set to <code>true</code> (the default is <code>true</code>) this server will not 
+	 * use the parsed request parameters (URL parameters and HTTP POST form contents) but
+	 * will instead parse these values manually from the request URL and request body.
+	 * <p>
+	 * This is useful because many servlet containers (e.g. Tomcat, Glassfish) will use 
+	 * ISO-8859-1 encoding to parse escaped URL characters instead of using UTF-8
+	 * as is specified by FHIR. 
+	 * </p>
+	 */
+	public boolean isIgnoreServerParsedRequestParameters() {
+		return myIgnoreServerParsedRequestParameters;
 	}
 
 	/**
@@ -1182,6 +1218,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setFhirContext(FhirContext theFhirContext) {
 		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		myFhirContext = theFhirContext;
+	}
+
+	/**
+	 * If set to <code>true</code> (the default is <code>true</code>) this server will not 
+	 * use the parsed request parameters (URL parameters and HTTP POST form contents) but
+	 * will instead parse these values manually from the request URL and request body.
+	 * <p>
+	 * This is useful because many servlet containers (e.g. Tomcat, Glassfish) will use 
+	 * ISO-8859-1 encoding to parse escaped URL characters instead of using UTF-8
+	 * as is specified by FHIR. 
+	 * </p>
+	 */
+	public void setIgnoreServerParsedRequestParameters(boolean theIgnoreServerParsedRequestParameters) {
+		myIgnoreServerParsedRequestParameters = theIgnoreServerParsedRequestParameters;
 	}
 
 	public void setImplementationDescription(String theImplementationDescription) {

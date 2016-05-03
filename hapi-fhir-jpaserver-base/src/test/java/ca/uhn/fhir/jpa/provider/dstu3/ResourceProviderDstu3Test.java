@@ -142,7 +142,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String output = IOUtils.toString(resp.getEntity().getContent());
 			ourLog.info(output);
 			
-			assertThat(output, containsString("<url value=\"" + ourServerBase + "/Patient?name=Jernel%C3%B6v&amp;_pretty=true\"/>"));
+			assertThat(output, containsString("<url value=\"http://localhost:" + ourPort + "/fhir/context/Patient?_pretty=true&amp;name=Jernel%C3%B6v\"/>"));
 			assertThat(output, containsString("<family value=\"Jernelöv\"/>"));
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());

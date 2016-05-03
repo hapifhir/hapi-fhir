@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -24,6 +26,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -40,8 +43,11 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -63,6 +69,7 @@ public class SearchDstu2Test {
 	private static int ourPort;
 	private static InstantDt ourReturnPublished;
 	private static Server ourServer;
+	private static RestfulServer ourServlet;
 
 	@Before
 	public void before() {
@@ -70,8 +77,29 @@ public class SearchDstu2Test {
 		ourLastDateAndList = null;
 		ourLastRef = null;
 		ourLastQuantity = null;
+		ourServlet.setIgnoreServerParsedRequestParameters(true);
 	}
 
+	@Test
+	public void testSearchWithInvalidPostUrl() throws Exception {
+		// should end with _search
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); 
+
+		// add parameters to the post method
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair("_id", "aaa"));
+
+		UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
+		filePost.setEntity(sendentity);
+
+		HttpResponse status = ourClient.execute(filePost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<diagnostics value=\"Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
+
+	}
 
 	@Test
 	public void testEncodeConvertsReferencesToRelative() throws Exception {
@@ -174,6 +202,27 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
+		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		httpGet.setEntity(entity);
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals("searchDateAndList", ourLastMethod);
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
+		assertThat(responseContent, containsString(":\"SYSTEM\""));
+
+	}
+
+	@Test
+	public void testSearchByPostWithBodyAndUrlParamsNoManual() throws Exception {
+		ourServlet.setIgnoreServerParsedRequestParameters(false);
 
 		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
@@ -251,7 +300,7 @@ public class SearchDstu2Test {
 			assertEquals("searchset", resp.getType());
 			assertEquals(100, resp.getTotal().intValue());
 		}
-		
+
 		nextLink = resp.getLink("next");
 		assertThat(nextLink.getUrl(), startsWith("http://"));
 
@@ -293,7 +342,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastQuantity.getPrefix());
 		assertEquals(100, ourLastQuantity.getValue().intValue());
 	}
@@ -371,7 +420,6 @@ public class SearchDstu2Test {
 		assertEquals("searchWhitelist01", ourLastMethod);
 	}
 
-
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -386,11 +434,11 @@ public class SearchDstu2Test {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -402,9 +450,6 @@ public class SearchDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -421,6 +466,14 @@ public class SearchDstu2Test {
 		}
 		//@formatter:on
 
+		/**
+		 * For testSearchWithInvalidPostUrl, ok to add a real body later
+		 */
+		@Create
+		public MethodOutcome create(@ResourceParam Patient thePatient) {
+			throw new UnsupportedOperationException();
+		}
+		
 		//@formatter:off
 		@Search()
 		public List<Patient> searchDateAndList(

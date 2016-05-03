@@ -2044,6 +2044,7 @@ public class SearchBuilder {
 				} else {
 
 					List<String> paths;
+					RuntimeSearchParam param = null;
 					if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						paths = Collections.singletonList(nextInclude.getValue());
 					} else {
@@ -2058,7 +2059,7 @@ public class SearchBuilder {
 						}
 
 						String paramName = nextInclude.getParamName();
-						RuntimeSearchParam param = isNotBlank(paramName) ? def.getSearchParam(paramName) : null;
+						param = isNotBlank(paramName) ? def.getSearchParam(paramName) : null;
 						if (param == null) {
 							ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
 							continue;
@@ -2083,10 +2084,24 @@ public class SearchBuilder {
 						}
 						List<ResourceLink> results = q.getResultList();
 						for (ResourceLink resourceLink : results) {
+							if (param != null && param.getTargets() != null && param.getTargets().isEmpty() == false) {
+								String type;
+								if (theReverseMode) {
+									type = resourceLink.getSourceResource().getResourceType();
+								} else {
+									type = resourceLink.getTargetResource().getResourceType();
+								}
+								if (!param.getTargets().contains(type)) {
+									continue;
+								}
+							}
+							
 							if (theReverseMode) {
-								pidsToInclude.add(resourceLink.getSourceResourcePid());
+								Long pid = resourceLink.getSourceResourcePid();
+								pidsToInclude.add(pid);
 							} else {
-								pidsToInclude.add(resourceLink.getTargetResourcePid());
+								Long pid = resourceLink.getTargetResourcePid();
+								pidsToInclude.add(pid);
 							}
 						}
 					}

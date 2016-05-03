@@ -527,6 +527,12 @@
 				a path of "Appointment.participant.actor" and a target type of "Patient". The search path
 				was being correctly handled, but the target type was being ignored.
 			</action>
+			<action type="add">
+				RestfulServer now manually parses URL parameters instead of relying on the container's
+				parsed parameters. This is useful because many Java servlet containers (e.g. Tomcat, Glassfish)
+				default to ISO-8859-1 encoding for URLs insetad of the UTF-8 encoding specified by
+				FHIR.
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">

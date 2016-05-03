@@ -160,6 +160,7 @@ public class Constants {
 	public static final String URL_TOKEN_HISTORY = "_history";
 	
 	public static final String URL_TOKEN_METADATA = "metadata";
+	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
