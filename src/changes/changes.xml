@@ -84,6 +84,12 @@
 				new FluentPath search parameter definitions
 				for DSTU3 resources.
 			</action>
+			<action type="add">
+				RequestValidatingInterceptor and ResponseValidatingInterceptor
+				both have new method <![CDATA[<code>setIgnoreValidatorExceptions</code>]]>
+				which causes validator exceptions to be ignored, rather than causing
+				processing to be aborted.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

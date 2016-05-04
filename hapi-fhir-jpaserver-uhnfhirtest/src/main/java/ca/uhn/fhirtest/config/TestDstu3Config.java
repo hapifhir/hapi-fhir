@@ -104,6 +104,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		requestValidator.addValidatorModule(instanceValidatorDstu3());
+		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
 	}
@@ -130,6 +131,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
 		responseValidator.addValidatorModule(instanceValidatorDstu3());
+		responseValidator.setIgnoreValidatorExceptions(true);
+		
 		return responseValidator;
 	}
 

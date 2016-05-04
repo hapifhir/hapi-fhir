@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -32,6 +36,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -41,9 +46,11 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -74,6 +81,127 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourServlet.registerInterceptor(myInterceptor);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testInterceptorExceptionNpeNoIgnore() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		myInterceptor.setAddResponseHeaderOnSeverity(null);
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		IValidatorModule module = mock(IValidatorModule.class);
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setIgnoreValidatorExceptions(false);
+
+		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<diagnostics value=\"java.lang.NullPointerException\"/>"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testInterceptorExceptionNpeIgnore() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		myInterceptor.setAddResponseHeaderOnSeverity(null);
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		IValidatorModule module = mock(IValidatorModule.class);
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setIgnoreValidatorExceptions(true);
+
+		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testInterceptorExceptionIseNoIgnore() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		myInterceptor.setAddResponseHeaderOnSeverity(null);
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		IValidatorModule module = mock(IValidatorModule.class);
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setIgnoreValidatorExceptions(false);
+
+		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<diagnostics value=\"FOO\"/>"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testInterceptorExceptionIseIgnore() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+
+		myInterceptor.setAddResponseHeaderOnSeverity(null);
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		IValidatorModule module = mock(IValidatorModule.class);
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setIgnoreValidatorExceptions(true);
+
+		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+	}
+
+	
 	/**
 	 * Test for #345
 	 */
@@ -89,7 +217,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 			ourLog.info("Response was:\n{}", status);
 
 			assertEquals(204, status.getStatusLine().getStatusCode());
-			assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
+			assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

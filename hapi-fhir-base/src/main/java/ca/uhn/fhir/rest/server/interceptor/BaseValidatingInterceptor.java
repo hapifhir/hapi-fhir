@@ -33,6 +33,8 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -61,12 +63,15 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	private Integer myAddResponseIssueHeaderOnSeverity = null;
 	private Integer myAddResponseOutcomeHeaderOnSeverity = null;
 	private Integer myFailOnSeverity = ResultSeverityEnum.ERROR.ordinal();
+	private boolean myIgnoreValidatorExceptions;
 	private int myMaximumHeaderLength = 200;
 	private String myResponseIssueHeaderName = provideDefaultResponseHeaderName();
 	private String myResponseIssueHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
 	private String myResponseIssueHeaderValueNoIssues = null;
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
+
 	private List<IValidatorModule> myValidatorModules;
+
 	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
 		StrLookup<?> lookup = new MyLookup(theNext);
@@ -78,6 +83,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 		theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, headerValue);
 	}
+
 	public BaseValidatingInterceptor<T> addValidatorModule(IValidatorModule theModule) {
 		Validate.notNull(theModule, "theModule must not be null");
 		if (getValidatorModules() == null) {
@@ -105,7 +111,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	public ResultSeverityEnum getAddResponseOutcomeHeaderOnSeverity() {
 		return myAddResponseOutcomeHeaderOnSeverity != null ? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity] : null;
 	}
-	
+
 	/**
 	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
 	 * the header value will be truncated.
@@ -123,6 +129,18 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 	public List<IValidatorModule> getValidatorModules() {
 		return myValidatorModules;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) this interceptor
+	 * will exit immediately and allow processing to continue if the validator throws
+	 * any exceptions.
+	 * <p>
+	 * This setting is mostly useful in testing situations
+	 * </p>
+	 */
+	public boolean isIgnoreValidatorExceptions() {
+		return myIgnoreValidatorExceptions;
 	}
 
 	abstract String provideDefaultResponseHeaderName();
@@ -153,6 +171,18 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 */
 	public void setFailOnSeverity(ResultSeverityEnum theSeverity) {
 		myFailOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) this interceptor
+	 * will exit immediately and allow processing to continue if the validator throws
+	 * any exceptions.
+	 * <p>
+	 * This setting is mostly useful in testing situations
+	 * </p>
+	 */
+	public void setIgnoreValidatorExceptions(boolean theIgnoreValidatorExceptions) {
+		myIgnoreValidatorExceptions = theIgnoreValidatorExceptions;
 	}
 
 	/**
@@ -218,7 +248,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 	/**
 	 * Sets the header value to add when no issues are found at or exceeding the
-	 * threshold specified by {@link #setAddResponseHeaderOnSeverity(ResultSeverityEnum)} 
+	 * threshold specified by {@link #setAddResponseHeaderOnSeverity(ResultSeverityEnum)}
 	 */
 	public void setResponseHeaderValueNoIssues(String theResponseHeaderValueNoIssues) {
 		myResponseIssueHeaderValueNoIssues = theResponseHeaderValueNoIssues;
@@ -247,8 +277,20 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		if (theRequest == null) {
 			return;
 		}
-		
-		ValidationResult validationResult = doValidate(validator, theRequest);
+
+		ValidationResult validationResult;
+		try {
+			validationResult = doValidate(validator, theRequest);
+		} catch (Exception e) {
+			if (myIgnoreValidatorExceptions) {
+				ourLog.warn("Validator threw an exception during validaiton", e);
+				return;
+			}
+			if (e instanceof BaseServerResponseException) {
+				throw (BaseServerResponseException)e;
+			}
+			throw new InternalErrorException(e);
+		}
 		
 		if (myAddResponseIssueHeaderOnSeverity != null) {
 			boolean found = false;
@@ -273,7 +315,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 				}
 			}
 		}
-		
+
 		if (myAddResponseOutcomeHeaderOnSeverity != null) {
 			IBaseOperationOutcome outcome = null;
 			for (SingleValidationMessage next : validationResult.getMessages()) {
@@ -287,7 +329,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 				outcome = OperationOutcomeUtil.newInstance(ctx);
 				OperationOutcomeUtil.addIssue(ctx, outcome, "information", "No issues detected", "", "informational");
 			}
-			
+
 			if (outcome != null) {
 				IParser parser = theRequestDetails.getServer().getFhirContext().newJsonParser().setPrettyPrint(false);
 				String encoded = parser.encodeResourceToString(outcome);
@@ -297,7 +339,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 				theRequestDetails.getResponse().addHeader(myResponseOutcomeHeaderName, encoded);
 			}
 		}
-		
+
 	}
 
 	private static class MyLookup extends StrLookup<String> {
