@@ -151,7 +151,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
+		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + myFhirContext.getVersion().getVersion().name() + ")");
 	}
 
 	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {
@@ -570,6 +570,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			Map<String, String[]> params = null;
 			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
 				completeUrl = requestUrl + "?" + theRequest.getQueryString();
+				/*
+				 * By default, we manually parse the request params (the URL params, or the body for
+				 * POST form queries) since Java containers can't be trusted to use UTF-8 encoding
+				 * when parsing. Specifically Tomcat 7 and Glassfish 4.0 use 8859-1 for some dumb
+				 * reason.... grr.....
+				 */
 				if (isIgnoreServerParsedRequestParameters()) {
 					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 					if (theRequestType == RequestTypeEnum.POST && isNotBlank(contentType) && contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {

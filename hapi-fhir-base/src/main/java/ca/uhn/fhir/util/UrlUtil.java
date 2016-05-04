@@ -289,14 +289,17 @@ public class UrlUtil {
 		if (theString == null) {
 			return null;
 		}
-		if (theString.indexOf('%') == -1) {
-			return theString;
+		for (int i = 0; i < theString.length(); i++) {
+			char nextChar = theString.charAt(i);
+			if (nextChar == '%' || nextChar == '+') {
+				try {
+					return URLDecoder.decode(theString, "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					throw new Error("UTF-8 not supported, this shouldn't happen", e);
+				}
+			}
 		}
-		try {
-			return URLDecoder.decode(theString, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("UTF-8 not supported, this shouldn't happen", e);
-		}
+		return theString;
 	}
 
 	public static class UrlParts {

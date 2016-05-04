@@ -82,6 +82,17 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
+	public void testSearchParamWithSpace() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param2=param+value&foo=bar");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals("searchParam2", ourLastMethod);
+		assertEquals("param value", ourLastRef.getValue());
+	}
+
+	@Test
 	public void testUnknownSearchParam() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?foo=bar");
 		HttpResponse status = ourClient.execute(httpGet);
