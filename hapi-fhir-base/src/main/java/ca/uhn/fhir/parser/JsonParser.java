@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -133,7 +133,7 @@ public class JsonParser extends BaseParser implements IParser {
 	/**
 	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
 	 * {@link FhirContext#newJsonParser()}.
-	 * 
+	 *
 	 * @param theParserErrorHandler
 	 */
 	public JsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
@@ -1026,7 +1026,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private JsonArray grabJsonArray(JsonObject theObject, String nextName, String thePosition) {
 		JsonValue object = theObject.get(nextName);
-		if (object == null) {
+		if (object == null || object.getValueType()==ValueType.NULL) {
 			return null;
 		}
 		if (object.getValueType() != ValueType.ARRAY) {

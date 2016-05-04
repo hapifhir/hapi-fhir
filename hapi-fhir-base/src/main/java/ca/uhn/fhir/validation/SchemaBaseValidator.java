@@ -9,9 +9,9 @@ package ca.uhn.fhir.validation;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXParseException;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -93,12 +94,16 @@ public class SchemaBaseValidator implements IValidatorModule {
 				encodedResource = theContext.getFhirContext().newXmlParser().encodeResourceToString((IBaseResource) theContext.getResource());
 			}
 
+			try {
 			/*
 			 * See https://github.com/jamesagnew/hapi-fhir/issues/339
 			 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 			 */
-			validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+			}catch (SAXNotRecognizedException ex){
+				ourLog.warn("Jaxp 1.5 Support not found.",ex);
+			}
 
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
 		} catch (SAXParseException e) {
@@ -132,13 +137,15 @@ public class SchemaBaseValidator implements IValidatorModule {
 			schemaFactory.setResourceResolver(new MyResourceResolver());
 
 			try {
-				
+				try {
 				/*
 				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
 				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 				 */
-				schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-				
+					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				}catch (SAXNotRecognizedException snex){
+					ourLog.warn("Jaxp 1.5 Support not found.",snex);
+				}
 				schema = schemaFactory.newSchema(new Source[] { baseSource });
 			} catch (SAXException e) {
 				throw new ConfigurationException("Could not load/parse schema file: " + theSchemaName, e);
