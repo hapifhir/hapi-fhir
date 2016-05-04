@@ -31,7 +31,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.ebaysf.web.cors.CORSFilter;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
@@ -235,6 +237,43 @@ public class ResponseHighlightingInterceptorTest {
 
 	}
 	
+	@Test
+	public void testDontHighlightWhenOriginHeaderPresent() throws Exception {
+		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
+			@Override
+			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
+			}
+		});
+		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(new Answer<String>() {
+			@Override
+			public String answer(InvocationOnMock theInvocation) throws Throwable {
+				return "http://example.com";
+			}
+		});
+
+		HttpServletResponse resp = mock(HttpServletResponse.class);
+		StringWriter sw = new StringWriter();
+		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
+
+		Patient resource = new Patient();
+		resource.addName().addFamily("FAMILY");
+
+		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		reqDetails.setRequestType(RequestTypeEnum.GET);
+		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		reqDetails.setParameters(params);
+		reqDetails.setServer(new RestfulServer(ourCtx));
+		reqDetails.setServletRequest(req);
+
+		// true means it decided to not handle the request..
+		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+
+	}
+
 	/**
 	 * See #346
 	 */
@@ -482,6 +521,9 @@ public class ResponseHighlightingInterceptorTest {
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		
+		proxyHandler.addFilterWithMapping(CORSFilter.class, "/*", 1);
+		
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 

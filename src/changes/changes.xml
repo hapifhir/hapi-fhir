@@ -90,6 +90,10 @@
 				which causes validator exceptions to be ignored, rather than causing
 				processing to be aborted.
 			</action>
+			<action type="add">
+				LoggingInterceptor on server has a new parameter 
+				<![CDATA[<code>${requestBodyFhir}</code>]]> which logs the entire request body.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
@@ -538,6 +542,10 @@
 				parsed parameters. This is useful because many Java servlet containers (e.g. Tomcat, Glassfish)
 				default to ISO-8859-1 encoding for URLs insetad of the UTF-8 encoding specified by
 				FHIR.
+			</action>
+			<action type="add">
+				ResponseHighlightingInterceptor now doesn't highlight if the request
+				has an Origin header, since this probably denotes an AJAX request.
 			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -24,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -182,7 +184,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 		return b.toString();
 	}
-
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 
@@ -207,10 +209,16 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		String requestedWith = theServletRequest.getHeader("X-Requested-With");
-		if (!force && requestedWith != null) {
+		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
+		/*
+		 * If the request has an Origin header, it is probably an AJAX request
+		 */
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+		
 
 		/*
 		 * Not a GET

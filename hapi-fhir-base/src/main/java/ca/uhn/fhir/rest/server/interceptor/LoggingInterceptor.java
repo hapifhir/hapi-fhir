@@ -30,10 +30,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.http.util.EncodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +88,10 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * <tr>
  * <td>${servletPath}</td>
  * <td>The part of thre requesting URL that corresponds to the particular Servlet being called (see {@link HttpServletRequest#getServletPath()})</td>
+ * </tr>
+ * <tr>
+ * <td>${requestBodyFhir}</td>
+ * <td>The complete body of the request if the request has a FHIR content-type (this can be quite large!). Will emit an empty string if the content type is not a FHIR content type</td>
  * </tr>
  * <tr>
  * <td>${requestUrl}</td>
@@ -281,6 +288,20 @@ public class LoggingInterceptor extends InterceptorAdapter {
 				return myRequest.getRequestURL().toString();
 			} else if (theKey.equals("requestVerb")) {
 				return myRequest.getMethod();
+			} else if (theKey.equals("requestBodyFhir")) {
+				String contentType = myRequest.getContentType();
+				int colonIndex = contentType.indexOf(';');
+				if (colonIndex != -1) {
+					contentType = contentType.substring(0, colonIndex);
+				}
+				contentType = contentType.trim();
+				
+				EncodingEnum encoding = EncodingEnum.forContentType(contentType);
+				if (encoding != null) {
+					byte[] requestContents = myRequestDetails.loadRequestContents();
+					return new String(requestContents, Charsets.UTF_8);
+				}
+				return "";
 			}
 
 			return "!VAL!";

@@ -41,6 +41,7 @@ public class Constants {
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
+	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String EXTOP_VALIDATE = "$validate";
@@ -87,6 +88,7 @@ public class Constants {
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_PREFER_RETURN = "return";
 	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
@@ -156,11 +158,10 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
+	
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
-	
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
