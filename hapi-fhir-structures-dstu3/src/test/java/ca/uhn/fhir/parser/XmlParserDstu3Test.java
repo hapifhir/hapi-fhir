@@ -120,14 +120,14 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeContained() throws Exception {
+	public void testEncodeContainedWithNonLocalId() throws Exception {
 
 		Patient p = new Patient();
 		p.setId("Patient1");
 		p.setBirthDate(new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse("2016-04-15 10:15:30"));
 
 		ProcedureRequest pr = new ProcedureRequest();
-		pr.setId("#1234567");
+		pr.setId("1234567");
 		pr.setSubject(new Reference(p));
 		pr.setCode(new CodeableConcept().addCoding(new Coding("breastfeeding-readiness-assessment", "Breastfeeding Readiness Assessment", "Breastfeeding Readiness Assessment")));
 //		pr.setReason(new StringType("Single Live Birth"));

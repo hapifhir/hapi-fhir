@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -32,6 +33,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.BaseResource;
@@ -117,7 +121,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -240,7 +243,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
-	
 	@Test
 	public void testChoiceParamDate() {
 		Observation o2 = new Observation();
@@ -254,7 +256,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
-	
+
 	@Test
 	public void testCreateDifferentTypesWithSameForcedId() {
 		String idName = "forcedId";
@@ -264,17 +266,17 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pat.addName().addFamily("FAM");
 		IIdType patId = myPatientDao.update(pat, mySrd).getId();
 		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
-		
+
 		Observation obs = new Observation();
 		obs.setId(idName);
 		obs.getCode().addCoding().setSystem("foo").setCode("testCreateDifferentTypesWithSameForcedId");
 		IIdType obsId = myObservationDao.update(obs, mySrd).getId();
 		assertEquals("Observation/" + idName, obsId.toUnqualifiedVersionless().getValue());
-		
+
 		pat = myPatientDao.read(patId.toUnqualifiedVersionless(), mySrd);
 		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
 	}
-	
+
 	@Test
 	public void testChoiceParamDateAlt() {
 		Observation o2 = new Observation();
@@ -468,7 +470,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(NamingSystem.SP_NAME, new StringParam("NDF"))), contains(id.getValue()));
 	}
 
@@ -497,7 +499,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(IssueType.INCOMPLETE, oo.getIssue().get(0).getCode());
 	}
-	
+
 	@Test
 	public void testCreateOperationOutcomeInfo() {
 		FhirResourceDaoDstu3<Bundle> dao = new FhirResourceDaoDstu3<Bundle>();
@@ -593,7 +595,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		myBundleDao.create(bundle, mySrd);
 
 	}
-	
+
 	@Test
 	public void testCreateWithIfNoneExistBasic() {
 		String methodName = "testCreateWithIfNoneExistBasic";
@@ -773,7 +775,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		// Lose typing so we can put the wrong type in
 		@SuppressWarnings("rawtypes")
 		IFhirResourceDao dao = myNamingSystemDao;
-		
+
 		Patient resource = new Patient();
 		resource.addName().addFamily("My Name");
 		try {
@@ -1473,10 +1475,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryWithFutureSinceDate() throws Exception {
-		
+
 		Date before = new Date();
 		Thread.sleep(10);
-		
+
 		Patient inPatient = new Patient();
 		inPatient.addName().addFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
@@ -1484,18 +1486,18 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		Thread.sleep(10);
 		Date after = new Date();
-		
+
 		// No since
-		
+
 		IBundleProvider history = myPatientDao.history(null, mySrd);
 		assertEquals(1, history.size());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, contains("http://example.com/1"));
-		
+
 		// Before since
-		
+
 		history = myPatientDao.history(before, mySrd);
 		assertEquals(1, history.size());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
@@ -1504,12 +1506,12 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertThat(profiles, contains("http://example.com/1"));
 
 		// After since
-		
+
 		history = myPatientDao.history(after, mySrd);
 		assertEquals(0, history.size());
 
 	}
-	
+
 	@Test
 	public void testHistoryReflectsMetaOperations() throws Exception {
 		Patient inPatient = new Patient();
@@ -1523,25 +1525,25 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, contains("http://example.com/1"));
-		
+
 		/*
 		 * Change metadata
 		 */
-		
+
 		inPatient.getMeta().addProfile("http://example.com/2");
 		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd);
-		
+
 		history = myPatientDao.history(null, mySrd);
 		assertEquals(1, history.size());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, containsInAnyOrder("http://example.com/1", "http://example.com/2"));
-		
+
 		/*
 		 * Do an update
 		 */
-		
+
 		inPatient.setId(id);
 		inPatient.getMeta().addProfile("http://example.com/3");
 		inPatient.getName().get(0).addFamily("version2");
@@ -1559,7 +1561,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("version1", outPatient.getName().get(0).getFamilyAsSingleString());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, containsInAnyOrder("http://example.com/1", "http://example.com/2"));
-}
+	}
 
 	@Test
 	public void testHistoryWithDeletedResource() throws Exception {
@@ -1603,7 +1605,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			assertEquals("Resource Patient/FOOFOOFOO is not known", e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testIdParam() {
 		Patient patient = new Patient();

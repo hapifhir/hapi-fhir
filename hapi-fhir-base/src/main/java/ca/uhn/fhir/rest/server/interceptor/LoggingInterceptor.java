@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.IOException;
 
 /*
@@ -31,12 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.apache.http.util.EncodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +58,18 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * </tr>
  * <tr>
  * <td>${idOrResourceName}</td>
- * <td>The resource ID associated with this request, or the resource name if the request applies to a type but not an instance, or "" otherwise</td>
+ * <td>The resource ID associated with this request, or the resource name if the request applies to a type but not an
+ * instance, or "" otherwise</td>
  * </tr>
  * <tr>
  * <td>${operationName}</td>
- * <td>If the request is an extended operation (e.g. "$validate") this value will be the operation name, or "" otherwise</td>
+ * <td>If the request is an extended operation (e.g. "$validate") this value will be the operation name, or ""
+ * otherwise</td>
  * </tr>
  * <tr>
  * <td>${operationType}</td>
- * <td>A code indicating the operation type for this request, e.g. "read", "history-instance", "extended-operation-instance", etc.)</td>
+ * <td>A code indicating the operation type for this request, e.g. "read", "history-instance",
+ * "extended-operation-instance", etc.)</td>
  * </tr>
  * <tr>
  * <td>${remoteAddr}</td>
@@ -74,7 +77,8 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * </tr>
  * <tr>
  * <td>${requestHeader.XXXX}</td>
- * <td>The value of the HTTP request header named XXXX. For example, a substitution variable named "${requestHeader.x-forwarded-for} will yield the value of the first header named "x-forwarded-for
+ * <td>The value of the HTTP request header named XXXX. For example, a substitution variable named
+ * "${requestHeader.x-forwarded-for} will yield the value of the first header named "x-forwarded-for
  * ", or "" if none.</td>
  * </tr>
  * <tr>
@@ -83,15 +87,18 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * </tr>
  * <tr>
  * <td>${responseEncodingNoDefault}</td>
- * <td>The encoding format requested by the client via the _format parameter or the Accept header. Value will be "json" or "xml", or "" if the client did not explicitly request a format</td>
+ * <td>The encoding format requested by the client via the _format parameter or the Accept header. Value will be "json"
+ * or "xml", or "" if the client did not explicitly request a format</td>
  * </tr>
  * <tr>
  * <td>${servletPath}</td>
- * <td>The part of thre requesting URL that corresponds to the particular Servlet being called (see {@link HttpServletRequest#getServletPath()})</td>
+ * <td>The part of thre requesting URL that corresponds to the particular Servlet being called (see
+ * {@link HttpServletRequest#getServletPath()})</td>
  * </tr>
  * <tr>
  * <td>${requestBodyFhir}</td>
- * <td>The complete body of the request if the request has a FHIR content-type (this can be quite large!). Will emit an empty string if the content type is not a FHIR content type</td>
+ * <td>The complete body of the request if the request has a FHIR content-type (this can be quite large!). Will emit an
+ * empty string if the content type is not a FHIR content type</td>
  * </tr>
  * <tr>
  * <td>${requestUrl}</td>
@@ -122,10 +129,9 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	public String getErrorMessageFormat() {
 		return myErrorMessageFormat;
 	}
-	
+
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
 		if (myLogExceptions) {
 			// Perform any string substitutions from the message format
 			StrLookup<?> lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
@@ -187,7 +193,8 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	}
 
 	/**
-	 * Sets the message format itself. See the {@link LoggingInterceptor class documentation} for information on the format
+	 * Sets the message format itself. See the {@link LoggingInterceptor class documentation} for information on the
+	 * format
 	 */
 	public void setMessageFormat(String theMessageFormat) {
 		Validate.notBlank(theMessageFormat, "Message format can not be null/empty");
@@ -290,16 +297,18 @@ public class LoggingInterceptor extends InterceptorAdapter {
 				return myRequest.getMethod();
 			} else if (theKey.equals("requestBodyFhir")) {
 				String contentType = myRequest.getContentType();
-				int colonIndex = contentType.indexOf(';');
-				if (colonIndex != -1) {
-					contentType = contentType.substring(0, colonIndex);
-				}
-				contentType = contentType.trim();
-				
-				EncodingEnum encoding = EncodingEnum.forContentType(contentType);
-				if (encoding != null) {
-					byte[] requestContents = myRequestDetails.loadRequestContents();
-					return new String(requestContents, Charsets.UTF_8);
+				if (isNotBlank(contentType)) {
+					int colonIndex = contentType.indexOf(';');
+					if (colonIndex != -1) {
+						contentType = contentType.substring(0, colonIndex);
+					}
+					contentType = contentType.trim();
+
+					EncodingEnum encoding = EncodingEnum.forContentType(contentType);
+					if (encoding != null) {
+						byte[] requestContents = myRequestDetails.loadRequestContents();
+						return new String(requestContents, Charsets.UTF_8);
+					}
 				}
 				return "";
 			}
