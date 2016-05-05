@@ -53,8 +53,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  */
 public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
-    /** a static initialization for the fhircontext. Only DSTU2 is supported */
-   private static final FhirContext CTX = FhirContext.forDstu2();
+    private final FhirContext CTX;
 
     /** the uri info */
     @Context
@@ -67,7 +66,22 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	public FhirContext getFhirContext() {
         return CTX;
     }
+    
+    /**
+     * Default is DSTU2.  Use {@link AbstractJaxRsProvider#AbstractJaxRsProvider(FhirContext)} to specify a DSTU3 context.
+     */
+    protected AbstractJaxRsProvider() {
+        CTX = FhirContext.forDstu2();
+    }
 
+    /**
+     * 
+     * @param ctx the {@link FhirContext} to support.
+     */
+    protected AbstractJaxRsProvider(FhirContext ctx) {
+        CTX = ctx;
+    }
+    
     /**
      * This method returns the query parameters
      * @return the query parameters

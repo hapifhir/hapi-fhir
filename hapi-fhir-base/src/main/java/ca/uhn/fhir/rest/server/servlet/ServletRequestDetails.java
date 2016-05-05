@@ -103,8 +103,10 @@ public class ServletRequestDetails extends RequestDetails {
 				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
 				if ("gzip".equals(contentEncoding)) {
 					ourLog.debug("Uncompressing (GZip) incoming content");
-					GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(requestContents));
-					requestContents = IOUtils.toByteArray(gis);
+					if (requestContents.length > 0) {
+						GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(requestContents));
+						requestContents = IOUtils.toByteArray(gis);
+					}
 				}
 			}
 			

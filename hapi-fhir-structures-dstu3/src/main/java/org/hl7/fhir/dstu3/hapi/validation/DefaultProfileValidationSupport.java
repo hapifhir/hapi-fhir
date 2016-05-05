@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -89,6 +90,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+		Validate.notBlank(theUri, "theUri must not be null or blank");
+		
 		if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 			return (T) fetchStructureDefinition(theContext, theUri);
 		}

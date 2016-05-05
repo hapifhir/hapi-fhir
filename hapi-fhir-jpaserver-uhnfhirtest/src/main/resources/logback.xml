@@ -73,7 +73,7 @@
 		</triggeringPolicy>
 		<encoder>
 			<!-- [%file:%line] -->
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %msg%n</pattern>
 		</encoder>
 	</appender>
 

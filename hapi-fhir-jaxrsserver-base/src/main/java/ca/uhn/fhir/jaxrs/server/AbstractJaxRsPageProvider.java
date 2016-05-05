@@ -31,6 +31,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
@@ -65,6 +66,19 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 		}
 	}
 
+	/**
+	 * Provides the ability to set the {@link FhirContext} instance.
+	 * @param ctx the {@link FhirContext} instance.
+	 */
+	protected AbstractJaxRsPageProvider(FhirContext ctx) {
+	    super(ctx);
+	    try {
+	        myBinding = new PageMethodBinding(getFhirContext(), PageProvider.class.getMethod("getPage"));
+	    } catch (Exception e) {
+	        throw new ca.uhn.fhir.context.ConfigurationException(e);
+	    }
+	}
+	
 	@Override
 	public String getBaseForRequest() {
 		try {

@@ -1541,7 +1541,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
 	private void validateQuestionannaireResponse(List<ValidationMessage> errors, Element element, NodeStack stack) {
 		Element q = element.getNamedChild("questionnaire");
-		if (hint(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), q != null, "No questionnaire is identified, so no validation can be performed against the base questionnaire")) {
+		if (hint(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), q != null && isNotBlank(q.getNamedChildValue("reference")), "No questionnaire is identified, so no validation can be performed against the base questionnaire")) {
 			long t = System.nanoTime();
 			Questionnaire qsrc = context.fetchResource(Questionnaire.class, q.getNamedChildValue("reference"));
 			sdTime = sdTime + (System.nanoTime() - t);

@@ -30,7 +30,7 @@ public class CommonConfig {
 	public IServerInterceptor requestLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.request");
-		retVal.setMessageFormat("Path[${servletPath}] ${requestBodyFhir}");
+		retVal.setMessageFormat("${requestVerb} ${servletPath} -\n${requestBodyFhir}");
 		retVal.setLogExceptions(false);
 		return retVal;
 	}
