@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.lang.reflect.GenericDeclaration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -380,7 +381,7 @@ public class JsonParserDstu2Test {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals("VERSION2", label.getVersion());
 	}
-
+	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -402,7 +403,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -422,7 +422,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	/**
 	 * Fixing #89
 	 */
@@ -458,6 +457,7 @@ public class JsonParserDstu2Test {
 		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
 
+	
 	/**
 	 * #158
 	 */
@@ -474,6 +474,7 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, not(containsString("tag")));
 	}
 
+	
 	/**
 	 * #158
 	 */
@@ -1339,6 +1340,104 @@ public class JsonParserDstu2Test {
 
 		assertEquals(exp, act);
 
+	}
+
+	/**
+	 * See #359 - This is the base test with no nulls, other testParseNullsFOO have nulls in them
+	 */
+	@Test
+	public void testParseNullsArray() {
+		//@formatter:off
+		String input =
+			"{\n" + 
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"id\":\"123\",\n" +
+			"    \"gender\":\"male\",\n" +
+			"    \"name\":null\n" + 
+			"}";
+		//@formatter:on
+		
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		assertEquals("Patient/123", patient.getId().getValue());
+		assertEquals(AdministrativeGenderEnum.MALE, patient.getGenderElement().getValueAsEnum());
+		assertEquals("", patient.getNameFirstRep().getFamilyAsSingleString());
+	}
+
+	/**
+	 * See #359 - This is the base test with no nulls, other testParseNullsFOO have nulls in them
+	 */
+	@Test
+	public void testParseNullsNone() {
+		//@formatter:off
+		String input =
+			"{\n" + 
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"id\":\"123\",\n" +
+			"    \"gender\":\"male\",\n" +
+			"    \"name\":[\n" + 
+			"        {\n" + 
+			"            \"family\":[\n" + 
+			"                \"FAMILY\"\n" + 
+			"            ]\n" + 
+			"        }\n" + 
+			"    ]\n" + 
+			"}";
+		//@formatter:on
+		
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		assertEquals("Patient/123", patient.getId().getValue());
+		assertEquals(AdministrativeGenderEnum.MALE, patient.getGenderElement().getValueAsEnum());
+		assertEquals("FAMILY", patient.getNameFirstRep().getFamilyAsSingleString());
+	}
+
+	/**
+	 * See #359 - This is the base test with no nulls, other testParseNullsFOO have nulls in them
+	 */
+	@Test
+	public void testParseNullsObject() {
+		//@formatter:off
+		String input =
+			"{\n" + 
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"id\":\"123\",\n" +
+			"    \"gender\":\"male\",\n" +
+			"    \"name\":[\n" + 
+			"        null\n" + 
+			"    ]\n" + 
+			"}";
+		//@formatter:on
+		
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		assertEquals("Patient/123", patient.getId().getValue());
+		assertEquals(AdministrativeGenderEnum.MALE, patient.getGenderElement().getValueAsEnum());
+		assertEquals("", patient.getNameFirstRep().getFamilyAsSingleString());
+	}
+
+	/**
+	 * See #359 - Let's be lenient about nulls!
+	 */
+	@Test
+	public void testParseNullsPrimitive() {
+		//@formatter:off
+		String input =
+			"{\n" + 
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"id\":null,\n" +
+			"    \"gender\":null,\n" +
+			"    \"name\":[\n" + 
+			"        {\n" + 
+			"            \"family\":[\n" + 
+			"                \"FAMILY\"\n" + 
+			"            ]\n" + 
+			"        }\n" + 
+			"    ]\n" + 
+			"}";
+		//@formatter:on
+		
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		assertEquals(null, patient.getId().getValue());
+		assertEquals(null, patient.getGenderElement().getValueAsEnum());
+		assertEquals("FAMILY", patient.getNameFirstRep().getFamilyAsSingleString());
 	}
 
 	@Test

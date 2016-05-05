@@ -2110,8 +2110,8 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", ourRequestBodyString);
-		assertNotNull(response.getResource());
-		assertEquals("FOOBAR", toOo(response.getResource()).getIssue().get(0).getDiagnosticsElement().getValue());
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", ((OperationOutcome)response.getOperationOutcome()).getIssue().get(0).getDiagnosticsElement().getValue());
 		
 	}
 
