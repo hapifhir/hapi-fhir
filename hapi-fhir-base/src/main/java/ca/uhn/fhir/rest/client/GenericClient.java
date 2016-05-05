@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -169,7 +170,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public BaseConformance conformance() {
+	public IBaseConformance conformance() {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
 			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/DSTU3+ structures");
 		}
@@ -183,7 +184,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Class<BaseConformance> conformance = (Class<BaseConformance>) myContext.getResourceDefinition("Conformance").getImplementingClass();
 
 		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance);
-		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+		IBaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -2325,7 +2326,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public MethodOutcome execute() {
 			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2.createValidateInvocation(myContext, myResource);
 			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<BaseOperationOutcome>(null, null);
-			BaseOperationOutcome outcome = invoke(null, handler, invocation);
+			IBaseOperationOutcome outcome = invoke(null, handler, invocation);
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setOperationOutcome(outcome);
 			return retVal;

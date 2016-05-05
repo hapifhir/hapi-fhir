@@ -22,8 +22,6 @@ package ca.uhn.fhir.jaxrs.server;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
 
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
@@ -37,12 +35,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindings;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * This server is the abstract superclass for all resource providers. It exposes
@@ -62,7 +61,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON,
 		Constants.CT_FHIR_XML })
 @Interceptors(JaxRsExceptionInterceptor.class)
-public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider
+public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> extends AbstractJaxRsProvider
 		implements IRestfulServer<JaxRsRequest>, IResourceProvider {
 
 	/** the method bindings for this class */
@@ -73,9 +72,19 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 * being constructed.
 	 */
 	protected AbstractJaxRsResourceProvider() {
+	    super();
 		theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
 	}
 
+	/**
+	 * Provides the ability to specify the {@link FhirContext}.
+	 * @param ctx the {@link FhirContext} instance.
+	 */
+	protected AbstractJaxRsResourceProvider(FhirContext ctx) {
+	    super(ctx);
+	    theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
+	}
+	
 	/**
 	 * This constructor takes in an explicit interface class. This subclass
 	 * should be identical to the class being constructed but is given
@@ -85,9 +94,24 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 * @param theProviderClass the interface of the class
 	 */
 	protected AbstractJaxRsResourceProvider(Class<? extends AbstractJaxRsProvider> theProviderClass) {
+	    super();
 		theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
 	}
 
+	/**
+	 * This constructor takes in an explicit interface class. This subclass
+	 * should be identical to the class being constructed but is given
+	 * explicitly in order to avoid issues with proxy classes in a jee
+	 * environment.
+	 * 
+	 * @param ctx the {@link FhirContext} instance.
+	 * @param theProviderClass the interface of the class
+	 */
+	protected AbstractJaxRsResourceProvider(FhirContext ctx, Class<? extends AbstractJaxRsProvider> theProviderClass) {
+	    super(ctx);
+	    theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
+	}
+	
 	/**
 	 * The base for request for a resource provider has the following form:</br>
 	 * {@link AbstractJaxRsResourceProvider#getBaseForServer()

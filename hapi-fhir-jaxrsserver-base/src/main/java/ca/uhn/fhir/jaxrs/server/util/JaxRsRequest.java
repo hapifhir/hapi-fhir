@@ -31,7 +31,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.IdType;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -129,18 +131,33 @@ public class JaxRsRequest extends RequestDetails {
 				throw new InvalidRequestException("Don't know how to handle request path: "
 						+ myServer.getUriInfo().getRequestUri().toASCIIString());
 			}
+			
+			FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
 
 			if (StringUtils.isNotBlank(myVersion)) {
-				result.setId(
-						new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+			    if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+    				result.setId(
+    						new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+			    } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+			        result.setId(
+			                new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+			    }
 			} else if (StringUtils.isNotBlank(myId)) {
-				result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+                    result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+                    result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                }
 			}
 
 			if (myRestOperation == RestOperationTypeEnum.UPDATE) {
 				String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
-					result.setId(new IdDt(contentLocation));
+	                if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+	                    result.setId(new IdType(contentLocation));
+	                } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+	                    result.setId(new IdDt(contentLocation));
+	                }
 				}
 			}
 			
