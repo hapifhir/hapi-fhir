@@ -400,7 +400,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 	public void setPublished(InstantDt thePublished) {
 		getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, thePublished);
 	}
-	/*
+	*/
 
 	public void setType(BoundCodeDt<BundleTypeEnum> theType) {
 		myType = theType;
