@@ -57,6 +57,7 @@ import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -281,7 +282,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
-							rest.addOperation().setName(methodBinding.getName()).getDefinition().setReference("OperationDefinition/" + opName);
+							rest.addOperation().setName(methodBinding.getName()).setDefinition(new Reference(readOperationDefinition(new IdType(opName))));
 						}
 					}
 
@@ -315,7 +316,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
-							rest.addOperation().setName(methodBinding.getName()).getDefinition().setReference("OperationDefinition/" + opName);
+							rest.addOperation().setName(methodBinding.getName()).setDefinition(new Reference(readOperationDefinition(new IdType(opName))));
 						}
 					}
 				}
