@@ -220,6 +220,10 @@
 			<id>joelsch</id>
 			<name>joelsch</name>
 		</developer>
+		<developer>
+			<id>euvitudo</id>
+			<name>Phillip Warner</name>
+		</developer>
 	</developers>
 
 	<licenses>

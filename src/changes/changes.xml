@@ -94,6 +94,10 @@
 				LoggingInterceptor on server has a new parameter 
 				<![CDATA[<code>${requestBodyFhir}</code>]]> which logs the entire request body.
 			</action>
+			<action type="add" issue="355">
+				JAX-RS server module now supports DSTU3 resources (previously it only supported DSTU2). Thanks
+				to Phillip Warner for implementing this, and providing a pull request!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
