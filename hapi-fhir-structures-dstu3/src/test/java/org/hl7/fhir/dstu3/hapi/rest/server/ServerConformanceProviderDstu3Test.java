@@ -132,7 +132,10 @@ public class ServerConformanceProviderDstu3Test {
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReferenceElement().getValue());
+		assertEquals("$everything", ((OperationDefinition)conformance.getRest().get(0).getOperation().get(0).getDefinition().getResource()).getCode());
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
+		assertEquals("$everything", opDef.getCode());
 	}
 
 	@Test
@@ -267,7 +270,7 @@ public class ServerConformanceProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
-		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReferenceElement().getValue());
+		assertEquals("$plain", ((OperationDefinition)sconf.getRest().get(0).getOperation().get(0).getDefinition().getResource()).getCode());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/plain"));
 
