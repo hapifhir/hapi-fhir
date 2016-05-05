@@ -98,6 +98,11 @@
 				JAX-RS server module now supports DSTU3 resources (previously it only supported DSTU2). Thanks
 				to Phillip Warner for implementing this, and providing a pull request!
 			</action>
+			<action type="fix" issue="356">
+				Generated conformance statements for DSTU3 servers did not properly reference their
+				OperationDefinitions. Thanks
+				to Phillip Warner for implementing this, and providing a pull request!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
