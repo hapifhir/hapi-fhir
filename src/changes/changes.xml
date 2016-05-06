@@ -113,6 +113,11 @@
 				(i.e. not a top level code). Thanks to Jon
 				Zammit for reporting!
 			</action>
+			<action type="fix" issue="361">
+				Restore the setType method in the DSTU1 Bundle
+				class, as it was accidentally commented out. Thanks
+				to GitHub user @Virdulys for the pull request!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
