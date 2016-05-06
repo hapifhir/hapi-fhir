@@ -242,7 +242,6 @@
 								<baseResourceName>questionnaireresponse</baseResourceName>
 								<baseResourceName>referralrequest</baseResourceName>
 								<baseResourceName>relatedperson</baseResourceName>
-								<baseResourceName>remittance</baseResourceName>
 								<baseResourceName>riskassessment</baseResourceName>
 								<baseResourceName>schedule</baseResourceName>
 								<baseResourceName>searchparameter</baseResourceName>

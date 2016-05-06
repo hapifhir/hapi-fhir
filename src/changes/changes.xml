@@ -123,6 +123,12 @@
 				where the type of the composite parameter is
 				a quantity (e.g. Observation:component-code-component-value-quantity)
 			</action>
+			<action type="remove">
+				Remove the Remittance resource from DSTU2
+				structures, as it is not a real resource and
+				was causing issues with interoperability
+				with the .NET client.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
