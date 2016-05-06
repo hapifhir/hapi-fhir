@@ -452,66 +452,14 @@ public class SearchBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
-
 			if (addPredicateMissingFalseIfPresent(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
 
-			String systemValue;
-			String unitsValue;
-			ParamPrefixEnum cmpValue;
-			BigDecimal valueValue;
-			String valueString;
-
-			if (params instanceof BaseQuantityDt) {
-				BaseQuantityDt param = (BaseQuantityDt) params;
-				systemValue = param.getSystemElement().getValueAsString();
-				unitsValue = param.getUnitsElement().getValueAsString();
-				cmpValue = ParamPrefixEnum.forDstu1Value(param.getComparatorElement().getValueAsString());
-				valueValue = param.getValueElement().getValue();
-				valueString = param.getValueElement().getValueAsString();
-			} else if (params instanceof QuantityParam) {
-				QuantityParam param = (QuantityParam) params;
-				systemValue = param.getSystem();
-				unitsValue = param.getUnits();
-				cmpValue = param.getPrefix();
-				valueValue = param.getValue();
-				valueString = param.getValueAsString();
-			} else {
-				throw new IllegalArgumentException("Invalid quantity type: " + params.getClass());
-			}
-
-			Predicate system = null;
-			if (!isBlank(systemValue)) {
-				system = builder.equal(from.get("mySystem"), systemValue);
-			}
-
-			Predicate code = null;
-			if (!isBlank(unitsValue)) {
-				code = builder.equal(from.get("myUnits"), unitsValue);
-			}
-
-			cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
-			final Expression<BigDecimal> path = from.get("myValue");
-			String invalidMessageName = "invalidQuantityPrefix";
-
-			Predicate num = createPredicateNumeric(builder, params, cmpValue, valueValue, path, invalidMessageName, valueString);
-
-			if (system == null && code == null) {
-				codePredicates.add(num);
-			} else if (system == null) {
-				Predicate singleCode = builder.and(code, num);
-				codePredicates.add(singleCode);
-			} else if (code == null) {
-				Predicate singleCode = builder.and(system, num);
-				codePredicates.add(singleCode);
-			} else {
-				Predicate singleCode = builder.and(system, code, num);
-				codePredicates.add(singleCode);
-			}
+			Predicate singleCode = createPredicateQuantity(builder, from, nextOr);
+			codePredicates.add(singleCode);
 		}
-
+		
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
@@ -1039,6 +987,11 @@ public class SearchBuilder {
 			retVal = createPredicateDate(builder, dateJoin, leftValue);
 			break;
 		}
+		case QUANTITY: {
+			From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = from.join("myParamsQuantity", JoinType.INNER);
+			retVal = createPredicateQuantity(builder, dateJoin, leftValue);
+			break;
+		}
 		}
 
 		if (retVal == null) {
@@ -1166,6 +1119,61 @@ public class SearchBuilder {
 			throw new InvalidRequestException(msg);
 		}
 		return num;
+	}
+
+	private Predicate createPredicateQuantity(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> theFrom, IQueryParameterType theParam) {
+		String systemValue;
+		String unitsValue;
+		ParamPrefixEnum cmpValue;
+		BigDecimal valueValue;
+		String valueString;
+
+		if (theParam instanceof BaseQuantityDt) {
+			BaseQuantityDt param = (BaseQuantityDt) theParam;
+			systemValue = param.getSystemElement().getValueAsString();
+			unitsValue = param.getUnitsElement().getValueAsString();
+			cmpValue = ParamPrefixEnum.forDstu1Value(param.getComparatorElement().getValueAsString());
+			valueValue = param.getValueElement().getValue();
+			valueString = param.getValueElement().getValueAsString();
+		} else if (theParam instanceof QuantityParam) {
+			QuantityParam param = (QuantityParam) theParam;
+			systemValue = param.getSystem();
+			unitsValue = param.getUnits();
+			cmpValue = param.getPrefix();
+			valueValue = param.getValue();
+			valueString = param.getValueAsString();
+		} else {
+			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
+		}
+
+		Predicate system = null;
+		if (!isBlank(systemValue)) {
+			system = theBuilder.equal(theFrom.get("mySystem"), systemValue);
+		}
+
+		Predicate code = null;
+		if (!isBlank(unitsValue)) {
+			code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
+		}
+
+		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+		final Expression<BigDecimal> path = theFrom.get("myValue");
+		String invalidMessageName = "invalidQuantityPrefix";
+
+		Predicate num = createPredicateNumeric(theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, valueString);
+
+		Predicate singleCode;
+		if (system == null && code == null) {
+			singleCode = num;
+		} else if (system == null) {
+			singleCode = theBuilder.and(code, num);
+		} else if (code == null) {
+			singleCode = theBuilder.and(system, num);
+		} else {
+			singleCode = theBuilder.and(system, code, num);
+		}
+		
+		return singleCode;
 	}
 
 	private void createPredicateResourceId(CriteriaBuilder builder, CriteriaQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {

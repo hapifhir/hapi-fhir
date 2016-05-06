@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -98,7 +99,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
@@ -516,6 +516,58 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id1, id2));
 		}
 
+	}
+
+	@Test
+	public void testSearchCompositeParamQuantity() {
+		//@formatter:off
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConceptDt().addCoding(new CodingDt().setSystem("http://foo").setCode("code1")))
+			.setValue(new QuantityDt().setSystem("http://bar").setCode("code1").setValue(100));
+		o1.addComponent()
+			.setCode(new CodeableConceptDt().addCoding(new CodingDt().setSystem("http://foo").setCode("code2")))
+			.setValue(new QuantityDt().setSystem("http://bar").setCode("code2").setValue(100));
+		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation o2 = new Observation();
+		o2.addComponent()
+			.setCode(new CodeableConceptDt().addCoding(new CodingDt().setSystem("http://foo").setCode("code1")))
+			.setValue(new QuantityDt().setSystem("http://bar").setCode("code1").setValue(200));
+		o2.addComponent()
+			.setCode(new CodeableConceptDt().addCoding(new CodingDt().setSystem("http://foo").setCode("code3")))
+			.setValue(new QuantityDt().setSystem("http://bar").setCode("code2").setValue(200));
+		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
+		//@formatter:on
+
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
+			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_COMPONENT_VALUE_QUANTITY, val);
+			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
+			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_COMPONENT_VALUE_QUANTITY, val);
+			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue(), id2.getValue()));
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code4");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
+			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_COMPONENT_VALUE_QUANTITY, val);
+			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code4");
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
+			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_COMPONENT_VALUE_QUANTITY, val);
+			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+		}
 	}
 
 	/**

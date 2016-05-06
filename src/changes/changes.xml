@@ -118,6 +118,11 @@
 				class, as it was accidentally commented out. Thanks
 				to GitHub user @Virdulys for the pull request!
 			</action>
+			<action type="add">
+				JPA server now supports composite search parameters
+				where the type of the composite parameter is
+				a quantity (e.g. Observation:component-code-component-value-quantity)
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
