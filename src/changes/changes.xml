@@ -107,6 +107,12 @@
 				Properly handle null arrays when parsing JSON resources. Thanks to Subhro for
 				fixing this and providing a pull request!
 			</action>
+			<action type="fix">
+				STU3 validator failed to validate codes where the
+				code was a child code within the code system that contained it
+				(i.e. not a top level code). Thanks to Jon
+				Zammit for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

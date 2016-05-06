@@ -223,14 +223,32 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
 		if (cs != null) {
-			for (ConceptDefinitionComponent next : cs.getConcept()) {
-				if (next.getCode().equals(theCode)) {
-					return new CodeValidationResult(next);
-				}
+			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept());
+			
+			if (retVal != null) {
+				return retVal;
 			}
 		}
 
 		return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
+	}
+
+	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList) {
+		CodeValidationResult retVal = null;
+		for (ConceptDefinitionComponent next : conceptList) {
+			if (next.getCode().equals(theCode)) {
+				retVal = new CodeValidationResult(next);
+				break;
+			}
+
+			// recurse
+			retVal = testIfConceptIsInList(theCode, next.getConcept());
+			if (retVal != null) {
+				break;
+			}
+		}
+		
+		return retVal;
 	}
 
 }
