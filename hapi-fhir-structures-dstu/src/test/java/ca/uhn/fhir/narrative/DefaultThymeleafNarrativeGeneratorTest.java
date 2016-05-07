@@ -83,7 +83,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		NarrativeDt narrative = new NarrativeDt();
 		gen.generateNarrative(myCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
-		assertThat(output, StringContains.containsString("<div>"));
+		assertThat(output, StringContains.containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">"));
 
 		// Removed because label is gone in DSTU2
 //		value.getIdentifierFirstRep().setLabel("FOO MRN 123");

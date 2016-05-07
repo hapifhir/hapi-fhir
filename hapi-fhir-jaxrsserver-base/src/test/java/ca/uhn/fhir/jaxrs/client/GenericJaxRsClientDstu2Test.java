@@ -1406,7 +1406,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_summary=text", ourRequestUri);
 		assertEquals(Patient.class, response.getClass());
-		assertEquals("<div>HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
 
 	}
 

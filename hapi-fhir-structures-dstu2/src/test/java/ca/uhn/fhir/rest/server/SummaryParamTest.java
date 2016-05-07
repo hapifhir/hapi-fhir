@@ -84,7 +84,7 @@ public class SummaryParamTest {
 		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, not(containsString("<Medic")));
-		assertEquals("<div>THE DIV</div>", responseContent);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
 		assertThat(responseContent, not(containsString("efer")));
 		assertEquals(SummaryEnum.TEXT, ourLastSummary);
 	}
@@ -101,7 +101,7 @@ public class SummaryParamTest {
 		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, not(containsString("<Patien")));
-		assertEquals("<div>TEXT</div>", responseContent);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
 		assertThat(responseContent, not(containsString("family")));
 		assertThat(responseContent, not(containsString("maritalStatus")));
 	}

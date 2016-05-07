@@ -29,6 +29,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
@@ -236,7 +237,8 @@ public class Controller extends BaseController {
 		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		FhirContext context = getContext(theRequest);
+		GenericClient client = theRequest.newClient(theReq, context, myConfig, interceptor);
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
@@ -252,7 +254,13 @@ public class Controller extends BaseController {
 		long start = System.currentTimeMillis();
 		try {
 			ourLog.info(logPrefix(theModel) + "Loading paging URL: {}", url);
-			client.loadPage().url(url).execute();
+			if (context.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				client.loadPage().byUrl(url).andReturnDstu1Bundle().execute();
+			} else {
+				@SuppressWarnings("unchecked")
+				Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
+				client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
+			}
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}

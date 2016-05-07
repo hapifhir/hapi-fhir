@@ -1445,7 +1445,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType newId = ourClient.create().resource(p1).encodedJson().execute().getId();
 
 		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedJson().execute();
-		assertEquals("<div>HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
 	@Test
@@ -1458,7 +1458,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType newId = ourClient.create().resource(p1).encodedXml().execute().getId();
 
 		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedXml().execute();
-		assertEquals("<div>HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
 	@Test

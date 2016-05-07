@@ -87,6 +87,8 @@ public class JsonParserTest {
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name));
 		// ourLog.info(msg);
 
+		msg = msg.replace("\"div\": \"<div>", "\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
+		
 		IParser p = ourCtx.newJsonParser();
 		Profile res = p.parseResource(Profile.class, msg);
 
@@ -469,7 +471,7 @@ public class JsonParserTest {
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div>AAA</div>"));
+		assertThat(str, StringContains.containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>"));
 		String substring = "\"reference\":\"#";
 		assertThat(str, StringContains.containsString(substring));
 
@@ -710,7 +712,7 @@ public class JsonParserTest {
 
 		String out = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(out);
-		assertThat(out, containsString("<div>hello</div>"));
+		assertThat(out, containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">hello</div>"));
 
 		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
 		out = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
@@ -968,7 +970,7 @@ public class JsonParserTest {
 
 		ourLog.info(str);
 
-		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
+		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">help</div>\"},"));
 	}
 
 	@Before

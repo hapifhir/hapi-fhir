@@ -39,7 +39,7 @@ import org.hibernate.annotations.ColumnDefault;
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
 	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_RESID", columnNames = {"RESOURCE_TYPE", "RESOURCE_PID"})
 }, indexes= {
-	@Index(name = "IDX_FORCEDID", columnList = "FORCED_ID"),
+	@Index(name = "IDX_FORCEDID_TYPE_FORCEDID", columnList = "RESOURCE_TYPE,FORCED_ID"),
 })
 //@formatter:on
 public class ForcedId {

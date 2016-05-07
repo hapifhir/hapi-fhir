@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DiagnosticOrder;
@@ -30,6 +31,7 @@ import org.hl7.fhir.dstu3.model.MedicationOrder;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.NamingSystem;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -175,6 +177,12 @@ protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu3")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	@Autowired
+	@Qualifier("myCompartmentDefinitionDaoDstu3")
+	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
+	@Autowired
+	@Qualifier("myOperationDefinitionDaoDstu3")
+	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;

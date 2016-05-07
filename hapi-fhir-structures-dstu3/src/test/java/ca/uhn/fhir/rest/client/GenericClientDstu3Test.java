@@ -118,7 +118,7 @@ public class GenericClientDstu3Test {
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), "UTF-8"));
-		assertEquals("<div>A PATIENT</div>", outputPt.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
 	}
 
 	@Test
@@ -199,8 +199,8 @@ public class GenericClientDstu3Test {
 		assertNotNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div>OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div>FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
@@ -243,7 +243,7 @@ public class GenericClientDstu3Test {
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div>FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
@@ -481,8 +481,8 @@ public class GenericClientDstu3Test {
 		assertNotNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div>OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div>FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
@@ -526,7 +526,7 @@ public class GenericClientDstu3Test {
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div>FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());

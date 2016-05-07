@@ -88,6 +88,29 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 	
+	@Test
+	public void testEncodeNarrativeShouldIncludeNamespace() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+	}
+	
+	@Test
+	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+	}
+
+	
 	/**
 	 * See #344
 	 */
@@ -830,7 +853,7 @@ public class JsonParserDstu3Test {
 		String output = ourCtx.newJsonParser().encodeResourceToString(p);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\"text\":{\"status\":\"generated\",\"div\":\"<div><div class=\\\"hapiHeaderText\\\"> John <b>SMITH </b></div>"));
+		assertThat(output, containsString("\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><div class=\\\"hapiHeaderText\\\"> John <b>SMITH </b></div>"));
 	}
 
 	@Test

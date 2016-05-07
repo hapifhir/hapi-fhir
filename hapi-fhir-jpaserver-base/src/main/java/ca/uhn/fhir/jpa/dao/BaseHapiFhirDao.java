@@ -142,6 +142,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -241,12 +242,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return InstantDt.withCurrentTime();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Set<ResourceLink> extractResourceLinks(ResourceTable theEntity, IBaseResource theResource) {
 		Set<ResourceLink> retVal = new HashSet<ResourceLink>();
-		
+
 		/*
-		 * For now we don't try to load any of the links in a bundle if it's the
-		 * actual bundle we're storing..
+		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
 		 */
 		if (theResource instanceof IBaseBundle) {
 			return retVal;
@@ -290,7 +291,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (nextId == null || nextId.hasIdPart() == false) {
 						continue;
 					}
-					
+				} else if (myContext.getElementDefinition((Class<? extends IBase>) nextObject.getClass()).getName().equals("uri")) {
+					continue;
 				} else {
 					if (!multiType) {
 						if (nextSpDef.getName().equals("sourceuri")) {
@@ -1251,11 +1253,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 							Set<Long> matches = processMatchUrl(nextIdText, matchResourceType);
 							if (matches.isEmpty()) {
 								String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
-								throw new InvalidRequestException(msg);
+								throw new ResourceNotFoundException(msg);
 							}
 							if (matches.size() > 1) {
 								String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
-								throw new InvalidRequestException(msg);
+								throw new PreconditionFailedException(msg);
 							}
 							Long next = matches.iterator().next();
 							String newId = translatePidIdToForcedId(resourceTypeString, next);
@@ -1519,9 +1521,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				for (IBase nextChild : values) {
 					IBaseReference nextRef = (IBaseReference) nextChild;
 					if (!isBlank(nextRef.getReferenceElement().getResourceType())) {
-						if (!validTypes.contains(nextRef.getReferenceElement().getResourceType())) {
-							throw new UnprocessableEntityException(
-									"Invalid reference found at path '" + newPath + "'. Resource type '" + nextRef.getReferenceElement().getResourceType() + "' is not valid for this path");
+						if (!nextRef.getReferenceElement().getValue().contains("?")) {
+							if (!validTypes.contains(nextRef.getReferenceElement().getResourceType())) {
+								throw new UnprocessableEntityException(
+										"Invalid reference found at path '" + newPath + "'. Resource type '" + nextRef.getReferenceElement().getResourceType() + "' is not valid for this path");
+							}
 						}
 					}
 				}

@@ -202,6 +202,7 @@ public class ExampleDataUploader extends BaseCommand {
 				ourLog.info("Downloading from remote url: {}", specUrl);
 				downloadFileFromInternet(result, exampleFileDownloading);
 
+				FileUtils.deleteQuietly(inputFile);
 				FileUtils.moveFile(exampleFileDownloading, inputFile);
 
 				if(!cacheFile) {

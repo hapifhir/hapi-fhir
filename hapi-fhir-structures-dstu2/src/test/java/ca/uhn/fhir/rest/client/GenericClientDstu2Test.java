@@ -1694,7 +1694,7 @@ public class GenericClientDstu2Test {
 
 		assertEquals("http://example.com/fhir/Patient/123?_summary=text", capt.getValue().getURI().toString());
 		assertEquals(Patient.class, response.getClass());
-		assertEquals("<div>HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
 
 	}
 

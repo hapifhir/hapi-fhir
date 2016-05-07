@@ -81,6 +81,28 @@ public class JsonParserDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
 	@Test
+	public void testEncodeNarrativeShouldIncludeNamespace() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+	}
+	
+	@Test
+	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+	}
+	
+	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");

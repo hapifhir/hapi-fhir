@@ -35,11 +35,14 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+
 @ca.uhn.fhir.model.api.annotation.DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
 
   public static final String NBSP = Character.toString((char)0xa0);
-  
+	private static final String DECL_XMLNS = " xmlns=\"http://www.w3.org/1999/xhtml\"";
+
   private NodeType nodeType;
   private String name;
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -304,7 +307,9 @@ public class XhtmlNode implements IBaseXhtml {
 			return null;
 		}
 		try {
-			return new XhtmlComposer().compose(this);
+			String retVal = new XhtmlComposer().compose(this);
+			retVal = XhtmlDt.preprocessXhtmlNamespaceDeclaration(retVal);
+			return retVal;
 		} catch (Exception e) {
 			// TODO: composer shouldn't throw exception like this
 			throw new RuntimeException(e);
@@ -327,12 +332,14 @@ public class XhtmlNode implements IBaseXhtml {
 		}
 		
 		if (!val.startsWith("<")) {
-			val = "<div>" + val + "</div>";
+			val = "<div" + DECL_XMLNS +">" + val + "</div>";
 		}
 		if (val.startsWith("<?") && val.endsWith("?>")) {
 			return;
 		}
 
+		val = XhtmlDt.preprocessXhtmlNamespaceDeclaration(val);
+		
 		try {
 			// TODO: this is ugly
 			XhtmlNode fragment = new XhtmlParser().parseFragment(val);

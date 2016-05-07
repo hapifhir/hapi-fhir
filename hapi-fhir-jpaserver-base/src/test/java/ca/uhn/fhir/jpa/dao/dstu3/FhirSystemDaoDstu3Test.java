@@ -17,6 +17,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -331,6 +332,62 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		respEntry = resp.getEntry().get(2).getResponse();
 		assertThat(respEntry.getStatus(), startsWith("404"));
 
+	}
+
+	@Test
+	public void testTransactionWithInlineMatchUrl() throws Exception {
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+		myPatientDao.create(patient, mySrd);
+		
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		
+		Bundle response = mySystemDao.transaction(mySrd, bundle);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		
+	}
+	
+	@Test
+	public void testTransactionWithInlineMatchUrlMultipleMatches() throws Exception {
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
+		myPatientDao.create(patient, mySrd);
+
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
+		}
+		
+	}
+	
+	@Test
+	public void testTransactionWithInlineMatchUrlNoMatches() throws Exception {
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - No resources match this search", e.getMessage());
+		}
+		
 	}
 
 	@Test

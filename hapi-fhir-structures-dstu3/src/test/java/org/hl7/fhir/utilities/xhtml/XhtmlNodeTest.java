@@ -18,7 +18,7 @@ public class XhtmlNodeTest {
 		String output = node.getValueAsString();
 		ourLog.info(output);
 		
-		assertEquals("<div><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ public class XhtmlNodeTest {
 		String output = node.getValueAsString();
 		ourLog.info(output);
 		
-		assertEquals("<div><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
 	}
 	
 }

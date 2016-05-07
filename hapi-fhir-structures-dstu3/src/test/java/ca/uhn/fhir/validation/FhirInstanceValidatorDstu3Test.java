@@ -1,6 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -24,6 +25,7 @@ import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -72,6 +74,28 @@ public class FhirInstanceValidatorDstu3Test {
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
+	}
+	
+	@Test
+//	@Ignore
+	public void testValidateBuiltInProfiles() throws Exception {
+		org.hl7.fhir.dstu3.model.Bundle bundle;
+		String name = "profiles-resources";
+		ourLog.info("Uploading " + name);
+		String vsContents;
+		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/profile/" + name + ".xml"), "UTF-8");
+
+		bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		for (BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
+			
+			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
+			
+			ValidationResult output = myVal.validateWithResult(next);
+			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+			assertThat("Failed to validate " + i.getFullUrl(), errors, empty());
+		}
+
 	}
 
 	@SuppressWarnings("unchecked")

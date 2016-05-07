@@ -129,6 +129,22 @@
 				was causing issues with interoperability
 				with the .NET client.
 			</action>
+			<action type="fix">
+				CLI tool cache feature (-c) for upload-example task sometimes failed
+				to write cache file and exited with an exception.
+			</action>
+			<action type="fix">
+				Fix error message in web testing UI when loading pages in a search
+				result for STU3 endpoints.
+			</action>
+			<action type="fix">
+				When encoding JSON resource, the parser will now always
+				ensure that XHTML narrative content has an 
+				XHTML namespace declaration on the first
+				DIV tag. This was preventing validation for
+				some resources using the official validator
+				rules.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
