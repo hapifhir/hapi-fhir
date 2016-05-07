@@ -119,6 +119,19 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
+	public void testEscapedOperationName() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escape("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escape("VALTOK2A|VALTOK2B"));
+		HttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info(response);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(2, ourLastParamValStr.size());
+	}
+	
+	@Test
 	public void testAndListWithUrl() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escape("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escape("VALTOK2A|VALTOK2B"));
 		HttpResponse status = ourClient.execute(httpGet);

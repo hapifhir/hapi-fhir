@@ -78,6 +78,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlPathTokenizer;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
@@ -913,7 +914,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
-		StringTokenizer tok = new StringTokenizer(theRequestPath, "/");
+		StringTokenizer tok = new UrlPathTokenizer(theRequestPath);
 		String resourceName = null;
 
 		IIdType id = null;

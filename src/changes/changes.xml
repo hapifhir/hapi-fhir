@@ -145,6 +145,11 @@
 				some resources using the official validator
 				rules.
 			</action>
+			<action type="fix">
+				Server failed to invoke operations when the name
+				was escaped (%24execute instead of $execute). 
+				Thanks to Michael Lawley for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
