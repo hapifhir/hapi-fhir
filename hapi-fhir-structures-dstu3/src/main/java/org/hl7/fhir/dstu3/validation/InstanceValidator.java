@@ -2229,7 +2229,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			} if (method == null) {
 				if (fullUrl == null)
 					return IdStatus.REQUIRED;
-				else if (fullUrl.primitiveValue().startsWith("urn:uuid:"))
+				else if (fullUrl.primitiveValue().startsWith("urn:uuid:") || fullUrl.primitiveValue().startsWith("urn:oid:"))
 					return IdStatus.OPTIONAL;
 				else
 					return IdStatus.REQUIRED;

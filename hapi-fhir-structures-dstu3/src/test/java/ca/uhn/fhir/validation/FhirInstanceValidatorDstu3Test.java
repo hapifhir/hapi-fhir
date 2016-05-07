@@ -3,8 +3,7 @@ package ca.uhn.fhir.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,9 +74,9 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
-	
+
 	@Test
-//	@Ignore
+	// @Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.dstu3.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -88,14 +87,23 @@ public class FhirInstanceValidatorDstu3Test {
 		bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
-			
+
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
-			
+
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 			assertThat("Failed to validate " + i.getFullUrl(), errors, empty());
 		}
 
+	}
+
+	@Test
+	public void testValidateDocument() throws Exception {
+		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sample-document.xml"), "UTF-8");
+
+		ValidationResult output = myVal.validateWithResult(vsContents);
+		logResultsAndReturnNonInformationalOnes(output);
+		assertTrue(output.isSuccessful());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,14 +116,13 @@ public class FhirInstanceValidatorDstu3Test {
 		myMockSupport = mock(IValidationSupport.class);
 		ValidationSupportChain validationSupport = new ValidationSupportChain(myMockSupport, myDefaultValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
-		
+
 		myVal.registerValidatorModule(myInstanceVal);
 
 		mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
 
 		myValidConcepts = new ArrayList<String>();
 
-		
 		when(myMockSupport.expandValueSet(any(FhirContext.class), any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) throws Throwable {
@@ -186,13 +193,13 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) throws Throwable {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0]);
-				ourLog.info("fetchAllStructureDefinitions()", new Object[] { });
+				ourLog.info("fetchAllStructureDefinitions()", new Object[] {});
 				return retVal;
 			}
 		});
 
 	}
-	
+
 	private Object defaultString(Integer theLocationLine) {
 		return theLocationLine != null ? theLocationLine.toString() : "";
 	}
@@ -202,7 +209,8 @@ public class FhirInstanceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
+			ourLog.info("Result {}: {} - {}:{} {} - {}",
+					new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
 			index++;
 
 			retVal.add(next);
@@ -296,14 +304,13 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnNonInformationalOnes(output);
-//		assertEquals(output.toString(), 1, output.getMessages().size());
-//		ourLog.info(output.getMessages().get(0).getLocationString());
-//		ourLog.info(output.getMessages().get(0).getMessage());
-//		assertEquals("/foo", output.getMessages().get(0).getLocationString());
-//		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+		// assertEquals(output.toString(), 1, output.getMessages().size());
+		// ourLog.info(output.getMessages().get(0).getLocationString());
+		// ourLog.info(output.getMessages().get(0).getMessage());
+		// assertEquals("/foo", output.getMessages().get(0).getLocationString());
+		// assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
 
-	
 	@Test
 	public void testValidateRawXmlResource() {
 		// @formatter:off
@@ -402,8 +409,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals("Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
 
 	}
-
-
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
@@ -532,7 +537,6 @@ public class FhirInstanceValidatorDstu3Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}
-
 
 	@AfterClass
 	public static void afterClassClearContext() {
