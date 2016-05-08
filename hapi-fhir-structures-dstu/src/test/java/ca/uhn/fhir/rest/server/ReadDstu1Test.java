@@ -33,9 +33,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ReadDstu1Test {
 
 	private static CloseableHttpClient ourClient;
@@ -131,7 +128,7 @@ public class ReadDstu1Test {
 
 	@Test
 	public void testReadWithEscapedCharsInId() throws Exception {
-		String id = "ABC!@#$%DEF";
+		String id = "ABC!@#$--DEF";
 		String idEscaped = URLEncoder.encode(id, "UTF-8");
 
 		String vid = "GHI:/:/JKL";

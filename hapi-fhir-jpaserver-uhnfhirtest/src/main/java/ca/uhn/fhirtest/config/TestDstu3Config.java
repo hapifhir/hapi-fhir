@@ -100,7 +100,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Lazy
 	public RequestValidatingInterceptor requestValidatingInterceptor() {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
-		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
+		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		requestValidator.addValidatorModule(instanceValidatorDstu3());

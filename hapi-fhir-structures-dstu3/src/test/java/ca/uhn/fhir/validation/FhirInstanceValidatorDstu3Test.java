@@ -21,9 +21,13 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -36,6 +40,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -94,6 +99,35 @@ public class FhirInstanceValidatorDstu3Test {
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 			assertThat("Failed to validate " + i.getFullUrl(), errors, empty());
 		}
+
+	}
+
+	@Test
+	// @Ignore
+	public void testValidateBundleWithObservations() throws Exception {
+		String name = "profiles-resources";
+		ourLog.info("Uploading " + name);
+		String inputString;
+		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), "UTF-8");
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
+		
+		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
+		List<Base> fpOutput;
+		BooleanType bool;
+		
+		fpOutput = fp.evaluate(bundle.getEntry().get(0), "component.where(code = %resource.code).empty()");
+		assertEquals(1, fpOutput.size());
+		bool = (BooleanType) fpOutput.get(0);
+		assertTrue(bool.getValue());
+//		
+//		fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
+//		assertEquals(1, fpOutput.size());
+//		bool = (BooleanType) fpOutput.get(0);
+//		assertTrue(bool.getValue());
+		
+		ValidationResult output = myVal.validateWithResult(inputString);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(errors, empty());
 
 	}
 

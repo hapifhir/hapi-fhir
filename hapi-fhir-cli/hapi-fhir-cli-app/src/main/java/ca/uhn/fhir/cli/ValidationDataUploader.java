@@ -4,6 +4,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -273,6 +275,23 @@ public class ValidationDataUploader extends BaseCommand {
 		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		total = bundle.getEntry().size();
 		count = 1;
+		
+		Collections.sort(bundle.getEntry(), new Comparator<BundleEntryComponent>() {
+			@Override
+			public int compare(BundleEntryComponent theO1, BundleEntryComponent theO2) {
+				if (theO1.getResource() == null && theO2.getResource() == null) {
+					return 0;
+				}
+				if (theO1.getResource() == null) {
+					return 1;
+				}
+				if (theO2.getResource() == null) {
+					return -1;
+				}
+				// StructureDefinition, then OperationDefinition, then CompartmentDefinition
+				return theO2.getResource().getClass().getName().compareTo(theO1.getResource().getClass().getName());
+			}});
+		
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());

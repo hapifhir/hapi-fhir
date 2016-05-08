@@ -511,14 +511,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 		
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p, mySrd).getId();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		myPatientDao.create(p, mySrd).getId();
-
+	
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
 		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
@@ -527,8 +520,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		try {
 			mySystemDao.transaction(mySrd, request);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - Multiple resources match this search", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - No resources match this search", e.getMessage());
 		}
 	}
 
@@ -555,7 +548,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		try {
 			mySystemDao.transaction(mySrd, request);
 			fail();
-		} catch (InvalidRequestException e) {
+		} catch (PreconditionFailedException e) {
 			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
 	}
