@@ -103,7 +103,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	// @Ignore
+	 @Ignore
 	public void testValidateBundleWithObservations() throws Exception {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
