@@ -261,7 +261,6 @@
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
-		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.4</phloc_commons_version>
 		<spring_version>4.2.5.RELEASE</spring_version>
@@ -830,13 +829,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<!-- 
-					Be careful upgrading the version of this plugin- 3.5 breaks the
-					relow-maven-skin that we use currently. Also once we move to 3.5
-					the site.xml <head> tag needs to have its contents put in a 
-					CDATA block. What an unpleasant misadventure to figure that all
-					out......
-					-->
+					<!-- Be careful upgrading the version of this plugin- 3.5 breaks the relow-maven-skin that we use currently. Also once we move to 3.5 the site.xml <head> tag needs to have its contents put in a CDATA 
+						block. What an unpleasant misadventure to figure that all out...... -->
 					<version>3.4</version>
 					<configuration>
 						<skip>false</skip>
@@ -861,12 +855,7 @@
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-api</artifactId>
 						</dependency>
-						<!-- 
-						<dependency>
-						    <groupId>org.apache.maven.doxia</groupId>
-						    <artifactId>doxia-core</artifactId>
-						</dependency>
-						-->						
+						<!-- <dependency> <groupId>org.apache.maven.doxia</groupId> <artifactId>doxia-core</artifactId> </dependency> -->
 						<dependency>
 							<groupId>org.apache.maven.doxia</groupId>
 							<artifactId>doxia-module-markdown</artifactId>
@@ -1299,13 +1288,7 @@
 						<artifactId>maven-scm-api</artifactId>
 						<version>1.9.4</version>
 					</dependency>
-					<!-- 
-					<dependency>
-						<groupId>org.apache.maven.doxia</groupId>
-						<artifactId>doxia-core</artifactId>
-						<version>1.7</version>
-					</dependency>
-					-->						
+					<!-- <dependency> <groupId>org.apache.maven.doxia</groupId> <artifactId>doxia-core</artifactId> <version>1.7</version> </dependency> -->
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
@@ -1345,25 +1328,8 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- 
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<version>0.12</version>
-				<configuration>
-					<message>Building site for ${project.version}</message>
-					<server>github</server>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>site-deploy</phase>
-					</execution>
-				</executions>
-			</plugin>
-			-->
+			<!-- <plugin> <groupId>com.github.github</groupId> <artifactId>site-maven-plugin</artifactId> <version>0.12</version> <configuration> <message>Building site for ${project.version}</message> <server>github</server> 
+				</configuration> <executions> <execution> <goals> <goal>site</goal> </goals> <phase>site-deploy</phase> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
 

@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -326,7 +327,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 		Collections.sort(theRequest.getEntry(), new TransactionSorter());
 		
-		List<IIdType> deletedResources = new ArrayList<IIdType>();
+		Set<String> deletedResources = new HashSet<String>();
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		
 		/*
@@ -400,14 +401,17 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.toCode(), url);
 				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
-					ResourceTable deleted = dao.delete(new IdType(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
-					if (deleted != null) {
-						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
+					IdType deleteId = new IdType(parts.getResourceType(), parts.getResourceId());
+					if (!deletedResources.contains(deleteId.getValueAsString())) {
+						ResourceTable deleted = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+						if (deleted != null) {
+							deletedResources.add(deleteId.getValueAsString());
+						}
 					}
 				} else {
 					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
 					for (ResourceTable deleted : allDeleted) {
-						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());						
+						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
 					}
 					if (allDeleted.isEmpty()) {
 						status = Constants.STATUS_HTTP_404_NOT_FOUND;
