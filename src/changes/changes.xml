@@ -154,6 +154,10 @@
 				JPA server transactions containing a bundle that has multiple entries
 				trying to delete the same resource caused a 500 internal error
 			</action>
+			<action type="fix">
+				JPA module failed to index search parameters that mapped to a Timing datatype,
+				e.g. CarePlan:activitydate
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

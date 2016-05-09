@@ -195,6 +195,9 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					}
 					
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
+				} else if (nextObject instanceof StringType) {
+					// CarePlan.activitydate can be a string
+					continue;
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());

@@ -122,7 +122,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<Base> fpOutput;
 		BooleanType bool;
 		
-		fpOutput = fp.evaluate(bundle.getEntry().get(0), "component.where(code = %resource.code).empty()");
+		fpOutput = fp.evaluate(bundle.getEntry().get(0).getResource(), "component.where(code = %resource.code).empty()");
 		assertEquals(1, fpOutput.size());
 		bool = (BooleanType) fpOutput.get(0);
 		assertTrue(bool.getValue());

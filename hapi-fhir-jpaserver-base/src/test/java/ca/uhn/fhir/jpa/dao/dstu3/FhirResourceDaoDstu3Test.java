@@ -573,7 +573,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
 	public void testTimingSearchParams() throws Exception {
 		Date before = new DateTimeType("2011-01-01T10:00:00Z").getValue();
 		Date middle = new DateTimeType("2011-01-02T10:00:00Z").getValue();
