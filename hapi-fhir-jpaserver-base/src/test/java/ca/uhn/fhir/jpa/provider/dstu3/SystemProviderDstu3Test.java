@@ -232,6 +232,8 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
+		
+		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 	}
 
 	@SuppressWarnings("deprecation")

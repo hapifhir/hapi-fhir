@@ -25,9 +25,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
@@ -44,6 +46,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
 import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -55,13 +58,13 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.omg.PortableServer.ThreadPolicyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -176,6 +179,22 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 						continue;
 					}
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd());
+				} else if (nextObject instanceof Timing) {
+					Timing nextValue = (Timing) nextObject;
+					if (nextValue.isEmpty()) {
+						continue;
+					}
+					TreeSet<Date> dates = new TreeSet<Date>();
+					for (DateTimeType nextEvent : nextValue.getEvent()) {
+						if (nextEvent.getValue() != null) {
+							dates.add(nextEvent.getValue());
+						}
+					}
+					if (dates.isEmpty()) {
+						continue;
+					}
+					
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());

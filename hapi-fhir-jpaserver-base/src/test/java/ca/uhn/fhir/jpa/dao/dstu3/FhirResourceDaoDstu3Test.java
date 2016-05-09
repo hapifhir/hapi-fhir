@@ -40,6 +40,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -68,6 +69,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -132,6 +134,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	
 	@Test
 	@Ignore
 	public void testCreateBuiltInProfiles() throws Exception {
@@ -570,6 +573,38 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	@Ignore
+	public void testTimingSearchParams() throws Exception {
+		Date before = new DateTimeType("2011-01-01T10:00:00Z").getValue();
+		Date middle = new DateTimeType("2011-01-02T10:00:00Z").getValue();
+		Date after = new DateTimeType("2011-01-03T10:00:00Z").getValue();
+		
+		CarePlan cp = new CarePlan();
+		cp.addActivity().getDetail().setScheduled(new Timing().addEvent(before).addEvent(middle).addEvent(after));
+		cp.addActivity().getDetail();
+		IIdType id = myCarePlanDao.create(cp, mySrd).getId().toUnqualifiedVersionless();
+
+		CarePlan cp2 = new CarePlan();
+		cp2.addActivity().getDetail().setScheduled(new StringType("FOO"));
+		cp2.addActivity().getDetail();
+		IIdType id2 = myCarePlanDao.create(cp2, mySrd).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap params;
+		
+		params = new SearchParameterMap();
+		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2010-01-01T10:00:00Z", null));
+		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), contains(id.getValue()));
+
+		params = new SearchParameterMap();
+		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2011-01-01T10:00:00Z", null));
+		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), contains(id.getValue()));
+		
+		params = new SearchParameterMap();
+		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2012-01-01T10:00:00Z", null));
+		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), empty());
+	}
+
+	@Test
 	public void testCreateWithIdFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
@@ -674,6 +709,26 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("Failed to CREATE"));
 		}
+
+	}
+
+	@Test
+	public void testCreateWithIfNoneExistId() {
+		String methodName = "testCreateWithIfNoneExistId";
+		MethodOutcome results;
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		results = myPatientDao.create(p, "Patient?_id=" + id.toVersionless().getValue(), mySrd);
+		assertEquals(id.getIdPart(), results.getId().getIdPart());
+		assertEquals(id.getVersionIdPart(), results.getId().getVersionIdPart());
+		assertFalse(results.getCreated().booleanValue());
 
 	}
 

@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -121,6 +122,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	/**
+	 * Issue submitted by Bryn
+	 */
+	@Test
+	public void testCreateBundle() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/bryn-bundle.json"));
+		Validate.notNull(input);
+		ourClient.create().resource(input).execute().getResource();
 	}
 
 	

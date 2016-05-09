@@ -182,71 +182,71 @@ public class ValidationDataUploader extends BaseCommand {
 		int total = 0;
 		int count = 0;
 		org.hl7.fhir.dstu3.model.Bundle bundle;
+		String vsContents;
 		
-//		String vsContents;
-//		try {
-//			ctx.getVersion().getPathToSchemaDefinitions();
-//			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"valuesets.xml"), "UTF-8");
-//		} catch (IOException e) {
-//			throw new CommandFailureException(e.toString());
-//		}
-//		org.hl7.fhir.dstu3.model.Bundle bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
-//
-//		total = bundle.getEntry().size();
-//		count = 1;
-//		for (BundleEntryComponent i : bundle.getEntry()) {
-//			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
-//			next.setId(next.getIdElement().toUnqualifiedVersionless());
-//
-//			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
-//			try {
-//				client.update().resource(next).execute();
-//			} catch (UnprocessableEntityException e) {
-//				ourLog.warn("UnprocessableEntityException: " + e.toString());
-//			}
-//			count++;
-//		}
-//
-//		try {
-//			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v3-codesystems.xml"), "UTF-8");
-//		} catch (IOException e) {
-//			throw new CommandFailureException(e.toString());
-//		}
-//
-//		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
-//		total = bundle.getEntry().size();
-//		count = 1;
-//		for (BundleEntryComponent i : bundle.getEntry()) {
-//			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
-//			next.setId(next.getIdElement().toUnqualifiedVersionless());
-//
-//			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
-//			client.update().resource(next).execute();
-//
-//			count++;
-//		}
-//
-//		try {
-//			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v2-tables.xml"), "UTF-8");
-//		} catch (IOException e) {
-//			throw new CommandFailureException(e.toString());
-//		}
-//		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
-//		total = bundle.getEntry().size();
-//		count = 1;
-//		for (BundleEntryComponent i : bundle.getEntry()) {
-//			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
-//			if (next.getIdElement().isIdPartValidLong()) {
-//				next.setIdElement(new IdType("v2-"+ next.getIdElement().getIdPart()));
-//			}
-//			next.setId(next.getIdElement().toUnqualifiedVersionless());
-//
-//			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
-//			client.update().resource(next).execute();
-//			count++;
-//		}
-//
-//		ourLog.info("Finished uploading ValueSets");
+		try {
+			ctx.getVersion().getPathToSchemaDefinitions();
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"valuesets.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+
+		total = bundle.getEntry().size();
+		count = 1;
+		for (BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			try {
+				client.update().resource(next).execute();
+			} catch (UnprocessableEntityException e) {
+				ourLog.warn("UnprocessableEntityException: " + e.toString());
+			}
+			count++;
+		}
+
+		try {
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v3-codesystems.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+
+		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+		for (BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+
+			count++;
+		}
+
+		try {
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v2-tables.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+		for (BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
+			if (next.getIdElement().isIdPartValidLong()) {
+				next.setIdElement(new IdType("v2-"+ next.getIdElement().getIdPart()));
+			}
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+			count++;
+		}
+
+		ourLog.info("Finished uploading ValueSets");
 
 		
 		uploadDstu3Profiles(ctx, client, "profiles-resources");

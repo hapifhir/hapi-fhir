@@ -3,7 +3,9 @@ package ca.uhn.fhir.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -89,17 +92,21 @@ public class FhirInstanceValidatorDstu3Test {
 		String vsContents;
 		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/profile/" + name + ".xml"), "UTF-8");
 
+		TreeSet<String> ids = new TreeSet<String>();
+		
 		bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
+			ids.add(next.getId());
 
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
+			ourLog.info("Validating {}", next.getId());
 
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 			assertThat("Failed to validate " + i.getFullUrl(), errors, empty());
 		}
 
+		ourLog.info("Validated the following:\n{}", ids);
 	}
 
 	@Test

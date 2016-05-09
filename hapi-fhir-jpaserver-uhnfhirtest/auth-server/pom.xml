@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- <parent> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir</artifactId> <version>1.6-SNAPSHOT</version> <relativePath>../pom.xml</relativePath> </parent> -->
+	
+	<groupId>ca.uhn.hapi.fhir</groupId>
+	<artifactId>hapi-fhir-jpaserver-uhnfhirtest-auth</artifactId>
+	<version>1.0</version>
+	
+	<packaging>war</packaging>
+
+	<name>HAPI FHIR - fhirtest.uhn.ca Auth Server</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mitre</groupId>
+			<artifactId>openid-connect-common</artifactId>
+			<version>1.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mitre</groupId>
+			<artifactId>openid-connect-server-webapp</artifactId>
+			<type>war</type>
+			<version>1.2.6</version>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<configuration>
+						<webApp>
+							<contextPath>/</contextPath>
+							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
+							<jettyEnvXml>src/main/webapp/WEB-INF/jetty-configure.xml</jettyEnvXml>
+						</webApp>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+					</configuration>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId></groupId>
+										<artifactId></artifactId>
+										<versionRange>[0.4,)</versionRange>
+										<goals>
+											<goal></goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Build-Time>${maven.build.timestamp}</Build-Time>
+						</manifestEntries>
+					</archive>
+					<overlays>
+						<overlay>
+							<groupId>org.mitre</groupId>
+							<artifactId>openid-connect-server-webapp</artifactId>
+							<!-- <excludes> <exclude>WEB-INF/classes/keystore.jwks</exclude> </excludes> -->
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+		<finalName>hapi-fhir-jpaserver-auth</finalName>
+	</build>
+
+</project>

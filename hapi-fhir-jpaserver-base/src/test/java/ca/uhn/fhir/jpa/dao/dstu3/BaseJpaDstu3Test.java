@@ -14,6 +14,7 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -156,6 +157,9 @@ protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	@Qualifier("myCarePlanDaoDstu3")
+	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu3")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
