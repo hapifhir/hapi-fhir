@@ -23,9 +23,6 @@ import ca.uhn.fhir.model.${version}.resource.*; //
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
-// import ca.uhn.fhir.model.dstu.resource.Binary;
-// import ca.uhn.fhir.model.dstu2.resource.Bundle;
-// import ca.uhn.fhir.model.api.Bundle;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
@@ -75,6 +72,10 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile, 
+
+			@Description(shortDefinition="Return resources linked to by the given target")
+			@OptionalParam(name="_has")
+			HasAndListParam theHas, 
 
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
@@ -147,6 +148,7 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE, theSearchForProfile);
+			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});
 #end

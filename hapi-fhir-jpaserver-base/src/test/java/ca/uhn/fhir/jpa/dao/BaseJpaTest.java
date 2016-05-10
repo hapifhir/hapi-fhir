@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class BaseJpaTest {
@@ -127,6 +129,7 @@ public class BaseJpaTest {
 		}
 		return retVal;
 	}
+
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();

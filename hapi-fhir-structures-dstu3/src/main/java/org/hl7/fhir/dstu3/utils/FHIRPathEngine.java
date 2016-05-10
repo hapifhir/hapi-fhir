@@ -50,6 +50,7 @@ import org.hl7.fhir.utilities.Table;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.ucum.Decimal;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ElementUtil;
 
 /**
@@ -1297,7 +1298,7 @@ public class FHIRPathEngine {
 			if ((lunit == null && runit == null) || lunit.equals(runit)) {
 				return opLessOrEqual(left.get(0).listChildrenByName("value"), right.get(0).listChildrenByName("value"));
 			} else {
-				throw new Error("Canonical Comparison isn't done yet");
+				throw new InternalErrorException("Canonical Comparison isn't done yet");
 			}
 		}
 		return new ArrayList<Base>();

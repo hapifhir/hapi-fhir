@@ -82,7 +82,12 @@ public enum RestSearchParameterTypeEnum {
 	 *
 	 * A search parameter that searches on a quantity.
 	 */
-	URI("uri", "http://hl7.org/fhir/search-param-type"),
+	URI("uri", "http://hl7.org/fhir/search-param-type"), 
+	
+	/**
+	 * _has parameter
+	 */
+	HAS("string", "http://hl7.org/fhir/search-param-type"),
 
 	;
 	
@@ -106,6 +111,10 @@ public enum RestSearchParameterTypeEnum {
 	
 	static {
 		for (RestSearchParameterTypeEnum next : RestSearchParameterTypeEnum.values()) {
+			if (next == HAS) {
+				continue;
+			}
+			
 			CODE_TO_ENUM.put(next.getCode(), next);
 			
 			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {

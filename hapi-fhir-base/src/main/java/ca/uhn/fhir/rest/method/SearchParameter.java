@@ -49,6 +49,9 @@ import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.NumberOrListParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -130,6 +133,10 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(CompositeOrListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamQualifiers.put(RestSearchParameterTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		
+		ourParamTypes.put(HasParam.class, RestSearchParameterTypeEnum.HAS);
+		ourParamTypes.put(HasOrListParam.class, RestSearchParameterTypeEnum.HAS);
+		ourParamTypes.put(HasAndListParam.class, RestSearchParameterTypeEnum.HAS);
 	}
 	
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
@@ -318,6 +325,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = RestSearchParameterTypeEnum.QUANTITY;
 		} else if (ReferenceParam.class.isAssignableFrom(type)) {
 			myParamType = RestSearchParameterTypeEnum.REFERENCE;
+		} else if (HasParam.class.isAssignableFrom(type)) {
+			myParamType = RestSearchParameterTypeEnum.STRING;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

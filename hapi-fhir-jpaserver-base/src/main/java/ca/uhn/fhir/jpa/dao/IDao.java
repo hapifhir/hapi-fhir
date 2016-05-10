@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -63,7 +65,9 @@ public interface IDao {
 	 */
 	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
 
+	<R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType);
+
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
-	
+
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation);
 }

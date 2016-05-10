@@ -1,4 +1,6 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.rest.param;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L
@@ -20,29 +22,20 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.StringTokenizer;
 
-public class UrlPathTokenizer extends StringTokenizer {
-
-	public UrlPathTokenizer(String theRequestPath) {
-		super(theRequestPath, "/");
-	}
+public class HasAndListParam  extends BaseAndListParam<HasOrListParam> {
 
 	@Override
-	public String nextToken() {
-		return UrlUtil.unescape(super.nextToken());
+	HasOrListParam newInstance() {
+		return new HasOrListParam();
 	}
 
 	@CoverageIgnore
 	@Override
-	public String nextToken(String theDelim) {
-		throw new UnsupportedOperationException();
+	public HasAndListParam addAnd(HasOrListParam theValue) {
+		addValue(theValue);
+		return this;
 	}
 
-	@CoverageIgnore
-	@Override
-	public Object nextElement() {
-		return super.nextElement();
-	}
-
+	
 }

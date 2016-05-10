@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
@@ -78,6 +79,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -321,6 +323,124 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 		List<IBaseResource> patients = toList(myPatientDao.search(params));
 		assertTrue(patients.size() >= 2);
+	}
+
+
+	@Test
+	public void testHasParameter() {
+		IIdType pid0, pid1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			myObservationDao.create(obs, mySrd);
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setValue("DEVICEID");
+			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
+			
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setDevice(new Reference(devId));
+			myObservationDao.create(obs, mySrd);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+
+		// No targets exist
+		params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "identifier", "urn:system|UNKNOWN"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
+
+		// Target exists but doesn't link to us
+		params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
+	}
+
+	@Test
+	public void testHasParameterChained() {
+		IIdType pid0;
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue("DEVICEID");
+			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
+			
+			Patient patient = new Patient();
+			patient.setGender(AdministrativeGender.MALE);
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.setDevice(new Reference(devId));
+			obs.setSubject(new Reference(pid0));
+			myObservationDao.create(obs, mySrd).getId();
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+
+		// No targets exist
+		params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "identifier", "urn:system|UNKNOWN"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
+
+		// Target exists but doesn't link to us
+		params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
+	}
+
+	@Test
+	public void testHasParameterInvalidResourceType() {
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation__", "subject", "identifier", "urn:system|FOO"));
+		try {
+			myPatientDao.search(params);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid resource type: Observation__", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testHasParameterInvalidTargetPath() {
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "soooooobject", "identifier", "urn:system|FOO"));
+		try {
+			myPatientDao.search(params);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown parameter name: Observation:soooooobject", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testHasParameterInvalidSearchParam() {
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_has", new HasParam("Observation", "subject", "IIIIDENFIEYR", "urn:system|FOO"));
+		try {
+			myPatientDao.search(params);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown parameter name: Observation:IIIIDENFIEYR", e.getMessage());
+		}
 	}
 
 	@Test

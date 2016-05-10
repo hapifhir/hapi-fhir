@@ -112,12 +112,16 @@ import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -133,6 +137,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class SearchBuilder {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
@@ -234,7 +239,80 @@ public class SearchBuilder {
 		doSetPids(q.getResultList());
 	}
 
-	private void addPredicateId(Set<Long> thePids, DateRangeParam theLastUpdated) {
+	private void addPredicateHas(List<List<? extends IQueryParameterType>> theHasParameters, DateRangeParam theLastUpdated) {
+
+		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
+
+			StringBuilder valueBuilder = new StringBuilder();
+			String targetResourceType = null;
+			String owningParameter = null;
+			String parameterName = null;
+			for (IQueryParameterType nextParam : nextOrList) {
+				HasParam next = (HasParam) nextParam;
+				if (valueBuilder.length() > 0) {
+					valueBuilder.append(',');
+				}
+				valueBuilder.append(UrlUtil.escape(next.getValueAsQueryToken(myContext)));
+				targetResourceType = next.getTargetResourceType();
+				owningParameter = next.getOwningFieldName();
+				parameterName = next.getParameterName();
+			}
+
+			if (valueBuilder.length() == 0) {
+				continue;
+			}
+
+			String matchUrl = targetResourceType + '?' + UrlUtil.escape(parameterName) + '=' + valueBuilder.toString();
+			RuntimeResourceDefinition targetResourceDefinition;
+			try {
+				targetResourceDefinition = myContext.getResourceDefinition(targetResourceType);
+			} catch (DataFormatException e) {
+				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
+			}
+			
+			RuntimeSearchParam owningParameterDef = targetResourceDefinition.getSearchParam(parameterName.replaceAll("\\..*", ""));
+			if (owningParameterDef == null) {
+				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
+			}
+			
+			owningParameterDef = targetResourceDefinition.getSearchParam(owningParameter);
+			if (owningParameterDef == null) {
+				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
+			}
+
+			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
+			Set<Long> match = myCallingDao.processMatchUrl(matchUrl, resourceType);
+			if (match.isEmpty()) {
+				doSetPids(new ArrayList<Long>());
+				return;
+			}
+			
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<ResourceLink> from = cq.from(ResourceLink.class);
+			cq.select(from.get("myTargetResourcePid").as(Long.class));
+
+			List<Predicate> predicates = new ArrayList<Predicate>();
+			predicates.add(builder.equal(from.get("mySourceResourceType"), targetResourceType));
+			predicates.add(from.get("mySourceResourcePid").in(match));
+			predicates.add(createResourceLinkPathPredicate(myContext, owningParameter, from, resourceType));
+			predicates.add(builder.equal(from.get("myTargetResourceType"), myResourceName));
+			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+			createPredicateLastUpdatedForResourceLink(builder, from, predicates);
+
+			cq.where(toArray(predicates));
+
+			TypedQuery<Long> q = myEntityManager.createQuery(cq);
+			doSetPids(q.getResultList());
+			if (doHaveNoResults()) {
+				return;
+			}
+
+			return;
+		}
+	}
+
+	private void addPredicateId(Set<Long> thePids) {
 		if (thePids == null || thePids.isEmpty()) {
 			return;
 		}
@@ -256,7 +334,7 @@ public class SearchBuilder {
 		doSetPids(q.getResultList());
 	}
 
-	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList, DateRangeParam theLastUpdated) {
+	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
 
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -286,7 +364,7 @@ public class SearchBuilder {
 			predicates.add(from.get("myLanguage").as(String.class).in(values));
 			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
 			createPredicateLastUpdatedForResourceTable(builder, from, predicates);
-			
+
 			predicates.add(builder.isNull(from.get("myDeleted")));
 
 			cq.where(toArray(predicates));
@@ -324,7 +402,7 @@ public class SearchBuilder {
 				throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
 			}
 			Predicate singleCode = from.get("mySourceResource").isNotNull();
-			Predicate name = createResourceLinkPathPredicate(theParamName, theBuilder, from);
+			Predicate name = createResourceLinkPathPredicate(theParamName, from);
 			codePredicates.add(theBuilder.and(name, singleCode));
 			missingFalse = true;
 		}
@@ -379,7 +457,7 @@ public class SearchBuilder {
 		predicates.add(builder.or(toArray(codePredicates)));
 		createPredicateResourceId(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
 		createPredicateLastUpdatedForIndexedSearchParam(builder, from, predicates);
-		
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -424,7 +502,7 @@ public class SearchBuilder {
 		subQ.select(subQfrom.get("mySourceResourcePid").as(Long.class));
 
 		// subQ.where(builder.equal(subQfrom.get("myParamName"), theParamName));
-		Predicate path = createResourceLinkPathPredicate(theParamName, builder, subQfrom);
+		Predicate path = createResourceLinkPathPredicate(theParamName, subQfrom);
 		subQ.where(path);
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
@@ -459,7 +537,7 @@ public class SearchBuilder {
 			Predicate singleCode = createPredicateQuantity(builder, from, nextOr);
 			codePredicates.add(singleCode);
 		}
-		
+
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
@@ -606,7 +684,7 @@ public class SearchBuilder {
 		}
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(createResourceLinkPathPredicate(theParamName, builder, from));
+		predicates.add(createResourceLinkPathPredicate(theParamName, from));
 		predicates.add(builder.or(toArray(codePredicates)));
 		createPredicateResourceId(builder, cq, predicates, from.get("mySourceResourcePid").as(Long.class));
 		createPredicateLastUpdatedForResourceLink(builder, from, predicates);
@@ -643,10 +721,10 @@ public class SearchBuilder {
 		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 		predicates.add(builder.equal(from.get("myParamName"), theParamName));
 		predicates.add(builder.or(toArray(codePredicates)));
-		
+
 		createPredicateResourceId(builder, cq, predicates, from.get("myResourcePid").as(Long.class));
 		createPredicateLastUpdatedForIndexedSearchParam(builder, from, predicates);
-		
+
 		cq.where(builder.and(toArray(predicates)));
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -666,63 +744,54 @@ public class SearchBuilder {
 		}
 
 		/*
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		Subquery<Long> subQ = cq.subquery(Long.class);
-		Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable);
-		subQ.select(subQfrom.get("myResourcePid").as(Long.class));
-		Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
-		Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
-		subQ.where(builder.and(subQtype, subQname));
-
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
-		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-		predicates.add(builder.isNull(from.get("myDeleted")));
-		createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-		*/
+		 * CriteriaBuilder builder = myEntityManager.getCriteriaBuilder(); CriteriaQuery<Long> cq = builder.createQuery(Long.class); Root<ResourceTable> from = cq.from(ResourceTable.class);
+		 * cq.select(from.get("myId").as(Long.class));
+		 * 
+		 * Subquery<Long> subQ = cq.subquery(Long.class); Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable); subQ.select(subQfrom.get("myResourcePid").as(Long.class));
+		 * Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName); Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
+		 * subQ.where(builder.and(subQtype, subQname));
+		 * 
+		 * List<Predicate> predicates = new ArrayList<Predicate>(); predicates.add(builder.not(builder.in(from.get("myId")).value(subQ))); predicates.add(builder.equal(from.get("myResourceType"),
+		 * myResourceName)); predicates.add(builder.isNull(from.get("myDeleted"))); createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+		 */
 
 		List<Pair<String, String>> notTags = Lists.newArrayList();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
 			for (IQueryParameterType nextOrParams : nextAndParams) {
 				if (nextOrParams instanceof TokenParam) {
-					TokenParam param = (TokenParam)nextOrParams;
+					TokenParam param = (TokenParam) nextOrParams;
 					if (param.getModifier() == TokenParamModifier.NOT) {
 						if (isNotBlank(param.getSystem()) || isNotBlank(param.getValue())) {
 							notTags.add(Pair.of(param.getSystem(), param.getValue()));
 						}
 					}
-				}				
+				}
 			}
-		}		
+		}
 
 		/*
-		 * We have a parameter of ResourceType?_tag:not=foo
-		 * This means match resources that don't have the given tag(s)
+		 * We have a parameter of ResourceType?_tag:not=foo This means match resources that don't have the given tag(s)
 		 */
 		if (notTags.isEmpty() == false) {
-//			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-//			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-//			Root<ResourceTable> from = cq.from(ResourceTable.class);
-//			cq.select(from.get("myId").as(Long.class));
-//
-//			Subquery<Long> subQ = cq.subquery(Long.class);
-//			Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
-//			subQ.select(subQfrom.get("myResourceId").as(Long.class));
-//			Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
-//			Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
-//			subQ.where(builder.and(subQtype, subQname));
-//
-//			List<Predicate> predicates = new ArrayList<Predicate>();
-//			predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
-//			predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-//			predicates.add(builder.isNull(from.get("myDeleted")));
-//			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+			// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			// Root<ResourceTable> from = cq.from(ResourceTable.class);
+			// cq.select(from.get("myId").as(Long.class));
+			//
+			// Subquery<Long> subQ = cq.subquery(Long.class);
+			// Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
+			// subQ.select(subQfrom.get("myResourceId").as(Long.class));
+			// Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
+			// Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
+			// subQ.where(builder.and(subQtype, subQname));
+			//
+			// List<Predicate> predicates = new ArrayList<Predicate>();
+			// predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
+			// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+			// predicates.add(builder.isNull(from.get("myDeleted")));
+			// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
 		}
-		
+
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
 			boolean haveTags = false;
 			for (IQueryParameterType nextParamUncasted : nextAndParams) {
@@ -768,23 +837,23 @@ public class SearchBuilder {
 					tokens.add(Pair.of(system, code));
 				}
 			}
-			
+
 			if (tokens.isEmpty()) {
 				continue;
 			}
-			
+
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
-				
+
 				CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 				Root<ResourceTable> newFrom = cq.from(ResourceTable.class);
-				
+
 				Subquery<Long> subQ = cq.subquery(Long.class);
 				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
 				cq.select(newFrom.get("myId").as(Long.class));
-				
+
 				List<Predicate> andPredicates = new ArrayList<Predicate>();
 				andPredicates = new ArrayList<Predicate>();
 				andPredicates.add(builder.equal(newFrom.get("myResourceType"), myResourceName));
@@ -793,34 +862,34 @@ public class SearchBuilder {
 				Subquery<Long> defJoin = subQ.subquery(Long.class);
 				Root<TagDefinition> defJoinFrom = defJoin.from(TagDefinition.class);
 				defJoin.select(defJoinFrom.get("myId").as(Long.class));
-				
+
 				subQ.where(subQfrom.get("myTagId").as(Long.class).in(defJoin));
-				
+
 				List<Predicate> orPredicates = createPredicateTagList(defJoinFrom, builder, tagType, tokens);
 				defJoin.where(toArray(orPredicates));
-				
+
 				cq.where(toArray(andPredicates));
 
 				TypedQuery<Long> q = myEntityManager.createQuery(cq);
 				Set<Long> pids = new HashSet<Long>(q.getResultList());
 				doSetPids(pids);
 				continue;
-			} 
-			
+			}
+
 			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 			Root<ResourceTag> from = cq.from(ResourceTag.class);
 			List<Predicate> andPredicates = new ArrayList<Predicate>();
 			andPredicates.add(builder.equal(from.get("myResourceType"), myResourceName));
 			From<ResourceTag, TagDefinition> defJoin = from.join("myTag");
-			
+
 			Join<?, ResourceTable> defJoin2 = from.join("myResource");
-			
+
 			Predicate notDeletedPredicatePrediate = builder.isNull(defJoin2.get("myDeleted"));
 			andPredicates.add(notDeletedPredicatePrediate);
-			
+
 			List<Predicate> orPredicates = createPredicateTagList(defJoin, builder, tagType, tokens);
 			andPredicates.add(builder.or(toArray(orPredicates)));
-			
+
 			if (theLastUpdated != null) {
 				andPredicates.addAll(createLastUpdatedPredicates(theLastUpdated, builder, defJoin2));
 			}
@@ -1172,7 +1241,7 @@ public class SearchBuilder {
 		} else {
 			singleCode = theBuilder.and(system, code, num);
 		}
-		
+
 		return singleCode;
 	}
 
@@ -1192,8 +1261,7 @@ public class SearchBuilder {
 				thePredicates.add(theExpression.in(myPids));
 			}
 		}
-		
-		
+
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
@@ -1233,7 +1301,7 @@ public class SearchBuilder {
 
 	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
 		Predicate typePrediate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
-		
+
 		List<Predicate> orPredicates = Lists.newArrayList();
 		for (Pair<String, String> next : theTokens) {
 			Predicate codePrediate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
@@ -1289,20 +1357,22 @@ public class SearchBuilder {
 			singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
 		} else {
 			/*
-			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but
-			 * no specified value this means to match all tokens with the given value.
+			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to match all tokens with the given value.
 			 * 
-			 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was 
-			 * the result :)
+			 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
 			 */
-			//singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
+			// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
 		}
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
 		return singleCode;
 	}
 
-	private Predicate createResourceLinkPathPredicate(String theParamName, CriteriaBuilder builder, Root<? extends ResourceLink> from) {
-		RuntimeSearchParam param = myContext.getResourceDefinition(myResourceType).getSearchParam(theParamName);
+	private Predicate createResourceLinkPathPredicate(String theParamName, Root<? extends ResourceLink> from) {
+		return createResourceLinkPathPredicate(myContext, theParamName, from, myResourceType);
+	}
+
+	private static Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, Root<? extends ResourceLink> from, Class<? extends IBaseResource> resourceType) {
+		RuntimeSearchParam param = theContext.getResourceDefinition(resourceType).getSearchParam(theParamName);
 		List<String> path = param.getPathsSplit();
 		Predicate type = from.get("mySourcePath").in(path);
 		return type;
@@ -1575,7 +1645,7 @@ public class SearchBuilder {
 		for (Include next : myParams.getRevIncludes()) {
 			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
 		}
-		
+
 		if (myParams.isPersistResults()) {
 			myEntityManager.persist(mySearchEntity);
 			for (SearchInclude next : mySearchEntity.getIncludes()) {
@@ -1583,7 +1653,7 @@ public class SearchBuilder {
 			}
 		}
 	}
-	
+
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		myParams = theParams;
 		StopWatch w = new StopWatch();
@@ -1738,7 +1808,7 @@ public class SearchBuilder {
 							}
 						}
 
-						addPredicateId(joinPids, theLastUpdated);
+						addPredicateId(joinPids);
 						if (doHaveNoResults()) {
 							return;
 						}
@@ -1747,7 +1817,11 @@ public class SearchBuilder {
 
 			} else if (nextParamName.equals(BaseResource.SP_RES_LANGUAGE)) {
 
-				addPredicateLanguage(nextParamEntry.getValue(), theLastUpdated);
+				addPredicateLanguage(nextParamEntry.getValue());
+
+			} else if (nextParamName.equals("_has")) {
+
+				addPredicateHas(nextParamEntry.getValue(), theLastUpdated);
 
 			} else if (nextParamName.equals(Constants.PARAM_TAG) || nextParamName.equals(Constants.PARAM_PROFILE) || nextParamName.equals(Constants.PARAM_SECURITY)) {
 

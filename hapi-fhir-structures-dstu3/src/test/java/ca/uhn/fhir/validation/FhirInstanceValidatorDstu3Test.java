@@ -109,6 +109,21 @@ public class FhirInstanceValidatorDstu3Test {
 		ourLog.info("Validated the following:\n{}", ids);
 	}
 
+	/**
+	 * FHIRPathEngine was throwing Error...
+	 */
+	@Test
+	public void testValidateCrucibleCarePlan() throws Exception {
+		org.hl7.fhir.dstu3.model.Bundle bundle;
+		String name = "profiles-resources";
+		ourLog.info("Uploading " + name);
+		String vsContents;
+		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/crucible-condition.xml"), "UTF-8");
+
+		ValidationResult output = myVal.validateWithResult(vsContents);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+	}
+
 	@Test
 	 @Ignore
 	public void testValidateBundleWithObservations() throws Exception {

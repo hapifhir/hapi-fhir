@@ -1,0 +1,124 @@
+
+<Condition xmlns="http://hl7.org/fhir">
+	<language value="en-US"/>
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">LFX0OELiP7YLinZcLkDvGg==
+		</div>
+	</text>
+	<identifier>
+		<use value="usual"/>
+		<type>
+			<coding>
+				<system value="http://hl7.org/fhir/v2/0203"/>
+				<code value="NIIP"/>
+				<display value="Agxy+U8E4tAl2YMAJr3W5A=="/>
+				<userSelected value="true"/>
+			</coding>
+			<text value="2yIAYV0uJhUo8/jA9BFrNw=="/>
+		</type>
+		<system value="http://www.example.com/ARFxP1cRuBsiiRm8ItsLDw=="/>
+		<value value="SSuSavjIfCfV1CmHkB/5dw=="/>
+		<period>
+			<start value="2016-05-10T11:15:50.926Z"/>
+			<end value="2016-05-10T11:15:50.926Z"/>
+		</period>
+		<assigner>
+			<display value="Organization /C0aapiYwhfYXKEbVqd1pQ=="/>
+		</assigner>
+	</identifier>
+	<patient>
+		<display value="Patient juQzQzr118UocFDUTDWU1A=="/>
+	</patient>
+	<encounter>
+		<display value="Encounter M3JplRlbYvurXozRWwa4SA=="/>
+	</encounter>
+	<asserter>
+		<display value="Patient rM3hr4legsdSyMdeOCuNCA=="/>
+	</asserter>
+	<dateRecorded value="2016-05-10"/>
+	<code>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="24043009"/>
+			<display value="mvD9sUIGVZ5VlVlpT0Bi+Q=="/>
+			<userSelected value="true"/>
+		</coding>
+		<text value="6Yxhlofy4YfGYnoaugMglg=="/>
+	</code>
+	<category>
+		<coding>
+			<system value="http://hl7.org/fhir/condition-category"/>
+			<code value="diagnosis"/>
+			<display value="LGhObAmHrUkk1R1XVDfTqQ=="/>
+			<userSelected value="false"/>
+		</coding>
+		<text value="mgeqavdXG3vDFQDPvj3Ezw=="/>
+	</category>
+	<clinicalStatus value="relapse"/>
+	<verificationStatus value="entered-in-error"/>
+	<severity>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="6736007"/>
+			<display value="UkiGVgl4AgzXz7EAIWamDQ=="/>
+			<userSelected value="true"/>
+		</coding>
+		<text value="ta92LvfcafCmLDuO7FnPxQ=="/>
+	</severity>
+	<onsetRange>
+		<low>
+			<value value="0.8595246484876637"/>
+			<comparator value="&lt;"/>
+			<unit value="nOYYJzovcpNk1Xkv0lxPJg=="/>
+			<system value="http://www.example.com/A7CUYaICHEikpE+P3dn/Tw=="/>
+			<code value="eURHPiUCEHOjjj8onWeCeQ=="/>
+		</low>
+		<high>
+			<value value="0.6433405008182949"/>
+			<comparator value="&lt;"/>
+			<unit value="Gw/H12dT45hubnfT2Huzag=="/>
+			<system value="http://www.example.com/3IE059a8KnG2sCAltoTe3w=="/>
+			<code value="6U7C4akdF5ebCAzi7yadMA=="/>
+		</high>
+	</onsetRange>
+	<abatementString value="ULx7Wh1Za6evfMcYlzdaFw=="/>
+	<stage>
+		<summary>
+			<coding>
+				<system value="http://snomed.info/sct"/>
+				<code value="369845003"/>
+				<display value="eLtqGjb34NIU4N+S0/UAGg=="/>
+				<userSelected value="true"/>
+			</coding>
+			<text value="QHlmzLaSqS5YTy8x8FJ5TQ=="/>
+		</summary>
+		<assessment>
+			<display value="DiagnosticReport GXL2HO68TMjjIKnAA/hVWA=="/>
+		</assessment>
+	</stage>
+	<evidence>
+		<code>
+			<coding>
+				<system value="http://snomed.info/sct"/>
+				<code value="33552005"/>
+				<display value="as3M2/YDGLNGTKV4A+Lyuw=="/>
+				<userSelected value="false"/>
+			</coding>
+			<text value="aX2ZT5h9E3NdckmCx0xjwQ=="/>
+		</code>
+		<detail>
+			<display value="Resource jzni40//4JvMxTzrIBmZpw=="/>
+		</detail>
+	</evidence>
+	<bodySite>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="2841007"/>
+			<display value="w2Dr0BZ1fORpTGd9HIhjww=="/>
+			<userSelected value="false"/>
+		</coding>
+		<text value="v/MGWdCezPpmiY+pth6amQ=="/>
+	</bodySite>
+	<notes value="nUQSRKDFhDwxvvVeJH6oVQ=="/>
+</Condition>
