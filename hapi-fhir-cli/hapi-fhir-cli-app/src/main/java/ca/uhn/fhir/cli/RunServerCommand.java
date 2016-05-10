@@ -45,6 +45,7 @@ public class RunServerCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		options.addOption(OPTION_P, "port", true, "The port to listen on (default is " + DEFAULT_PORT + ")");
+		options.addOption(null, "lowmem", false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		return options;
 	}
 
@@ -59,6 +60,11 @@ public class RunServerCommand extends BaseCommand {
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
+		
+		if (theCommandLine.hasOption("lowmem")) {
+			ourLog.info("Running in low memory mode, some features disabled");
+			System.setProperty("lowmem", "lowmem");
+		}
 		
 		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));
 

@@ -158,6 +158,11 @@
 				JPA module failed to index search parameters that mapped to a Timing datatype,
 				e.g. CarePlan:activitydate
 			</action>
+			<action type="add">
+				Add a new option to the CLI run-server command called <![CDATA[<code>--lowmem</code>]]>.
+				This option disables some features (e.g. fulltext search) in order to allow the
+				server to start in memory-constrained environments (e.g Raspberry Pi)
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

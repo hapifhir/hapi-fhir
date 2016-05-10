@@ -9,8 +9,11 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,6 +27,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 @Configuration
 @EnableTransactionManagement()
+@Import(FhirDbConfig.class)
 public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
@@ -55,6 +59,10 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
+	@Autowired()
+	@Qualifier("jpaProperties")
+	private Properties myJpaProperties;
+
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
@@ -62,26 +70,10 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
-		retVal.setJpaProperties(jpaProperties());
+		retVal.setJpaProperties(myJpaProperties);
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
-		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
-		extraProperties.put("hibernate.format_sql", "true");
-		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.jdbc.batch_size", "20");
-		extraProperties.put("hibernate.cache.use_query_cache", "false");
-		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
-		extraProperties.put("hibernate.cache.use_structured_entries", "false");
-		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		return extraProperties;
-	}
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.

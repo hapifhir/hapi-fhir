@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.PatientProfileDstu2;
@@ -83,8 +85,23 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
+		assertThat(responseContent, not(containsString("html")));
 		assertThat(responseContent, containsString("<profile value=\"http://foo\"/>"));
 		assertThat(responseContent, containsString("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>"));
+
+	}
+
+	@Test
+	public void testProfilesGetAddedHtml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=html");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("http://foo"));
+		assertThat(responseContent, containsString("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient"));
 
 	}
 
@@ -102,6 +119,8 @@ public class SearchReturningProfiledResourceDstu2Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 
+		servlet.registerInterceptor(new ResponseHighlighterInterceptor());
+		
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
