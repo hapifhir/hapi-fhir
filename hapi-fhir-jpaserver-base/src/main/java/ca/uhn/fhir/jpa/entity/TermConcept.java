@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -153,6 +154,12 @@ public class TermConcept implements Serializable {
 
 	public void setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
+	}
+
+	public void addChildren(List<TermConcept> theChildren) {
+		for (TermConcept next : theChildren) {
+			addChild(next);
+		}
 	}
 
 }

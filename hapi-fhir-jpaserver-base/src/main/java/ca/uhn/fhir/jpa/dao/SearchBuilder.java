@@ -70,6 +70,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -98,7 +99,9 @@ import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.term.ITerminologySvc;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -155,9 +158,10 @@ public class SearchBuilder {
 	private IFulltextSearchSvc mySearchDao;
 	private Search mySearchEntity;
 	private ISearchResultDao mySearchResultDao;
+	private ITerminologySvc myTerminologySvc;
 
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
-			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao) {
+			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, ITerminologySvc theTerminologySvc) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
@@ -166,6 +170,7 @@ public class SearchBuilder {
 		myCallingDao = theDao;
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
 		myForcedIdDao = theForcedIdDao;
+		myTerminologySvc = theTerminologySvc;
 	}
 
 	private void addPredicateComposite(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1319,18 +1324,20 @@ public class SearchBuilder {
 			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
+		TokenParamModifier modifier = null;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			system = id.getSystem();
-			code = id.getValue();
+			code = (id.getValue());
+			modifier = id.getModifier();
 		} else if (theParameter instanceof BaseIdentifierDt) {
 			BaseIdentifierDt id = (BaseIdentifierDt) theParameter;
 			system = id.getSystemElement().getValueAsString();
-			code = id.getValueElement().getValue();
+			code = (id.getValueElement().getValue());
 		} else if (theParameter instanceof BaseCodingDt) {
 			BaseCodingDt id = (BaseCodingDt) theParameter;
 			system = id.getSystemElement().getValueAsString();
-			code = id.getCodeElement().getValue();
+			code = (id.getCodeElement().getValue());
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
 		}
@@ -1339,6 +1346,7 @@ public class SearchBuilder {
 			throw new InvalidRequestException(
 					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 		}
+
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 			throw new InvalidRequestException(
 					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
@@ -1353,8 +1361,31 @@ public class SearchBuilder {
 			// If the system is "", we only match on null systems
 			singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
 		}
+		
 		if (StringUtils.isNotBlank(code)) {
-			singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+			
+			if (modifier != null) {
+				switch (modifier) {
+				case IN:
+				case NOT_IN:
+					system = defaultString(system);
+					if (!myTerminologySvc.supportsSystem(system)) {
+						throw new InvalidRequestException("Unable to perform :in search for system: " + system);
+					}
+					Set<TermConcept> codeConcepts = myTerminologySvc.findCodesBelow(system, code);
+					Set<String> codeCodes = toCodes(codeConcepts);
+					if (modifier == TokenParamModifier.IN) {
+						singleCodePredicates.add(theFrom.get("myValue").in(codeCodes));
+					} else {
+						singleCodePredicates.add(theBuilder.not(theFrom.get("myValue").in(codeCodes)));
+					}
+					break;
+				default:
+					throw new InvalidRequestException("Invalid modifier " + modifier.getValue() + " for param " + theParamName);
+				}
+			} else {
+				singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+			}
 		} else {
 			/*
 			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to match all tokens with the given value.
@@ -1365,6 +1396,16 @@ public class SearchBuilder {
 		}
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
 		return singleCode;
+	}
+
+	private Set<String> toCodes(Set<TermConcept> theCodeConcepts) {
+		HashSet<String> retVal = Sets.newHashSet();
+		for (TermConcept next : theCodeConcepts) {
+			if (isNotBlank(next.getCode())) {
+				retVal.add(next.getCode());
+			}
+		}
+		return retVal;
 	}
 
 	private Predicate createResourceLinkPathPredicate(String theParamName, Root<? extends ResourceLink> from) {
@@ -1765,7 +1806,7 @@ public class SearchBuilder {
 		return doReturnProvider();
 	}
 
-	public void searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
+	private void searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
 		SearchParameterMap params = theParams;
 		if (params == null) {
 			params = new SearchParameterMap();

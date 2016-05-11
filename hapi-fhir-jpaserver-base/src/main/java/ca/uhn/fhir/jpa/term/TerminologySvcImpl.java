@@ -1,27 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2016 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import static java.util.stream.Collectors.collectingAndThen;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -44,24 +22,25 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 
 public class TerminologySvcImpl implements ITerminologySvc {
-	private static final Object PLACEHOLDER_OBJECT = new Object();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologySvcImpl.class);
+	private static final Object PLACEHOLDER_OBJECT = new Object();
+
+	@Autowired
+	private ITermCodeSystemDao myCodeSystemDao;
 
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
 	@Autowired
-	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-
-	@Autowired
 	private ITermConceptDao myConceptDao;
 
 	@Autowired
-	private ITermCodeSystemDao myCodeSystemDao;
+	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
 	private FhirContext myContext;
@@ -146,7 +125,7 @@ public class TerminologySvcImpl implements ITerminologySvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(String theSystemUri, TermCodeSystemVersion theCodeSystem) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSystem) {
 		ourLog.info("Storing code system");
 
 		ValidateUtil.isNotNullOrThrowInvalidRequest(theCodeSystem.getResource() != null, "No resource supplied");
@@ -154,14 +133,17 @@ public class TerminologySvcImpl implements ITerminologySvc {
 
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			TermCodeSystem newCodeSystem = new TermCodeSystem();
-			newCodeSystem.setResource(theCodeSystem.getResource());
-			newCodeSystem.setCodeSystemUri(theSystemUri);
-			myCodeSystemDao.save(newCodeSystem);
+			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
+			if (codeSystem == null) {
+				codeSystem = new TermCodeSystem();
+			}
+			codeSystem.setResource(theCodeSystem.getResource());
+			codeSystem.setCodeSystemUri(theSystemUri);
+			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystem.getResource().getId())) {
-				throw new InvalidRequestException(
-						myContext.getLocalizer().getMessage(TerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().getValue()));
+				String msg = myContext.getLocalizer().getMessage(TerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
 			}
 		}
 
@@ -172,11 +154,20 @@ public class TerminologySvcImpl implements ITerminologySvc {
 		}
 
 		myCodeSystemVersionDao.save(theCodeSystem);
+		
+		codeSystem.setCurrentVersion(theCodeSystem);
+		myCodeSystemDao.save(codeSystem);
 
 		conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystem.getConcepts()) {
 			persistChildren(next, theCodeSystem, conceptsStack);
 		}
+	}
+
+	@Override
+	public boolean supportsSystem(String theSystem) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		return cs != null;
 	}
 
 	private void validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
@@ -192,6 +183,14 @@ public class TerminologySvcImpl implements ITerminologySvc {
 		}
 
 		theConceptsStack.remove(theConcept);
+	}
+
+	@Override
+	public Set<TermConcept> findCodesBelow(String theSystem, String theCode) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		
+		return findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 	}
 
 }

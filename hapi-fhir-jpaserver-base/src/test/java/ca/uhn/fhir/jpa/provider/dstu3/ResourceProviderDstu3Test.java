@@ -176,8 +176,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String uri = ourServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escape("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
+	}
+	
+	@Test
+	public void testHasParameterNoResults() throws Exception {
+
+		HttpGet get = new HttpGet(ourServerBase + "/AllergyIntolerance?_has=Provenance:target:userID=12345");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertThat(resp, containsString("Invalid _has parameter syntax: _has"));
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
 
 	}
+	
 	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException, ClientProtocolException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);

@@ -85,14 +85,12 @@ import ca.uhn.fhir.util.TestUtil;
 @ContextConfiguration(classes= {TestDstu3Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
-	
+
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
 	protected ApplicationContext myAppCtx;
-
-
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu3")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
@@ -119,7 +117,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoDstu3")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
-	//	@PersistenceContext()
+	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
@@ -141,16 +139,16 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myMedicationDaoDstu3")
 	protected IFhirResourceDao<Medication> myMedicationDao;
 	@Autowired
-		@Qualifier("myMedicationOrderDaoDstu3")
-		protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
+	@Qualifier("myMedicationOrderDaoDstu3")
+	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-	
-@Autowired
-@Qualifier("myObservationDaoDstu3")
-protected IFhirResourceDao<Observation> myObservationDao;
-	
+
+	@Autowired
+	@Qualifier("myObservationDaoDstu3")
+	protected IFhirResourceDao<Observation> myObservationDao;
+
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
@@ -209,16 +207,19 @@ protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
 		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
 	}
+
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
 	}
+
 	@Before
 	@Transactional
 	public void beforeFlushFT() {
@@ -253,7 +254,6 @@ protected IFhirResourceDao<Observation> myObservationDao;
 		IParser newJsonParser = MethodUtil.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}
-
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(myTxManager);

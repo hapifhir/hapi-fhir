@@ -150,6 +150,39 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testUpdateConditionalByLastUpdated() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantType start = InstantType.now();
+		Thread.sleep(100);
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
+
+		p = myPatientDao.read(id.toVersionless(), mySrd);
+		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+
+	}
+
+	@Test
 	public void testUpdateCreatesTextualIdIfItDoesntAlreadyExist() {
 		Patient p = new Patient();
 		String methodName = "testUpdateCreatesTextualIdIfItDoesntAlreadyExist";

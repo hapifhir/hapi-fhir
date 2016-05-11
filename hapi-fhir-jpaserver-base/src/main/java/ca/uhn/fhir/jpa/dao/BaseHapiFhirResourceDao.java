@@ -65,6 +65,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
+import ca.uhn.fhir.jpa.term.ITerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -109,7 +110,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired()
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
-
+	@Autowired()
+	protected ITerminologySvc myTerminologySvc;
+	
 	private String mySecondaryPrimaryKeyParamName;
 
 	@Override
@@ -855,7 +858,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName(), getContext(), theParams.getRequestDetails());
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
@@ -871,7 +874,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
 			map.add(nextEntry.getKey(), (nextEntry.getValue()));
 		}
-		return searchForIdsWithAndOr(map, null);
+		return searchForIdsWithAndOr(map);
 	}
 
 	@Override
@@ -880,10 +883,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao);
+	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
+		theParams.setPersistResults(false);
+		
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc);
 		builder.setType(getResourceType(), getResourceName());
-		builder.searchForIdsWithAndOr(theParams, theLastUpdated);
+		builder.search(theParams);
 		return builder.doGetPids();
 	}
 

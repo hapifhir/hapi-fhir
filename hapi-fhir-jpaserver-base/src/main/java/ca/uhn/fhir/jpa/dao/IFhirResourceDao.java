@@ -162,7 +162,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 
-	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated);
+	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
 
 	DaoMethodOutcome update(T theResource, RequestDetails theRequestDetails);
 

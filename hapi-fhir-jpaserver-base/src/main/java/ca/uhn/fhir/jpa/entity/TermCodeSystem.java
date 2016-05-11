@@ -45,6 +45,10 @@ public class TermCodeSystem implements Serializable {
 	@Column(name="CODE_SYSTEM_URI", nullable=false)
 	private String myCodeSystemUri;
 
+	@OneToOne()
+	@JoinColumn(name="CURRENT_VERSION_PID", referencedColumnName="PID", nullable=true)
+	private TermCodeSystemVersion myCurrentVersion;
+	
 	@Id()
 	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEM_PID")
@@ -55,8 +59,15 @@ public class TermCodeSystem implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false)
 	private ResourceTable myResource;
 
+	@Column(name = "RES_ID", insertable=false, updatable=false)
+	private Long myResourcePid;
+
 	public String getCodeSystemUri() {
 		return myCodeSystemUri;
+	}
+
+	public TermCodeSystemVersion getCurrentVersion() {
+		return myCurrentVersion;
 	}
 
 	public ResourceTable getResource() {
@@ -65,6 +76,10 @@ public class TermCodeSystem implements Serializable {
 
 	public void setCodeSystemUri(String theCodeSystemUri) {
 		myCodeSystemUri = theCodeSystemUri;
+	}
+
+	public void setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
+		myCurrentVersion = theCurrentVersion;
 	}
 
 	public void setResource(ResourceTable theResource) {

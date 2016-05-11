@@ -951,12 +951,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
 		paramMap.setPersistResults(false);
 
-		if (paramMap.isEmpty()) {
+		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
-		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, paramMap.getLastUpdated());
+		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
 
 		return ids;
 	}
@@ -1426,7 +1426,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return theEntity;
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime,
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime,
 			RequestDetails theRequestDetails) {
 		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime, theRequestDetails);
 	}

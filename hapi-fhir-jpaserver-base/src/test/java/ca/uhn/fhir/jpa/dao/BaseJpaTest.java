@@ -7,14 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -54,7 +55,6 @@ import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class BaseJpaTest {
@@ -62,39 +62,23 @@ public class BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 	protected ServletRequestDetails mySrd;
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-	@SuppressWarnings({ "rawtypes" })
-	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.size());
-	}
-
 	@Before
 	public void beforeCreateSrd() {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
 		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
 	}
-	
+
+	@SuppressWarnings({ "rawtypes" })
+	protected List toList(IBundleProvider theSearch) {
+		return theSearch.getResources(0, theSearch.size());
+	}
+
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (Entry next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-			// }
-		}
-		return retVal;
-	}
-
-	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
-		for (BundleEntryComponent next : theFound.getEntry()) {
-			// if (next.getResource()!= null) {
-			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			// }
 		}
 		return retVal;
@@ -110,15 +94,25 @@ public class BaseJpaTest {
 		}
 		return retVal;
 	}
-	
-	protected String[] toValues(IIdType... theValues) {
-		ArrayList<String> retVal = new ArrayList<String>();
-		for (IIdType next : theValues) {
-			retVal.add(next.getValue());
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (IBaseResource next : theFound) {
+			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
 		}
-		return retVal.toArray(new String[retVal.size()]);
+		return retVal;
 	}
-	
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (BundleEntryComponent next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
+			// }
+		}
+		return retVal;
+	}
+
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<String>();
 		int size = theFound.size();
@@ -130,18 +124,22 @@ public class BaseJpaTest {
 		return retVal;
 	}
 
-
-	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
-		for (IBaseResource next : theFound) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+	protected String[] toValues(IIdType... theValues) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (IIdType next : theValues) {
+			retVal.add(next.getValue());
 		}
-		return retVal;
+		return retVal.toArray(new String[retVal.size()]);
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@AfterClass
 	public static void afterClassShutdownDerby() throws SQLException {
-		//		DriverManager.getConnection("jdbc:derby:;shutdown=true");
+		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
 		// } catch (SQLNonTransientConnectionException e) {
@@ -212,5 +210,12 @@ public class BaseJpaTest {
 		});
 	}
 
-	
+	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
+		HashSet<String> retVal = new HashSet<String>();
+		for (TermConcept next : theConcepts) {
+			retVal.add(next.getCode());
+		}
+		return retVal;
+	}
+
 }

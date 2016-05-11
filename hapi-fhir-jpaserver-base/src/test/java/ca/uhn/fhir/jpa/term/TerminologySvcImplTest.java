@@ -7,14 +7,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
@@ -59,7 +57,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		child.addChild(parent);
 
 		try {
-			myTermSvc.storeNewCodeSystemVersion("http://foo", cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
@@ -97,7 +95,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion("http://foo", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
 
 		Set<TermConcept> concepts;
 		Set<String> codes;
@@ -148,7 +146,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion("http://foo", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
 
 		Set<TermConcept> concepts;
 		Set<String> codes;
@@ -167,6 +165,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		assertThat(codes, empty());
 	}
 
+	
 	@Test
 	public void testCreateDuplicateCodeSystemUri() {
 		CodeSystem codeSystem = new CodeSystem();
@@ -180,7 +179,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
 
-		myTermSvc.storeNewCodeSystemVersion("http://example.com/my_code_system", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -190,7 +189,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
-		myTermSvc.storeNewCodeSystemVersion("http://example.com/my_code_system", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -201,7 +200,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
 		try {
-			myTermSvc.storeNewCodeSystemVersion("http://example.com/my_code_system", cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));
@@ -209,11 +208,4 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 
 	}
 
-	private Set<String> toCodes(Set<TermConcept> theConcepts) {
-		HashSet<String> retVal = new HashSet<String>();
-		for (TermConcept next : theConcepts) {
-			retVal.add(next.getCode());
-		}
-		return retVal;
-	}
 }
