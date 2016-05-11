@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -47,6 +47,8 @@ public class V3EntityDeterminerEnumFactory implements EnumFactory<V3EntityDeterm
       return V3EntityDeterminer.KIND;
     if ("GROUPKIND".equals(codeString))
       return V3EntityDeterminer.GROUPKIND;
+    if ("QUANTIFIED_KIND".equals(codeString))
+      return V3EntityDeterminer.QUANTIFIEDKIND;
     throw new IllegalArgumentException("Unknown V3EntityDeterminer code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class V3EntityDeterminerEnumFactory implements EnumFactory<V3EntityDeterm
       return "KIND";
     if (code == V3EntityDeterminer.GROUPKIND)
       return "GROUPKIND";
+    if (code == V3EntityDeterminer.QUANTIFIEDKIND)
+      return "QUANTIFIED_KIND";
     return "?";
   }
 

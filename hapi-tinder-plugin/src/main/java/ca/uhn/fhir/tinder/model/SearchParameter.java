@@ -1,5 +1,7 @@
 package ca.uhn.fhir.tinder.model;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 public class SearchParameter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameter.class);
+	private List<String> myCompartments = new ArrayList<String>();
 	private List<String> myCompositeOf;
 	private List<String> myCompositeTypes;
 	private String myDescription;
@@ -18,12 +21,19 @@ public class SearchParameter {
 	private String myResourceName;
 	private List<String> myTargetTypes;
 	private String myType;
-
 	private String myVersion;
 
 	public SearchParameter(String theVersion, String theResourceName) {
 		this.myVersion = theVersion;
 		this.myResourceName = theResourceName;
+	}
+
+	public void addCompartment(String theCompartment) {
+		myCompartments.add(theCompartment);
+	}
+
+	public List<String> getCompartments() {
+		return myCompartments;
 	}
 
 	public List<String> getCompositeOf() {
@@ -76,7 +86,9 @@ public class SearchParameter {
 			}
 		} else {
 			if (myType == null) {
-				ourLog.warn("Search parameter {} has no type", myName);
+				if (isNotBlank(myName)) {
+					ourLog.warn("Search parameter {} has no type", myName);
+				}
 			}
 			if ("resource".equals(myType) || "reference".equals(myType)) {
 				retVal.add(new Include(myResourceName + ":" + myName));
@@ -128,8 +140,11 @@ public class SearchParameter {
 		myPath = thePath;
 	}
 
-	public void setTargetTypes(List<String> theTargetTypes) {
-		myTargetTypes = theTargetTypes;
+	public void addTargetType(String theTargetType) {
+		if (myTargetTypes == null) {
+			myTargetTypes = new ArrayList<String>();
+		}
+		myTargetTypes.add(theTargetType);
 	}
 
 	public void setType(String theType) {

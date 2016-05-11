@@ -2,12 +2,16 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.util.TestUtil;
 
 public class IdentifierDtTest {
-
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testTokenNoSystem() {
 		IdentifierDt dt = new IdentifierDt();
@@ -15,7 +19,7 @@ public class IdentifierDtTest {
 		
 		assertEquals(null, dt.getSystem().getValueAsString());
 		assertEquals("c", dt.getValue().getValue());
-		assertEquals("c", dt.getValueAsQueryToken());
+		assertEquals("c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -25,7 +29,7 @@ public class IdentifierDtTest {
 		
 		assertEquals("a", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());
-		assertEquals("a|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("a|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -36,7 +40,7 @@ public class IdentifierDtTest {
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());
 		
-		assertEquals("|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	/**
@@ -50,8 +54,14 @@ public class IdentifierDtTest {
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());
 		
-		assertEquals("|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

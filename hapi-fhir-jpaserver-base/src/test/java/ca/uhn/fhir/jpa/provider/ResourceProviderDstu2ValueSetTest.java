@@ -10,10 +10,13 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.primitive.BooleanDt;
@@ -21,22 +24,30 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
 
 	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2ValueSetTest.class);
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Before
 	@Transactional
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 		upload.setId("");
-		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
+		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 	
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemBad() {
+	public void testValidateCodeOperationByCodeAndSystemInstance() {
 		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
@@ -53,8 +64,147 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
 	}
 
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemType() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
+			.andParameter("system", new UriDt("http://loinc.org"))
+			.execute();
+		//@formatter:on
 
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystem() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
+			.andParameter("system", new UriDt("http://loinc.org"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+	}
 	
+	@Test
+	@Ignore
+	public void testLookupOperationForBuiltInCode() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeDt("M"))
+			.andParameter("system", new UriDt("http://hl7.org/fhir/v3/MaritalStatus"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(new StringDt("Married"), respParam.getParameter().get(1).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+	}
+
+	@Test
+	public void testLookupOperationByCoding() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
+				.andParameter("code", new CodeDt("8450-9"))
+				.andParameter("system", new UriDt("http://loinc.org"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination2() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
+				.andParameter("system", new UriDt("http://loinc.org"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination3() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", null))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+		}
+		//@formatter:on
+	}
+
 	@Test
 	public void testExpandById() throws IOException {
 		//@formatter:off

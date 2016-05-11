@@ -18,6 +18,7 @@ package ca.uhn.fhir.testmodel;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -376,7 +377,7 @@ public class IdentifierDt
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken() {
+	public String getValueAsQueryToken(FhirContext theContext) {
 		if (org.apache.commons.lang3.StringUtils.isNotBlank(getSystem().getValueAsString())) {
 			return getSystem().getValueAsString() + '|' + getValue().getValueAsString(); 
 		} else {
@@ -423,7 +424,7 @@ public class IdentifierDt
 	 */
 	@Deprecated
 	@Override
-	public void setMissing(Boolean theMissing) {
+	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 

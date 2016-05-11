@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
-import net.sourceforge.cobertura.CoverageIgnore;
-
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -29,6 +27,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that the request is pointing to a resource that does not exist.

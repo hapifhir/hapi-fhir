@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu;
  * #%L
  * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
@@ -165,18 +167,20 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
+		assert nextDef != null;
+		
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
-			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
-				StructureElementDefinitionType type = elem.getDefinition().addType();
-				type.getCode().setValue("ResourceReference");
-
-				if (next != IResource.class) {
-					@SuppressWarnings("unchecked")
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
-					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
-				}
-			}
+//			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
+//			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
+//				StructureElementDefinitionType type = elem.getDefinition().addType();
+//				type.getCode().setValue("ResourceReference");
+//
+//				if (next != IResource.class) {
+//					@SuppressWarnings("unchecked")
+//					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
+//					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
+//				}
+//			}
 
 			return;
 		}
@@ -231,6 +235,9 @@ public class FhirDstu1 implements IFhirVersion {
 				if (nextChild instanceof RuntimeChildUndeclaredExtensionDefinition) {
 					continue;
 				}
+				if (nextChild instanceof RuntimeChildExtension) {
+					continue;
+				} 
 
 				BaseRuntimeDeclaredChildDefinition child = (BaseRuntimeDeclaredChildDefinition) nextChild;
 				StructureElement elem = theStruct.addElement();
@@ -397,5 +404,11 @@ public class FhirDstu1 implements IFhirVersion {
 
 		return theExtensionDefToCode;
 	}
+
+	@Override
+	public IIdType newIdType() {
+		return new IdDt();
+	}
+
 
 }

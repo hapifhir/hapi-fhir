@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -49,6 +49,9 @@ import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.NumberOrListParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -130,10 +133,14 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(CompositeOrListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamQualifiers.put(RestSearchParameterTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		
+		ourParamTypes.put(HasParam.class, RestSearchParameterTypeEnum.HAS);
+		ourParamTypes.put(HasOrListParam.class, RestSearchParameterTypeEnum.HAS);
+		ourParamTypes.put(HasAndListParam.class, RestSearchParameterTypeEnum.HAS);
 	}
 	
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
-	private List<Class<? extends IResource>> myDeclaredTypes;
+	private List<Class<? extends IBaseResource>> myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder<?> myParamBinder;
@@ -162,13 +169,13 @@ public class SearchParameter extends BaseQueryParameter {
 
 		List<IQueryParameterOr<?>> val = myParamBinder.encode(theContext, theObject);
 		for (IQueryParameterOr<?> nextOr : val) {
-			retVal.add(new QualifiedParamList(nextOr));
+			retVal.add(new QualifiedParamList(nextOr, theContext));
 		}
 
 		return retVal;
 	}
 
-	public List<Class<? extends IResource>> getDeclaredTypes() {
+	public List<Class<? extends IBaseResource>> getDeclaredTypes() {
 		return Collections.unmodifiableList(myDeclaredTypes);
 	}
 
@@ -255,7 +262,7 @@ public class SearchParameter extends BaseQueryParameter {
 		myCompositeTypes = Arrays.asList(theCompositeTypes);
 	}
 
-	public void setDeclaredTypes(Class<? extends IResource>[] theTypes) {
+	public void setDeclaredTypes(Class<? extends IBaseResource>[] theTypes) {
 		myDeclaredTypes = Arrays.asList(theTypes);
 	}
 
@@ -318,6 +325,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = RestSearchParameterTypeEnum.QUANTITY;
 		} else if (ReferenceParam.class.isAssignableFrom(type)) {
 			myParamType = RestSearchParameterTypeEnum.REFERENCE;
+		} else if (HasParam.class.isAssignableFrom(type)) {
+			myParamType = RestSearchParameterTypeEnum.STRING;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

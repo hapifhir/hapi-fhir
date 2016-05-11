@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ package ca.uhn.fhir.context;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 public abstract class BaseRuntimeChildDefinition {
 
@@ -71,6 +73,17 @@ public abstract class BaseRuntimeChildDefinition {
 		void addValue(Object theTarget, IBase theValue);
 
 		void setValue(Object theTarget, IBase theValue);
+	}
+
+	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next : theClassToElementDefinitions.entrySet()) {
+			if (IBaseReference.class.isAssignableFrom(next.getKey())) {
+				return next.getValue();
+			}
+		}
+		
+		// Shouldn't happen
+		throw new IllegalStateException("Unable to find reference type");
 	}
 
 	// public String getExtensionUrl() {

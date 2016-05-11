@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import java.math.BigDecimal;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -29,18 +31,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import java.math.*;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A container for a collection of resources.
  */
@@ -49,39 +53,39 @@ public class Bundle extends Resource implements IBaseBundle {
 
     public enum BundleType {
         /**
-         * The bundle is a document. The first resource is a Composition
+         * The bundle is a document. The first resource is a Composition.
          */
         DOCUMENT, 
         /**
-         * The bundle is a message. The first resource is a MessageHeader
+         * The bundle is a message. The first resource is a MessageHeader.
          */
         MESSAGE, 
         /**
-         * The bundle is a transaction - intended to be processed by a server as an atomic commit
+         * The bundle is a transaction - intended to be processed by a server as an atomic commit.
          */
         TRANSACTION, 
         /**
-         * The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free
+         * The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.
          */
         TRANSACTIONRESPONSE, 
         /**
-         * The bundle is a transaction - intended to be processed by a server as a group of actions
+         * The bundle is a transaction - intended to be processed by a server as a group of actions.
          */
         BATCH, 
         /**
-         * The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success
+         * The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.
          */
         BATCHRESPONSE, 
         /**
-         * The bundle is a list of resources from a _history interaction on a server
+         * The bundle is a list of resources from a history interaction on a server.
          */
         HISTORY, 
         /**
-         * The bundle is a list of resources returned as a result of a search/query interaction, operation, or message
+         * The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single document for ease of distribution
+         * The bundle is a set of resources collected into a single document for ease of distribution.
          */
         COLLECTION, 
         /**
@@ -141,15 +145,15 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getDefinition() {
           switch (this) {
-            case DOCUMENT: return "The bundle is a document. The first resource is a Composition";
-            case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader";
-            case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit";
-            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free";
-            case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions";
-            case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success";
-            case HISTORY: return "The bundle is a list of resources from a _history interaction on a server";
-            case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message";
-            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution";
+            case DOCUMENT: return "The bundle is a document. The first resource is a Composition.";
+            case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
+            case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
+            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.";
+            case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
+            case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
+            case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
+            case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution.";
             default: return "?";
           }
         }
@@ -219,15 +223,15 @@ public class Bundle extends Resource implements IBaseBundle {
 
     public enum SearchEntryMode {
         /**
-         * This resource matched the search specification
+         * This resource matched the search specification.
          */
         MATCH, 
         /**
-         * This resource is returned because it is referred to from another resource in the search set
+         * This resource is returned because it is referred to from another resource in the search set.
          */
         INCLUDE, 
         /**
-         * An OperationOutcome that provides additional information about the processing of a search
+         * An OperationOutcome that provides additional information about the processing of a search.
          */
         OUTCOME, 
         /**
@@ -263,9 +267,9 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getDefinition() {
           switch (this) {
-            case MATCH: return "This resource matched the search specification";
-            case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set";
-            case OUTCOME: return "An OperationOutcome that provides additional information about the processing of a search";
+            case MATCH: return "This resource matched the search specification.";
+            case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set.";
+            case OUTCOME: return "An OperationOutcome that provides additional information about the processing of a search.";
             default: return "?";
           }
         }
@@ -1038,17 +1042,17 @@ public class Bundle extends Resource implements IBaseBundle {
         protected UriType url;
 
         /**
-         * If the ETag values match, return a 304 Not modified status. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         @Child(name = "ifNoneMatch", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not modified status. See the the API documentation for [\"Conditional Read\"](http.html#cread)." )
+        @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not modified status. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
         protected StringType ifNoneMatch;
 
         /**
-         * Only perform the operation if the last updated date matches. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         @Child(name = "ifModifiedSince", type = {InstantType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. See the the API documentation for [\"Conditional Read\"](http.html#cread)." )
+        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
         protected InstantType ifModifiedSince;
 
         /**
@@ -1059,10 +1063,10 @@ public class Bundle extends Resource implements IBaseBundle {
         protected StringType ifMatch;
 
         /**
-         * Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
+         * Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
          */
         @Child(name = "ifNoneExist", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for [\"Conditional Create\"](http.html#ccreate). This is just the query portion of the URL - what follows the \"?\" (not including the \"?\")." )
+        @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for [\"Conditional Create\"](http.html#ccreate). This is just the query portion of the URL - what follows the \"?\" (not including the \"?\")." )
         protected StringType ifNoneExist;
 
         private static final long serialVersionUID = -1349769744L;
@@ -1174,7 +1178,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
+         * @return {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
          */
         public StringType getIfNoneMatchElement() { 
           if (this.ifNoneMatch == null)
@@ -1194,7 +1198,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
+         * @param value {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
          */
         public BundleEntryRequestComponent setIfNoneMatchElement(StringType value) { 
           this.ifNoneMatch = value;
@@ -1202,14 +1206,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return If the ETag values match, return a 304 Not modified status. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * @return If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public String getIfNoneMatch() { 
           return this.ifNoneMatch == null ? null : this.ifNoneMatch.getValue();
         }
 
         /**
-         * @param value If the ETag values match, return a 304 Not modified status. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * @param value If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public BundleEntryRequestComponent setIfNoneMatch(String value) { 
           if (Utilities.noString(value))
@@ -1223,7 +1227,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #ifModifiedSince} (Only perform the operation if the last updated date matches. See the the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfModifiedSince" gives direct access to the value
+         * @return {@link #ifModifiedSince} (Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfModifiedSince" gives direct access to the value
          */
         public InstantType getIfModifiedSinceElement() { 
           if (this.ifModifiedSince == null)
@@ -1243,7 +1247,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #ifModifiedSince} (Only perform the operation if the last updated date matches. See the the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfModifiedSince" gives direct access to the value
+         * @param value {@link #ifModifiedSince} (Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfModifiedSince" gives direct access to the value
          */
         public BundleEntryRequestComponent setIfModifiedSinceElement(InstantType value) { 
           this.ifModifiedSince = value;
@@ -1251,14 +1255,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return Only perform the operation if the last updated date matches. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * @return Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public Date getIfModifiedSince() { 
           return this.ifModifiedSince == null ? null : this.ifModifiedSince.getValue();
         }
 
         /**
-         * @param value Only perform the operation if the last updated date matches. See the the API documentation for ["Conditional Read"](http.html#cread).
+         * @param value Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public BundleEntryRequestComponent setIfModifiedSince(Date value) { 
           if (value == null)
@@ -1321,7 +1325,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #ifNoneExist} (Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").). This is the underlying object with id, value and extensions. The accessor "getIfNoneExist" gives direct access to the value
+         * @return {@link #ifNoneExist} (Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").). This is the underlying object with id, value and extensions. The accessor "getIfNoneExist" gives direct access to the value
          */
         public StringType getIfNoneExistElement() { 
           if (this.ifNoneExist == null)
@@ -1341,7 +1345,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #ifNoneExist} (Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").). This is the underlying object with id, value and extensions. The accessor "getIfNoneExist" gives direct access to the value
+         * @param value {@link #ifNoneExist} (Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").). This is the underlying object with id, value and extensions. The accessor "getIfNoneExist" gives direct access to the value
          */
         public BundleEntryRequestComponent setIfNoneExistElement(StringType value) { 
           this.ifNoneExist = value;
@@ -1349,14 +1353,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
+         * @return Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
          */
         public String getIfNoneExist() { 
           return this.ifNoneExist == null ? null : this.ifNoneExist.getValue();
         }
 
         /**
-         * @param value Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
+         * @param value Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL - what follows the "?" (not including the "?").
          */
         public BundleEntryRequestComponent setIfNoneExist(String value) { 
           if (Utilities.noString(value))
@@ -1373,10 +1377,10 @@ public class Bundle extends Resource implements IBaseBundle {
           super.listChildren(childrenList);
           childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a update history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
-          childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
+          childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
+          childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
           childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section [\"Managing Resource Contention\"](http.html#concurrency).", 0, java.lang.Integer.MAX_VALUE, ifMatch));
-          childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information,see the the API documentation for [\"Conditional Create\"](http.html#ccreate). This is just the query portion of the URL - what follows the \"?\" (not including the \"?\").", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
+          childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for [\"Conditional Create\"](http.html#ccreate). This is just the query portion of the URL - what follows the \"?\" (not including the \"?\").", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
         }
 
       public BundleEntryRequestComponent copy() {

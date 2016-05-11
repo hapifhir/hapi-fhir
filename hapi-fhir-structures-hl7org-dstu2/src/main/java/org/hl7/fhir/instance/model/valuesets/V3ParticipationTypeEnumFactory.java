@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -81,6 +81,8 @@ public class V3ParticipationTypeEnumFactory implements EnumFactory<V3Participati
       return V3ParticipationType.CAT;
     if ("CSM".equals(codeString))
       return V3ParticipationType.CSM;
+    if ("TPA".equals(codeString))
+      return V3ParticipationType.TPA;
     if ("DEV".equals(codeString))
       return V3ParticipationType.DEV;
     if ("NRD".equals(codeString))
@@ -205,6 +207,8 @@ public class V3ParticipationTypeEnumFactory implements EnumFactory<V3Participati
       return "CAT";
     if (code == V3ParticipationType.CSM)
       return "CSM";
+    if (code == V3ParticipationType.TPA)
+      return "TPA";
     if (code == V3ParticipationType.DEV)
       return "DEV";
     if (code == V3ParticipationType.NRD)

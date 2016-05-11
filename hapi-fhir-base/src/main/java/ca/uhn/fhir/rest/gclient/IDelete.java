@@ -3,13 +3,11 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,7 @@ import ca.uhn.fhir.model.api.IResource;
 
 public interface IDelete {
 
-	IDeleteTyped resource(IResource theResource);
+	IDeleteTyped resource(IBaseResource theResource);
 	
 	IDeleteTyped resourceById(IIdType theId);
 	

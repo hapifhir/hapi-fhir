@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -69,6 +69,8 @@ public class V3NullFlavorEnumFactory implements EnumFactory<V3NullFlavor> {
       return V3NullFlavor.QS;
     if ("TRC".equals(codeString))
       return V3NullFlavor.TRC;
+    if ("NP".equals(codeString))
+      return V3NullFlavor.NP;
     throw new IllegalArgumentException("Unknown V3NullFlavor code '"+codeString+"'");
   }
 
@@ -103,6 +105,8 @@ public class V3NullFlavorEnumFactory implements EnumFactory<V3NullFlavor> {
       return "QS";
     if (code == V3NullFlavor.TRC)
       return "TRC";
+    if (code == V3NullFlavor.NP)
+      return "NP";
     return "?";
   }
 

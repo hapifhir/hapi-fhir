@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ package ca.uhn.fhir.rest.client.interceptor;
  */
 
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests. Bearer tokens are used for protocols such as OAUTH2 (see the
@@ -71,12 +71,12 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequest) {
 		theRequest.addHeader(Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) {
+	public void interceptResponse(IHttpResponse theResponse) {
 		// nothing
 	}
 

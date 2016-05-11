@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,26 +44,27 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
+public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, MetaDt> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1.class);
 
 	@Override
-	public MetaDt metaGetOperation() {
+	public MetaDt metaGetOperation(RequestDetails theRequestDetails) {
 		throw new NotImplementedOperationException("meta not supported in DSTU1");
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public List<IResource> transaction(List<IResource> theResources) {
+	public List<IResource> transaction(RequestDetails theRequestDetails, List<IResource> theResources) {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		long start = System.currentTimeMillis();
@@ -269,15 +270,13 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 				ResourceMetadataKeyEnum.DELETED_AT.put(resource, new InstantDt(deletedTimestampOrNull));
 			}
 
-			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime);
+			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime, theRequestDetails);
 		}
 
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Transaction completed in {}ms with {} creations and {} updates", new Object[] { delay, creations, updates });
 
 		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Transaction completed in " + delay + "ms with " + creations + " creations and " + updates + " updates");
-
-		notifyWriteCompleted();
 
 		return retVal;
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,15 @@ package ca.uhn.fhir.util;
  */
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
@@ -52,18 +47,15 @@ import org.codehaus.stax2.io.EscapingWriterFactory;
 import com.ctc.wstx.api.WstxInputProperties;
 import com.ctc.wstx.stax.WstxOutputFactory;
 
+import ca.uhn.fhir.util.jar.DependencyLogFactory;
+import ca.uhn.fhir.util.jar.IDependencyLog;
+
 /**
  * Utility methods for working with the StAX API.
  * 
  * This class contains code adapted from the Apache Axiom project.
  */
 public class XmlUtil {
-	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");
-	private static final Attributes.Name BUNDLE_VENDOR = new Attributes.Name("Bundle-Vendor");
-	private static final Attributes.Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
-	private static final Attributes.Name IMPLEMENTATION_TITLE = new Attributes.Name("Implementation-Title");
-	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
-	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
 	private static volatile boolean ourHaveLoggedStaxImplementation;
 	private static volatile XMLInputFactory ourInputFactory;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
@@ -1571,6 +1563,17 @@ public class XmlUtil {
 			}
 
 			/*
+			 * These two properties disable external entity processing, which can 
+			 * be a security vulnerability.
+			 * 
+			 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
+			 */
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
+			inputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", false); // disable external entities
+
+			
+			/*
 			 * In the following few lines, you can uncomment the first and comment the second to disable automatic
 			 * parsing of extended entities, e.g. &sect;
 			 * 
@@ -1645,73 +1648,12 @@ public class XmlUtil {
 		return outputFactory;
 	}
 
-	private static URL getRootUrlForClass(Class<?> cls) {
-		ClassLoader classLoader = cls.getClassLoader();
-		String resource = cls.getName().replace('.', '/') + ".class";
-		if (classLoader == null) {
-			// A null class loader means the bootstrap class loader. In this case we use the
-			// system class loader. This is safe since we can assume that the system class
-			// loader uses parent first as delegation policy.
-			classLoader = ClassLoader.getSystemClassLoader();
-		}
-		URL url = classLoader.getResource(resource);
-		if (url == null) {
-			return null;
-		}
-		String file = url.getFile();
-		if (file.endsWith(resource)) {
-			try {
-				return new URL(url.getProtocol(), url.getHost(), url.getPort(), file.substring(0, file.length() - resource.length()));
-			} catch (MalformedURLException ex) {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
-
 	private static void logStaxImplementation(Class<?> theClass) {
-		try {
-			URL rootUrl = getRootUrlForClass(theClass);
-			if (rootUrl == null) {
-				ourLog.info("Unable to determine location of StAX implementation containing class");
-			} else {
-				Manifest manifest;
-				URL metaInfUrl = new URL(rootUrl, "META-INF/MANIFEST.MF");
-				InputStream is = metaInfUrl.openStream();
-				try {
-					manifest = new Manifest(is);
-				} finally {
-					is.close();
-				}
-				Attributes attrs = manifest.getMainAttributes();
-				String title = attrs.getValue(IMPLEMENTATION_TITLE);
-				String symbolicName = attrs.getValue(BUNDLE_SYMBOLIC_NAME);
-				if (symbolicName != null) {
-					int i = symbolicName.indexOf(';');
-					if (i != -1) {
-						symbolicName = symbolicName.substring(0, i);
-					}
-				}
-				String vendor = attrs.getValue(IMPLEMENTATION_VENDOR);
-				if (vendor == null) {
-					vendor = attrs.getValue(BUNDLE_VENDOR);
-				}
-				String version = attrs.getValue(IMPLEMENTATION_VERSION);
-				if (version == null) {
-					version = attrs.getValue(BUNDLE_VERSION);
-				}
-				if (ourLog.isDebugEnabled()) {
-					ourLog.debug("FHIR XML procesing will use StAX implementation at {}\n  Title:         {}\n  Symbolic name: {}\n  Vendor:        {}\n  Version:       {}", new Object[] { rootUrl, title, symbolicName, vendor, version } );
-				} else {
-					ourLog.info("FHIR XML procesing will use StAX implementation '{}' version '{}'", title, version);
-				}
-			}
-		} catch (Throwable e) {
-			ourLog.info("Unable to determine StAX implementation: " + e.getMessage());
-		} finally {
-			ourHaveLoggedStaxImplementation = true;
+		IDependencyLog logger = DependencyLogFactory.createJarLogger();
+		if (logger != null) {
+			logger.logStaxImplementation(theClass);
 		}
+		ourHaveLoggedStaxImplementation = true;
 	}
 
 	public static void main(String[] args) throws FactoryConfigurationError, XMLStreamException {

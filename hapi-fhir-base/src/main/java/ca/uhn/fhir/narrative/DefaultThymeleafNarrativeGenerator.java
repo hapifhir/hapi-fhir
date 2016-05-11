@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,16 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
-	
+
 	private boolean myUseHapiServerConformanceNarrative;
 
 	@Override
 	protected List<String> getPropertyFile() {
-		List<String> retVal=new ArrayList<String>();
+		List<String> retVal = new ArrayList<String>();
 		retVal.add(NARRATIVES_PROPERTIES);
 		if (myUseHapiServerConformanceNarrative) {
 			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
@@ -44,25 +43,19 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * Conformance resource will be provided, which is designed to be used with 
-	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
-	 * page which can assist users of the service.
+	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI {@link RestfulServer}
+	 * instances. This narrative provides a friendly search page which can assist users of the service.
 	 */
 	public void setUseHapiServerConformanceNarrative(boolean theValue) {
-		myUseHapiServerConformanceNarrative=theValue;
+		myUseHapiServerConformanceNarrative = theValue;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * Conformance resource will be provided, which is designed to be used with 
-	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
-	 * page which can assist users of the service.
+	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI {@link RestfulServer}
+	 * instances. This narrative provides a friendly search page which can assist users of the service.
 	 */
 	public boolean isUseHapiServerConformanceNarrative() {
 		return myUseHapiServerConformanceNarrative;
 	}
-
-
 
 }

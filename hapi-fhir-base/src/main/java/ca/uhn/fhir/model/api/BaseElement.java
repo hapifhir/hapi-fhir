@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,30 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
+	private List<String> myFormatCommentsPost;
+	private List<String> myFormatCommentsPre;
+	
+   @Child(name = "extension", type = {ExtensionDt.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+   @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
 	private List<ExtensionDt> myUndeclaredExtensions;
+	
+   /**
+    * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
+    */
+   @Child(name = "modifierExtension", type = {ExtensionDt.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=false)
+   @Description(shortDefinition="Extensions that cannot be ignored", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions." )
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
-	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
 		Validate.notEmpty(theUrl, "URL must be populated");
-		Validate.notNull(theValue, "Value must not be null");
-		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
+
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
 		if (theIsModifier) {
 			getUndeclaredModifierExtensions();
 			myUndeclaredModifierExtensions.add(retVal);
@@ -48,10 +62,10 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	}
 
 	@Override
-	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
 		Validate.notEmpty(theUrl, "URL must be populated");
-
-		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
+		Validate.notNull(theValue, "Value must not be null");
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
 		if (theIsModifier) {
 			getUndeclaredModifierExtensions();
 			myUndeclaredModifierExtensions.add(retVal);
@@ -87,6 +101,20 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	}
 
 	@Override
+	public List<String> getFormatCommentsPost() {
+		if (myFormatCommentsPost == null)
+			myFormatCommentsPost = new ArrayList<String>();
+		return myFormatCommentsPost;
+	}
+
+	@Override
+	public List<String> getFormatCommentsPre() {
+		if (myFormatCommentsPre == null)
+			myFormatCommentsPre = new ArrayList<String>();
+		return myFormatCommentsPre;
+	}
+
+	@Override
 	public List<ExtensionDt> getUndeclaredExtensions() {
 		if (myUndeclaredExtensions == null) {
 			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
@@ -114,13 +142,21 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return (myUndeclaredModifierExtensions);
 	}
 
+	@Override
+	public boolean hasFormatComment() {
+		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty()) || (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
+	}
+
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
-	 * {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
+	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {
 			for (ExtensionDt next : myUndeclaredExtensions) {
+				if (next == null) {
+					continue;
+				}
 				if (!next.isEmpty()) {
 					return false;
 				}
@@ -128,6 +164,9 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		}
 		if (myUndeclaredModifierExtensions != null) {
 			for (ExtensionDt next : myUndeclaredModifierExtensions) {
+				if (next == null) {
+					continue;
+				}
 				if (!next.isEmpty()) {
 					return false;
 				}

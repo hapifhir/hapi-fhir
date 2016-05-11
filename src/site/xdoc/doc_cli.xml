@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Command Line Tool</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Command Line Tool for HAPI FHIR">
+			<p>
+				<b>hapi-fhir-cli</b> is the HAPI FHIR Command Line tool. It features a number of HAPI's
+				built-in features as easy to use command line options. 
+			</p>
+
+			<subsection name="Download and Installation">
+				<p>
+					You can get the tool by downloading it from our
+					<a href="https://github.com/jamesagnew/hapi-fhir/releases">GitHub Releases</a> page
+					(look for the archive named <code>hapi-fhir-[version]-cli.tar.bz2</code> on OSX/Linux or <code>hapi-fhir-[version]-cli.zip</code> on Windows).
+				</p>
+				<p>
+					When you have downloaded the archive (either ZIP or tar.bz2), expand it into a directory
+					where you will keep it, and add this directory to your path. 
+				</p>
+				<p>
+					You can now try the tool out by executing the following command: <code>hapi-fhir-cli</code>
+				</p>
+				<p>
+					This command should show a help screen, as shown in the screeenshot below.
+				</p>
+				<img src="./images/hapi-fhir-cli.png" alt="Basic screen shot" style="margin-left: 40px;"/>
+			</subsection>
+			
+			<subsection name="Troubleshooting">
+				<p>
+					<b>Note on Java version support:</b> The HAPI library is designed to
+					work in Java 6+, but the Command Line Tool required a minimum of Java 8. This
+					is because the Jetty Web Server that is used within the tool has this requirement. 
+				</p>
+				<p>
+					The tool should work correctly on any system that has Java 8 (or newer) installed. If
+					it is not working correctly, first try the following command to test if Java is installed:<br/>
+					<code>$ java -version</code>
+				</p>
+				<p>
+					If this command does not produce output similar to the following, you should install/reinstall
+					Java.<br/>
+					<pre><![CDATA[$ java -version
+java version "1.8.0_60"
+Java(TM) SE Runtime Environment (build 1.8.0_60-b27)
+Java HotSpot(TM) 64-Bit Server VM (build 25.60-b23, mixed mode)]]></pre>
+				</p>
+				<p>
+					If this does not help, please post a question on our
+					<a href="https://groups.google.com/d/forum/hapi-fhir">Google Group</a>.
+				</p>
+			</subsection>
+			
+		</section>
+		
+		<section name="Server (run-server)">
+			<p>
+				The CLI tool can be used to start a local, fully functional FHIR server which you can use
+				for testing. To start this server, simply issue the command <code>hapi-fhir-cli run-server</code>
+				as shown in the example below:
+			</p>
+			<img src="./images/hapi-fhir-cli-run-server.png" alt="Run Server" style="margin-left: 40px;"/>
+			<p>
+				Once the server has started, you can access the testing webpage by pointing your
+				browser at <a href="http://localhost:8080/">http://localhost:8080/</a>. The FHIR
+				server base URL will be <a href="http://localhost:8080/baseDstu2/">http://localhost:8080/baseDstu2/</a>.
+			</p>
+			<p>
+				Note that by default this server will not be populated with any resources at all. You can
+				easily populate it with the FHIR example resources by <b>leaving it running</b> and opening
+				a second terminal window, then using the <code>hapi-fhir-cli upload-examples</code> command
+				(see the section below).
+			</p>
+			<p>
+				The server uses a local Derby database instance for storage. You may want to execute 
+				this command in an empty directory, which you can clear if you want to reset the server.
+			</p>
+		</section>
+		
+		<section name="Upload Example Resources (upload-examples)">
+			<p>
+				The <b>upload-examples</b> command downloads the complete set of FHIR example resources from
+				the HL7 website, and uploads them to a server of your choice. This can be useful to
+				populate a server with test data.
+			</p>
+			<p>
+				To execute this command, uploading test resources to a local CLI server, issue
+				the following: <code>hapi-fhir-cli upload-examples -t http://localhost:8080/baseDstu2</code> 
+			</p>
+			<p>
+				Note that this command may take a surprisingly long time to complete because of the 
+				large number of examples.
+			</p>
+		</section>
+	</body>
+
+</document>

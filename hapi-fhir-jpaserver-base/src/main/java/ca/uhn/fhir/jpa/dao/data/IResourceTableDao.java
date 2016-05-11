@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,5 +25,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 
 public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
-	
+	// nothing yet
 }

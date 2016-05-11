@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3AcknowledgementCondition {
@@ -47,6 +47,10 @@ public enum V3AcknowledgementCondition {
          */
         NE, 
         /**
+         * Send an acknowledgement for successful completions only.
+         */
+        SU, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -59,6 +63,8 @@ public enum V3AcknowledgementCondition {
           return ER;
         if ("NE".equals(codeString))
           return NE;
+        if ("SU".equals(codeString))
+          return SU;
         throw new Exception("Unknown V3AcknowledgementCondition code '"+codeString+"'");
         }
         public String toCode() {
@@ -66,6 +72,7 @@ public enum V3AcknowledgementCondition {
             case AL: return "AL";
             case ER: return "ER";
             case NE: return "NE";
+            case SU: return "SU";
             default: return "?";
           }
         }
@@ -77,6 +84,7 @@ public enum V3AcknowledgementCondition {
             case AL: return "Always send an acknowledgement.";
             case ER: return "Send an acknowledgement for error/reject conditions only.";
             case NE: return "Never send an acknowledgement.";
+            case SU: return "Send an acknowledgement for successful completions only.";
             default: return "?";
           }
         }
@@ -85,6 +93,7 @@ public enum V3AcknowledgementCondition {
             case AL: return "Always";
             case ER: return "Error/reject only";
             case NE: return "Never";
+            case SU: return "Successful only";
             default: return "?";
           }
     }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,47 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.search.annotations.Field;
 
 //@formatter:off
+@Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_URI" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_URI", indexes = { 
-	@org.hibernate.annotations.Index(name = "IDX_SP_URI", columnNames = { "RES_TYPE", "SP_NAME", "SP_URI" }) 
+@Table(name = "HFJ_SPIDX_URI", indexes = { 
+	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"), 
+	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"), 
+	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID") 
 })
 //@formatter:on
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
-	public static final int MAX_LENGTH = 256;
+	/*
+	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here 
+	 */
+	public static final int MAX_LENGTH = 255;
 
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@SequenceGenerator(name="SEQ_SPIDX_URI", sequenceName="SEQ_SPIDX_URI")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SPIDX_URI")
+	@Column(name = "SP_ID")
+	private Long myId;
+
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
+	@Field()
 	public String myUri;
 
 	public ResourceIndexedSearchParamUri() {
@@ -70,6 +89,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public String getUri() {

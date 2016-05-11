@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head  th:include="tmpl-head :: head">
-		<title>RESTful Tester</title>
+	<head>
+		<title th:include="window-title :: result" />
+		<th:block th:include="tmpl-head :: head" />
+		<script th:include="tmpl-buttonclick-handler :: handler" />
 	</head>
 
 	<body>
@@ -118,7 +120,9 @@
 										If the response is a bundle, this block will contain a collapsible
 										table with a summary of each entry as well as paging buttons and
 										controls for viewing/editing/etc results
-										-->															
+										
+										NON-RI Bundle
+										-->
 										<div th:if="${bundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
 											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
@@ -134,7 +138,7 @@
 														
 															<!-- Prev/Next Page Buttons -->
 															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
-																style="margin-left: 15px;" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+																style="margin-left: 15px;">
 																<span class="glyphicon glyphicon-step-backward"></span>
 																Prev Page
 															</button>
@@ -144,15 +148,14 @@
 																}
 																$('#page-prev-btn').click(function() {
 																	var btn = $(this);
-																	btn.button('loading');
+																	handleActionButtonClick($(this));
 																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
 																	$("#outerForm").attr("action", "page").submit();
 	
 																});
 															</script>
 	
-															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn"	
-																data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;">
+															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn">
 																<span class="glyphicon glyphicon-step-forward"></span>
 																Next Page
 															</button>
@@ -162,7 +165,7 @@
 																}
 																$('#page-next-btn').click(function() {
 																	var btn = $(this);
-																	btn.button('loading');
+																	handleActionButtonClick($(this));
 																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
 																	$("#outerForm").attr("action", "page").submit();
 																});
@@ -191,8 +194,8 @@
 															<tr th:each="entry : ${bundle.entries}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
-																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ><i class="fa fa-book"></i> Read</button>
-																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil" data-loading-text="Loading &lt;i class='fa fa-spinner fa-spin'/&gt;" ></i> Update</button>
+																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
+																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
 																	</th:block>
 																</td>
 																<td>
@@ -219,7 +222,116 @@
 													});
 												</script>
 											</div>
-										</div>										
+										</div>
+										<!-- END Non-RI Bundle -->
+
+
+										<!-- 
+										If the response is a bundle, this block will contain a collapsible
+										table with a summary of each entry as well as paging buttons and
+										controls for viewing/editing/etc results
+										
+										RI Bundle
+										-->
+										<div th:if="${riBundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
+											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<th:block th:if="${#lists.isEmpty(riBundle.entry)}">Bundle contains no entries</th:block>
+														<a th:unless="${#lists.isEmpty(riBundle.entry)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
+															<span th:if="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' entries'"/>
+															<span th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
+														</a>
+
+														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null}">
+														
+															<!-- Prev/Next Page Buttons -->
+															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
+																style="margin-left: 15px;">
+																<span class="glyphicon glyphicon-step-backward"></span>
+																Prev Page
+															</button>
+															<script type="text/javascript">
+																if (<th:block th:text="${riBundle.getLink('prev') == null}"/>) {
+																	$('#page-prev-btn').prop('disabled', true);
+																}
+																$('#page-prev-btn').click(function() {
+																	var btn = $(this);
+																	handleActionButtonClick($(this));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('prev') != null}"  th:text="${riBundle.getLink('prev').url}"/>' }));
+																	$("#outerForm").attr("action", "page").submit();
+	
+																});
+															</script>
+	
+															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn">
+																<span class="glyphicon glyphicon-step-forward"></span>
+																Next Page
+															</button>
+															<script type="text/javascript">
+																if (<th:block th:text="${riBundle.getLink('next') == null}"/>) {
+																	$('#page-next-btn').prop('disabled', true);
+																}
+																$('#page-next-btn').click(function() {
+																	var btn = $(this);
+																	handleActionButtonClick($(this));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('next') != null}" th:text="${riBundle.getLink('next').url}"/>' }));
+																	$("#outerForm").attr("action", "page").submit();
+																});
+															</script>
+														</th:block>
+													</h4>
+												</div>
+												<div id="collapseOne" class="panel-collapse collapse in" th:unless="${#lists.isEmpty(riBundle.entry)}">
+													<div class="panel-body" style="padding-bottom: 0px;">
+														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
+															<colgroup>
+																<col style="width: 100px;"/>
+																<col/>
+																<col/>
+																<col style="width: 100px;"/>
+															</colgroup>
+															<thead>
+																<tr>
+																	<th></th>
+																	<th>ID</th>
+																	<th>Updated</th>
+																</tr>
+															</thead>
+															<tbody>
+															<tr th:each="entry : ${riBundle.entry}">
+																<td style="white-space: nowrap;">
+																	<th:block th:if="${entry.resource} != null">
+																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.idElement.resourceType} + '\', \'' + ${entry.resource.idElement.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.idElement.versionIdPart,'')} + '\');'" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
+																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.idElement.resourceType} + '\', \'' + ${entry.resource.idElement.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.idElement.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
+																	</th:block>
+																</td>
+																<td>
+																	<a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.idElement.toUnqualified()}" style="font-size: 0.8em"/>
+																</td>
+																<td th:if="${entry.resource} == null or ${entry.resource.meta.lastUpdatedElement.value} == null"></td>
+																<td th:if="${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == true" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'HH:mm:ss')}"></td>
+																<td th:if="${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == false" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}"></td>
+															</tr>
+															</tbody>
+														</table>
+													</div>
+												</div>
+												<script type="text/javascript">
+													$('#collapseOne').on('hidden.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+													});
+	
+													$('#collapseOne').on('shown.bs.collapse', function () {
+													   $("#collapseOneIcon").removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+													});
+												</script>
+											</div>
+										</div>
+										<!-- END RI Bundle -->
+
+										
 										<div class="panel-heading" sstyle="margin: 5px;">
 											<h4 class="panel-title">
 												Raw Message

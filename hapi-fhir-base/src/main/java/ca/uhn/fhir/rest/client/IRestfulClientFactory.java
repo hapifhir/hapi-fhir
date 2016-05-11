@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,13 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import org.apache.http.client.HttpClient;
+import java.util.List;
+import java.util.Map;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public interface IRestfulClientFactory {
@@ -48,6 +52,16 @@ public interface IRestfulClientFactory {
 	public static final int DEFAULT_SOCKET_TIMEOUT = 10000;
 	
 	/**
+	 * Default value for {@link #getPoolMaxTotal() ()}
+	 */
+	public static final int DEFAULT_POOL_MAX = 20;
+	
+	/**
+	 * Default value for {@link #getPoolMaxPerRoute() }
+	 */
+	public static final int DEFAULT_POOL_MAX_PER_ROUTE = DEFAULT_POOL_MAX;
+	
+	/**
 	 * Gets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection
 	 * pool may wait for an available connection before failing. This setting typically does not need to be adjusted.
 	 * <p>
@@ -66,14 +80,23 @@ public interface IRestfulClientFactory {
 	int getConnectTimeout();
 
 	/**
-	 * Returns the Apache HTTP client instance. This method will not return null.
-	 * 
-	 * @see #setHttpClient(HttpClient)
+	 * Returns the HTTP client instance. This method will not return null.
+	 * @param theUrl
+	 *            The complete FHIR url to which the http request will be sent
+	 * @param theIfNoneExistParams
+	 *            The params for header "If-None-Exist" as a hashmap
+	 * @param theIfNoneExistString
+	 *            The param for header "If-None-Exist" as a string
+	 * @param theRequestType
+	 *            the type of HTTP request (GET, DELETE, ..) 
+	 * @param theHeaders
+	 *            the headers to be sent together with the http request
+	 * @return the HTTP client instance
 	 */
-	HttpClient getHttpClient();
+	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
-	 * @deprecated Use {@link #getServerValidationMode()} instead
+	 * @deprecated Use {@link #getServerValidationMode()} instead (this method is a synonym for that method, but this method is poorly named and will be removed at some point)
 	 */
 	@Deprecated
 	ServerValidationModeEnum getServerValidationModeEnum();
@@ -99,6 +122,22 @@ public interface IRestfulClientFactory {
 	 */
 	int getSocketTimeout();
 
+	/**
+	 * Gets the maximum number of connections allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX}
+	 * </p>
+	 */
+	int getPoolMaxTotal();
+
+	/**
+	 * Gets the maximum number of connections per route allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX_PER_ROUTE}
+	 * </p>
+	 */
+	int getPoolMaxPerRoute();
+	
 	/**
 	 * Instantiates a new client instance
 	 * 
@@ -146,7 +185,7 @@ public interface IRestfulClientFactory {
 	 * @param theHttpClient
 	 *            An HTTP client instance to use, or <code>null</code>
 	 */
-	void setHttpClient(HttpClient theHttpClient);
+	<T> void setHttpClient(T theHttpClient);
 
 	/**
 	 * Sets the HTTP proxy to use for outgoing connections
@@ -192,5 +231,28 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	void setSocketTimeout(int theSocketTimeout);
+
+	/**
+	 * Sets the maximum number of connections allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX}
+	 * </p>
+	 */
+	void setPoolMaxTotal(int thePoolMaxTotal);
+
+	/**
+	 * Sets the maximum number of connections per route allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX_PER_ROUTE}
+	 * </p>
+	 */
+	void setPoolMaxPerRoute(int thePoolMaxPerRoute);
+	
+	void validateServerBase(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
+
+	/**
+	 * This method is internal to HAPI - It may change in future versions, use with caution.
+	 */	
+	void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
 
 }

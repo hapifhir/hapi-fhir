@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,24 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.Reader;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype, IBaseReference {
 
+	private static final long serialVersionUID = 1L;
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IBaseResource myResource;
 
@@ -95,42 +90,27 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 	 * HTTP client to retrieve the resource unless it has already been loaded, or was a contained resource in which case
 	 * it is simply returned.
 	 */
-	public IBaseResource loadResource(IRestfulClient theClient) throws IOException {
+	public IBaseResource loadResource(IRestfulClient theClient) {
 		if (myResource != null) {
 			return myResource;
 		}
 
 		IdDt resourceId = getReference();
-		if (resourceId == null) {
+		if (resourceId == null || isBlank(resourceId.getValue())) {
 			throw new IllegalStateException("Reference has no resource ID defined");
+		}
+		if (isBlank(resourceId.getBaseUrl()) || isBlank(resourceId.getResourceType())) {
+			throw new IllegalStateException("Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: " + resourceId.getValue());
 		}
 
 		String resourceUrl = resourceId.getValue();
 
 		ourLog.debug("Loading resource at URL: {}", resourceUrl);
 
-		HttpClient httpClient = theClient.getHttpClient();
-		FhirContext context = theClient.getFhirContext();
-
-		if (!resourceUrl.startsWith("http")) {
-			resourceUrl = theClient.getServerBase() + resourceUrl;
-		}
-
-		HttpGet get = new HttpGet(resourceUrl);
-		HttpResponse response = httpClient.execute(get);
-		try {
-			// TODO: choose appropriate parser based on response CT
-			IParser parser = context.newXmlParser();
-
-			Reader responseReader = BaseClient.createReaderFromResponse(response);
-			myResource = parser.parseResource(responseReader);
-
-		} finally {
-			if (response instanceof CloseableHttpResponse) {
-				((CloseableHttpResponse) response).close();
-			}
-		}
-
+		RuntimeResourceDefinition definition = theClient.getFhirContext().getResourceDefinition(resourceId.getResourceType());
+		Class<? extends IBaseResource> resourceType = definition.getImplementingClass();
+		myResource = theClient.fetchResourceFromUrl(resourceType, resourceUrl);
+		myResource.setId(resourceUrl);
 		return myResource;
 	}
 

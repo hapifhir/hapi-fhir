@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -54,6 +56,13 @@ public class BinaryDstu2Test {
 	private static int ourPort;
 
 	private static Server ourServer;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {
@@ -126,14 +135,47 @@ public class BinaryDstu2Test {
 	}
 
 	@Test
-	public void testRead() throws Exception {
+	public void testBinaryReadAcceptMissing() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+
 		HttpResponse status = ourClient.execute(httpGet);
 		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+
+	}
+
+	@Test
+	public void testBinaryReadAcceptBrowser() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+		httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+	}
+	
+	@Test
+	public void testBinaryReadAcceptFhirJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertNull(status.getFirstHeader("Content-Disposition"));
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
 
 	}
 
@@ -144,7 +186,7 @@ public class BinaryDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 		ourLog.info(responseContent);
 
@@ -162,7 +204,7 @@ public class BinaryDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 		ourLog.info(responseContent);
 
@@ -171,11 +213,6 @@ public class BinaryDstu2Test {
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
 	}
 
 	@BeforeClass
@@ -200,9 +237,6 @@ public class BinaryDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class ResourceProvider implements IResourceProvider {
 
 		@Create

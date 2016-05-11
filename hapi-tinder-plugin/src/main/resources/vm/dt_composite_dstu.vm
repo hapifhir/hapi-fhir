@@ -111,7 +111,7 @@ public class ${className}
 	
 	@Override
 	public String toString() {
-		return "IdentifierDt[" + getValueAsQueryToken() + "]";
+		return "IdentifierDt[" + getValue() + "]";
 	}
 #end
 #if ( ${className} == "QuantityDt" )

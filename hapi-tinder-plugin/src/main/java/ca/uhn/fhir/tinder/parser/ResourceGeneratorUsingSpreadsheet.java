@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,11 +17,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
 	private String myTemplate = null;
-	private String myVersion;
+	private File myTemplateFile = null;
 
 	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
-		myVersion = theVersion;
 	}
 
 	public List<String> getInputStreamNames() {
@@ -28,12 +28,21 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	}
 
 	@Override
-	protected void postProcess(BaseElement theTarget) {
+	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		super.postProcess(theTarget);
 		
 		if ("Bundle".equals(theTarget.getName())) {
 			addEverythingToSummary(theTarget);
 		}
+		
+		if (getVersion().equals("dstu2") && theTarget instanceof Resource) {
+			try {
+				new CompartmentParser(getVersion(), (Resource) theTarget).parse();
+			} catch (Exception e) {
+				throw new MojoFailureException(e.toString(), e);
+			}
+		}
+		
 	}
 
 	private void addEverythingToSummary(BaseElement theTarget) {
@@ -48,7 +57,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		myInputStreams = new ArrayList<InputStream>();
 
 		for (String next : theBaseResourceNames) {
-			String resName = "/res/" + myVersion + "/" + next.toLowerCase() + "-spreadsheet.xml";
+			String resName = "/res/" + getVersion() + "/" + next.toLowerCase() + "-spreadsheet.xml";
 			resName = resName.replace("/dev/", "/dstu2/");
 			
 			InputStream nextRes = getClass().getResourceAsStream(resName);
@@ -65,6 +74,10 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public void setTemplate(String theTemplate) {
 		myTemplate = theTemplate;
+	}
+
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
 	}
 
 	@Override
@@ -86,11 +99,16 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected String getTemplate() {
 		if (myTemplate != null) {
 			return myTemplate;
-		} else if ("dstu".equals(myVersion)) {
+		} else if ("dstu".equals(getVersion())) {
 			return "/vm/resource_dstu.vm";
 		} else {
 			return "/vm/resource.vm";
 		}
+	}
+
+	@Override
+	protected File getTemplateFile() {
+		return myTemplateFile;
 	}
 
 	@Override

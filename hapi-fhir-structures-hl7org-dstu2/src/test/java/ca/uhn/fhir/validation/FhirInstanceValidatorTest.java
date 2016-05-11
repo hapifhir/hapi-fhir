@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
@@ -25,19 +29,23 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.IValidationSupport.CodeValidationResult;
 
 public class FhirInstanceValidatorTest {
 
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorTest.class);
-  private DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
+  private static DefaultProfileValidationSupport ourDefaultValidationSupport = new DefaultProfileValidationSupport();
   private FhirInstanceValidator myInstanceVal;
   private IValidationSupport myMockSupport;
 
@@ -48,6 +56,12 @@ public class FhirInstanceValidatorTest {
   private void addValidConcept(String theSystem, String theCode) {
     myValidConcepts.add(theSystem + "___" + theCode);
   }
+  
+  @AfterClass
+  public static void afterClass() {
+    ourDefaultValidationSupport.flush();
+    ourDefaultValidationSupport = null;
+  }
 
   @SuppressWarnings("unchecked")
   @Before
@@ -56,7 +70,7 @@ public class FhirInstanceValidatorTest {
     myVal.setValidateAgainstStandardSchema(false);
     myVal.setValidateAgainstStandardSchematron(false);
 
-    myInstanceVal = new FhirInstanceValidator();
+    myInstanceVal = new FhirInstanceValidator(ourDefaultValidationSupport);
     myVal.registerValidatorModule(myInstanceVal);
 
     mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
@@ -70,7 +84,7 @@ public class FhirInstanceValidatorTest {
         ConceptSetComponent arg = (ConceptSetComponent)theInvocation.getArguments()[0];
         ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
         if (retVal == null) {
-          retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
+          retVal = ourDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
         }
         ourLog.info("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
         return retVal;
@@ -88,7 +102,7 @@ public class FhirInstanceValidatorTest {
         .thenAnswer(new Answer<IBaseResource>() {
           @Override
           public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-            IBaseResource retVal = myDefaultValidationSupport.fetchResource(
+            IBaseResource retVal = ourDefaultValidationSupport.fetchResource(
                 (FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
                 (String) theInvocation.getArguments()[2]);
             ourLog.info("fetchResource({}, {}) : {}",
@@ -107,7 +121,7 @@ public class FhirInstanceValidatorTest {
             if (myValidConcepts.contains(system + "___" + code)) {
               retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
             } else {
-              retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
+              retVal = ourDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
             }
             ourLog.info("validateCode({}, {}, {}) : {}",
                 new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
@@ -117,7 +131,7 @@ public class FhirInstanceValidatorTest {
     when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<ValueSet>() {
       @Override
       public ValueSet answer(InvocationOnMock theInvocation) throws Throwable {
-        ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
+        ValueSet retVal = ourDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
         ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
         return retVal;
       }
@@ -157,6 +171,13 @@ public class FhirInstanceValidatorTest {
     return retVal;
   }
 
+  @Rule
+  public TestRule watcher = new TestWatcher() {
+     protected void starting(Description description) {
+        ourLog.info("Starting test: " + description.getMethodName());
+     }
+  };
+  
   @Test
   public void testValidateRawJsonResource() {
     // @formatter:off
@@ -306,22 +327,24 @@ public class FhirInstanceValidatorTest {
         + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(
-        "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
+        "The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
         output.getMessages().get(0).getMessage());
   }
 
+
+  
   
   @Test
   public void testValidateResourceWithValuesetExpansion() {
     
     Patient patient = new Patient();
-    patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("foo").setCode("bar");
+    patient.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
     ValidationResult output = myVal.validateWithResult(patient);
     List<SingleValidationMessage> all = logResultsAndReturnAll(output);
     assertEquals(1, all.size());
     assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
-    assertEquals("None of the codes are in the expected value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)", all.get(0).getMessage());
+    assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
     assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
     patient = new Patient();
@@ -344,8 +367,7 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 1, errors.size());
-    assertEquals("Unable to validate code \"12345\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
+    assertEquals(errors.toString(), 0, errors.size());
 
   }
 
@@ -380,9 +402,7 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 1, errors.size());
-    assertEquals("Unable to validate code \"1234\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
-    assertEquals(ResultSeverityEnum.WARNING, errors.get(0).getSeverity());
+    assertEquals(errors.toString(), 0, errors.size());
     
     
   }

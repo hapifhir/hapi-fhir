@@ -4,22 +4,40 @@
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
+	</listener>	
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>
+			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+		</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			ca.uhn.fhirtest.config.DbServerConfig
+		</param-value>
+	</context-param>
+	
+	<!-- 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			/WEB-INF/hapi-fhir-server-config.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
 			/WEB-INF/hapi-fhir-tester-config.xml
+		</param-value>
+	</context-param>
+	-->
+	 
+	<!-- 
 			classpath:/hapi-fhir-server-database-config-dstu1.xml 
 			classpath:/hapi-fhir-server-database-config-dstu2.xml 
 			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
 			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
 			classpath:fhir-spring-subscription-config-dstu2.xml
-		</param-value>
-	</context-param>
-
+			classpath:fhir-spring-search-config-dstu2.xml
+	-->
+	
   <!-- Servlets -->
 
 	<servlet>
@@ -30,7 +48,6 @@
 			<param-value>
 				/WEB-INF/hapi-fhir-tester-application-context.xml
 				/WEB-INF/hapi-fhir-tester-config.xml
-				classpath:fhir-spring-subscription-config-dstu2.xml
 			</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
@@ -57,7 +74,7 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU1 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU 1 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
@@ -71,11 +88,25 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU2 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU 2 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>DSTU2</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletDstu3</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server (DSTU 3 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>DSTU3</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -96,6 +127,15 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
+		<servlet-name>fhirServletDstu3</servlet-name>
+		<url-pattern>/baseDstu2.1/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServletDstu3</servlet-name>
+		<url-pattern>/baseDstu3/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
 		<servlet-name>fhirServletDstu2</servlet-name>
 		<url-pattern>/baseDev/*</url-pattern>
 	</servlet-mapping>
@@ -110,7 +150,7 @@
 	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->
 	<filter>
 		<filter-name>CORS Filter</filter-name>
-		<filter-class>org.ebaysf.web.cors.CORSFilter</filter-class>
+		<filter-class>ca.uhn.fhirtest.CORSFilter_</filter-class>
 		<init-param>
 			<description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>
 			<param-name>cors.allowed.origins</param-name>

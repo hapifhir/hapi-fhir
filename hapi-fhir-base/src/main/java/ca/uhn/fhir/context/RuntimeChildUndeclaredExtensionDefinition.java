@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types, false);
-		def.sealAndInitialize(theContext, theClassToElementDefinitions);
+		BaseRuntimeElementDefinition<?> def = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myAttributeNameToDefinition.put(value, def);
 		/*
@@ -147,23 +146,25 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return false;
 	}
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
+	
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-//		for (theContext.get)
-		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
-				// if (next.getName().equals("CodeableConcept")) {
-				// System.out.println();
-				// }
 
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
-				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
+				boolean isSpecialization = ((IRuntimeDatatypeDefinition) next).isSpecialization();
+				if (isSpecialization) {
+					ourLog.trace("Not adding specialization: {}", next.getImplementingClass());
+				}
+				
+				if (!isSpecialization) {
 					
 					if (!next.isStandardType()) {
 						continue;
@@ -178,7 +179,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					 * type.
 					 */
 					if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
-						if (!qualifiedName.startsWith("org.hl7.fhir.instance.model")) {
+						if (!qualifiedName.startsWith("org.hl7.fhir")) {
 							continue;
 						}
 					}
@@ -197,12 +198,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
-
-//		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
-//			@SuppressWarnings("unchecked")
-//			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-//			myDatatypeToDefinition.put(type, next.getValue());
-//		}
 
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1

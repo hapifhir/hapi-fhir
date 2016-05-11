@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			}
 		}
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
@@ -119,7 +119,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
 		}
 
-		HttpDeleteClientInvocation retVal = createDeleteInvocation(idDt);
+		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), idDt);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -129,8 +129,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return retVal;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(IIdType theId) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theId);
+	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId) {
+		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theId);
 		return retVal;
 	}
 
@@ -144,13 +144,13 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return null;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(String theSearchUrl) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theSearchUrl);
+	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl) {
+		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theSearchUrl);
 		return retVal;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(String theResourceType, Map<String, List<String>> theParams) {
-		return new HttpDeleteClientInvocation(theResourceType, theParams);
+	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
+		return new HttpDeleteClientInvocation(theContext, theResourceType, theParams);
 	}
 
 }

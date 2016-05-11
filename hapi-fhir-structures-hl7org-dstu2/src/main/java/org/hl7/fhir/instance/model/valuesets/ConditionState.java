@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ConditionState {
 
         /**
-         * The condition is active
+         * The condition is active.
          */
         ACTIVE, 
         /**
-         * The condition inactive but not resolved
+         * The condition inactive but not resolved.
          */
         INACTIVE, 
         /**
-         * The condition is resolved
+         * The condition is resolved.
          */
         RESOLVED, 
         /**
@@ -74,9 +74,9 @@ public enum ConditionState {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The condition is active";
-            case INACTIVE: return "The condition inactive but not resolved";
-            case RESOLVED: return "The condition is resolved";
+            case ACTIVE: return "The condition is active.";
+            case INACTIVE: return "The condition inactive but not resolved.";
+            case RESOLVED: return "The condition is resolved.";
             default: return "?";
           }
         }

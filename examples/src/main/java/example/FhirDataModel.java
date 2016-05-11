@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -15,8 +16,11 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class FhirDataModel {
 
@@ -153,27 +157,58 @@ public class FhirDataModel {
 
    
    public static void main(String[] args) {
+      tmp();
+      
+      
       datatypes();
 
       // START SNIPPET: observation
+      // Create an Observation instance
       Observation observation = new Observation();
       
-      // Create a quantity datatype
-      QuantityDt q = new QuantityDt();
-      q.setValue(185);
-      q.setSystem("http://unitsofmeasure.org");
-      q.setCode("lbs");
+      // Give the observation a status
+      observation.setStatus(ObservationStatusEnum.FINAL);
       
-      // Put the datatype in the observation
-      observation.setValue(q);
+      // Give the observation a code (what kind of observation is this)
+      CodingDt coding = observation.getCode().addCoding();
+      coding.setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
+      
+      // Create a quantity datatype
+      QuantityDt value = new QuantityDt();
+      value.setValue(83.9).setSystem("http://unitsofmeasure.org").setCode("kg");
+      observation.setValue(value);
       
       // Set the reference range
-      observation.getReferenceRangeFirstRep().setLow(new SimpleQuantityDt(100));
-      observation.getReferenceRangeFirstRep().setHigh(new SimpleQuantityDt(200));
+      SimpleQuantityDt low = new SimpleQuantityDt();
+      low.setValue(45).setSystem("http://unitsofmeasure.org").setCode("kg");
+      observation.getReferenceRangeFirstRep().setLow(low);
+      SimpleQuantityDt high = new SimpleQuantityDt();
+      low.setValue(90).setSystem("http://unitsofmeasure.org").setCode("kg");
+      observation.getReferenceRangeFirstRep().setHigh(high);
       
       // END SNIPPET: observation
       
       
+   }
+
+   private static void tmp() {
+// Create a FHIR Context
+FhirContext ctx = FhirContext.forDstu2();
+
+// Create a client
+IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+
+// Read a patient with the given ID
+Patient patient = client
+   .read()
+   .resource(Patient.class)
+   .withId("952975")
+   .execute();
+
+// Print the patient's name
+String string = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+System.out.println(string);
+
    }
 
    public void namesHard() {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,12 +76,37 @@ public class ElementUtil {
 		return true;
 	}
 
+	/*
+	public static <T> void validateAllElementsAreOfTypeOrThrowClassCastExceptionForModelSetter(List<T> theList, Class<T> theType) {
+		if (theList == null) {
+			return;
+		}
+		for (T next : theList) {
+			if (next != null && theType.isAssignableFrom(next.getClass()) == false) {
+				StringBuilder b = new StringBuilder();
+				b.append("Failed to set invalid value, found element in list of type ");
+				b.append(next.getClass().getSimpleName());
+				b.append(" but expected ");
+				b.append(theType.getName());
+				throw new ClassCastException(b.toString());
+			}
+		}
+	}
+	*/
+	
 	public static boolean isEmpty(List<? extends IBase> theElements) {
 		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.size(); i++) {
-			IBase next = theElements.get(i);
+			IBase next;
+			try {
+				next = theElements.get(i);
+			} catch (ClassCastException e) {
+				List<?> elements = theElements;
+				String s = "Found instance of " + elements.get(i).getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
+				throw new ClassCastException(s);
+			}
 			if (next != null && !next.isEmpty()) {
 				return false;
 			}

@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -45,17 +46,16 @@ import ca.uhn.fhir.util.PortUtil;
 public class CreateConditionalTest {
 	private static CloseableHttpClient ourClient;
 	
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateConditionalTest.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static IdDt ourLastId;
 	private static IdDt ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateConditionalTest.class);
+	private static int ourPort;
+	private static Server ourServer;
 	
-	
-	
+
 	@Before
 	public void before() {
 		ourLastId = null;
@@ -64,6 +64,8 @@ public class CreateConditionalTest {
 		ourLastRequestWasSearch = false;
 	}
 
+
+	
 	@Test
 	public void testCreateWithConditionalUrl() throws Exception {
 
@@ -97,7 +99,7 @@ public class CreateConditionalTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2?_format=true&_pretty=true");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient?_format=true&_pretty=true");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -111,8 +113,8 @@ public class CreateConditionalTest {
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
-		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
+		assertEquals(null, ourLastId.toUnqualified().getValue());
+		assertEquals(null, ourLastIdParam);
 		assertNull(ourLastConditionalUrl);
 
 	}
@@ -141,8 +143,9 @@ public class CreateConditionalTest {
 
 	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
@@ -170,23 +173,23 @@ public class CreateConditionalTest {
 	
 	public static class PatientProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Search
-		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
-			ourLastRequestWasSearch = true;
-			return new ArrayList<IResource>();
-		}
-		
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;
 			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+		
+		@Search
+		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
+			ourLastRequestWasSearch = true;
+			return new ArrayList<IResource>();
 		}
 
 	}

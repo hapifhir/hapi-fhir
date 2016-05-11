@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ObjectRole {
 
         /**
-         * This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal
+         * This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal.
          */
         _1, 
         /**
@@ -55,7 +55,7 @@ public enum ObjectRole {
          */
         _5, 
         /**
-         * A human participant not otherwise identified by some other category
+         * A human participant not otherwise identified by some other category.
          */
         _6, 
         /**
@@ -99,7 +99,7 @@ public enum ObjectRole {
          */
         _16, 
         /**
-         * A source or destination for data transfer, that acts as an archive, database, or similar role.
+         * A source or destination for data transfer that acts as an archive, database, or similar role.
          */
         _17, 
         /**
@@ -111,11 +111,11 @@ public enum ObjectRole {
          */
         _19, 
         /**
-         * An order, task, work item, procedure step, or other description of work to be performed.  E.g., a particular instance of an MPPS.
+         * An order, task, work item, procedure step, or other description of work to be performed; e.g. a particular instance of an MPPS.
          */
         _20, 
         /**
-         * A list of jobs or a system that provides lists of jobs.  E.g., an MWL SCP.
+         * A list of jobs or a system that provides lists of jobs; e.g. an MWL SCP.
          */
         _21, 
         /**
@@ -221,12 +221,12 @@ public enum ObjectRole {
         }
         public String getDefinition() {
           switch (this) {
-            case _1: return "This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal";
+            case _1: return "This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal.";
             case _2: return "This is a location identified as related to the event.  This is usually the location where the event took place.  Note that for shipping, the usual events are arrival at a location or departure from a location.";
             case _3: return "This object is any kind of persistent document created as a result of the event.  This could be a paper report, film, electronic report, DICOM Study, etc.  Issues related to medical records life cycle management are conveyed elsewhere.";
             case _4: return "A logical object related to a health record event.  This is any healthcare  specific resource (object) not restricted to FHIR defined Resources.";
             case _5: return "This is any configurable file used to control creation of documents.  Examples include the objects maintained by the HL7 Master File transactions, Value Sets, etc.";
-            case _6: return "A human participant not otherwise identified by some other category";
+            case _6: return "A human participant not otherwise identified by some other category.";
             case _7: return "(deprecated)";
             case _8: return "Typically a licensed person who is providing or performing care related to the event, generally a physician.   The key distinction between doctor and practitioner is with regards to their role, not the licensing.  The doctor is the human who actually performed the work.  The practitioner is the human or organization that is responsible for the work.";
             case _9: return "A person or system that is being notified as part of the event.  This is relevant in situations where automated systems provide notifications to other parties when an event took place.";
@@ -237,11 +237,11 @@ public enum ObjectRole {
             case _14: return "(deprecated)  Relevant to certain RBAC security methodologies.";
             case _15: return "Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note, the distinction between practitioners and the doctor that actually provided the care to the patient.";
             case _16: return "The source or destination for data transfer, when it does not match some other role.";
-            case _17: return "A source or destination for data transfer, that acts as an archive, database, or similar role.";
+            case _17: return "A source or destination for data transfer that acts as an archive, database, or similar role.";
             case _18: return "An object that holds schedule information.  This could be an appointment book, availability information, etc.";
             case _19: return "An organization or person that is the recipient of services.  This could be an organization that is buying services for a patient, or a person that is buying services for an animal.";
-            case _20: return "An order, task, work item, procedure step, or other description of work to be performed.  E.g., a particular instance of an MPPS.";
-            case _21: return "A list of jobs or a system that provides lists of jobs.  E.g., an MWL SCP.";
+            case _20: return "An order, task, work item, procedure step, or other description of work to be performed; e.g. a particular instance of an MPPS.";
+            case _21: return "A list of jobs or a system that provides lists of jobs; e.g. an MWL SCP.";
             case _22: return "(Deprecated)";
             case _23: return "An object that specifies or controls the routing or delivery of items.  For example, a distribution list is the routing criteria for mail.  The items delivered may be documents, jobs, or other objects.";
             case _24: return "The contents of a query.  This is used to capture the contents of any kind of query.  For security surveillance purposes knowing the queries being made is very important.";
@@ -253,7 +253,7 @@ public enum ObjectRole {
             case _1: return "Patient";
             case _2: return "Location";
             case _3: return "Report";
-            case _4: return "DomainResource";
+            case _4: return "Domain Resource";
             case _5: return "Master file";
             case _6: return "User";
             case _7: return "List";

@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-@SuppressWarnings("unused")
 public abstract class ServerExceptionsExample implements IResourceProvider {
 
 private boolean databaseIsDown;

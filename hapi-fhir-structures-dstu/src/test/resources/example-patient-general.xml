@@ -1,5 +1,4 @@
 <Patient xmlns="http://hl7.org/fhir">
-<!--  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">  -->
   	<extension url="urn:patientext:att">
 		<valueAttachment>
 			<contentType value="aaaa"/>
@@ -74,7 +73,6 @@
 
   <telecom>
     <use value="home"/>
-    <!--   home communication details aren't known   -->
   </telecom>
   <telecom>
     <system value="phone"/>
@@ -82,7 +80,6 @@
     <use value="work"/>
   </telecom>
 
-  <!--   use FHIR code system for male / female   -->
   <gender>
     <coding>
       <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
@@ -116,7 +113,6 @@
 
     <name>
       <family value="du">
-        <!--   the &quot;du&quot; part is a family name prefix (VV in iso 21090)   -->
         <extension url="http://hl7.org/fhir/Profile/iso-21090#qualifier">
           <valueCode value="VV"/>
         </extension>

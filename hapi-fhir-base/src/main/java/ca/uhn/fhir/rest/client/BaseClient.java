@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +25,8 @@ package ca.uhn.fhir.rest.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,44 +38,53 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.IClientResponseHandlerHandlesBinary;
+import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public abstract class BaseClient implements IRestfulClient {
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
-	private final HttpClient myClient;
+	private final IHttpClient myClient;
 	private boolean myDontValidateConformance;
 	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
 	private final RestfulClientFactory myFactory;
 	private List<IClientInterceptor> myInterceptors = new ArrayList<IClientInterceptor>();
 	private boolean myKeepResponses = false;
-	private HttpResponse myLastResponse;
+	private IHttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
 	private SummaryEnum mySummary;
 	private final String myUrlBase;
-	
-	BaseClient(HttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
+
+	BaseClient(IHttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
 		myClient = theClient;
 		myUrlBase = theUrlBase;
@@ -98,13 +107,20 @@ public abstract class BaseClient implements IRestfulClient {
 		return retVal;
 	}
 
+	@Override
+	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
+		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType);
+		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null);
+	}
+
 	void forceConformanceCheck() {
 		myFactory.validateServerBase(myUrlBase, myClient, this);
 	}
 
 	/**
-	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the
-	 * FHIR specification)
+	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not
+	 * explicitly request an encoding. (This is standard behaviour according to the FHIR specification)
 	 */
 	public EncodingEnum getEncoding() {
 		return myEncoding;
@@ -114,7 +130,7 @@ public abstract class BaseClient implements IRestfulClient {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HttpClient getHttpClient() {
+	public IHttpClient getHttpClient() {
 		return myClient;
 	}
 
@@ -125,7 +141,7 @@ public abstract class BaseClient implements IRestfulClient {
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
-	public HttpResponse getLastResponse() {
+	public IHttpResponse getLastResponse() {
 		return myLastResponse;
 	}
 
@@ -137,8 +153,9 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
+	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
+	 * servers which might implement it).
 	 */
 	public Boolean getPrettyPrint() {
 		return myPrettyPrint;
@@ -168,8 +185,7 @@ public abstract class BaseClient implements IRestfulClient {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null);
 	}
 
-	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -177,8 +193,8 @@ public abstract class BaseClient implements IRestfulClient {
 
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
-		HttpRequestBase httpRequest;
-		HttpResponse response;
+		IHttpRequest httpRequest;
+		IHttpResponse response = null;
 		try {
 			Map<String, List<String>> params = createExtraParams();
 
@@ -187,7 +203,7 @@ public abstract class BaseClient implements IRestfulClient {
 			} else if (theEncoding == EncodingEnum.JSON) {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
 			}
-			
+
 			if (theSummaryMode != null) {
 				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
 			} else if (mySummary != null) {
@@ -197,8 +213,8 @@ public abstract class BaseClient implements IRestfulClient {
 			if (thePrettyPrint == Boolean.TRUE) {
 				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
 			}
-			
-			if (theSubsetElements != null && theSubsetElements.isEmpty()== false) {
+
+			if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
 				params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
 			}
 
@@ -211,12 +227,9 @@ public abstract class BaseClient implements IRestfulClient {
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);
-				if (httpRequest instanceof HttpEntityEnclosingRequest) {
-					HttpEntity entity = ((HttpEntityEnclosingRequest) httpRequest).getEntity();
-					if (entity.isRepeatable()) {
-						String content = IOUtils.toString(entity.getContent());
-						ourLog.info("Client request body: {}", content);
-					}
+				String body = httpRequest.getRequestBodyFromStream();
+				if (body != null) {
+					ourLog.info("Client request body: {}", body);
 				}
 			}
 
@@ -224,45 +237,26 @@ public abstract class BaseClient implements IRestfulClient {
 				nextInterceptor.interceptRequest(httpRequest);
 			}
 
-			response = myClient.execute(httpRequest);
+			response = httpRequest.execute();
 
 			for (IClientInterceptor nextInterceptor : myInterceptors) {
 				nextInterceptor.interceptResponse(response);
 			}
 
-		} catch (DataFormatException e) {
-			throw new FhirClientConnectionException(e);
-		} catch (IOException e) {
-			throw new FhirClientConnectionException(e);
-		}
-
-		try {
 			String mimeType;
-			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatusLine().getStatusCode()) {
+			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
 				mimeType = null;
 			} else {
-				ContentType ct = ContentType.get(response.getEntity());
-				mimeType = ct != null ? ct.getMimeType() : null;
+				mimeType = response.getMimeType();
 			}
 
-			Map<String, List<String>> headers = new HashMap<String, List<String>>();
-			if (response.getAllHeaders() != null) {
-				for (Header next : response.getAllHeaders()) {
-					String name = next.getName().toLowerCase();
-					List<String> list = headers.get(name);
-					if (list == null) {
-						list = new ArrayList<String>();
-						headers.put(name, list);
-					}
-					list.add(next.getValue());
-				}
-			}
+			Map<String, List<String>> headers = response.getAllHeaders();
 
-			if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() > 299) {
+			if (response.getStatus() < 200 || response.getStatus() > 299) {
 				String body = null;
 				Reader reader = null;
 				try {
-					reader = createReaderFromResponse(response);
+					reader = response.createReader();
 					body = IOUtils.toString(reader);
 				} catch (Exception e) {
 					ourLog.debug("Failed to read input stream", e);
@@ -270,8 +264,8 @@ public abstract class BaseClient implements IRestfulClient {
 					IOUtils.closeQuietly(reader);
 				}
 
-				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
-				BaseOperationOutcome oo = null;
+				String message = "HTTP " + response.getStatus() + " " + response.getStatusInfo();
+				IBaseOperationOutcome oo = null;
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
@@ -280,9 +274,10 @@ public abstract class BaseClient implements IRestfulClient {
 						IParser p = enc.newParser(theContext);
 						try {
 							// TODO: handle if something other than OO comes back
-							oo = (BaseOperationOutcome) p.parseResource(body);
-							if (oo.getIssueFirstRep().getDetailsElement().isEmpty() == false) {
-								message = message + ": " + oo.getIssueFirstRep().getDetailsElement().getValue();
+							oo = (IBaseOperationOutcome) p.parseResource(body);
+							String details = OperationOutcomeUtil.getFirstIssueDetails(getFhirContext(), oo);
+							if (isNotBlank(details)) {
+								message = message + ": " + details;
 							}
 						} catch (Exception e) {
 							ourLog.debug("Failed to process OperationOutcome response");
@@ -292,7 +287,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 				keepResponseAndLogIt(theLogRequestAndResponse, response, body);
 
-				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
+				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatus(), message);
 				exception.setOperationOutcome(oo);
 
 				if (body != null) {
@@ -304,7 +299,7 @@ public abstract class BaseClient implements IRestfulClient {
 			if (binding instanceof IClientResponseHandlerHandlesBinary) {
 				IClientResponseHandlerHandlesBinary<T> handlesBinary = (IClientResponseHandlerHandlesBinary<T>) binding;
 				if (handlesBinary.isBinary()) {
-					InputStream reader = response.getEntity().getContent();
+					InputStream reader = response.readEntity();
 					try {
 
 						if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
@@ -313,7 +308,7 @@ public abstract class BaseClient implements IRestfulClient {
 								myLastResponse = response;
 								myLastResponseBody = null;
 							}
-							String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
+							String message = "HTTP " + response.getStatus() + " " + response.getStatusInfo();
 							if (theLogRequestAndResponse) {
 								ourLog.info("Client response: {} - {} bytes", message, responseBytes.length);
 							} else {
@@ -322,14 +317,14 @@ public abstract class BaseClient implements IRestfulClient {
 							reader = new ByteArrayInputStream(responseBytes);
 						}
 
-						return handlesBinary.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+						return handlesBinary.invokeClient(mimeType, reader, response.getStatus(), headers);
 					} finally {
 						IOUtils.closeQuietly(reader);
 					}
 				}
 			}
 
-			Reader reader = createReaderFromResponse(response);
+			Reader reader = response.createReader();
 
 			if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 				String responseString = IOUtils.toString(reader);
@@ -338,22 +333,24 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			try {
-				return binding.invokeClient(mimeType, reader, response.getStatusLine().getStatusCode(), headers);
+				return binding.invokeClient(mimeType, reader, response.getStatus(), headers);
 			} finally {
 				IOUtils.closeQuietly(reader);
 			}
 
+		} catch (DataFormatException e) {
+			throw new FhirClientConnectionException(e);
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
 			throw new FhirClientConnectionException(e);
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new FhirClientConnectionException(e);
 		} finally {
-			if (response instanceof CloseableHttpResponse) {
-				try {
-					((CloseableHttpResponse) response).close();
-				} catch (IOException e) {
-					ourLog.debug("Failed to close response", e);
-				}
+			if (response != null) {
+				response.close();
 			}
 		}
 	}
@@ -366,20 +363,21 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
+	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
+	 * servers which might implement it).
 	 */
 	public boolean isPrettyPrint() {
 		return Boolean.TRUE.equals(myPrettyPrint);
 	}
 
-	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, HttpResponse response, String responseString) {
+	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, IHttpResponse response, String responseString) {
 		if (myKeepResponses) {
 			myLastResponse = response;
 			myLastResponseBody = responseString;
 		}
 		if (theLogRequestAndResponse) {
-			String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
+			String message = "HTTP " + response.getStatus() + " " + response.getStatusInfo();
 			if (StringUtils.isNotBlank(responseString)) {
 				ourLog.info("Client response: {}\n{}", message, responseString);
 			} else {
@@ -397,7 +395,8 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the loading of conformance statements, use
+	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the
+	 * loading of conformance statements, use
 	 * {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
 	 */
 	public void setDontValidateConformance(boolean theDontValidateConformance) {
@@ -405,8 +404,9 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is perfectly acceptable behaviour according
-	 * to the FHIR specification. In this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not
+	 * explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR specification. In
+	 * this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
 	 */
 	@Override
 	public void setEncoding(EncodingEnum theEncoding) {
@@ -424,7 +424,7 @@ public abstract class BaseClient implements IRestfulClient {
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
-	public void setLastResponse(HttpResponse theLastResponse) {
+	public void setLastResponse(IHttpResponse theLastResponse) {
 		myLastResponse = theLastResponse;
 	}
 
@@ -436,8 +436,9 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
+	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
+	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
+	 * servers which might implement it).
 	 */
 	@Override
 	public void setPrettyPrint(Boolean thePrettyPrint) {
@@ -455,26 +456,94 @@ public abstract class BaseClient implements IRestfulClient {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.remove(theInterceptor);
 	}
+	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
+		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
+		if (thePreferResponseType != null) {
+			preferResponseTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferResponseTypes.add(thePreferResponseType);
+		}
+		return preferResponseTypes;
+	}
 
-	public static Reader createReaderFromResponse(HttpResponse theResponse) throws IllegalStateException, IOException {
-		HttpEntity entity = theResponse.getEntity();
-		if (entity == null) {
-			return new StringReader("");
+	protected final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
+
+		private boolean myAllowHtmlResponse;
+		private IIdType myId;
+		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
+		private Class<T> myReturnType;
+
+		public ResourceResponseHandler() {
+			this(null);
 		}
-		Charset charset = null;
-		if (entity.getContentType() != null && entity.getContentType().getElements() != null && entity.getContentType().getElements().length > 0) {
-			ContentType ct = ContentType.get(entity);
-			charset = ct.getCharset();
+
+		public ResourceResponseHandler(Class<T> theReturnType) {
+			this(theReturnType, null, null);
 		}
-		if (charset == null) {
-			if (Constants.STATUS_HTTP_204_NO_CONTENT != theResponse.getStatusLine().getStatusCode()) {
-				ourLog.warn("Response did not specify a charset.");
+
+		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId) {
+			this(theReturnType, thePreferResponseType, theId, false);
+		}
+
+		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId, boolean theAllowHtmlResponse) {
+			this(theReturnType, toTypeList(thePreferResponseType), theId, theAllowHtmlResponse);
+		}
+
+		public ResourceResponseHandler(Class<T> theClass, List<Class<? extends IBaseResource>> thePreferResponseTypes) {
+			this(theClass, thePreferResponseTypes, null, false);
+		}
+
+		
+		public ResourceResponseHandler(Class<T> theReturnType, List<Class<? extends IBaseResource>> thePreferResponseTypes, IIdType theId, boolean theAllowHtmlResponse) {
+			myReturnType = theReturnType;
+			myId = theId;
+			myPreferResponseTypes = thePreferResponseTypes;
+			myAllowHtmlResponse = theAllowHtmlResponse;
+		}
+
+		@Override
+		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myReturnType != null) {
+					return readHtmlResponse(theResponseReader);
+				}
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
-			charset = Charset.forName("UTF-8");
+			IParser parser = respType.newParser(getFhirContext());
+			if (myPreferResponseTypes != null) {
+				parser.setPreferTypes(myPreferResponseTypes);
+			}
+			T retVal = parser.parseResource(myReturnType, theResponseReader);
+
+			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
+
+			return retVal;
 		}
 
-		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
-		return reader;
+		@SuppressWarnings("unchecked")
+		private T readHtmlResponse(Reader theResponseReader) {
+			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myReturnType);
+			IBaseResource instance = resDef.newInstance();
+			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
+			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
+			IBase textInstance = textElement.newInstance();
+			textChild.getMutator().addValue(instance, textInstance);
+
+			BaseRuntimeChildDefinition divChild = textElement.getChildByName("div");
+			BaseRuntimeElementDefinition<?> divElement = divChild.getChildByName("div");
+			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();
+			try {
+				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
+			} catch (Exception e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server: " + e.getMessage(), e);
+			}
+			divChild.getMutator().addValue(textInstance, divInstance);
+			return (T) instance;
+		}
+
+		public void setPreferResponseTypes(List<Class<? extends IBaseResource>> thePreferResponseTypes) {
+			myPreferResponseTypes = thePreferResponseTypes;
+		}
 	}
 
 }

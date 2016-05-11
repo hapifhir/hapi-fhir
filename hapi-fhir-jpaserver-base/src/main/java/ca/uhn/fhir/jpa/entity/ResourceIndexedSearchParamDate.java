@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,13 @@ package ca.uhn.fhir.jpa.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -32,29 +38,45 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
 
 //@formatter:off
+@Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {
-	@org.hibernate.annotations.Index(name="IDX_SP_DATE", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE_LOW","SP_VALUE_HIGH"})
+@Table(name = "HFJ_SPIDX_DATE", indexes= {
+	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
+	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID") 
 })
 //@formatter:on
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_DATE", sequenceName = "SEQ_SPIDX_DATE")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
+	@Column(name = "SP_ID")
+	private Long myId;
+
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Field
 	public Date myValueHigh;
 
 	@Column(name = "SP_VALUE_LOW", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Field
 	public Date myValueLow;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamDate() {
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
 		setParamName(theName);
 		setValueLow(theLow);
@@ -79,6 +101,11 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append(getValueHigh(), obj.getValueHigh());
 		b.append(getValueLow(), obj.getValueLow());
 		return b.isEquals();
+	}
+
+	@Override
+	protected Long getId() {
+		return myId;
 	}
 
 	public Date getValueHigh() {

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ParticipationFunction {
@@ -123,7 +123,7 @@ public enum V3ParticipationFunction {
          */
         PROVMGT, 
         /**
-         * Definition: Managing utilization of services by ensuring that providers adhere to, e.g., payeraTMs clinical protocols for medical appropriateness and standards of medical necessity.  May include management of authorizations for services and referrals.
+         * Definition: Managing utilization of services by ensuring that providers adhere to, e.g. payeraTMs clinical protocols for medical appropriateness and standards of medical necessity.  May include management of authorizations for services and referrals.
          */
         UMGT, 
         /**
@@ -143,7 +143,7 @@ public enum V3ParticipationFunction {
          */
         _UNDERWRITERPARTICIPATIONFUNCTION, 
         /**
-         * Definition: Contracting for the provision and administration of health services to payors while retaining the risk for coverage.  Contracting may be for all provision and administration; or for provision of certain types of services; for provision of services by region; and by types of administration, e.g., claims adjudication, enrollment, provider management, and utilization management.  Typically done by underwriters for sponsors who need coverage provided to covered parties in multiple regions.  The underwriter may act as the payor in some, but not all of the regions in which coverage is provided.
+         * Definition: Contracting for the provision and administration of health services to payors while retaining the risk for coverage.  Contracting may be for all provision and administration; or for provision of certain types of services; for provision of services by region; and by types of administration, e.g. claims adjudication, enrollment, provider management, and utilization management.  Typically done by underwriters for sponsors who need coverage provided to covered parties in multiple regions.  The underwriter may act as the payor in some, but not all of the regions in which coverage is provided.
          */
         PAYORCNTR, 
         /**
@@ -155,7 +155,7 @@ public enum V3ParticipationFunction {
          */
         RETROCES, 
         /**
-         * Definition: Delegating risk for a policy or program to one or more subcontracting underwriters, e.g., a major health insurer may delegate risk for provision of coverage under a national health plan to other underwriters by region .
+         * Definition: Delegating risk for a policy or program to one or more subcontracting underwriters, e.g. a major health insurer may delegate risk for provision of coverage under a national health plan to other underwriters by region .
          */
         SUBCTRT, 
         /**
@@ -196,7 +196,7 @@ public enum V3ParticipationFunction {
          */
         DISPHYS, 
         /**
-         * In a typical surgery setting the assistant facing the primary surgeon.  The first assistant performs parts of the operation and assists in others (e.g., incision, approach, electrocoutering, ligatures, sutures).
+         * In a typical surgery setting the assistant facing the primary surgeon.  The first assistant performs parts of the operation and assists in others (e.g. incision, approach, electrocoutering, ligatures, sutures).
          */
         FASST, 
         /**
@@ -204,7 +204,7 @@ public enum V3ParticipationFunction {
          */
         MDWF, 
         /**
-         * In a typical surgery setting the non-sterile nurse handles material supply from the stock, forwards specimen to pathology, and helps with other non-sterile tasks (e.g., phone calls, etc.).
+         * In a typical surgery setting the non-sterile nurse handles material supply from the stock, forwards specimen to pathology, and helps with other non-sterile tasks (e.g. phone calls, etc.).
          */
         NASST, 
         /**
@@ -219,7 +219,7 @@ public enum V3ParticipationFunction {
          * A verifier who is accountable for reviewing and asserting that the verification of an Act complies with jurisdictional or organizational policy.
 
                         
-                           UsageConstraint: UsageConstraint:  Specifies the exact function that an actor is authorized to have as a verifier of an Act.  Connotes that a specialized verifier asserts compliance for veracity of the review per jurisdictional or organizational policy.  E.g., The Provider who takes responsibility for authenticity of a record submitted to a payer.
+                           UsageConstraint: UsageConstraint:  Specifies the exact function that an actor is authorized to have as a verifier of an Act.  Connotes that a specialized verifier asserts compliance for veracity of the review per jurisdictional or organizational policy; e.g. The Provider who takes responsibility for authenticity of a record submitted to a payer.
 
                         REVIEW ParticipationFunction should be used with VFR (verifier)
          */
@@ -237,7 +237,7 @@ public enum V3ParticipationFunction {
          */
         SNRS, 
         /**
-         * In a typical surgery setting there is rarely a third assistant (e.g., in some Hip operations the third assistant postures the affected leg).
+         * In a typical surgery setting there is rarely a third assistant (e.g. in some Hip operations the third assistant postures the affected leg).
          */
         TASST, 
         /**
@@ -428,15 +428,15 @@ public enum V3ParticipationFunction {
             case FFSMGT: return "Definition: Managing all operations required to administer a fee for service or indemnity health plan including enrolling covered parties and providing customer service, provider contracting, claims payment, care management and utilization review.";
             case MCMGT: return "Definition: Managing all operations required to administer a managed care plan including enrolling covered parties and providing customer service,, provider contracting, claims payment, care management and utilization review.";
             case PROVMGT: return "Definition: Managing provider contracting, provider services, credentialing, profiling, performance measures, and ensuring network adequacy.";
-            case UMGT: return "Definition: Managing utilization of services by ensuring that providers adhere to, e.g., payeraTMs clinical protocols for medical appropriateness and standards of medical necessity.  May include management of authorizations for services and referrals.";
+            case UMGT: return "Definition: Managing utilization of services by ensuring that providers adhere to, e.g. payeraTMs clinical protocols for medical appropriateness and standards of medical necessity.  May include management of authorizations for services and referrals.";
             case _SPONSORPARTICIPATIONFUNCTION: return "Definition: Set of codes indicating the manner in which sponsors participate in a policy or program. NOTE: use only when the Sponsor is not further specified with a SponsorRoleType as being either a fully insured sponsor or a self insured sponsor.";
             case FULINRD: return "Definition: Responsibility taken by a sponsor to contract with one or more underwriters for the assumption of full responsibility for the risk and administration of a policy or program.";
             case SELFINRD: return "Definition: Responsibility taken by a sponsor to organize the underwriting of risk and administration of a policy or program.";
             case _UNDERWRITERPARTICIPATIONFUNCTION: return "Definition: Set of codes indicating the manner in which underwriters participate in a policy or program.";
-            case PAYORCNTR: return "Definition: Contracting for the provision and administration of health services to payors while retaining the risk for coverage.  Contracting may be for all provision and administration; or for provision of certain types of services; for provision of services by region; and by types of administration, e.g., claims adjudication, enrollment, provider management, and utilization management.  Typically done by underwriters for sponsors who need coverage provided to covered parties in multiple regions.  The underwriter may act as the payor in some, but not all of the regions in which coverage is provided.";
+            case PAYORCNTR: return "Definition: Contracting for the provision and administration of health services to payors while retaining the risk for coverage.  Contracting may be for all provision and administration; or for provision of certain types of services; for provision of services by region; and by types of administration, e.g. claims adjudication, enrollment, provider management, and utilization management.  Typically done by underwriters for sponsors who need coverage provided to covered parties in multiple regions.  The underwriter may act as the payor in some, but not all of the regions in which coverage is provided.";
             case REINS: return "Definition: Underwriting reinsurance for another underwriter for the policy or program.";
             case RETROCES: return "Definition: Underwriting reinsurance for another reinsurer.";
-            case SUBCTRT: return "Definition: Delegating risk for a policy or program to one or more subcontracting underwriters, e.g., a major health insurer may delegate risk for provision of coverage under a national health plan to other underwriters by region .";
+            case SUBCTRT: return "Definition: Delegating risk for a policy or program to one or more subcontracting underwriters, e.g. a major health insurer may delegate risk for provision of coverage under a national health plan to other underwriters by region .";
             case UNDERWRTNG: return "Definition: Provision of underwriting analysis for another underwriter without assumption of risk.";
             case ADMPHYS: return "A physician who admitted a patient to a hospital or other care unit that is the context of this service.";
             case ANEST: return "In a typical anesthesia setting an anesthesiologist or anesthesia resident in charge of the anesthesia and life support, but only a witness to the surgical procedure itself.  To clarify responsibilities anesthesia should always be represented as a separate service related to the surgery.";
@@ -445,16 +445,16 @@ public enum V3ParticipationFunction {
             case ATTPHYS: return "A physician who is primarily responsible for a patient during the hospitalization, which is the context of the service.";
             case COMPOSER: return "A device used by an author to record new information, which may also be used by the author to select existing information for aggregation with newly recorded information for the purpose of generating a new artifact.\n                           UsageConstraint: COMPOSER ParticipationFunction should be used with DEV (device) ParticipationType.\r\n\n                        \n                           Usage Note: This code will enable implementers to more specifically represent the manner in which a Device participated in and facilitated the generation of a CDA Clinical Document or a CDA Entry by the responsible Author, which is comprised of the Author's newly entered content, and may include the pre-existing content selected by the Author, for the purpose of establishing the provenance and accountability for these acts.";
             case DISPHYS: return "A physician who discharged a patient from a hospital or other care unit that is the context of this service.";
-            case FASST: return "In a typical surgery setting the assistant facing the primary surgeon.  The first assistant performs parts of the operation and assists in others (e.g., incision, approach, electrocoutering, ligatures, sutures).";
+            case FASST: return "In a typical surgery setting the assistant facing the primary surgeon.  The first assistant performs parts of the operation and assists in others (e.g. incision, approach, electrocoutering, ligatures, sutures).";
             case MDWF: return "A person (usually female) helping a woman deliver a baby. Responsibilities vary locally, ranging from a mere optional assistant to a full required participant, responsible for (normal) births and pre- and post-natal care for both mother and baby.";
-            case NASST: return "In a typical surgery setting the non-sterile nurse handles material supply from the stock, forwards specimen to pathology, and helps with other non-sterile tasks (e.g., phone calls, etc.).";
+            case NASST: return "In a typical surgery setting the non-sterile nurse handles material supply from the stock, forwards specimen to pathology, and helps with other non-sterile tasks (e.g. phone calls, etc.).";
             case PCP: return "The healthcare provider that holds primary responsibility for the overall care of a patient.";
             case PRISURG: return "In a typical surgery setting the primary performing surgeon.";
-            case REVIEWER: return "A verifier who is accountable for reviewing and asserting that the verification of an Act complies with jurisdictional or organizational policy.\r\n\n                        \n                           UsageConstraint: UsageConstraint:  Specifies the exact function that an actor is authorized to have as a verifier of an Act.  Connotes that a specialized verifier asserts compliance for veracity of the review per jurisdictional or organizational policy.  E.g., The Provider who takes responsibility for authenticity of a record submitted to a payer.\r\n\n                        REVIEW ParticipationFunction should be used with VFR (verifier)";
+            case REVIEWER: return "A verifier who is accountable for reviewing and asserting that the verification of an Act complies with jurisdictional or organizational policy.\r\n\n                        \n                           UsageConstraint: UsageConstraint:  Specifies the exact function that an actor is authorized to have as a verifier of an Act.  Connotes that a specialized verifier asserts compliance for veracity of the review per jurisdictional or organizational policy; e.g. The Provider who takes responsibility for authenticity of a record submitted to a payer.\r\n\n                        REVIEW ParticipationFunction should be used with VFR (verifier)";
             case RNDPHYS: return "A physician who made rounds on a patient in a hospital or other care center.";
             case SASST: return "In a typical surgery setting the assistant who primarily holds the hooks.";
             case SNRS: return "In a typical surgery setting the nurse in charge of the instrumentation.";
-            case TASST: return "In a typical surgery setting there is rarely a third assistant (e.g., in some Hip operations the third assistant postures the affected leg).";
+            case TASST: return "In a typical surgery setting there is rarely a third assistant (e.g. in some Hip operations the third assistant postures the affected leg).";
             default: return "?";
           }
         }

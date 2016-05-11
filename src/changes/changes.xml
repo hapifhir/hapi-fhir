@@ -6,17 +6,804 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.3" date="TBD">
+		<release version="1.6" date="TBD">
+			<action type="fix" issue="345">
+				ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations
+				that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!
+			</action>
+			<action type="fix" issue="342">
+				REST server now throws an HTTP 400 instead of an HTTP 500 if an operation which takes
+				a FHIR resource in the request body (e.g. create, update) contains invalid content that
+				the parser is unable to parse. Thanks to Jim Steel for the suggestion!				
+			</action>
 			<action type="add">
-            Bump the version of a few dependencies to the
-            latest versions (dependent HAPI modules listed in brackets):
-            <![CDATA[
-               <ul>
-                  <li>Springframework (JPA, Web Tester): 4.1.5 -> 4.2.1</li>
-                  <li>Hibernate (JPA, Web Tester): 4.2.17 -> 5.0.1</li>
-               </ul>
-            ]]>
-         </action>
+				Deprecate fluent client search operations without an explicit declaration of the
+				bundle type being used. This also means that in a client 
+				<![CDATA[<code>.search()</code>]]>
+				operation, the
+				<![CDATA[<code>.returnBundle(Bundle.class)</code>]]>
+				needs to be the last statement before
+				<![CDATA[<code>.execute()</code>]]>
+			</action>
+			<action type="add" issue="346">
+				Server now respects the parameter <![CDATA[<code>_format=application/xml+fhir"</code>]]>
+				which is technically invalid since the + should be escaped, but is likely to be used. Also,
+				a parameter of <![CDATA[<code>_format=html</code>]]> can now be used, which 
+				forces SyntaxHighlightingInterceptor to use HTML even
+				if the headers wouldn't otherwise trigger it.
+				Thanks to Jim Steel for reporting!
+			</action>
+			<action type="fix">
+				Improve performance when parsing large bundles by fixing a loop over all of the
+				entries inthe bundle to stitch together cross-references, which was happening once
+				per entry instead of once overall. Thanks to Erick on the HAPI FHIR Google Group for
+				noticing that this was an issue!
+			</action>
+			<action type="remove">
+				JSON parser no longer allows the resource ID to be specified in an element called "_id"
+				(the correct one is "id"). Previously _id was allowed because some early FHIR examples
+				used that form, but this was never actually valid so it is now being removed.
+			</action>
+			<action type="add">
+				JPA server now allows "forced IDs" (ids containing non-numeric, client assigned IDs)
+				to use the same logical ID part on different resource types. E.g. A server may now have
+				both Patient/foo and Obervation/foo on the same server.<![CDATA[<br/><br/>]]>
+				Note that existing databases will need to modify index "IDX_FORCEDID" as
+				it is no longer unique, and perform a reindexing pass.
+			</action>
+			<action type="fix" issue="350">
+				When serializing/encoding custom types which replace exsting choice fields by
+				fixing the choice to a single type, the parser would forget that the
+				field was a choice and would use the wrong name (e.g. "abatement" instead of
+				"abatementDateType"). Thanks to Yaroslav Kovbas for reporting and
+				providing a unit test! 
+			</action>
+			<action type="fix">
+				JPA server transactions sometimes created an incorrect resource reference
+				if a resource being saved contained references that had a display value but
+				not an actual reference. Thanks to David Hay for reporting!
+			</action>
+			<action type="add" issue="352">
+				When performing a REST Client create or update with
+				<![CDATA[<code>Prefer: return=representation</code>]]> set,
+				if the server does not honour the Prefer header, the client
+				will automatically fetch the resource before returning. Thanks
+				to Ewout Kramer for the idea!  
+			</action>
+			<action type="add" issue="354">
+				DSTU3 structures now have 
+				<![CDATA[<code>setFoo(List)</code>]]>
+				and 
+				<![CDATA[<code>setGetFooFirstRep()</code>]]>
+				methods, bringing them back to parity with the HAPI
+				DSTU2 structures. Thanks to Rahul Somasunderam and
+				Claude Nanjo for the suggestions! 
+			</action>
+			<action type="add">
+				JPA server has now been refactored to use the
+				new FluentPath search parameter definitions
+				for DSTU3 resources.
+			</action>
+			<action type="add">
+				RequestValidatingInterceptor and ResponseValidatingInterceptor
+				both have new method <![CDATA[<code>setIgnoreValidatorExceptions</code>]]>
+				which causes validator exceptions to be ignored, rather than causing
+				processing to be aborted.
+			</action>
+			<action type="add">
+				LoggingInterceptor on server has a new parameter 
+				<![CDATA[<code>${requestBodyFhir}</code>]]> which logs the entire request body.
+			</action>
+			<action type="add" issue="355">
+				JAX-RS server module now supports DSTU3 resources (previously it only supported DSTU2). Thanks
+				to Phillip Warner for implementing this, and providing a pull request!
+			</action>
+			<action type="fix" issue="356">
+				Generated conformance statements for DSTU3 servers did not properly reference their
+				OperationDefinitions. Thanks
+				to Phillip Warner for implementing this, and providing a pull request!
+			</action>
+			<action type="fix" issue="359">
+				Properly handle null arrays when parsing JSON resources. Thanks to Subhro for
+				fixing this and providing a pull request!
+			</action>
+			<action type="fix">
+				STU3 validator failed to validate codes where the
+				code was a child code within the code system that contained it
+				(i.e. not a top level code). Thanks to Jon
+				Zammit for reporting!
+			</action>
+			<action type="fix" issue="361">
+				Restore the setType method in the DSTU1 Bundle
+				class, as it was accidentally commented out. Thanks
+				to GitHub user @Virdulys for the pull request!
+			</action>
+			<action type="add">
+				JPA server now supports composite search parameters
+				where the type of the composite parameter is
+				a quantity (e.g. Observation:component-code-component-value-quantity)
+			</action>
+			<action type="remove">
+				Remove the Remittance resource from DSTU2
+				structures, as it is not a real resource and
+				was causing issues with interoperability
+				with the .NET client.
+			</action>
+			<action type="fix">
+				CLI tool cache feature (-c) for upload-example task sometimes failed
+				to write cache file and exited with an exception.
+			</action>
+			<action type="fix">
+				Fix error message in web testing UI when loading pages in a search
+				result for STU3 endpoints.
+			</action>
+			<action type="fix">
+				When encoding JSON resource, the parser will now always
+				ensure that XHTML narrative content has an 
+				XHTML namespace declaration on the first
+				DIV tag. This was preventing validation for
+				some resources using the official validator
+				rules.
+			</action>
+			<action type="fix">
+				Server failed to invoke operations when the name
+				was escaped (%24execute instead of $execute). 
+				Thanks to Michael Lawley for reporting!
+			</action>
+			<action type="fix">
+				JPA server transactions containing a bundle that has multiple entries
+				trying to delete the same resource caused a 500 internal error
+			</action>
+			<action type="fix">
+				JPA module failed to index search parameters that mapped to a Timing datatype,
+				e.g. CarePlan:activitydate
+			</action>
+			<action type="add">
+				Add a new option to the CLI run-server command called <![CDATA[<code>--lowmem</code>]]>.
+				This option disables some features (e.g. fulltext search) in order to allow the
+				server to start in memory-constrained environments (e.g Raspberry Pi)
+			</action>
+		</release>
+		<release version="1.5" date="2016-04-20">
+			<action type="fix" issue="339">
+				Security Fix: XML parser was vulnerable to XXE (XML External Entity) 
+				processing, which could result in local files on disk being disclosed.
+				See <![CDATA[<a href="https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing">this page</a>]]>
+				for more information.
+				Thanks to Jim Steel for reporting!
+			</action>
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
+						<li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li>
+						<li>SLF4j (All): 1.7.14 -&gt; 1.7.21</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
+				Support comments when parsing and encoding both JSON and XML. Comments are retrieved
+				and added to the newly created methods 
+				IBase#getFormatCommentsPre() and
+				IBase#getFormatCommentsPost()
+			</action>
+			<action type="add" issue="293">
+				Added options to the CLI upload-examples command which allow it to cache
+				the downloaded content file, or use an arbitrary one. Thanks to Adam Carbone
+				for the pull request!
+			</action>
+			<action type="fix">
+				REST search parameters with a prefix/comparator had not been updated to use
+				the DSTU2 style prefixes (gt2011-01-10) instead of the DSTU1 style prefixes
+				(&gt;2011-01-01). The client has been updated so that it uses the new prefixes
+				if the client has a DSTU2+ context. The server has been updated so that it now
+				supports both styles.
+				<![CDATA[<br/><br/>]]>
+				As a part of this change, a new enum called
+				<![CDATA[<a href="./apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html">ParamPrefixEnum</a>]]>
+				has been introduced. This enum replaces the old 
+				<![CDATA[<a href="./apidocs/ca/uhn/fhir/model/dstu/valueset/QuantityCompararatorEnum.html">QuantityCompararatorEnum</a>]]>
+				which has a typo in its name and can not represent several new prefixes added since 
+				DSTU1.
+			</action>
+			<action type="add">
+				JPA server number and quantity search params now follow the rules for the
+				use of precision in search terms outlined in the
+				<![CDATA[<a href="https://www.hl7.org/fhir/search.html">search page</a>]]> of the
+				FHIR specification. For example, previously a 1% tolerance was applied for
+				all searches (10% for approximate search). Now, a tolerance which respects the
+				precision of the search term is used (but still 10% for approximate search).
+			</action>
+			<action type="fix" issue="291">
+				Fix a failure starting the REST server if a method returns an untyped List, which
+				among other things prevented resource provider added to the server
+				as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for
+				reporting and figuring out exactly why this wasn't working!
+			</action>
+			<action type="add">
+				JPA server now supports :above and :below qualifiers on URI search params
+			</action>
+			<action type="add">
+				Add optional support (disabled by default for now) to JPA server to support
+				inline references containing search URLs. These URLs will be resolved when
+				a resource is being created/updated and replaced with the single matching
+				resource. This is being used as a part of the May 2016 Connectathon for
+				a testing scenario.
+			</action>
+			<action type="add">
+				The server no longer adds a 
+				<![CDATA[<code>WWW-Authenticate</code>]]>
+				header to the response if any resource provider code throws an
+				<![CDATA[<code>AuthenticationException</code>]]>. This header is 
+				used for interactive authentication, which isn't generally 
+				appropriate for FHIR. We added code to add this header a long time
+				ago for testing purposes and it never got removed. Please let us
+				know if you need the ability to add this header automatically. Thanks
+				to Lars Kristian Roland for pointing this out.
+			</action>
+			<action type="fix">
+				In the client, the create/update operations on a Binary resource 
+				(which use the raw binary's content type as opposed to the FHIR
+				content type) were not including any request headers (Content-Type, 
+				User-Agent, etc.) Thanks to Peter Van Houte of Agfa Healthcare for
+				reporting!
+			</action>
+			<action type="fix">
+				Handling of Binary resources containing embedded FHIR resources for
+				create/update/etc operations has been corrected per the FHIR rules
+				outlined at
+				<![CDATA[<a href="http://hl7.org/fhir/binary.html">Binary Resource</a>]]>
+				in both the client and server. 
+				<![CDATA[<br/><br/>]]>
+				Essentially, if the Binary contains something
+				that isn't FHIR (e.g. an image with an image content-type) the
+				client will send the raw data with the image content type to the server. The
+				server will place the content type and raw data into a Binary resource instance
+				and pass those to the resource provider. This part was already correct previous
+				to 1.5. 
+				<![CDATA[<br/><br/>]]>
+				On the other hand, if the Binary contains a FHIR content type, the Binary
+				is now sent by the client to the server as a Binary resource with a FHIR content-type,
+				and the embedded FHIR content is contained in the appropriate fields. The server
+				will pass this &quot;outer&quot; Binary resource to the resource provider code. 
+			</action>
+			<action type="add">
+				The RequestDetails and ActionRequestDetails objects which are passed to 
+				server interceptor methods and may also be used as server provider method
+				arguments now has a new method 
+				<![CDATA[
+				<code>Map&lt;String, String&gt; getUserData()</code>
+				]]>
+				which can be used to pass data and objects between interceptor methods to
+				to providers. This can be useful, for instance, if an authorization
+				interceptor wants to pass the logged in user's details to other parts
+				of the server.
+			</action>
+			<action type="fix" issue="297">
+				<![CDATA[When <code>IServerInterceptor#incomingRequestPreHandled()</code> is called 
+				for a <code>@Validate</code> method, the resource was not populated in the
+				<code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!	
+				]]>
+			</action>
+			<action type="fix" issue="298">
+				<![CDATA[
+					Request to server at <code>[baseUrl]/metadata</code> with an HTTP method
+					other than GET (e.g. POST, PUT) should result in an HTTP 405. Thanks to 
+					Michael Lawley for reporting! 
+				]]>
+			</action>
+			<action type="fix" issue="302">
+				Fix a server exception when trying to automatically add the profile tag
+				to a resource which already has one or more profiles set. Thanks to
+				Magnus Vinther for reporting!
+			</action>
+			<action type="fix" issue="296">
+				QuantityParam parameters being used in the RESTful server were ignoring
+				the 
+				<![CDATA[<code>:missing</code>]]> 
+				qualifier. Thanks to Alexander Takacs for reporting!
+			</action>
+			<action type="fix" issue="299">
+				Annotation client failed with an exception if the response contained
+				extensions on fields in the resonse Bundle (e.g. Bundle.entry.search).
+				Thanks to GitHub user am202 for reporting! 
+			</action>
+			<action type="fix" issue="274">
+				Primitive elements with no value but an extension were sometimes not
+				encoded correctly in XML, and sometimes not parsed correctly in JSON.
+				Thanks to Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" issue="280">
+				The Web Testing UI has long had an issue where if you click on a button which 
+				navigates to a new page (e.g. search, read, etc) and then click the back button
+				to return to the original page, the button you clicked remains disabled and can't
+				be clicked again (on Firefox and Safari). This is now fixed. Unfortunately the fix means that the
+				buttom will no longer show a "loading" spinner, but there doesn't seem to 
+				be another way of fixing this. Thanks to Mark Scrimshire for reporting! 
+			</action>
+			<action type="fix">
+				Extensions found while parsing an object that doesn't support extensions are now
+				reported using the IParserErrorHandler framework in the same way that
+				other similar errors are handled. This allows the parser to be more lenient
+				when needed.
+			</action>
+			<action type="add" issue="304">
+				Improve error message if incorrect type is placed in a list field in the data model. Java
+				uses generics to prevent this at compile time, but if someone is in an environment without 
+				generics this helps improve the error message at runtime. Thanks to Hugo Soares for
+				suggesting.
+			</action>
+			<action type="fix" issue="308">
+				Prevent an unneeded warning when parsing a resource containing
+				a declared extension. Thanks to Matt Blanchette for reporting!
+			</action>
+			<action type="fix">
+				Web Tester UI did not invoke VRead even if a version ID was specified. Thanks
+				to Poseidon for reporting!
+			</action>
+			<action type="add">
+				Per discussion on the FHIR implementer chat, the JPA server no
+				longer includes _revinclude matches in the Bundle.total count, or the
+				page size limit.
+			</action>
+			<action type="add">
+				JPA server now persists search results to the database in a new table where they 
+				can be temporaily preserved. This makes the JPA server much more scalable, since it
+				no longer needs to store large lists of pages in memory between search invocations.
+				<![CDATA[<br/><br/>]]>
+				Old searches are deleted after an hour by default, but this can be changed
+				via a setting in the DaoConfig.
+			</action>
+			<action type="add">
+				JPA servers' resource version history mechanism 
+				has been adjusted so that the history table
+				keeps a record of all versions including the
+				current version. This has the very helpful
+				side effect that history no longer needs to be
+				paged into memory as a complete set. Previously
+				history had a hard limit of only being able to 
+				page the most recent 20000 entries. Now it has
+				no limit.
+			</action>
+			<action type="fix">
+				JPA server returned the wrong Bundle.type value (COLLECTION, should be SEARCHSET)
+				for $everything operation responses. Thanks to Sonali Somase for reporting!				
+			</action>
+			<action type="fix" issue="305">
+				REST and JPA server should reject update requests where the resource body does not
+				contain an ID, or contains an ID which does not match the URL. Previously these
+				were accepted (the URL ID was trusted) which is incorrect according to the
+				FHIR specification. Thanks to GitHub user ametke for reporting!
+				<![CDATA[<br/><br/>]]>
+				As a part of this change, server error messages were also improved for
+				requests where the URL does not contain an ID but needs to (e.g. for
+				an update) or contains an ID but shouldn't (e.g. for a create)				
+			</action>
+			<action type="fix">
+				When fields of type BoundCodeDt (e.g. Patient.gender)
+				are serialized and deserialized using Java's native
+				object serialization, the enum binder was not
+				serialized too. This meant that values for the
+				field in the deserialized object could not be
+				modified. Thanks to Thomas Andersen for reporting!
+			</action>
+			<action type="fix" issue="313">
+				REST Server responded to HTTP OPTIONS requests with 
+				any URI as being a request for the server's
+				Conformance statement. This is incorrect, as only
+				a request for <![CDATA[<code>OPTIONS [base url]</code>]]> should be treated as such. Thanks to Michael Lawley for reporting!
+			</action>
+			<action type="fix">
+				REST annotation style client was not able to handle extended operations
+				($foo) where the response from the server was a raw resource instead
+				of a Parameters resource. Thanks to Andrew Michael Martin for reporting!
+			</action>
+			<action type="add">
+				JPA server applies _lastUpdated filter inline with other searches wherever possible
+				instead of applying this filter as a second query against the results of the 
+				first query. This should improve performance when searching against large
+				datasets.
+			</action>
+			<action type="add">
+				Parsers have new method 
+				<![CDATA[<code>setDontEncodeElements</code>]]>
+				which can be used to force the parser to not encode certain elements
+				in a resource when serializing. For example this can be used to omit
+				sensitive data or skip the resource metadata.
+			</action>
+			<action type="add">
+				JPA server database design has been adjusted
+				so that different tables use different sequences
+				to generate their indexes, resulting in more sequential
+				resource IDs being assigned by the server
+			</action>
+			<action type="fix">
+				Server now correctly serves up Binary resources
+				using their native content type (instead of as a
+				FHIR resource) if the request contains an accept
+				header containing "application/xml" as some browsers
+				do.
+			</action>
+			<action type="add">
+				DSTU2 resources now have a 
+				<![CDATA[<code>getMeta()</code>]]> method which returns a
+				modifiable view of the resource metadata for convenience. This
+				matches the equivalent method in the DSTU3 structures.
+			</action>
+			<action type="add" issue="315">
+				Add a new method to FhirContext called
+				<![CDATA[
+				<code><a href="./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-">setDefaultTypeForProfile</a></code>
+				]]>
+				which can be used to specify that when recources are received which declare
+				support for specific profiles, a specific custom structures should be used 
+				instead of the default. For example, if you have created a custom Observation
+				class for a specific profile, you could use this method to cause your custom
+				type to be used by the parser for resources in a search bundle you receive.
+				<![CDATA[
+				<br/><br/>
+				See the documentation page on
+				<a href="./doc_extensions.html">Profiles and Extensions</a>
+				for more information.
+				]]>
+			</action>
+			<action type="fix" issue="315">
+				Parsing/Encoding a custom resource type which extends a
+				base type sometimes caused the FhirContext to treat all future
+				parses of the same resource as using the custom type even when
+				this was not wanted.
+				<![CDATA[<br/><br/>]]>
+				Custom structures may now be explicitly declared by profile
+				using the
+				<![CDATA[
+				<code><a href="./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-">setDefaultTypeForProfile</a></code>
+				]]>
+				method.
+				<![CDATA[<br/><br/>]]>
+				This issue was discovered and fixed as a part of the implementation of issue #315.
+			</action>
+			<action type="add" issue="321">
+				Set up the tinder plugin to work as an ant task
+				as well as a Maven plugin, and to use external
+				sources. Thanks to Bill Denton for the pull
+				request!
+			</action>
+			<action type="fix">
+				JPA server now allows searching by token
+				parameter using a system only and no code,
+				giving a search for any tokens which match
+				the given token with any code. Previously the
+				expected behaviour for this search 
+				was not clear in the spec and HAPI had different
+				behaviour from the other reference servers.
+			</action>
+			<action type="add">
+				Introduce a JAX-RS client provider which can be used instead of the
+				default Apache HTTP Client provider to provide low level HTTP
+				services to HAPI's REST client. See
+				<![CDATA[<a href="./doc_rest_client_alternate_provider.html">JAX-RS &amp; Alternate HTTP Client Providers</a>]]>
+				for more information.
+				<![CDATA[<br/><br/>]]>
+				This is useful in cases where you have other non-FHIR REST clients
+				using a JAX-RS provider and want to take advantage of the
+				rest of the framework. 
+				<![CDATA[<br/><br/>]]>
+				Thanks to Peter Van Houte from Agfa for the amazing work!
+			</action>
+			<action type="fix" issue="312">
+				Parser failed with a NPE while encoding resources if the
+				resource contained a null extension. Thanks to 
+				steve1medix for reporting!
+			</action>
+			<action type="fix" issue="320">
+				In generated model classes (DSTU1/2) don't
+				use BoundCodeDt and BoundCodeableConceptDt for
+				coded fields which use example bindings. Thanks
+				to GitHub user Ricq for reporting!
+			</action>
+			<action type="add">
+				<![CDATA[
+				Operations methods defined using 
+				<code>@Operation</code> will now infer the maximum number of repetitions
+				of their parameters by the type of the parameter. Previously if
+				a default <code>max()</code> value was not specified in the
+				<code>@OperationParam</code> annotation on a parameter, the maximum
+				was assumed to be 1. Now, if a max value is not explicitly specified 
+				and the type of the parameter is a basic type (e.g. <code>StringDt</code>) the
+				max will be 1. If the parameter is a collection type (e.g. <code>List&lt;StringDt&gt;</code>)
+				the max will be *
+				]]>
+			</action>
+			<action type="add" issue="317">
+				<![CDATA[
+				Operation methods defined using
+				<code>@Operation</code>
+				may now use search parameter types, such as 
+				<code>TokenParam</code> and
+				<code>TokenAndListParam</code> as values. Thanks to 
+				Christian Ohr for reporting!
+				]]>
+			</action>
+			<action type="add">
+				Add databases indexes to JPA module search index tables
+				for the RES_ID column on each. This should help
+				performance when searching over large datasets.
+				Thanks to Emmanuel Duviviers for the suggestion!
+			</action>
+			<action type="fix">
+				DateTimeType should fail to parse 1974-12-25+10:00 as this is not
+				a valid time in FHIR. Thanks to Grahame Grieve for reporting!
+			</action>
+			<action type="fix">
+				When parsing a Bundle resource, if the Bundle.entry.request.url contains a UUID
+				but the resource body has no ID, the Resource.id will be populated with the ID from the
+				Bundle.entry.request.url. This is helpful when round tripping Bundles containing
+				UUIDs.
+			</action>
+			<action type="fix">
+				When parsing a DSTU3 bundle, references between resources did not have
+				the actual resource instance populated into the reference if the
+				IDs matched as they did in DSTU1/2.
+			</action>
+			<action type="fix" issue="326">
+				Contained resource references on DSTU3
+				resources were not serialized correctly when
+				using the Json Parser. Thanks to GitHub user
+				@fw060 for reporting and supplying a patch
+				which corrects the issue!
+			</action>
+			<action type="fix" issue="325">
+				DSTU3 model classes equalsShallow and equalsDeep both did not work
+				correctly if a field was null in one object, but contained an empty
+				object in the other (e.g. a StringType with no actual value in it). These
+				two should be considered equal, since they would produce the exact same
+				wire format.<![CDATA[<br/><br/>]]>
+				Thanks to GitHub user @ipropper for reporting and providing
+				a test case!
+			</action>
+			<action type="add">
+				JPA server now supports searching for <![CDATA[<code>_tag:not=[tag]</code>]]>
+				which enables finding resources that to not have a given tag/profile/security tag.
+				Thanks to Lars Kristian Roland for the suggestion!
+			</action>
+			<action type="fix">
+				Extensions containing resource references did not get encoded correctly
+				some of the time. Thanks to Poseidon for reporting!
+			</action>
+			<action type="fix">
+				Parsers (both XML and JSON) encoded the first few elements of DSTU3 structures in the wrong order:
+				Extensions were placed before any other content, which is incorrect (several
+				elements come first: meta, text, etc.)
+			</action>
+			<action type="fix">
+				In server implementations, the Bundle.entry.fullUrl was not getting correctly
+				populated on Hl7OrgDstu2 servers. Thanks to Christian Ohr for reporting!
+			</action>
+			<action type="fix" issue="335">
+				Ensure that element IDs within resources (i.e. IDs on elements other than the
+				resource itself) get serialized and parsed correctly. Previously, these didn't get
+				serialized in a bunch of circumstances. Thanks to Vadim Peretokin for reporting
+				and providing test cases!
+			</action>
+			<action type="add">
+				Improve CLI error message if the tool can't bind to the requested port. Thanks
+				to Claude Nanjo for the suggestion!
+			</action>
+			<action type="fix">
+				Server param of <![CDATA[<code>_summary=text</code>]]> did not
+				include mandatory elements in return as well as
+				the text element, even though the FHIR specification
+				required it.
+			</action>
+			<action type="fix">
+				Remove invalid resource type "Documentation" from DSTU2
+				structures.
+			</action>
+			<action type="fix">
+				JPA server did not respect target types for search parameters. E.g. Appointment:patient has
+				a path of "Appointment.participant.actor" and a target type of "Patient". The search path
+				was being correctly handled, but the target type was being ignored.
+			</action>
+			<action type="add">
+				RestfulServer now manually parses URL parameters instead of relying on the container's
+				parsed parameters. This is useful because many Java servlet containers (e.g. Tomcat, Glassfish)
+				default to ISO-8859-1 encoding for URLs insetad of the UTF-8 encoding specified by
+				FHIR.
+			</action>
+			<action type="add">
+				ResponseHighlightingInterceptor now doesn't highlight if the request
+				has an Origin header, since this probably denotes an AJAX request.
+			</action>
+		</release>
+		<release version="1.4" date="2016-02-04">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li>
+						<li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li>
+						<li>Phloc-Commons (Schematron Validator): 4.3.6 -&gt; 4.4.4</li>
+						<li>Apache httpclient (Client): 4.4 -&gt; 4.5.1</li>
+						<li>Apache httpcore (Client): 4.4 -&gt; 4.4.4</li>
+						<li>SLF4j (All): 1.7.13 -&gt; 1.7.14</li>
+					</ul>
+				]]>
+			</action>
+			<action type="fix">
+				Remove a dependency on a Java 1.7 class 
+				(ReflectiveOperationException) in several spots in the 
+				codebase. This dependency was accidentally introduced in
+				1.3, and animal-sniffer-plugin failed to detect it (sigh).
+			</action>
+			<action type="add">
+				Add two new server interceptors: 
+				<![CDATA[
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/RequestValidatingInterceptor.html">RequestValidatingInterceptor</a> 
+				and 
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/ResponseValidatingInterceptor.html">ResponseValidatingInterceptor</a>
+				]]>
+				which can be used to validate incoming requests or outgoing responses using the standard FHIR validation
+				tools. See the 
+				<![CDATA[
+				<a href="./doc_rest_server_interceptor.html#RequestResponse_Validation">Server Validation Page</a>
+				]]>
+				for examples of how to use these interceptors. These intereptors have both
+				been enabled on the
+				<![CDATA[
+				<a href="http://fhirtest.uhn.ca">public test page</a>.
+				]]>
+			</action>
+			<action type="fix" issue="259">
+				Make IBoundCodeableConcept and IValueSetEnumBinder serializable,
+				fixing an issue when trying to serialize model classes containing
+				bound codes. Thanks to Nick Peterson for the Pull Request!
+			</action>
+			<action type="add" issue="251">
+				Introduce a JAX-RS version of the REST server, which can be used
+				to deploy the same resource provider implementations which work
+				on the existing REST server into a JAX-RS (e.g. Jersey) environment.
+				Thanks to Peter Van Houte from Agfa for the amazing work!
+			</action>
+			<action type="add">
+				CLI now supports writing to file:// URL for 'upload-examples' command
+			</action>
+			<action type="add">
+				GZipped content is now supported for client-to-server uploads (create, update, transaction, etc.).
+				The server will not automatically detect compressed incoming content and decompress it (this can be
+				disabled using a RestfulServer configuration setting). A new client interceptor has been added
+				which compresses outgoing content from the client.
+			</action>
+			<action type="fix">
+				JPA server transaction attempted to validate resources twice each,
+				with one of these times being before anything had been committed to the
+				database. This meant that if a transaction contained both a Questionnaire
+				and a QuestionnaireResponse, it would fail because the QuestionnaireResponse
+				validator wouldn't be able to find the questionnaire. This is now corrected.
+			</action>
+			<action type="add">
+				Add a new method to the generic/fluent client for searching: 
+				<![CDATA[<code>.count(int)</code><br/>]]>
+				This replaces the existing ".limitTo(int)" method which has
+				now been deprocated because it was badly named and undocumented.
+			</action>
+			<action type="add">
+				Profile validator has been configured to allow extensions even if they
+				aren't explicitly declared in the profile.
+			</action>
+			<action type="add" issue="265">
+				Add a constraint that the Maven build will only run in JDK 8+. HAPI
+				remains committed to supporting JDK 6+ in the compiled library, but these
+				days it can only be built using JDK 8. Thanks to joelsch for the PR!
+			</action>
+			<action type="fix">
+				When serializing a value[x] field, if the value type was a profiled type (e.g. markdown is a 
+				profile of string) HAPI 1.3 would use the base type in the element name, e.g.
+				valueString instead of valueMarkdown. After discussion with Grahame, this appears to
+				be incorrect behaviour so it has been fixed.
+			</action>
+			<action type="add" issue="240">
+				Support target parameter type in _include / _revinclude values, e.g.
+				_include=Patient:careProvider:Organization. Thanks to Joe Portner
+				for reporting!
+			</action>
+			<action type="add">
+				Use ResponseHighlighterInterceptor in the hapi-fhir-jpaserver-example
+				project to provide nice syntax highlighting. Thanks to Rob Hausam for
+				noting that this wasn't there.
+			</action>
+			<action type="add">
+				Introduce custom @CoverageIgnore annotation to hapi-fhir-base in order to 
+				remove dependency on cobertura during build and in runtime.
+			</action>
+			<action type="fix">
+				Server-generated conformance statements incorrectly used /Profile/ instead
+				of /StructureDefinition/ in URL links to structures.
+			</action>
+			<action type="add">
+				JsonParser has been changed so that when serializing numbers it will use
+				plain format (0.001) instead of scientific format (1e-3). The latter is
+				valid JSON, and the parser will still correctly parse either format (all
+				clients should be prepared to) but this change makes serialized
+				resources appear more consistent between XML and JSON. As a result of this
+				change, trailing zeros will now be preserved when serializing as well.
+			</action>
+			<action type="add" issue="278">
+				Add DSTU3 example to hapi-fhir-jpaserver-example. Thanks to Karl 
+				Davis for the Pull Request!
+			</action>
+			<action type="add">
+				RestfulServer#setUseBrowserFriendlyContentTypes has been deprecated and its
+				functionality removed. The intention of this feature was that if it 
+				detected a request coming in from a browser, it would serve up JSON/XML 
+				using content types that caused the browsers to pretty print. But 
+				each browser has different rules for when to pretty print, and 
+				after we wrote that feature both Chrome and FF changed their rules to break it anyhow.
+				ResponseHighlightingInterceptor provides a better implementation of
+				this functionality and should be used instead.
+			</action>
+			<action type="remove">
+				Narrative generator framework has removed the
+				ability to generate resource titles. This
+				functionality was only useful for DSTU1
+				implementations and wasn't compatible
+				with coming changes to that API.
+			</action>
+			<action type="fix" issue="283">
+				Remove dependency on Servlet-API 3.0+ by using methods available in 2.5 where possible.
+				Note that we continue to use Servlet-API 3.0+ features in some parts of the JPA API, so
+				running in an old serlvet container should be tested well before use. Thanks to Bill Denton
+				for reporting!
+			</action>
+			<action type="add" issue="288">
+				Add new methods to RestfulClientFactory allowing you to configure the size of the
+				client pool used by Apache HttpClient. Thanks to Matt Blanchette for the pull
+				request!
+			</action>
+			<action type="add">
+				Add support for new modifier types on Token search params in Server and 
+				annotation client.
+			</action>
+			<action type="fix" issue="286">
+				Server conformance statement should include search parameter chains if the
+				chains are explicitly defined via @Search(whitelist={....}). Thanks to lcamilo15
+				for reporting!
+			</action>
+			<action type="fix">
+				Remove afterPropertiesSet() call in Java config for JPA
+				server's EntityManagerFactory. This doesn't need to be called
+				manually, the the manual call led to a warning about
+				the EntityManager being created twice.
+			</action>
+			<action type="add" issue="289">
+				Allow server to correctly figure out it's own address even if the container provides
+				a Servlet Context Path which does not include the root. Thanks to Petro Mykhaylyshyn
+				for the pull request!
+			</action>
+		</release>
+		<release version="1.3" date="2015-11-14">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
+						<li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
+						<li>SLF4j (Core): 1.7.102 -&gt; 1.7.12</li>
+						<li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
+						<li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5."</li>
+						<li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
+						<li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
+						<li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
+				JPA and Tester Overlay now use Spring Java config files instead
+				of the older XML config files. All example projects have been updated. 
+			</action>
 			<action type="add">
 				JPA server removes duplicate resource index entries before storing them 
 				(e.g. if a patient has the same name twice, only one index entry is created
@@ -49,7 +836,7 @@
 				Narrative generator did not include OperationOutcome.issue.diagnostics in the
 				generated narrative.
 			</action>
-			<action type="add">
+			<action type="add" issue="250">
 				Clients (generic and annotation) did not populate the Accept header on outgoing
 				requests. This is now populated to indicate that the client supports both XML and
 				JSON unless the user has explicitly requested one or the other (in which case the
@@ -68,7 +855,7 @@
 			</action>
 			<action type="fix">
 				In server, if a client request is received and it has an Accept header indicating
-			       	that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list.
+					 	that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list.
 			</action>
 			<action type="add">
 				JPA server now supports searching with sort by token, quantity,
@@ -161,6 +948,91 @@
 				@IdParam(optional=true)
 				meaning that the same operation can also be invoked
 				at the type level.
+			</action>
+			<action type="add">
+				Make JPA search queries with _lastUpdated parameter a bit more efficient
+			</action>
+			<action type="add" issue="239">
+				Clean up Android project to make it more lightweight and remove a 
+				number of unneeded dependencies. Thanks to Thomas Andersen
+				for the pull request!
+			</action>
+			<action type="fix">
+				Fix a crash when encoding a Binary resource in JSON encoding
+				if the resource has no content-type
+			</action>
+			<action type="fix">
+				JPA server now supports read/history/search in transaction entries
+				by calling the actual implementing method in the server (previously
+				the call was simulated, which meant that many features did not work)
+			</action>
+			<action type="fix">
+				ResourceReferenceDt#loadResource(IRestfulClient) did not
+				use the client's read functionality, so it did not
+				handle JSON responses or use interceptors. Thanks to
+				JT for reporting!
+			</action>
+			<action type="add">
+				JPA server maximumn length for a URI search parameter has been reduced from
+				256 to 255 in order to accomodate MySQL's indexing requirements
+			</action>
+			<action type="fix" issue="242">
+				Server failed to respond correctly to compartment search operations
+				if the same provider also contained a read operation. Thanks to GitHub user
+				@am202 for reporting!
+			</action>
+			<action type="fix" issue="245">
+				Fix issue in testpage-overlay's new Java configuration where only the first
+				configured server actually gets used.
+			</action>
+			<action type="add">
+				Introduce
+				<![CDATA[<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>]]>
+				interceptors for JPA server which can be used for more fine grained operations.
+			</action>
+			<action type="fix" issue="241">
+				Parser (XML and JSON) shouldn't encode an ID tag in resources
+				which are part of a bundle when the resource has a UUID/OID
+				ID.
+			</action>
+			<action type="add">
+				Add ability for a server REST resource provider @Search method
+				to declare that it should allow even parameters it doesn't 
+				understand.
+			</action>
+			<action type="fix" issue="247">
+				Correctly set the Bundle.type value on all pages of a search result in
+				the server, and correcltly set the same value in JPA server $everything
+				results.
+			</action>
+			<action type="add">
+				JPA $everything operations now support new parameters _content 
+				and _text, which work the same way as the same parameters on a 
+				search. This is experimental, since it is not a part of the core
+				FHIR specification.
+			</action>
+			<action type="add" fix="250">
+				Process "Accept: text/xml" and "Accept: text/json" headers was
+				wanting the equivalent FHIR encoding styles. These are not 
+				correct, but the intention is clear so we will honour them
+				just to be helpful.
+			</action>
+			<action type="fix">
+				Generated Enum types for some ValueSets did not include all
+				codes (specifically, ValueSets which defined concepts containing
+				child concepts did not result in Enum values for the child concepts)
+			</action>
+			<action type="fix" fix="253">
+				In the JPA server, order of transaction processing should be 
+				DELETE, POST, PUT, GET, and the order should not matter
+				within entries with the same verb. Thanks to Bill de Beaubien
+				for reporting!
+			</action>
+			<action type="add" fix="254">
+				Add the ability to wire JPA conformance providers
+				using Spring (basically, add default constructors
+				and setters to the conformance providers). Thanks
+				to C. Mike Bylund for the pull request!
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
@@ -263,7 +1135,7 @@
 			</action>
 			<action type="add">
 				Resource references using resource instance objects instead of resource IDs 
-				will correctly qualify the IDs with the resource type if they aren't already qualified   
+				will correctly qualify the IDs with the resource type if they aren't already qualified	
 			</action>
 			<action type="add" issue="211">
 				Testpage Overlay project now properly allows a custom client
@@ -797,7 +1669,7 @@
 				RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!
 			</action>
 			<action type="add">
-			    JPA module now supports deleting resource via transaction
+				 JPA module now supports deleting resource via transaction
 			</action>
 			<action type="fix" issue="97" due-to="twilson650">
 				DateClientParam#second() incorrectly used DAY precision instead
@@ -842,15 +1714,15 @@
 			<action type="add">
 				Add support for FHIR "extended operations" as defined in the FHIR DSTU2
 				specification, for the Generic Client, Annotation Client, and
-				Server.  
+				Server.	
 			</action>
 			<action type="fix">
 				Observation.applies[x] and other similar search fields with multiple allowable 
-				value types were not being correctly indexed in the JPA server.    
+				value types were not being correctly indexed in the JPA server.	 
 			</action>
 			<action type="fix" issue="122">
 				DateClientParam.before() incorrectly placed "&lt;=" instead of 
-				"&lt;" in the request URL. Thanks to Ryan for reporting!    
+				"&lt;" in the request URL. Thanks to Ryan for reporting!	 
 			</action>
 			<action type="add" issue="77" dev="wdebeau1">
 				Server now only automatically adds _include resources which are provided
@@ -879,7 +1751,7 @@
 				own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast
 				version is finalized. See the
 				<![CDATA[<a href="./doc_dstu2.html">DSTU2 page</a>]]> 
-				for more information.  
+				for more information.	
 			</action>
 			<action type="fix">
 				<![CDATA[
@@ -918,7 +1790,7 @@
 			</action>			
 			<action type="add" issue="44" dev="petromykhailysyn">
 				Remove unnecessary IOException from narrative generator API. Thanks to
-				Petro Mykhailysyn for the pull request!  
+				Petro Mykhailysyn for the pull request!	
 			</action>			
 			<action type="add" issue="48" dev="wdebeau1">
 				Introduced a new 
@@ -1192,7 +2064,7 @@
 			</action>			
 			<action type="add" issue="31" dev="preston">
 				Add a 
-				<![CDATA[<a href="https://www.vagrantup.com/">Vagrant</a>]]>  
+				<![CDATA[<a href="https://www.vagrantup.com/">Vagrant</a>]]>	
 				based environment (basically a fully built, self contained development environment) for
 				trying out the HAPI server modules. Thanks to Preston Lee for the pull request, and for 
 				offering to maintain this! 
@@ -1209,19 +2081,19 @@
 		<release version="0.6" date="2014-09-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
 			<action type="add">
-				Allow generic client  ... OAUTH
+				Allow generic client	... OAUTH
 			</action>
 			-->
 			<action type="add">
 				Add server interceptor framework, and new interceptor for logging incoming
-				requests.   
+				requests.	
 			</action>
 			<action type="add">
 				Add server validation framework for validating resources against the FHIR schemas and schematrons
 			</action>
 			<action type="fix">
 				Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University
-				Health Network for reporting!   
+				Health Network for reporting!	
 			</action>
 			<action type="fix" issue="4">
 				Create method was incorrectly returning an HTTP 204 on sucessful completion, but
@@ -1422,7 +2294,7 @@
 				space (e.g. a WAR file with a space in the name) failed to work correctly.
 				Thanks to David Hay of Orion for reporting this!
 			</action>
-        </release>			
+			</release>			
 		<release version="0.4" date="2014-07-13">
 			<action type="add">
 				<![CDATA[<b>BREAKING CHANGE:</b>]]>: IdDt has been modified so that it 
@@ -1495,8 +2367,12 @@
 			<action type="add">
 				Support added for deleted-entry by/name, by/email, and comment from Tombstones spec
 			</action>
-        </release>			
-		<release version="0.3" date="2014-04-12" description="This release corrects lots of bugs and introduces the fluent client mode">
-        </release>			
+		</release>			
+		<release version="0.3" date="2014-05-12" description="This release corrects lots of bugs and introduces the fluent client mode">
+		</release>			
+		<release version="0.2" date="2014-04-23">
+		</release>			
+		<release version="0.1" date="2014-04-15">
+		</release>			
 	</body>
 </document>

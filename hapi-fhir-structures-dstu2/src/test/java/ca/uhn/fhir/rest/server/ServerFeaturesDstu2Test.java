@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -36,9 +37,11 @@ import ca.uhn.fhir.util.PortUtil;
 public class ServerFeaturesDstu2Test {
 
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerFeaturesDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+
 	private static RestfulServer ourServlet;
 
 	@Test
@@ -50,6 +53,73 @@ public class ServerFeaturesDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Conformance"));
+
+		/*
+		 * Now with a leading /
+		 */
+
+		httpGet = new HttpOptions("http://localhost:" + ourPort + "/");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<Conformance"));
+
+	}
+
+
+	/**
+	 * See #313
+	 */
+	@Test
+	public void testOptionsForNonBasePath1() throws Exception {
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	/**
+	 * See #313
+	 */
+	@Test
+	public void testOptionsForNonBasePath2() throws Exception {
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Patient/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	/**
+	 * See #313
+	 */
+	@Test
+	public void testOptionsForNonBasePath3() throws Exception {
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/metadata");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		assertEquals(405, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testOptionsJson() throws Exception {
+		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("resourceType\":\"Conformance"));
 	}
 
 	@Test
@@ -77,20 +147,11 @@ public class ServerFeaturesDstu2Test {
 
 	}
 
-	@Test
-	public void testOptionsJson() throws Exception {
-		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("resourceType\":\"Conformance"));
-	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -119,6 +180,11 @@ public class ServerFeaturesDstu2Test {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Read
 		public Patient read(@IdParam IdDt theId) {
 			Patient p1 = new Patient();
@@ -127,14 +193,14 @@ public class ServerFeaturesDstu2Test {
 			return p1;
 		}
 
+	}
+
+	public static class DummyPatientResourceProvider2 implements IResourceProvider {
+
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-
-	}
-
-	public static class DummyPatientResourceProvider2 implements IResourceProvider {
 
 		@Read
 		public Patient read(@IdParam IdDt theId) {
@@ -142,11 +208,6 @@ public class ServerFeaturesDstu2Test {
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("PRP2");
 			return p1;
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

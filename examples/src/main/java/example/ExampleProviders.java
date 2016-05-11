@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 
 @SuppressWarnings(value= {"serial"})
 public class ExampleProviders {
@@ -35,7 +34,7 @@ public class PlainProvider {
 
 
 //START SNIPPET: plainProviderServer
-public class ExampleServlet extends RestfulServer {
+public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
 
     /**
      * Constructor
@@ -59,7 +58,7 @@ public class ExampleServlet extends RestfulServer {
 //END SNIPPET: plainProviderServer
 
     //START SNIPPET: addressStrategy
-    public class MyServlet extends RestfulServer {
+    public class MyServlet extends ca.uhn.fhir.rest.server.RestfulServer {
 
         /**
          * Constructor

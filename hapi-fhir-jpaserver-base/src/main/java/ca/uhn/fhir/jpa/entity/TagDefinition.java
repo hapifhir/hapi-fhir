@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.Tag;
 
@@ -145,5 +147,17 @@ public class TagDefinition implements Serializable {
 		b.append(myId);
 		return b.toHashCode();
 	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder retVal = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		retVal.append("id", myId);
+		retVal.append("system", mySystem);
+		retVal.append("code", myCode);
+		retVal.append("display", myDisplay);
+		return retVal.build();
+	}
+	
+	
 	
 }

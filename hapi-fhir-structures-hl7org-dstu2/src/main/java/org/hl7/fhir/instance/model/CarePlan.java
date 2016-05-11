@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
@@ -48,7 +50,7 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanStatus {
         /**
-         * The plan has been suggested but no commitment to it has yet been made
+         * The plan has been suggested but no commitment to it has yet been made.
          */
         PROPOSED, 
         /**
@@ -56,15 +58,15 @@ public class CarePlan extends DomainResource {
          */
         DRAFT, 
         /**
-         * The plan is intended to be followed and used as part of patient care
+         * The plan is intended to be followed and used as part of patient care.
          */
         ACTIVE, 
         /**
-         * The plan is no longer in use and is not expected to be followed or used in patient care
+         * The plan is no longer in use and is not expected to be followed or used in patient care.
          */
         COMPLETED, 
         /**
-         * The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan)
+         * The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan).
          */
         CANCELLED, 
         /**
@@ -108,11 +110,11 @@ public class CarePlan extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The plan has been suggested but no commitment to it has yet been made";
+            case PROPOSED: return "The plan has been suggested but no commitment to it has yet been made.";
             case DRAFT: return "The plan is in development or awaiting use but is not yet intended to be acted upon.";
-            case ACTIVE: return "The plan is intended to be followed and used as part of patient care";
-            case COMPLETED: return "The plan is no longer in use and is not expected to be followed or used in patient care";
-            case CANCELLED: return "The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan)";
+            case ACTIVE: return "The plan is intended to be followed and used as part of patient care.";
+            case COMPLETED: return "The plan is no longer in use and is not expected to be followed or used in patient care.";
+            case CANCELLED: return "The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan).";
             default: return "?";
           }
         }
@@ -162,15 +164,15 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanRelationship {
         /**
-         * The referenced plan is considered to be part of this plan
+         * The referenced plan is considered to be part of this plan.
          */
         INCLUDES, 
         /**
-         * This plan takes the places of the referenced plan
+         * This plan takes the places of the referenced plan.
          */
         REPLACES, 
         /**
-         * This plan provides details about how to perform activities defined at a higher level by the referenced plan
+         * This plan provides details about how to perform activities defined at a higher level by the referenced plan.
          */
         FULFILLS, 
         /**
@@ -206,9 +208,9 @@ public class CarePlan extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INCLUDES: return "The referenced plan is considered to be part of this plan";
-            case REPLACES: return "This plan takes the places of the referenced plan";
-            case FULFILLS: return "This plan provides details about how to perform activities defined at a higher level by the referenced plan";
+            case INCLUDES: return "The referenced plan is considered to be part of this plan.";
+            case REPLACES: return "This plan takes the places of the referenced plan.";
+            case FULFILLS: return "This plan provides details about how to perform activities defined at a higher level by the referenced plan.";
             default: return "?";
           }
         }
@@ -248,15 +250,15 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanActivityStatus {
         /**
-         * Activity is planned but no action has yet been taken
+         * Activity is planned but no action has yet been taken.
          */
         NOTSTARTED, 
         /**
-         * Appointment or other booking has occurred but activity has not yet begun
+         * Appointment or other booking has occurred but activity has not yet begun.
          */
         SCHEDULED, 
         /**
-         * Activity has been started but is not yet complete
+         * Activity has been started but is not yet complete.
          */
         INPROGRESS, 
         /**
@@ -264,11 +266,11 @@ public class CarePlan extends DomainResource {
          */
         ONHOLD, 
         /**
-         * The activities have been completed (more or less) as planned
+         * The activities have been completed (more or less) as planned.
          */
         COMPLETED, 
         /**
-         * The activities have been ended prior to completion (perhaps even before they were started)
+         * The activities have been ended prior to completion (perhaps even before they were started).
          */
         CANCELLED, 
         /**
@@ -316,12 +318,12 @@ public class CarePlan extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSTARTED: return "Activity is planned but no action has yet been taken";
-            case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun";
-            case INPROGRESS: return "Activity has been started but is not yet complete";
+            case NOTSTARTED: return "Activity is planned but no action has yet been taken.";
+            case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun.";
+            case INPROGRESS: return "Activity has been started but is not yet complete.";
             case ONHOLD: return "Activity was started but has temporarily ceased with an expectation of resumption at a future time.";
-            case COMPLETED: return "The activities have been completed (more or less) as planned";
-            case CANCELLED: return "The activities have been ended prior to completion (perhaps even before they were started)";
+            case COMPLETED: return "The activities have been completed (more or less) as planned.";
+            case CANCELLED: return "The activities have been ended prior to completion (perhaps even before they were started).";
             default: return "?";
           }
         }
@@ -549,10 +551,10 @@ public class CarePlan extends DomainResource {
     @Block()
     public static class CarePlanParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Indicates specific responsibility of an individual within the care plan.  E.g. "Primary physician", "Team coordinator", "Caregiver", etc.
+         * Indicates specific responsibility of an individual within the care plan; e.g. "Primary physician", "Team coordinator", "Caregiver", etc.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc." )
+        @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care plan; e.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc." )
         protected CodeableConcept role;
 
         /**
@@ -577,7 +579,7 @@ public class CarePlan extends DomainResource {
       }
 
         /**
-         * @return {@link #role} (Indicates specific responsibility of an individual within the care plan.  E.g. "Primary physician", "Team coordinator", "Caregiver", etc.)
+         * @return {@link #role} (Indicates specific responsibility of an individual within the care plan; e.g. "Primary physician", "Team coordinator", "Caregiver", etc.)
          */
         public CodeableConcept getRole() { 
           if (this.role == null)
@@ -593,7 +595,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #role} (Indicates specific responsibility of an individual within the care plan.  E.g. "Primary physician", "Team coordinator", "Caregiver", etc.)
+         * @param value {@link #role} (Indicates specific responsibility of an individual within the care plan; e.g. "Primary physician", "Team coordinator", "Caregiver", etc.)
          */
         public CarePlanParticipantComponent setRole(CodeableConcept value) { 
           this.role = value;
@@ -641,7 +643,7 @@ public class CarePlan extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care plan; e.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization)", "The specific person or organization who is participating/expected to participate in the care plan.", 0, java.lang.Integer.MAX_VALUE, member));
         }
 
@@ -945,10 +947,10 @@ public class CarePlan extends DomainResource {
         protected CodeableConcept category;
 
         /**
-         * Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter.
+         * Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Detail type of activity", formalDefinition="Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter." )
+        @Description(shortDefinition="Detail type of activity", formalDefinition="Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter." )
         protected CodeableConcept code;
 
         /**
@@ -1011,14 +1013,14 @@ public class CarePlan extends DomainResource {
         protected Type scheduled;
 
         /**
-         * Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.
+         * Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.
          */
         @Child(name = "location", type = {Location.class}, order=10, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Where it should happen", formalDefinition="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc." )
+        @Description(shortDefinition="Where it should happen", formalDefinition="Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc." )
         protected Reference location;
 
         /**
-         * The actual object that is the target of the reference (Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.)
+         * The actual object that is the target of the reference (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
         protected Location locationTarget;
 
@@ -1049,10 +1051,10 @@ public class CarePlan extends DomainResource {
         protected SimpleQuantity dailyAmount;
 
         /**
-         * Identifies the quantity expected to be supplied, addministered or consumed by the subject.
+         * Identifies the quantity expected to be supplied, administered or consumed by the subject.
          */
         @Child(name = "quantity", type = {SimpleQuantity.class}, order=14, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="How much to administer/supply/consume", formalDefinition="Identifies the quantity expected to be supplied, addministered or consumed by the subject." )
+        @Description(shortDefinition="How much to administer/supply/consume", formalDefinition="Identifies the quantity expected to be supplied, administered or consumed by the subject." )
         protected SimpleQuantity quantity;
 
         /**
@@ -1104,7 +1106,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @return {@link #code} (Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter.)
+         * @return {@link #code} (Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.)
          */
         public CodeableConcept getCode() { 
           if (this.code == null)
@@ -1120,7 +1122,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter.)
+         * @param value {@link #code} (Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.)
          */
         public CarePlanActivityDetailComponent setCode(CodeableConcept value) { 
           this.code = value;
@@ -1466,7 +1468,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @return {@link #location} (Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.)
+         * @return {@link #location} (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
         public Reference getLocation() { 
           if (this.location == null)
@@ -1482,7 +1484,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #location} (Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.)
+         * @param value {@link #location} (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
         public CarePlanActivityDetailComponent setLocation(Reference value) { 
           this.location = value;
@@ -1490,7 +1492,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.)
+         * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
         public Location getLocationTarget() { 
           if (this.locationTarget == null)
@@ -1502,7 +1504,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.)
+         * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
         public CarePlanActivityDetailComponent setLocationTarget(Location value) { 
           this.locationTarget = value;
@@ -1628,7 +1630,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @return {@link #quantity} (Identifies the quantity expected to be supplied, addministered or consumed by the subject.)
+         * @return {@link #quantity} (Identifies the quantity expected to be supplied, administered or consumed by the subject.)
          */
         public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
@@ -1644,7 +1646,7 @@ public class CarePlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #quantity} (Identifies the quantity expected to be supplied, addministered or consumed by the subject.)
+         * @param value {@link #quantity} (Identifies the quantity expected to be supplied, administered or consumed by the subject.)
          */
         public CarePlanActivityDetailComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
@@ -1703,7 +1705,7 @@ public class CarePlan extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
           childrenList.add(new Property("reasonReference", "Reference(Condition)", "Provides the health condition(s) that drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
           childrenList.add(new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal));
@@ -1711,11 +1713,11 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("statusReason", "CodeableConcept", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, java.lang.Integer.MAX_VALUE, statusReason));
           childrenList.add(new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.", 0, java.lang.Integer.MAX_VALUE, prohibited));
           childrenList.add(new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, java.lang.Integer.MAX_VALUE, scheduled));
-          childrenList.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.", 0, java.lang.Integer.MAX_VALUE, location));
+          childrenList.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, java.lang.Integer.MAX_VALUE, location));
           childrenList.add(new Property("performer", "Reference(Practitioner|Organization|RelatedPerson|Patient)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer));
           childrenList.add(new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, java.lang.Integer.MAX_VALUE, product));
           childrenList.add(new Property("dailyAmount", "SimpleQuantity", "Identifies the quantity expected to be consumed in a given day.", 0, java.lang.Integer.MAX_VALUE, dailyAmount));
-          childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, addministered or consumed by the subject.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, administered or consumed by the subject.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("description", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, java.lang.Integer.MAX_VALUE, description));
         }
 
@@ -1796,10 +1798,10 @@ public class CarePlan extends DomainResource {
   }
 
     /**
-     * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="External Ids for this plan", formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="External Ids for this plan", formalDefinition="This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
@@ -1815,21 +1817,21 @@ public class CarePlan extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposed | draft | active | completed | cancelled", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record." )
+    @Description(shortDefinition="proposed | draft | active | completed | cancelled", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record." )
     protected Enumeration<CarePlanStatus> status;
 
     /**
-     * Identifiers the context in which this particular CarePlan is defined.
+     * Identifies the context in which this particular CarePlan is defined.
      */
     @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Created in context of", formalDefinition="Identifiers the context in which this particular CarePlan is defined." )
+    @Description(shortDefinition="Created in context of", formalDefinition="Identifies the context in which this particular CarePlan is defined." )
     protected Reference context;
 
     /**
-     * The actual object that is the target of the reference (Identifiers the context in which this particular CarePlan is defined.)
+     * The actual object that is the target of the reference (Identifies the context in which this particular CarePlan is defined.)
      */
     protected Resource contextTarget;
 
@@ -1860,10 +1862,10 @@ public class CarePlan extends DomainResource {
     protected DateTimeType modified;
 
     /**
-     * Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans.  E.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.
+     * Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans; e.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Type of plan", formalDefinition="Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans.  E.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc." )
+    @Description(shortDefinition="Type of plan", formalDefinition="Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc." )
     protected List<CodeableConcept> category;
 
     /**
@@ -1912,13 +1914,13 @@ public class CarePlan extends DomainResource {
     protected List<CarePlanParticipantComponent> participant;
 
     /**
-     * Describes the intended objective(s) of carrying out the Care Plan.
+     * Describes the intended objective(s) of carrying out the care plan.
      */
     @Child(name = "goal", type = {Goal.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Desired outcome of plan", formalDefinition="Describes the intended objective(s) of carrying out the Care Plan." )
+    @Description(shortDefinition="Desired outcome of plan", formalDefinition="Describes the intended objective(s) of carrying out the care plan." )
     protected List<Reference> goal;
     /**
-     * The actual objects that are the target of the reference (Describes the intended objective(s) of carrying out the Care Plan.)
+     * The actual objects that are the target of the reference (Describes the intended objective(s) of carrying out the care plan.)
      */
     protected List<Goal> goalTarget;
 
@@ -1955,7 +1957,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1973,7 +1975,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -2034,7 +2036,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<CarePlanStatus> getStatusElement() { 
       if (this.status == null)
@@ -2054,7 +2056,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public CarePlan setStatusElement(Enumeration<CarePlanStatus> value) { 
       this.status = value;
@@ -2062,14 +2064,14 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * @return Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.
      */
     public CarePlanStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
+     * @param value Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.
      */
     public CarePlan setStatus(CarePlanStatus value) { 
         if (this.status == null)
@@ -2079,7 +2081,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (Identifiers the context in which this particular CarePlan is defined.)
+     * @return {@link #context} (Identifies the context in which this particular CarePlan is defined.)
      */
     public Reference getContext() { 
       if (this.context == null)
@@ -2095,7 +2097,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #context} (Identifiers the context in which this particular CarePlan is defined.)
+     * @param value {@link #context} (Identifies the context in which this particular CarePlan is defined.)
      */
     public CarePlan setContext(Reference value) { 
       this.context = value;
@@ -2103,14 +2105,14 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifiers the context in which this particular CarePlan is defined.)
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the context in which this particular CarePlan is defined.)
      */
     public Resource getContextTarget() { 
       return this.contextTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifiers the context in which this particular CarePlan is defined.)
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the context in which this particular CarePlan is defined.)
      */
     public CarePlan setContextTarget(Resource value) { 
       this.contextTarget = value;
@@ -2240,7 +2242,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans.  E.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.)
+     * @return {@link #category} (Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans; e.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.)
      */
     public List<CodeableConcept> getCategory() { 
       if (this.category == null)
@@ -2258,7 +2260,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans.  E.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.)
+     * @return {@link #category} (Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans; e.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.)
      */
     // syntactic sugar
     public CodeableConcept addCategory() { //3
@@ -2519,7 +2521,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #goal} (Describes the intended objective(s) of carrying out the Care Plan.)
+     * @return {@link #goal} (Describes the intended objective(s) of carrying out the care plan.)
      */
     public List<Reference> getGoal() { 
       if (this.goal == null)
@@ -2537,7 +2539,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #goal} (Describes the intended objective(s) of carrying out the Care Plan.)
+     * @return {@link #goal} (Describes the intended objective(s) of carrying out the care plan.)
      */
     // syntactic sugar
     public Reference addGoal() { //3
@@ -2559,7 +2561,7 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #goal} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Describes the intended objective(s) of carrying out the Care Plan.)
+     * @return {@link #goal} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Describes the intended objective(s) of carrying out the care plan.)
      */
     public List<Goal> getGoalTarget() { 
       if (this.goalTarget == null)
@@ -2569,7 +2571,7 @@ public class CarePlan extends DomainResource {
 
     // syntactic sugar
     /**
-     * @return {@link #goal} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Describes the intended objective(s) of carrying out the Care Plan.)
+     * @return {@link #goal} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Describes the intended objective(s) of carrying out the care plan.)
      */
     public Goal addGoalTarget() { 
       Goal r = new Goal();
@@ -2645,20 +2647,20 @@ public class CarePlan extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("status", "code", "Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifiers the context in which this particular CarePlan is defined.", 0, java.lang.Integer.MAX_VALUE, context));
+        childrenList.add(new Property("status", "code", "Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the context in which this particular CarePlan is defined.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson|Organization)", "Identifies the individual(s) or ogranization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("modified", "dateTime", "Identifies the most recent date on which the plan has been revised.", 0, java.lang.Integer.MAX_VALUE, modified));
-        childrenList.add(new Property("category", "CodeableConcept", "Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans.  E.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("category", "CodeableConcept", "Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("description", "string", "A description of the scope and nature of the plan.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses));
         childrenList.add(new Property("support", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, support));
         childrenList.add(new Property("relatedPlan", "", "Identifies CarePlans with some sort of formal relationship to the current plan.", 0, java.lang.Integer.MAX_VALUE, relatedPlan));
         childrenList.add(new Property("participant", "", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, participant));
-        childrenList.add(new Property("goal", "Reference(Goal)", "Describes the intended objective(s) of carrying out the Care Plan.", 0, java.lang.Integer.MAX_VALUE, goal));
+        childrenList.add(new Property("goal", "Reference(Goal)", "Describes the intended objective(s) of carrying out the care plan.", 0, java.lang.Integer.MAX_VALUE, goal));
         childrenList.add(new Property("activity", "", "Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.", 0, java.lang.Integer.MAX_VALUE, activity));
         childrenList.add(new Property("note", "Annotation", "General notes about the care plan not covered elsewhere.", 0, java.lang.Integer.MAX_VALUE, note));
       }

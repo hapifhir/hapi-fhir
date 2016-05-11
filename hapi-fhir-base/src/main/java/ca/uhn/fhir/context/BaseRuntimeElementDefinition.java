@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"[" + getName() + "]";
+		return getClass().getSimpleName()+"[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
 	}
 
 	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
@@ -214,8 +214,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		/**
 		 * HL7.org style.
 		 */
-		PRIMITIVE_XHTML_HL7ORG
-
+		PRIMITIVE_XHTML_HL7ORG, 
+		
 	}
 
 }

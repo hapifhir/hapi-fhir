@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -167,10 +168,13 @@ public class TransactionWithBundleParamTest {
 }
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
+	
+	
+	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -196,9 +200,8 @@ public class TransactionWithBundleParamTest {
 		ourClient = builder.build();
 
 	}
-	
-	
-	
+
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */

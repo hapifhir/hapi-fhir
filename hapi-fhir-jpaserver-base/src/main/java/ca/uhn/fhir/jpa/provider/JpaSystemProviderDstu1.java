@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,22 @@ package ca.uhn.fhir.jpa.provider;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class JpaSystemProviderDstu1 extends BaseJpaSystemProvider<List<IResource>> {
+public class JpaSystemProviderDstu1 extends BaseJpaSystemProvider<List<IResource>, MetaDt> {
 
 	@Transaction
-	public List<IResource> transaction(HttpServletRequest theRequest, @TransactionParam List<IResource> theResources) {
-		startRequest(theRequest);
+	public List<IResource> transaction(RequestDetails theRequestDetails, @TransactionParam List<IResource> theResources) {
+		startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		try {
-			return getDao().transaction(theResources);
+			return getDao().transaction(theRequestDetails, theResources);
 		} finally {
-			endRequest(theRequest);
+			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
 	}
 

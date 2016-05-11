@@ -33,13 +33,12 @@
 	
 		<head>
 			<!-- Syntax Highlighter -->
-			<!--
-			-->
 			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
+			
 			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
 			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
 			
@@ -47,8 +46,6 @@
 			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
 			   font size
 			 -->
-			<!--
-			-->
 			<link rel="shortcut icon" href="http://jamesagnew.github.io/hapi-fhir/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 			
@@ -74,12 +71,13 @@
 
 		<menu name="Using HAPI" inherit="bottom" >
 			<item name="Documentation Index" href="./docindex.html"/>
+			<item name="Command Line Tool (cli)" href="./doc_cli.html" />
 		</menu>
 		
 		<menu name="Documentation" inherit="top" >
 			<item name="Documentation Index" href="./docindex.html"/>
 			<item name="Introduction" href="./doc_intro.html"/>
-			<item name="DSTU2 Support / HL7.org Structures" href="./doc_dstu2.html" />
+			<item name="DSTU3 Support / HL7.org Structures" href="./doc_dstu2.html" />
 			<item name="The Data Model" href="./doc_fhirobjects.html">
 				<item name="Working with Resources" href="./doc_fhirobjects.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />
@@ -92,14 +90,18 @@
 				<item name="Annotation Client" href="./doc_rest_client_annotation.html" />
 				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
 				<item name="Client HTTP Configuration" href="./doc_rest_client_http_config.html"/>
+				<item name="Client Examples" href="./doc_rest_client_examples.html"/>
+				<item name="JAX-RS Client &amp; Alternate HTTP Providers" href="./doc_rest_client_alternate_provider.html"/>
 			</item>
 			<item name="RESTful Server" href="./doc_rest_server.html" >
 				<item name="Using RESTful Server" href="./doc_rest_server.html" />
 				<item name="RESTful Operations" href="./doc_rest_operations.html" />
 				<item name="Narrative Generator" href="./doc_narrative.html" />
-				<item name="CORS Support" href="./doc_cors.html" />
 				<item name="Interceptors (server)" href="./doc_rest_server_interceptor.html" />
+				<item name="Security" href="./doc_rest_server_security.html" />
+				<item name="CORS Support" href="./doc_cors.html" />
 				<item name="Web Testing UI" href="./doc_server_tester.html" />
+				<item name="JAX-RS Support" href="./doc_rest_server_jaxrs.html" />
 			</item>
 			<item name="Logging" href="./doc_logging.html" />
 			<item name="ETags" href="./doc_rest_etag.html" />
@@ -109,9 +111,10 @@
 				<item name="Core API" href="./apidocs/index.html" />
 				<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 				<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
-				<item name="Model API (RI DSTU2)" href="./apidocs-hl7org-dstu2/index.html" />
+				<item name="Model API (DSTU3)" href="./apidocs-dstu3/index.html" />
 				<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 			</item>
+			<item name="Command Line Tool (hapi-fhir-cli)" href="./doc_cli.html" />
 			<item name="Maven Plugin (hapi-tinder-plugin)" href="./doc_tinder.html" />
 		</menu>
 	
@@ -120,7 +123,7 @@
 			<item name="Core API" href="./apidocs/index.html" />
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
-			<item name="Model API (RI DSTU2)" href="./apidocs-hl7org-dstu2/index.html" />
+			<item name="Model API (DSTU3)" href="./apidocs-dstu3/index.html" />
 			<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 		</menu>
 		<menu name="JXR" inherit="top">
@@ -131,6 +134,7 @@
 		<menu name="Get Help" inherit="top">
 			<item name="Google Group (Ask Questions)" href="https://groups.google.com/d/forum/hapi-fhir" />
 			<item name="Issue Tracker (Report Bugs/Request Features)" href="https://github.com/jamesagnew/hapi-fhir/issues" />
+			<item name="Frequently Asked Questions (FAQ)" href="./hapi-fhir-faq.html" />
 		</menu>
 
 		<menu name="Test Server">
@@ -138,12 +142,15 @@
 			<item name="Vagrant Private Test Server" href="./doc_vagrant.html"/>
 		</menu>
 		
-		
 		<menu name="Reports" inherit="bottom">
 			<item name="Project Developers" href="team-list.html" />
 			<item name="Coveralls (Test Coverage)" href="https://coveralls.io/github/jamesagnew/hapi-fhir" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="Checkstyle" href="checkstyle.html" />
+		</menu>
+		
+		<menu name="Contribute" inherit="bottom">
+			<item name="Guide to Hacking HAPI" href="./hacking_hapi_fhir.html"/>
 		</menu>
 
 	</body>
@@ -189,7 +196,7 @@
 			<topNav>Documentation|Get Help|Test Server</topNav>
 			<bottomNav maxSpan="9" >
 				<column>HAPI FHIR|Test Server</column>
-				<column>Using HAPI</column>
+				<column>Using HAPI|Contribute</column>
 				<column>JavaDocs|JXR</column>
 				<column>Get Help|Maven Reports</column>
 			</bottomNav>
@@ -204,7 +211,7 @@
 				<a href="https://github.com/jamesagnew/hapi-fhir"><img src="./images/github-logo-mini.png" alt="Hosted on GitHub" border="0"/></a>
 				<br/>
 				Star us and we will love you!<br />
-				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 			]]></bottomDescription>
 			<brand>
 				<name><![CDATA[

@@ -80,7 +80,7 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 	}
 
 	public boolean hasValue() {
-		return !isEmpty();
+  	  return !StringUtils.isBlank(getValueAsString());
 	}
 
 	public String getValueAsString() {

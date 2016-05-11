@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,26 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.client.HttpClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-class ClientInvocationHandlerFactory {
+public class ClientInvocationHandlerFactory {
 
 	private final Map<Method, BaseMethodBinding<?>> myBindings = new HashMap<Method, BaseMethodBinding<?>>();
-	private final HttpClient myClient;
+	private final IHttpClient myClient;
 	private final FhirContext myContext;
 	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
 	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 	private final String myUrlBase;
 
-	public ClientInvocationHandlerFactory(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
+	public ClientInvocationHandlerFactory(IHttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		myClient = theClient;
 		myUrlBase = theUrlBase;
 		myContext = theContext;
@@ -57,6 +58,7 @@ class ClientInvocationHandlerFactory {
 			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("setSummary", SummaryEnum.class), new SetSummaryLambda());
+			myMethodToLambda.put(theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class), new FetchResourceFromUrlLambda());
 
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
@@ -73,7 +75,7 @@ class ClientInvocationHandlerFactory {
 		return new ClientInvocationHandler(myClient, myContext, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda, theRestfulClientFactory);
 	}
 
-	interface ILambda {
+	public interface ILambda {
 		Object handle(ClientInvocationHandler theTarget, Object[] theArgs);
 	}
 
@@ -85,7 +87,18 @@ class ClientInvocationHandlerFactory {
 			return null;
 		}
 	}
-
+	
+	class FetchResourceFromUrlLambda implements ILambda {
+		@Override
+		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseResource> type = (Class<? extends IBaseResource>) theArgs[0];
+			String url = (String) theArgs[1];
+			
+			return theTarget.fetchResourceFromUrl(type, url);
+		}
+	}
+	
 	class SetEncodingLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {

@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ProvenanceAgentType {
 
         /**
-         * The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. "not a healthcare provider"
+         * The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. "not a healthcare provider".
          */
         PERSON, 
         /**
@@ -43,7 +43,7 @@ public enum ProvenanceAgentType {
          */
         PRACTITIONER, 
         /**
-         * The participant is an organization
+         * The participant is an organization.
          */
         ORGANIZATION, 
         /**
@@ -102,9 +102,9 @@ public enum ProvenanceAgentType {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. \"not a healthcare provider\"";
+            case PERSON: return "The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. \"not a healthcare provider\".";
             case PRACTITIONER: return "The participant is a practitioner, a person (provider) who is directly or indirectly involved in the provisioning of healthcare.";
-            case ORGANIZATION: return "The participant is an organization";
+            case ORGANIZATION: return "The participant is an organization.";
             case SOFTWARE: return "The participant is a software application including services, algorithms, etc.";
             case PATIENT: return "The participant is the patient, a person or animal receiving care or other health-related services.";
             case DEVICE: return "The participant is a device, an instance of a manufactured thing that is used in the provision of healthcare without being substantially changed through that activity. The device may be a machine, an insert, a computer, an application, etc. This includes durable (reusable) medical equipment as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.";

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.context.FhirContext;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +49,12 @@ public interface IQueryParameterType {
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
+	 * @param theContext TODO
 	 * 
 	 * @return Returns a representation of this parameter's value as it will be represented "over the wire". In other
 	 * words, how it will be presented in a URL (although not URL escaped) 
 	 */
-	public String getValueAsQueryToken();
+	public String getValueAsQueryToken(FhirContext theContext);
 	
 	/**
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")
@@ -67,8 +69,10 @@ public interface IQueryParameterType {
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
-	 * instead of a normal value 
+	 * instead of a normal value
+	 *  
+	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
-	void setMissing(Boolean theMissing);
+	IQueryParameterType setMissing(Boolean theMissing);
 
 }

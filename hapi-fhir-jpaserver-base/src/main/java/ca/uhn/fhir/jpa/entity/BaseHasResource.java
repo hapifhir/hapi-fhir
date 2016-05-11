@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BaseHasResource {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "RES_VERSION", nullable = true, length = 5)
+	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	private FhirVersionEnum myFhirVersion;
 
@@ -119,6 +119,10 @@ public abstract class BaseHasResource {
 
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
+	}
+
+	public Date getUpdatedDate() {
+		return myUpdated;
 	}
 
 	public abstract long getVersion();

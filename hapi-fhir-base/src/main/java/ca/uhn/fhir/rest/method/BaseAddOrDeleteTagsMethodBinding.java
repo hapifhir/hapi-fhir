@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,11 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -45,7 +42,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -59,8 +56,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	private String myResourceName;
 	private Integer myTagListParamIndex;
 
-	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, Class<? extends IResource> theTypeFromMethodAnnotation) {
-		super(theMethod, theConetxt, theProvider);
+	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, Class<? extends IResource> theTypeFromMethodAnnotation) {
+		super(theMethod, theContext, theProvider);
 
 		if (theProvider instanceof IResourceProvider) {
 			myType = ((IResourceProvider) theProvider).getResourceType();
@@ -72,9 +69,9 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName() + " parameter. Please specity a resource type in the method annotation on this method");
 		}
 		
-		myResourceName = theConetxt.getResourceDefinition(myType).getName();
+		myResourceName = theContext.getResourceDefinition(myType).getName();
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 		myTagListParamIndex = MethodUtil.findTagListParameterIndex(theMethod);
 
@@ -154,8 +151,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		Object[] params = createParametersForServerRequest(theRequest, null);
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		Object[] params = createParametersForServerRequest(theRequest);
 
 		params[myIdParamIndex] = theRequest.getId();
 
@@ -164,7 +161,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		}
 
 		IParser parser = createAppropriateParserForParsingServerRequest(theRequest);
-		Reader reader = theRequest.getServletRequest().getReader();
+		Reader reader = theRequest.getReader();
 		try {
 			TagList tagList = parser.parseTagList(reader);
 			params[myTagListParamIndex] = tagList;
@@ -175,21 +172,13 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, theRequest.getServletRequest(), theRequest.getServletResponse());
+			boolean continueProcessing = next.outgoingResponse(theRequest);
 			if (!continueProcessing) {
-				return;
+				return null;
 			}
 		}
-
-		HttpServletResponse response = theRequest.getServletResponse();
-		response.setContentType(Constants.CT_TEXT);
-		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
-
-		theServer.addHeadersToResponse(response);
-
-		PrintWriter writer = response.getWriter();
-		writer.close();
+		
+		return theRequest.getResponse().returnResponse(null, Constants.STATUS_HTTP_200_OK, false, null, null);
 	}
 
 	@Override

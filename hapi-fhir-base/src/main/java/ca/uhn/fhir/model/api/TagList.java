@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of
@@ -251,6 +253,33 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	@Override
 	public <T> T[] toArray(T[] theA) {
 		return myTagSet.toArray(theA);
+	}
+
+	/**
+	 * Returns false
+	 */
+	@Override
+	@CoverageIgnore
+	public boolean hasFormatComment() {
+		return false;
+	}
+
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	@CoverageIgnore
+	public List<String> getFormatCommentsPre() {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	@CoverageIgnore
+	public List<String> getFormatCommentsPost() {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.search.annotations.Field;
 
 @Entity
 @Table(name = "HFJ_RES_LINK" , indexes= {
@@ -57,27 +59,39 @@ public class ResourceLink implements Serializable {
 
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
+//	@ContainedIn()
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
+
+	@Column(name = "SOURCE_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
+	@Field()
+	private String mySourceResourceType;
 
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
+	@Field()
 	private Long myTargetResourcePid;
 
+	@Column(name = "TARGET_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
+	@Field()
+	private String myTargetResourceType;
+
 	public ResourceLink() {
-		// nothing
+		super();
 	}
 
 	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
 		super();
-		mySourcePath = theSourcePath;
-		mySourceResource = theSourceResource;
-		myTargetResource = theTargetResource;
+		setSourcePath(theSourcePath);
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
 	}
 
 	@Override
@@ -95,7 +109,7 @@ public class ResourceLink implements Serializable {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
-		b.append(myTargetResource, obj.myTargetResource);
+		b.append(myTargetResourcePid, obj.myTargetResourcePid);
 		return b.isEquals();
 	}
 
@@ -124,7 +138,7 @@ public class ResourceLink implements Serializable {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(mySourcePath);
 		b.append(mySourceResource);
-		b.append(myTargetResource);
+		b.append(myTargetResourcePid);
 		return b.toHashCode();
 	}
 
@@ -134,11 +148,15 @@ public class ResourceLink implements Serializable {
 
 	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
+		mySourceResourcePid = theSourceResource.getId();
+		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
 	public void setTargetResource(ResourceTable theTargetResource) {
 		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
+		myTargetResourcePid = theTargetResource.getId();
+		myTargetResourceType = theTargetResource.getResourceType();
 	}
 
 	@Override

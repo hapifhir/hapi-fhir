@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum PatientMpiMatch {
 
         /**
-         * This record meets the MPI criteria to be automatically considered as a full match
+         * This record meets the MPI criteria to be automatically considered as a full match.
          */
         CERTAIN, 
         /**
-         * This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match
+         * This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match.
          */
         PROBABLE, 
         /**
-         * This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match
+         * This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match.
          */
         POSSIBLE, 
         /**
-         * This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the MPI
+         * This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the MPI.
          */
         CERTAINLYNOT, 
         /**
@@ -81,10 +81,10 @@ public enum PatientMpiMatch {
         }
         public String getDefinition() {
           switch (this) {
-            case CERTAIN: return "This record meets the MPI criteria to be automatically considered as a full match";
-            case PROBABLE: return "This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match";
-            case POSSIBLE: return "This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match";
-            case CERTAINLYNOT: return "This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the MPI";
+            case CERTAIN: return "This record meets the MPI criteria to be automatically considered as a full match.";
+            case PROBABLE: return "This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match.";
+            case POSSIBLE: return "This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match.";
+            case CERTAINLYNOT: return "This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the MPI.";
             default: return "?";
           }
         }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,11 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -59,7 +60,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation();
+		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation(getContext());
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -72,7 +73,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
 		return new SimpleBundleProvider(conf);
 	}
@@ -80,11 +81,21 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
-			return true;
+			if (theRequest.getOperation() == null && theRequest.getResourceName() == null) {
+				return true;
+			}
 		}
 
-		if (theRequest.getRequestType() == RequestTypeEnum.GET && "metadata".equals(theRequest.getOperation())) {
-			return true;
+		if (theRequest.getResourceName() != null) {
+			return false;
+		}
+		
+		if ("metadata".equals(theRequest.getOperation())) {
+			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+				return true;
+			} else {
+				throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			}
 		}
 
 		return false;

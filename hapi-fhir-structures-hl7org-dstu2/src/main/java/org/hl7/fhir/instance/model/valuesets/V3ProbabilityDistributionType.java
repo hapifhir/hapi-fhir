@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ProbabilityDistributionType {
 
         /**
-         * The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g., occurs when probabilities are estimated.)  Two parameters a and b  are available to adjust the curve.  The mean m and variance s2 relate as follows: m = a/ (a + b) and s2 = ab/((a + b)2 (a + b + 1)).
+         * The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g. occurs when probabilities are estimated.)  Two parameters a and b  are available to adjust the curve.  The mean m and variance s2 relate as follows: m = a/ (a + b) and s2 = ab/((a + b)2 (a + b + 1)).
          */
         B, 
         /**
@@ -116,7 +116,7 @@ public enum V3ProbabilityDistributionType {
         }
         public String getDefinition() {
           switch (this) {
-            case B: return "The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g., occurs when probabilities are estimated.)  Two parameters a and b  are available to adjust the curve.  The mean m and variance s2 relate as follows: m = a/ (a + b) and s2 = ab/((a + b)2 (a + b + 1)).";
+            case B: return "The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g. occurs when probabilities are estimated.)  Two parameters a and b  are available to adjust the curve.  The mean m and variance s2 relate as follows: m = a/ (a + b) and s2 = ab/((a + b)2 (a + b + 1)).";
             case E: return "Used for data that describes extinction.  The exponential distribution is a special form of g-distribution where a = 1, hence, the relationship to mean m and variance s2 are m = b and s2 = b2.";
             case F: return "Used to describe the quotient of two c2 random variables.  The F-distribution has two parameters n1 and n2, which are the numbers of degrees of freedom of the numerator and denominator variable respectively. The relationship to mean m  and variance s2 are: m = n2 / (n2 - 2) and s2 = (2 n2 (n2 + n1 - 2)) / (n1 (n2 - 2)2 (n2 - 4)).";
             case G: return "The gamma-distribution used for data that is skewed and bounded to the right, i.e. where the maximum of the distribution curve is located near the origin.  The g-distribution has a two parameters a and b.  The relationship to mean m and variance s2 is m = a b and s2 = a b2.";

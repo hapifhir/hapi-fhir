@@ -17,9 +17,11 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -30,6 +32,8 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -43,16 +47,46 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
+	@Before
+	public void beforeEnableScheduling() {
+		myDaoConfig.setSchedulingDisabled(false);
+	}
+
 	@Override
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 
-		SubscriptionsRequireManualActivationInterceptor interceptor = new SubscriptionsRequireManualActivationInterceptor();
+		SubscriptionsRequireManualActivationInterceptorDstu2 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		interceptor.setDao(mySubscriptionDao);
 		myDaoConfig.getInterceptors().add(interceptor);
 	}
 
 	private void sleepUntilPingCount(BaseSocket socket, int wantPingCount) throws InterruptedException {
+		
+		/*
+		 * In a separate thread, start a polling for new resources. Normally the scheduler would
+		 * take care of this, but that can take longer which makes the unit tests run much slower
+		 * so we simulate that part.. 
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					ourLog.warn("Interrupted", e);
+				}
+				ourLog.info("About to poll in separate thread");
+				mySubscriptionDao.pollForNewUndeliveredResources();
+				ourLog.info("Done poll in separate thread");
+			}}.start();
+		
 		ourLog.info("Entering loop");
 		for (long start = System.currentTimeMillis(), now = System.currentTimeMillis(); now - start <= 20000; now = System.currentTimeMillis()) {
 			ourLog.debug("Starting");
@@ -167,11 +201,11 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testSubscriptionDynamic() throws Exception {
 		myDaoConfig.setSubscriptionEnabled(true);
 		myDaoConfig.setSubscriptionPollDelay(0);
-
+		
 		String methodName = "testSubscriptionDynamic";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		String criteria = "Observation?subject=Patient/" + pId.getIdPart();
 		DynamicEchoSocket socket = new DynamicEchoSocket(criteria, EncodingEnum.JSON);
@@ -184,17 +218,17 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 			sleepUntilPingCount(socket, 1);
 
-			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId));
+			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId), mySrd);
 
 			Observation obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			Thread.sleep(100);
 
@@ -209,7 +243,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			sleepUntilPingCount(socket, 4);
 
@@ -236,7 +270,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		String methodName = "testSubscriptionDynamic";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		String criteria = "Observation?subject=Patient/" + pId.getIdPart() + "&_format=xml";
 		DynamicEchoSocket socket = new DynamicEchoSocket(criteria, EncodingEnum.XML);
@@ -249,18 +283,18 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 			sleepUntilPingCount(socket, 1);
 
-			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId));
+			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId), mySrd);
 
 			Observation obs = new Observation();
 			ResourceMetadataKeyEnum.PROFILES.put(obs, Collections.singletonList(new IdDt("http://foo")));
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			Thread.sleep(100);
 
@@ -275,7 +309,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			sleepUntilPingCount(socket, 4);
 
@@ -301,26 +335,26 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		String methodName = "testSubscriptionResourcesAppear";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Subscription subs = new Subscription();
 		ResourceMetadataKeyEnum.PROFILES.put(subs, Collections.singletonList(new IdDt("http://foo")));
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-		String subsId = mySubscriptionDao.create(subs).getId().getIdPart();
+		String subsId = mySubscriptionDao.create(subs, mySrd).getId().getIdPart();
 
 		Thread.sleep(100);
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType afterId1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType afterId2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
@@ -338,7 +372,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			obs = new Observation();
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
-			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			IIdType afterId3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			sleepUntilPingCount(socket, 2);
 

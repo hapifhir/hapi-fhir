@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXParseException;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -53,7 +54,9 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-class SchemaBaseValidator implements IValidatorModule {
+public class SchemaBaseValidator implements IValidatorModule {
+	public static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
 
@@ -73,7 +76,7 @@ class SchemaBaseValidator implements IValidatorModule {
 	private Map<String, Schema> myKeyToSchema = new HashMap<String, Schema>();
 	private FhirContext myCtx;
 
-	SchemaBaseValidator(FhirContext theContext) {
+	public SchemaBaseValidator(FhirContext theContext) {
 		myCtx = theContext;
 	}
 
@@ -91,11 +94,30 @@ class SchemaBaseValidator implements IValidatorModule {
 				encodedResource = theContext.getFhirContext().newXmlParser().encodeResourceToString((IBaseResource) theContext.getResource());
 			}
 
+			try {
+			/*
+			 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+			 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
+			 */
+				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+			}catch (SAXNotRecognizedException ex){
+				ourLog.warn("Jaxp 1.5 Support not found.",ex);
+			}
+
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
+		} catch (SAXParseException e) {
+			SingleValidationMessage message = new SingleValidationMessage();
+			message.setLocationLine(e.getLineNumber());
+			message.setLocationCol(e.getColumnNumber());
+			message.setMessage(e.getLocalizedMessage());
+			message.setSeverity(ResultSeverityEnum.FATAL);
+			theContext.addValidationMessage(message);
 		} catch (SAXException e) {
-			throw new ConfigurationException("Could not apply schema file", e);
+			// Catch all
+			throw new ConfigurationException("Could not load/parse schema file", e);
 		} catch (IOException e) {
-			// This shouldn't happen since we're using a string source
+			// Catch all
 			throw new ConfigurationException("Could not load/parse schema file", e);
 		}
 	}
@@ -115,6 +137,15 @@ class SchemaBaseValidator implements IValidatorModule {
 			schemaFactory.setResourceResolver(new MyResourceResolver());
 
 			try {
+				try {
+				/*
+				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
+				 */
+					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				}catch (SAXNotRecognizedException snex){
+					ourLog.warn("Jaxp 1.5 Support not found.",snex);
+				}
 				schema = schemaFactory.newSchema(new Source[] { baseSource });
 			} catch (SAXException e) {
 				throw new ConfigurationException("Could not load/parse schema file: " + theSchemaName, e);
@@ -129,7 +160,7 @@ class SchemaBaseValidator implements IValidatorModule {
 		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 		if (baseIs == null) {
-			throw new InternalErrorException("Schema not found. " + SchematronBaseValidator.RESOURCES_JAR_NOTE);
+			throw new InternalErrorException("Schema not found. " + RESOURCES_JAR_NOTE);
 		}
 		baseIs = new BOMInputStream(baseIs, false);
 		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));

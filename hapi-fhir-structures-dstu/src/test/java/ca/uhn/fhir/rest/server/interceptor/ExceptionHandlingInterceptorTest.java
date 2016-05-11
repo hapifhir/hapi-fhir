@@ -41,19 +41,20 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionHandlingInterceptorTest {
 
+	private static ExceptionHandlingInterceptor myInterceptor;
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private static ExceptionHandlingInterceptor myInterceptor;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Before
 	public void before() {
@@ -96,13 +97,12 @@ public class ExceptionHandlingInterceptorTest {
 	}
 
 	
-	
-	
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
 
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -126,6 +126,8 @@ public class ExceptionHandlingInterceptorTest {
 		myInterceptor = new ExceptionHandlingInterceptor();
 		servlet.registerInterceptor(myInterceptor);
 	}
+
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */

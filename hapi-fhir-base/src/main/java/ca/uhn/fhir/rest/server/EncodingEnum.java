@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
+import java.util.Collections;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +23,21 @@ package ca.uhn.fhir.rest.server;
  */
 
 import java.util.HashMap;
+import java.util.Map;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public enum EncodingEnum {
 
-	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, "application/xml", Constants.FORMAT_XML) {
+	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.FORMAT_XML) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
 	},
 
-	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.CT_JSON, Constants.FORMAT_JSON) {
+	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.FORMAT_JSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newJsonParser();
@@ -43,15 +46,18 @@ public enum EncodingEnum {
 
 	;
 
-	private static HashMap<String, EncodingEnum> ourContentTypeToEncoding;
+	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
+	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
 
 	static {
 		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
 		for (EncodingEnum next : values()) {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
-			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
 		}
+		
+		// Add before we add the lenient ones
+		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<String, EncodingEnum>(ourContentTypeToEncoding));
 
 		/*
 		 * These are wrong, but we add them just to be tolerant of other
@@ -67,13 +73,11 @@ public enum EncodingEnum {
 
 	private String myResourceContentType;
 	private String myBundleContentType;
-	private String myBrowserFriendlyContentType;
 	private String myFormatContentType;
 
-	EncodingEnum(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType, String theFormatContentType) {
+	EncodingEnum(String theResourceContentType, String theBundleContentType, String theFormatContentType) {
 		myResourceContentType = theResourceContentType;
 		myBundleContentType = theBundleContentType;
-		myBrowserFriendlyContentType = theBrowserFriendlyContentType;
 		myFormatContentType = theFormatContentType;
 	}
 
@@ -91,12 +95,40 @@ public enum EncodingEnum {
 		return myResourceContentType;
 	}
 
-	public String getBrowserFriendlyBundleContentType() {
-		return myBrowserFriendlyContentType;
-	}
-
+	/**
+	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is lenient!</b> Things like "application/xml" will return {@link EncodingEnum#XML}
+	 * even if the "+fhir" part is missing from the expected content type.
+	 * </p>
+	 */
 	public static EncodingEnum forContentType(String theContentType) {
 		return ourContentTypeToEncoding.get(theContentType);
+	}
+
+	/**
+	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is NOT lenient!</b> Things like "application/xml" will return <code>null</code>
+	 * </p>
+	 * @see #forContentType(String)
+	 */
+	public static EncodingEnum forContentTypeStrict(String theContentType) {
+		return ourContentTypeToEncodingStrict.get(theContentType);
+	}
+
+	/**
+	 * Returns a map containing the encoding for a given content type, or <code>null</code> if no encoding
+	 * is found. 
+	 * <p>
+	 * <b>This method is NOT lenient!</b> Things like "application/xml" will return <code>null</code>
+	 * </p>
+	 * @see #forContentType(String)
+	 */
+	public static Map<String, EncodingEnum> getContentTypeToEncodingStrict() {
+		return ourContentTypeToEncodingStrict;
 	}
 
 	public String getFormatContentType() {

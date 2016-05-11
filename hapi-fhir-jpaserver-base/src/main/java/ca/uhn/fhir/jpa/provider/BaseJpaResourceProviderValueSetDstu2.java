@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.BooleanUtils;
-
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -40,7 +40,9 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
@@ -68,7 +70,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
 			if (haveId) {
 				return dao.expand(theId, toFilterString(theFilter));
 			} else if (haveIdentifier) {
@@ -103,6 +105,43 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	}
 
 	//@formatter:off
+	@Operation(name = "$lookup", idempotent = true, returnParameters= {
+		@OperationParam(name="name", type=StringDt.class, min=1),
+		@OperationParam(name="version", type=StringDt.class, min=0),
+		@OperationParam(name="display", type=StringDt.class, min=1),
+		@OperationParam(name="abstract", type=BooleanDt.class, min=1),
+	})
+	public Parameters lookup(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name="code", min=0, max=1) CodeDt theCode, 
+			@OperationParam(name="system", min=0, max=1) UriDt theSystem,
+			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding,
+			RequestDetails theRequestDetails 
+			) {
+		//@formatter:on
+		
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt>) getDao();
+			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			if (result.isFound()==false) {
+				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
+			}
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("name").setValue(new StringDt(result.getCodeSystemDisplayName()));
+			if (isNotBlank(result.getCodeSystemVersion())) {
+				retVal.addParameter().setName("version").setValue(new StringDt(result.getCodeSystemVersion()));
+			}
+			retVal.addParameter().setName("display").setValue(new StringDt(result.getCodeDisplay()));
+			retVal.addParameter().setName("abstract").setValue(new BooleanDt(result.isCodeIsAbstract()));			
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+	
+	
+	//@formatter:off
 	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
 		@OperationParam(name="result", type=BooleanDt.class, min=1),
 		@OperationParam(name="message", type=StringDt.class),
@@ -122,7 +161,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
 			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept);
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("result").setValue(new BooleanDt(result.isResult()));
@@ -137,4 +176,6 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			endRequest(theServletRequest);
 		}
 	}
+
+	
 }

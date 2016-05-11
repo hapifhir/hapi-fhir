@@ -4,7 +4,7 @@ package org.hl7.fhir.instance.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,5 +30,9 @@ public interface INarrative extends ICompositeType {
 
 	// TODO: use less broad exception type here
 	public String getDivAsString() throws Exception;
+
+	public INarrative setStatusAsString(String theString);
+
+	public String getStatusAsString();
 
 }

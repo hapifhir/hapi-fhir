@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
 public interface IOperationUntypedWithInputAndPartialOutput<T extends IBaseParameters> extends IOperationUntypedWithInput<T> {
 
 	/**
@@ -34,5 +36,15 @@ public interface IOperationUntypedWithInputAndPartialOutput<T extends IBaseParam
 	 * @param theValue The first parameter value
 	 */
 	IOperationUntypedWithInputAndPartialOutput<T> andParameter(String theName, IBase theValue);
+
+	/**
+	 * Use chained method calls to construct a Parameters input. This form is a convenience
+	 * in order to allow simple method chaining to be used to build up a parameters
+	 * resource for the input of an operation without needing to manually construct one.
+	 * 
+	 * @param theName The first parameter name
+	 * @param theValue The first parameter value
+	 */
+	IOperationUntypedWithInputAndPartialOutput<T> andSearchParameter(String theName, IQueryParameterType theValue);
 
 }

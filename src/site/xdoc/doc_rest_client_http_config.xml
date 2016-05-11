@@ -22,16 +22,15 @@
 			</p>
 
 			<p>
-				In many cases, the default configuration should suffice. However,
-				if you require anything
-				more sophisticated (username/password, HTTP
-				proxy settings, etc.) you will need
-				to configure the underlying
-				client.
+				In many cases, the default configuration should suffice. HAPI FHIR 
+				also encapsulates some of the more common configuration settings you
+				might want to use (socket timesouts, proxy settings, etc.) so that these
+				can be configured through HAPI's API without needing to understand the
+				underlying HTTP Client library.
 			</p>
 
 			<p>
-				The underlying client configuration is provided by accessing the
+				This configuration is provided by accessing the
 				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html">IRestfulClientFactory</a>
 				class from the FhirContext.
 			</p>
@@ -39,8 +38,10 @@
 			<p>
 				Note that individual requests and responses
 				can be tweaked using
-				<a href="./doc_rest_client_interceptor.html">Client Interceptors</a>
-				.
+				<a href="./doc_rest_client_interceptor.html">Client Interceptors.</a>
+				This approach is generally useful for configuration involving
+				tweaking the HTTP request/response, such as adding authorization headers
+				or logging.
 			</p>
 
 			<subsection name="Setting Socket Timeouts">

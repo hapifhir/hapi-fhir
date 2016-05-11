@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -48,47 +50,47 @@ public class DeviceComponent extends DomainResource {
 
     public enum MeasmntPrinciple {
         /**
-         * Measurement principle isn't in the list
+         * Measurement principle isn't in the list.
          */
         OTHER, 
         /**
-         * Measurement is done using chemical
+         * Measurement is done using the chemical principle.
          */
         CHEMICAL, 
         /**
-         * Measurement is done using electrical
+         * Measurement is done using the electrical principle.
          */
         ELECTRICAL, 
         /**
-         * Measurement is done using impedance
+         * Measurement is done using the impedance principle.
          */
         IMPEDANCE, 
         /**
-         * Measurement is done using nuclear
+         * Measurement is done using the nuclear principle.
          */
         NUCLEAR, 
         /**
-         * Measurement is done using optical
+         * Measurement is done using the optical principle.
          */
         OPTICAL, 
         /**
-         * Measurement is done using thermal
+         * Measurement is done using the thermal principle.
          */
         THERMAL, 
         /**
-         * Measurement is done using biological
+         * Measurement is done using the biological principle.
          */
         BIOLOGICAL, 
         /**
-         * Measurement is done using mechanical
+         * Measurement is done using the mechanical principle.
          */
         MECHANICAL, 
         /**
-         * Measurement is done using acoustical
+         * Measurement is done using the acoustical principle.
          */
         ACOUSTICAL, 
         /**
-         * Measurement is done using manual
+         * Measurement is done using the manual principle.
          */
         MANUAL, 
         /**
@@ -156,17 +158,17 @@ public class DeviceComponent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case OTHER: return "Measurement principle isn't in the list";
-            case CHEMICAL: return "Measurement is done using chemical";
-            case ELECTRICAL: return "Measurement is done using electrical";
-            case IMPEDANCE: return "Measurement is done using impedance";
-            case NUCLEAR: return "Measurement is done using nuclear";
-            case OPTICAL: return "Measurement is done using optical";
-            case THERMAL: return "Measurement is done using thermal";
-            case BIOLOGICAL: return "Measurement is done using biological";
-            case MECHANICAL: return "Measurement is done using mechanical";
-            case ACOUSTICAL: return "Measurement is done using acoustical";
-            case MANUAL: return "Measurement is done using manual";
+            case OTHER: return "Measurement principle isn't in the list.";
+            case CHEMICAL: return "Measurement is done using the chemical principle.";
+            case ELECTRICAL: return "Measurement is done using the electrical principle.";
+            case IMPEDANCE: return "Measurement is done using the impedance principle.";
+            case NUCLEAR: return "Measurement is done using the nuclear principle.";
+            case OPTICAL: return "Measurement is done using the optical principle.";
+            case THERMAL: return "Measurement is done using the thermal principle.";
+            case BIOLOGICAL: return "Measurement is done using the biological principle.";
+            case MECHANICAL: return "Measurement is done using the mechanical principle.";
+            case ACOUSTICAL: return "Measurement is done using the acoustical principle.";
+            case MANUAL: return "Measurement is done using the manual principle.";
             default: return "?";
           }
         }
@@ -470,10 +472,10 @@ public class DeviceComponent extends DomainResource {
     protected List<CodeableConcept> operationalStatus;
 
     /**
-     * Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.
+     * Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.
      */
     @Child(name = "parameterGroup", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Current supported parameter group", formalDefinition="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular." )
+    @Description(shortDefinition="Current supported parameter group", formalDefinition="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular." )
     protected CodeableConcept parameterGroup;
 
     /**
@@ -738,7 +740,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.)
+     * @return {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
      */
     public CodeableConcept getParameterGroup() { 
       if (this.parameterGroup == null)
@@ -754,7 +756,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.)
+     * @param value {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
      */
     public DeviceComponent setParameterGroup(CodeableConcept value) { 
       this.parameterGroup = value;
@@ -882,7 +884,7 @@ public class DeviceComponent extends DomainResource {
         childrenList.add(new Property("source", "Reference(Device)", "Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the parent resource. For example: Channel is linked to its VMD parent.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("operationalStatus", "CodeableConcept", "Indicates current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
-        childrenList.add(new Property("parameterGroup", "CodeableConcept", "Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.", 0, java.lang.Integer.MAX_VALUE, parameterGroup));
+        childrenList.add(new Property("parameterGroup", "CodeableConcept", "Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, java.lang.Integer.MAX_VALUE, parameterGroup));
         childrenList.add(new Property("measurementPrinciple", "code", "Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, java.lang.Integer.MAX_VALUE, measurementPrinciple));
         childrenList.add(new Property("productionSpecification", "", "Describes the production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
         childrenList.add(new Property("languageCode", "CodeableConcept", "Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, java.lang.Integer.MAX_VALUE, languageCode));

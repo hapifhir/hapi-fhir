@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,31 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.Date;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 /**
  * @param <T>
  *           The bundle type
  */
-public interface IFhirSystemDao<T> extends IDao {
+public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Use with caution! This deletes everything!!
+	 * @param theRequestDetails TODO
 	 */
-	void deleteAllTagsOnServer();
+	void deleteAllTagsOnServer(RequestDetails theRequestDetails);
 
-	TagList getAllTags();
+	TagList getAllTags(RequestDetails theRequestDetails);
+
+	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
 
 	Map<String, Long> getResourceCounts();
 
-	IBundleProvider history(Date theDate);
-
-	int performReindexingPass(Integer theCount);
+	IBundleProvider history(Date theDate, RequestDetails theRequestDetails);
 
 	/**
 	 * Marks all indexes as needing fresh indexing
@@ -55,9 +58,12 @@ public interface IFhirSystemDao<T> extends IDao {
 
 	/**
 	 * Not supported for DSTU1
+	 * @param theRequestDetails TODO
 	 */
-	MetaDt metaGetOperation();
+	MT metaGetOperation(RequestDetails theRequestDetails);
 
-	T transaction(T theResources);
+	int performReindexingPass(Integer theCount, RequestDetails theRequestDetails);
+
+	T transaction(RequestDetails theRequestDetails, T theResources);
 
 }

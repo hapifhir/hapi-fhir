@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Server Security</title>
+	</properties>
+
+	<body>
+
+		<!-- The body of the document contains a number of sections -->
+		<section name="Server Security">
+
+			<p>
+				Security is a complex topic which goes far beyond the scope of HAPI FHIR.
+				HAPI does provide mechanisms which can be used to implement security in
+				your server however.
+			</p>
+			
+			<p>
+				Because HAPI FHIR's REST server is based on the Servlet API, you may use any
+				security mechanism which works in that environment. Some serlvet containers
+				may provide security layers you can plug into. The rest of this page
+				does not explore that method, but rather looks at HAPI FHIR hooks that can
+				be used to implement FHIR specific security.
+			</p>
+			
+			<subsection name="Authentication vs Authorization">
+			
+				<p>
+					Background reading: <a href="https://en.wikipedia.org/wiki/Authentication">Wikipedia - Authentication</a>
+				</p>
+				<p>
+					Server security is divided into two topics:
+				</p>
+				<ul>
+					<li>
+						<b>Authentication (AuthN):</b> Is verifying that the user is who they say they 
+						are. This is typically accomplished by testing a username/password in the request,
+						or by checking a "bearer token" in the request.
+					</li>
+					<li>
+						<b>Authorization (AuthZ):</b> Is verifying that the user is allowed to perform 
+						the given action. For example, in a FHIR application you might use AuthN to test that
+						the user making a request to the FHIR server is allowed to access the server, but
+						that test might determine that the requesting user is not permitted to perform
+						write operations and therefore block a FHIR <code>create</code> operation. This is
+						AuthN and AuthZ in action.
+					</li>
+				</ul>
+				
+			</subsection>
+			
+		</section>
+		
+		<section name="Authentication Interceptors">
+		
+			<p>
+				The <a href="./doc_rest_server_interceptor.html">Server Interceptor</a>
+				framework can provide an easy way to test for credentials. The following
+				example shows a simple interceptor which tests for HTTP Basic Auth.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="basicAuthInterceptor" />
+				<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
+			</macro>
+			
+		</section>
+		
+		<section name="Authorization Interceptor">
+			
+			<p>
+				HAPI FHIR 1.5 introduced a new interceptor, the
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
+			</p>
+			<p>
+				This interceptor can help with the complicated task of determining whether a user
+				has the appropriate permission to perform a given task on a FHIR server. This is
+				done by declaring
+			</p>
+			<p class="doc_info_bubble">
+				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
+				been heavily tested. Use with caution, and do lots of testing! We welcome
+				feedback and suggestions on this feature. In addition, this documentation is 
+				not yet complete. More examples and details will be added soon! Please get in
+				touch if you'd like to help test, have suggestions, etc.
+			</p>
+			
+			<p>
+				The AuthorizationInterceptor works by allowing you to declare 
+				permissions based on an individual request coming in. In other
+				words, you could have code that examines an incoming request and
+				determines that it is being made by a Patient with ID 123. You
+				could then declare that the requesting user has access to read and
+				write any resource in compartment "Patient/123", which corresponds
+				to any Observation, MedicationOrder etc with a subject of 
+				"<code>Patient/123</code>". On the other hand, another request
+				might be detemrined to belong to an administrator user, and
+				could be declared to be allowed to do anything.
+			</p>
+			
+			<p>
+				The AuthorizationInterceptor is used by subclassing it and then registering your
+				subclass with the <code>RestfulServer</code>. The following example shows a subclassed
+				interceptor implementing some basic rules:
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="patientAndAdmin" />
+				<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+			</macro>
+			
+			<subsection name="Using AuthorizationInterceptor in a REST Server">
+				
+				<p>
+					The AuthorizationInterceptor works by examining the client request
+					in order to determine whether "write" operations are legal, and looks at
+					the response from the server in order to determine whether "read" operations
+					are legal.
+				</p>
+				<p>
+					This approach has limitations however: If a request has a conditional operation, 
+					such as a delete operation which uses a search URL, or a create operation which
+					uses an <code>If-None-Exist</code> header, the interceptor will not know the
+					actual target until the server actually processes the request. 
+				</p>
+				<p>
+					For better security, individual resource providers should notify interceptors
+					about their actual targets in the event of any "write" operations (create, 
+					operations embedded in transactions, etc.)
+				</p>
+				<p>
+					The mechanism for doing this isn't yet fully documented, this will be improved
+					over the next release cycle (post 1.5). Please get in touch on our google group
+					if you want to help! 
+				</p>
+				
+			</subsection>
+			
+		</section>
+		
+	</body>
+
+</document>

@@ -1,0 +1,1 @@
+identifierSchemeId	alternateIdentifier	effectiveTime	active	moduleId	referencedComponentId

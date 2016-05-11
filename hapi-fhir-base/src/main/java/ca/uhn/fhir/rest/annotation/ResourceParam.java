@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import ca.uhn.fhir.rest.server.IResourceProvider;
+
+/**
+ * Denotes a parameter for a REST method which will contain the resource actually 
+ * being created/updated/etc in an operation which contains a resource in the HTTP request.
+ * <p>
+ * For example, in a {@link Create} operation the method parameter annotated with this
+ * annotation will contain the actual resource being created.
+ * </p>
+ * <p>
+ * Parameters with this annotation should typically be of the type of resource being
+ * operated on (see below for an exception when raw data is required). For example, in a
+ * {@link IResourceProvider} for Patient resources, the parameter annotated with this
+ * annotation should be of type Patient. 
+ * </p>
+ * <p>
+ * Note that in servers it is also acceptable to have parameters with this annotation
+ * which are of type {@link String} or of type <code>byte[]</code>. Parameters of
+ * these types will contain the raw/unparsed HTTP request body. It is fine to
+ * have multiple parameters with this annotation, so you can have one parameter
+ * which accepts the parsed resource, and another which accepts the raw request.
+ * </p>
+ */
 @Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceParam {

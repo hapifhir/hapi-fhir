@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IncludeTest;
 import ca.uhn.fhir.rest.server.IncludeTest.ExtPatient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class IncludedResourceStitchingClientTest {
 
@@ -245,4 +247,10 @@ public class IncludedResourceStitchingClientTest {
 		//@formatter:off
 		
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

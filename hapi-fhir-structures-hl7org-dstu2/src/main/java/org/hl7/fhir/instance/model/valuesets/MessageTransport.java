@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum MessageTransport {
 
         /**
-         * The application sends or receives messages using HTTP POST (may be over http or https)
+         * The application sends or receives messages using HTTP POST (may be over http: or https:).
          */
         HTTP, 
         /**
-         * The application sends or receives messages using File Transfer Protocol
+         * The application sends or receives messages using File Transfer Protocol.
          */
         FTP, 
         /**
-         * The application sends or receivers messages using HL7's Minimal Lower Level Protocol
+         * The application sends or receives messages using HL7's Minimal Lower Level Protocol.
          */
         MLLP, 
         /**
@@ -74,9 +74,9 @@ public enum MessageTransport {
         }
         public String getDefinition() {
           switch (this) {
-            case HTTP: return "The application sends or receives messages using HTTP POST (may be over http or https)";
-            case FTP: return "The application sends or receives messages using File Transfer Protocol";
-            case MLLP: return "The application sends or receivers messages using HL7's Minimal Lower Level Protocol";
+            case HTTP: return "The application sends or receives messages using HTTP POST (may be over http: or https:).";
+            case FTP: return "The application sends or receives messages using File Transfer Protocol.";
+            case MLLP: return "The application sends or receives messages using HL7's Minimal Lower Level Protocol.";
             default: return "?";
           }
         }

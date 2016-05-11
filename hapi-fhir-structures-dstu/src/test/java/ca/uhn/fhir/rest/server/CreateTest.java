@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -88,50 +89,6 @@ public class CreateTest {
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("<Patient ", "<identifier>","<value value=\"001"));
 		assertEquals(EncodingEnum.XML, ourLastEncoding);
-	}
-
-	@Test
-	public void testCreateWithWrongContentTypeXml() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		String inputString = ourCtx.newJsonParser().encodeResourceToString(patient);
-		ContentType inputCt = ContentType.create(Constants.CT_FHIR_XML, "UTF-8");
-		httpPost.setEntity(new StringEntity(inputString, inputCt));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Unexpected character"));
-	}
-
-	@Test
-	public void testCreateWithWrongContentTypeJson() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		String inputString = ourCtx.newXmlParser().encodeResourceToString(patient);
-		ContentType inputCt = ContentType.create(Constants.CT_FHIR_JSON, "UTF-8");
-		httpPost.setEntity(new StringEntity(inputString, inputCt));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Unexpected char"));
 	}
 
 	@Test
@@ -219,7 +176,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Organization/001", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsStringIgnoringCase("utf-8"));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"","\"value\":\"001"));
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
@@ -249,11 +206,56 @@ public class CreateTest {
 
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
+	@Test
+	public void testCreateWithWrongContentTypeJson() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		String inputString = ourCtx.newXmlParser().encodeResourceToString(patient);
+		ContentType inputCt = ContentType.create(Constants.CT_FHIR_JSON, "UTF-8");
+		httpPost.setEntity(new StringEntity(inputString, inputCt));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Unexpected char"));
 	}
 
+	@Test
+	public void testCreateWithWrongContentTypeXml() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		String inputString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ContentType inputCt = ContentType.create(Constants.CT_FHIR_XML, "UTF-8");
+		httpPost.setEntity(new StringEntity(inputString, inputCt));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Unexpected character"));
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -279,6 +281,7 @@ public class CreateTest {
 		ourClient = builder.build();
 
 	}
+	
 	@ResourceDef(name = "Observation")
 	public static class CustomObservation extends Observation {
 
@@ -315,7 +318,7 @@ public class CreateTest {
 		}
 
 	}
-	
+
 	public static class DiagnosticReportProvider implements IResourceProvider {
 		private TagList myLastTags;
 
@@ -391,6 +394,7 @@ public class CreateTest {
 		}
 
 	}
+
 
 	public static class PatientProvider implements IResourceProvider {
 

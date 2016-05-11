@@ -29,45 +29,45 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum AuditSourceType {
 
         /**
-         * End-user display device, diagnostic device
+         * End-user display device, diagnostic device.
          */
         _1, 
         /**
-         * Data acquisition device or instrument
+         * Data acquisition device or instrument.
          */
         _2, 
         /**
-         * Web Server process or thread
+         * Web Server process or thread.
          */
         _3, 
         /**
-         * Application Server process or thread
+         * Application Server process or thread.
          */
         _4, 
         /**
-         * Database Server process or thread
+         * Database Server process or thread.
          */
         _5, 
         /**
-         * Security server, e.g., a domain controller
+         * Security server, e.g. a domain controller.
          */
         _6, 
         /**
-         * ISO level 1-3 network component
+         * ISO level 1-3 network component.
          */
         _7, 
         /**
-         * ISO level 4-6 operating software
+         * ISO level 4-6 operating software.
          */
         _8, 
         /**
-         * other kind of device (defined by DICOM, but some other code/system can be used)
+         * other kind of device (defined by DICOM, but some other code/system can be used).
          */
         _9, 
         /**
@@ -116,15 +116,15 @@ public enum AuditSourceType {
         }
         public String getDefinition() {
           switch (this) {
-            case _1: return "End-user display device, diagnostic device";
-            case _2: return "Data acquisition device or instrument";
-            case _3: return "Web Server process or thread";
-            case _4: return "Application Server process or thread";
-            case _5: return "Database Server process or thread";
-            case _6: return "Security server, e.g., a domain controller";
-            case _7: return "ISO level 1-3 network component";
-            case _8: return "ISO level 4-6 operating software";
-            case _9: return "other kind of device (defined by DICOM, but some other code/system can be used)";
+            case _1: return "End-user display device, diagnostic device.";
+            case _2: return "Data acquisition device or instrument.";
+            case _3: return "Web Server process or thread.";
+            case _4: return "Application Server process or thread.";
+            case _5: return "Database Server process or thread.";
+            case _6: return "Security server, e.g. a domain controller.";
+            case _7: return "ISO level 1-3 network component.";
+            case _8: return "ISO level 4-6 operating software.";
+            case _9: return "other kind of device (defined by DICOM, but some other code/system can be used).";
             default: return "?";
           }
         }

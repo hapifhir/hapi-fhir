@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.util;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -46,9 +48,9 @@ public class DatatypeUtil {
 	/**
 	 * Joins a list of strings with a single space (' ') between each string 
 	 */
-	public static String joinStringsSpaceSeparated(List<StringDt> theStrings) {
+	public static String joinStringsSpaceSeparated(List<? extends IPrimitiveType<String>> theStrings) {
 		StringBuilder b = new StringBuilder();
-		for (StringDt next : theStrings) {
+		for (IPrimitiveType<String> next : theStrings) {
 			if (next.isEmpty()) {
 				continue;
 			}

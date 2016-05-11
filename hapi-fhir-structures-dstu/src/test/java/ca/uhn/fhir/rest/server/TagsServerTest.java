@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -111,6 +112,25 @@ public class TagsServerTest {
 	}
 
 	@Test
+	public void testGetAllTagsObservationIdVersion() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/111/_history/222/_tags");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
+		TagList expected = new TagList();
+		expected.addTag(null, "Patient111222", "DogLabel");
+		expected.addTag("http://cats", "AllCat", "CatLabel");
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void testGetAllTagsPatient() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_tags");
@@ -168,25 +188,6 @@ public class TagsServerTest {
 		expected.addTag("http://cats", "AllCat", "CatLabel");
 		assertEquals(expected, actual);
 	}
-
-	@Test
-	public void testGetAllTagsObservationIdVersion() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/111/_history/222/_tags");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
-		TagList expected = new TagList();
-		expected.addTag(null, "Patient111222", "DogLabel");
-		expected.addTag("http://cats", "AllCat", "CatLabel");
-		assertEquals(expected, actual);
-	}
 	
 	@Test
 	public void testRemoveTagsById() throws Exception {
@@ -226,9 +227,11 @@ public class TagsServerTest {
 		assertEquals(tagList, ourLastTagList);
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -254,6 +257,7 @@ public class TagsServerTest {
 
 	}
 
+
 	public static class DummyProvider {
 
 		@AddTags(type = Patient.class)
@@ -270,18 +274,18 @@ public class TagsServerTest {
 			return tagList;
 		}
 
-		@GetTags(type = Patient.class)
-		public TagList getAllTagsPatient() {
+		@GetTags(type = Observation.class)
+		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag((String) null, "Patient", "DogLabel"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theId.getVersionIdPart(), "DogLabel"));
 			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
 
 		@GetTags(type = Patient.class)
-		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
+		public TagList getAllTagsPatient() {
 			TagList tagList = new TagList();
-			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + defaultString(theId.getVersionIdPart()), "DogLabel"));
+			tagList.add(new Tag((String) null, "Patient", "DogLabel"));
 			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}
@@ -294,10 +298,10 @@ public class TagsServerTest {
 //			return tagList;
 //		}
 
-		@GetTags(type = Observation.class)
-		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
+		@GetTags(type = Patient.class)
+		public TagList getAllTagsPatientId(@IdParam IdDt theId) {
 			TagList tagList = new TagList();
-			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theId.getVersionIdPart(), "DogLabel"));
+			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + defaultString(theId.getVersionIdPart()), "DogLabel"));
 			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
 			return tagList;
 		}

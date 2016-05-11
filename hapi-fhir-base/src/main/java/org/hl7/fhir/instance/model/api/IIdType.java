@@ -6,7 +6,7 @@ package org.hl7.fhir.instance.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ package org.hl7.fhir.instance.model.api;
  * which version of the strctures your application is using.   
  * </p>
  */
-public interface IIdType {
+public interface IIdType extends IPrimitiveType<String> {
 
 	void applyTo(IBaseResource theResource);
 
@@ -121,6 +121,7 @@ public interface IIdType {
 	 */
 	boolean isVersionIdPartValidLong();
 
+	@Override
 	IIdType setValue(String theString);
 
 	IIdType toUnqualified();
@@ -134,5 +135,21 @@ public interface IIdType {
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
 	IIdType withVersion(String theVersion);
+
+	/**
+	 * Sets the value of this ID by combining all of the individual parts.
+	 * <p>
+	 * <b>Required parameters:</b> The following rules apply to the parameters of this method (in this case, populated means
+	 * a non-empty string and not populated means <code>null</code> or an empty string)
+	 * </p>
+	 * <ul>
+	 * <li>All values may be not populated</li>
+	 * <li>If <b>theVersionIdPart</b> is populated, <b>theResourceType</b> and <b>theIdPart</b> must be populated</li>
+	 * <li>If <b>theBaseUrl</b> is populated and <b>theIdPart</b> is populated, <b>theResourceType</b> must be populated</li>
+	 * </ul>
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 */
+	IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart);
 
 }

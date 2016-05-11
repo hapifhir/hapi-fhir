@@ -5,28 +5,29 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}Dstu2;
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem'))
+import ca.uhn.fhir.jpa.provider${package_suffix}.BaseJpaResourceProvider${className}${versionCapitalized};
 #else
-import ca.uhn.fhir.jpa.provider.JpaResourceProvider${versionCapitalized};
+import ca.uhn.fhir.jpa.provider${package_suffix}.JpaResourceProvider${versionCapitalized};
 #end 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.*;
+#if ( $isRi )
+import org.hl7.fhir.${version}.model.*;
+#else
 import ca.uhn.fhir.model.${version}.composite.*;
-import ca.uhn.fhir.model.${version}.resource.*;
+import ca.uhn.fhir.model.${version}.resource.*; //
+#end
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.model.dstu.resource.Binary;
-// import ca.uhn.fhir.model.dstu2.resource.Bundle;
-// import ca.uhn.fhir.model.api.Bundle;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
 ## RPs implement type specific operations 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem'))
 	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
 	JpaResourceProvider${versionCapitalized}<${className}>
@@ -34,14 +35,16 @@ public class ${className}ResourceProvider extends
 	{
 
 	@Override
-	public Class<? extends IResource> getResourceType() {
+	public Class<${className}> getResourceType() {
 		return ${className}.class;
 	}
 
 	@Search()
 	public ca.uhn.fhir.rest.server.IBundleProvider search(
 			javax.servlet.http.HttpServletRequest theServletRequest,
-	
+			
+			ca.uhn.fhir.rest.method.RequestDetails theRequestDetails,
+			
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringAndListParam theId, 
@@ -49,6 +52,14 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="The resource language")
 			@OptionalParam(name="_language")
 			StringAndListParam theResourceLanguage, 
+
+			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT)
+			StringAndListParam theFtContent, 
+
+			@Description(shortDefinition="Search the contents of the resource's narrative using a fulltext search")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TEXT)
+			StringAndListParam theFtText, 
 
 			@Description(shortDefinition="Search for resources which have the given tag")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TAG)
@@ -61,6 +72,10 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile, 
+
+			@Description(shortDefinition="Return resources linked to by the given target")
+			@OptionalParam(name="_has")
+			HasAndListParam theHas, 
 
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
@@ -120,7 +135,7 @@ public class ${className}ResourceProvider extends
 			@Sort 
 			SortSpec theSort,
 			
-			@Count
+			@ca.uhn.fhir.rest.annotation.Count
 			Integer theCount
 	) {
 		startRequest(theServletRequest);
@@ -128,9 +143,12 @@ public class ${className}ResourceProvider extends
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add("_id", theId);
 			paramMap.add("_language", theResourceLanguage);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT, theFtContent);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TEXT, theFtText);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE, theSearchForProfile);
+			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});
 #end
@@ -141,6 +159,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
+			paramMap.setRequestDetails(theRequestDetails);
 
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;

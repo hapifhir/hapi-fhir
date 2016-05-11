@@ -2,8 +2,6 @@
 /target
 *.log
 *.log*
-/.settings/
-.classpath
 .project
 /target/
 /target/
@@ -106,7 +104,6 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
 
 # Eclipse Core
@@ -122,7 +119,6 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-.classpath
 
 # PDT-specific
 .buildpath

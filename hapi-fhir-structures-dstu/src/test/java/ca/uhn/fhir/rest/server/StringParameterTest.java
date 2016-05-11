@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class StringParameterTest {
 
@@ -36,6 +37,18 @@ public class StringParameterTest {
 
 	private static Server ourServer;
 
+	@Test
+	public void testContains() {
+		StringParam sp = new StringParam("VAL");
+		sp.setContains(true);
+		assertEquals(":contains", sp.getQueryParameterQualifier());
+		
+		sp = new StringParam("VAL");
+		sp.setValueAsQueryToken(":contains", "VAL");
+		assertEquals(true, sp.isContains());
+		assertEquals("VAL", sp.getValue());
+	}
+	
 	@Test
 	public void testRawString() throws Exception {
 		{
@@ -149,8 +162,9 @@ public class StringParameterTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -175,6 +189,7 @@ public class StringParameterTest {
 		ourClient = builder.build();
 
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.

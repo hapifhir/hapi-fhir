@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
@@ -31,18 +32,25 @@ import ca.uhn.fhir.model.api.annotation.Description;
 public class RuntimeChildCompositeBoundDatatypeDefinition extends RuntimeChildCompositeDatatypeDefinition {
 
 	private IValueSetEnumBinder<Enum<?>> myBinder;
+	private Class<? extends Enum<?>> myEnumType;
 
-	public RuntimeChildCompositeBoundDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype, IValueSetEnumBinder<Enum<?>> theBinder) {
+	public RuntimeChildCompositeBoundDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype, IValueSetEnumBinder<Enum<?>> theBinder, Class<? extends Enum<?>> theEnumType) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
+		Validate.notNull(theBinder, "theBinder must not be null");
+		Validate.notNull(theEnumType, "theEnumType must not be null");
+		
 		myBinder = theBinder;
-		if (theBinder==null) {
-			throw new IllegalArgumentException("Binder must not be null");
-		}
+		myEnumType = theEnumType;
 	}
 
 	@Override
 	public IValueSetEnumBinder<Enum<?>> getInstanceConstructorArguments() {
 		return myBinder;
+	}
+
+	@Override
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return myEnumType;
 	}
 
 }

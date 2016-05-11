@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -48,8 +48,8 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	private HashSet<String> myParamNames;
 	private Integer myIdParamIndex;
 
-	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, IDynamicSearchResourceProvider theProvider) {
-		super(theReturnResourceType, theMethod, theConetxt, theProvider);
+	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, IDynamicSearchResourceProvider theProvider) {
+		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myProvider = theProvider;
 		mySearchParameters = myProvider.getSearchParameters();
@@ -59,7 +59,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 			myParamNames.add(next.getName());
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 
 	}
 
@@ -86,7 +86,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}

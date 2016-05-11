@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,24 @@ public @interface OperationParam {
 	 */
 	final int MAX_UNLIMITED = -1;
 
+
+	/**
+	 * Value for {@link OperationParam#max()} indicating that the maximum will be inferred 
+	 * from the type. If the type is a single parameter type (e.g. <code>StringDt</code>,
+	 * <code>TokenParam</code>, <code>IBaseResource</code>) the maximum will be
+	 * <code>1</code>. 
+	 * <p>
+	 * If the type is a collection, e.g.
+	 * <code>List&lt;StringDt&gt;</code> or <code>List&lt;TokenOrListParam&gt;</code>
+	 * the maximum will be set to <code>*</code>. If the param is a search parameter
+	 * "and" type, such as <code>TokenAndListParam</code> the maximum will also be
+	 * set to <code>*</code>
+	 * </p>
+	 * 
+	 * @since 1.5
+	 */
+	final int MAX_DEFAULT = -2;
+	
 	/**
 	 * The name of the parameter
 	 */
@@ -66,9 +84,10 @@ public @interface OperationParam {
 	/**
 	 * The maximum number of repetitions allowed for this child. Should be
 	 * set to {@link #MAX_UNLIMITED} if there is no limit to the number of
-	 * repetitions (default is 1)
+	 * repetitions. See {@link #MAX_DEFAULT} for a description of the default
+	 * behaviour.
 	 */
-	int max() default 1;
+	int max() default MAX_UNLIMITED;
 
 	
 }

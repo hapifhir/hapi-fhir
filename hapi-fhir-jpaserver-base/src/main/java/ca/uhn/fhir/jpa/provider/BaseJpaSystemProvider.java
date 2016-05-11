@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,40 +31,41 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public class BaseJpaSystemProvider<T> extends BaseJpaProvider {
+public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 
-	private IFhirSystemDao<T> myDao;
+	private IFhirSystemDao<T, MT> myDao;
 
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
 
 	@Required
-	public void setDao(IFhirSystemDao<T> theDao) {
+	public void setDao(IFhirSystemDao<T, MT> theDao) {
 		myDao = theDao;
 	}
 
 	@History
-	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate) {
+	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate);
+			return myDao.history(theDate, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
-	protected IFhirSystemDao<T> getDao() {
+	protected IFhirSystemDao<T, MT> getDao() {
 		return myDao;
 	}
 
 	@GetTags
-	public TagList getAllTagsOnServer(HttpServletRequest theRequest) {
+	public TagList getAllTagsOnServer(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-		return myDao.getAllTags();
+		return myDao.getAllTags(theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

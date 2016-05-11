@@ -2,7 +2,11 @@ package ca.uhn.fhir.model.base.composite;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
+
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.util.TestUtil;
+
 import org.junit.Test;
 
 /**
@@ -68,4 +72,10 @@ public class BaseCodingDtTest {
     public void whenTokenIncludesEmptySystem_CodeWithSystem_shouldNotMatch() {
         assertFalse(new CodingDt("http://bar.org", "53").matchesToken(myTokenWithEmptySystem));
     }
+
+ 	@AfterClass
+ 	public static void afterClassClearContext() {
+ 		TestUtil.clearAllStaticFieldsForUnitTest();
+ 	}
+
 }

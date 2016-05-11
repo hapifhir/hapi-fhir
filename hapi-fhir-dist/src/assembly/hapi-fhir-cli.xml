@@ -12,19 +12,20 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/../hapi-fhir-cli/target/</directory>
+			<directory>${project.basedir}/../hapi-fhir-cli/hapi-fhir-cli-app/target/</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>hapi-fhir-cli.jar</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../hapi-fhir-cli/src/main/script</directory>
+			<directory>${project.basedir}/../hapi-fhir-cli/hapi-fhir-cli-app/src/main/script</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>hapi-fhir-cli</include>
 				<include>hapi-fhir-cli.cmd</include>
 			</includes>
+			<fileMode>0555</fileMode>
 		</fileSet>
 	</fileSets>
 

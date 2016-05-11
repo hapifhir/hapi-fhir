@@ -1,7 +1,9 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,20 +11,46 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class BaseDateTimeDtDstu2Test {
 	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private SimpleDateFormat myDateInstantParser;
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	}
+
+	@Test
+	public void testParseInvalid() {
+		try {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString("1974-12-25+10:00");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25+10:00", e.getMessage());
+		}
+		try {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString("1974-12-25Z");
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25Z", e.getMessage());
+		}
 	}
 
 	/**
@@ -39,6 +67,21 @@ public class BaseDateTimeDtDstu2Test {
 		DateDt date = new DateDt();
 		date.setValue(time);
 		assertEquals("2012-01-02", date.getValueAsString());
+	}
+
+	@Test
+	public void testMinutePrecisionEncode() throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
+		
+		DateTimeDt date = new DateTimeDt();
+		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
+		date.setTimeZone(TimeZone.getTimeZone("EST"));
+		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
+
+		date.setTimeZoneZulu(true);
+		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
 	}
 
 	/**
@@ -63,7 +106,7 @@ public class BaseDateTimeDtDstu2Test {
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
 		assertThat(human, containsString("2012"));
-		assertThat(human, containsString("12:00:00"));
+		assertThat(human, containsString("12"));
 	}
 
 	public static void afterClass() {

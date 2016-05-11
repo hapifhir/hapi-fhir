@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -47,31 +52,25 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidationSupport;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.validation.ValidationSupportChain;
-import net.sourceforge.cobertura.CoverageIgnore;
 
 public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
-	/**
-	 * TODO: set this to required after the next release
-	 */
-	@Autowired(required = false)
+	@Autowired()
 	@Qualifier("myJpaValidationSupportDstu2")
 	private IValidationSupport myJpaValidationSupport;
 
+	
 	@Override
 	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
 		List<Object> values;
@@ -91,16 +90,17 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
 		oo.getIssueFirstRep().getDiagnosticsElement().setValue(theMessage);
+		oo.getIssueFirstRep().getCodeElement().setValue(theCode);
 		return oo;
 	}
 
 	@Override
-	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource, getContext(), theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {
@@ -108,14 +108,15 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
 			}
 			final ResourceTable entity = readEntityLatestVersion(theId);
+
+			// Validate that there are no resources pointing to the candidate that
+			// would prevent deletion
+			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+			validateOkToDelete(deleteConflicts, entity);
+			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+				
 			OperationOutcome oo = new OperationOutcome();
-			try {
-				validateOkToDeleteOrThrowResourceVersionConflictException(entity);
-				oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
-			} catch (ResourceVersionConflictException e) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(e.getMessage());
-				throw new ResourceVersionConflictException(e.getMessage(), oo);
-			}
+			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}
 
@@ -137,7 +138,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 		if (result.isSuccessful()) {
 			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome((OperationOutcome) result.toOperationOutcome());
+			retVal.setOperationOutcome(result.toOperationOutcome());
 			return retVal;
 		} else {
 			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());

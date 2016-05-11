@@ -29,18 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.
  */
@@ -49,11 +52,11 @@ public class ImplementationGuide extends DomainResource {
 
     public enum GuideDependencyType {
         /**
-         * The guide is referred to by URL
+         * The guide is referred to by URL.
          */
         REFERENCE, 
         /**
-         * The guide is embedded in this guide when published
+         * The guide is embedded in this guide when published.
          */
         INCLUSION, 
         /**
@@ -85,8 +88,8 @@ public class ImplementationGuide extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REFERENCE: return "The guide is referred to by URL";
-            case INCLUSION: return "The guide is embedded in this guide when published";
+            case REFERENCE: return "The guide is referred to by URL.";
+            case INCLUSION: return "The guide is embedded in this guide when published.";
             default: return "?";
           }
         }
@@ -121,27 +124,27 @@ public class ImplementationGuide extends DomainResource {
 
     public enum GuideResourcePurpose {
         /**
-         * The resource is intended as an example
+         * The resource is intended as an example.
          */
         EXAMPLE, 
         /**
-         * The resource defines a value set or concept map used in the Implementation Guide
+         * The resource defines a value set or concept map used in the implementation guide.
          */
         TERMINOLOGY, 
         /**
-         * The resource defines a profile (StructureDefinition) that is used in the implementation guide
+         * The resource defines a profile (StructureDefinition) that is used in the implementation guide.
          */
         PROFILE, 
         /**
-         * The resource defines an extension (StructureDefinition) that is used in the implementation guide
+         * The resource defines an extension (StructureDefinition) that is used in the implementation guide.
          */
         EXTENSION, 
         /**
-         * The resource contains a dictionary that is part of the implementation guide
+         * The resource contains a dictionary that is part of the implementation guide.
          */
         DICTIONARY, 
         /**
-         * The resource defines a logical model (in a StructureDefinition) that is used in the implementation guide
+         * The resource defines a logical model (in a StructureDefinition) that is used in the implementation guide.
          */
         LOGICAL, 
         /**
@@ -189,12 +192,12 @@ public class ImplementationGuide extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case EXAMPLE: return "The resource is intended as an example";
-            case TERMINOLOGY: return "The resource defines a value set or concept map used in the Implementation Guide";
-            case PROFILE: return "The resource defines a profile (StructureDefinition) that is used in the implementation guide";
-            case EXTENSION: return "The resource defines an extension (StructureDefinition) that is used in the implementation guide";
-            case DICTIONARY: return "The resource contains a dictionary that is part of the implementation guide";
-            case LOGICAL: return "The resource defines a logical model (in a StructureDefinition) that is used in the implementation guide";
+            case EXAMPLE: return "The resource is intended as an example.";
+            case TERMINOLOGY: return "The resource defines a value set or concept map used in the implementation guide.";
+            case PROFILE: return "The resource defines a profile (StructureDefinition) that is used in the implementation guide.";
+            case EXTENSION: return "The resource defines an extension (StructureDefinition) that is used in the implementation guide.";
+            case DICTIONARY: return "The resource contains a dictionary that is part of the implementation guide.";
+            case LOGICAL: return "The resource defines a logical model (in a StructureDefinition) that is used in the implementation guide.";
             default: return "?";
           }
         }
@@ -249,35 +252,35 @@ public class ImplementationGuide extends DomainResource {
 
     public enum GuidePageKind {
         /**
-         * This is a page of content that is included in the implementation guide. It has no particular function
+         * This is a page of content that is included in the implementation guide. It has no particular function.
          */
         PAGE, 
         /**
-         * This is a page that represents a human readable rendering of an example
+         * This is a page that represents a human readable rendering of an example.
          */
         EXAMPLE, 
         /**
-         * This is a page that represents a list of resources of one or more types
+         * This is a page that represents a list of resources of one or more types.
          */
         LIST, 
         /**
-         * This is a page that is where an included guide is injected
+         * This is a page showing where an included guide is injected.
          */
         INCLUDE, 
         /**
-         * This is a page that lists the resources of a given type, and also creates pages for all the listed types as other pages in the section
+         * This is a page that lists the resources of a given type, and also creates pages for all the listed types as other pages in the section.
          */
         DIRECTORY, 
         /**
-         * This is a page that creates the listed resources as a dictionary
+         * This is a page that creates the listed resources as a dictionary.
          */
         DICTIONARY, 
         /**
-         * This is a generated page that contains the table of contents
+         * This is a generated page that contains the table of contents.
          */
         TOC, 
         /**
-         * This is a page that represents a presented resource. This is typically used for generated conformance resource presentations
+         * This is a page that represents a presented resource. This is typically used for generated conformance resource presentations.
          */
         RESOURCE, 
         /**
@@ -333,14 +336,14 @@ public class ImplementationGuide extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PAGE: return "This is a page of content that is included in the implementation guide. It has no particular function";
-            case EXAMPLE: return "This is a page that represents a human readable rendering of an example";
-            case LIST: return "This is a page that represents a list of resources of one or more types";
-            case INCLUDE: return "This is a page that is where an included guide is injected";
-            case DIRECTORY: return "This is a page that lists the resources of a given type, and also creates pages for all the listed types as other pages in the section";
-            case DICTIONARY: return "This is a page that creates the listed resources as a dictionary";
-            case TOC: return "This is a generated page that contains the table of contents";
-            case RESOURCE: return "This is a page that represents a presented resource. This is typically used for generated conformance resource presentations";
+            case PAGE: return "This is a page of content that is included in the implementation guide. It has no particular function.";
+            case EXAMPLE: return "This is a page that represents a human readable rendering of an example.";
+            case LIST: return "This is a page that represents a list of resources of one or more types.";
+            case INCLUDE: return "This is a page showing where an included guide is injected.";
+            case DIRECTORY: return "This is a page that lists the resources of a given type, and also creates pages for all the listed types as other pages in the section.";
+            case DICTIONARY: return "This is a page that creates the listed resources as a dictionary.";
+            case TOC: return "This is a generated page that contains the table of contents.";
+            case RESOURCE: return "This is a page that represents a presented resource. This is typically used for generated conformance resource presentations.";
             default: return "?";
           }
         }
@@ -572,10 +575,10 @@ public class ImplementationGuide extends DomainResource {
         protected Enumeration<GuideDependencyType> type;
 
         /**
-         * Where the dependncy is located.
+         * Where the dependency is located.
          */
         @Child(name = "uri", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Where to find dependency", formalDefinition="Where the dependncy is located." )
+        @Description(shortDefinition="Where to find dependency", formalDefinition="Where the dependency is located." )
         protected UriType uri;
 
         private static final long serialVersionUID = 162447098L;
@@ -642,7 +645,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return {@link #uri} (Where the dependncy is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
+         * @return {@link #uri} (Where the dependency is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
         public UriType getUriElement() { 
           if (this.uri == null)
@@ -662,7 +665,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @param value {@link #uri} (Where the dependncy is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
+         * @param value {@link #uri} (Where the dependency is located.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
         public ImplementationGuideDependencyComponent setUriElement(UriType value) { 
           this.uri = value;
@@ -670,14 +673,14 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return Where the dependncy is located.
+         * @return Where the dependency is located.
          */
         public String getUri() { 
           return this.uri == null ? null : this.uri.getValue();
         }
 
         /**
-         * @param value Where the dependncy is located.
+         * @param value Where the dependency is located.
          */
         public ImplementationGuideDependencyComponent setUri(String value) { 
             if (this.uri == null)
@@ -689,7 +692,7 @@ public class ImplementationGuide extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "How the dependency is represented when the guide is published.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("uri", "uri", "Where the dependncy is located.", 0, java.lang.Integer.MAX_VALUE, uri));
+          childrenList.add(new Property("uri", "uri", "Where the dependency is located.", 0, java.lang.Integer.MAX_VALUE, uri));
         }
 
       public ImplementationGuideDependencyComponent copy() {
@@ -744,10 +747,10 @@ public class ImplementationGuide extends DomainResource {
         protected StringType description;
 
         /**
-         * A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.
+         * A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.
          */
         @Child(name = "resource", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Resource in the implementation guide", formalDefinition="A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource." )
+        @Description(shortDefinition="Resource in the implementation guide", formalDefinition="A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource." )
         protected List<ImplementationGuidePackageResourceComponent> resource;
 
         private static final long serialVersionUID = -701846580L;
@@ -862,7 +865,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return {@link #resource} (A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.)
+         * @return {@link #resource} (A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.)
          */
         public List<ImplementationGuidePackageResourceComponent> getResource() { 
           if (this.resource == null)
@@ -880,7 +883,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return {@link #resource} (A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.)
+         * @return {@link #resource} (A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.)
          */
     // syntactic sugar
         public ImplementationGuidePackageResourceComponent addResource() { //3
@@ -905,7 +908,7 @@ public class ImplementationGuide extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "The name for the group, as used in page.package.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("description", "string", "Human readable text describing the package.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("resource", "", "A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("resource", "", "A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
       public ImplementationGuidePackageComponent copy() {
@@ -1529,17 +1532,17 @@ public class ImplementationGuide extends DomainResource {
         protected UriType source;
 
         /**
-         * A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.
+         * A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.
          */
         @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Short name shown for navigational assistance", formalDefinition="A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc." )
+        @Description(shortDefinition="Short name shown for navigational assistance", formalDefinition="A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc." )
         protected StringType name;
 
         /**
-         * The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.
+         * The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.
          */
         @Child(name = "kind", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="page | example | list | include | directory | dictionary | toc | resource", formalDefinition="The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest." )
+        @Description(shortDefinition="page | example | list | include | directory | dictionary | toc | resource", formalDefinition="The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest." )
         protected Enumeration<GuidePageKind> kind;
 
         /**
@@ -1560,7 +1563,7 @@ public class ImplementationGuide extends DomainResource {
          * The format of the page.
          */
         @Child(name = "format", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Format of the page (e.g. html, markdown etc)", formalDefinition="The format of the page." )
+        @Description(shortDefinition="Format of the page (e.g. html, markdown, etc.)", formalDefinition="The format of the page." )
         protected CodeType format;
 
         /**
@@ -1635,7 +1638,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return {@link #name} (A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StringType getNameElement() { 
           if (this.name == null)
@@ -1655,7 +1658,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @param value {@link #name} (A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public ImplementationGuidePageComponent setNameElement(StringType value) { 
           this.name = value;
@@ -1663,14 +1666,14 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.
+         * @return A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.
+         * @param value A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.
          */
         public ImplementationGuidePageComponent setName(String value) { 
             if (this.name == null)
@@ -1680,7 +1683,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return {@link #kind} (The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         * @return {@link #kind} (The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
          */
         public Enumeration<GuidePageKind> getKindElement() { 
           if (this.kind == null)
@@ -1700,7 +1703,7 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @param value {@link #kind} (The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         * @param value {@link #kind} (The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
          */
         public ImplementationGuidePageComponent setKindElement(Enumeration<GuidePageKind> value) { 
           this.kind = value;
@@ -1708,14 +1711,14 @@ public class ImplementationGuide extends DomainResource {
         }
 
         /**
-         * @return The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.
+         * @return The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.
          */
         public GuidePageKind getKind() { 
           return this.kind == null ? null : this.kind.getValue();
         }
 
         /**
-         * @param value The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.
+         * @param value The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.
          */
         public ImplementationGuidePageComponent setKind(GuidePageKind value) { 
             if (this.kind == null)
@@ -1924,8 +1927,8 @@ public class ImplementationGuide extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("source", "uri", "The source address for the page.", 0, java.lang.Integer.MAX_VALUE, source));
-          childrenList.add(new Property("name", "string", "A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("kind", "code", "The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.", 0, java.lang.Integer.MAX_VALUE, kind));
+          childrenList.add(new Property("name", "string", "A short name used to represent this page in navigational structures such as table of contents, bread crumbs, etc.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("kind", "code", "The kind of page that this is. Some pages are autogenerated (list, example), and other kinds are of interest so that tools can navigate the user to the page of interest.", 0, java.lang.Integer.MAX_VALUE, kind));
           childrenList.add(new Property("type", "code", "For constructed pages, what kind of resources to include in the list.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("package", "string", "For constructed pages, a list of packages to include in the page (or else empty for everything).", 0, java.lang.Integer.MAX_VALUE, package_));
           childrenList.add(new Property("format", "code", "The format of the page.", 0, java.lang.Integer.MAX_VALUE, format));
@@ -1993,7 +1996,7 @@ public class ImplementationGuide extends DomainResource {
      * An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published.
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Literal URL used to reference this Implementation Guide", formalDefinition="An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published." )
+    @Description(shortDefinition="Absolute URL used to reference this Implementation Guide", formalDefinition="An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published." )
     protected UriType url;
 
     /**
@@ -2039,10 +2042,10 @@ public class ImplementationGuide extends DomainResource {
     protected List<ImplementationGuideContactComponent> contact;
 
     /**
-     * The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.
+     * The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date for this version of the Implementation Guide", formalDefinition="The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes." )
+    @Description(shortDefinition="Date for this version of the Implementation Guide", formalDefinition="The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes." )
     protected DateTimeType date;
 
     /**
@@ -2053,38 +2056,38 @@ public class ImplementationGuide extends DomainResource {
     protected StringType description;
 
     /**
-     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.
+     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdiction for which this implementation guide was defined.
      */
     @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The implementation guide is intended to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined." )
+    @Description(shortDefinition="The implementation guide is intended to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdiction for which this implementation guide was defined." )
     protected List<CodeableConcept> useContext;
 
     /**
      * A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
     @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
-     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
+     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version." )
+    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version." )
     protected IdType fhirVersion;
 
     /**
-     * Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.
+     * Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.
      */
     @Child(name = "dependency", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Another Implementation guide this depends on", formalDefinition="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides." )
+    @Description(shortDefinition="Another Implementation guide this depends on", formalDefinition="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides." )
     protected List<ImplementationGuideDependencyComponent> dependency;
 
     /**
-     * A logial group of resources. Logical groups can be used when building pages.
+     * A logical group of resources. Logical groups can be used when building pages.
      */
     @Child(name = "package", type = {}, order=13, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Group of resources as used in .page.package", formalDefinition="A logial group of resources. Logical groups can be used when building pages." )
+    @Description(shortDefinition="Group of resources as used in .page.package", formalDefinition="A logical group of resources. Logical groups can be used when building pages." )
     protected List<ImplementationGuidePackageComponent> package_;
 
     /**
@@ -2098,7 +2101,7 @@ public class ImplementationGuide extends DomainResource {
      * A binary file that is included in the  implementation guide when it is published.
      */
     @Child(name = "binary", type = {UriType.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Image, css, script, etc", formalDefinition="A binary file that is included in the  implementation guide when it is published." )
+    @Description(shortDefinition="Image, css, script, etc.", formalDefinition="A binary file that is included in the  implementation guide when it is published." )
     protected List<UriType> binary;
 
     /**
@@ -2447,7 +2450,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2467,7 +2470,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public ImplementationGuide setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2475,14 +2478,14 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.
+     * @return The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.
+     * @param value The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.
      */
     public ImplementationGuide setDate(Date value) { 
       if (value == null)
@@ -2545,7 +2548,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdiction for which this implementation guide was defined.)
      */
     public List<CodeableConcept> getUseContext() { 
       if (this.useContext == null)
@@ -2563,7 +2566,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdiction for which this implementation guide was defined.)
      */
     // syntactic sugar
     public CodeableConcept addUseContext() { //3
@@ -2634,7 +2637,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -2654,7 +2657,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public ImplementationGuide setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -2662,14 +2665,14 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
+     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
+     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.
      */
     public ImplementationGuide setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -2683,7 +2686,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #dependency} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.)
+     * @return {@link #dependency} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.)
      */
     public List<ImplementationGuideDependencyComponent> getDependency() { 
       if (this.dependency == null)
@@ -2701,7 +2704,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #dependency} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.)
+     * @return {@link #dependency} (Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.)
      */
     // syntactic sugar
     public ImplementationGuideDependencyComponent addDependency() { //3
@@ -2723,7 +2726,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #package_} (A logial group of resources. Logical groups can be used when building pages.)
+     * @return {@link #package_} (A logical group of resources. Logical groups can be used when building pages.)
      */
     public List<ImplementationGuidePackageComponent> getPackage() { 
       if (this.package_ == null)
@@ -2741,7 +2744,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #package_} (A logial group of resources. Logical groups can be used when building pages.)
+     * @return {@link #package_} (A logical group of resources. Logical groups can be used when building pages.)
      */
     // syntactic sugar
     public ImplementationGuidePackageComponent addPackage() { //3
@@ -2889,13 +2892,13 @@ public class ImplementationGuide extends DomainResource {
         childrenList.add(new Property("experimental", "boolean", "This Implementation Guide was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the implementation guide.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("date", "dateTime", "The date this version of the implementation guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the Implementation Guide and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdiction for which this implementation guide was defined.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
-        childrenList.add(new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency));
-        childrenList.add(new Property("package", "", "A logial group of resources. Logical groups can be used when building pages.", 0, java.lang.Integer.MAX_VALUE, package_));
+        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
+        childrenList.add(new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc.defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency));
+        childrenList.add(new Property("package", "", "A logical group of resources. Logical groups can be used when building pages.", 0, java.lang.Integer.MAX_VALUE, package_));
         childrenList.add(new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global));
         childrenList.add(new Property("binary", "uri", "A binary file that is included in the  implementation guide when it is published.", 0, java.lang.Integer.MAX_VALUE, binary));
         childrenList.add(new Property("page", "", "A page / section in the implementation guide. The root page is the implementation guide home page.", 0, java.lang.Integer.MAX_VALUE, page));
@@ -3012,7 +3015,7 @@ public class ImplementationGuide extends DomainResource {
   public static final String SP_EXPERIMENTAL = "experimental";
   @SearchParamDefinition(name="version", path="ImplementationGuide.version", description="The version identifier of the implementation guide", type="token" )
   public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="url", path="ImplementationGuide.url", description="Literal URL used to reference this Implementation Guide", type="uri" )
+  @SearchParamDefinition(name="url", path="ImplementationGuide.url", description="Absolute URL used to reference this Implementation Guide", type="uri" )
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="status", path="ImplementationGuide.status", description="The current status of the implementation guide", type="token" )
   public static final String SP_STATUS = "status";

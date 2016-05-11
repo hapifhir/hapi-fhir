@@ -5,7 +5,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,12 @@ public enum RestSearchParameterTypeEnum {
 	 *
 	 * A search parameter that searches on a quantity.
 	 */
-	URI("uri", "http://hl7.org/fhir/search-param-type"),
+	URI("uri", "http://hl7.org/fhir/search-param-type"), 
+	
+	/**
+	 * _has parameter
+	 */
+	HAS("string", "http://hl7.org/fhir/search-param-type"),
 
 	;
 	
@@ -106,6 +111,10 @@ public enum RestSearchParameterTypeEnum {
 	
 	static {
 		for (RestSearchParameterTypeEnum next : RestSearchParameterTypeEnum.values()) {
+			if (next == HAS) {
+				continue;
+			}
+			
 			CODE_TO_ENUM.put(next.getCode(), next);
 			
 			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
@@ -132,7 +141,7 @@ public enum RestSearchParameterTypeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public RestSearchParameterTypeEnum forCode(String theCode) {
+	public static RestSearchParameterTypeEnum forCode(String theCode) {
 		RestSearchParameterTypeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
@@ -141,6 +150,8 @@ public enum RestSearchParameterTypeEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<RestSearchParameterTypeEnum> VALUESET_BINDER = new IValueSetEnumBinder<RestSearchParameterTypeEnum>() {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public String toCodeString(RestSearchParameterTypeEnum theEnum) {
 			return theEnum.getCode();

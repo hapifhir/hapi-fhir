@@ -4,23 +4,31 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
 /**
  * Definition class for adding extensions to the built-in
  * Patient resource type.
+ * 
+ * Note the "profile" attribute below, which indicates the URL/ID of the
+ * profile implemented by this resource. You are not required to supply this,
+ * but if you do it will be automatically populated in the resource meta
+ * tag if the resource is returned by a server.
  */
-@ResourceDef(name="Patient")
+@ResourceDef(name="Patient", profile="http://example.com/StructureDefinition/mypatient")
 public class MyPatient extends Patient {
 
-	/**
+   private static final long serialVersionUID = 1L;
+
+   /**
 	 * Each extension is defined in a field. Any valid HAPI Data Type
 	 * can be used for the field type. Note that the [name=""] attribute
 	 * in the @Child annotation needs to match the name for the bean accessor
@@ -29,7 +37,7 @@ public class MyPatient extends Patient {
 	@Child(name="petName")	
 	@Extension(url="http://example.com/dontuse#petname", definedLocally=false, isModifier=false)
 	@Description(shortDefinition="The name of the patient's favourite pet")
-	private StringDt myPetName;
+	private StringType myPetName;
 
 	/**
 	 * The second example extension uses a List type to provide
@@ -41,7 +49,7 @@ public class MyPatient extends Patient {
 	@Child(name="importantDates", max=Child.MAX_UNLIMITED)	
 	@Extension(url="http://example.com/dontuse#importantDates", definedLocally=false, isModifier=true)
 	@Description(shortDefinition="Some dates of note for this patient")
-	private List<DateTimeDt> myImportantDates;
+	private List<DateTimeType> myImportantDates;
 
 	/**
 	 * It is important to override the isEmpty() method, adding a check for any
@@ -62,28 +70,28 @@ public class MyPatient extends Patient {
 	 ********/
 	
 	/** Getter for important dates */
-	public List<DateTimeDt> getImportantDates() {
+	public List<DateTimeType> getImportantDates() {
 		if (myImportantDates==null) {
-			myImportantDates = new ArrayList<DateTimeDt>();
+			myImportantDates = new ArrayList<DateTimeType>();
 		}
 		return myImportantDates;
 	}
 
 	/** Getter for pet name */
-	public StringDt getPetName() {
+	public StringType getPetName() {
 		if (myPetName == null) {
-			myPetName = new StringDt();
+			myPetName = new StringType();
 		}
 		return myPetName;
 	}
 
 	/** Setter for important dates */
-	public void setImportantDates(List<DateTimeDt> theImportantDates) {
+	public void setImportantDates(List<DateTimeType> theImportantDates) {
 		myImportantDates = theImportantDates;
 	}
 
 	/** Setter for pet name */
-	public void setPetName(StringDt thePetName) {
+	public void setPetName(StringType thePetName) {
 		myPetName = thePetName;
 	}
 

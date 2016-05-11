@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ProcedureProgressStatusCodes {
 
         /**
-         * A patient is in the Operating Room
+         * A patient is in the Operating Room.
          */
         A, 
         /**
-         * The patient is prepared for a procedure
+         * The patient is prepared for a procedure.
          */
         B, 
         /**
-         * The patient is under anesthesia
+         * The patient is under anesthesia.
          */
         C, 
         /**
@@ -55,7 +55,7 @@ public enum ProcedureProgressStatusCodes {
          */
         E, 
         /**
-         * The patient is in the recovery room
+         * The patient is in the recovery room.
          */
         F, 
         /**
@@ -95,12 +95,12 @@ public enum ProcedureProgressStatusCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case A: return "A patient is in the Operating Room";
-            case B: return "The patient is prepared for a procedure";
-            case C: return "The patient is under anesthesia";
+            case A: return "A patient is in the Operating Room.";
+            case B: return "The patient is prepared for a procedure.";
+            case C: return "The patient is under anesthesia.";
             case D: return "";
             case E: return "";
-            case F: return "The patient is in the recovery room";
+            case F: return "The patient is in the recovery room.";
             default: return "?";
           }
         }

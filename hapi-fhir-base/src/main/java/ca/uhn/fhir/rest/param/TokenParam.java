@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +19,35 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.server.Constants;
 
 public class TokenParam extends BaseParam implements IQueryParameterType {
 
+	private TokenParamModifier myModifier;
 	private String mySystem;
-	private boolean myText;
 	private String myValue;
 
+	/**
+	 * Constructor
+	 */
 	public TokenParam() {
+		super();
 	}
 
 	/**
-	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a
-	 * parameter
+	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and
+	 * {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
 	 * 
 	 * @param theCodingDt
 	 *           The coding
@@ -53,7 +57,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
+	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and
+	 * {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
 	 * parameter
 	 * 
 	 * @param theIdentifierDt
@@ -70,8 +75,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException(
-					"theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException("theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
@@ -80,8 +84,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		if (isText()) {
-			return Constants.PARAMQUALIFIER_TOKEN_TEXT;
+		if (getModifier() != null) {
+			return getModifier().getValue();
 		} else {
 			return null;
 		}
@@ -91,7 +95,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 * {@inheritDoc}
 	 */
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
 		} else {
@@ -104,7 +108,18 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 */
 	@Override
 	void doSetValueAsQueryToken(String theQualifier, String theParameter) {
-		setText(Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(theQualifier));
+		setModifier(null);
+		if (theQualifier != null) {
+			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
+			setModifier(modifier);
+			
+			if (modifier == TokenParamModifier.TEXT) {
+				setSystem(null);
+				setValue(ParameterUtil.unescape(theParameter));
+				return;
+			}
+		}
+
 		setSystem(null);
 		if (theParameter == null) {
 			setValue(null);
@@ -119,10 +134,24 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		}
 	}
 
+	/**
+	 * Returns the modifier for this token
+	 */
+	public TokenParamModifier getModifier() {
+		return myModifier;
+	}
+
+	/**
+	 * Returns the system for this token. Note that if a {@link #getModifier()} is being used, the entire value of the
+	 * parameter will be placed in {@link #getValue() value} and this method will return <code>null</code>.
+	 */
 	public String getSystem() {
 		return mySystem;
 	}
 
+	/**
+	 * Returns the value for the token
+	 */
 	public String getValue() {
 		return myValue;
 	}
@@ -139,30 +168,49 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return StringUtils.isEmpty(myValue);
 	}
 
+	/**
+	 * Returns true if {@link #getModifier()} returns {@link TokenParamModifier#TEXT}
+	 */
 	public boolean isText() {
-		return myText;
+		return myModifier == TokenParamModifier.TEXT;
 	}
 
-	public void setSystem(String theSystem) {
+	public TokenParam setModifier(TokenParamModifier theModifier) {
+		myModifier = theModifier;
+		return this;
+	}
+
+	public TokenParam setSystem(String theSystem) {
 		mySystem = theSystem;
+		return this;
 	}
 
-	public void setText(boolean theText) {
-		myText = theText;
+	/**
+	 * @deprecated Use {@link #setModifier(TokenParamModifier)} instead
+	 */
+	@Deprecated
+	public TokenParam setText(boolean theText) {
+		if (theText) {
+			myModifier = TokenParamModifier.TEXT;
+		} else {
+			myModifier = null;
+		}
+		return this;
 	}
 
-	public void setValue(String theValue) {
+	public TokenParam setValue(String theValue) {
 		myValue = theValue;
+		return this;
 	}
 
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("system", defaultString(getSystem()));
-		builder.append("value", getValue());
-		if (myText) {
-			builder.append(":text", myText);
+		if (myModifier != null) {
+			builder.append(":" + myModifier.getValue());
 		}
+		builder.append("value", getValue());
 		if (getMissing() != null) {
 			builder.append(":missing", getMissing());
 		}

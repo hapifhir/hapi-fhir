@@ -3,6 +3,7 @@ package ca.uhn.fhir.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
@@ -11,7 +12,7 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +30,40 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class RuntimeSearchParam {
 
-	private String myDescription;
-	private String myName;
-	private RestSearchParameterTypeEnum myParamType;
-	private String myPath;
-	private List<RuntimeSearchParam> myCompositeOf;
+	private final List<RuntimeSearchParam> myCompositeOf;
+	private final String myDescription;
+	private final String myName;
+	private final RestSearchParameterTypeEnum myParamType;
+	private final String myPath;
+	private final Set<String> myTargets;
+	private final Set<String> myProvidesMembershipInCompartments;
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType) {
-		this(theName, theDescription, thePath, theParamType, null);
-	}
-
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf) {
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
 		myCompositeOf = theCompositeOf;
+		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
+			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
+		} else {
+			myProvidesMembershipInCompartments = null;
+		}
+		if (theTargets != null && theTargets.isEmpty() == false) {
+			myTargets = Collections.unmodifiableSet(theTargets);
+		} else {
+			myTargets = null;
+		}
+	}
+
+	public Set<String> getTargets() {
+		return myTargets;
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
+		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {
@@ -70,10 +88,10 @@ public class RuntimeSearchParam {
 
 	public List<String> getPathsSplit() {
 		String path = getPath();
-		if (path.indexOf('|')==-1) {
+		if (path.indexOf('|') == -1) {
 			return Collections.singletonList(path);
 		}
-		
+
 		List<String> retVal = new ArrayList<String>();
 		StringTokenizer tok = new StringTokenizer(path, "|");
 		while (tok.hasMoreElements()) {
@@ -81,6 +99,13 @@ public class RuntimeSearchParam {
 			retVal.add(nextPath.trim());
 		}
 		return retVal;
+	}
+
+	/**
+	 * Can return null
+	 */
+	public Set<String> getProvidesMembershipInCompartments() {
+		return myProvidesMembershipInCompartments;
 	}
 
 }

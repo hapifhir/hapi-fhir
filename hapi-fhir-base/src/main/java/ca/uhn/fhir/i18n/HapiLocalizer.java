@@ -4,7 +4,7 @@ package ca.uhn.fhir.i18n;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class HapiLocalizer {
 				formatString = "!MESSAGE!";
 			}
 			
-			format = new MessageFormat(formatString);
+			format = new MessageFormat(formatString.trim());
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters).toString();
 		} else {

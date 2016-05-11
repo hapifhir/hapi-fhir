@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import ca.uhn.fhir.util.XmlUtil;
 @DatatypeDef(name = "xhtml")
 public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
+	private static final String DECL_XMLNS = " xmlns=\"http://www.w3.org/1999/xhtml\"";
+	private static final String DIV_OPEN_FIRST = "<div" + DECL_XMLNS + ">";
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -95,12 +97,14 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	protected List<XMLEvent> parse(String theValue) {
 		String val = theValue.trim();
 		if (!val.startsWith("<")) {
-			val = "<div>" + val + "</div>";
+			val = DIV_OPEN_FIRST + val + "</div>";
 		}
-		if (val.startsWith("<?") && val.endsWith("?>")) {
+		boolean hasProcessingInstruction = val.startsWith("<?");
+		if (hasProcessingInstruction && val.endsWith("?>")) {
 			return null;
 		}
 
+		
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
 			StringReader reader = new StringReader(val);
@@ -143,11 +147,29 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			super.setValueAsString(null);
 		} else {
 			String value = theValue.trim();
-			if (value.charAt(0) != '<') {
-				value = "<div>" + value + "</div>";
-			}
+			value = preprocessXhtmlNamespaceDeclaration(value);
+
 			super.setValueAsString(value);
 		}
+	}
+
+	public static String preprocessXhtmlNamespaceDeclaration(String value) {
+		if (value.charAt(0) != '<') {
+			value = DIV_OPEN_FIRST + value + "</div>";
+		}
+		
+		boolean hasProcessingInstruction = value.startsWith("<?");
+		int firstTagIndex = value.indexOf("<", hasProcessingInstruction ? 1 : 0);
+		if (firstTagIndex != -1) {
+			int firstTagEnd = value.indexOf(">", firstTagIndex);
+			if (firstTagEnd != -1) {
+				String firstTag = value.substring(firstTagIndex, firstTagEnd);
+				if (!firstTag.contains(" xmlns")) {
+					value = value.substring(0, firstTagEnd) + DECL_XMLNS + value.substring(firstTagEnd);
+				}
+			}
+		}
+		return value;
 	}
 
 }

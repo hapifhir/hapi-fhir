@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.Collection;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +26,22 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 
 public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
-	// nothing
+	
+	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search")
+	Collection<SearchResult> findWithSearchUuid(@Param("search") Search theSearch);
+	
+	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
+	Page<SearchResult> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
+
+	@Modifying
+	@Query(value="DELETE FROM SearchResult r WHERE r.mySearchPid = :search")
+	void deleteForSearch(@Param("search") Long theSearchPid);
 }

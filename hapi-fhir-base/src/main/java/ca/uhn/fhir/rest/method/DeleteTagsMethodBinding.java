@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 public class DeleteTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 
-	public DeleteTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, DeleteTags theDeleteTags) {
-		super(theMethod, theConetxt, theProvider, theDeleteTags.type());
+	public DeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, DeleteTags theDeleteTags) {
+		super(theMethod, theContext, theProvider, theDeleteTags.type());
 	}
 
 	@Override

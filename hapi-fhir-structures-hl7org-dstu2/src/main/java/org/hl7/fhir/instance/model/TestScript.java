@@ -29,18 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
@@ -49,11 +52,11 @@ public class TestScript extends DomainResource {
 
     public enum ContentType {
         /**
-         * XML content-type corresponding to the application/xml+fhir mime-type
+         * XML content-type corresponding to the application/xml+fhir mime-type.
          */
         XML, 
         /**
-         * JSON content-type corresponding to the application/json+fhir mime-type
+         * JSON content-type corresponding to the application/json+fhir mime-type.
          */
         JSON, 
         /**
@@ -85,8 +88,8 @@ public class TestScript extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case XML: return "XML content-type corresponding to the application/xml+fhir mime-type";
-            case JSON: return "JSON content-type corresponding to the application/json+fhir mime-type";
+            case XML: return "XML content-type corresponding to the application/xml+fhir mime-type.";
+            case JSON: return "JSON content-type corresponding to the application/json+fhir mime-type.";
             default: return "?";
           }
         }
@@ -121,11 +124,11 @@ public class TestScript extends DomainResource {
 
     public enum AssertionDirectionType {
         /**
-         * Default value. Assertion is evaluated on the response.
+         * The assertion is evaluated on the response. This is the default value.
          */
         RESPONSE, 
         /**
-         * Not equals comparison.
+         * The assertion is evaluated on the request.
          */
         REQUEST, 
         /**
@@ -157,8 +160,8 @@ public class TestScript extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case RESPONSE: return "Default value. Assertion is evaluated on the response.";
-            case REQUEST: return "Not equals comparison.";
+            case RESPONSE: return "The assertion is evaluated on the response. This is the default value.";
+            case REQUEST: return "The assertion is evaluated on the request.";
             default: return "?";
           }
         }
@@ -756,10 +759,10 @@ public class TestScript extends DomainResource {
         protected List<TestScriptMetadataLinkComponent> link;
 
         /**
-         * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
+         * Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.
          */
         @Child(name = "capability", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
+        @Description(shortDefinition="Capabilities  that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilities that must exist and are assumed to function correctly on the FHIR server being tested." )
         protected List<TestScriptMetadataCapabilityComponent> capability;
 
         private static final long serialVersionUID = 745183328L;
@@ -812,7 +815,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #capability} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #capability} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public List<TestScriptMetadataCapabilityComponent> getCapability() { 
           if (this.capability == null)
@@ -830,7 +833,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #capability} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #capability} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
     // syntactic sugar
         public TestScriptMetadataCapabilityComponent addCapability() { //3
@@ -854,7 +857,7 @@ public class TestScript extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("link", "", "A link to the FHIR specification that this test is covering.", 0, java.lang.Integer.MAX_VALUE, link));
-          childrenList.add(new Property("capability", "", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
+          childrenList.add(new Property("capability", "", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
         }
 
       public TestScriptMetadataComponent copy() {
@@ -1973,10 +1976,10 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptSetupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
+         * Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.
          */
         @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
+        @Description(shortDefinition="Capabilities  that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilities that must exist and are assumed to function correctly on the FHIR server being tested." )
         protected TestScriptMetadataComponent metadata;
 
         /**
@@ -1996,7 +1999,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #metadata} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #metadata} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public TestScriptMetadataComponent getMetadata() { 
           if (this.metadata == null)
@@ -2012,7 +2015,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #metadata} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @param value {@link #metadata} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public TestScriptSetupComponent setMetadata(TestScriptMetadataComponent value) { 
           this.metadata = value;
@@ -2061,7 +2064,7 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("metadata", "@TestScript.metadata", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
+          childrenList.add(new Property("metadata", "@TestScript.metadata", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
           childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
@@ -4327,10 +4330,10 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptTestComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The name of this testused for tracking/logging purposes by test engines.
+         * The name of this test used for tracking/logging purposes by test engines.
          */
         @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Tracking/logging name of this test", formalDefinition="The name of this testused for tracking/logging purposes by test engines." )
+        @Description(shortDefinition="Tracking/logging name of this test", formalDefinition="The name of this test used for tracking/logging purposes by test engines." )
         protected StringType name;
 
         /**
@@ -4341,10 +4344,10 @@ public class TestScript extends DomainResource {
         protected StringType description;
 
         /**
-         * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
+         * Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.
          */
         @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Capabiltities that are expected to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
+        @Description(shortDefinition="Capabilities  that are expected to function correctly on the FHIR server being tested", formalDefinition="Capabilities that must exist and are assumed to function correctly on the FHIR server being tested." )
         protected TestScriptMetadataComponent metadata;
 
         /**
@@ -4364,7 +4367,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #name} (The name of this testused for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (The name of this test used for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StringType getNameElement() { 
           if (this.name == null)
@@ -4384,7 +4387,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #name} (The name of this testused for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (The name of this test used for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public TestScriptTestComponent setNameElement(StringType value) { 
           this.name = value;
@@ -4392,14 +4395,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The name of this testused for tracking/logging purposes by test engines.
+         * @return The name of this test used for tracking/logging purposes by test engines.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value The name of this testused for tracking/logging purposes by test engines.
+         * @param value The name of this test used for tracking/logging purposes by test engines.
          */
         public TestScriptTestComponent setName(String value) { 
           if (Utilities.noString(value))
@@ -4462,7 +4465,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #metadata} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #metadata} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public TestScriptMetadataComponent getMetadata() { 
           if (this.metadata == null)
@@ -4478,7 +4481,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #metadata} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @param value {@link #metadata} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public TestScriptTestComponent setMetadata(TestScriptMetadataComponent value) { 
           this.metadata = value;
@@ -4527,9 +4530,9 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of this testused for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("metadata", "@TestScript.metadata", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
+          childrenList.add(new Property("metadata", "@TestScript.metadata", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
           childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
@@ -4873,7 +4876,7 @@ public class TestScript extends DomainResource {
      * An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Literal URL used to reference this TestScript", formalDefinition="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published." )
+    @Description(shortDefinition="Absolute URL used to reference this TestScript", formalDefinition="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published." )
     protected UriType url;
 
     /**
@@ -4926,10 +4929,10 @@ public class TestScript extends DomainResource {
     protected List<TestScriptContactComponent> contact;
 
     /**
-     * The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     * The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change." )
+    @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change." )
     protected DateTimeType date;
 
     /**
@@ -4957,14 +4960,14 @@ public class TestScript extends DomainResource {
      * A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
     @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
-     * The required capability must exist and is assumed to function correctly on the FHIR server being tested.
+     * The required capability must exist and are assumed to function correctly on the FHIR server being tested.
      */
     @Child(name = "metadata", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and is assumed to function correctly on the FHIR server being tested." )
+    @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and are assumed to function correctly on the FHIR server being tested." )
     protected TestScriptMetadataComponent metadata;
 
     /**
@@ -5383,7 +5386,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -5403,7 +5406,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public TestScript setDateElement(DateTimeType value) { 
       this.date = value;
@@ -5411,14 +5414,14 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     * @return The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     * @param value The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.
      */
     public TestScript setDate(Date value) { 
       if (value == null)
@@ -5619,7 +5622,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #metadata} (The required capability must exist and is assumed to function correctly on the FHIR server being tested.)
+     * @return {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
      */
     public TestScriptMetadataComponent getMetadata() { 
       if (this.metadata == null)
@@ -5635,7 +5638,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @param value {@link #metadata} (The required capability must exist and is assumed to function correctly on the FHIR server being tested.)
+     * @param value {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
      */
     public TestScript setMetadata(TestScriptMetadataComponent value) { 
       this.metadata = value;
@@ -5914,12 +5917,12 @@ public class TestScript extends DomainResource {
         childrenList.add(new Property("experimental", "boolean", "This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the Test Script.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("date", "dateTime", "The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the TestScript and its use.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("requirements", "string", "Explains why this Test Script is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("metadata", "", "The required capability must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
+        childrenList.add(new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
         childrenList.add(new Property("multiserver", "boolean", "If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.", 0, java.lang.Integer.MAX_VALUE, multiserver));
         childrenList.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
         childrenList.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
@@ -6031,19 +6034,19 @@ public class TestScript extends DomainResource {
     return ResourceType.TestScript;
    }
 
-  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="TestScript.identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string" )
   public static final String SP_TESTSCRIPTTESTCAPABILITY = "testscript-test-capability";
   @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string" )
   public static final String SP_TESTSCRIPTSETUPCAPABILITY = "testscript-setup-capability";
-  @SearchParamDefinition(name="name", path="TestScript.name", description="TestScript.name", type="string" )
+  @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="description", path="TestScript.description", description="TestScript description", type="string" )
+  @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string" )
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string" )
   public static final String SP_TESTSCRIPTCAPABILITY = "testscript-capability";
-  @SearchParamDefinition(name="url", path="TestScript.url", description="TestScript url", type="uri" )
+  @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri" )
   public static final String SP_URL = "url";
 
 }

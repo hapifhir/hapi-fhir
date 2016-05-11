@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -38,19 +39,20 @@ import ca.uhn.fhir.util.PortUtil;
 public class IncludeAndRevincludeParameterTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeAndRevincludeParameterTest.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static FhirContext ourCtx;
 	private static Set<Include> ourIncludes;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeAndRevincludeParameterTest.class);
+	private static int ourPort;
 	private static Set<Include> ourReverseIncludes;
+	private static Server ourServer;
 
 	@Before
 	public void before() {
 		ourIncludes = null;
 		ourReverseIncludes = null;
 	}
-	
+
+
 	@Test
 	public void testNoIncludes() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude");
@@ -62,7 +64,7 @@ public class IncludeAndRevincludeParameterTest {
 		assertThat(ourIncludes, hasSize(0));
 		assertThat(ourReverseIncludes, hasSize(0));
 	}
-
+	
 	@Test
 	public void testWithBoth() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
@@ -77,9 +79,11 @@ public class IncludeAndRevincludeParameterTest {
 		assertThat(ourReverseIncludes, containsInAnyOrder(new Include("C.c"), new Include("D.d")));
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -107,6 +111,11 @@ public class IncludeAndRevincludeParameterTest {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Search(queryName = "normalInclude")
 		public List<Patient> normalInclude(
 				@IncludeParam() Set<Include> theIncludes,
@@ -115,11 +124,6 @@ public class IncludeAndRevincludeParameterTest {
 			ourIncludes = theIncludes;
 			ourReverseIncludes = theRevincludes;
 			return new ArrayList<Patient>();
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
 		}
 
 	}

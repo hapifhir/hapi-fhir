@@ -5,13 +5,13 @@ import java.util.List;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import net.sourceforge.cobertura.CoverageIgnore;
  * This class represents a restful search operation parameter for an "OR list" of tokens (in other words, a 
  * list which can contain one-or-more tokens, where the server should return results matching any of the tokens)
  */
-public class TokenOrListParam extends BaseOrListParam<TokenParam> {
+public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenParam> {
 
 	/**
 	 * Create a new empty token "OR list"

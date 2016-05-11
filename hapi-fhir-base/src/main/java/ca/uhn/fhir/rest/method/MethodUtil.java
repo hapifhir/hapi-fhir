@@ -24,9 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.DateUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -89,13 +89,14 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,8 +147,8 @@ public class MethodUtil {
 		return value;
 	}
 
-	public static HttpGetClientInvocation createConformanceInvocation() {
-		return new HttpGetClientInvocation("metadata");
+	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
+		return new HttpGetClientInvocation(theContext, "metadata");
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, FhirContext theContext) {
@@ -260,6 +261,8 @@ public class MethodUtil {
 		} else {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
 		}
+		
+		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
@@ -322,8 +325,20 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
 	}
 
-	public static Integer findIdParameterIndex(Method theMethod) {
-		return MethodUtil.findParamAnnotationIndex(theMethod, IdParam.class);
+	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
+		Integer index = MethodUtil.findParamAnnotationIndex(theMethod, IdParam.class);
+		if (index != null) {
+			Class<?> paramType = theMethod.getParameterTypes()[index];
+			if (IIdType.class.equals(paramType)) {
+				return index;
+			}
+			boolean isRi = theContext.getVersion().getVersion().isRi();
+			boolean usesHapiId = IdDt.class.equals(paramType);
+			if (isRi == usesHapiId) {
+				throw new ConfigurationException("Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+			}
+		}
+		return index;
 	}
 
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
@@ -388,6 +403,10 @@ public class MethodUtil {
 			}
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
 				param = new ServletRequestParameter();
+			} else if (parameterType.equals(RequestDetails.class)) {
+				param = new RequestDetailsParameter();
+			} else if (parameterType.equals(IRequestOperationCallback.class)) {
+				param = new RequestOperationCallbackParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
@@ -437,10 +456,20 @@ public class MethodUtil {
 							mode = Mode.RESOURCE;
 						} else if (String.class.equals(parameterType)) {
 							mode = ResourceParameter.Mode.BODY;
+						} else if (byte[].class.equals(parameterType)) {
+							mode = ResourceParameter.Mode.BODY_BYTE_ARRAY;
 						} else if (EncodingEnum.class.equals(parameterType)) {
 							mode = Mode.ENCODING;
 						} else {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+							StringBuilder b = new StringBuilder();
+							b.append("Method '");
+							b.append(theMethod.getName());
+							b.append("' is annotated with @");
+							b.append(ResourceParam.class.getSimpleName());
+							b.append(" but has a type that is not an implemtation of ");
+							b.append(IBaseResource.class.getCanonicalName());
+							b.append(" or String or byte[]");
+							throw new ConfigurationException(b.toString());
 						}
 						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider, mode);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
@@ -730,7 +759,7 @@ public class MethodUtil {
 		MethodOutcome retVal = new MethodOutcome();
 		if (locationHeaders != null && locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
-			BaseOutcomeReturningMethodBinding.parseContentLocation(retVal, theResourceName, locationHeader);
+			BaseOutcomeReturningMethodBinding.parseContentLocation(theContext, retVal, theResourceName, locationHeader);
 		}
 		if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
 			EncodingEnum ct = EncodingEnum.forContentType(theResponseMimeType);
@@ -753,8 +782,8 @@ public class MethodUtil {
 				if (reader != null) {
 					IParser parser = ct.newParser(theContext);
 					IBaseResource outcome = parser.parseResource(reader);
-					if (outcome instanceof BaseOperationOutcome) {
-						retVal.setOperationOutcome((BaseOperationOutcome) outcome);
+					if (outcome instanceof IBaseOperationOutcome) {
+						retVal.setOperationOutcome((IBaseOperationOutcome) outcome);
 					} else {
 						retVal.setResource(outcome);
 					}

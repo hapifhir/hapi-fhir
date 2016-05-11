@@ -34,9 +34,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.instance.utilities.Utilities;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.utils.ToolingExtensions;
-import org.hl7.fhir.utilities.Utilities;
 
 public class ValidationMessage 
 {

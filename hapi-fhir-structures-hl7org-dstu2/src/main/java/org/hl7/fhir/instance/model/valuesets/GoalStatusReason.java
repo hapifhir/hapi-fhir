@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum GoalStatusReason {
 
         /**
-         * Goal suspended or ended because of a surgical procedure
+         * Goal suspended or ended because of a surgical procedure.
          */
         SURGERY, 
         /**
-         * Goal suspended or ended because of a significant life event (marital change, bereavement, etc.)
+         * Goal suspended or ended because of a significant life event (marital change, bereavement, etc.).
          */
         LIFEEVENT, 
         /**
@@ -81,8 +81,8 @@ public enum GoalStatusReason {
         }
         public String getDefinition() {
           switch (this) {
-            case SURGERY: return "Goal suspended or ended because of a surgical procedure";
-            case LIFEEVENT: return "Goal suspended or ended because of a significant life event (marital change, bereavement, etc.)";
+            case SURGERY: return "Goal suspended or ended because of a surgical procedure.";
+            case LIFEEVENT: return "Goal suspended or ended because of a significant life event (marital change, bereavement, etc.).";
             case REPLACED: return "Goal has been superseded by a new goal.";
             case PATIENTREQUEST: return "Patient wishes the goal to be set aside, at least temporarily.";
             default: return "?";

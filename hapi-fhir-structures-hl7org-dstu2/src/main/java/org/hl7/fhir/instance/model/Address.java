@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.
  */
@@ -47,19 +47,19 @@ public class Address extends Type implements ICompositeType {
 
     public enum AddressUse {
         /**
-         * A communication address at a home
+         * A communication address at a home.
          */
         HOME, 
         /**
-         * An office address. First choice for business related contacts during business hours
+         * An office address. First choice for business related contacts during business hours.
          */
         WORK, 
         /**
-         * A temporary address. The period can provide more detailed information
+         * A temporary address. The period can provide more detailed information.
          */
         TEMP, 
         /**
-         * This address is no longer in use (or was never correct, but retained for records)
+         * This address is no longer in use (or was never correct, but retained for records).
          */
         OLD, 
         /**
@@ -99,10 +99,10 @@ public class Address extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case HOME: return "A communication address at a home";
-            case WORK: return "An office address. First choice for business related contacts during business hours";
-            case TEMP: return "A temporary address. The period can provide more detailed information";
-            case OLD: return "This address is no longer in use (or was never correct, but retained for records)";
+            case HOME: return "A communication address at a home.";
+            case WORK: return "An office address. First choice for business related contacts during business hours.";
+            case TEMP: return "A temporary address. The period can provide more detailed information.";
+            case OLD: return "This address is no longer in use (or was never correct, but retained for records).";
             default: return "?";
           }
         }
@@ -147,15 +147,15 @@ public class Address extends Type implements ICompositeType {
 
     public enum AddressType {
         /**
-         * Mailing addresses - PO Boxes and care-of addresses
+         * Mailing addresses - PO Boxes and care-of addresses.
          */
         POSTAL, 
         /**
-         * A physical address that can be visited
+         * A physical address that can be visited.
          */
         PHYSICAL, 
         /**
-         * An address that is both physical and postal
+         * An address that is both physical and postal.
          */
         BOTH, 
         /**
@@ -191,9 +191,9 @@ public class Address extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case POSTAL: return "Mailing addresses - PO Boxes and care-of addresses";
-            case PHYSICAL: return "A physical address that can be visited";
-            case BOTH: return "An address that is both physical and postal";
+            case POSTAL: return "Mailing addresses - PO Boxes and care-of addresses.";
+            case PHYSICAL: return "A physical address that can be visited.";
+            case BOTH: return "An address that is both physical and postal.";
             default: return "?";
           }
         }
@@ -256,7 +256,7 @@ public class Address extends Type implements ICompositeType {
      * This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.
      */
     @Child(name = "line", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Street name, number, direction & P.O. Box etc", formalDefinition="This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information." )
+    @Description(shortDefinition="Street name, number, direction & P.O. Box etc.", formalDefinition="This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information." )
     protected List<StringType> line;
 
     /**
@@ -277,7 +277,7 @@ public class Address extends Type implements ICompositeType {
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      */
     @Child(name = "state", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Sub-unit of country (abreviations ok)", formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)." )
+    @Description(shortDefinition="Sub-unit of country (abbreviations ok)", formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)." )
     protected StringType state;
 
     /**

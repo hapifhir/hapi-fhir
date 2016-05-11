@@ -22,7 +22,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 
 	@Override
-	protected void postProcess(BaseElement theTarget) {
+	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		super.postProcess(theTarget);
 
 		/*
@@ -32,16 +32,18 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		theTarget.setSummary("Y");
 	}
 
-	private String myVersion;
-
 	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
-		myVersion = theVersion;
 	}
 
 	@Override
 	protected String getTemplate() {
-		return "dstu".equals(myVersion) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
+		return "dstu".equals(getVersion()) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
+	}
+	
+	@Override
+	protected File getTemplateFile() {
+		return null;
 	}
 
 	@Override
@@ -68,7 +70,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
-					getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					if (classInfo.getName().contains("Bound") == false) {
+						getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -82,7 +86,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
-					getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					if (classInfo.getName().contains("Bound") == false) {
+						getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -103,7 +109,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected List<String> getInputStreamNames() {
 		ArrayList<String> retVal = new ArrayList<String>();
 
-		String version = myVersion;
+		String version = getVersion();
 		if (version.equals("dev")) {
 			version = "dstu2";
 		}

@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +51,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -70,7 +72,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 		Validate.notNull(theMethod, "Method must not be null");
 
-		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod);
+		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		Integer versionIdIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -138,6 +140,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
+		if (isNotBlank(theRequest.getCompartmentName())) {
+			return false;
+		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
 			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
 			return false;
@@ -162,15 +167,15 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
 			if (id.hasVersionIdPart()) {
-				retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
+				retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
 			} else {
-				retVal = createReadInvocation(id, resourceName);
+				retVal = createReadInvocation(getContext(), id, resourceName);
 			}
 		} else {
 			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
 			String resourceName = getResourceName();
 
-			retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
+			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -198,13 +203,16 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			return resource;
 		case BUNDLE_PROVIDER:
 			return new SimpleBundleProvider(resource);
+		case BUNDLE_RESOURCE:
+		case METHOD_OUTCOME:
+			break;
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParameterType);
 		if (myVersionIdIndex != null) {
 			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
@@ -214,7 +222,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IBundleProvider retVal = toResourceList(response);
 
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-			String ifNoneMatch = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+			String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
 				List<IBaseResource> responseResources = retVal.getResources(0, 1);
 				IBaseResource responseResource = responseResources.get(0);
@@ -241,20 +249,20 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return mySupportsVersion || myVersionIdIndex != null;
 	}
 
-	public static HttpGetClientInvocation createAbsoluteReadInvocation(IIdType theId) {
-		return new HttpGetClientInvocation(theId.toVersionless().getValue());
+	public static HttpGetClientInvocation createAbsoluteReadInvocation(FhirContext theContext, IIdType theId) {
+		return new HttpGetClientInvocation(theContext, theId.toVersionless().getValue());
 	}
 
-	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IIdType theId) {
-		return new HttpGetClientInvocation(theId.getValue());
+	public static HttpGetClientInvocation createAbsoluteVReadInvocation(FhirContext theContext, IIdType theId) {
+		return new HttpGetClientInvocation(theContext, theId.getValue());
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart()).getValue());
+	public static HttpGetClientInvocation createReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart()).getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
+	public static HttpGetClientInvocation createVReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
 	}
 
 	@Override

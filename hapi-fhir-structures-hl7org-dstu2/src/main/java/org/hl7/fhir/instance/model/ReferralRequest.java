@@ -29,50 +29,50 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
- * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organisation.
+ * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
 @ResourceDef(name="ReferralRequest", profile="http://hl7.org/fhir/Profile/ReferralRequest")
 public class ReferralRequest extends DomainResource {
 
     public enum ReferralStatus {
         /**
-         * A draft referral that has yet to be send
+         * A draft referral that has yet to be send.
          */
         DRAFT, 
         /**
-         * The referral has been transmitted, but not yet acknowledged by the recipient
+         * The referral has been transmitted, but not yet acknowledged by the recipient.
          */
         REQUESTED, 
         /**
-         * The referral has been acknowledged by the recipient, and is in the process of being actioned
+         * The referral has been acknowledged by the recipient, and is in the process of being actioned.
          */
         ACTIVE, 
         /**
-         * The referral has been cancelled without being completed. For example it is no longer needed
+         * The referral has been cancelled without being completed. For example it is no longer needed.
          */
         CANCELLED, 
         /**
-         * The recipient has agreed to deliver the care requested by the referral
+         * The recipient has agreed to deliver the care requested by the referral.
          */
         ACCEPTED, 
         /**
-         * The recipient has declined to accept the referral
+         * The recipient has declined to accept the referral.
          */
         REJECTED, 
         /**
-         * The referral has been completely actioned
+         * The referral has been completely actioned.
          */
         COMPLETED, 
         /**
@@ -124,13 +124,13 @@ public class ReferralRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "A draft referral that has yet to be send";
-            case REQUESTED: return "The referral has been transmitted, but not yet acknowledged by the recipient";
-            case ACTIVE: return "The referral has been acknowledged by the recipient, and is in the process of being actioned";
-            case CANCELLED: return "The referral has been cancelled without being completed. For example it is no longer needed";
-            case ACCEPTED: return "The recipient has agreed to deliver the care requested by the referral";
-            case REJECTED: return "The recipient has declined to accept the referral";
-            case COMPLETED: return "The referral has been completely actioned";
+            case DRAFT: return "A draft referral that has yet to be send.";
+            case REQUESTED: return "The referral has been transmitted, but not yet acknowledged by the recipient.";
+            case ACTIVE: return "The referral has been acknowledged by the recipient, and is in the process of being actioned.";
+            case CANCELLED: return "The referral has been cancelled without being completed. For example it is no longer needed.";
+            case ACCEPTED: return "The recipient has agreed to deliver the care requested by the referral.";
+            case REJECTED: return "The recipient has declined to accept the referral.";
+            case COMPLETED: return "The referral has been completely actioned.";
             default: return "?";
           }
         }
@@ -196,10 +196,10 @@ public class ReferralRequest extends DomainResource {
     protected Enumeration<ReferralStatus> status;
 
     /**
-     * Business Id that uniquely identifies the referral/care transfer request instance.
+     * Business identifier that uniquely identifies the referral/care transfer request instance.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Business Identifier", formalDefinition="Business Id that uniquely identifies the referral/care transfer request instance." )
+    @Description(shortDefinition="Business identifier", formalDefinition="Business identifier that uniquely identifies the referral/care transfer request instance." )
     protected List<Identifier> identifier;
 
     /**
@@ -217,10 +217,10 @@ public class ReferralRequest extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.
+     * Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The clinical specialty (discipline) that the referral is requested for", formalDefinition="Indication of the clinical domain or discipline to which the referral or transfer of care request is sent." )
+    @Description(shortDefinition="The clinical specialty (discipline) that the referral is requested for", formalDefinition="Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology." )
     protected CodeableConcept specialty;
 
     /**
@@ -243,14 +243,14 @@ public class ReferralRequest extends DomainResource {
     protected Patient patientTarget;
 
     /**
-     * The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).
+     * The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).
      */
     @Child(name = "requester", type = {Practitioner.class, Organization.class, Patient.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Requester of referral / transfer of care", formalDefinition="The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral)." )
+    @Description(shortDefinition="Requester of referral / transfer of care", formalDefinition="The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral)." )
     protected Reference requester;
 
     /**
-     * The actual object that is the target of the reference (The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).)
+     * The actual object that is the target of the reference (The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).)
      */
     protected Resource requesterTarget;
 
@@ -286,34 +286,34 @@ public class ReferralRequest extends DomainResource {
     protected DateTimeType dateSent;
 
     /**
-     * Description of clinical condition indicating why referral/transfer of care is requested.
+     * Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Reason for referral / Transfer of care request", formalDefinition="Description of clinical condition indicating why referral/transfer of care is requested." )
+    @Description(shortDefinition="Reason for referral / transfer of care request", formalDefinition="Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management." )
     protected CodeableConcept reason;
 
     /**
-     * The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
+     * The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
      */
     @Child(name = "description", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="A textual description of the referral", formalDefinition="The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary." )
+    @Description(shortDefinition="A textual description of the referral", formalDefinition="The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary." )
     protected StringType description;
 
     /**
-     * The service(s) that is/are requested to be provided to the patient.
+     * The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.
      */
     @Child(name = "serviceRequested", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="What actions are requested as part of referral?", formalDefinition="The service(s) that is/are requested to be provided to the patient." )
+    @Description(shortDefinition="Actions requested as part of the referral", formalDefinition="The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion." )
     protected List<CodeableConcept> serviceRequested;
 
     /**
-     * Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.
+     * Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.
      */
     @Child(name = "supportingInformation", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Additonal information to support referral or transfer of care request", formalDefinition="Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care." )
+    @Description(shortDefinition="Additonal information to support referral or transfer of care request", formalDefinition="Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan." )
     protected List<Reference> supportingInformation;
     /**
-     * The actual objects that are the target of the reference (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.)
+     * The actual objects that are the target of the reference (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
      */
     protected List<Resource> supportingInformationTarget;
 
@@ -388,7 +388,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Business Id that uniquely identifies the referral/care transfer request instance.)
+     * @return {@link #identifier} (Business identifier that uniquely identifies the referral/care transfer request instance.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -406,7 +406,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Business Id that uniquely identifies the referral/care transfer request instance.)
+     * @return {@link #identifier} (Business identifier that uniquely identifies the referral/care transfer request instance.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -501,7 +501,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #specialty} (Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.)
+     * @return {@link #specialty} (Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.)
      */
     public CodeableConcept getSpecialty() { 
       if (this.specialty == null)
@@ -517,7 +517,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #specialty} (Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.)
+     * @param value {@link #specialty} (Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.)
      */
     public ReferralRequest setSpecialty(CodeableConcept value) { 
       this.specialty = value;
@@ -593,7 +593,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #requester} (The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).)
+     * @return {@link #requester} (The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).)
      */
     public Reference getRequester() { 
       if (this.requester == null)
@@ -609,7 +609,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #requester} (The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).)
+     * @param value {@link #requester} (The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).)
      */
     public ReferralRequest setRequester(Reference value) { 
       this.requester = value;
@@ -617,14 +617,14 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #requester} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).)
+     * @return {@link #requester} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).)
      */
     public Resource getRequesterTarget() { 
       return this.requesterTarget;
     }
 
     /**
-     * @param value {@link #requester} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).)
+     * @param value {@link #requester} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).)
      */
     public ReferralRequest setRequesterTarget(Resource value) { 
       this.requesterTarget = value;
@@ -774,7 +774,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Description of clinical condition indicating why referral/transfer of care is requested.)
+     * @return {@link #reason} (Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.)
      */
     public CodeableConcept getReason() { 
       if (this.reason == null)
@@ -790,7 +790,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #reason} (Description of clinical condition indicating why referral/transfer of care is requested.)
+     * @param value {@link #reason} (Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.)
      */
     public ReferralRequest setReason(CodeableConcept value) { 
       this.reason = value;
@@ -798,7 +798,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -818,7 +818,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ReferralRequest setDescriptionElement(StringType value) { 
       this.description = value;
@@ -826,14 +826,14 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
+     * @return The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
+     * @param value The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.
      */
     public ReferralRequest setDescription(String value) { 
       if (Utilities.noString(value))
@@ -847,7 +847,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceRequested} (The service(s) that is/are requested to be provided to the patient.)
+     * @return {@link #serviceRequested} (The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.)
      */
     public List<CodeableConcept> getServiceRequested() { 
       if (this.serviceRequested == null)
@@ -865,7 +865,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceRequested} (The service(s) that is/are requested to be provided to the patient.)
+     * @return {@link #serviceRequested} (The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.)
      */
     // syntactic sugar
     public CodeableConcept addServiceRequested() { //3
@@ -887,7 +887,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.)
+     * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
      */
     public List<Reference> getSupportingInformation() { 
       if (this.supportingInformation == null)
@@ -905,7 +905,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.)
+     * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
      */
     // syntactic sugar
     public Reference addSupportingInformation() { //3
@@ -927,7 +927,7 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.)
+     * @return {@link #supportingInformation} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
      */
     public List<Resource> getSupportingInformationTarget() { 
       if (this.supportingInformationTarget == null)
@@ -962,20 +962,20 @@ public class ReferralRequest extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("status", "code", "The workflow status of the referral or transfer of care request.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("identifier", "Identifier", "Business Id that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Business identifier that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("date", "dateTime", "Date/DateTime of creation for draft requests and date of activation for active requests.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("type", "CodeableConcept", "An indication of the type of referral (or where applicable the type of transfer of care) request.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("specialty", "CodeableConcept", "Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.", 0, java.lang.Integer.MAX_VALUE, specialty));
+        childrenList.add(new Property("specialty", "CodeableConcept", "Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.", 0, java.lang.Integer.MAX_VALUE, specialty));
         childrenList.add(new Property("priority", "CodeableConcept", "An indication of the urgency of referral (or where applicable the type of transfer of care) request.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient who is the subject of a referral or transfer of care request.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("requester", "Reference(Practitioner|Organization|Patient)", "The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral).", 0, java.lang.Integer.MAX_VALUE, requester));
+        childrenList.add(new Property("requester", "Reference(Practitioner|Organization|Patient)", "The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral).", 0, java.lang.Integer.MAX_VALUE, requester));
         childrenList.add(new Property("recipient", "Reference(Practitioner|Organization)", "The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.", 0, java.lang.Integer.MAX_VALUE, recipient));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter at which the request for referral or transfer of care is initiated.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("dateSent", "dateTime", "Date/DateTime the request for referral or transfer of care is sent by the author.", 0, java.lang.Integer.MAX_VALUE, dateSent));
-        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why referral/transfer of care is requested.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("description", "string", "The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("serviceRequested", "CodeableConcept", "The service(s) that is/are requested to be provided to the patient.", 0, java.lang.Integer.MAX_VALUE, serviceRequested));
-        childrenList.add(new Property("supportingInformation", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
+        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("description", "string", "The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("serviceRequested", "CodeableConcept", "The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.", 0, java.lang.Integer.MAX_VALUE, serviceRequested));
+        childrenList.add(new Property("supportingInformation", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         childrenList.add(new Property("fulfillmentTime", "Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, java.lang.Integer.MAX_VALUE, fulfillmentTime));
       }
 

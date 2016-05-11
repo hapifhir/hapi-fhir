@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ConformanceExpectation {
 
         /**
-         * Support for the specified capability is required to be considered conformant
+         * Support for the specified capability is required to be considered conformant.
          */
         SHALL, 
         /**
-         * Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration
+         * Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration.
          */
         SHOULD, 
         /**
-         * Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional
+         * Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional.
          */
         MAY, 
         /**
-         * Support for the specified capability is strongly discouraged and should occur only after careful consideration
+         * Support for the specified capability is strongly discouraged and should occur only after careful consideration.
          */
         SHOULDNOT, 
         /**
@@ -81,19 +81,19 @@ public enum ConformanceExpectation {
         }
         public String getDefinition() {
           switch (this) {
-            case SHALL: return "Support for the specified capability is required to be considered conformant";
-            case SHOULD: return "Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration";
-            case MAY: return "Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional";
-            case SHOULDNOT: return "Support for the specified capability is strongly discouraged and should occur only after careful consideration";
+            case SHALL: return "Support for the specified capability is required to be considered conformant.";
+            case SHOULD: return "Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration.";
+            case MAY: return "Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional.";
+            case SHOULDNOT: return "Support for the specified capability is strongly discouraged and should occur only after careful consideration.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case SHALL: return "S H A L L";
-            case SHOULD: return "S H O U L D";
-            case MAY: return "M A Y";
-            case SHOULDNOT: return "S H O U L D N O T";
+            case SHALL: return "SHALL";
+            case SHOULD: return "SHOULD";
+            case MAY: return "MAY";
+            case SHOULDNOT: return "SHOULD-NOT";
             default: return "?";
           }
     }

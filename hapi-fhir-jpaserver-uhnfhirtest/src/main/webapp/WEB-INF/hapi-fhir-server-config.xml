@@ -24,20 +24,6 @@
 		<ref bean="myLoggingInterceptor"/>
 	</util:list>
 	
-		<!-- 
-	<bean class="ca.uhn.fhirtest.HsqldbServer" id="dbServer" init-method="start">
-		<constructor-arg>
-			<value>
-				server.database.0=file:#{systemProperties['fhir.db.location']}/hsql-fhir-db
-				server.dbname.0=uhnfhirdb
-				server.remote_open=true
-				hsqldb.reconfig_logging=false
-				hsqldb.default_table_type=cached
-			</value>
-		</constructor-arg>
-	</bean>
-	-->
-
 	<!--for mysql-->
 	<!--
 	<bean id="dbServer" class="ca.uhn.fhirtest.MySqlServer">

@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 public class XmlUtilTest {
@@ -21,6 +22,12 @@ public class XmlUtilTest {
 	@Test
 	public void testCreateStreamWriter() throws Exception {
 		XmlUtil.createXmlStreamWriter(new StringWriter());
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

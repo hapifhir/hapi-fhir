@@ -3,12 +3,19 @@
 
 	<properties>
 		<title>Profiles and Extensions</title>
-		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+		<author email="jamesagnew@gmail.com">James Agnew</author>
 	</properties>
 
 	<body>
 
 		<section name="Undeclared Extensions">
+			
+			<p class="doc_info_bubble">
+				Note on FHIR Versions: Because of the differences in the way the structures
+				work between DSTU2 and DSTU3, we have provided two versions of many of the
+				examples on this page. See the <a href="./download.html">download page</a>
+				for more information on FHIR versions.
+			</p>
 			
 			<p>
 				Extensions are a key part of the FHIR specification, providing a standardized
@@ -21,19 +28,42 @@
 				Undeclared extensions can be added to any of the built in FHIR resource types that come with HAPI-FHIR.
 			</p>
 			
+			<p>
+				<b>DSTU2</b>
+			</p>
 			<macro name="snippet">
 				<param name="id" value="resourceExtension" />
-				<param name="file" value="examples/src/main/java/example/Extensions.java" />
+				<param name="file" value="examples/src/main/java/example/ExtensionsDstu2.java" />
+			</macro>
+
+			<p>
+				<b>DSTU3</b>
+			</p>
+			<macro name="snippet">
+				<param name="id" value="resourceExtension" />
+				<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
 			</macro>
 			
 			<p>
 				Undeclared extensions can also be added to datatypes (composite or primitive).
 			</p>
+
+			<p>
+				<b>DSTU2</b>
+			</p>
 			<macro name="snippet">
 				<param name="id" value="resourceStringExtension" />
-				<param name="file" value="examples/src/main/java/example/Extensions.java" />
+				<param name="file" value="examples/src/main/java/example/ExtensionsDstu2.java" />
 			</macro>
 			
+			<p>
+				<b>DSTU3</b>
+			</p>
+			<macro name="snippet">
+				<param name="id" value="resourceStringExtension" />
+				<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+			</macro>
+
 			<subsection name="Sub-Extensions">
 
 				<p>
@@ -41,24 +71,48 @@
 					of a datatype. This is done by adding a child undeclared extension to the
 					parent extension.
 				</p>
+
+				<p>
+					<b>DSTU2</b>
+				</p>
 				<macro name="snippet">
 					<param name="id" value="subExtension" />
-					<param name="file" value="examples/src/main/java/example/Extensions.java" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu2.java" />
 				</macro>
 			
+				<p>
+					<b>DSTU3</b>
+				</p>
+				<macro name="snippet">
+					<param name="id" value="subExtension" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+
 			</subsection>
 
 			<subsection name="Retrieving Extension Values">
 
 				<p>
 					HAPI provides a few ways of accessing extension values in resources 
-					which are receieved from other sources (i.e. downloaded by a client).
+					which are received from other sources (i.e. downloaded by a client).
+				</p>
+
+				<p>
+					<b>DSTU2</b>
 				</p>
 				<macro name="snippet">
 					<param name="id" value="parseExtension" />
-					<param name="file" value="examples/src/main/java/example/Extensions.java" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu2.java" />
 				</macro>
 			
+				<p>
+					<b>DSTU3</b>
+				</p>
+				<macro name="snippet">
+					<param name="id" value="parseExtension" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+
 			</subsection>
 			
 		</section>
@@ -119,85 +173,72 @@
 					<param name="file" value="examples/src/main/java/example/MyPatientUse.java" />
 				</macro>
 
-			<subsection name="Documentation">
+			<subsection name="Using Custom Types in a Client">
 				
 				<p>
-					Note in the example above the use of the <code>@Description</code>
-					annotation on the extension fields. This documentation is important,
-					as the FHIR Server will automatically add it to the generated Profile
-					resources which are exported by the server.  
+					If you are using a client and wish to use a specific custom structure,
+					you may simply use the custom structure as you would a build in
+					HAPI type.
 				</p>
+				<macro name="snippet">
+					<param name="id" value="customTypeClientSimple" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
 				
 				<p>
-					These bits of documentation will then be re-added to any automatically
-					generated clients built using <a href="./doc_tinder.html">Tinder</a>
-					against your server.
+					You may also explicitly use custom types in searches and other
+					operations which return resources.
 				</p>
+				<macro name="snippet">
+					<param name="id" value="customTypeClientSearch" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+
+				<p>
+					You can also explicitly declare a preferred response resource custom
+					type. This is useful for some operations that do not otherwise
+					declare their resource types in the method signature.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="customTypeClientSearch2" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+
+			</subsection>
+			
+			<subsection name="Using Multiple Custom Types in a Client">
+			
+				<p>
+					Sometimes you may not know in advance exactly which
+					type you will be receiving. For example, there are Patient resources
+					which conform to several different profiles on a server and you 
+					aren't sure which profile you will get back for a specific read,
+					you can declare the "primary" type for a given profile.
+				</p>
+				<p>
+					This is declared at the FhirContext level, and will apply to any 
+					clients created from this context (including clients created before
+					the default was set).
+				</p>
+				<macro name="snippet">
+					<param name="id" value="customTypeClientDeclared" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+				
+			</subsection>
+
+			<subsection name="Using Custom Types in a Server">
 				
 				<p>
-					The following is a snippet from the generated Profile resource
-					which is automatically created by a HAPI RESTful server using
-					your new type. (Don't worry if this part doens't make sense to you
-					yet, this is an advanced feature)
+					If you are using a client and wish to use a specific custom structure,
+					you may simply use the custom structure as you would a build in
+					HAPI type.
 				</p>
-				
-				<source><![CDATA[<element>
-   <path value="Patient.extension"/>
-   <name value="extension"/>
-   <slicing>
-      <discriminator value="url"/>
-      <ordered value="false"/>
-      <rules value="open"/>
-   </slicing>
-   <definition>
-      <type>
-         <code value="Extension"/>
-      </type>
-   </definition>
-</element>
-<element>
-   <path value="Patient.extension"/>
-   <name value="extension"/>
-   <definition>
-      <short value="The name of the patient's favourite pet"/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-         <code value="Extension"/>
-         <profile value="http://example.com/dontuse#petname"/>
-      </type>
-      <isModifier value="false"/>
-   </definition>
-</element>
-<element>
-   <path value="Patient.modifierExtension"/>
-   <name value="modifierExtension"/>
-   <slicing>
-      <discriminator value="url"/>
-      <ordered value="false"/>
-      <rules value="open"/>
-   </slicing>
-   <definition>
-      <type>
-         <code value="Extension"/>
-      </type>
-   </definition>
-</element>
-<element>
-   <path value="Patient.modifierExtension"/>
-   <name value="modifierExtension"/>
-   <definition>
-      <short value="Some dates of note for the patient"/>
-      <min value="0"/>
-      <max value="*"/>
-      <type>
-         <code value="Extension"/>
-         <profile value="http://example.com/dontuse#importantDates"/>
-      </type>
-      <isModifier value="true"/>
-   </definition>
-</element>]]></source>	
-				
+				<macro name="snippet">
+					<param name="id" value="customTypeClientSimple" />
+					<param name="file" value="examples/src/main/java/example/ExtensionsDstu3.java" />
+				</macro>
+
 			</subsection>
 			
 		</section>

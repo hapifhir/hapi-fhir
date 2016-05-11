@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -48,30 +48,26 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private String myCompartmentName;
-	private Class<? extends IBaseResource> myDeclaredResourceType;
 	private String myDescription;
 	private Integer myIdParamIndex;
 	private String myQueryName;
+	private boolean myAllowUnknownParams;
 
-	@SuppressWarnings("unchecked")
 	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
-		this.myDeclaredResourceType = (Class<? extends IBaseResource>) theMethod.getReturnType();
-		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		this.myAllowUnknownParams = search.allowUnknownParams();
 
 		Description desc = theMethod.getAnnotation(Description.class);
 		if (desc != null) {
@@ -119,10 +115,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public Class<? extends IBaseResource> getDeclaredResourceType() {
-		return myDeclaredResourceType;
-	}
-
 	public String getDescription() {
 		return myDescription;
 	}
@@ -139,15 +131,15 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.BUNDLE;
+//		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+			return ReturnTypeEnum.BUNDLE;
+//		} else {
+//			return ReturnTypeEnum.RESOURCE;
+//		}
 	}
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (!theRequest.getResourceName().equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", new Object[] { getMethod().getName(), theRequest.getResourceName(), getResourceName() } );
-			return false;
-		}
 		if (theRequest.getId() != null && myIdParamIndex == null) {
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
@@ -243,17 +235,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
-		for (String next : keySet) {
-			// if (next.startsWith("_")) {
-			// if (!SPECIAL_PARAM_NAMES.contains(next)) {
-			// continue;
-			// }
-			// }
-			if (!methodParamsTemp.contains(next)) {
-				return false;
+		if (myAllowUnknownParams == false) {
+			for (String next : keySet) {
+				if (!methodParamsTemp.contains(next)) {
+					return false;
+				}
 			}
 		}
-
 		return true;
 	}
 
@@ -283,7 +271,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -312,10 +300,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			retVal.add(next);
 		}
 		return retVal;
-	}
-
-	public void setResourceType(Class<? extends IResource> resourceType) {
-		this.myDeclaredResourceType = resourceType;
 	}
 
 	@Override
@@ -361,16 +345,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		case GET:
 		default:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
 			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName);
 			}
 			break;
 		case GET_WITH_SEARCH:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
 			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
 			}
 			break;
 		case POST:
@@ -477,8 +461,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(String theSearchUrl, Map<String, List<String>> theParams) {
-		return new HttpGetClientInvocation(theParams, theSearchUrl);
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+		return new HttpGetClientInvocation(theContext, theParams, theSearchUrl);
 	}
 
 }

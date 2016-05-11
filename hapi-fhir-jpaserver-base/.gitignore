@@ -1,6 +1,9 @@
+ca.uhn.fhir.jpa.entity.ResourceTable/
 target/
 /bin
 nohup.out
+lucene_indexes/
+ca.uhn.fhir.jpa.entity.ResourceTable/
 
 # Created by https://www.gitignore.io
 
@@ -100,7 +103,6 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
 
 # Eclipse Core
@@ -116,7 +118,6 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-.classpath
 
 # PDT-specific
 .buildpath

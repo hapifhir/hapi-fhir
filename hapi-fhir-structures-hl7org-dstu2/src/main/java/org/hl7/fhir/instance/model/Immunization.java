@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -207,7 +209,7 @@ public class Immunization extends DomainResource {
          * Date of reaction to the immunization.
          */
         @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="When did reaction start?", formalDefinition="Date of reaction to the immunization." )
+        @Description(shortDefinition="When reaction started", formalDefinition="Date of reaction to the immunization." )
         protected DateTimeType date;
 
         /**
@@ -226,7 +228,7 @@ public class Immunization extends DomainResource {
          * Self-reported indicator.
          */
         @Child(name = "reported", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Was reaction self-reported?", formalDefinition="Self-reported indicator." )
+        @Description(shortDefinition="Indicates self-reported reaction", formalDefinition="Self-reported indicator." )
         protected BooleanType reported;
 
         private static final long serialVersionUID = -1297668556L;
@@ -426,7 +428,7 @@ public class Immunization extends DomainResource {
          * Nominal position in a series.
          */
         @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="What dose number within series?", formalDefinition="Nominal position in a series." )
+        @Description(shortDefinition="Dose number within series", formalDefinition="Nominal position in a series." )
         protected PositiveIntType doseSequence;
 
         /**
@@ -437,14 +439,14 @@ public class Immunization extends DomainResource {
         protected StringType description;
 
         /**
-         * Indicates the authority who published the protocol?  E.g. ACIP.
+         * Indicates the authority who published the protocol.  E.g. ACIP.
          */
         @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP." )
+        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol.  E.g. ACIP." )
         protected Reference authority;
 
         /**
-         * The actual object that is the target of the reference (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * The actual object that is the target of the reference (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
         protected Organization authorityTarget;
 
@@ -473,14 +475,14 @@ public class Immunization extends DomainResource {
          * Indicates if the immunization event should "count" against  the protocol.
          */
         @Child(name = "doseStatus", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Does dose count towards immunity?", formalDefinition="Indicates if the immunization event should \"count\" against  the protocol." )
+        @Description(shortDefinition="Indicates if dose counts towards immunity", formalDefinition="Indicates if the immunization event should \"count\" against  the protocol." )
         protected CodeableConcept doseStatus;
 
         /**
-         * Provides an explanation as to why a immunization event should or should not count against the protocol.
+         * Provides an explanation as to why an immunization event should or should not count against the protocol.
          */
         @Child(name = "doseStatusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Why does does count/not count?", formalDefinition="Provides an explanation as to why a immunization event should or should not count against the protocol." )
+        @Description(shortDefinition="Why dose does (not) count", formalDefinition="Provides an explanation as to why an immunization event should or should not count against the protocol." )
         protected CodeableConcept doseStatusReason;
 
         private static final long serialVersionUID = 386814037L;
@@ -596,7 +598,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return {@link #authority} (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @return {@link #authority} (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
         public Reference getAuthority() { 
           if (this.authority == null)
@@ -612,7 +614,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @param value {@link #authority} (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @param value {@link #authority} (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
         public ImmunizationVaccinationProtocolComponent setAuthority(Reference value) { 
           this.authority = value;
@@ -620,7 +622,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
         public Organization getAuthorityTarget() { 
           if (this.authorityTarget == null)
@@ -632,7 +634,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
         public ImmunizationVaccinationProtocolComponent setAuthorityTarget(Organization value) { 
           this.authorityTarget = value;
@@ -798,7 +800,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return {@link #doseStatusReason} (Provides an explanation as to why a immunization event should or should not count against the protocol.)
+         * @return {@link #doseStatusReason} (Provides an explanation as to why an immunization event should or should not count against the protocol.)
          */
         public CodeableConcept getDoseStatusReason() { 
           if (this.doseStatusReason == null)
@@ -814,7 +816,7 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @param value {@link #doseStatusReason} (Provides an explanation as to why a immunization event should or should not count against the protocol.)
+         * @param value {@link #doseStatusReason} (Provides an explanation as to why an immunization event should or should not count against the protocol.)
          */
         public ImmunizationVaccinationProtocolComponent setDoseStatusReason(CodeableConcept value) { 
           this.doseStatusReason = value;
@@ -825,12 +827,12 @@ public class Immunization extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, java.lang.Integer.MAX_VALUE, doseSequence));
           childrenList.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol?  E.g. ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
+          childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
           childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
           childrenList.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, java.lang.Integer.MAX_VALUE, seriesDoses));
           childrenList.add(new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
           childrenList.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatus));
-          childrenList.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why a immunization event should or should not count against the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
+          childrenList.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
         }
 
       public ImmunizationVaccinationProtocolComponent copy() {
@@ -916,7 +918,7 @@ public class Immunization extends DomainResource {
      * The patient who either received or did not receive the immunization.
      */
     @Child(name = "patient", type = {Patient.class}, order=4, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Who was immunized?", formalDefinition="The patient who either received or did not receive the immunization." )
+    @Description(shortDefinition="Who was immunized", formalDefinition="The patient who either received or did not receive the immunization." )
     protected Reference patient;
 
     /**
@@ -935,14 +937,14 @@ public class Immunization extends DomainResource {
      * True if this administration was reported rather than directly administered.
      */
     @Child(name = "reported", type = {BooleanType.class}, order=6, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Is this a self-reported record?", formalDefinition="True if this administration was reported rather than directly administered." )
+    @Description(shortDefinition="Indicates a self-reported record", formalDefinition="True if this administration was reported rather than directly administered." )
     protected BooleanType reported;
 
     /**
      * Clinician who administered the vaccine.
      */
     @Child(name = "performer", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Who administered vaccine?", formalDefinition="Clinician who administered the vaccine." )
+    @Description(shortDefinition="Who administered vaccine", formalDefinition="Clinician who administered the vaccine." )
     protected Reference performer;
 
     /**
@@ -954,7 +956,7 @@ public class Immunization extends DomainResource {
      * Clinician who ordered the vaccination.
      */
     @Child(name = "requester", type = {Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Who ordered vaccination?", formalDefinition="Clinician who ordered the vaccination." )
+    @Description(shortDefinition="Who ordered vaccination", formalDefinition="Clinician who ordered the vaccination." )
     protected Reference requester;
 
     /**
@@ -990,7 +992,7 @@ public class Immunization extends DomainResource {
      * The service delivery location where the vaccine administration occurred.
      */
     @Child(name = "location", type = {Location.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Where did vaccination occur?", formalDefinition="The service delivery location where the vaccine administration occurred." )
+    @Description(shortDefinition="Where vaccination occurred", formalDefinition="The service delivery location where the vaccine administration occurred." )
     protected Reference location;
 
     /**
@@ -1044,7 +1046,7 @@ public class Immunization extends DomainResource {
      * Reasons why a vaccine was or was not administered.
      */
     @Child(name = "explanation", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Administration / non-administration reasons", formalDefinition="Reasons why a vaccine was or was not administered." )
+    @Description(shortDefinition="Administration/non-administration reasons", formalDefinition="Reasons why a vaccine was or was not administered." )
     protected ImmunizationExplanationComponent explanation;
 
     /**
@@ -2045,7 +2047,7 @@ public class Immunization extends DomainResource {
   public static final String SP_NOTGIVEN = "notgiven";
   @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="What dose number within series?", type="number" )
+  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number" )
   public static final String SP_DOSESEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference" )
   public static final String SP_PATIENT = "patient";
@@ -2055,7 +2057,7 @@ public class Immunization extends DomainResource {
   public static final String SP_REASONNOTGIVEN = "reason-not-given";
   @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When did reaction start?", type="date" )
+  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date" )
   public static final String SP_REACTIONDATE = "reaction-date";
   @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token" )
   public static final String SP_STATUS = "status";

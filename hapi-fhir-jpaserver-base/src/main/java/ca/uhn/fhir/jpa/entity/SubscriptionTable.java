@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -41,8 +39,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 
 //@formatter:off
 @Entity
@@ -89,8 +85,7 @@ public class SubscriptionTable {
 	private Long myResId;
 
 	@Column(name = "SUBSCRIPTION_STATUS", nullable = false, length = 20)
-	@Enumerated(EnumType.STRING)
-	private SubscriptionStatusEnum myStatus;
+	private String myStatus;
 
 	//@formatter:off
 	@OneToOne()
@@ -124,7 +119,7 @@ public class SubscriptionTable {
 		return myNextCheck;
 	}
 
-	public SubscriptionStatusEnum getStatus() {
+	public String getStatus() {
 		return myStatus;
 	}
 
@@ -152,7 +147,7 @@ public class SubscriptionTable {
 		myNextCheck = theNextCheck;
 	}
 
-	public void setStatus(SubscriptionStatusEnum theStatus) {
+	public void setStatus(String theStatus) {
 		myStatus = theStatus;
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.validation;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.thymeleaf.util.Validate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -29,8 +28,9 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ObjectUtil;
 
-class ValidationContext<T> extends BaseValidationContext<T> implements IValidationContext<T> {
+public class ValidationContext<T> extends BaseValidationContext<T> implements IValidationContext<T> {
 
 	private final IEncoder myEncoder;
 	private final T myResource;
@@ -136,8 +136,8 @@ class ValidationContext<T> extends BaseValidationContext<T> implements IValidati
 	}
 
 	public static IValidationContext<IBaseResource> forText(final FhirContext theContext, final String theResourceBody) {
-		Validate.notNull(theContext, "theContext can not be null");
-		Validate.notEmpty(theResourceBody, "theResourceBody can not be null or empty");
+		ObjectUtil.requireNonNull(theContext, "theContext can not be null");
+		ObjectUtil.requireNotEmpty(theResourceBody, "theResourceBody can not be null or empty");
 		return new BaseValidationContext<IBaseResource>(theContext) {
 
 			private EncodingEnum myEncoding;
@@ -169,5 +169,4 @@ class ValidationContext<T> extends BaseValidationContext<T> implements IValidati
 
 		};
 	}
-
 }

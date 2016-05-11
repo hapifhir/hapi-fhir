@@ -1,10 +1,12 @@
 package org.hl7.fhir.instance.model.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +22,7 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-public interface IBaseEnumFactory<T extends Enum<?>> {
+public interface IBaseEnumFactory<T extends Enum<?>> extends Serializable {
 
     /**
      * Read an enumeration value from the string that represents it on the XML or JSON

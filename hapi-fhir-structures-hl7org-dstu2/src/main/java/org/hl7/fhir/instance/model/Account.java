@@ -29,17 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
  */
@@ -48,11 +47,11 @@ public class Account extends DomainResource {
 
     public enum AccountStatus {
         /**
-         * This account is active and may be used
+         * This account is active and may be used.
          */
         ACTIVE, 
         /**
-         * This account is inactive and should not be used to track financial information
+         * This account is inactive and should not be used to track financial information.
          */
         INACTIVE, 
         /**
@@ -84,8 +83,8 @@ public class Account extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "This account is active and may be used";
-            case INACTIVE: return "This account is inactive and should not be used to track financial information";
+            case ACTIVE: return "This account is active and may be used.";
+            case INACTIVE: return "This account is inactive and should not be used to track financial information.";
             default: return "?";
           }
         }
@@ -119,10 +118,10 @@ public class Account extends DomainResource {
     }
 
     /**
-     * Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number).
+     * Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Account number", formalDefinition="Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number)." )
+    @Description(shortDefinition="Account number", formalDefinition="Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number)." )
     protected List<Identifier> identifier;
 
     /**
@@ -168,10 +167,10 @@ public class Account extends DomainResource {
     protected Money balance;
 
     /**
-     * Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc.
+     * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
      */
     @Child(name = "coveragePeriod", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc." )
+    @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
     protected Period coveragePeriod;
 
     /**
@@ -215,7 +214,7 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number).)
+     * @return {@link #identifier} (Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -233,7 +232,7 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number).)
+     * @return {@link #identifier} (Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -449,7 +448,7 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return {@link #coveragePeriod} (Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc.)
+     * @return {@link #coveragePeriod} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
      */
     public Period getCoveragePeriod() { 
       if (this.coveragePeriod == null)
@@ -465,7 +464,7 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @param value {@link #coveragePeriod} (Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc.)
+     * @param value {@link #coveragePeriod} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
      */
     public Account setCoveragePeriod(Period value) { 
       this.coveragePeriod = value;
@@ -606,14 +605,14 @@ public class Account extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/useable or not.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("activePeriod", "Period", "Indicates the period of time over which the account is allowed.", 0, java.lang.Integer.MAX_VALUE, activePeriod));
         childrenList.add(new Property("currency", "Coding", "Identifies the currency to which transactions must be converted when crediting or debiting the account.", 0, java.lang.Integer.MAX_VALUE, currency));
         childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
-        childrenList.add(new Property("coveragePeriod", "Period", "Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, coveragePeriod));
+        childrenList.add(new Property("coveragePeriod", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, coveragePeriod));
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));

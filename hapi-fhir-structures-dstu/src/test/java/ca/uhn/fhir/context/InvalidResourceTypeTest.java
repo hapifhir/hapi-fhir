@@ -3,10 +3,12 @@ package ca.uhn.fhir.context;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class InvalidResourceTypeTest {
 
@@ -27,5 +29,11 @@ public class InvalidResourceTypeTest {
 	{
     	// nothing
 	}
+
+
+ 	@AfterClass
+ 	public static void afterClassClearContext() {
+ 		TestUtil.clearAllStaticFieldsForUnitTest();
+ 	}
 
 }

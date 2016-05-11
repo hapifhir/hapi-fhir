@@ -11,16 +11,18 @@ a browser.
 <!--*/-->
 
 <div>
-	<div class="hapiHeaderText" th:if="${not resource.nameFirstRep.empty}" th:narrative="${resource.nameFirstRep}"/>
+	<th:block th:unless="${#lists.isEmpty(resource.name)}">
+		<div class="hapiHeaderText" th:narrative="${resource.name[0]}"/>
+	</th:block>
 	<table class="hapiPropertyTable">
 		<tbody>
-			<tr th:if="${not resource.identifierFirstRep.empty}">
+			<tr th:if="${not resource.identifier.empty}">
 				<td>Identifier</td>
-				<td th:narrative="${resource.identifierFirstRep}"></td>
+				<td th:narrative="${resource.identifier[0]}"></td>
 			</tr>
-			<tr th:if="${not resource.addressFirstRep.empty}">
+			<tr th:if="${not resource.address.empty}">
 				<td>Address</td>
-				<td th:narrative="${resource.addressFirstRep}"></td>
+				<td th:narrative="${resource.address[0]}"></td>
 			</tr>
 			<tr th:if="${not resource.birthDateElement.empty}">
 				<td>Date of birth</td>

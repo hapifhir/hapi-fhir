@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,4 +66,10 @@ public @interface SearchParamDefinition {
 	 */
 	Class<? extends IBaseResource>[] target() default {};
 	
+	/**
+	 * Indicates that this field indicates that resources linked to by this parameter
+	 * (must be a reference parameter) place the resource in the given compartment.
+	 */
+	Compartment[] providesMembershipIn() default {};
+
 }

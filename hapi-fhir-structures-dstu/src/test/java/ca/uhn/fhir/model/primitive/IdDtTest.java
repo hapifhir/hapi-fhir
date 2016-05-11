@@ -5,12 +5,14 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.util.TestUtil;
 
 public class IdDtTest {
 
@@ -29,6 +31,12 @@ public class IdDtTest {
 		assertFalse(new IdDt(" 1").isIdPartValid());
 		assertFalse(new IdDt("1:1").isIdPartValid());
 		assertFalse(new IdDt(StringUtils.leftPad("", 65, '0')).isIdPartValid());
+	}
+	
+	@Test
+	public void testConstructorsWithNullArguments() {
+		IdDt id = new IdDt(null, null, null);
+		assertEquals(null, id.getValue());
 	}
 	
 	@Test
@@ -222,6 +230,12 @@ public class IdDtTest {
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu1();
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

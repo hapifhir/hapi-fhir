@@ -35,19 +35,20 @@ public class GenericClientExample {
    public static void simpleExample() {
       // START SNIPPET: simple
       // We're connecting to a DSTU1 compliant server in this example
-      FhirContext ctx = FhirContext.forDstu1();
-      String serverBase = "http://fhirtest.uhn.ca/baseDstu1";
+      FhirContext ctx = FhirContext.forDstu2();
+      String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
       
       IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
       // Perform a search
-      ca.uhn.fhir.model.api.Bundle results = client
+      Bundle results = client
             .search()
             .forResource(Patient.class)
             .where(Patient.FAMILY.matches().value("duck"))
+            .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
             .execute();
 
-      System.out.println("Found " + results.size() + " patients named 'duck'");
+      System.out.println("Found " + results.getEntry().size() + " patients named 'duck'");
       // END SNIPPET: simple
    }
 
@@ -96,7 +97,7 @@ public class GenericClientExample {
                   .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
                   .execute();
 
-          // This will return true if the server responded with an HTTP 201 created,
+          // This will return Boolean.TRUE if the server responded with an HTTP 201 created,
           // otherwise it will return null.
           Boolean created = outcome.getCreated();
 

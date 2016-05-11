@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.GetPage;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -69,7 +70,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -81,15 +82,12 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
-	/**
-	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
-	 */
-	private static volatile IRequestReader ourRequestReader;
 	private FhirContext myContext;
 	private Method myMethod;
 	private List<IParameter> myParameters;
@@ -131,7 +129,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
-		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
+		String contentTypeHeader = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 		EncodingEnum encoding;
 		if (isBlank(contentTypeHeader)) {
 			encoding = EncodingEnum.XML;
@@ -151,14 +149,14 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return parser;
 	}
 
-	protected Object[] createParametersForServerRequest(RequestDetails theRequest, byte[] theRequestContents) {
+	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param == null) {
 				continue;
 			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theRequestContents, this);
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
 	}
@@ -251,9 +249,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
+	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
-	protected final Object invokeServerMethod(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) {
+	protected final Object invokeServerMethod(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
@@ -293,41 +291,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return mySupportsConditionalMultiple;
 	}
 
-	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {
-		/*
-		 * This is weird, but this class is used both in clients and in servers, and we want to avoid needing to depend on servlet-api in clients since there is no point. So we dynamically load a class
-		 * that does the servlet processing in servers. Down the road it may make sense to just split the method binding classes into server and client versions, but this isn't actually a huge deal I
-		 * don't think.
-		 */
-		IRequestReader reader = ourRequestReader;
-		if (reader == null) {
-			try {
-				Class.forName("javax.servlet.ServletInputStream");
-				String className = BaseMethodBinding.class.getName() + "$" + "ActiveRequestReader";
-				try {
-					reader = (IRequestReader) Class.forName(className).newInstance();
-				} catch (Exception e1) {
-					throw new ConfigurationException("Failed to instantiate class " + className, e1);
-				}
-			} catch (ClassNotFoundException e) {
-				String className = BaseMethodBinding.class.getName() + "$" + "InactiveRequestReader";
-				try {
-					reader = (IRequestReader) Class.forName(className).newInstance();
-				} catch (Exception e1) {
-					throw new ConfigurationException("Failed to instantiate class " + className, e1);
-				}
-			}
-			ourRequestReader = reader;
-		}
-
-		InputStream inputStream = reader.getInputStream(theRequest);
-		byte[] requestContents = IOUtils.toByteArray(inputStream);
-		
-		theRequest.setRawRequest(requestContents);
-
-		return requestContents;
-	}
-
 	/**
 	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(RequestDetails, ActionRequestDetails, Object[])} to provide method specifics to the
 	 * interceptors.
@@ -340,8 +303,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 *           The method params as generated by the specific method binding
 	 */
 	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
-		// TODO Auto-generated method stub
-
+		// nothing by default
 	}
 
 	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
@@ -421,12 +383,17 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
 		Operation operation = theMethod.getAnnotation(Operation.class);
+		GetPage getPage = theMethod.getAnnotation(GetPage.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation, getPage)) {
 			return null;
 		}
 
+		if (getPage != null) {
+			return new PageMethodBinding(theContext, theMethod);
+		}
+		
 		Class<? extends IBaseResource> returnType;
 
 		Class<? extends IBaseResource> returnTypeFromRp = null;
@@ -454,7 +421,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			// returns a bundle
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
-			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
+			if (returnTypeFromMethod == null) {
+				ourLog.trace("Method {} returns a non-typed list, can't verify return type", theMethod);
+			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
 						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
@@ -641,19 +610,19 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	/**
-	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 * @see ServletRequestDetails#getByteStreamRequestContents()
 	 */
-	static class ActiveRequestReader implements IRequestReader {
+	public static class ActiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) throws IOException {
-			return theRequestDetails.getServletRequest().getInputStream();
+			return theRequestDetails.getInputStream();
 		}
 	}
 
 	/**
-	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 * @see ServletRequestDetails#getByteStreamRequestContents()
 	 */
-	static class InactiveRequestReader implements IRequestReader {
+	public static class InactiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) {
 			throw new IllegalStateException("The servlet-api JAR is not found on the classpath. Please check that this library is available.");
@@ -661,9 +630,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	/**
-	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 * @see ServletRequestDetails#getByteStreamRequestContents()
 	 */
-	private static interface IRequestReader {
+	public static interface IRequestReader {
 		InputStream getInputStream(RequestDetails theRequestDetails) throws IOException;
 	}
 

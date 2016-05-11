@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 /**
  * A single tag
@@ -35,7 +35,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * {@link #getScheme() scheme} and 
  * </p>
  */
-public class Tag extends BaseElement implements IElement {
+public class Tag extends BaseElement implements IElement, IBaseCoding {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -60,10 +60,6 @@ public class Tag extends BaseElement implements IElement {
 	private String myScheme;
 	private String myTerm;
 
-	/**
-	 * @deprecated Tags will become immutable in a future release, so this constructor should not be used.
-	 */
-	@Deprecated
 	public Tag() {
 	}
 
@@ -150,12 +146,7 @@ public class Tag extends BaseElement implements IElement {
 
 	/**
 	 * Sets the label and returns a reference to this tag
-	 * 
-	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
-	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
-	 * tag object
 	 */
-	@Deprecated
 	public Tag setLabel(String theLabel) {
 		myLabel = theLabel;
 		return this;
@@ -163,12 +154,7 @@ public class Tag extends BaseElement implements IElement {
 
 	/**
 	 * Sets the scheme and returns a reference to this tag
-	 * 
-	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
-	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
-	 * tag object
 	 */
-	@Deprecated
 	public Tag setScheme(String theScheme) {
 		myScheme = theScheme;
 		return this;
@@ -176,12 +162,7 @@ public class Tag extends BaseElement implements IElement {
 
 	/**
 	 * Sets the term and returns a reference to this tag
-	 * 
-	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
-	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
-	 * tag object
 	 */
-	@Deprecated
 	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
 		return this;
@@ -206,6 +187,39 @@ public class Tag extends BaseElement implements IElement {
 		b.append("Term", myTerm);
 		b.append("Label", myLabel);
 		return b.toString();
+	}
+
+	@Override
+	public String getCode() {
+		return getTerm();
+	}
+
+	@Override
+	public String getDisplay() {
+		return getLabel();
+	}
+
+	@Override
+	public String getSystem() {
+		return getScheme();
+	}
+
+	@Override
+	public IBaseCoding setCode(String theTerm) {
+		setTerm(myTerm);
+		return this;
+	}
+
+	@Override
+	public IBaseCoding setDisplay(String theLabel) {
+		setLabel(theLabel);
+		return this;
+	}
+
+	@Override
+	public IBaseCoding setSystem(String theScheme) {
+		setScheme(theScheme);
+		return this;
 	}
 
 }

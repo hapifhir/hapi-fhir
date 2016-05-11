@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -53,10 +53,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	private String myResourceName;
 	private final RestOperationTypeEnum myResourceOperationType;
 
-	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
-		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
+	public HistoryMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();
@@ -80,7 +80,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (type != IResource.class) {
-			myResourceName = theConetxt.getResourceDefinition(type).getName();
+			myResourceName = theContext.getResourceDefinition(type).getName();
 		} else {
 			myResourceName = null;
 		}
@@ -142,7 +142,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, null, null);
+		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -155,7 +155,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -206,7 +206,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		};
 	}
 
-	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, String theId, BaseDateTimeDt theSince, Integer theLimit) {
+	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -230,7 +230,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
 		}
 
-		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
+		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString());
 		return retVal;
 	}
 

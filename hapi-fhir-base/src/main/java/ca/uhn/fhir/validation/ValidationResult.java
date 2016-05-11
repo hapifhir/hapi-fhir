@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class ValidationResult {
 	 * Was the validation successful (in other words, do we have no issues that are at
 	 * severity {@link ResultSeverityEnum#ERROR} or {@link ResultSeverityEnum#FATAL}. A validation
 	 * is still considered successful if it only has issues at level {@link ResultSeverityEnum#WARNING} or
-	 * lower. 
+	 * lower.
 	 * 
 	 * @return true if the validation was successful
 	 */
@@ -74,6 +74,10 @@ public class ValidationResult {
 	private String toDescription() {
 		StringBuilder b = new StringBuilder(100);
 		if (myMessages.size() > 0) {
+			if (myMessages.get(0).getSeverity() != null) {
+				b.append(myMessages.get(0).getSeverity().name());
+				b.append(" - ");
+			}
 			b.append(myMessages.get(0).getMessage());
 			b.append(" - ");
 			b.append(myMessages.get(0).getLocationString());
@@ -109,6 +113,11 @@ public class ValidationResult {
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
 			OperationOutcomeUtil.addIssue(myCtx, oo, severity, next.getMessage(), location, ExceptionHandlingInterceptor.PROCESSING);
+		}
+
+		if (myMessages.isEmpty()) {
+			String message = myCtx.getLocalizer().getMessage(ValidationResult.class, "noIssuesDetected");
+			OperationOutcomeUtil.addIssue(myCtx, oo, "information", message, null, "informational");
 		}
 
 		return oo;

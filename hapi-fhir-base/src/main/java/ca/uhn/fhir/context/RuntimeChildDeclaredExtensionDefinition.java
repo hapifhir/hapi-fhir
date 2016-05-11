@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -139,6 +138,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 		return myDefinedLocally;
 	}
 
+	@Override
 	public boolean isModifier() {
 		return myModifier;
 	}
@@ -165,7 +165,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 				myDatatypeChildName = "valueResource";
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
-				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types, false);
+				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 			} else {
 				myChildDef = elementDef;
 			}

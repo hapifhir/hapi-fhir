@@ -16,11 +16,16 @@ public class ValidatorTest {
 	@Test
 	public void testValidator() {
 
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		FhirValidator val = ctx.newValidator();
 
-		val.validateWithResult(new Patient());
-		
+		try {
+			val.validateWithResult(new Patient());
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("This parser is for FHIR version DSTU1 - Can not encode a structure for version DSTU2", e.getMessage());
+		}
+
 		// Phloc is not onthe classpath
 		assertTrue(val.isValidateAgainstStandardSchema());
 		assertFalse(val.isValidateAgainstStandardSchematron());

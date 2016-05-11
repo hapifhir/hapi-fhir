@@ -84,19 +84,40 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class RestfulServerMethodTest {
-
 	private static CloseableHttpClient ourClient;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerMethodTest.class);
 	private static int ourPort;
 	private static DummyDiagnosticReportResourceProvider ourReportProvider;
-	private static Server ourServer;
 	private static RestfulServer ourRestfulServer;
+	private static Server ourServer;
+
+	private HttpServletRequest createHttpServletRequest() {
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
+		when(req.getServletPath()).thenReturn("/fhir");
+		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getContextPath()).thenReturn("/FhirStorm");
+		return req;
+	}
+	
+	@Test
+	public void test404IsPropagatedCorrectly() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?throw404=true");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, StringContains.containsString("AAAABBBB"));
+	}
 
 	@Test
 	public void testCreateBundleDoesntCreateDoubleEntries() {
@@ -116,35 +137,6 @@ public class RestfulServerMethodTest {
 		IVersionSpecificBundleFactory factory = ourCtx.newBundleFactory();
 		factory.initializeBundleFromResourceList("", resources, "http://foo", "http://foo", 2, null);
 		assertEquals(2, factory.getDstu1Bundle().getEntries().size());
-	}
-	
-	@Test
-	public void test404IsPropagatedCorrectly() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?throw404=true");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, StringContains.containsString("AAAABBBB"));
-	}
-
-	@Test
-	public void testInvalidResourceTriggers400() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/FooResource?blah=bar");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -535,6 +527,20 @@ public class RestfulServerMethodTest {
 	}
 
 	@Test
+	public void testInvalidResourceTriggers400() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/FooResource?blah=bar");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
 	public void testReadOnTypeThatDoesntSupportRead() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/AdverseReaction/223");
@@ -722,8 +728,8 @@ public class RestfulServerMethodTest {
 		assertEquals(1, bundle.getEntries().size());
 
 		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
-		assertEquals("urn:aaa|aaa", patient.getIdentifier().get(1).getValueAsQueryToken());
-		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
+		assertEquals("urn:aaa|aaa", patient.getIdentifier().get(1).getValueAsQueryToken(ourCtx));
+		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -900,7 +906,7 @@ public class RestfulServerMethodTest {
 		// Make sure there is no crash
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
-
+	
 	@Test
 	public void testSearchWithOptionalParam() throws Exception {
 
@@ -943,7 +949,15 @@ public class RestfulServerMethodTest {
 		assertEquals("BBB", patient.getName().get(0).getGiven().get(0).getValue());
 
 	}
-	
+
+	@Test
+	public void testServerProfileProviderFindsProfiles() {
+		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
+		IdDt id = new IdDt("Profile", "observation");
+		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
+		assertNotNull(profile);
+	}
+
 	@Test
 	public void testValidate() throws Exception {
 
@@ -1039,26 +1053,10 @@ public class RestfulServerMethodTest {
 
 	}
 
-	@Test
-	public void testServerProfileProviderFindsProfiles() {
-		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
-		IdDt id = new IdDt("Profile", "observation");
-		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
-		assertNotNull(profile);
-	}
-
-	private HttpServletRequest createHttpServletRequest() {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
-		when(req.getServletPath()).thenReturn("/fhir");
-		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
-		when(req.getContextPath()).thenReturn("/FhirStorm");
-		return req;
-	}
-
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -1150,6 +1148,20 @@ public class RestfulServerMethodTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
+		}
 
 		@Delete()
 		public MethodOutcome deletePatient(@IdParam IdDt theId) {
@@ -1256,8 +1268,8 @@ public class RestfulServerMethodTest {
 		@Search()
 		public Patient getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers) {
 			Patient retVal = getIdToPatient().get("1");
-			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken());
-			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken());
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken(ourCtx));
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken(ourCtx));
 			return retVal;
 		}
 
@@ -1353,6 +1365,11 @@ public class RestfulServerMethodTest {
 			return retVal;
 		}
 
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -1363,25 +1380,6 @@ public class RestfulServerMethodTest {
 		@Read()
 		public Patient read(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getIdPart());
-		}
-
-		@Read(version=true)
-		public Patient vread(@IdParam IdDt theId) {
-			Patient retVal = getIdToPatient().get(theId.getIdPart());
-			if (retVal == null) {
-				throw new ResourceNotFoundException("Couldn't find ID " + theId.getIdPart() + " - Valid IDs are: " + getIdToPatient().keySet());
-			}
-			
-			List<HumanNameDt> name = retVal.getName();
-			HumanNameDt nameDt = name.get(0);
-			String value = theId.getVersionIdPart();
-			nameDt.setText(value);
-			return retVal;
-		}
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
 		}
 
 		
@@ -1405,21 +1403,22 @@ public class RestfulServerMethodTest {
 			return new MethodOutcome();
 		}
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.getGender().setText("M");
-			patient.getId().setValue("1");
-			return patient;
+		@Read(version=true)
+		public Patient vread(@IdParam IdDt theId) {
+			Patient retVal = getIdToPatient().get(theId.getIdPart());
+			if (retVal == null) {
+				throw new ResourceNotFoundException("Couldn't find ID " + theId.getIdPart() + " - Valid IDs are: " + getIdToPatient().keySet());
+			}
+			
+			List<HumanNameDt> name = retVal.getName();
+			HumanNameDt nameDt = name.get(0);
+			String value = theId.getVersionIdPart();
+			nameDt.setText(value);
+			return retVal;
 		}
 
 	}
+
 
 	public static class DummyRestfulServer extends RestfulServer {
 

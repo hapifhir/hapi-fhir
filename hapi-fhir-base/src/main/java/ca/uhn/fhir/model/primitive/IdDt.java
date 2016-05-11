@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package ca.uhn.fhir.model.primitive;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -49,7 +49,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * limit of 36 characters.
  * </p>
  * <p>
- * regex: [a-z0-9\-\.]{1,36}
+ * regex: [a-z-Z0-9\-\.]{1,36}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf=StringDt.class)
@@ -170,6 +170,9 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
 		myHaveComponentParts = true;
+		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
+			myHaveComponentParts = false;
+		}
 	}
 
 	/**
@@ -673,6 +676,27 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 			throw new NullPointerException("Long ID can not be null");
 		}
 		return theIdPart.toString();
+	}
+
+	@Override
+	public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
+		if (isNotBlank(theVersionIdPart)) {
+			Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+			Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+		}
+		if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
+			Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
+		}
+		
+		setValue(null);
+		
+		myBaseUrl = theBaseUrl;
+		myResourceType = theResourceType;
+		myUnqualifiedId = theIdPart;
+		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
+		myHaveComponentParts = true;
+		
+		return this;
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,13 @@ public enum TemporalPrecisionEnum {
 			return DateUtils.addDays(theInput, theAmount);
 		}
 	},
+	MINUTE(Calendar.MINUTE) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addMinutes(theInput, theAmount);
+		}
+		
+	},
 	SECOND(Calendar.SECOND) {
 		@Override
 		public Date add(Date theInput, int theAmount) {
@@ -58,7 +65,7 @@ public enum TemporalPrecisionEnum {
 		public Date add(Date theInput, int theAmount) {
 			return DateUtils.addMilliseconds(theInput, theAmount);
 		}
-	},
+	}, 
 	
 	;
 	

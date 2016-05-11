@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -89,6 +89,14 @@ public class V3EntityNamePartQualifierEnumFactory implements EnumFactory<V3Entit
       return V3EntityNamePartQualifier.TMK;
     if ("USE".equals(codeString))
       return V3EntityNamePartQualifier.USE;
+    if ("_PersonNamePartQualifier".equals(codeString))
+      return V3EntityNamePartQualifier._PERSONNAMEPARTQUALIFIER;
+    if ("_PersonNamePartAffixTypes".equals(codeString))
+      return V3EntityNamePartQualifier._PERSONNAMEPARTAFFIXTYPES;
+    if ("_PersonNamePartChangeQualifier".equals(codeString))
+      return V3EntityNamePartQualifier._PERSONNAMEPARTCHANGEQUALIFIER;
+    if ("_PersonNamePartMiscQualifier".equals(codeString))
+      return V3EntityNamePartQualifier._PERSONNAMEPARTMISCQUALIFIER;
     throw new IllegalArgumentException("Unknown V3EntityNamePartQualifier code '"+codeString+"'");
   }
 
@@ -143,6 +151,14 @@ public class V3EntityNamePartQualifierEnumFactory implements EnumFactory<V3Entit
       return "TMK";
     if (code == V3EntityNamePartQualifier.USE)
       return "USE";
+    if (code == V3EntityNamePartQualifier._PERSONNAMEPARTQUALIFIER)
+      return "_PersonNamePartQualifier";
+    if (code == V3EntityNamePartQualifier._PERSONNAMEPARTAFFIXTYPES)
+      return "_PersonNamePartAffixTypes";
+    if (code == V3EntityNamePartQualifier._PERSONNAMEPARTCHANGEQUALIFIER)
+      return "_PersonNamePartChangeQualifier";
+    if (code == V3EntityNamePartQualifier._PERSONNAMEPARTMISCQUALIFIER)
+      return "_PersonNamePartMiscQualifier";
     return "?";
   }
 

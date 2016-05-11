@@ -7,8 +7,10 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -26,6 +28,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ServerInvalidDefinitionTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
@@ -284,6 +287,27 @@ public class ServerInvalidDefinitionTest {
 				public IBaseResource setId(IIdType theId) {
 					return null;
 				}
+
+				@Override
+				public boolean hasFormatComment() {
+					return false;
+				}
+
+				@Override
+				public List<String> getFormatCommentsPre() {
+					return null;
+				}
+
+				@Override
+				public List<String> getFormatCommentsPost() {
+					return null;
+				}
+
+				@Override
+				public IBaseMetaType getMeta() {
+					// TODO Auto-generated method stub
+					return null;
+				}
 			}.getClass();
 		}
 
@@ -334,6 +358,12 @@ public class ServerInvalidDefinitionTest {
 			return null;
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

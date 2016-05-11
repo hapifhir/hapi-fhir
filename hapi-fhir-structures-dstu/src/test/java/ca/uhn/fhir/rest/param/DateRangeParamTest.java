@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -15,10 +16,11 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DateRangeParamTest {
 
-	private static SimpleDateFormat ourFmt;
+	private static final SimpleDateFormat ourFmt;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateRangeParamTest.class);
 
 	static {
@@ -165,6 +167,12 @@ public class DateRangeParamTest {
 
 	public static Date parseM1(String theString) throws ParseException {
 		return new Date(ourFmt.parse(theString).getTime() - 1L);
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

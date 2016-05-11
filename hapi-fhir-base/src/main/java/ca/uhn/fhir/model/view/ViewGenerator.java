@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.view;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.view;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -70,6 +71,8 @@ public class ViewGenerator {
 	private void copyChildren(BaseRuntimeElementCompositeDefinition<?> theSourceDef, BaseElement theSource, BaseRuntimeElementCompositeDefinition<?> theTargetDef, BaseElement theTarget) {
 		if (!theSource.isEmpty()) {
 			List<BaseRuntimeChildDefinition> targetChildren = theTargetDef.getChildren();
+			List<RuntimeChildDeclaredExtensionDefinition> targetExts = theTargetDef.getExtensions();
+
 			for (BaseRuntimeChildDefinition nextChild : targetChildren) {
 
 				String elementName = nextChild.getElementName();
@@ -84,34 +87,49 @@ public class ViewGenerator {
 
 				List<? extends IBase> sourceValues = sourceChildEquivalent.getAccessor().getValues(theSource);
 				for (IBase nextElement : sourceValues) {
-					nextChild.getMutator().addValue(theTarget, nextElement);
+					boolean handled = false;
+					if (nextElement instanceof IBaseExtension) {
+						String url = ((IBaseExtension<?,?>) nextElement).getUrl();
+						for (RuntimeChildDeclaredExtensionDefinition nextExt : targetExts) {
+							String nextTargetUrl = nextExt.getExtensionUrl();
+							if (!nextTargetUrl.equals(url)) {
+								continue;
+							}
+							addExtension(theSourceDef, theSource, theTarget, nextExt, url);
+							handled = true;
+						}						
+					} 
+					if (!handled) {
+						nextChild.getMutator().addValue(theTarget, nextElement);
+					}
 				}
 			}
 			
-			List<RuntimeChildDeclaredExtensionDefinition> targetExts = theTargetDef.getExtensions();
 			for (RuntimeChildDeclaredExtensionDefinition nextExt : targetExts) {
 				String url = nextExt.getExtensionUrl();
-				
-				RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url);
-				if (sourceDeclaredExt == null) {
-					
-					for (ExtensionDt next : theSource.getAllUndeclaredExtensions()) {
-						if (next.getUrlAsString().equals(url)) {
-							nextExt.getMutator().addValue(theTarget, next.getValue());
-						}
-					}
-					
-				} else {
-					
-					List<? extends IBase> values = sourceDeclaredExt.getAccessor().getValues(theSource);
-					for (IBase nextElement : values) {
-						nextExt.getMutator().addValue(theTarget, nextElement);
-					}
-					
-				}
-				
+				addExtension(theSourceDef, theSource, theTarget, nextExt, url);
 			}
 			
+			
+		}
+	}
+
+	private void addExtension(BaseRuntimeElementCompositeDefinition<?> theSourceDef, BaseElement theSource, BaseElement theTarget, RuntimeChildDeclaredExtensionDefinition nextExt, String url) {
+		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url);
+		if (sourceDeclaredExt == null) {
+			
+			for (ExtensionDt next : theSource.getAllUndeclaredExtensions()) {
+				if (next.getUrlAsString().equals(url)) {
+					nextExt.getMutator().addValue(theTarget, next.getValue());
+				}
+			}
+			
+		} else {
+			
+			List<? extends IBase> values = sourceDeclaredExt.getAccessor().getValues(theSource);
+			for (IBase nextElement : values) {
+				nextExt.getMutator().addValue(theTarget, nextElement);
+			}
 			
 		}
 	}

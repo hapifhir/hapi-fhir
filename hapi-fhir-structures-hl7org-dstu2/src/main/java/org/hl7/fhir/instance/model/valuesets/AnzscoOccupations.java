@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum AnzscoOccupations {
 
         /**
-         * Managers nfd
+         * Managers not further defined
          */
         _100000, 
         /**
-         * Chief Executives, General Managers and Legislators nfd
+         * Chief Executives, General Managers and Legislators not further defined
          */
         _111000, 
         /**
@@ -47,7 +47,7 @@ public enum AnzscoOccupations {
          */
         _111111, 
         /**
-         * General Managers nfd
+         * General Managers not further defined
          */
         _111200, 
         /**
@@ -59,7 +59,7 @@ public enum AnzscoOccupations {
          */
         _111212, 
         /**
-         * Legislators nfd
+         * Legislators not further defined
          */
         _111300, 
         /**
@@ -71,11 +71,11 @@ public enum AnzscoOccupations {
          */
         _111312, 
         /**
-         * Legislators nec
+         * Legislators not elsewhere classified
          */
         _111399, 
         /**
-         * Farmers and Farm Managers nfd
+         * Farmers and Farm Managers not further defined
          */
         _121000, 
         /**
@@ -83,7 +83,7 @@ public enum AnzscoOccupations {
          */
         _121111, 
         /**
-         * Crop Farmers nfd
+         * Crop Farmers not further defined
          */
         _121200, 
         /**
@@ -123,11 +123,11 @@ public enum AnzscoOccupations {
          */
         _121221, 
         /**
-         * Crop Farmers nec
+         * Crop Farmers not elsewhere classified
          */
         _121299, 
         /**
-         * Livestock Farmers nfd
+         * Livestock Farmers not further defined
          */
         _121300, 
         /**
@@ -171,7 +171,7 @@ public enum AnzscoOccupations {
          */
         _121322, 
         /**
-         * Livestock Farmers nec
+         * Livestock Farmers not elsewhere classified
          */
         _121399, 
         /**
@@ -179,11 +179,11 @@ public enum AnzscoOccupations {
          */
         _121411, 
         /**
-         * Specialist Managers nfd
+         * Specialist Managers not further defined
          */
         _130000, 
         /**
-         * Advertising and Sales Managers nfd
+         * Advertising and Sales Managers not further defined
          */
         _131100, 
         /**
@@ -195,7 +195,7 @@ public enum AnzscoOccupations {
          */
         _131112, 
         /**
-         * Business Administration Managers nfd
+         * Business Administration Managers not further defined
          */
         _132000, 
         /**
@@ -219,11 +219,11 @@ public enum AnzscoOccupations {
          */
         _132511, 
         /**
-         * Construction, Distribution and Production Managers nfd
+         * Construction, Distribution and Production Managers not further defined
          */
         _133000, 
         /**
-         * Construction Managers nfd
+         * Construction Managers not further defined
          */
         _133100, 
         /**
@@ -239,7 +239,7 @@ public enum AnzscoOccupations {
          */
         _133211, 
         /**
-         * Importers, Exporters and Wholesalers nfd
+         * Importers, Exporters and Wholesalers not further defined
          */
         _133300, 
         /**
@@ -255,7 +255,7 @@ public enum AnzscoOccupations {
          */
         _133411, 
         /**
-         * Production Managers nfd
+         * Production Managers not further defined
          */
         _133500, 
         /**
@@ -275,7 +275,7 @@ public enum AnzscoOccupations {
          */
         _133611, 
         /**
-         * Education, Health and Welfare Services Managers nfd
+         * Education, Health and Welfare Services Managers not further defined
          */
         _134000, 
         /**
@@ -283,7 +283,7 @@ public enum AnzscoOccupations {
          */
         _134111, 
         /**
-         * Health and Welfare Services Managers nfd
+         * Health and Welfare Services Managers not further defined
          */
         _134200, 
         /**
@@ -303,7 +303,7 @@ public enum AnzscoOccupations {
          */
         _134214, 
         /**
-         * Health and Welfare Services Managers nec
+         * Health and Welfare Services Managers not elsewhere classified
          */
         _134299, 
         /**
@@ -311,7 +311,7 @@ public enum AnzscoOccupations {
          */
         _134311, 
         /**
-         * Other Education Managers nfd
+         * Other Education Managers not further defined
          */
         _134400, 
         /**
@@ -323,11 +323,11 @@ public enum AnzscoOccupations {
          */
         _134412, 
         /**
-         * Education Managers nec
+         * Education Managers not elsewhere classified
          */
         _134499, 
         /**
-         * ICT Managers nfd
+         * ICT Managers not further defined
          */
         _135100, 
         /**
@@ -339,15 +339,15 @@ public enum AnzscoOccupations {
          */
         _135112, 
         /**
-         * ICT Managers nec
+         * ICT Managers not elsewhere classified
          */
         _135199, 
         /**
-         * Miscellaneous Specialist Managers nfd
+         * Miscellaneous Specialist Managers not further defined
          */
         _139000, 
         /**
-         * Commissioned Officers (Management) nfd
+         * Commissioned Officers (Management) not further defined
          */
         _139100, 
         /**
@@ -367,7 +367,7 @@ public enum AnzscoOccupations {
          */
         _139211, 
         /**
-         * Other Specialist Managers nfd
+         * Other Specialist Managers not further defined
          */
         _139900, 
         /**
@@ -391,15 +391,15 @@ public enum AnzscoOccupations {
          */
         _139915, 
         /**
-         * Specialist Managers nec
+         * Specialist Managers not elsewhere classified
          */
         _139999, 
         /**
-         * Hospitality, Retail and Service Managers nfd
+         * Hospitality, Retail and Service Managers not further defined
          */
         _140000, 
         /**
-         * Accommodation and Hospitality Managers nfd
+         * Accommodation and Hospitality Managers not further defined
          */
         _141000, 
         /**
@@ -419,7 +419,7 @@ public enum AnzscoOccupations {
          */
         _141411, 
         /**
-         * Other Accommodation and Hospitality Managers nfd
+         * Other Accommodation and Hospitality Managers not further defined
          */
         _141900, 
         /**
@@ -427,11 +427,11 @@ public enum AnzscoOccupations {
          */
         _141911, 
         /**
-         * Accommodation and Hospitality Managers nec
+         * Accommodation and Hospitality Managers not elsewhere classified
          */
         _141999, 
         /**
-         * Retail Managers nfd
+         * Retail Managers not further defined
          */
         _142100, 
         /**
@@ -459,11 +459,11 @@ public enum AnzscoOccupations {
          */
         _142116, 
         /**
-         * Miscellaneous Hospitality, Retail and Service Managers nfd
+         * Miscellaneous Hospitality, Retail and Service Managers not further defined
          */
         _149000, 
         /**
-         * Amusement, Fitness and Sports Centre Managers nfd
+         * Amusement, Fitness and Sports Centre Managers not further defined
          */
         _149100, 
         /**
@@ -479,7 +479,7 @@ public enum AnzscoOccupations {
          */
         _149113, 
         /**
-         * Call or Contact Centre and Customer Service Managers nfd
+         * Call or Contact Centre and Customer Service Managers not further defined
          */
         _149200, 
         /**
@@ -491,11 +491,11 @@ public enum AnzscoOccupations {
          */
         _149212, 
         /**
-         * Conference and Event Organiser
+         * Conference and Event Organizer
          */
         _149311, 
         /**
-         * Transport Services Managers nfd
+         * Transport Services Managers not further defined
          */
         _149400, 
         /**
@@ -511,7 +511,7 @@ public enum AnzscoOccupations {
          */
         _149413, 
         /**
-         * Other Hospitality, Retail and Service Managers nfd
+         * Other Hospitality, Retail and Service Managers not further defined
          */
         _149900, 
         /**
@@ -531,23 +531,23 @@ public enum AnzscoOccupations {
          */
         _149914, 
         /**
-         * Hospitality, Retail and Service Managers nec
+         * Hospitality, Retail and Service Managers not elsewhere classified
          */
         _149999, 
         /**
-         * Professionals nfd
+         * Professionals not further defined
          */
         _200000, 
         /**
-         * Arts and Media Professionals nfd
+         * Arts and Media Professionals not further defined
          */
         _210000, 
         /**
-         * Arts Professionals nfd
+         * Arts Professionals not further defined
          */
         _211000, 
         /**
-         * Actors, Dancers and Other Entertainers nfd
+         * Actors, Dancers and Other Entertainers not further defined
          */
         _211100, 
         /**
@@ -563,11 +563,11 @@ public enum AnzscoOccupations {
          */
         _211113, 
         /**
-         * Actors, Dancers and Other Entertainers nec
+         * Actors, Dancers and Other Entertainers not elsewhere classified
          */
         _211199, 
         /**
-         * Music Professionals nfd
+         * Music Professionals not further defined
          */
         _211200, 
         /**
@@ -587,7 +587,7 @@ public enum AnzscoOccupations {
          */
         _211214, 
         /**
-         * Music Professionals nec
+         * Music Professionals not elsewhere classified
          */
         _211299, 
         /**
@@ -595,7 +595,7 @@ public enum AnzscoOccupations {
          */
         _211311, 
         /**
-         * Visual Arts and Crafts Professionals nfd
+         * Visual Arts and Crafts Professionals not further defined
          */
         _211400, 
         /**
@@ -611,15 +611,15 @@ public enum AnzscoOccupations {
          */
         _211413, 
         /**
-         * Visual Arts and Crafts Professionals nec
+         * Visual Arts and Crafts Professionals not elsewhere classified
          */
         _211499, 
         /**
-         * Media Professionals nfd
+         * Media Professionals not further defined
          */
         _212000, 
         /**
-         * Artistic Directors, and Media Producers and Presenters nfd
+         * Artistic Directors, and Media Producers and Presenters not further defined
          */
         _212100, 
         /**
@@ -639,7 +639,7 @@ public enum AnzscoOccupations {
          */
         _212114, 
         /**
-         * Authors, and Book and Script Editors nfd
+         * Authors, and Book and Script Editors not further defined
          */
         _212200, 
         /**
@@ -651,7 +651,7 @@ public enum AnzscoOccupations {
          */
         _212212, 
         /**
-         * Film, Television, Radio and Stage Directors nfd
+         * Film, Television, Radio and Stage Directors not further defined
          */
         _212300, 
         /**
@@ -687,11 +687,11 @@ public enum AnzscoOccupations {
          */
         _212318, 
         /**
-         * Film, Television, Radio and Stage Directors nec
+         * Film, Television, Radio and Stage Directors not elsewhere classified
          */
         _212399, 
         /**
-         * Journalists and Other Writers nfd
+         * Journalists and Other Writers not further defined
          */
         _212400, 
         /**
@@ -719,19 +719,19 @@ public enum AnzscoOccupations {
          */
         _212416, 
         /**
-         * Journalists and Other Writers nec
+         * Journalists and Other Writers not elsewhere classified
          */
         _212499, 
         /**
-         * Business, Human Resource and Marketing Professionals nfd
+         * Business, Human Resource and Marketing Professionals not further defined
          */
         _220000, 
         /**
-         * Accountants, Auditors and Company Secretaries nfd
+         * Accountants, Auditors and Company Secretaries not further defined
          */
         _221000, 
         /**
-         * Accountants nfd
+         * Accountants not further defined
          */
         _221100, 
         /**
@@ -747,7 +747,7 @@ public enum AnzscoOccupations {
          */
         _221113, 
         /**
-         * Auditors, Company Secretaries and Corporate Treasurers nfd
+         * Auditors, Company Secretaries and Corporate Treasurers not further defined
          */
         _221200, 
         /**
@@ -767,11 +767,11 @@ public enum AnzscoOccupations {
          */
         _221214, 
         /**
-         * Financial Brokers and Dealers, and Investment Advisers nfd
+         * Financial Brokers and Dealers, and Investment Advisers not further defined
          */
         _222000, 
         /**
-         * Financial Brokers nfd
+         * Financial Brokers not further defined
          */
         _222100, 
         /**
@@ -787,11 +787,11 @@ public enum AnzscoOccupations {
          */
         _222113, 
         /**
-         * Financial Brokers nec
+         * Financial Brokers not elsewhere classified
          */
         _222199, 
         /**
-         * Financial Dealers nfd
+         * Financial Dealers not further defined
          */
         _222200, 
         /**
@@ -807,11 +807,11 @@ public enum AnzscoOccupations {
          */
         _222213, 
         /**
-         * Financial Dealers nec
+         * Financial Dealers not elsewhere classified
          */
         _222299, 
         /**
-         * Financial Investment Advisers and Managers nfd
+         * Financial Investment Advisers and Managers not further defined
          */
         _222300, 
         /**
@@ -823,11 +823,11 @@ public enum AnzscoOccupations {
          */
         _222312, 
         /**
-         * Human Resource and Training Professionals nfd
+         * Human Resource and Training Professionals not further defined
          */
         _223000, 
         /**
-         * Human Resource Professionals nfd
+         * Human Resource Professionals not further defined
          */
         _223100, 
         /**
@@ -851,11 +851,11 @@ public enum AnzscoOccupations {
          */
         _223311, 
         /**
-         * Information and Organization Professionals nfd
+         * Information and Organization Professionals not further defined
          */
         _224000, 
         /**
-         * Actuaries, Mathematicians and Statisticians nfd
+         * Actuaries, Mathematicians and Statisticians not further defined
          */
         _224100, 
         /**
@@ -871,7 +871,7 @@ public enum AnzscoOccupations {
          */
         _224113, 
         /**
-         * Archivists, Curators and Records Managers nfd
+         * Archivists, Curators and Records Managers not further defined
          */
         _224200, 
         /**
@@ -895,7 +895,7 @@ public enum AnzscoOccupations {
          */
         _224311, 
         /**
-         * Intelligence and Policy Analysts nfd
+         * Intelligence and Policy Analysts not further defined
          */
         _224400, 
         /**
@@ -907,7 +907,7 @@ public enum AnzscoOccupations {
          */
         _224412, 
         /**
-         * Land Economists and Valuers nfd
+         * Land Economists and Valuers not further defined
          */
         _224500, 
         /**
@@ -923,7 +923,7 @@ public enum AnzscoOccupations {
          */
         _224611, 
         /**
-         * Management and Organization Analysts nfd
+         * Management and Organization Analysts not further defined
          */
         _224700, 
         /**
@@ -935,7 +935,7 @@ public enum AnzscoOccupations {
          */
         _224712, 
         /**
-         * Other Information and Organization Professionals nfd
+         * Other Information and Organization Professionals not further defined
          */
         _224900, 
         /**
@@ -955,15 +955,15 @@ public enum AnzscoOccupations {
          */
         _224914, 
         /**
-         * Information and Organization Professionals nec
+         * Information and Organization Professionals not elsewhere classified
          */
         _224999, 
         /**
-         * Sales, Marketing and Public Relations Professionals nfd
+         * Sales, Marketing and Public Relations Professionals not further defined
          */
         _225000, 
         /**
-         * Advertising and Marketing Professionals nfd
+         * Advertising and Marketing Professionals not further defined
          */
         _225100, 
         /**
@@ -979,7 +979,7 @@ public enum AnzscoOccupations {
          */
         _225113, 
         /**
-         * ICT Sales Professionals nfd
+         * ICT Sales Professionals not further defined
          */
         _225200, 
         /**
@@ -999,7 +999,7 @@ public enum AnzscoOccupations {
          */
         _225311, 
         /**
-         * Technical Sales Representatives nfd
+         * Technical Sales Representatives not further defined
          */
         _225400, 
         /**
@@ -1011,19 +1011,19 @@ public enum AnzscoOccupations {
          */
         _225412, 
         /**
-         * Technical Sales Representatives nec
+         * Technical Sales Representatives not elsewhere classified
          */
         _225499, 
         /**
-         * Design, Engineering, Science and Transport Professionals nfd
+         * Design, Engineering, Science and Transport Professionals not further defined
          */
         _230000, 
         /**
-         * Air and Marine Transport Professionals nfd
+         * Air and Marine Transport Professionals not further defined
          */
         _231000, 
         /**
-         * Air Transport Professionals nfd
+         * Air Transport Professionals not further defined
          */
         _231100, 
         /**
@@ -1043,11 +1043,11 @@ public enum AnzscoOccupations {
          */
         _231114, 
         /**
-         * Air Transport Professionals nec
+         * Air Transport Professionals not elsewhere classified
          */
         _231199, 
         /**
-         * Marine Transport Professionals nfd
+         * Marine Transport Professionals not further defined
          */
         _231200, 
         /**
@@ -1071,15 +1071,15 @@ public enum AnzscoOccupations {
          */
         _231215, 
         /**
-         * Marine Transport Professionals nec
+         * Marine Transport Professionals not elsewhere classified
          */
         _231299, 
         /**
-         * Architects, Designers, Planners and Surveyors nfd
+         * Architects, Designers, Planners and Surveyors not further defined
          */
         _232000, 
         /**
-         * Architects and Landscape Architects nfd
+         * Architects and Landscape Architects not further defined
          */
         _232100, 
         /**
@@ -1091,7 +1091,7 @@ public enum AnzscoOccupations {
          */
         _232112, 
         /**
-         * Cartographers and Surveyors nfd
+         * Cartographers and Surveyors not further defined
          */
         _232200, 
         /**
@@ -1103,7 +1103,7 @@ public enum AnzscoOccupations {
          */
         _232212, 
         /**
-         * Fashion, Industrial and Jewellery Designers nfd
+         * Fashion, Industrial and Jewellery Designers not further defined
          */
         _232300, 
         /**
@@ -1119,7 +1119,7 @@ public enum AnzscoOccupations {
          */
         _232313, 
         /**
-         * Graphic and Web Designers, and Illustrators nfd
+         * Graphic and Web Designers, and Illustrators not further defined
          */
         _232400, 
         /**
@@ -1147,11 +1147,11 @@ public enum AnzscoOccupations {
          */
         _232611, 
         /**
-         * Engineering Professionals nfd
+         * Engineering Professionals not further defined
          */
         _233000, 
         /**
-         * Chemical and Materials Engineers nfd
+         * Chemical and Materials Engineers not further defined
          */
         _233100, 
         /**
@@ -1163,7 +1163,7 @@ public enum AnzscoOccupations {
          */
         _233112, 
         /**
-         * Civil Engineering Professionals nfd
+         * Civil Engineering Professionals not further defined
          */
         _233200, 
         /**
@@ -1195,7 +1195,7 @@ public enum AnzscoOccupations {
          */
         _233411, 
         /**
-         * Industrial, Mechanical and Production Engineers nfd
+         * Industrial, Mechanical and Production Engineers not further defined
          */
         _233500, 
         /**
@@ -1211,7 +1211,7 @@ public enum AnzscoOccupations {
          */
         _233513, 
         /**
-         * Mining Engineers nfd
+         * Mining Engineers not further defined
          */
         _233600, 
         /**
@@ -1223,7 +1223,7 @@ public enum AnzscoOccupations {
          */
         _233612, 
         /**
-         * Other Engineering Professionals nfd
+         * Other Engineering Professionals not further defined
          */
         _233900, 
         /**
@@ -1251,15 +1251,15 @@ public enum AnzscoOccupations {
          */
         _233916, 
         /**
-         * Engineering Professionals nec
+         * Engineering Professionals not elsewhere classified
          */
         _233999, 
         /**
-         * Natural and Physical Science Professionals nfd
+         * Natural and Physical Science Professionals not further defined
          */
         _234000, 
         /**
-         * Agricultural and Forestry Scientists nfd
+         * Agricultural and Forestry Scientists not further defined
          */
         _234100, 
         /**
@@ -1275,7 +1275,7 @@ public enum AnzscoOccupations {
          */
         _234113, 
         /**
-         * Chemists, and Food and Wine Scientists nfd
+         * Chemists, and Food and Wine Scientists not further defined
          */
         _234200, 
         /**
@@ -1291,7 +1291,7 @@ public enum AnzscoOccupations {
          */
         _234213, 
         /**
-         * Environmental Scientists nfd
+         * Environmental Scientists not further defined
          */
         _234300, 
         /**
@@ -1311,11 +1311,11 @@ public enum AnzscoOccupations {
          */
         _234314, 
         /**
-         * Environmental Scientists nec
+         * Environmental Scientists not elsewhere classified
          */
         _234399, 
         /**
-         * Geologists and Geophysicists nfd
+         * Geologists and Geophysicists not further defined
          */
         _234400, 
         /**
@@ -1327,7 +1327,7 @@ public enum AnzscoOccupations {
          */
         _234412, 
         /**
-         * Life Scientists nfd
+         * Life Scientists not further defined
          */
         _234500, 
         /**
@@ -1363,7 +1363,7 @@ public enum AnzscoOccupations {
          */
         _234518, 
         /**
-         * Life Scientists nec
+         * Life Scientists not elsewhere classified
          */
         _234599, 
         /**
@@ -1375,7 +1375,7 @@ public enum AnzscoOccupations {
          */
         _234711, 
         /**
-         * Other Natural and Physical Science Professionals nfd
+         * Other Natural and Physical Science Professionals not further defined
          */
         _234900, 
         /**
@@ -1395,15 +1395,15 @@ public enum AnzscoOccupations {
          */
         _234914, 
         /**
-         * Natural and Physical Science Professionals nec
+         * Natural and Physical Science Professionals not elsewhere classified
          */
         _234999, 
         /**
-         * Education Professionals nfd
+         * Education Professionals not further defined
          */
         _240000, 
         /**
-         * School Teachers nfd
+         * School Teachers not further defined
          */
         _241000, 
         /**
@@ -1423,7 +1423,7 @@ public enum AnzscoOccupations {
          */
         _241411, 
         /**
-         * Special Education Teachers nfd
+         * Special Education Teachers not further defined
          */
         _241500, 
         /**
@@ -1439,15 +1439,15 @@ public enum AnzscoOccupations {
          */
         _241513, 
         /**
-         * Special Education Teachers nec
+         * Special Education Teachers not elsewhere classified
          */
         _241599, 
         /**
-         * Tertiary Education Teachers nfd
+         * Tertiary Education Teachers not further defined
          */
         _242000, 
         /**
-         * University Lecturers and Tutors nfd
+         * University Lecturers and Tutors not further defined
          */
         _242100, 
         /**
@@ -1463,11 +1463,11 @@ public enum AnzscoOccupations {
          */
         _242211, 
         /**
-         * Miscellaneous Education Professionals nfd
+         * Miscellaneous Education Professionals not further defined
          */
         _249000, 
         /**
-         * Education Advisers and Reviewers nfd
+         * Education Advisers and Reviewers not further defined
          */
         _249100, 
         /**
@@ -1479,7 +1479,7 @@ public enum AnzscoOccupations {
          */
         _249112, 
         /**
-         * Private Tutors and Teachers nfd
+         * Private Tutors and Teachers not further defined
          */
         _249200, 
         /**
@@ -1499,7 +1499,7 @@ public enum AnzscoOccupations {
          */
         _249214, 
         /**
-         * Private Tutors and Teachers nec
+         * Private Tutors and Teachers not elsewhere classified
          */
         _249299, 
         /**
@@ -1507,11 +1507,11 @@ public enum AnzscoOccupations {
          */
         _249311, 
         /**
-         * Health Professionals nfd
+         * Health Professionals not further defined
          */
         _250000, 
         /**
-         * Health Diagnostic and Promotion Professionals nfd
+         * Health Diagnostic and Promotion Professionals not further defined
          */
         _251000, 
         /**
@@ -1519,7 +1519,7 @@ public enum AnzscoOccupations {
          */
         _251111, 
         /**
-         * Medical Imaging Professionals nfd
+         * Medical Imaging Professionals not further defined
          */
         _251200, 
         /**
@@ -1539,7 +1539,7 @@ public enum AnzscoOccupations {
          */
         _251214, 
         /**
-         * Occupational and Environmental Health Professionals nfd
+         * Occupational and Environmental Health Professionals not further defined
          */
         _251300, 
         /**
@@ -1551,7 +1551,7 @@ public enum AnzscoOccupations {
          */
         _251312, 
         /**
-         * Optometrists and Orthoptists nfd
+         * Optometrists and Orthoptists not further defined
          */
         _251400, 
         /**
@@ -1563,7 +1563,7 @@ public enum AnzscoOccupations {
          */
         _251412, 
         /**
-         * Pharmacists nfd
+         * Pharmacists not further defined
          */
         _251500, 
         /**
@@ -1579,7 +1579,7 @@ public enum AnzscoOccupations {
          */
         _251513, 
         /**
-         * Other Health Diagnostic and Promotion Professionals nfd
+         * Other Health Diagnostic and Promotion Professionals not further defined
          */
         _251900, 
         /**
@@ -1591,15 +1591,15 @@ public enum AnzscoOccupations {
          */
         _251912, 
         /**
-         * Health Diagnostic and Promotion Professionals nec
+         * Health Diagnostic and Promotion Professionals not elsewhere classified
          */
         _251999, 
         /**
-         * Health Therapy Professionals nfd
+         * Health Therapy Professionals not further defined
          */
         _252000, 
         /**
-         * Chiropractors and Osteopaths nfd
+         * Chiropractors and Osteopaths not further defined
          */
         _252100, 
         /**
@@ -1611,7 +1611,7 @@ public enum AnzscoOccupations {
          */
         _252112, 
         /**
-         * Complementary Health Therapists nfd
+         * Complementary Health Therapists not further defined
          */
         _252200, 
         /**
@@ -1631,11 +1631,11 @@ public enum AnzscoOccupations {
          */
         _252214, 
         /**
-         * Complementary Health Therapists nec
+         * Complementary Health Therapists not elsewhere classified
          */
         _252299, 
         /**
-         * Dental Practitioners nfd
+         * Dental Practitioners not further defined
          */
         _252300, 
         /**
@@ -1659,7 +1659,7 @@ public enum AnzscoOccupations {
          */
         _252611, 
         /**
-         * Speech Professionals and Audiologists nfd
+         * Speech Professionals and Audiologists not further defined
          */
         _252700, 
         /**
@@ -1671,11 +1671,11 @@ public enum AnzscoOccupations {
          */
         _252712, 
         /**
-         * Medical Practitioners nfd
+         * Medical Practitioners not further defined
          */
         _253000, 
         /**
-         * Generalist Medical Practitioners nfd
+         * Generalist Medical Practitioners not further defined
          */
         _253100, 
         /**
@@ -1691,7 +1691,7 @@ public enum AnzscoOccupations {
          */
         _253211, 
         /**
-         * Internal Medicine Specialists nfd
+         * Internal Medicine Specialists not further defined
          */
         _253300, 
         /**
@@ -1743,7 +1743,7 @@ public enum AnzscoOccupations {
          */
         _253324, 
         /**
-         * Internal Medicine Specialists nec
+         * Internal Medicine Specialists not elsewhere classified
          */
         _253399, 
         /**
@@ -1751,7 +1751,7 @@ public enum AnzscoOccupations {
          */
         _253411, 
         /**
-         * Surgeons nfd
+         * Surgeons not further defined
          */
         _253500, 
         /**
@@ -1791,7 +1791,7 @@ public enum AnzscoOccupations {
          */
         _253521, 
         /**
-         * Other Medical Practitioners nfd
+         * Other Medical Practitioners not further defined
          */
         _253900, 
         /**
@@ -1819,11 +1819,11 @@ public enum AnzscoOccupations {
          */
         _253916, 
         /**
-         * Medical Practitioners nec
+         * Medical Practitioners not elsewhere classified
          */
         _253999, 
         /**
-         * Midwifery and Nursing Professionals nfd
+         * Midwifery and Nursing Professionals not further defined
          */
         _254000, 
         /**
@@ -1831,7 +1831,7 @@ public enum AnzscoOccupations {
          */
         _254111, 
         /**
-         * Nurse Educators and Researchers nfd
+         * Nurse Educators and Researchers not further defined
          */
         _254200, 
         /**
@@ -1847,7 +1847,7 @@ public enum AnzscoOccupations {
          */
         _254311, 
         /**
-         * Registered Nurses nfd
+         * Registered Nurses not further defined
          */
         _254400, 
         /**
@@ -1899,19 +1899,19 @@ public enum AnzscoOccupations {
          */
         _254424, 
         /**
-         * Registered Nurses nec
+         * Registered Nurses not elsewhere classified
          */
         _254499, 
         /**
-         * ICT Professionals nfd
+         * ICT Professionals not further defined
          */
         _260000, 
         /**
-         * Business and Systems Analysts, and Programmers nfd
+         * Business and Systems Analysts, and Programmers not further defined
          */
         _261000, 
         /**
-         * ICT Business and Systems Analysts nfd
+         * ICT Business and Systems Analysts not further defined
          */
         _261100, 
         /**
@@ -1923,7 +1923,7 @@ public enum AnzscoOccupations {
          */
         _261112, 
         /**
-         * Multimedia Specialists and Web Developers nfd
+         * Multimedia Specialists and Web Developers not further defined
          */
         _261200, 
         /**
@@ -1935,7 +1935,7 @@ public enum AnzscoOccupations {
          */
         _261212, 
         /**
-         * Software and Applications Programmers nfd
+         * Software and Applications Programmers not further defined
          */
         _261300, 
         /**
@@ -1951,11 +1951,11 @@ public enum AnzscoOccupations {
          */
         _261313, 
         /**
-         * Software and Applications Programmers nec
+         * Software and Applications Programmers not elsewhere classified
          */
         _261399, 
         /**
-         * Database and Systems Administrators, and ICT Security Specialists nfd
+         * Database and Systems Administrators, and ICT Security Specialists not further defined
          */
         _262100, 
         /**
@@ -1971,11 +1971,11 @@ public enum AnzscoOccupations {
          */
         _262113, 
         /**
-         * ICT Network and Support Professionals nfd
+         * ICT Network and Support Professionals not further defined
          */
         _263000, 
         /**
-         * Computer Network Professionals nfd
+         * Computer Network Professionals not further defined
          */
         _263100, 
         /**
@@ -1991,7 +1991,7 @@ public enum AnzscoOccupations {
          */
         _263113, 
         /**
-         * ICT Support and Test Engineers nfd
+         * ICT Support and Test Engineers not further defined
          */
         _263200, 
         /**
@@ -2007,11 +2007,11 @@ public enum AnzscoOccupations {
          */
         _263213, 
         /**
-         * ICT Support and Test Engineers nec
+         * ICT Support and Test Engineers not elsewhere classified
          */
         _263299, 
         /**
-         * Telecommunications Engineering Professionals nfd
+         * Telecommunications Engineering Professionals not further defined
          */
         _263300, 
         /**
@@ -2023,11 +2023,11 @@ public enum AnzscoOccupations {
          */
         _263312, 
         /**
-         * Legal, Social and Welfare Professionals nfd
+         * Legal, Social and Welfare Professionals not further defined
          */
         _270000, 
         /**
-         * Legal Professionals nfd
+         * Legal Professionals not further defined
          */
         _271000, 
         /**
@@ -2035,7 +2035,7 @@ public enum AnzscoOccupations {
          */
         _271111, 
         /**
-         * Judicial and Other Legal Professionals nfd
+         * Judicial and Other Legal Professionals not further defined
          */
         _271200, 
         /**
@@ -2051,7 +2051,7 @@ public enum AnzscoOccupations {
          */
         _271213, 
         /**
-         * Judicial and Other Legal Professionals nec
+         * Judicial and Other Legal Professionals not elsewhere classified
          */
         _271299, 
         /**
@@ -2059,11 +2059,11 @@ public enum AnzscoOccupations {
          */
         _271311, 
         /**
-         * Social and Welfare Professionals nfd
+         * Social and Welfare Professionals not further defined
          */
         _272000, 
         /**
-         * Counsellors nfd
+         * Counsellors not further defined
          */
         _272100, 
         /**
@@ -2087,7 +2087,7 @@ public enum AnzscoOccupations {
          */
         _272115, 
         /**
-         * Counsellors nec
+         * Counsellors not elsewhere classified
          */
         _272199, 
         /**
@@ -2095,7 +2095,7 @@ public enum AnzscoOccupations {
          */
         _272211, 
         /**
-         * Psychologists nfd
+         * Psychologists not further defined
          */
         _272300, 
         /**
@@ -2115,11 +2115,11 @@ public enum AnzscoOccupations {
          */
         _272314, 
         /**
-         * Psychologists nec
+         * Psychologists not elsewhere classified
          */
         _272399, 
         /**
-         * Social Professionals nfd
+         * Social Professionals not further defined
          */
         _272400, 
         /**
@@ -2135,7 +2135,7 @@ public enum AnzscoOccupations {
          */
         _272413, 
         /**
-         * Social Professionals nec
+         * Social Professionals not elsewhere classified
          */
         _272499, 
         /**
@@ -2143,7 +2143,7 @@ public enum AnzscoOccupations {
          */
         _272511, 
         /**
-         * Welfare, Recreation and Community Arts Workers nfd
+         * Welfare, Recreation and Community Arts Workers not further defined
          */
         _272600, 
         /**
@@ -2159,15 +2159,15 @@ public enum AnzscoOccupations {
          */
         _272613, 
         /**
-         * Technicians and Trades Workers nfd
+         * Technicians and Trades Workers not further defined
          */
         _300000, 
         /**
-         * Engineering, ICT and Science Technicians nfd
+         * Engineering, ICT and Science Technicians not further defined
          */
         _310000, 
         /**
-         * Agricultural, Medical and Science Technicians nfd
+         * Agricultural, Medical and Science Technicians not further defined
          */
         _311000, 
         /**
@@ -2175,7 +2175,7 @@ public enum AnzscoOccupations {
          */
         _311111, 
         /**
-         * Medical Technicians nfd
+         * Medical Technicians not further defined
          */
         _311200, 
         /**
@@ -2199,11 +2199,11 @@ public enum AnzscoOccupations {
          */
         _311215, 
         /**
-         * Medical Technicians nec
+         * Medical Technicians not elsewhere classified
          */
         _311299, 
         /**
-         * Primary Products Inspectors nfd
+         * Primary Products Inspectors not further defined
          */
         _311300, 
         /**
@@ -2219,11 +2219,11 @@ public enum AnzscoOccupations {
          */
         _311313, 
         /**
-         * Primary Products Inspectors nec
+         * Primary Products Inspectors not elsewhere classified
          */
         _311399, 
         /**
-         * Science Technicians nfd
+         * Science Technicians not further defined
          */
         _311400, 
         /**
@@ -2243,15 +2243,15 @@ public enum AnzscoOccupations {
          */
         _311414, 
         /**
-         * Science Technicians nec
+         * Science Technicians not elsewhere classified
          */
         _311499, 
         /**
-         * Building and Engineering Technicians nfd
+         * Building and Engineering Technicians not further defined
          */
         _312000, 
         /**
-         * Architectural, Building and Surveying Technicians nfd
+         * Architectural, Building and Surveying Technicians not further defined
          */
         _312100, 
         /**
@@ -2279,7 +2279,7 @@ public enum AnzscoOccupations {
          */
         _312116, 
         /**
-         * Civil Engineering Draftspersons and Technicians nfd
+         * Civil Engineering Draftspersons and Technicians not further defined
          */
         _312200, 
         /**
@@ -2291,7 +2291,7 @@ public enum AnzscoOccupations {
          */
         _312212, 
         /**
-         * Electrical Engineering Draftspersons and Technicians nfd
+         * Electrical Engineering Draftspersons and Technicians not further defined
          */
         _312300, 
         /**
@@ -2303,7 +2303,7 @@ public enum AnzscoOccupations {
          */
         _312312, 
         /**
-         * Electronic Engineering Draftspersons and Technicians nfd
+         * Electronic Engineering Draftspersons and Technicians not further defined
          */
         _312400, 
         /**
@@ -2315,7 +2315,7 @@ public enum AnzscoOccupations {
          */
         _312412, 
         /**
-         * Mechanical Engineering Draftspersons and Technicians nfd
+         * Mechanical Engineering Draftspersons and Technicians not further defined
          */
         _312500, 
         /**
@@ -2331,7 +2331,7 @@ public enum AnzscoOccupations {
          */
         _312611, 
         /**
-         * Other Building and Engineering Technicians nfd
+         * Other Building and Engineering Technicians not further defined
          */
         _312900, 
         /**
@@ -2347,15 +2347,15 @@ public enum AnzscoOccupations {
          */
         _312913, 
         /**
-         * Building and Engineering Technicians nec
+         * Building and Engineering Technicians not elsewhere classified
          */
         _312999, 
         /**
-         * ICT and Telecommunications Technicians nfd
+         * ICT and Telecommunications Technicians not further defined
          */
         _313000, 
         /**
-         * ICT Support Technicians nfd
+         * ICT Support Technicians not further defined
          */
         _313100, 
         /**
@@ -2371,11 +2371,11 @@ public enum AnzscoOccupations {
          */
         _313113, 
         /**
-         * ICT Support Technicians nec
+         * ICT Support Technicians not elsewhere classified
          */
         _313199, 
         /**
-         * Telecommunications Technical Specialists nfd
+         * Telecommunications Technical Specialists not further defined
          */
         _313200, 
         /**
@@ -2395,11 +2395,11 @@ public enum AnzscoOccupations {
          */
         _313214, 
         /**
-         * Automotive and Engineering Trades Workers nfd
+         * Automotive and Engineering Trades Workers not further defined
          */
         _320000, 
         /**
-         * Automotive Electricians and Mechanics nfd
+         * Automotive Electricians and Mechanics not further defined
          */
         _321000, 
         /**
@@ -2407,7 +2407,7 @@ public enum AnzscoOccupations {
          */
         _321111, 
         /**
-         * Motor Mechanics nfd
+         * Motor Mechanics not further defined
          */
         _321200, 
         /**
@@ -2427,11 +2427,11 @@ public enum AnzscoOccupations {
          */
         _321214, 
         /**
-         * Fabrication Engineering Trades Workers nfd
+         * Fabrication Engineering Trades Workers not further defined
          */
         _322000, 
         /**
-         * Metal Casting, Forging and Finishing Trades Workers nfd
+         * Metal Casting, Forging and Finishing Trades Workers not further defined
          */
         _322100, 
         /**
@@ -2459,7 +2459,7 @@ public enum AnzscoOccupations {
          */
         _322211, 
         /**
-         * Structural Steel and Welding Trades Workers nfd
+         * Structural Steel and Welding Trades Workers not further defined
          */
         _322300, 
         /**
@@ -2475,11 +2475,11 @@ public enum AnzscoOccupations {
          */
         _322313, 
         /**
-         * Mechanical Engineering Trades Workers nfd
+         * Mechanical Engineering Trades Workers not further defined
          */
         _323000, 
         /**
-         * Aircraft Maintenance Engineers nfd
+         * Aircraft Maintenance Engineers not further defined
          */
         _323100, 
         /**
@@ -2495,7 +2495,7 @@ public enum AnzscoOccupations {
          */
         _323113, 
         /**
-         * Metal Fitters and Machinists nfd
+         * Metal Fitters and Machinists not further defined
          */
         _323200, 
         /**
@@ -2519,11 +2519,11 @@ public enum AnzscoOccupations {
          */
         _323215, 
         /**
-         * Metal Fitters and Machinists nec
+         * Metal Fitters and Machinists not elsewhere classified
          */
         _323299, 
         /**
-         * Precision Metal Trades Workers nfd
+         * Precision Metal Trades Workers not further defined
          */
         _323300, 
         /**
@@ -2551,7 +2551,7 @@ public enum AnzscoOccupations {
          */
         _323316, 
         /**
-         * Toolmakers and Engineering Patternmakers nfd
+         * Toolmakers and Engineering Patternmakers not further defined
          */
         _323400, 
         /**
@@ -2563,7 +2563,7 @@ public enum AnzscoOccupations {
          */
         _323412, 
         /**
-         * Panelbeaters, and Vehicle Body Builders, Trimmers and Painters nfd
+         * Panelbeaters, and Vehicle Body Builders, Trimmers and Painters not further defined
          */
         _324000, 
         /**
@@ -2571,7 +2571,7 @@ public enum AnzscoOccupations {
          */
         _324111, 
         /**
-         * Vehicle Body Builders and Trimmers nfd
+         * Vehicle Body Builders and Trimmers not further defined
          */
         _324200, 
         /**
@@ -2587,15 +2587,15 @@ public enum AnzscoOccupations {
          */
         _324311, 
         /**
-         * Construction Trades Workers nfd
+         * Construction Trades Workers not further defined
          */
         _330000, 
         /**
-         * Bricklayers, and Carpenters and Joiners nfd
+         * Bricklayers, and Carpenters and Joiners not further defined
          */
         _331000, 
         /**
-         * Bricklayers and Stonemasons nfd
+         * Bricklayers and Stonemasons not further defined
          */
         _331100, 
         /**
@@ -2619,7 +2619,7 @@ public enum AnzscoOccupations {
          */
         _331213, 
         /**
-         * Floor Finishers and Painting Trades Workers nfd
+         * Floor Finishers and Painting Trades Workers not further defined
          */
         _332000, 
         /**
@@ -2631,7 +2631,7 @@ public enum AnzscoOccupations {
          */
         _332211, 
         /**
-         * Glaziers, Plasterers and Tilers nfd
+         * Glaziers, Plasterers and Tilers not further defined
          */
         _333000, 
         /**
@@ -2639,7 +2639,7 @@ public enum AnzscoOccupations {
          */
         _333111, 
         /**
-         * Plasterers nfd
+         * Plasterers not further defined
          */
         _333200, 
         /**
@@ -2659,7 +2659,7 @@ public enum AnzscoOccupations {
          */
         _333411, 
         /**
-         * Plumbers nfd
+         * Plumbers not further defined
          */
         _334100, 
         /**
@@ -2683,11 +2683,11 @@ public enum AnzscoOccupations {
          */
         _334115, 
         /**
-         * Electrotechnology and Telecommunications Trades Workers nfd
+         * Electrotechnology and Telecommunications Trades Workers not further defined
          */
         _340000, 
         /**
-         * Electricians nfd
+         * Electricians not further defined
          */
         _341100, 
         /**
@@ -2703,7 +2703,7 @@ public enum AnzscoOccupations {
          */
         _341113, 
         /**
-         * Electronics and Telecommunications Trades Workers nfd
+         * Electronics and Telecommunications Trades Workers not further defined
          */
         _342000, 
         /**
@@ -2711,7 +2711,7 @@ public enum AnzscoOccupations {
          */
         _342111, 
         /**
-         * Electrical Distribution Trades Workers nfd
+         * Electrical Distribution Trades Workers not further defined
          */
         _342200, 
         /**
@@ -2723,7 +2723,7 @@ public enum AnzscoOccupations {
          */
         _342212, 
         /**
-         * Electronics Trades Workers nfd
+         * Electronics Trades Workers not further defined
          */
         _342300, 
         /**
@@ -2747,7 +2747,7 @@ public enum AnzscoOccupations {
          */
         _342315, 
         /**
-         * Telecommunications Trades Workers nfd
+         * Telecommunications Trades Workers not further defined
          */
         _342400, 
         /**
@@ -2767,11 +2767,11 @@ public enum AnzscoOccupations {
          */
         _342414, 
         /**
-         * Food Trades Workers nfd
+         * Food Trades Workers not further defined
          */
         _351000, 
         /**
-         * Bakers and Pastrycooks nfd
+         * Bakers and Pastrycooks not further defined
          */
         _351100, 
         /**
@@ -2795,15 +2795,15 @@ public enum AnzscoOccupations {
          */
         _351411, 
         /**
-         * Skilled Animal and Horticultural Workers nfd
+         * Skilled Animal and Horticultural Workers not further defined
          */
         _360000, 
         /**
-         * Animal Attendants and Trainers, and Shearers nfd
+         * Animal Attendants and Trainers, and Shearers not further defined
          */
         _361000, 
         /**
-         * Animal Attendants and Trainers nfd
+         * Animal Attendants and Trainers not further defined
          */
         _361100, 
         /**
@@ -2823,7 +2823,7 @@ public enum AnzscoOccupations {
          */
         _361114, 
         /**
-         * Animal Attendants and Trainers nec
+         * Animal Attendants and Trainers not elsewhere classified
          */
         _361199, 
         /**
@@ -2835,7 +2835,7 @@ public enum AnzscoOccupations {
          */
         _361311, 
         /**
-         * Horticultural Trades Workers nfd
+         * Horticultural Trades Workers not further defined
          */
         _362000, 
         /**
@@ -2843,7 +2843,7 @@ public enum AnzscoOccupations {
          */
         _362111, 
         /**
-         * Gardeners nfd
+         * Gardeners not further defined
          */
         _362200, 
         /**
@@ -2867,7 +2867,7 @@ public enum AnzscoOccupations {
          */
         _362411, 
         /**
-         * Other Technicians and Trades Workers nfd
+         * Other Technicians and Trades Workers not further defined
          */
         _390000, 
         /**
@@ -2875,11 +2875,11 @@ public enum AnzscoOccupations {
          */
         _391111, 
         /**
-         * Printing Trades Workers nfd
+         * Printing Trades Workers not further defined
          */
         _392000, 
         /**
-         * Binders, Finishers and Screen Printers nfd
+         * Binders, Finishers and Screen Printers not further defined
          */
         _392100, 
         /**
@@ -2895,7 +2895,7 @@ public enum AnzscoOccupations {
          */
         _392211, 
         /**
-         * Printers nfd
+         * Printers not further defined
          */
         _392300, 
         /**
@@ -2907,11 +2907,11 @@ public enum AnzscoOccupations {
          */
         _392312, 
         /**
-         * Textile, Clothing and Footwear Trades Workers nfd
+         * Textile, Clothing and Footwear Trades Workers not further defined
          */
         _393000, 
         /**
-         * Canvas and Leather Goods Makers nfd
+         * Canvas and Leather Goods Makers not further defined
          */
         _393100, 
         /**
@@ -2931,7 +2931,7 @@ public enum AnzscoOccupations {
          */
         _393114, 
         /**
-         * Clothing Trades Workers nfd
+         * Clothing Trades Workers not further defined
          */
         _393200, 
         /**
@@ -2947,7 +2947,7 @@ public enum AnzscoOccupations {
          */
         _393213, 
         /**
-         * Clothing Trades Workers nec
+         * Clothing Trades Workers not elsewhere classified
          */
         _393299, 
         /**
@@ -2955,7 +2955,7 @@ public enum AnzscoOccupations {
          */
         _393311, 
         /**
-         * Wood Trades Workers nfd
+         * Wood Trades Workers not further defined
          */
         _394000, 
         /**
@@ -2963,7 +2963,7 @@ public enum AnzscoOccupations {
          */
         _394111, 
         /**
-         * Wood Machinists and Other Wood Trades Workers nfd
+         * Wood Machinists and Other Wood Trades Workers not further defined
          */
         _394200, 
         /**
@@ -2983,15 +2983,15 @@ public enum AnzscoOccupations {
          */
         _394214, 
         /**
-         * Wood Machinists and Other Wood Trades Workers nec
+         * Wood Machinists and Other Wood Trades Workers not elsewhere classified
          */
         _394299, 
         /**
-         * Miscellaneous Technicians and Trades Workers nfd
+         * Miscellaneous Technicians and Trades Workers not further defined
          */
         _399000, 
         /**
-         * Boat Builders and Shipwrights nfd
+         * Boat Builders and Shipwrights not further defined
          */
         _399100, 
         /**
@@ -3003,7 +3003,7 @@ public enum AnzscoOccupations {
          */
         _399112, 
         /**
-         * Chemical, Gas, Petroleum and Power Generation Plant Operators nfd
+         * Chemical, Gas, Petroleum and Power Generation Plant Operators not further defined
          */
         _399200, 
         /**
@@ -3019,7 +3019,7 @@ public enum AnzscoOccupations {
          */
         _399213, 
         /**
-         * Gallery, Library and Museum Technicians nfd
+         * Gallery, Library and Museum Technicians not further defined
          */
         _399300, 
         /**
@@ -3035,7 +3035,7 @@ public enum AnzscoOccupations {
          */
         _399411, 
         /**
-         * Performing Arts Technicians nfd
+         * Performing Arts Technicians not further defined
          */
         _399500, 
         /**
@@ -3067,7 +3067,7 @@ public enum AnzscoOccupations {
          */
         _399517, 
         /**
-         * Performing Arts Technicians nec
+         * Performing Arts Technicians not elsewhere classified
          */
         _399599, 
         /**
@@ -3075,7 +3075,7 @@ public enum AnzscoOccupations {
          */
         _399611, 
         /**
-         * Other Miscellaneous Technicians and Trades Workers nfd
+         * Other Miscellaneous Technicians and Trades Workers not further defined
          */
         _399900, 
         /**
@@ -3107,19 +3107,19 @@ public enum AnzscoOccupations {
          */
         _399917, 
         /**
-         * Technicians and Trades Workers nec
+         * Technicians and Trades Workers not elsewhere classified
          */
         _399999, 
         /**
-         * Community and Personal Service Workers nfd
+         * Community and Personal Service Workers not further defined
          */
         _400000, 
         /**
-         * Health and Welfare Support Workers nfd
+         * Health and Welfare Support Workers not further defined
          */
         _411000, 
         /**
-         * Ambulance Officers and Paramedics nfd
+         * Ambulance Officers and Paramedics not further defined
          */
         _411100, 
         /**
@@ -3131,7 +3131,7 @@ public enum AnzscoOccupations {
          */
         _411112, 
         /**
-         * Dental Hygienists, Technicians and Therapists nfd
+         * Dental Hygienists, Technicians and Therapists not further defined
          */
         _411200, 
         /**
@@ -3155,7 +3155,7 @@ public enum AnzscoOccupations {
          */
         _411311, 
         /**
-         * Enrolled and Mothercraft Nurses nfd
+         * Enrolled and Mothercraft Nurses not further defined
          */
         _411400, 
         /**
@@ -3175,7 +3175,7 @@ public enum AnzscoOccupations {
          */
         _411611, 
         /**
-         * Welfare Support Workers nfd
+         * Welfare Support Workers not further defined
          */
         _411700, 
         /**
@@ -3203,11 +3203,11 @@ public enum AnzscoOccupations {
          */
         _411716, 
         /**
-         * Carers and Aides nfd
+         * Carers and Aides not further defined
          */
         _420000, 
         /**
-         * Child Carers nfd
+         * Child Carers not further defined
          */
         _421100, 
         /**
@@ -3227,7 +3227,7 @@ public enum AnzscoOccupations {
          */
         _421114, 
         /**
-         * Education Aides nfd
+         * Education Aides not further defined
          */
         _422100, 
         /**
@@ -3247,7 +3247,7 @@ public enum AnzscoOccupations {
          */
         _422116, 
         /**
-         * Personal Carers and Assistants nfd
+         * Personal Carers and Assistants not further defined
          */
         _423000, 
         /**
@@ -3259,7 +3259,7 @@ public enum AnzscoOccupations {
          */
         _423211, 
         /**
-         * Nursing Support and Personal Care Workers nfd
+         * Nursing Support and Personal Care Workers not further defined
          */
         _423300, 
         /**
@@ -3279,7 +3279,7 @@ public enum AnzscoOccupations {
          */
         _423314, 
         /**
-         * Special Care Workers nfd
+         * Special Care Workers not further defined
          */
         _423400, 
         /**
@@ -3295,11 +3295,11 @@ public enum AnzscoOccupations {
          */
         _423413, 
         /**
-         * Hospitality Workers nfd
+         * Hospitality Workers not further defined
          */
         _431000, 
         /**
-         * Bar Attendants and Baristas nfd
+         * Bar Attendants and Baristas not further defined
          */
         _431100, 
         /**
@@ -3327,7 +3327,7 @@ public enum AnzscoOccupations {
          */
         _431511, 
         /**
-         * Other Hospitality Workers nfd
+         * Other Hospitality Workers not further defined
          */
         _431900, 
         /**
@@ -3339,15 +3339,15 @@ public enum AnzscoOccupations {
          */
         _431912, 
         /**
-         * Hospitality Workers nec
+         * Hospitality Workers not elsewhere classified
          */
         _431999, 
         /**
-         * Protective Service Workers nfd
+         * Protective Service Workers not further defined
          */
         _440000, 
         /**
-         * Defence Force Members, Fire Fighters and Police nfd
+         * Defence Force Members, Fire Fighters and Police not further defined
          */
         _441000, 
         /**
@@ -3355,7 +3355,7 @@ public enum AnzscoOccupations {
          */
         _441111, 
         /**
-         * Fire and Emergency Workers nfd
+         * Fire and Emergency Workers not further defined
          */
         _441200, 
         /**
@@ -3367,7 +3367,7 @@ public enum AnzscoOccupations {
          */
         _441212, 
         /**
-         * Police nfd
+         * Police not further defined
          */
         _441300, 
         /**
@@ -3379,7 +3379,7 @@ public enum AnzscoOccupations {
          */
         _441312, 
         /**
-         * Prison and Security Officers nfd
+         * Prison and Security Officers not further defined
          */
         _442000, 
         /**
@@ -3387,7 +3387,7 @@ public enum AnzscoOccupations {
          */
         _442111, 
         /**
-         * Security Officers and Guards nfd
+         * Security Officers and Guards not further defined
          */
         _442200, 
         /**
@@ -3419,15 +3419,15 @@ public enum AnzscoOccupations {
          */
         _442217, 
         /**
-         * Security Officers and Guards nec
+         * Security Officers and Guards not elsewhere classified
          */
         _442299, 
         /**
-         * Sports and Personal Service Workers nfd
+         * Sports and Personal Service Workers not further defined
          */
         _450000, 
         /**
-         * Personal Service and Travel Workers nfd
+         * Personal Service and Travel Workers not further defined
          */
         _451000, 
         /**
@@ -3439,7 +3439,7 @@ public enum AnzscoOccupations {
          */
         _451211, 
         /**
-         * Funeral Workers nfd
+         * Funeral Workers not further defined
          */
         _451300, 
         /**
@@ -3447,11 +3447,11 @@ public enum AnzscoOccupations {
          */
         _451311, 
         /**
-         * Funeral Workers nec
+         * Funeral Workers not elsewhere classified
          */
         _451399, 
         /**
-         * Gallery, Museum and Tour Guides nfd
+         * Gallery, Museum and Tour Guides not further defined
          */
         _451400, 
         /**
@@ -3463,7 +3463,7 @@ public enum AnzscoOccupations {
          */
         _451412, 
         /**
-         * Personal Care Consultants nfd
+         * Personal Care Consultants not further defined
          */
         _451500, 
         /**
@@ -3475,7 +3475,7 @@ public enum AnzscoOccupations {
          */
         _451512, 
         /**
-         * Tourism and Travel Advisers nfd
+         * Tourism and Travel Advisers not further defined
          */
         _451600, 
         /**
@@ -3487,7 +3487,7 @@ public enum AnzscoOccupations {
          */
         _451612, 
         /**
-         * Travel Attendants nfd
+         * Travel Attendants not further defined
          */
         _451700, 
         /**
@@ -3495,11 +3495,11 @@ public enum AnzscoOccupations {
          */
         _451711, 
         /**
-         * Travel Attendants nec
+         * Travel Attendants not elsewhere classified
          */
         _451799, 
         /**
-         * Other Personal Service Workers nfd
+         * Other Personal Service Workers not further defined
          */
         _451800, 
         /**
@@ -3515,11 +3515,11 @@ public enum AnzscoOccupations {
          */
         _451813, 
         /**
-         * Personal Service Workers nec
+         * Personal Service Workers not elsewhere classified
          */
         _451899, 
         /**
-         * Sports and Fitness Workers nfd
+         * Sports and Fitness Workers not further defined
          */
         _452000, 
         /**
@@ -3527,7 +3527,7 @@ public enum AnzscoOccupations {
          */
         _452111, 
         /**
-         * Outdoor Adventure Guides nfd
+         * Outdoor Adventure Guides not further defined
          */
         _452200, 
         /**
@@ -3559,11 +3559,11 @@ public enum AnzscoOccupations {
          */
         _452217, 
         /**
-         * Outdoor Adventure Guides nec
+         * Outdoor Adventure Guides not elsewhere classified
          */
         _452299, 
         /**
-         * Sports Coaches, Instructors and Officials nfd
+         * Sports Coaches, Instructors and Officials not further defined
          */
         _452300, 
         /**
@@ -3611,7 +3611,7 @@ public enum AnzscoOccupations {
          */
         _452323, 
         /**
-         * Sportspersons nfd
+         * Sportspersons not further defined
          */
         _452400, 
         /**
@@ -3631,19 +3631,19 @@ public enum AnzscoOccupations {
          */
         _452414, 
         /**
-         * Sportspersons nec
+         * Sportspersons not elsewhere classified
          */
         _452499, 
         /**
-         * Clerical and Administrative Workers nfd
+         * Clerical and Administrative Workers not further defined
          */
         _500000, 
         /**
-         * Office Managers and Program Administrators nfd
+         * Office Managers and Program Administrators not further defined
          */
         _510000, 
         /**
-         * Contract, Program and Project Administrators nfd
+         * Contract, Program and Project Administrators not further defined
          */
         _511100, 
         /**
@@ -3655,7 +3655,7 @@ public enum AnzscoOccupations {
          */
         _511112, 
         /**
-         * Office and Practice Managers nfd
+         * Office and Practice Managers not further defined
          */
         _512000, 
         /**
@@ -3663,7 +3663,7 @@ public enum AnzscoOccupations {
          */
         _512111, 
         /**
-         * Practice Managers nfd
+         * Practice Managers not further defined
          */
         _512200, 
         /**
@@ -3671,11 +3671,11 @@ public enum AnzscoOccupations {
          */
         _512211, 
         /**
-         * Practice Managers nec
+         * Practice Managers not elsewhere classified
          */
         _512299, 
         /**
-         * Personal Assistants and Secretaries nfd
+         * Personal Assistants and Secretaries not further defined
          */
         _521000, 
         /**
@@ -3683,7 +3683,7 @@ public enum AnzscoOccupations {
          */
         _521111, 
         /**
-         * Secretaries nfd
+         * Secretaries not further defined
          */
         _521200, 
         /**
@@ -3695,7 +3695,7 @@ public enum AnzscoOccupations {
          */
         _521212, 
         /**
-         * General Clerical Workers nfd
+         * General Clerical Workers not further defined
          */
         _530000, 
         /**
@@ -3703,7 +3703,7 @@ public enum AnzscoOccupations {
          */
         _531111, 
         /**
-         * Keyboard Operators nfd
+         * Keyboard Operators not further defined
          */
         _532100, 
         /**
@@ -3719,15 +3719,15 @@ public enum AnzscoOccupations {
          */
         _532113, 
         /**
-         * Inquiry Clerks and Receptionists nfd
+         * Inquiry Clerks and Receptionists not further defined
          */
         _540000, 
         /**
-         * Call or Contact Centre Information Clerks nfd
+         * Call or Contact Centre Information Clerks not further defined
          */
         _541000, 
         /**
-         * Call or Contact Centre Workers nfd
+         * Call or Contact Centre Workers not further defined
          */
         _541100, 
         /**
@@ -3743,7 +3743,7 @@ public enum AnzscoOccupations {
          */
         _541211, 
         /**
-         * Receptionists nfd
+         * Receptionists not further defined
          */
         _542100, 
         /**
@@ -3763,15 +3763,15 @@ public enum AnzscoOccupations {
          */
         _542114, 
         /**
-         * Numerical Clerks nfd
+         * Numerical Clerks not further defined
          */
         _550000, 
         /**
-         * Accounting Clerks and Bookkeepers nfd
+         * Accounting Clerks and Bookkeepers not further defined
          */
         _551000, 
         /**
-         * Accounting Clerks nfd
+         * Accounting Clerks not further defined
          */
         _551100, 
         /**
@@ -3791,7 +3791,7 @@ public enum AnzscoOccupations {
          */
         _551311, 
         /**
-         * Financial and Insurance Clerks nfd
+         * Financial and Insurance Clerks not further defined
          */
         _552000, 
         /**
@@ -3803,7 +3803,7 @@ public enum AnzscoOccupations {
          */
         _552211, 
         /**
-         * Insurance, Money Market and Statistical Clerks nfd
+         * Insurance, Money Market and Statistical Clerks not further defined
          */
         _552300, 
         /**
@@ -3823,11 +3823,11 @@ public enum AnzscoOccupations {
          */
         _552314, 
         /**
-         * Clerical and Office Support Workers nfd
+         * Clerical and Office Support Workers not further defined
          */
         _561000, 
         /**
-         * Betting Clerks nfd
+         * Betting Clerks not further defined
          */
         _561100, 
         /**
@@ -3843,11 +3843,11 @@ public enum AnzscoOccupations {
          */
         _561113, 
         /**
-         * Betting Clerks nec
+         * Betting Clerks not elsewhere classified
          */
         _561199, 
         /**
-         * Couriers and Postal Deliverers nfd
+         * Couriers and Postal Deliverers not further defined
          */
         _561200, 
         /**
@@ -3863,7 +3863,7 @@ public enum AnzscoOccupations {
          */
         _561311, 
         /**
-         * Mail Sorters nfd
+         * Mail Sorters not further defined
          */
         _561400, 
         /**
@@ -3883,7 +3883,7 @@ public enum AnzscoOccupations {
          */
         _561611, 
         /**
-         * Other Clerical and Office Support Workers nfd
+         * Other Clerical and Office Support Workers not further defined
          */
         _561900, 
         /**
@@ -3899,19 +3899,19 @@ public enum AnzscoOccupations {
          */
         _561913, 
         /**
-         * Clerical and Office Support Workers nec
+         * Clerical and Office Support Workers not elsewhere classified
          */
         _561999, 
         /**
-         * Other Clerical and Administrative Workers nfd
+         * Other Clerical and Administrative Workers not further defined
          */
         _590000, 
         /**
-         * Logistics Clerks nfd
+         * Logistics Clerks not further defined
          */
         _591000, 
         /**
-         * Purchasing and Supply Logistics Clerks nfd
+         * Purchasing and Supply Logistics Clerks not further defined
          */
         _591100, 
         /**
@@ -3939,7 +3939,7 @@ public enum AnzscoOccupations {
          */
         _591116, 
         /**
-         * Transport and Despatch Clerks nfd
+         * Transport and Despatch Clerks not further defined
          */
         _591200, 
         /**
@@ -3951,11 +3951,11 @@ public enum AnzscoOccupations {
          */
         _591212, 
         /**
-         * Miscellaneous Clerical and Administrative Workers nfd
+         * Miscellaneous Clerical and Administrative Workers not further defined
          */
         _599000, 
         /**
-         * Conveyancers and Legal Executives nfd
+         * Conveyancers and Legal Executives not further defined
          */
         _599100, 
         /**
@@ -3967,7 +3967,7 @@ public enum AnzscoOccupations {
          */
         _599112, 
         /**
-         * Court and Legal Clerks nfd
+         * Court and Legal Clerks not further defined
          */
         _599200, 
         /**
@@ -3999,7 +3999,7 @@ public enum AnzscoOccupations {
          */
         _599411, 
         /**
-         * Inspectors and Regulatory Officers nfd
+         * Inspectors and Regulatory Officers not further defined
          */
         _599500, 
         /**
@@ -4039,11 +4039,11 @@ public enum AnzscoOccupations {
          */
         _599521, 
         /**
-         * Inspectors and Regulatory Officers nec
+         * Inspectors and Regulatory Officers not elsewhere classified
          */
         _599599, 
         /**
-         * Insurance Investigators, Loss Adjusters and Risk Surveyors nfd
+         * Insurance Investigators, Loss Adjusters and Risk Surveyors not further defined
          */
         _599600, 
         /**
@@ -4063,7 +4063,7 @@ public enum AnzscoOccupations {
          */
         _599711, 
         /**
-         * Other Miscellaneous Clerical and Administrative Workers nfd
+         * Other Miscellaneous Clerical and Administrative Workers not further defined
          */
         _599900, 
         /**
@@ -4083,23 +4083,23 @@ public enum AnzscoOccupations {
          */
         _599914, 
         /**
-         * Clerical and Administrative Workers nec
+         * Clerical and Administrative Workers not elsewhere classified
          */
         _599999, 
         /**
-         * Sales Workers nfd
+         * Sales Workers not further defined
          */
         _600000, 
         /**
-         * Sales Representatives and Agents nfd
+         * Sales Representatives and Agents not further defined
          */
         _610000, 
         /**
-         * Insurance Agents and Sales Representatives nfd
+         * Insurance Agents and Sales Representatives not further defined
          */
         _611000, 
         /**
-         * Auctioneers, and Stock and Station Agents nfd
+         * Auctioneers, and Stock and Station Agents not further defined
          */
         _611100, 
         /**
@@ -4115,7 +4115,7 @@ public enum AnzscoOccupations {
          */
         _611211, 
         /**
-         * Sales Representatives nfd
+         * Sales Representatives not further defined
          */
         _611300, 
         /**
@@ -4135,11 +4135,11 @@ public enum AnzscoOccupations {
          */
         _611314, 
         /**
-         * Sales Representatives nec
+         * Sales Representatives not elsewhere classified
          */
         _611399, 
         /**
-         * Real Estate Sales Agents nfd
+         * Real Estate Sales Agents not further defined
          */
         _612100, 
         /**
@@ -4163,7 +4163,7 @@ public enum AnzscoOccupations {
          */
         _612115, 
         /**
-         * Sales Assistants and Salespersons nfd
+         * Sales Assistants and Salespersons not further defined
          */
         _621000, 
         /**
@@ -4175,7 +4175,7 @@ public enum AnzscoOccupations {
          */
         _621211, 
         /**
-         * Motor Vehicle and Vehicle Parts Salespersons nfd
+         * Motor Vehicle and Vehicle Parts Salespersons not further defined
          */
         _621300, 
         /**
@@ -4199,7 +4199,7 @@ public enum AnzscoOccupations {
          */
         _621611, 
         /**
-         * Street Vendors and Related Salespersons nfd
+         * Street Vendors and Related Salespersons not further defined
          */
         _621700, 
         /**
@@ -4215,7 +4215,7 @@ public enum AnzscoOccupations {
          */
         _621713, 
         /**
-         * Other Sales Assistants and Salespersons nfd
+         * Other Sales Assistants and Salespersons not further defined
          */
         _621900, 
         /**
@@ -4227,15 +4227,15 @@ public enum AnzscoOccupations {
          */
         _621912, 
         /**
-         * Sales Assistants and Salespersons nec
+         * Sales Assistants and Salespersons not elsewhere classified
          */
         _621999, 
         /**
-         * Sales Support Workers nfd
+         * Sales Support Workers not further defined
          */
         _630000, 
         /**
-         * Checkout Operators and Office Cashiers nfd
+         * Checkout Operators and Office Cashiers not further defined
          */
         _631100, 
         /**
@@ -4247,11 +4247,11 @@ public enum AnzscoOccupations {
          */
         _631112, 
         /**
-         * Miscellaneous Sales Support Workers nfd
+         * Miscellaneous Sales Support Workers not further defined
          */
         _639000, 
         /**
-         * Models and Sales Demonstrators nfd
+         * Models and Sales Demonstrators not further defined
          */
         _639100, 
         /**
@@ -4263,7 +4263,7 @@ public enum AnzscoOccupations {
          */
         _639112, 
         /**
-         * Retail and Wool Buyers nfd
+         * Retail and Wool Buyers not further defined
          */
         _639200, 
         /**
@@ -4279,7 +4279,7 @@ public enum AnzscoOccupations {
          */
         _639311, 
         /**
-         * Ticket Salespersons nfd
+         * Ticket Salespersons not further defined
          */
         _639400, 
         /**
@@ -4299,19 +4299,19 @@ public enum AnzscoOccupations {
          */
         _639911, 
         /**
-         * Machinery Operators and Drivers nfd
+         * Machinery Operators and Drivers not further defined
          */
         _700000, 
         /**
-         * Machine and Stationary Plant Operators nfd
+         * Machine and Stationary Plant Operators not further defined
          */
         _710000, 
         /**
-         * Machine Operators nfd
+         * Machine Operators not further defined
          */
         _711000, 
         /**
-         * Clay, Concrete, Glass and Stone Processing Machine Operators nfd
+         * Clay, Concrete, Glass and Stone Processing Machine Operators not further defined
          */
         _711100, 
         /**
@@ -4331,7 +4331,7 @@ public enum AnzscoOccupations {
          */
         _711114, 
         /**
-         * Clay, Concrete, Glass and Stone Processing Machine Operators nec
+         * Clay, Concrete, Glass and Stone Processing Machine Operators not elsewhere classified
          */
         _711199, 
         /**
@@ -4339,7 +4339,7 @@ public enum AnzscoOccupations {
          */
         _711211, 
         /**
-         * Paper and Wood Processing Machine Operators nfd
+         * Paper and Wood Processing Machine Operators not further defined
          */
         _711300, 
         /**
@@ -4355,7 +4355,7 @@ public enum AnzscoOccupations {
          */
         _711411, 
         /**
-         * Plastics and Rubber Production Machine Operators nfd
+         * Plastics and Rubber Production Machine Operators not further defined
          */
         _711500, 
         /**
@@ -4383,7 +4383,7 @@ public enum AnzscoOccupations {
          */
         _711516, 
         /**
-         * Plastics and Rubber Production Machine Operators nec
+         * Plastics and Rubber Production Machine Operators not elsewhere classified
          */
         _711599, 
         /**
@@ -4391,7 +4391,7 @@ public enum AnzscoOccupations {
          */
         _711611, 
         /**
-         * Textile and Footwear Production Machine Operators nfd
+         * Textile and Footwear Production Machine Operators not further defined
          */
         _711700, 
         /**
@@ -4419,11 +4419,11 @@ public enum AnzscoOccupations {
          */
         _711716, 
         /**
-         * Textile and Footwear Production Machine Operators nec
+         * Textile and Footwear Production Machine Operators not elsewhere classified
          */
         _711799, 
         /**
-         * Other Machine Operators nfd
+         * Other Machine Operators not further defined
          */
         _711900, 
         /**
@@ -4443,11 +4443,11 @@ public enum AnzscoOccupations {
          */
         _711914, 
         /**
-         * Machine Operators nec
+         * Machine Operators not elsewhere classified
          */
         _711999, 
         /**
-         * Stationary Plant Operators nfd
+         * Stationary Plant Operators not further defined
          */
         _712000, 
         /**
@@ -4455,7 +4455,7 @@ public enum AnzscoOccupations {
          */
         _712111, 
         /**
-         * Drillers, Miners and Shot Firers nfd
+         * Drillers, Miners and Shot Firers not further defined
          */
         _712200, 
         /**
@@ -4475,7 +4475,7 @@ public enum AnzscoOccupations {
          */
         _712311, 
         /**
-         * Other Stationary Plant Operators nfd
+         * Other Stationary Plant Operators not further defined
          */
         _712900, 
         /**
@@ -4519,15 +4519,15 @@ public enum AnzscoOccupations {
          */
         _712922, 
         /**
-         * Stationary Plant Operators nec
+         * Stationary Plant Operators not elsewhere classified
          */
         _712999, 
         /**
-         * Mobile Plant Operators nfd
+         * Mobile Plant Operators not further defined
          */
         _721000, 
         /**
-         * Agricultural, Forestry and Horticultural Plant Operators nfd
+         * Agricultural, Forestry and Horticultural Plant Operators not further defined
          */
         _721100, 
         /**
@@ -4539,7 +4539,7 @@ public enum AnzscoOccupations {
          */
         _721112, 
         /**
-         * Earthmoving Plant Operators nfd
+         * Earthmoving Plant Operators not further defined
          */
         _721200, 
         /**
@@ -4571,7 +4571,7 @@ public enum AnzscoOccupations {
          */
         _721311, 
         /**
-         * Other Mobile Plant Operators nfd
+         * Other Mobile Plant Operators not further defined
          */
         _721900, 
         /**
@@ -4599,19 +4599,19 @@ public enum AnzscoOccupations {
          */
         _721916, 
         /**
-         * Mobile Plant Operators nec
+         * Mobile Plant Operators not elsewhere classified
          */
         _721999, 
         /**
-         * Road and Rail Drivers nfd
+         * Road and Rail Drivers not further defined
          */
         _730000, 
         /**
-         * Automobile, Bus and Rail Drivers nfd
+         * Automobile, Bus and Rail Drivers not further defined
          */
         _731000, 
         /**
-         * Automobile Drivers nfd
+         * Automobile Drivers not further defined
          */
         _731100, 
         /**
@@ -4623,11 +4623,11 @@ public enum AnzscoOccupations {
          */
         _731112, 
         /**
-         * Automobile Drivers nec
+         * Automobile Drivers not elsewhere classified
          */
         _731199, 
         /**
-         * Bus and Coach Drivers nfd
+         * Bus and Coach Drivers not further defined
          */
         _731200, 
         /**
@@ -4643,7 +4643,7 @@ public enum AnzscoOccupations {
          */
         _731213, 
         /**
-         * Train and Tram Drivers nfd
+         * Train and Tram Drivers not further defined
          */
         _731300, 
         /**
@@ -4659,7 +4659,7 @@ public enum AnzscoOccupations {
          */
         _732111, 
         /**
-         * Truck Drivers nfd
+         * Truck Drivers not further defined
          */
         _733100, 
         /**
@@ -4687,11 +4687,11 @@ public enum AnzscoOccupations {
          */
         _741111, 
         /**
-         * Labourers nfd
+         * Labourers not further defined
          */
         _800000, 
         /**
-         * Cleaners and Laundry Workers nfd
+         * Cleaners and Laundry Workers not further defined
          */
         _811000, 
         /**
@@ -4707,7 +4707,7 @@ public enum AnzscoOccupations {
          */
         _811311, 
         /**
-         * Housekeepers nfd
+         * Housekeepers not further defined
          */
         _811400, 
         /**
@@ -4719,7 +4719,7 @@ public enum AnzscoOccupations {
          */
         _811412, 
         /**
-         * Laundry Workers nfd
+         * Laundry Workers not further defined
          */
         _811500, 
         /**
@@ -4735,7 +4735,7 @@ public enum AnzscoOccupations {
          */
         _811513, 
         /**
-         * Other Cleaners nfd
+         * Other Cleaners not further defined
          */
         _811600, 
         /**
@@ -4747,15 +4747,15 @@ public enum AnzscoOccupations {
          */
         _811612, 
         /**
-         * Cleaners nec
+         * Cleaners not elsewhere classified
          */
         _811699, 
         /**
-         * Construction and Mining Labourers nfd
+         * Construction and Mining Labourers not further defined
          */
         _821000, 
         /**
-         * Building and Plumbing Labourers nfd
+         * Building and Plumbing Labourers not further defined
          */
         _821100, 
         /**
@@ -4783,7 +4783,7 @@ public enum AnzscoOccupations {
          */
         _821311, 
         /**
-         * Insulation and Home Improvement Installers nfd
+         * Insulation and Home Improvement Installers not further defined
          */
         _821400, 
         /**
@@ -4803,7 +4803,7 @@ public enum AnzscoOccupations {
          */
         _821611, 
         /**
-         * Structural Steel Construction Workers nfd
+         * Structural Steel Construction Workers not further defined
          */
         _821700, 
         /**
@@ -4823,7 +4823,7 @@ public enum AnzscoOccupations {
          */
         _821714, 
         /**
-         * Other Construction and Mining Labourers nfd
+         * Other Construction and Mining Labourers not further defined
          */
         _821900, 
         /**
@@ -4847,15 +4847,15 @@ public enum AnzscoOccupations {
          */
         _821915, 
         /**
-         * Factory Process Workers nfd
+         * Factory Process Workers not further defined
          */
         _830000, 
         /**
-         * Food Process Workers nfd
+         * Food Process Workers not further defined
          */
         _831000, 
         /**
-         * Food and Drink Factory Workers nfd
+         * Food and Drink Factory Workers not further defined
          */
         _831100, 
         /**
@@ -4891,11 +4891,11 @@ public enum AnzscoOccupations {
          */
         _831118, 
         /**
-         * Food and Drink Factory Workers nec
+         * Food and Drink Factory Workers not elsewhere classified
          */
         _831199, 
         /**
-         * Meat Boners and Slicers, and Slaughterers nfd
+         * Meat Boners and Slicers, and Slaughterers not further defined
          */
         _831200, 
         /**
@@ -4907,7 +4907,7 @@ public enum AnzscoOccupations {
          */
         _831212, 
         /**
-         * Meat, Poultry and Seafood Process Workers nfd
+         * Meat, Poultry and Seafood Process Workers not further defined
          */
         _831300, 
         /**
@@ -4923,11 +4923,11 @@ public enum AnzscoOccupations {
          */
         _831313, 
         /**
-         * Packers and Product Assemblers nfd
+         * Packers and Product Assemblers not further defined
          */
         _832000, 
         /**
-         * Packers nfd
+         * Packers not further defined
          */
         _832100, 
         /**
@@ -4951,7 +4951,7 @@ public enum AnzscoOccupations {
          */
         _832115, 
         /**
-         * Packers nec
+         * Packers not elsewhere classified
          */
         _832199, 
         /**
@@ -4959,7 +4959,7 @@ public enum AnzscoOccupations {
          */
         _832211, 
         /**
-         * Miscellaneous Factory Process Workers nfd
+         * Miscellaneous Factory Process Workers not further defined
          */
         _839000, 
         /**
@@ -4967,7 +4967,7 @@ public enum AnzscoOccupations {
          */
         _839111, 
         /**
-         * Plastics and Rubber Factory Workers nfd
+         * Plastics and Rubber Factory Workers not further defined
          */
         _839200, 
         /**
@@ -4979,7 +4979,7 @@ public enum AnzscoOccupations {
          */
         _839212, 
         /**
-         * Product Quality Controllers nfd
+         * Product Quality Controllers not further defined
          */
         _839300, 
         /**
@@ -4995,7 +4995,7 @@ public enum AnzscoOccupations {
          */
         _839313, 
         /**
-         * Timber and Wood Process Workers nfd
+         * Timber and Wood Process Workers not further defined
          */
         _839400, 
         /**
@@ -5011,7 +5011,7 @@ public enum AnzscoOccupations {
          */
         _839413, 
         /**
-         * Other Factory Process Workers nfd
+         * Other Factory Process Workers not further defined
          */
         _839900, 
         /**
@@ -5043,11 +5043,11 @@ public enum AnzscoOccupations {
          */
         _839917, 
         /**
-         * Factory Process Workers nec
+         * Factory Process Workers not elsewhere classified
          */
         _839999, 
         /**
-         * Farm, Forestry and Garden Workers nfd
+         * Farm, Forestry and Garden Workers not further defined
          */
         _841000, 
         /**
@@ -5055,7 +5055,7 @@ public enum AnzscoOccupations {
          */
         _841111, 
         /**
-         * Crop Farm Workers nfd
+         * Crop Farm Workers not further defined
          */
         _841200, 
         /**
@@ -5083,11 +5083,11 @@ public enum AnzscoOccupations {
          */
         _841216, 
         /**
-         * Crop Farm Workers nec
+         * Crop Farm Workers not elsewhere classified
          */
         _841299, 
         /**
-         * Forestry and Logging Workers nfd
+         * Forestry and Logging Workers not further defined
          */
         _841300, 
         /**
@@ -5103,7 +5103,7 @@ public enum AnzscoOccupations {
          */
         _841313, 
         /**
-         * Garden and Nursery Labourers nfd
+         * Garden and Nursery Labourers not further defined
          */
         _841400, 
         /**
@@ -5115,7 +5115,7 @@ public enum AnzscoOccupations {
          */
         _841412, 
         /**
-         * Livestock Farm Workers nfd
+         * Livestock Farm Workers not further defined
          */
         _841500, 
         /**
@@ -5147,7 +5147,7 @@ public enum AnzscoOccupations {
          */
         _841517, 
         /**
-         * Livestock Farm Workers nec
+         * Livestock Farm Workers not elsewhere classified
          */
         _841599, 
         /**
@@ -5155,7 +5155,7 @@ public enum AnzscoOccupations {
          */
         _841611, 
         /**
-         * Other Farm, Forestry and Garden Workers nfd
+         * Other Farm, Forestry and Garden Workers not further defined
          */
         _841900, 
         /**
@@ -5167,11 +5167,11 @@ public enum AnzscoOccupations {
          */
         _841912, 
         /**
-         * Farm, Forestry and Garden Workers nec
+         * Farm, Forestry and Garden Workers not elsewhere classified
          */
         _841999, 
         /**
-         * Food Preparation Assistants nfd
+         * Food Preparation Assistants not further defined
          */
         _851000, 
         /**
@@ -5179,7 +5179,7 @@ public enum AnzscoOccupations {
          */
         _851111, 
         /**
-         * Food Trades Assistants nfd
+         * Food Trades Assistants not further defined
          */
         _851200, 
         /**
@@ -5187,7 +5187,7 @@ public enum AnzscoOccupations {
          */
         _851211, 
         /**
-         * Food Trades Assistants nec
+         * Food Trades Assistants not elsewhere classified
          */
         _851299, 
         /**
@@ -5195,15 +5195,15 @@ public enum AnzscoOccupations {
          */
         _851311, 
         /**
-         * Other Labourers nfd
+         * Other Labourers not further defined
          */
         _890000, 
         /**
-         * Freight Handlers and Shelf Fillers nfd
+         * Freight Handlers and Shelf Fillers not further defined
          */
         _891000, 
         /**
-         * Freight and Furniture Handlers nfd
+         * Freight and Furniture Handlers not further defined
          */
         _891100, 
         /**
@@ -5223,7 +5223,7 @@ public enum AnzscoOccupations {
          */
         _891211, 
         /**
-         * Miscellaneous Labourers nfd
+         * Miscellaneous Labourers not further defined
          */
         _899000, 
         /**
@@ -5231,7 +5231,7 @@ public enum AnzscoOccupations {
          */
         _899111, 
         /**
-         * Deck and Fishing Hands nfd
+         * Deck and Fishing Hands not further defined
          */
         _899200, 
         /**
@@ -5247,7 +5247,7 @@ public enum AnzscoOccupations {
          */
         _899311, 
         /**
-         * Motor Vehicle Parts and Accessories Fitters nfd
+         * Motor Vehicle Parts and Accessories Fitters not further defined
          */
         _899400, 
         /**
@@ -5271,7 +5271,7 @@ public enum AnzscoOccupations {
          */
         _899415, 
         /**
-         * Printing Assistants and Table Workers nfd
+         * Printing Assistants and Table Workers not further defined
          */
         _899500, 
         /**
@@ -5291,7 +5291,7 @@ public enum AnzscoOccupations {
          */
         _899711, 
         /**
-         * Other Miscellaneous Labourers nfd
+         * Other Miscellaneous Labourers not further defined
          */
         _899900, 
         /**
@@ -5335,7 +5335,7 @@ public enum AnzscoOccupations {
          */
         _899922, 
         /**
-         * Labourers nec
+         * Labourers not elsewhere classified
          */
         _899999, 
         /**
@@ -9335,6 +9335,1337 @@ public enum AnzscoOccupations {
         }
         public String getDefinition() {
           switch (this) {
+            case _100000: return "Managers not further defined";
+            case _111000: return "Chief Executives, General Managers and Legislators not further defined";
+            case _111111: return "Chief Executive or Managing Director";
+            case _111200: return "General Managers not further defined";
+            case _111211: return "Corporate General Manager";
+            case _111212: return "Defence Force Senior Officer";
+            case _111300: return "Legislators not further defined";
+            case _111311: return "Local Government Legislator";
+            case _111312: return "Member of Parliament";
+            case _111399: return "Legislators not elsewhere classified";
+            case _121000: return "Farmers and Farm Managers not further defined";
+            case _121111: return "Aquaculture Farmer";
+            case _121200: return "Crop Farmers not further defined";
+            case _121211: return "Cotton Grower";
+            case _121212: return "Flower Grower";
+            case _121213: return "Fruit or Nut Grower";
+            case _121214: return "Grain, Oilseed or Pasture Grower";
+            case _121215: return "Grape Grower";
+            case _121216: return "Mixed Crop Farmer";
+            case _121217: return "Sugar Cane Grower";
+            case _121218: return "Turf Grower";
+            case _121221: return "Vegetable Grower";
+            case _121299: return "Crop Farmers not elsewhere classified";
+            case _121300: return "Livestock Farmers not further defined";
+            case _121311: return "Apiarist";
+            case _121312: return "Beef Cattle Farmer";
+            case _121313: return "Dairy Cattle Farmer";
+            case _121314: return "Deer Farmer";
+            case _121315: return "Goat Farmer";
+            case _121316: return "Horse Breeder";
+            case _121317: return "Mixed Livestock Farmer";
+            case _121318: return "Pig Farmer";
+            case _121321: return "Poultry Farmer";
+            case _121322: return "Sheep Farmer";
+            case _121399: return "Livestock Farmers not elsewhere classified";
+            case _121411: return "Mixed Crop and Livestock Farmer";
+            case _130000: return "Specialist Managers not further defined";
+            case _131100: return "Advertising and Sales Managers not further defined";
+            case _131111: return "Advertising and Public Relations Manager";
+            case _131112: return "Sales and Marketing Manager";
+            case _132000: return "Business Administration Managers not further defined";
+            case _132111: return "Corporate Services Manager";
+            case _132211: return "Finance Manager";
+            case _132311: return "Human Resource Manager";
+            case _132411: return "Policy and Planning Manager";
+            case _132511: return "Research and Development Manager";
+            case _133000: return "Construction, Distribution and Production Managers not further defined";
+            case _133100: return "Construction Managers not further defined";
+            case _133111: return "Construction Project Manager";
+            case _133112: return "Project Builder";
+            case _133211: return "Engineering Manager";
+            case _133300: return "Importers, Exporters and Wholesalers not further defined";
+            case _133311: return "Importer or Exporter";
+            case _133312: return "Wholesaler";
+            case _133411: return "Manufacturer";
+            case _133500: return "Production Managers not further defined";
+            case _133511: return "Production Manager (Forestry)";
+            case _133512: return "Production Manager (Manufacturing)";
+            case _133513: return "Production Manager (Mining)";
+            case _133611: return "Supply and Distribution Manager";
+            case _134000: return "Education, Health and Welfare Services Managers not further defined";
+            case _134111: return "Child Care Centre Manager";
+            case _134200: return "Health and Welfare Services Managers not further defined";
+            case _134211: return "Medical Administrator";
+            case _134212: return "Nursing Clinical Director";
+            case _134213: return "Primary Health Organization Manager";
+            case _134214: return "Welfare Centre Manager";
+            case _134299: return "Health and Welfare Services Managers not elsewhere classified";
+            case _134311: return "School Principal";
+            case _134400: return "Other Education Managers not further defined";
+            case _134411: return "Faculty Head";
+            case _134412: return "Regional Education Manager";
+            case _134499: return "Education Managers not elsewhere classified";
+            case _135100: return "ICT Managers not further defined";
+            case _135111: return "Chief Information Officer";
+            case _135112: return "ICT Project Manager";
+            case _135199: return "ICT Managers not elsewhere classified";
+            case _139000: return "Miscellaneous Specialist Managers not further defined";
+            case _139100: return "Commissioned Officers (Management) not further defined";
+            case _139111: return "Commissioned Defence Force Officer";
+            case _139112: return "Commissioned Fire Officer";
+            case _139113: return "Commissioned Police Officer";
+            case _139211: return "Senior Non-commissioned Defence Force Member";
+            case _139900: return "Other Specialist Managers not further defined";
+            case _139911: return "Arts Administrator or Manager";
+            case _139912: return "Environmental Manager";
+            case _139913: return "Laboratory Manager";
+            case _139914: return "Quality Assurance Manager";
+            case _139915: return "Sports Administrator";
+            case _139999: return "Specialist Managers not elsewhere classified";
+            case _140000: return "Hospitality, Retail and Service Managers not further defined";
+            case _141000: return "Accommodation and Hospitality Managers not further defined";
+            case _141111: return "Cafe or Restaurant Manager";
+            case _141211: return "Caravan Park and Camping Ground Manager";
+            case _141311: return "Hotel or Motel Manager";
+            case _141411: return "Licensed Club Manager";
+            case _141900: return "Other Accommodation and Hospitality Managers not further defined";
+            case _141911: return "Bed and Breakfast Operator";
+            case _141999: return "Accommodation and Hospitality Managers not elsewhere classified";
+            case _142100: return "Retail Managers not further defined";
+            case _142111: return "Retail Manager (General)";
+            case _142112: return "Antique Dealer";
+            case _142113: return "Betting Agency Manager";
+            case _142114: return "Hair or Beauty Salon Manager";
+            case _142115: return "Post Office Manager";
+            case _142116: return "Travel Agency Manager";
+            case _149000: return "Miscellaneous Hospitality, Retail and Service Managers not further defined";
+            case _149100: return "Amusement, Fitness and Sports Centre Managers not further defined";
+            case _149111: return "Amusement Centre Manager";
+            case _149112: return "Fitness Centre Manager";
+            case _149113: return "Sports Centre Manager";
+            case _149200: return "Call or Contact Centre and Customer Service Managers not further defined";
+            case _149211: return "Call or Contact Centre Manager";
+            case _149212: return "Customer Service Manager";
+            case _149311: return "Conference and Event Organizer";
+            case _149400: return "Transport Services Managers not further defined";
+            case _149411: return "Fleet Manager";
+            case _149412: return "Railway Station Manager";
+            case _149413: return "Transport Company Manager";
+            case _149900: return "Other Hospitality, Retail and Service Managers not further defined";
+            case _149911: return "Boarding Kennel or Cattery Operator";
+            case _149912: return "Cinema or Theatre Manager";
+            case _149913: return "Facilities Manager";
+            case _149914: return "Financial Institution Branch Manager";
+            case _149999: return "Hospitality, Retail and Service Managers not elsewhere classified";
+            case _200000: return "Professionals not further defined";
+            case _210000: return "Arts and Media Professionals not further defined";
+            case _211000: return "Arts Professionals not further defined";
+            case _211100: return "Actors, Dancers and Other Entertainers not further defined";
+            case _211111: return "Actor";
+            case _211112: return "Dancer or Choreographer";
+            case _211113: return "Entertainer or Variety Artist";
+            case _211199: return "Actors, Dancers and Other Entertainers not elsewhere classified";
+            case _211200: return "Music Professionals not further defined";
+            case _211211: return "Composer";
+            case _211212: return "Music Director";
+            case _211213: return "Musician (Instrumental)";
+            case _211214: return "Singer";
+            case _211299: return "Music Professionals not elsewhere classified";
+            case _211311: return "Photographer";
+            case _211400: return "Visual Arts and Crafts Professionals not further defined";
+            case _211411: return "Painter (Visual Arts)";
+            case _211412: return "Potter or Ceramic Artist";
+            case _211413: return "Sculptor";
+            case _211499: return "Visual Arts and Crafts Professionals not elsewhere classified";
+            case _212000: return "Media Professionals not further defined";
+            case _212100: return "Artistic Directors, and Media Producers and Presenters not further defined";
+            case _212111: return "Artistic Director";
+            case _212112: return "Media Producer (excluding Video)";
+            case _212113: return "Radio Presenter";
+            case _212114: return "Television Presenter";
+            case _212200: return "Authors, and Book and Script Editors not further defined";
+            case _212211: return "Author";
+            case _212212: return "Book or Script Editor";
+            case _212300: return "Film, Television, Radio and Stage Directors not further defined";
+            case _212311: return "Art Director (Film, Television or Stage)";
+            case _212312: return "Director (Film, Television, Radio or Stage)";
+            case _212313: return "Director of Photography";
+            case _212314: return "Film and Video Editor";
+            case _212315: return "Program Director (Television or Radio)";
+            case _212316: return "Stage Manager";
+            case _212317: return "Technical Director";
+            case _212318: return "Video Producer";
+            case _212399: return "Film, Television, Radio and Stage Directors not elsewhere classified";
+            case _212400: return "Journalists and Other Writers not further defined";
+            case _212411: return "Copywriter";
+            case _212412: return "Newspaper or Periodical Editor";
+            case _212413: return "Print Journalist";
+            case _212414: return "Radio Journalist";
+            case _212415: return "Technical Writer";
+            case _212416: return "Television Journalist";
+            case _212499: return "Journalists and Other Writers not elsewhere classified";
+            case _220000: return "Business, Human Resource and Marketing Professionals not further defined";
+            case _221000: return "Accountants, Auditors and Company Secretaries not further defined";
+            case _221100: return "Accountants not further defined";
+            case _221111: return "Accountant (General)";
+            case _221112: return "Management Accountant";
+            case _221113: return "Taxation Accountant";
+            case _221200: return "Auditors, Company Secretaries and Corporate Treasurers not further defined";
+            case _221211: return "Company Secretary";
+            case _221212: return "Corporate Treasurer";
+            case _221213: return "External Auditor";
+            case _221214: return "Internal Auditor";
+            case _222000: return "Financial Brokers and Dealers, and Investment Advisers not further defined";
+            case _222100: return "Financial Brokers not further defined";
+            case _222111: return "Commodities Trader";
+            case _222112: return "Finance Broker";
+            case _222113: return "Insurance Broker";
+            case _222199: return "Financial Brokers not elsewhere classified";
+            case _222200: return "Financial Dealers not further defined";
+            case _222211: return "Financial Market Dealer";
+            case _222212: return "Futures Trader";
+            case _222213: return "Stockbroking Dealer";
+            case _222299: return "Financial Dealers not elsewhere classified";
+            case _222300: return "Financial Investment Advisers and Managers not further defined";
+            case _222311: return "Financial Investment Adviser";
+            case _222312: return "Financial Investment Manager";
+            case _223000: return "Human Resource and Training Professionals not further defined";
+            case _223100: return "Human Resource Professionals not further defined";
+            case _223111: return "Human Resource Adviser";
+            case _223112: return "Recruitment Consultant";
+            case _223113: return "Workplace Relations Adviser";
+            case _223211: return "ICT Trainer";
+            case _223311: return "Training and Development Professional";
+            case _224000: return "Information and Organization Professionals not further defined";
+            case _224100: return "Actuaries, Mathematicians and Statisticians not further defined";
+            case _224111: return "Actuary";
+            case _224112: return "Mathematician";
+            case _224113: return "Statistician";
+            case _224200: return "Archivists, Curators and Records Managers not further defined";
+            case _224211: return "Archivist";
+            case _224212: return "Gallery or Museum Curator";
+            case _224213: return "Health Information Manager";
+            case _224214: return "Records Manager";
+            case _224311: return "Economist";
+            case _224400: return "Intelligence and Policy Analysts not further defined";
+            case _224411: return "Intelligence Officer";
+            case _224412: return "Policy Analyst";
+            case _224500: return "Land Economists and Valuers not further defined";
+            case _224511: return "Land Economist";
+            case _224512: return "Valuer";
+            case _224611: return "Librarian";
+            case _224700: return "Management and Organization Analysts not further defined";
+            case _224711: return "Management Consultant";
+            case _224712: return "Organization and Methods Analyst";
+            case _224900: return "Other Information and Organization Professionals not further defined";
+            case _224911: return "Electorate Officer";
+            case _224912: return "Liaison Officer";
+            case _224913: return "Migration Agent";
+            case _224914: return "Patents Examiner";
+            case _224999: return "Information and Organization Professionals not elsewhere classified";
+            case _225000: return "Sales, Marketing and Public Relations Professionals not further defined";
+            case _225100: return "Advertising and Marketing Professionals not further defined";
+            case _225111: return "Advertising Specialist";
+            case _225112: return "Market Research Analyst";
+            case _225113: return "Marketing Specialist";
+            case _225200: return "ICT Sales Professionals not further defined";
+            case _225211: return "ICT Account Manager";
+            case _225212: return "ICT Business Development Manager";
+            case _225213: return "ICT Sales Representative";
+            case _225311: return "Public Relations Professional";
+            case _225400: return "Technical Sales Representatives not further defined";
+            case _225411: return "Sales Representative (Industrial Products)";
+            case _225412: return "Sales Representative (Medical and Pharmaceutical Products)";
+            case _225499: return "Technical Sales Representatives not elsewhere classified";
+            case _230000: return "Design, Engineering, Science and Transport Professionals not further defined";
+            case _231000: return "Air and Marine Transport Professionals not further defined";
+            case _231100: return "Air Transport Professionals not further defined";
+            case _231111: return "Aeroplane Pilot";
+            case _231112: return "Air Traffic Controller";
+            case _231113: return "Flying Instructor";
+            case _231114: return "Helicopter Pilot";
+            case _231199: return "Air Transport Professionals not elsewhere classified";
+            case _231200: return "Marine Transport Professionals not further defined";
+            case _231211: return "Master Fisher";
+            case _231212: return "Ship's Engineer";
+            case _231213: return "Ship's Master";
+            case _231214: return "Ship's Officer";
+            case _231215: return "Ship's Surveyor";
+            case _231299: return "Marine Transport Professionals not elsewhere classified";
+            case _232000: return "Architects, Designers, Planners and Surveyors not further defined";
+            case _232100: return "Architects and Landscape Architects not further defined";
+            case _232111: return "Architect";
+            case _232112: return "Landscape Architect";
+            case _232200: return "Cartographers and Surveyors not further defined";
+            case _232211: return "Cartographer";
+            case _232212: return "Surveyor";
+            case _232300: return "Fashion, Industrial and Jewellery Designers not further defined";
+            case _232311: return "Fashion Designer";
+            case _232312: return "Industrial Designer";
+            case _232313: return "Jewellery Designer";
+            case _232400: return "Graphic and Web Designers, and Illustrators not further defined";
+            case _232411: return "Graphic Designer";
+            case _232412: return "Illustrator";
+            case _232413: return "Multimedia Designer";
+            case _232414: return "Web Designer";
+            case _232511: return "Interior Designer";
+            case _232611: return "Urban and Regional Planner";
+            case _233000: return "Engineering Professionals not further defined";
+            case _233100: return "Chemical and Materials Engineers not further defined";
+            case _233111: return "Chemical Engineer";
+            case _233112: return "Materials Engineer";
+            case _233200: return "Civil Engineering Professionals not further defined";
+            case _233211: return "Civil Engineer";
+            case _233212: return "Geotechnical Engineer";
+            case _233213: return "Quantity Surveyor";
+            case _233214: return "Structural Engineer";
+            case _233215: return "Transport Engineer";
+            case _233311: return "Electrical Engineer";
+            case _233411: return "Electronics Engineer";
+            case _233500: return "Industrial, Mechanical and Production Engineers not further defined";
+            case _233511: return "Industrial Engineer";
+            case _233512: return "Mechanical Engineer";
+            case _233513: return "Production or Plant Engineer";
+            case _233600: return "Mining Engineers not further defined";
+            case _233611: return "Mining Engineer (excluding Petroleum)";
+            case _233612: return "Petroleum Engineer";
+            case _233900: return "Other Engineering Professionals not further defined";
+            case _233911: return "Aeronautical Engineer";
+            case _233912: return "Agricultural Engineer";
+            case _233913: return "Biomedical Engineer";
+            case _233914: return "Engineering Technologist";
+            case _233915: return "Environmental Engineer";
+            case _233916: return "Naval Architect";
+            case _233999: return "Engineering Professionals not elsewhere classified";
+            case _234000: return "Natural and Physical Science Professionals not further defined";
+            case _234100: return "Agricultural and Forestry Scientists not further defined";
+            case _234111: return "Agricultural Consultant";
+            case _234112: return "Agricultural Scientist";
+            case _234113: return "Forester";
+            case _234200: return "Chemists, and Food and Wine Scientists not further defined";
+            case _234211: return "Chemist";
+            case _234212: return "Food Technologist";
+            case _234213: return "Wine Maker";
+            case _234300: return "Environmental Scientists not further defined";
+            case _234311: return "Conservation Officer";
+            case _234312: return "Environmental Consultant";
+            case _234313: return "Environmental Research Scientist";
+            case _234314: return "Park Ranger";
+            case _234399: return "Environmental Scientists not elsewhere classified";
+            case _234400: return "Geologists and Geophysicists not further defined";
+            case _234411: return "Geologist";
+            case _234412: return "Geophysicist";
+            case _234500: return "Life Scientists not further defined";
+            case _234511: return "Life Scientist (General)";
+            case _234512: return "Anatomist or Physiologist";
+            case _234513: return "Biochemist";
+            case _234514: return "Biotechnologist";
+            case _234515: return "Botanist";
+            case _234516: return "Marine Biologist";
+            case _234517: return "Microbiologist";
+            case _234518: return "Zoologist";
+            case _234599: return "Life Scientists not elsewhere classified";
+            case _234611: return "Medical Laboratory Scientist";
+            case _234711: return "Veterinarian";
+            case _234900: return "Other Natural and Physical Science Professionals not further defined";
+            case _234911: return "Conservator";
+            case _234912: return "Metallurgist";
+            case _234913: return "Meteorologist";
+            case _234914: return "Physicist";
+            case _234999: return "Natural and Physical Science Professionals not elsewhere classified";
+            case _240000: return "Education Professionals not further defined";
+            case _241000: return "School Teachers not further defined";
+            case _241111: return "Early Childhood (Pre-primary School) Teacher";
+            case _241213: return "Primary School Teacher";
+            case _241311: return "Middle School Teacher";
+            case _241411: return "Secondary School Teacher";
+            case _241500: return "Special Education Teachers not further defined";
+            case _241511: return "Special Needs Teacher";
+            case _241512: return "Teacher of the Hearing Impaired";
+            case _241513: return "Teacher of the Sight Impaired";
+            case _241599: return "Special Education Teachers not elsewhere classified";
+            case _242000: return "Tertiary Education Teachers not further defined";
+            case _242100: return "University Lecturers and Tutors not further defined";
+            case _242111: return "University Lecturer";
+            case _242112: return "University Tutor";
+            case _242211: return "Vocational Education Teacher";
+            case _249000: return "Miscellaneous Education Professionals not further defined";
+            case _249100: return "Education Advisers and Reviewers not further defined";
+            case _249111: return "Education Adviser";
+            case _249112: return "Education Reviewer";
+            case _249200: return "Private Tutors and Teachers not further defined";
+            case _249211: return "Art Teacher (Private Tuition)";
+            case _249212: return "Dance Teacher (Private Tuition)";
+            case _249213: return "Drama Teacher (Private Tuition)";
+            case _249214: return "Music Teacher (Private Tuition)";
+            case _249299: return "Private Tutors and Teachers not elsewhere classified";
+            case _249311: return "Teacher of English to Speakers of Other Languages";
+            case _250000: return "Health Professionals not further defined";
+            case _251000: return "Health Diagnostic and Promotion Professionals not further defined";
+            case _251111: return "Dietitian";
+            case _251200: return "Medical Imaging Professionals not further defined";
+            case _251211: return "Medical Diagnostic Radiographer";
+            case _251212: return "Medical Radiation Therapist";
+            case _251213: return "Nuclear Medicine Technologist";
+            case _251214: return "Sonographer";
+            case _251300: return "Occupational and Environmental Health Professionals not further defined";
+            case _251311: return "Environmental Health Officer";
+            case _251312: return "Occupational Health and Safety Adviser";
+            case _251400: return "Optometrists and Orthoptists not further defined";
+            case _251411: return "Optometrist";
+            case _251412: return "Orthoptist";
+            case _251500: return "Pharmacists not further defined";
+            case _251511: return "Hospital Pharmacist";
+            case _251512: return "Industrial Pharmacist";
+            case _251513: return "Retail Pharmacist";
+            case _251900: return "Other Health Diagnostic and Promotion Professionals not further defined";
+            case _251911: return "Health Promotion Officer";
+            case _251912: return "Orthotist or Prosthetist";
+            case _251999: return "Health Diagnostic and Promotion Professionals not elsewhere classified";
+            case _252000: return "Health Therapy Professionals not further defined";
+            case _252100: return "Chiropractors and Osteopaths not further defined";
+            case _252111: return "Chiropractor";
+            case _252112: return "Osteopath";
+            case _252200: return "Complementary Health Therapists not further defined";
+            case _252211: return "Acupuncturist";
+            case _252212: return "Homoeopath";
+            case _252213: return "Naturopath";
+            case _252214: return "Traditional Chinese Medicine Practitioner";
+            case _252299: return "Complementary Health Therapists not elsewhere classified";
+            case _252300: return "Dental Practitioners not further defined";
+            case _252311: return "Dental Specialist";
+            case _252312: return "Dentist";
+            case _252411: return "Occupational Therapist";
+            case _252511: return "Physiotherapist";
+            case _252611: return "Podiatrist";
+            case _252700: return "Speech Professionals and Audiologists not further defined";
+            case _252711: return "Audiologist";
+            case _252712: return "Speech Pathologist";
+            case _253000: return "Medical Practitioners not further defined";
+            case _253100: return "Generalist Medical Practitioners not further defined";
+            case _253111: return "General Medical Practitioner";
+            case _253112: return "Resident Medical Officer";
+            case _253211: return "Anaesthetist";
+            case _253300: return "Internal Medicine Specialists not further defined";
+            case _253311: return "Specialist Physician (General Medicine)";
+            case _253312: return "Cardiologist";
+            case _253313: return "Clinical Haematologist";
+            case _253314: return "Clinical Oncologist";
+            case _253315: return "Endocrinologist";
+            case _253316: return "Gastroenterologist";
+            case _253317: return "Intensive Care Specialist";
+            case _253318: return "Neurologist";
+            case _253321: return "Paediatrician";
+            case _253322: return "Renal Medicine Specialist";
+            case _253323: return "Rheumatologist";
+            case _253324: return "Thoracic Medicine Specialist";
+            case _253399: return "Internal Medicine Specialists not elsewhere classified";
+            case _253411: return "Psychiatrist";
+            case _253500: return "Surgeons not further defined";
+            case _253511: return "Surgeon (General)";
+            case _253512: return "Cardiothoracic Surgeon";
+            case _253513: return "Neurosurgeon";
+            case _253514: return "Orthopaedic Surgeon";
+            case _253515: return "Otorhinolaryngologist";
+            case _253516: return "Paediatric Surgeon";
+            case _253517: return "Plastic and Reconstructive Surgeon";
+            case _253518: return "Urologist";
+            case _253521: return "Vascular Surgeon";
+            case _253900: return "Other Medical Practitioners not further defined";
+            case _253911: return "Dermatologist";
+            case _253912: return "Emergency Medicine Specialist";
+            case _253913: return "Obstetrician and Gynaecologist";
+            case _253914: return "Ophthalmologist";
+            case _253915: return "Pathologist";
+            case _253916: return "Radiologist";
+            case _253999: return "Medical Practitioners not elsewhere classified";
+            case _254000: return "Midwifery and Nursing Professionals not further defined";
+            case _254111: return "Midwife";
+            case _254200: return "Nurse Educators and Researchers not further defined";
+            case _254211: return "Nurse Educator";
+            case _254212: return "Nurse Researcher";
+            case _254311: return "Nurse Manager";
+            case _254400: return "Registered Nurses not further defined";
+            case _254411: return "Nurse Practitioner";
+            case _254412: return "Registered Nurse (Aged Care)";
+            case _254413: return "Registered Nurse (Child and Family Health)";
+            case _254414: return "Registered Nurse (Community Health)";
+            case _254415: return "Registered Nurse (Critical Care and Emergency)";
+            case _254416: return "Registered Nurse (Developmental Disability)";
+            case _254417: return "Registered Nurse (Disability and Rehabilitation)";
+            case _254418: return "Registered Nurse (Medical)";
+            case _254421: return "Registered Nurse (Medical Practice)";
+            case _254422: return "Registered Nurse (Mental Health)";
+            case _254423: return "Registered Nurse (Perioperative)";
+            case _254424: return "Registered Nurse (Surgical)";
+            case _254499: return "Registered Nurses not elsewhere classified";
+            case _260000: return "ICT Professionals not further defined";
+            case _261000: return "Business and Systems Analysts, and Programmers not further defined";
+            case _261100: return "ICT Business and Systems Analysts not further defined";
+            case _261111: return "ICT Business Analyst";
+            case _261112: return "Systems Analyst";
+            case _261200: return "Multimedia Specialists and Web Developers not further defined";
+            case _261211: return "Multimedia Specialist";
+            case _261212: return "Web Developer";
+            case _261300: return "Software and Applications Programmers not further defined";
+            case _261311: return "Analyst Programmer";
+            case _261312: return "Developer Programmer";
+            case _261313: return "Software Engineer";
+            case _261399: return "Software and Applications Programmers not elsewhere classified";
+            case _262100: return "Database and Systems Administrators, and ICT Security Specialists not further defined";
+            case _262111: return "Database Administrator";
+            case _262112: return "ICT Security Specialist";
+            case _262113: return "Systems Administrator";
+            case _263000: return "ICT Network and Support Professionals not further defined";
+            case _263100: return "Computer Network Professionals not further defined";
+            case _263111: return "Computer Network and Systems Engineer";
+            case _263112: return "Network Administrator";
+            case _263113: return "Network Analyst";
+            case _263200: return "ICT Support and Test Engineers not further defined";
+            case _263211: return "ICT Quality Assurance Engineer";
+            case _263212: return "ICT Support Engineer";
+            case _263213: return "ICT Systems Test Engineer";
+            case _263299: return "ICT Support and Test Engineers not elsewhere classified";
+            case _263300: return "Telecommunications Engineering Professionals not further defined";
+            case _263311: return "Telecommunications Engineer";
+            case _263312: return "Telecommunications Network Engineer";
+            case _270000: return "Legal, Social and Welfare Professionals not further defined";
+            case _271000: return "Legal Professionals not further defined";
+            case _271111: return "Barrister";
+            case _271200: return "Judicial and Other Legal Professionals not further defined";
+            case _271211: return "Judge";
+            case _271212: return "Magistrate";
+            case _271213: return "Tribunal Member";
+            case _271299: return "Judicial and Other Legal Professionals not elsewhere classified";
+            case _271311: return "Solicitor";
+            case _272000: return "Social and Welfare Professionals not further defined";
+            case _272100: return "Counsellors not further defined";
+            case _272111: return "Careers Counsellor";
+            case _272112: return "Drug and Alcohol Counsellor";
+            case _272113: return "Family and Marriage Counsellor";
+            case _272114: return "Rehabilitation Counsellor";
+            case _272115: return "Student Counsellor";
+            case _272199: return "Counsellors not elsewhere classified";
+            case _272211: return "Minister of Religion";
+            case _272300: return "Psychologists not further defined";
+            case _272311: return "Clinical Psychologist";
+            case _272312: return "Educational Psychologist";
+            case _272313: return "Organizational Psychologist";
+            case _272314: return "Psychotherapist";
+            case _272399: return "Psychologists not elsewhere classified";
+            case _272400: return "Social Professionals not further defined";
+            case _272411: return "Historian";
+            case _272412: return "Interpreter";
+            case _272413: return "Translator";
+            case _272499: return "Social Professionals not elsewhere classified";
+            case _272511: return "Social Worker";
+            case _272600: return "Welfare, Recreation and Community Arts Workers not further defined";
+            case _272611: return "Community Arts Worker";
+            case _272612: return "Recreation Officer";
+            case _272613: return "Welfare Worker";
+            case _300000: return "Technicians and Trades Workers not further defined";
+            case _310000: return "Engineering, ICT and Science Technicians not further defined";
+            case _311000: return "Agricultural, Medical and Science Technicians not further defined";
+            case _311111: return "Agricultural Technician";
+            case _311200: return "Medical Technicians not further defined";
+            case _311211: return "Anaesthetic Technician";
+            case _311212: return "Cardiac Technician";
+            case _311213: return "Medical Laboratory Technician";
+            case _311214: return "Operating Theatre Technician";
+            case _311215: return "Pharmacy Technician";
+            case _311299: return "Medical Technicians not elsewhere classified";
+            case _311300: return "Primary Products Inspectors not further defined";
+            case _311311: return "Fisheries Officer";
+            case _311312: return "Meat Inspector";
+            case _311313: return "Quarantine Officer";
+            case _311399: return "Primary Products Inspectors not elsewhere classified";
+            case _311400: return "Science Technicians not further defined";
+            case _311411: return "Chemistry Technician";
+            case _311412: return "Earth Science Technician";
+            case _311413: return "Life Science Technician";
+            case _311414: return "School Laboratory Technician";
+            case _311499: return "Science Technicians not elsewhere classified";
+            case _312000: return "Building and Engineering Technicians not further defined";
+            case _312100: return "Architectural, Building and Surveying Technicians not further defined";
+            case _312111: return "Architectural Draftsperson";
+            case _312112: return "Building Associate";
+            case _312113: return "Building Inspector";
+            case _312114: return "Construction Estimator";
+            case _312115: return "Plumbing Inspector";
+            case _312116: return "Surveying or Cartographic Technician";
+            case _312200: return "Civil Engineering Draftspersons and Technicians not further defined";
+            case _312211: return "Civil Engineering Draftsperson";
+            case _312212: return "Civil Engineering Technician";
+            case _312300: return "Electrical Engineering Draftspersons and Technicians not further defined";
+            case _312311: return "Electrical Engineering Draftsperson";
+            case _312312: return "Electrical Engineering Technician";
+            case _312400: return "Electronic Engineering Draftspersons and Technicians not further defined";
+            case _312411: return "Electronic Engineering Draftsperson";
+            case _312412: return "Electronic Engineering Technician";
+            case _312500: return "Mechanical Engineering Draftspersons and Technicians not further defined";
+            case _312511: return "Mechanical Engineering Draftsperson";
+            case _312512: return "Mechanical Engineering Technician";
+            case _312611: return "Safety Inspector";
+            case _312900: return "Other Building and Engineering Technicians not further defined";
+            case _312911: return "Maintenance Planner";
+            case _312912: return "Metallurgical or Materials Technician";
+            case _312913: return "Mine Deputy";
+            case _312999: return "Building and Engineering Technicians not elsewhere classified";
+            case _313000: return "ICT and Telecommunications Technicians not further defined";
+            case _313100: return "ICT Support Technicians not further defined";
+            case _313111: return "Hardware Technician";
+            case _313112: return "ICT Customer Support Officer";
+            case _313113: return "Web Administrator";
+            case _313199: return "ICT Support Technicians not elsewhere classified";
+            case _313200: return "Telecommunications Technical Specialists not further defined";
+            case _313211: return "Radiocommunications Technician";
+            case _313212: return "Telecommunications Field Engineer";
+            case _313213: return "Telecommunications Network Planner";
+            case _313214: return "Telecommunications Technical Officer or Technologist";
+            case _320000: return "Automotive and Engineering Trades Workers not further defined";
+            case _321000: return "Automotive Electricians and Mechanics not further defined";
+            case _321111: return "Automotive Electrician";
+            case _321200: return "Motor Mechanics not further defined";
+            case _321211: return "Motor Mechanic (General)";
+            case _321212: return "Diesel Motor Mechanic";
+            case _321213: return "Motorcycle Mechanic";
+            case _321214: return "Small Engine Mechanic";
+            case _322000: return "Fabrication Engineering Trades Workers not further defined";
+            case _322100: return "Metal Casting, Forging and Finishing Trades Workers not further defined";
+            case _322111: return "Blacksmith";
+            case _322112: return "Electroplater";
+            case _322113: return "Farrier";
+            case _322114: return "Metal Casting Trades Worker";
+            case _322115: return "Metal Polisher";
+            case _322211: return "Sheetmetal Trades Worker";
+            case _322300: return "Structural Steel and Welding Trades Workers not further defined";
+            case _322311: return "Metal Fabricator";
+            case _322312: return "Pressure Welder";
+            case _322313: return "Welder (First Class)";
+            case _323000: return "Mechanical Engineering Trades Workers not further defined";
+            case _323100: return "Aircraft Maintenance Engineers not further defined";
+            case _323111: return "Aircraft Maintenance Engineer (Avionics)";
+            case _323112: return "Aircraft Maintenance Engineer (Mechanical)";
+            case _323113: return "Aircraft Maintenance Engineer (Structures)";
+            case _323200: return "Metal Fitters and Machinists not further defined";
+            case _323211: return "Fitter (General)";
+            case _323212: return "Fitter and Turner";
+            case _323213: return "Fitter-Welder";
+            case _323214: return "Metal Machinist (First Class)";
+            case _323215: return "Textile, Clothing and Footwear Mechanic";
+            case _323299: return "Metal Fitters and Machinists not elsewhere classified";
+            case _323300: return "Precision Metal Trades Workers not further defined";
+            case _323311: return "Engraver";
+            case _323312: return "Gunsmith";
+            case _323313: return "Locksmith";
+            case _323314: return "Precision Instrument Maker and Repairer";
+            case _323315: return "Saw Maker and Repairer";
+            case _323316: return "Watch and Clock Maker and Repairer";
+            case _323400: return "Toolmakers and Engineering Patternmakers not further defined";
+            case _323411: return "Engineering Patternmaker";
+            case _323412: return "Toolmaker";
+            case _324000: return "Panelbeaters, and Vehicle Body Builders, Trimmers and Painters not further defined";
+            case _324111: return "Panelbeater";
+            case _324200: return "Vehicle Body Builders and Trimmers not further defined";
+            case _324211: return "Vehicle Body Builder";
+            case _324212: return "Vehicle Trimmer";
+            case _324311: return "Vehicle Painter";
+            case _330000: return "Construction Trades Workers not further defined";
+            case _331000: return "Bricklayers, and Carpenters and Joiners not further defined";
+            case _331100: return "Bricklayers and Stonemasons not further defined";
+            case _331111: return "Bricklayer";
+            case _331112: return "Stonemason";
+            case _331211: return "Carpenter and Joiner";
+            case _331212: return "Carpenter";
+            case _331213: return "Joiner";
+            case _332000: return "Floor Finishers and Painting Trades Workers not further defined";
+            case _332111: return "Floor Finisher";
+            case _332211: return "Painting Trades Worker";
+            case _333000: return "Glaziers, Plasterers and Tilers not further defined";
+            case _333111: return "Glazier";
+            case _333200: return "Plasterers not further defined";
+            case _333211: return "Fibrous Plasterer";
+            case _333212: return "Solid Plasterer";
+            case _333311: return "Roof Tiler";
+            case _333411: return "Wall and Floor Tiler";
+            case _334100: return "Plumbers not further defined";
+            case _334111: return "Plumber (General)";
+            case _334112: return "Airconditioning and Mechanical Services Plumber";
+            case _334113: return "Drainer";
+            case _334114: return "Gasfitter";
+            case _334115: return "Roof Plumber";
+            case _340000: return "Electrotechnology and Telecommunications Trades Workers not further defined";
+            case _341100: return "Electricians not further defined";
+            case _341111: return "Electrician (General)";
+            case _341112: return "Electrician (Special Class)";
+            case _341113: return "Lift Mechanic";
+            case _342000: return "Electronics and Telecommunications Trades Workers not further defined";
+            case _342111: return "Airconditioning and Refrigeration Mechanic";
+            case _342200: return "Electrical Distribution Trades Workers not further defined";
+            case _342211: return "Electrical Linesworker";
+            case _342212: return "Technical Cable Jointer";
+            case _342300: return "Electronics Trades Workers not further defined";
+            case _342311: return "Business Machine Mechanic";
+            case _342312: return "Communications Operator";
+            case _342313: return "Electronic Equipment Trades Worker";
+            case _342314: return "Electronic Instrument Trades Worker (General)";
+            case _342315: return "Electronic Instrument Trades Worker (Special Class)";
+            case _342400: return "Telecommunications Trades Workers not further defined";
+            case _342411: return "Cabler (Data and Telecommunications)";
+            case _342412: return "Telecommunications Cable Jointer";
+            case _342413: return "Telecommunications Linesworker";
+            case _342414: return "Telecommunications Technician";
+            case _351000: return "Food Trades Workers not further defined";
+            case _351100: return "Bakers and Pastrycooks not further defined";
+            case _351111: return "Baker";
+            case _351112: return "Pastrycook";
+            case _351211: return "Butcher or Smallgoods Maker";
+            case _351311: return "Chef";
+            case _351411: return "Cook";
+            case _360000: return "Skilled Animal and Horticultural Workers not further defined";
+            case _361000: return "Animal Attendants and Trainers, and Shearers not further defined";
+            case _361100: return "Animal Attendants and Trainers not further defined";
+            case _361111: return "Dog Handler or Trainer";
+            case _361112: return "Horse Trainer";
+            case _361113: return "Pet Groomer";
+            case _361114: return "Zookeeper";
+            case _361199: return "Animal Attendants and Trainers not elsewhere classified";
+            case _361211: return "Shearer";
+            case _361311: return "Veterinary Nurse";
+            case _362000: return "Horticultural Trades Workers not further defined";
+            case _362111: return "Florist";
+            case _362200: return "Gardeners not further defined";
+            case _362211: return "Gardener (General)";
+            case _362212: return "Arborist";
+            case _362213: return "Landscape Gardener";
+            case _362311: return "Greenkeeper";
+            case _362411: return "Nurseryperson";
+            case _390000: return "Other Technicians and Trades Workers not further defined";
+            case _391111: return "Hairdresser";
+            case _392000: return "Printing Trades Workers not further defined";
+            case _392100: return "Binders, Finishers and Screen Printers not further defined";
+            case _392111: return "Binder and Finisher";
+            case _392112: return "Screen Printer";
+            case _392211: return "Graphic Pre-press Trades Worker";
+            case _392300: return "Printers not further defined";
+            case _392311: return "Printing Machinist";
+            case _392312: return "Small Offset Printer";
+            case _393000: return "Textile, Clothing and Footwear Trades Workers not further defined";
+            case _393100: return "Canvas and Leather Goods Makers not further defined";
+            case _393111: return "Canvas Goods Maker";
+            case _393112: return "Leather Goods Maker";
+            case _393113: return "Sail Maker";
+            case _393114: return "Shoemaker";
+            case _393200: return "Clothing Trades Workers not further defined";
+            case _393211: return "Apparel Cutter";
+            case _393212: return "Clothing Patternmaker";
+            case _393213: return "Dressmaker or Tailor";
+            case _393299: return "Clothing Trades Workers not elsewhere classified";
+            case _393311: return "Upholsterer";
+            case _394000: return "Wood Trades Workers not further defined";
+            case _394111: return "Cabinetmaker";
+            case _394200: return "Wood Machinists and Other Wood Trades Workers not further defined";
+            case _394211: return "Furniture Finisher";
+            case _394212: return "Picture Framer";
+            case _394213: return "Wood Machinist";
+            case _394214: return "Wood Turner";
+            case _394299: return "Wood Machinists and Other Wood Trades Workers not elsewhere classified";
+            case _399000: return "Miscellaneous Technicians and Trades Workers not further defined";
+            case _399100: return "Boat Builders and Shipwrights not further defined";
+            case _399111: return "Boat Builder and Repairer";
+            case _399112: return "Shipwright";
+            case _399200: return "Chemical, Gas, Petroleum and Power Generation Plant Operators not further defined";
+            case _399211: return "Chemical Plant Operator";
+            case _399212: return "Gas or Petroleum Operator";
+            case _399213: return "Power Generation Plant Operator";
+            case _399300: return "Gallery, Library and Museum Technicians not further defined";
+            case _399311: return "Gallery or Museum Technician";
+            case _399312: return "Library Technician";
+            case _399411: return "Jeweller";
+            case _399500: return "Performing Arts Technicians not further defined";
+            case _399511: return "Broadcast Transmitter Operator";
+            case _399512: return "Camera Operator (Film, Television or Video)";
+            case _399513: return "Light Technician";
+            case _399514: return "Make Up Artist";
+            case _399515: return "Musical Instrument Maker or Repairer";
+            case _399516: return "Sound Technician";
+            case _399517: return "Television Equipment Operator";
+            case _399599: return "Performing Arts Technicians not elsewhere classified";
+            case _399611: return "Signwriter";
+            case _399900: return "Other Miscellaneous Technicians and Trades Workers not further defined";
+            case _399911: return "Diver";
+            case _399912: return "Interior Decorator";
+            case _399913: return "Optical Dispenser";
+            case _399914: return "Optical Mechanic";
+            case _399915: return "Photographer's Assistant";
+            case _399916: return "Plastics Technician";
+            case _399917: return "Wool Classer";
+            case _399999: return "Technicians and Trades Workers not elsewhere classified";
+            case _400000: return "Community and Personal Service Workers not further defined";
+            case _411000: return "Health and Welfare Support Workers not further defined";
+            case _411100: return "Ambulance Officers and Paramedics not further defined";
+            case _411111: return "Ambulance Officer";
+            case _411112: return "Intensive Care Ambulance Paramedic";
+            case _411200: return "Dental Hygienists, Technicians and Therapists not further defined";
+            case _411211: return "Dental Hygienist";
+            case _411212: return "Dental Prosthetist";
+            case _411213: return "Dental Technician";
+            case _411214: return "Dental Therapist";
+            case _411311: return "Diversional Therapist";
+            case _411400: return "Enrolled and Mothercraft Nurses not further defined";
+            case _411411: return "Enrolled Nurse";
+            case _411412: return "Mothercraft Nurse";
+            case _411511: return "Aboriginal and Torres Strait Islander Health Worker";
+            case _411611: return "Massage Therapist";
+            case _411700: return "Welfare Support Workers not further defined";
+            case _411711: return "Community Worker";
+            case _411712: return "Disabilities Services Officer";
+            case _411713: return "Family Support Worker";
+            case _411714: return "Parole or Probation Officer";
+            case _411715: return "Residential Care Officer";
+            case _411716: return "Youth Worker";
+            case _420000: return "Carers and Aides not further defined";
+            case _421100: return "Child Carers not further defined";
+            case _421111: return "Child Care Worker";
+            case _421112: return "Family Day Care Worker";
+            case _421113: return "Nanny";
+            case _421114: return "Out of School Hours Care Worker";
+            case _422100: return "Education Aides not further defined";
+            case _422111: return "Aboriginal and Torres Strait Islander Education Worker";
+            case _422112: return "Integration Aide";
+            case _422115: return "Preschool Aide";
+            case _422116: return "Teachers' Aide";
+            case _423000: return "Personal Carers and Assistants not further defined";
+            case _423111: return "Aged or Disabled Carer";
+            case _423211: return "Dental Assistant";
+            case _423300: return "Nursing Support and Personal Care Workers not further defined";
+            case _423311: return "Hospital Orderly";
+            case _423312: return "Nursing Support Worker";
+            case _423313: return "Personal Care Assistant";
+            case _423314: return "Therapy Aide";
+            case _423400: return "Special Care Workers not further defined";
+            case _423411: return "Child or Youth Residential Care Assistant";
+            case _423412: return "Hostel Parent";
+            case _423413: return "Refuge Worker";
+            case _431000: return "Hospitality Workers not further defined";
+            case _431100: return "Bar Attendants and Baristas not further defined";
+            case _431111: return "Bar Attendant";
+            case _431112: return "Barista";
+            case _431211: return "Cafe Worker";
+            case _431311: return "Gaming Worker";
+            case _431411: return "Hotel Service Manager";
+            case _431511: return "Waiter";
+            case _431900: return "Other Hospitality Workers not further defined";
+            case _431911: return "Bar Useful or Busser";
+            case _431912: return "Doorperson or Luggage Porter";
+            case _431999: return "Hospitality Workers not elsewhere classified";
+            case _440000: return "Protective Service Workers not further defined";
+            case _441000: return "Defence Force Members, Fire Fighters and Police not further defined";
+            case _441111: return "Defence Force Member - Other Ranks";
+            case _441200: return "Fire and Emergency Workers not further defined";
+            case _441211: return "Emergency Service Worker";
+            case _441212: return "Fire Fighter";
+            case _441300: return "Police not further defined";
+            case _441311: return "Detective";
+            case _441312: return "Police Officer";
+            case _442000: return "Prison and Security Officers not further defined";
+            case _442111: return "Prison Officer";
+            case _442200: return "Security Officers and Guards not further defined";
+            case _442211: return "Alarm, Security or Surveillance Monitor";
+            case _442212: return "Armoured Car Escort";
+            case _442213: return "Crowd Controller";
+            case _442214: return "Private Investigator";
+            case _442215: return "Retail Loss Prevention Officer";
+            case _442216: return "Security Consultant";
+            case _442217: return "Security Officer";
+            case _442299: return "Security Officers and Guards not elsewhere classified";
+            case _450000: return "Sports and Personal Service Workers not further defined";
+            case _451000: return "Personal Service and Travel Workers not further defined";
+            case _451111: return "Beauty Therapist";
+            case _451211: return "Driving Instructor";
+            case _451300: return "Funeral Workers not further defined";
+            case _451311: return "Funeral Director";
+            case _451399: return "Funeral Workers not elsewhere classified";
+            case _451400: return "Gallery, Museum and Tour Guides not further defined";
+            case _451411: return "Gallery or Museum Guide";
+            case _451412: return "Tour Guide";
+            case _451500: return "Personal Care Consultants not further defined";
+            case _451511: return "Natural Remedy Consultant";
+            case _451512: return "Weight Loss Consultant";
+            case _451600: return "Tourism and Travel Advisers not further defined";
+            case _451611: return "Tourist Information Officer";
+            case _451612: return "Travel Consultant";
+            case _451700: return "Travel Attendants not further defined";
+            case _451711: return "Flight Attendant";
+            case _451799: return "Travel Attendants not elsewhere classified";
+            case _451800: return "Other Personal Service Workers not further defined";
+            case _451811: return "Civil Celebrant";
+            case _451812: return "Hair or Beauty Salon Assistant";
+            case _451813: return "Sex Worker or Escort";
+            case _451899: return "Personal Service Workers not elsewhere classified";
+            case _452000: return "Sports and Fitness Workers not further defined";
+            case _452111: return "Fitness Instructor";
+            case _452200: return "Outdoor Adventure Guides not further defined";
+            case _452211: return "Bungy Jump Master";
+            case _452212: return "Fishing Guide";
+            case _452213: return "Hunting Guide";
+            case _452214: return "Mountain or Glacier Guide";
+            case _452215: return "Outdoor Adventure Instructor";
+            case _452216: return "Trekking Guide";
+            case _452217: return "Whitewater Rafting Guide";
+            case _452299: return "Outdoor Adventure Guides not elsewhere classified";
+            case _452300: return "Sports Coaches, Instructors and Officials not further defined";
+            case _452311: return "Diving Instructor (Open Water)";
+            case _452312: return "Gymnastics Coach or Instructor";
+            case _452313: return "Horse Riding Coach or Instructor";
+            case _452314: return "Snowsport Instructor";
+            case _452315: return "Swimming Coach or Instructor";
+            case _452316: return "Tennis Coach";
+            case _452317: return "Other Sports Coach or Instructor";
+            case _452318: return "Dog or Horse Racing Official";
+            case _452321: return "Sports Development Officer";
+            case _452322: return "Sports Umpire";
+            case _452323: return "Other Sports Official";
+            case _452400: return "Sportspersons not further defined";
+            case _452411: return "Footballer";
+            case _452412: return "Golfer";
+            case _452413: return "Jockey";
+            case _452414: return "Lifeguard";
+            case _452499: return "Sportspersons not elsewhere classified";
+            case _500000: return "Clerical and Administrative Workers not further defined";
+            case _510000: return "Office Managers and Program Administrators not further defined";
+            case _511100: return "Contract, Program and Project Administrators not further defined";
+            case _511111: return "Contract Administrator";
+            case _511112: return "Program or Project Administrator";
+            case _512000: return "Office and Practice Managers not further defined";
+            case _512111: return "Office Manager";
+            case _512200: return "Practice Managers not further defined";
+            case _512211: return "Health Practice Manager";
+            case _512299: return "Practice Managers not elsewhere classified";
+            case _521000: return "Personal Assistants and Secretaries not further defined";
+            case _521111: return "Personal Assistant";
+            case _521200: return "Secretaries not further defined";
+            case _521211: return "Secretary (General)";
+            case _521212: return "Legal Secretary";
+            case _530000: return "General Clerical Workers not further defined";
+            case _531111: return "General Clerk";
+            case _532100: return "Keyboard Operators not further defined";
+            case _532111: return "Data Entry Operator";
+            case _532112: return "Machine Shorthand Reporter";
+            case _532113: return "Word Processing Operator";
+            case _540000: return "Inquiry Clerks and Receptionists not further defined";
+            case _541000: return "Call or Contact Centre Information Clerks not further defined";
+            case _541100: return "Call or Contact Centre Workers not further defined";
+            case _541111: return "Call or Contact Centre Team Leader";
+            case _541112: return "Call or Contact Centre Operator";
+            case _541211: return "Inquiry Clerk";
+            case _542100: return "Receptionists not further defined";
+            case _542111: return "Receptionist (General)";
+            case _542112: return "Admissions Clerk";
+            case _542113: return "Hotel or Motel Receptionist";
+            case _542114: return "Medical Receptionist";
+            case _550000: return "Numerical Clerks not further defined";
+            case _551000: return "Accounting Clerks and Bookkeepers not further defined";
+            case _551100: return "Accounting Clerks not further defined";
+            case _551111: return "Accounts Clerk";
+            case _551112: return "Cost Clerk";
+            case _551211: return "Bookkeeper";
+            case _551311: return "Payroll Clerk";
+            case _552000: return "Financial and Insurance Clerks not further defined";
+            case _552111: return "Bank Worker";
+            case _552211: return "Credit or Loans Officer";
+            case _552300: return "Insurance, Money Market and Statistical Clerks not further defined";
+            case _552311: return "Bookmaker";
+            case _552312: return "Insurance Consultant";
+            case _552313: return "Money Market Clerk";
+            case _552314: return "Statistical Clerk";
+            case _561000: return "Clerical and Office Support Workers not further defined";
+            case _561100: return "Betting Clerks not further defined";
+            case _561111: return "Betting Agency Counter Clerk";
+            case _561112: return "Bookmaker's Clerk";
+            case _561113: return "Telephone Betting Clerk";
+            case _561199: return "Betting Clerks not elsewhere classified";
+            case _561200: return "Couriers and Postal Deliverers not further defined";
+            case _561211: return "Courier";
+            case _561212: return "Postal Delivery Officer";
+            case _561311: return "Filing or Registry Clerk";
+            case _561400: return "Mail Sorters not further defined";
+            case _561411: return "Mail Clerk";
+            case _561412: return "Postal Sorting Officer";
+            case _561511: return "Survey Interviewer";
+            case _561611: return "Switchboard Operator";
+            case _561900: return "Other Clerical and Office Support Workers not further defined";
+            case _561911: return "Classified Advertising Clerk";
+            case _561912: return "Meter Reader";
+            case _561913: return "Parking Inspector";
+            case _561999: return "Clerical and Office Support Workers not elsewhere classified";
+            case _590000: return "Other Clerical and Administrative Workers not further defined";
+            case _591000: return "Logistics Clerks not further defined";
+            case _591100: return "Purchasing and Supply Logistics Clerks not further defined";
+            case _591111: return "Order Clerk";
+            case _591112: return "Production Clerk";
+            case _591113: return "Purchasing Officer";
+            case _591114: return "Sales Clerk";
+            case _591115: return "Stock Clerk";
+            case _591116: return "Warehouse Administrator";
+            case _591200: return "Transport and Despatch Clerks not further defined";
+            case _591211: return "Despatching and Receiving Clerk";
+            case _591212: return "Import-Export Clerk";
+            case _599000: return "Miscellaneous Clerical and Administrative Workers not further defined";
+            case _599100: return "Conveyancers and Legal Executives not further defined";
+            case _599111: return "Conveyancer";
+            case _599112: return "Legal Executive";
+            case _599200: return "Court and Legal Clerks not further defined";
+            case _599211: return "Clerk of Court";
+            case _599212: return "Court Bailiff or Sheriff";
+            case _599213: return "Court Orderly";
+            case _599214: return "Law Clerk";
+            case _599215: return "Trust Officer";
+            case _599311: return "Debt Collector";
+            case _599411: return "Human Resource Clerk";
+            case _599500: return "Inspectors and Regulatory Officers not further defined";
+            case _599511: return "Customs Officer";
+            case _599512: return "Immigration Officer";
+            case _599513: return "Motor Vehicle Licence Examiner";
+            case _599514: return "Noxious Weeds and Pest Inspector";
+            case _599515: return "Social Security Assessor";
+            case _599516: return "Taxation Inspector";
+            case _599517: return "Train Examiner";
+            case _599518: return "Transport Operations Inspector";
+            case _599521: return "Water Inspector";
+            case _599599: return "Inspectors and Regulatory Officers not elsewhere classified";
+            case _599600: return "Insurance Investigators, Loss Adjusters and Risk Surveyors not further defined";
+            case _599611: return "Insurance Investigator";
+            case _599612: return "Insurance Loss Adjuster";
+            case _599613: return "Insurance Risk Surveyor";
+            case _599711: return "Library Assistant";
+            case _599900: return "Other Miscellaneous Clerical and Administrative Workers not further defined";
+            case _599911: return "Coding Clerk";
+            case _599912: return "Production Assistant (Film, Television, Radio or Stage)";
+            case _599913: return "Proof Reader";
+            case _599914: return "Radio Despatcher";
+            case _599999: return "Clerical and Administrative Workers not elsewhere classified";
+            case _600000: return "Sales Workers not further defined";
+            case _610000: return "Sales Representatives and Agents not further defined";
+            case _611000: return "Insurance Agents and Sales Representatives not further defined";
+            case _611100: return "Auctioneers, and Stock and Station Agents not further defined";
+            case _611111: return "Auctioneer";
+            case _611112: return "Stock and Station Agent";
+            case _611211: return "Insurance Agent";
+            case _611300: return "Sales Representatives not further defined";
+            case _611311: return "Sales Representative (Building and Plumbing Supplies)";
+            case _611312: return "Sales Representative (Business Services)";
+            case _611313: return "Sales Representative (Motor Vehicle Parts and Accessories)";
+            case _611314: return "Sales Representative (Personal and Household Goods)";
+            case _611399: return "Sales Representatives not elsewhere classified";
+            case _612100: return "Real Estate Sales Agents not further defined";
+            case _612111: return "Business Broker";
+            case _612112: return "Property Manager";
+            case _612113: return "Real Estate Agency Principal";
+            case _612114: return "Real Estate Agent";
+            case _612115: return "Real Estate Representative";
+            case _621000: return "Sales Assistants and Salespersons not further defined";
+            case _621111: return "Sales Assistant (General)";
+            case _621211: return "ICT Sales Assistant";
+            case _621300: return "Motor Vehicle and Vehicle Parts Salespersons not further defined";
+            case _621311: return "Motor Vehicle or Caravan Salesperson";
+            case _621312: return "Motor Vehicle Parts Interpreter";
+            case _621411: return "Pharmacy Sales Assistant";
+            case _621511: return "Retail Supervisor";
+            case _621611: return "Service Station Attendant";
+            case _621700: return "Street Vendors and Related Salespersons not further defined";
+            case _621711: return "Cash Van Salesperson";
+            case _621712: return "Door-to-door Salesperson";
+            case _621713: return "Street Vendor";
+            case _621900: return "Other Sales Assistants and Salespersons not further defined";
+            case _621911: return "Materials Recycler";
+            case _621912: return "Rental Salesperson";
+            case _621999: return "Sales Assistants and Salespersons not elsewhere classified";
+            case _630000: return "Sales Support Workers not further defined";
+            case _631100: return "Checkout Operators and Office Cashiers not further defined";
+            case _631111: return "Checkout Operator";
+            case _631112: return "Office Cashier";
+            case _639000: return "Miscellaneous Sales Support Workers not further defined";
+            case _639100: return "Models and Sales Demonstrators not further defined";
+            case _639111: return "Model";
+            case _639112: return "Sales Demonstrator";
+            case _639200: return "Retail and Wool Buyers not further defined";
+            case _639211: return "Retail Buyer";
+            case _639212: return "Wool Buyer";
+            case _639311: return "Telemarketer";
+            case _639400: return "Ticket Salespersons not further defined";
+            case _639411: return "Ticket Seller";
+            case _639412: return "Transport Conductor";
+            case _639511: return "Visual Merchandiser";
+            case _639911: return "Other Sales Support Worker";
+            case _700000: return "Machinery Operators and Drivers not further defined";
+            case _710000: return "Machine and Stationary Plant Operators not further defined";
+            case _711000: return "Machine Operators not further defined";
+            case _711100: return "Clay, Concrete, Glass and Stone Processing Machine Operators not further defined";
+            case _711111: return "Clay Products Machine Operator";
+            case _711112: return "Concrete Products Machine Operator";
+            case _711113: return "Glass Production Machine Operator";
+            case _711114: return "Stone Processing Machine Operator";
+            case _711199: return "Clay, Concrete, Glass and Stone Processing Machine Operators not elsewhere classified";
+            case _711211: return "Industrial Spraypainter";
+            case _711300: return "Paper and Wood Processing Machine Operators not further defined";
+            case _711311: return "Paper Products Machine Operator";
+            case _711312: return "Wood Processing Machine Operator";
+            case _711411: return "Photographic Developer and Printer";
+            case _711500: return "Plastics and Rubber Production Machine Operators not further defined";
+            case _711511: return "Plastic Cablemaking Machine Operator";
+            case _711512: return "Plastic Compounding and Reclamation Machine Operator";
+            case _711513: return "Plastics Fabricator or Welder";
+            case _711514: return "Plastics Production Machine Operator (General)";
+            case _711515: return "Reinforced Plastic and Composite Production Worker";
+            case _711516: return "Rubber Production Machine Operator";
+            case _711599: return "Plastics and Rubber Production Machine Operators not elsewhere classified";
+            case _711611: return "Sewing Machinist";
+            case _711700: return "Textile and Footwear Production Machine Operators not further defined";
+            case _711711: return "Footwear Production Machine Operator";
+            case _711712: return "Hide and Skin Processing Machine Operator";
+            case _711713: return "Knitting Machine Operator";
+            case _711714: return "Textile Dyeing and Finishing Machine Operator";
+            case _711715: return "Weaving Machine Operator";
+            case _711716: return "Yarn Carding and Spinning Machine Operator";
+            case _711799: return "Textile and Footwear Production Machine Operators not elsewhere classified";
+            case _711900: return "Other Machine Operators not further defined";
+            case _711911: return "Chemical Production Machine Operator";
+            case _711912: return "Motion Picture Projectionist";
+            case _711913: return "Sand Blaster";
+            case _711914: return "Sterilisation Technician";
+            case _711999: return "Machine Operators not elsewhere classified";
+            case _712000: return "Stationary Plant Operators not further defined";
+            case _712111: return "Crane, Hoist or Lift Operator";
+            case _712200: return "Drillers, Miners and Shot Firers not further defined";
+            case _712211: return "Driller";
+            case _712212: return "Miner";
+            case _712213: return "Shot Firer";
+            case _712311: return "Engineering Production Systems Worker";
+            case _712900: return "Other Stationary Plant Operators not further defined";
+            case _712911: return "Boiler or Engine Operator";
+            case _712912: return "Bulk Materials Handling Plant Operator";
+            case _712913: return "Cement Production Plant Operator";
+            case _712914: return "Concrete Batching Plant Operator";
+            case _712915: return "Concrete Pump Operator";
+            case _712916: return "Paper and Pulp Mill Operator";
+            case _712917: return "Railway Signal Operator";
+            case _712918: return "Train Controller";
+            case _712921: return "Waste Water or Water Plant Operator";
+            case _712922: return "Weighbridge Operator";
+            case _712999: return "Stationary Plant Operators not elsewhere classified";
+            case _721000: return "Mobile Plant Operators not further defined";
+            case _721100: return "Agricultural, Forestry and Horticultural Plant Operators not further defined";
+            case _721111: return "Agricultural and Horticultural Mobile Plant Operator";
+            case _721112: return "Logging Plant Operator";
+            case _721200: return "Earthmoving Plant Operators not further defined";
+            case _721211: return "Earthmoving Plant Operator (General)";
+            case _721212: return "Backhoe Operator";
+            case _721213: return "Bulldozer Operator";
+            case _721214: return "Excavator Operator";
+            case _721215: return "Grader Operator";
+            case _721216: return "Loader Operator";
+            case _721311: return "Forklift Driver";
+            case _721900: return "Other Mobile Plant Operators not further defined";
+            case _721911: return "Aircraft Baggage Handler and Airline Ground Crew";
+            case _721912: return "Linemarker";
+            case _721913: return "Paving Plant Operator";
+            case _721914: return "Railway Track Plant Operator";
+            case _721915: return "Road Roller Operator";
+            case _721916: return "Streetsweeper Operator";
+            case _721999: return "Mobile Plant Operators not elsewhere classified";
+            case _730000: return "Road and Rail Drivers not further defined";
+            case _731000: return "Automobile, Bus and Rail Drivers not further defined";
+            case _731100: return "Automobile Drivers not further defined";
+            case _731111: return "Chauffeur";
+            case _731112: return "Taxi Driver";
+            case _731199: return "Automobile Drivers not elsewhere classified";
+            case _731200: return "Bus and Coach Drivers not further defined";
+            case _731211: return "Bus Driver";
+            case _731212: return "Charter and Tour Bus Driver";
+            case _731213: return "Passenger Coach Driver";
+            case _731300: return "Train and Tram Drivers not further defined";
+            case _731311: return "Train Driver";
+            case _731312: return "Tram Driver";
+            case _732111: return "Delivery Driver";
+            case _733100: return "Truck Drivers not further defined";
+            case _733111: return "Truck Driver (General)";
+            case _733112: return "Aircraft Refueller";
+            case _733113: return "Furniture Removalist";
+            case _733114: return "Tanker Driver";
+            case _733115: return "Tow Truck Driver";
+            case _741111: return "Storeperson";
+            case _800000: return "Labourers not further defined";
+            case _811000: return "Cleaners and Laundry Workers not further defined";
+            case _811111: return "Car Detailer";
+            case _811211: return "Commercial Cleaner";
+            case _811311: return "Domestic Cleaner";
+            case _811400: return "Housekeepers not further defined";
+            case _811411: return "Commercial Housekeeper";
+            case _811412: return "Domestic Housekeeper";
+            case _811500: return "Laundry Workers not further defined";
+            case _811511: return "Laundry Worker (General)";
+            case _811512: return "Drycleaner";
+            case _811513: return "Ironer or Presser";
+            case _811600: return "Other Cleaners not further defined";
+            case _811611: return "Carpet Cleaner";
+            case _811612: return "Window Cleaner";
+            case _811699: return "Cleaners not elsewhere classified";
+            case _821000: return "Construction and Mining Labourers not further defined";
+            case _821100: return "Building and Plumbing Labourers not further defined";
+            case _821111: return "Builder's Labourer";
+            case _821112: return "Drainage, Sewerage and Stormwater Labourer";
+            case _821113: return "Earthmoving Labourer";
+            case _821114: return "Plumber's Assistant";
+            case _821211: return "Concreter";
+            case _821311: return "Fencer";
+            case _821400: return "Insulation and Home Improvement Installers not further defined";
+            case _821411: return "Building Insulation Installer";
+            case _821412: return "Home Improvement Installer";
+            case _821511: return "Paving and Surfacing Labourer";
+            case _821611: return "Railway Track Worker";
+            case _821700: return "Structural Steel Construction Workers not further defined";
+            case _821711: return "Construction Rigger";
+            case _821712: return "Scaffolder";
+            case _821713: return "Steel Fixer";
+            case _821714: return "Structural Steel Erector";
+            case _821900: return "Other Construction and Mining Labourers not further defined";
+            case _821911: return "Crane Chaser";
+            case _821912: return "Driller's Assistant";
+            case _821913: return "Lagger";
+            case _821914: return "Mining Support Worker";
+            case _821915: return "Surveyor's Assistant";
+            case _830000: return "Factory Process Workers not further defined";
+            case _831000: return "Food Process Workers not further defined";
+            case _831100: return "Food and Drink Factory Workers not further defined";
+            case _831111: return "Baking Factory Worker";
+            case _831112: return "Brewery Worker";
+            case _831113: return "Confectionery Maker";
+            case _831114: return "Dairy Products Maker";
+            case _831115: return "Fruit and Vegetable Factory Worker";
+            case _831116: return "Grain Mill Worker";
+            case _831117: return "Sugar Mill Worker";
+            case _831118: return "Winery Cellar Hand";
+            case _831199: return "Food and Drink Factory Workers not elsewhere classified";
+            case _831200: return "Meat Boners and Slicers, and Slaughterers not further defined";
+            case _831211: return "Meat Boner and Slicer";
+            case _831212: return "Slaughterer";
+            case _831300: return "Meat, Poultry and Seafood Process Workers not further defined";
+            case _831311: return "Meat Process Worker";
+            case _831312: return "Poultry Process Worker";
+            case _831313: return "Seafood Process Worker";
+            case _832000: return "Packers and Product Assemblers not further defined";
+            case _832100: return "Packers not further defined";
+            case _832111: return "Chocolate Packer";
+            case _832112: return "Container Filler";
+            case _832113: return "Fruit and Vegetable Packer";
+            case _832114: return "Meat Packer";
+            case _832115: return "Seafood Packer";
+            case _832199: return "Packers not elsewhere classified";
+            case _832211: return "Product Assembler";
+            case _839000: return "Miscellaneous Factory Process Workers not further defined";
+            case _839111: return "Metal Engineering Process Worker";
+            case _839200: return "Plastics and Rubber Factory Workers not further defined";
+            case _839211: return "Plastics Factory Worker";
+            case _839212: return "Rubber Factory Worker";
+            case _839300: return "Product Quality Controllers not further defined";
+            case _839311: return "Product Examiner";
+            case _839312: return "Product Grader";
+            case _839313: return "Product Tester";
+            case _839400: return "Timber and Wood Process Workers not further defined";
+            case _839411: return "Paper and Pulp Mill Worker";
+            case _839412: return "Sawmill or Timber Yard Worker";
+            case _839413: return "Wood and Wood Products Factory Worker";
+            case _839900: return "Other Factory Process Workers not further defined";
+            case _839911: return "Cement and Concrete Plant Worker";
+            case _839912: return "Chemical Plant Worker";
+            case _839913: return "Clay Processing Factory Worker";
+            case _839914: return "Fabric and Textile Factory Worker";
+            case _839915: return "Footwear Factory Worker";
+            case _839916: return "Glass Processing Worker";
+            case _839917: return "Hide and Skin Processing Worker";
+            case _839999: return "Factory Process Workers not elsewhere classified";
+            case _841000: return "Farm, Forestry and Garden Workers not further defined";
+            case _841111: return "Aquaculture Worker";
+            case _841200: return "Crop Farm Workers not further defined";
+            case _841211: return "Fruit or Nut Farm Worker";
+            case _841212: return "Fruit or Nut Picker";
+            case _841213: return "Grain, Oilseed or Pasture Farm Worker";
+            case _841214: return "Vegetable Farm Worker";
+            case _841215: return "Vegetable Picker";
+            case _841216: return "Vineyard Worker";
+            case _841299: return "Crop Farm Workers not elsewhere classified";
+            case _841300: return "Forestry and Logging Workers not further defined";
+            case _841311: return "Forestry Worker";
+            case _841312: return "Logging Assistant";
+            case _841313: return "Tree Faller";
+            case _841400: return "Garden and Nursery Labourers not further defined";
+            case _841411: return "Garden Labourer";
+            case _841412: return "Horticultural Nursery Assistant";
+            case _841500: return "Livestock Farm Workers not further defined";
+            case _841511: return "Beef Cattle Farm Worker";
+            case _841512: return "Dairy Cattle Farm Worker";
+            case _841513: return "Mixed Livestock Farm Worker";
+            case _841514: return "Poultry Farm Worker";
+            case _841515: return "Sheep Farm Worker";
+            case _841516: return "Stablehand";
+            case _841517: return "Wool Handler";
+            case _841599: return "Livestock Farm Workers not elsewhere classified";
+            case _841611: return "Mixed Crop and Livestock Farm Worker";
+            case _841900: return "Other Farm, Forestry and Garden Workers not further defined";
+            case _841911: return "Hunter-Trapper";
+            case _841912: return "Pest or Weed Controller";
+            case _841999: return "Farm, Forestry and Garden Workers not elsewhere classified";
+            case _851000: return "Food Preparation Assistants not further defined";
+            case _851111: return "Fast Food Cook";
+            case _851200: return "Food Trades Assistants not further defined";
+            case _851211: return "Pastrycook's Assistant";
+            case _851299: return "Food Trades Assistants not elsewhere classified";
+            case _851311: return "Kitchenhand";
+            case _890000: return "Other Labourers not further defined";
+            case _891000: return "Freight Handlers and Shelf Fillers not further defined";
+            case _891100: return "Freight and Furniture Handlers not further defined";
+            case _891111: return "Freight Handler (Rail or Road)";
+            case _891112: return "Truck Driver's Offsider";
+            case _891113: return "Waterside Worker";
+            case _891211: return "Shelf Filler";
+            case _899000: return "Miscellaneous Labourers not further defined";
+            case _899111: return "Caretaker";
+            case _899200: return "Deck and Fishing Hands not further defined";
+            case _899211: return "Deck Hand";
+            case _899212: return "Fishing Hand";
+            case _899311: return "Handyperson";
+            case _899400: return "Motor Vehicle Parts and Accessories Fitters not further defined";
+            case _899411: return "Motor Vehicle Parts and Accessories Fitter (General)";
+            case _899412: return "Autoglazier";
+            case _899413: return "Exhaust and Muffler Fitter";
+            case _899414: return "Radiator Fitter";
+            case _899415: return "Tyre Fitter";
+            case _899500: return "Printing Assistants and Table Workers not further defined";
+            case _899511: return "Printer's Assistant";
+            case _899512: return "Printing Table Worker";
+            case _899611: return "Recycling or Rubbish Collector";
+            case _899711: return "Vending Machine Attendant";
+            case _899900: return "Other Miscellaneous Labourers not further defined";
+            case _899911: return "Bicycle Mechanic";
+            case _899912: return "Car Park Attendant";
+            case _899913: return "Crossing Supervisor";
+            case _899914: return "Electrical or Telecommunications Trades Assistant";
+            case _899915: return "Leaflet or Newspaper Deliverer";
+            case _899916: return "Mechanic's Assistant";
+            case _899917: return "Railways Assistant";
+            case _899918: return "Sign Erector";
+            case _899921: return "Ticket Collector or Usher";
+            case _899922: return "Trolley Collector";
+            case _899999: return "Labourers not elsewhere classified";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
             case _100000: return "Managers nfd";
             case _111000: return "Chief Executives, General Managers and Legislators nfd";
             case _111111: return "Chief Executive or Managing Director";
@@ -9449,7 +10780,7 @@ public enum AnzscoOccupations {
             case _149200: return "Call or Contact Centre and Customer Service Managers nfd";
             case _149211: return "Call or Contact Centre Manager";
             case _149212: return "Customer Service Manager";
-            case _149311: return "Conference and Event Organiser";
+            case _149311: return "Conference and Event Organizer";
             case _149400: return "Transport Services Managers nfd";
             case _149411: return "Fleet Manager";
             case _149412: return "Railway Station Manager";
@@ -10630,1337 +11961,6 @@ public enum AnzscoOccupations {
             case _891100: return "Freight and Furniture Handlers nfd";
             case _891111: return "Freight Handler (Rail or Road)";
             case _891112: return "Truck Driver's Offsider";
-            case _891113: return "Waterside Worker";
-            case _891211: return "Shelf Filler";
-            case _899000: return "Miscellaneous Labourers nfd";
-            case _899111: return "Caretaker";
-            case _899200: return "Deck and Fishing Hands nfd";
-            case _899211: return "Deck Hand";
-            case _899212: return "Fishing Hand";
-            case _899311: return "Handyperson";
-            case _899400: return "Motor Vehicle Parts and Accessories Fitters nfd";
-            case _899411: return "Motor Vehicle Parts and Accessories Fitter (General)";
-            case _899412: return "Autoglazier";
-            case _899413: return "Exhaust and Muffler Fitter";
-            case _899414: return "Radiator Fitter";
-            case _899415: return "Tyre Fitter";
-            case _899500: return "Printing Assistants and Table Workers nfd";
-            case _899511: return "Printer's Assistant";
-            case _899512: return "Printing Table Worker";
-            case _899611: return "Recycling or Rubbish Collector";
-            case _899711: return "Vending Machine Attendant";
-            case _899900: return "Other Miscellaneous Labourers nfd";
-            case _899911: return "Bicycle Mechanic";
-            case _899912: return "Car Park Attendant";
-            case _899913: return "Crossing Supervisor";
-            case _899914: return "Electrical or Telecommunications Trades Assistant";
-            case _899915: return "Leaflet or Newspaper Deliverer";
-            case _899916: return "Mechanic's Assistant";
-            case _899917: return "Railways Assistant";
-            case _899918: return "Sign Erector";
-            case _899921: return "Ticket Collector or Usher";
-            case _899922: return "Trolley Collector";
-            case _899999: return "Labourers nec";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case _100000: return "Managers nfd";
-            case _111000: return "Chief Executives, General Managers and Legislators nfd";
-            case _111111: return "Chief Executive or Managing Director";
-            case _111200: return "General Managers nfd";
-            case _111211: return "Corporate General Manager";
-            case _111212: return "Defence Force Senior Officer";
-            case _111300: return "Legislators nfd";
-            case _111311: return "Local Government Legislator";
-            case _111312: return "Member of Parliament";
-            case _111399: return "Legislators nec";
-            case _121000: return "Farmers and Farm Managers nfd";
-            case _121111: return "Aquaculture Farmer";
-            case _121200: return "Crop Farmers nfd";
-            case _121211: return "Cotton Grower";
-            case _121212: return "Flower Grower";
-            case _121213: return "Fruit or Nut Grower";
-            case _121214: return "Grain, Oilseed or Pasture Grower";
-            case _121215: return "Grape Grower";
-            case _121216: return "Mixed Crop Farmer";
-            case _121217: return "Sugar Cane Grower";
-            case _121218: return "Turf Grower";
-            case _121221: return "Vegetable Grower";
-            case _121299: return "Crop Farmers nec";
-            case _121300: return "Livestock Farmers nfd";
-            case _121311: return "Apiarist";
-            case _121312: return "Beef Cattle Farmer";
-            case _121313: return "Dairy Cattle Farmer";
-            case _121314: return "Deer Farmer";
-            case _121315: return "Goat Farmer";
-            case _121316: return "Horse Breeder";
-            case _121317: return "Mixed Livestock Farmer";
-            case _121318: return "Pig Farmer";
-            case _121321: return "Poultry Farmer";
-            case _121322: return "Sheep Farmer";
-            case _121399: return "Livestock Farmers nec";
-            case _121411: return "Mixed Crop and Livestock Farmer";
-            case _130000: return "Specialist Managers nfd";
-            case _131100: return "Advertising and Sales Managers nfd";
-            case _131111: return "Advertising and Public Relations Manager";
-            case _131112: return "Sales and Marketing Manager";
-            case _132000: return "Business Administration Managers nfd";
-            case _132111: return "Corporate Services Manager";
-            case _132211: return "Finance Manager";
-            case _132311: return "Human Resource Manager";
-            case _132411: return "Policy and Planning Manager";
-            case _132511: return "Research and Development Manager";
-            case _133000: return "Construction, Distribution and Production Managers nfd";
-            case _133100: return "Construction Managers nfd";
-            case _133111: return "Construction Project Manager";
-            case _133112: return "Project Builder";
-            case _133211: return "Engineering Manager";
-            case _133300: return "Importers, Exporters and Wholesalers nfd";
-            case _133311: return "Importer or Exporter";
-            case _133312: return "Wholesaler";
-            case _133411: return "Manufacturer";
-            case _133500: return "Production Managers nfd";
-            case _133511: return "Production Manager (Forestry)";
-            case _133512: return "Production Manager (Manufacturing)";
-            case _133513: return "Production Manager (Mining)";
-            case _133611: return "Supply and Distribution Manager";
-            case _134000: return "Education, Health and Welfare Services Managers nfd";
-            case _134111: return "Child Care Centre Manager";
-            case _134200: return "Health and Welfare Services Managers nfd";
-            case _134211: return "Medical Administrator";
-            case _134212: return "Nursing Clinical Director";
-            case _134213: return "Primary Health Organization Manager";
-            case _134214: return "Welfare Centre Manager";
-            case _134299: return "Health and Welfare Services Managers nec";
-            case _134311: return "School Principal";
-            case _134400: return "Other Education Managers nfd";
-            case _134411: return "Faculty Head";
-            case _134412: return "Regional Education Manager";
-            case _134499: return "Education Managers nec";
-            case _135100: return "ICT Managers nfd";
-            case _135111: return "Chief Information Officer";
-            case _135112: return "ICT Project Manager";
-            case _135199: return "ICT Managers nec";
-            case _139000: return "Miscellaneous Specialist Managers nfd";
-            case _139100: return "Commissioned Officers (Management) nfd";
-            case _139111: return "Commissioned Defence Force Officer";
-            case _139112: return "Commissioned Fire Officer";
-            case _139113: return "Commissioned Police Officer";
-            case _139211: return "Senior Non-commissioned Defence Force Member";
-            case _139900: return "Other Specialist Managers nfd";
-            case _139911: return "Arts Administrator or Manager";
-            case _139912: return "Environmental Manager";
-            case _139913: return "Laboratory Manager";
-            case _139914: return "Quality Assurance Manager";
-            case _139915: return "Sports Administrator";
-            case _139999: return "Specialist Managers nec";
-            case _140000: return "Hospitality, Retail and Service Managers nfd";
-            case _141000: return "Accommodation and Hospitality Managers nfd";
-            case _141111: return "Cafe or Restaurant Manager";
-            case _141211: return "Caravan Park and Camping Ground Manager";
-            case _141311: return "Hotel or Motel Manager";
-            case _141411: return "Licensed Club Manager";
-            case _141900: return "Other Accommodation and Hospitality Managers nfd";
-            case _141911: return "Bed and Breakfast Operator";
-            case _141999: return "Accommodation and Hospitality Managers nec";
-            case _142100: return "Retail Managers nfd";
-            case _142111: return "Retail Manager (General)";
-            case _142112: return "Antique Dealer";
-            case _142113: return "Betting Agency Manager";
-            case _142114: return "Hair or Beauty Salon Manager";
-            case _142115: return "Post Office Manager";
-            case _142116: return "Travel Agency Manager";
-            case _149000: return "Miscellaneous Hospitality, Retail and Service Managers nfd";
-            case _149100: return "Amusement, Fitness and Sports Centre Managers nfd";
-            case _149111: return "Amusement Centre Manager";
-            case _149112: return "Fitness Centre Manager";
-            case _149113: return "Sports Centre Manager";
-            case _149200: return "Call or Contact Centre and Customer Service Managers nfd";
-            case _149211: return "Call or Contact Centre Manager";
-            case _149212: return "Customer Service Manager";
-            case _149311: return "Conference and Event Organiser";
-            case _149400: return "Transport Services Managers nfd";
-            case _149411: return "Fleet Manager";
-            case _149412: return "Railway Station Manager";
-            case _149413: return "Transport Company Manager";
-            case _149900: return "Other Hospitality, Retail and Service Managers nfd";
-            case _149911: return "Boarding Kennel or Cattery Operator";
-            case _149912: return "Cinema or Theatre Manager";
-            case _149913: return "Facilities Manager";
-            case _149914: return "Financial Institution Branch Manager";
-            case _149999: return "Hospitality, Retail and Service Managers nec";
-            case _200000: return "Professionals nfd";
-            case _210000: return "Arts and Media Professionals nfd";
-            case _211000: return "Arts Professionals nfd";
-            case _211100: return "Actors, Dancers and Other Entertainers nfd";
-            case _211111: return "Actor";
-            case _211112: return "Dancer or Choreographer";
-            case _211113: return "Entertainer or Variety Artist";
-            case _211199: return "Actors, Dancers and Other Entertainers nec";
-            case _211200: return "211200";
-            case _211211: return "Composer";
-            case _211212: return "Music Director";
-            case _211213: return "Musician (Instrumental)";
-            case _211214: return "Singer";
-            case _211299: return "Music Professionals nec";
-            case _211311: return "Photographer";
-            case _211400: return "Visual Arts and Crafts Professionals nfd";
-            case _211411: return "211411";
-            case _211412: return "Potter or Ceramic Artist";
-            case _211413: return "Sculptor";
-            case _211499: return "Visual Arts and Crafts Professionals nec";
-            case _212000: return "Media Professionals nfd";
-            case _212100: return "Artistic Directors, and Media Producers and Presenters nfd";
-            case _212111: return "Artistic Director";
-            case _212112: return "Media Producer (excluding Video)";
-            case _212113: return "Radio Presenter";
-            case _212114: return "Television Presenter";
-            case _212200: return "Authors, and Book and Script Editors nfd";
-            case _212211: return "Author";
-            case _212212: return "Book or Script Editor";
-            case _212300: return "Film, Television, Radio and Stage Directors nfd";
-            case _212311: return "Art Director (Film, Television or Stage)";
-            case _212312: return "Director (Film, Television, Radio or Stage)";
-            case _212313: return "Director of Photography";
-            case _212314: return "Film and Video Editor";
-            case _212315: return "Program Director (Television or Radio)";
-            case _212316: return "Stage Manager";
-            case _212317: return "Technical Director";
-            case _212318: return "Video Producer";
-            case _212399: return "Film, Television, Radio and Stage Directors nec";
-            case _212400: return "Journalists and Other Writers nfd";
-            case _212411: return "Copywriter";
-            case _212412: return "Newspaper or Periodical Editor";
-            case _212413: return "Print Journalist";
-            case _212414: return "Radio Journalist";
-            case _212415: return "Technical Writer";
-            case _212416: return "Television Journalist";
-            case _212499: return "Journalists and Other Writers nec";
-            case _220000: return "Business, Human Resource and Marketing Professionals nfd";
-            case _221000: return "Accountants, Auditors and Company Secretaries nfd";
-            case _221100: return "Accountants nfd";
-            case _221111: return "Accountant (General)";
-            case _221112: return "Management Accountant";
-            case _221113: return "Taxation Accountant";
-            case _221200: return "Auditors, Company Secretaries and Corporate Treasurers nfd";
-            case _221211: return "Company Secretary";
-            case _221212: return "Corporate Treasurer";
-            case _221213: return "External Auditor";
-            case _221214: return "Internal Auditor";
-            case _222000: return "Financial Brokers and Dealers, and Investment Advisers nfd";
-            case _222100: return "Financial Brokers nfd";
-            case _222111: return "Commodities Trader";
-            case _222112: return "Finance Broker";
-            case _222113: return "Insurance Broker";
-            case _222199: return "Financial Brokers nec";
-            case _222200: return "Financial Dealers nfd";
-            case _222211: return "Financial Market Dealer";
-            case _222212: return "222212";
-            case _222213: return "Stockbroking Dealer";
-            case _222299: return "Financial Dealers nec";
-            case _222300: return "Financial Investment Advisers and Managers nfd";
-            case _222311: return "Financial Investment Adviser";
-            case _222312: return "Financial Investment Manager";
-            case _223000: return "Human Resource and Training Professionals nfd";
-            case _223100: return "Human Resource Professionals nfd";
-            case _223111: return "Human Resource Adviser";
-            case _223112: return "223112";
-            case _223113: return "Workplace Relations Adviser";
-            case _223211: return "ICT Trainer";
-            case _223311: return "Training and Development Professional";
-            case _224000: return "Information and Organization Professionals nfd";
-            case _224100: return "Actuaries, Mathematicians and Statisticians nfd";
-            case _224111: return "Actuary";
-            case _224112: return "Mathematician";
-            case _224113: return "Statistician";
-            case _224200: return "Archivists, Curators and Records Managers nfd";
-            case _224211: return "Archivist";
-            case _224212: return "Gallery or Museum Curator";
-            case _224213: return "Health Information Manager";
-            case _224214: return "Records Manager";
-            case _224311: return "Economist";
-            case _224400: return "Intelligence and Policy Analysts nfd";
-            case _224411: return "Intelligence Officer";
-            case _224412: return "Policy Analyst";
-            case _224500: return "Land Economists and Valuers nfd";
-            case _224511: return "Land Economist";
-            case _224512: return "Valuer";
-            case _224611: return "Librarian";
-            case _224700: return "Management and Organization Analysts nfd";
-            case _224711: return "Management Consultant";
-            case _224712: return "Organization and Methods Analyst";
-            case _224900: return "Other Information and Organization Professionals nfd";
-            case _224911: return "Electorate Officer";
-            case _224912: return "Liaison Officer";
-            case _224913: return "Migration Agent";
-            case _224914: return "Patents Examiner";
-            case _224999: return "Information and Organization Professionals nec";
-            case _225000: return "Sales, Marketing and Public Relations Professionals nfd";
-            case _225100: return "Advertising and Marketing Professionals nfd";
-            case _225111: return "Advertising Specialist";
-            case _225112: return "Market Research Analyst";
-            case _225113: return "Marketing Specialist";
-            case _225200: return "ICT Sales Professionals nfd";
-            case _225211: return "ICT Account Manager";
-            case _225212: return "ICT Business Development Manager";
-            case _225213: return "ICT Sales Representative";
-            case _225311: return "Public Relations Professional";
-            case _225400: return "Technical Sales Representatives nfd";
-            case _225411: return "Sales Representative (Industrial Products)";
-            case _225412: return "Sales Representative (Medical and Pharmaceutical Products)";
-            case _225499: return "Technical Sales Representatives nec";
-            case _230000: return "Design, Engineering, Science and Transport Professionals nfd";
-            case _231000: return "Air and Marine Transport Professionals nfd";
-            case _231100: return "Air Transport Professionals nfd";
-            case _231111: return "Aeroplane Pilot";
-            case _231112: return "Air Traffic Controller";
-            case _231113: return "Flying Instructor";
-            case _231114: return "Helicopter Pilot";
-            case _231199: return "Air Transport Professionals nec";
-            case _231200: return "Marine Transport Professionals nfd";
-            case _231211: return "Master Fisher";
-            case _231212: return "Ship's Engineer";
-            case _231213: return "Ship's Master";
-            case _231214: return "Ship's Officer";
-            case _231215: return "Ship's Surveyor";
-            case _231299: return "Marine Transport Professionals nec";
-            case _232000: return "Architects, Designers, Planners and Surveyors nfd";
-            case _232100: return "Architects and Landscape Architects nfd";
-            case _232111: return "Architect";
-            case _232112: return "Landscape Architect";
-            case _232200: return "Cartographers and Surveyors nfd";
-            case _232211: return "Cartographer";
-            case _232212: return "Surveyor";
-            case _232300: return "Fashion, Industrial and Jewellery Designers nfd";
-            case _232311: return "Fashion Designer";
-            case _232312: return "Industrial Designer";
-            case _232313: return "Jewellery Designer";
-            case _232400: return "Graphic and Web Designers, and Illustrators nfd";
-            case _232411: return "Graphic Designer";
-            case _232412: return "Illustrator";
-            case _232413: return "Multimedia Designer";
-            case _232414: return "Web Designer";
-            case _232511: return "Interior Designer";
-            case _232611: return "Urban and Regional Planner";
-            case _233000: return "Engineering Professionals nfd";
-            case _233100: return "Chemical and Materials Engineers nfd";
-            case _233111: return "Chemical Engineer";
-            case _233112: return "Materials Engineer";
-            case _233200: return "Civil Engineering Professionals nfd";
-            case _233211: return "Civil Engineer";
-            case _233212: return "Geotechnical Engineer";
-            case _233213: return "Quantity Surveyor";
-            case _233214: return "Structural Engineer";
-            case _233215: return "Transport Engineer";
-            case _233311: return "Electrical Engineer";
-            case _233411: return "Electronics Engineer";
-            case _233500: return "Industrial, Mechanical and Production Engineers nfd";
-            case _233511: return "Industrial Engineer";
-            case _233512: return "Mechanical Engineer";
-            case _233513: return "Production or Plant Engineer";
-            case _233600: return "Mining Engineers nfd";
-            case _233611: return "Mining Engineer (excluding Petroleum)";
-            case _233612: return "Petroleum Engineer";
-            case _233900: return "Other Engineering Professionals nfd";
-            case _233911: return "Aeronautical Engineer";
-            case _233912: return "Agricultural Engineer";
-            case _233913: return "Biomedical Engineer";
-            case _233914: return "Engineering Technologist";
-            case _233915: return "Environmental Engineer";
-            case _233916: return "Naval Architect";
-            case _233999: return "Engineering Professionals nec";
-            case _234000: return "Natural and Physical Science Professionals nfd";
-            case _234100: return "Agricultural and Forestry Scientists nfd";
-            case _234111: return "Agricultural Consultant";
-            case _234112: return "Agricultural Scientist";
-            case _234113: return "Forester";
-            case _234200: return "Chemists, and Food and Wine Scientists nfd";
-            case _234211: return "Chemist";
-            case _234212: return "Food Technologist";
-            case _234213: return "Wine Maker";
-            case _234300: return "Environmental Scientists nfd";
-            case _234311: return "Conservation Officer";
-            case _234312: return "Environmental Consultant";
-            case _234313: return "Environmental Research Scientist";
-            case _234314: return "Park Ranger";
-            case _234399: return "Environmental Scientists nec";
-            case _234400: return "Geologists and Geophysicists nfd";
-            case _234411: return "Geologist";
-            case _234412: return "Geophysicist";
-            case _234500: return "Life Scientists nfd";
-            case _234511: return "Life Scientist (General)";
-            case _234512: return "Anatomist or Physiologist";
-            case _234513: return "Biochemist";
-            case _234514: return "Biotechnologist";
-            case _234515: return "Botanist";
-            case _234516: return "Marine Biologist";
-            case _234517: return "Microbiologist";
-            case _234518: return "Zoologist";
-            case _234599: return "Life Scientists nec";
-            case _234611: return "Medical Laboratory Scientist";
-            case _234711: return "Veterinarian";
-            case _234900: return "Other Natural and Physical Science Professionals nfd";
-            case _234911: return "Conservator";
-            case _234912: return "Metallurgist";
-            case _234913: return "Meteorologist";
-            case _234914: return "Physicist";
-            case _234999: return "Natural and Physical Science Professionals nec";
-            case _240000: return "Education Professionals nfd";
-            case _241000: return "School Teachers nfd";
-            case _241111: return "Early Childhood (Pre-primary School) Teacher";
-            case _241213: return "Primary School Teacher";
-            case _241311: return "Middle School Teacher";
-            case _241411: return "Secondary School Teacher";
-            case _241500: return "Special Education Teachers nfd";
-            case _241511: return "Special Needs Teacher";
-            case _241512: return "Teacher of the Hearing Impaired";
-            case _241513: return "Teacher of the Sight Impaired";
-            case _241599: return "Special Education Teachers nec";
-            case _242000: return "Tertiary Education Teachers nfd";
-            case _242100: return "University Lecturers and Tutors nfd";
-            case _242111: return "University Lecturer";
-            case _242112: return "University Tutor";
-            case _242211: return "Vocational Education Teacher";
-            case _249000: return "Miscellaneous Education Professionals nfd";
-            case _249100: return "Education Advisers and Reviewers nfd";
-            case _249111: return "Education Adviser";
-            case _249112: return "Education Reviewer";
-            case _249200: return "Private Tutors and Teachers nfd";
-            case _249211: return "Art Teacher (Private Tuition)";
-            case _249212: return "Dance Teacher (Private Tuition)";
-            case _249213: return "249213";
-            case _249214: return "Music Teacher (Private Tuition)";
-            case _249299: return "Private Tutors and Teachers nec";
-            case _249311: return "Teacher of English to Speakers of Other Languages";
-            case _250000: return "Health Professionals nfd";
-            case _251000: return "Health Diagnostic and Promotion Professionals nfd";
-            case _251111: return "Dietitian";
-            case _251200: return "Medical Imaging Professionals nfd";
-            case _251211: return "Medical Diagnostic Radiographer";
-            case _251212: return "Medical Radiation Therapist";
-            case _251213: return "Nuclear Medicine Technologist";
-            case _251214: return "Sonographer";
-            case _251300: return "Occupational and Environmental Health Professionals nfd";
-            case _251311: return "Environmental Health Officer";
-            case _251312: return "Occupational Health and Safety Adviser";
-            case _251400: return "Optometrists and Orthoptists nfd";
-            case _251411: return "Optometrist";
-            case _251412: return "Orthoptist";
-            case _251500: return "Pharmacists nfd";
-            case _251511: return "Hospital Pharmacist";
-            case _251512: return "Industrial Pharmacist";
-            case _251513: return "Retail Pharmacist";
-            case _251900: return "Other Health Diagnostic and Promotion Professionals nfd";
-            case _251911: return "Health Promotion Officer";
-            case _251912: return "Orthotist or Prosthetist";
-            case _251999: return "Health Diagnostic and Promotion Professionals nec";
-            case _252000: return "Health Therapy Professionals nfd";
-            case _252100: return "Chiropractors and Osteopaths nfd";
-            case _252111: return "Chiropractor";
-            case _252112: return "Osteopath";
-            case _252200: return "Complementary Health Therapists nfd";
-            case _252211: return "Acupuncturist";
-            case _252212: return "Homoeopath";
-            case _252213: return "Naturopath";
-            case _252214: return "Traditional Chinese Medicine Practitioner";
-            case _252299: return "Complementary Health Therapists nec";
-            case _252300: return "Dental Practitioners nfd";
-            case _252311: return "Dental Specialist";
-            case _252312: return "Dentist";
-            case _252411: return "252411";
-            case _252511: return "Physiotherapist";
-            case _252611: return "Podiatrist";
-            case _252700: return "Speech Professionals and Audiologists nfd";
-            case _252711: return "252711";
-            case _252712: return "Speech Pathologist";
-            case _253000: return "Medical Practitioners nfd";
-            case _253100: return "Generalist Medical Practitioners nfd";
-            case _253111: return "General Medical Practitioner";
-            case _253112: return "Resident Medical Officer";
-            case _253211: return "Anaesthetist";
-            case _253300: return "Internal Medicine Specialists nfd";
-            case _253311: return "Specialist Physician (General Medicine)";
-            case _253312: return "Cardiologist";
-            case _253313: return "Clinical Haematologist";
-            case _253314: return "253314";
-            case _253315: return "Endocrinologist";
-            case _253316: return "Gastroenterologist";
-            case _253317: return "Intensive Care Specialist";
-            case _253318: return "Neurologist";
-            case _253321: return "Paediatrician";
-            case _253322: return "Renal Medicine Specialist";
-            case _253323: return "Rheumatologist";
-            case _253324: return "Thoracic Medicine Specialist";
-            case _253399: return "Internal Medicine Specialists nec";
-            case _253411: return "Psychiatrist";
-            case _253500: return "Surgeons nfd";
-            case _253511: return "Surgeon (General)";
-            case _253512: return "Cardiothoracic Surgeon";
-            case _253513: return "Neurosurgeon";
-            case _253514: return "Orthopaedic Surgeon";
-            case _253515: return "Otorhinolaryngologist";
-            case _253516: return "Paediatric Surgeon";
-            case _253517: return "Plastic and Reconstructive Surgeon";
-            case _253518: return "Urologist";
-            case _253521: return "Vascular Surgeon";
-            case _253900: return "Other Medical Practitioners nfd";
-            case _253911: return "Dermatologist";
-            case _253912: return "253912";
-            case _253913: return "Obstetrician and Gynaecologist";
-            case _253914: return "Ophthalmologist";
-            case _253915: return "Pathologist";
-            case _253916: return "Radiologist";
-            case _253999: return "Medical Practitioners nec";
-            case _254000: return "Midwifery and Nursing Professionals nfd";
-            case _254111: return "Midwife";
-            case _254200: return "Nurse Educators and Researchers nfd";
-            case _254211: return "Nurse Educator";
-            case _254212: return "Nurse Researcher";
-            case _254311: return "Nurse Manager";
-            case _254400: return "Registered Nurses nfd";
-            case _254411: return "Nurse Practitioner";
-            case _254412: return "Registered Nurse (Aged Care)";
-            case _254413: return "Registered Nurse (Child and Family Health)";
-            case _254414: return "Registered Nurse (Community Health)";
-            case _254415: return "254415";
-            case _254416: return "Registered Nurse (Developmental Disability)";
-            case _254417: return "Registered Nurse (Disability and Rehabilitation)";
-            case _254418: return "Registered Nurse (Medical)";
-            case _254421: return "Registered Nurse (Medical Practice)";
-            case _254422: return "Registered Nurse (Mental Health)";
-            case _254423: return "Registered Nurse (Perioperative)";
-            case _254424: return "Registered Nurse (Surgical)";
-            case _254499: return "Registered Nurses nec";
-            case _260000: return "ICT Professionals nfd";
-            case _261000: return "Business and Systems Analysts, and Programmers nfd";
-            case _261100: return "ICT Business and Systems Analysts nfd";
-            case _261111: return "ICT Business Analyst";
-            case _261112: return "Systems Analyst";
-            case _261200: return "Multimedia Specialists and Web Developers nfd";
-            case _261211: return "Multimedia Specialist";
-            case _261212: return "Web Developer";
-            case _261300: return "Software and Applications Programmers nfd";
-            case _261311: return "Analyst Programmer";
-            case _261312: return "Developer Programmer";
-            case _261313: return "Software Engineer";
-            case _261399: return "Software and Applications Programmers nec";
-            case _262100: return "Database and Systems Administrators, and ICT Security Specialists nfd";
-            case _262111: return "Database Administrator";
-            case _262112: return "ICT Security Specialist";
-            case _262113: return "Systems Administrator";
-            case _263000: return "ICT Network and Support Professionals nfd";
-            case _263100: return "Computer Network Professionals nfd";
-            case _263111: return "Computer Network and Systems Engineer";
-            case _263112: return "Network Administrator";
-            case _263113: return "Network Analyst";
-            case _263200: return "ICT Support and Test Engineers nfd";
-            case _263211: return "ICT Quality Assurance Engineer";
-            case _263212: return "ICT Support Engineer";
-            case _263213: return "ICT Systems Test Engineer";
-            case _263299: return "ICT Support and Test Engineers nec";
-            case _263300: return "Telecommunications Engineering Professionals nfd";
-            case _263311: return "Telecommunications Engineer";
-            case _263312: return "Telecommunications Network Engineer";
-            case _270000: return "Legal, Social and Welfare Professionals nfd";
-            case _271000: return "Legal Professionals nfd";
-            case _271111: return "Barrister";
-            case _271200: return "Judicial and Other Legal Professionals nfd";
-            case _271211: return "Judge";
-            case _271212: return "Magistrate";
-            case _271213: return "Tribunal Member";
-            case _271299: return "Judicial and Other Legal Professionals nec";
-            case _271311: return "Solicitor";
-            case _272000: return "Social and Welfare Professionals nfd";
-            case _272100: return "Counsellors nfd";
-            case _272111: return "Careers Counsellor";
-            case _272112: return "Drug and Alcohol Counsellor";
-            case _272113: return "Family and Marriage Counsellor";
-            case _272114: return "Rehabilitation Counsellor";
-            case _272115: return "Student Counsellor";
-            case _272199: return "Counsellors nec";
-            case _272211: return "Minister of Religion";
-            case _272300: return "Psychologists nfd";
-            case _272311: return "Clinical Psychologist";
-            case _272312: return "Educational Psychologist";
-            case _272313: return "Organizational Psychologist";
-            case _272314: return "Psychotherapist";
-            case _272399: return "Psychologists nec";
-            case _272400: return "Social Professionals nfd";
-            case _272411: return "Historian";
-            case _272412: return "Interpreter";
-            case _272413: return "Translator";
-            case _272499: return "Social Professionals nec";
-            case _272511: return "Social Worker";
-            case _272600: return "Welfare, Recreation and Community Arts Workers nfd";
-            case _272611: return "Community Arts Worker";
-            case _272612: return "Recreation Officer";
-            case _272613: return "Welfare Worker";
-            case _300000: return "Technicians and Trades Workers nfd";
-            case _310000: return "Engineering, ICT and Science Technicians nfd";
-            case _311000: return "Agricultural, Medical and Science Technicians nfd";
-            case _311111: return "Agricultural Technician";
-            case _311200: return "Medical Technicians nfd";
-            case _311211: return "Anaesthetic Technician";
-            case _311212: return "Cardiac Technician";
-            case _311213: return "Medical Laboratory Technician";
-            case _311214: return "Operating Theatre Technician";
-            case _311215: return "Pharmacy Technician";
-            case _311299: return "Medical Technicians nec";
-            case _311300: return "Primary Products Inspectors nfd";
-            case _311311: return "Fisheries Officer";
-            case _311312: return "Meat Inspector";
-            case _311313: return "Quarantine Officer";
-            case _311399: return "Primary Products Inspectors nec";
-            case _311400: return "Science Technicians nfd";
-            case _311411: return "Chemistry Technician";
-            case _311412: return "Earth Science Technician";
-            case _311413: return "Life Science Technician";
-            case _311414: return "School Laboratory Technician";
-            case _311499: return "Science Technicians nec";
-            case _312000: return "Building and Engineering Technicians nfd";
-            case _312100: return "Architectural, Building and Surveying Technicians nfd";
-            case _312111: return "Architectural Draftsperson";
-            case _312112: return "Building Associate";
-            case _312113: return "Building Inspector";
-            case _312114: return "Construction Estimator";
-            case _312115: return "Plumbing Inspector";
-            case _312116: return "Surveying or Cartographic Technician";
-            case _312200: return "Civil Engineering Draftspersons and Technicians nfd";
-            case _312211: return "Civil Engineering Draftsperson";
-            case _312212: return "Civil Engineering Technician";
-            case _312300: return "Electrical Engineering Draftspersons and Technicians nfd";
-            case _312311: return "Electrical Engineering Draftsperson";
-            case _312312: return "Electrical Engineering Technician";
-            case _312400: return "Electronic Engineering Draftspersons and Technicians nfd";
-            case _312411: return "Electronic Engineering Draftsperson";
-            case _312412: return "Electronic Engineering Technician";
-            case _312500: return "Mechanical Engineering Draftspersons and Technicians nfd";
-            case _312511: return "Mechanical Engineering Draftsperson";
-            case _312512: return "Mechanical Engineering Technician";
-            case _312611: return "Safety Inspector";
-            case _312900: return "Other Building and Engineering Technicians nfd";
-            case _312911: return "Maintenance Planner";
-            case _312912: return "Metallurgical or Materials Technician";
-            case _312913: return "312913";
-            case _312999: return "Building and Engineering Technicians nec";
-            case _313000: return "ICT and Telecommunications Technicians nfd";
-            case _313100: return "ICT Support Technicians nfd";
-            case _313111: return "Hardware Technician";
-            case _313112: return "ICT Customer Support Officer";
-            case _313113: return "Web Administrator";
-            case _313199: return "ICT Support Technicians nec";
-            case _313200: return "Telecommunications Technical Specialists nfd";
-            case _313211: return "Radiocommunications Technician";
-            case _313212: return "Telecommunications Field Engineer";
-            case _313213: return "Telecommunications Network Planner";
-            case _313214: return "Telecommunications Technical Officer or Technologist";
-            case _320000: return "Automotive and Engineering Trades Workers nfd";
-            case _321000: return "Automotive Electricians and Mechanics nfd";
-            case _321111: return "Automotive Electrician";
-            case _321200: return "Motor Mechanics nfd";
-            case _321211: return "Motor Mechanic (General)";
-            case _321212: return "Diesel Motor Mechanic";
-            case _321213: return "Motorcycle Mechanic";
-            case _321214: return "Small Engine Mechanic";
-            case _322000: return "Fabrication Engineering Trades Workers nfd";
-            case _322100: return "Metal Casting, Forging and Finishing Trades Workers nfd";
-            case _322111: return "Blacksmith";
-            case _322112: return "Electroplater";
-            case _322113: return "Farrier";
-            case _322114: return "Metal Casting Trades Worker";
-            case _322115: return "Metal Polisher";
-            case _322211: return "Sheetmetal Trades Worker";
-            case _322300: return "Structural Steel and Welding Trades Workers nfd";
-            case _322311: return "Metal Fabricator";
-            case _322312: return "Pressure Welder";
-            case _322313: return "Welder (First Class)";
-            case _323000: return "Mechanical Engineering Trades Workers nfd";
-            case _323100: return "Aircraft Maintenance Engineers nfd";
-            case _323111: return "Aircraft Maintenance Engineer (Avionics)";
-            case _323112: return "Aircraft Maintenance Engineer (Mechanical)";
-            case _323113: return "Aircraft Maintenance Engineer (Structures)";
-            case _323200: return "Metal Fitters and Machinists nfd";
-            case _323211: return "Fitter (General)";
-            case _323212: return "Fitter and Turner";
-            case _323213: return "Fitter-Welder";
-            case _323214: return "Metal Machinist (First Class)";
-            case _323215: return "Textile, Clothing and Footwear Mechanic";
-            case _323299: return "Metal Fitters and Machinists nec";
-            case _323300: return "Precision Metal Trades Workers nfd";
-            case _323311: return "Engraver";
-            case _323312: return "Gunsmith";
-            case _323313: return "Locksmith";
-            case _323314: return "Precision Instrument Maker and Repairer";
-            case _323315: return "Saw Maker and Repairer";
-            case _323316: return "Watch and Clock Maker and Repairer";
-            case _323400: return "Toolmakers and Engineering Patternmakers nfd";
-            case _323411: return "Engineering Patternmaker";
-            case _323412: return "Toolmaker";
-            case _324000: return "Panelbeaters, and Vehicle Body Builders, Trimmers and Painters nfd";
-            case _324111: return "Panelbeater";
-            case _324200: return "Vehicle Body Builders and Trimmers nfd";
-            case _324211: return "Vehicle Body Builder";
-            case _324212: return "Vehicle Trimmer";
-            case _324311: return "Vehicle Painter";
-            case _330000: return "Construction Trades Workers nfd";
-            case _331000: return "Bricklayers, and Carpenters and Joiners nfd";
-            case _331100: return "Bricklayers and Stonemasons nfd";
-            case _331111: return "Bricklayer";
-            case _331112: return "Stonemason";
-            case _331211: return "Carpenter and Joiner";
-            case _331212: return "Carpenter";
-            case _331213: return "Joiner";
-            case _332000: return "Floor Finishers and Painting Trades Workers nfd";
-            case _332111: return "Floor Finisher";
-            case _332211: return "332211";
-            case _333000: return "Glaziers, Plasterers and Tilers nfd";
-            case _333111: return "Glazier";
-            case _333200: return "Plasterers nfd";
-            case _333211: return "Fibrous Plasterer";
-            case _333212: return "Solid Plasterer";
-            case _333311: return "Roof Tiler";
-            case _333411: return "Wall and Floor Tiler";
-            case _334100: return "Plumbers nfd";
-            case _334111: return "Plumber (General)";
-            case _334112: return "Airconditioning and Mechanical Services Plumber";
-            case _334113: return "Drainer";
-            case _334114: return "Gasfitter";
-            case _334115: return "Roof Plumber";
-            case _340000: return "Electrotechnology and Telecommunications Trades Workers nfd";
-            case _341100: return "Electricians nfd";
-            case _341111: return "Electrician (General)";
-            case _341112: return "Electrician (Special Class)";
-            case _341113: return "Lift Mechanic";
-            case _342000: return "Electronics and Telecommunications Trades Workers nfd";
-            case _342111: return "Airconditioning and Refrigeration Mechanic";
-            case _342200: return "342200";
-            case _342211: return "Electrical Linesworker";
-            case _342212: return "Technical Cable Jointer";
-            case _342300: return "Electronics Trades Workers nfd";
-            case _342311: return "Business Machine Mechanic";
-            case _342312: return "Communications Operator";
-            case _342313: return "Electronic Equipment Trades Worker";
-            case _342314: return "Electronic Instrument Trades Worker (General)";
-            case _342315: return "Electronic Instrument Trades Worker (Special Class)";
-            case _342400: return "Telecommunications Trades Workers nfd";
-            case _342411: return "Cabler (Data and Telecommunications)";
-            case _342412: return "Telecommunications Cable Jointer";
-            case _342413: return "Telecommunications Linesworker";
-            case _342414: return "Telecommunications Technician";
-            case _351000: return "Food Trades Workers nfd";
-            case _351100: return "Bakers and Pastrycooks nfd";
-            case _351111: return "Baker";
-            case _351112: return "Pastrycook";
-            case _351211: return "Butcher or Smallgoods Maker";
-            case _351311: return "Chef";
-            case _351411: return "Cook";
-            case _360000: return "Skilled Animal and Horticultural Workers nfd";
-            case _361000: return "Animal Attendants and Trainers, and Shearers nfd";
-            case _361100: return "Animal Attendants and Trainers nfd";
-            case _361111: return "Dog Handler or Trainer";
-            case _361112: return "Horse Trainer";
-            case _361113: return "Pet Groomer";
-            case _361114: return "Zookeeper";
-            case _361199: return "Animal Attendants and Trainers nec";
-            case _361211: return "Shearer";
-            case _361311: return "Veterinary Nurse";
-            case _362000: return "Horticultural Trades Workers nfd";
-            case _362111: return "Florist";
-            case _362200: return "Gardeners nfd";
-            case _362211: return "Gardener (General)";
-            case _362212: return "Arborist";
-            case _362213: return "Landscape Gardener";
-            case _362311: return "Greenkeeper";
-            case _362411: return "Nurseryperson";
-            case _390000: return "Other Technicians and Trades Workers nfd";
-            case _391111: return "Hairdresser";
-            case _392000: return "Printing Trades Workers nfd";
-            case _392100: return "Binders, Finishers and Screen Printers nfd";
-            case _392111: return "Binder and Finisher";
-            case _392112: return "Screen Printer";
-            case _392211: return "Graphic Pre-press Trades Worker";
-            case _392300: return "Printers nfd";
-            case _392311: return "Printing Machinist";
-            case _392312: return "Small Offset Printer";
-            case _393000: return "Textile, Clothing and Footwear Trades Workers nfd";
-            case _393100: return "Canvas and Leather Goods Makers nfd";
-            case _393111: return "Canvas Goods Maker";
-            case _393112: return "Leather Goods Maker";
-            case _393113: return "Sail Maker";
-            case _393114: return "Shoemaker";
-            case _393200: return "Clothing Trades Workers nfd";
-            case _393211: return "Apparel Cutter";
-            case _393212: return "Clothing Patternmaker";
-            case _393213: return "Dressmaker or Tailor";
-            case _393299: return "Clothing Trades Workers nec";
-            case _393311: return "Upholsterer";
-            case _394000: return "Wood Trades Workers nfd";
-            case _394111: return "Cabinetmaker";
-            case _394200: return "Wood Machinists and Other Wood Trades Workers nfd";
-            case _394211: return "Furniture Finisher";
-            case _394212: return "Picture Framer";
-            case _394213: return "Wood Machinist";
-            case _394214: return "Wood Turner";
-            case _394299: return "Wood Machinists and Other Wood Trades Workers nec";
-            case _399000: return "Miscellaneous Technicians and Trades Workers nfd";
-            case _399100: return "Boat Builders and Shipwrights nfd";
-            case _399111: return "Boat Builder and Repairer";
-            case _399112: return "Shipwright";
-            case _399200: return "Chemical, Gas, Petroleum and Power Generation Plant Operators nfd";
-            case _399211: return "Chemical Plant Operator";
-            case _399212: return "Gas or Petroleum Operator";
-            case _399213: return "Power Generation Plant Operator";
-            case _399300: return "Gallery, Library and Museum Technicians nfd";
-            case _399311: return "Gallery or Museum Technician";
-            case _399312: return "Library Technician";
-            case _399411: return "Jeweller";
-            case _399500: return "Performing Arts Technicians nfd";
-            case _399511: return "Broadcast Transmitter Operator";
-            case _399512: return "Camera Operator (Film, Television or Video)";
-            case _399513: return "Light Technician";
-            case _399514: return "Make Up Artist";
-            case _399515: return "Musical Instrument Maker or Repairer";
-            case _399516: return "Sound Technician";
-            case _399517: return "Television Equipment Operator";
-            case _399599: return "Performing Arts Technicians nec";
-            case _399611: return "Signwriter";
-            case _399900: return "Other Miscellaneous Technicians and Trades Workers nfd";
-            case _399911: return "Diver";
-            case _399912: return "Interior Decorator";
-            case _399913: return "Optical Dispenser";
-            case _399914: return "Optical Mechanic";
-            case _399915: return "Photographer's Assistant";
-            case _399916: return "Plastics Technician";
-            case _399917: return "Wool Classer";
-            case _399999: return "Technicians and Trades Workers nec";
-            case _400000: return "Community and Personal Service Workers nfd";
-            case _411000: return "Health and Welfare Support Workers nfd";
-            case _411100: return "Ambulance Officers and Paramedics nfd";
-            case _411111: return "Ambulance Officer";
-            case _411112: return "Intensive Care Ambulance Paramedic";
-            case _411200: return "Dental Hygienists, Technicians and Therapists nfd";
-            case _411211: return "Dental Hygienist";
-            case _411212: return "Dental Prosthetist";
-            case _411213: return "Dental Technician";
-            case _411214: return "Dental Therapist";
-            case _411311: return "Diversional Therapist";
-            case _411400: return "Enrolled and Mothercraft Nurses nfd";
-            case _411411: return "Enrolled Nurse";
-            case _411412: return "Mothercraft Nurse";
-            case _411511: return "Aboriginal and Torres Strait Islander Health Worker";
-            case _411611: return "Massage Therapist";
-            case _411700: return "Welfare Support Workers nfd";
-            case _411711: return "Community Worker";
-            case _411712: return "Disabilities Services Officer";
-            case _411713: return "Family Support Worker";
-            case _411714: return "Parole or Probation Officer";
-            case _411715: return "Residential Care Officer";
-            case _411716: return "Youth Worker";
-            case _420000: return "Carers and Aides nfd";
-            case _421100: return "Child Carers nfd";
-            case _421111: return "Child Care Worker";
-            case _421112: return "Family Day Care Worker";
-            case _421113: return "Nanny";
-            case _421114: return "Out of School Hours Care Worker";
-            case _422100: return "Education Aides nfd";
-            case _422111: return "Aboriginal and Torres Strait Islander Education Worker";
-            case _422112: return "Integration Aide";
-            case _422115: return "Preschool Aide";
-            case _422116: return "Teachers' Aide";
-            case _423000: return "Personal Carers and Assistants nfd";
-            case _423111: return "Aged or Disabled Carer";
-            case _423211: return "Dental Assistant";
-            case _423300: return "Nursing Support and Personal Care Workers nfd";
-            case _423311: return "Hospital Orderly";
-            case _423312: return "Nursing Support Worker";
-            case _423313: return "Personal Care Assistant";
-            case _423314: return "Therapy Aide";
-            case _423400: return "Special Care Workers nfd";
-            case _423411: return "Child or Youth Residential Care Assistant";
-            case _423412: return "Hostel Parent";
-            case _423413: return "Refuge Worker";
-            case _431000: return "Hospitality Workers nfd";
-            case _431100: return "Bar Attendants and Baristas nfd";
-            case _431111: return "Bar Attendant";
-            case _431112: return "Barista";
-            case _431211: return "Cafe Worker";
-            case _431311: return "Gaming Worker";
-            case _431411: return "Hotel Service Manager";
-            case _431511: return "Waiter";
-            case _431900: return "Other Hospitality Workers nfd";
-            case _431911: return "Bar Useful or Busser";
-            case _431912: return "Doorperson or Luggage Porter";
-            case _431999: return "Hospitality Workers nec";
-            case _440000: return "Protective Service Workers nfd";
-            case _441000: return "Defence Force Members, Fire Fighters and Police nfd";
-            case _441111: return "Defence Force Member - Other Ranks";
-            case _441200: return "Fire and Emergency Workers nfd";
-            case _441211: return "Emergency Service Worker";
-            case _441212: return "Fire Fighter";
-            case _441300: return "Police nfd";
-            case _441311: return "Detective";
-            case _441312: return "Police Officer";
-            case _442000: return "Prison and Security Officers nfd";
-            case _442111: return "Prison Officer";
-            case _442200: return "Security Officers and Guards nfd";
-            case _442211: return "Alarm, Security or Surveillance Monitor";
-            case _442212: return "Armoured Car Escort";
-            case _442213: return "Crowd Controller";
-            case _442214: return "Private Investigator";
-            case _442215: return "Retail Loss Prevention Officer";
-            case _442216: return "Security Consultant";
-            case _442217: return "Security Officer";
-            case _442299: return "Security Officers and Guards nec";
-            case _450000: return "Sports and Personal Service Workers nfd";
-            case _451000: return "Personal Service and Travel Workers nfd";
-            case _451111: return "Beauty Therapist";
-            case _451211: return "Driving Instructor";
-            case _451300: return "Funeral Workers nfd";
-            case _451311: return "Funeral Director";
-            case _451399: return "Funeral Workers nec";
-            case _451400: return "Gallery, Museum and Tour Guides nfd";
-            case _451411: return "Gallery or Museum Guide";
-            case _451412: return "Tour Guide";
-            case _451500: return "Personal Care Consultants nfd";
-            case _451511: return "Natural Remedy Consultant";
-            case _451512: return "Weight Loss Consultant";
-            case _451600: return "Tourism and Travel Advisers nfd";
-            case _451611: return "Tourist Information Officer";
-            case _451612: return "Travel Consultant";
-            case _451700: return "Travel Attendants nfd";
-            case _451711: return "Flight Attendant";
-            case _451799: return "Travel Attendants nec";
-            case _451800: return "Other Personal Service Workers nfd";
-            case _451811: return "Civil Celebrant";
-            case _451812: return "Hair or Beauty Salon Assistant";
-            case _451813: return "Sex Worker or Escort";
-            case _451899: return "Personal Service Workers nec";
-            case _452000: return "Sports and Fitness Workers nfd";
-            case _452111: return "Fitness Instructor";
-            case _452200: return "Outdoor Adventure Guides nfd";
-            case _452211: return "Bungy Jump Master";
-            case _452212: return "Fishing Guide";
-            case _452213: return "Hunting Guide";
-            case _452214: return "Mountain or Glacier Guide";
-            case _452215: return "Outdoor Adventure Instructor";
-            case _452216: return "Trekking Guide";
-            case _452217: return "Whitewater Rafting Guide";
-            case _452299: return "Outdoor Adventure Guides nec";
-            case _452300: return "Sports Coaches, Instructors and Officials nfd";
-            case _452311: return "Diving Instructor (Open Water)";
-            case _452312: return "Gymnastics Coach or Instructor";
-            case _452313: return "Horse Riding Coach or Instructor";
-            case _452314: return "Snowsport Instructor";
-            case _452315: return "Swimming Coach or Instructor";
-            case _452316: return "Tennis Coach";
-            case _452317: return "Other Sports Coach or Instructor";
-            case _452318: return "Dog or Horse Racing Official";
-            case _452321: return "Sports Development Officer";
-            case _452322: return "Sports Umpire";
-            case _452323: return "Other Sports Official";
-            case _452400: return "Sportspersons nfd";
-            case _452411: return "Footballer";
-            case _452412: return "Golfer";
-            case _452413: return "Jockey";
-            case _452414: return "Lifeguard";
-            case _452499: return "Sportspersons nec";
-            case _500000: return "Clerical and Administrative Workers nfd";
-            case _510000: return "Office Managers and Program Administrators nfd";
-            case _511100: return "Contract, Program and Project Administrators nfd";
-            case _511111: return "Contract Administrator";
-            case _511112: return "Program or Project Administrator";
-            case _512000: return "Office and Practice Managers nfd";
-            case _512111: return "Office Manager";
-            case _512200: return "Practice Managers nfd";
-            case _512211: return "Health Practice Manager";
-            case _512299: return "Practice Managers nec";
-            case _521000: return "Personal Assistants and Secretaries nfd";
-            case _521111: return "Personal Assistant";
-            case _521200: return "Secretaries nfd";
-            case _521211: return "Secretary (General)";
-            case _521212: return "Legal Secretary";
-            case _530000: return "General Clerical Workers nfd";
-            case _531111: return "General Clerk";
-            case _532100: return "Keyboard Operators nfd";
-            case _532111: return "Data Entry Operator";
-            case _532112: return "Machine Shorthand Reporter";
-            case _532113: return "Word Processing Operator";
-            case _540000: return "Inquiry Clerks and Receptionists nfd";
-            case _541000: return "Call or Contact Centre Information Clerks nfd";
-            case _541100: return "Call or Contact Centre Workers nfd";
-            case _541111: return "Call or Contact Centre Team Leader";
-            case _541112: return "Call or Contact Centre Operator";
-            case _541211: return "Inquiry Clerk";
-            case _542100: return "Receptionists nfd";
-            case _542111: return "Receptionist (General)";
-            case _542112: return "Admissions Clerk";
-            case _542113: return "Hotel or Motel Receptionist";
-            case _542114: return "Medical Receptionist";
-            case _550000: return "Numerical Clerks nfd";
-            case _551000: return "Accounting Clerks and Bookkeepers nfd";
-            case _551100: return "Accounting Clerks nfd";
-            case _551111: return "Accounts Clerk";
-            case _551112: return "Cost Clerk";
-            case _551211: return "Bookkeeper";
-            case _551311: return "Payroll Clerk";
-            case _552000: return "Financial and Insurance Clerks nfd";
-            case _552111: return "Bank Worker";
-            case _552211: return "Credit or Loans Officer";
-            case _552300: return "Insurance, Money Market and Statistical Clerks nfd";
-            case _552311: return "Bookmaker";
-            case _552312: return "Insurance Consultant";
-            case _552313: return "Money Market Clerk";
-            case _552314: return "Statistical Clerk";
-            case _561000: return "Clerical and Office Support Workers nfd";
-            case _561100: return "Betting Clerks nfd";
-            case _561111: return "Betting Agency Counter Clerk";
-            case _561112: return "Bookmaker's Clerk";
-            case _561113: return "Telephone Betting Clerk";
-            case _561199: return "Betting Clerks nec";
-            case _561200: return "Couriers and Postal Deliverers nfd";
-            case _561211: return "Courier";
-            case _561212: return "Postal Delivery Officer";
-            case _561311: return "Filing or Registry Clerk";
-            case _561400: return "Mail Sorters nfd";
-            case _561411: return "Mail Clerk";
-            case _561412: return "Postal Sorting Officer";
-            case _561511: return "Survey Interviewer";
-            case _561611: return "Switchboard Operator";
-            case _561900: return "Other Clerical and Office Support Workers nfd";
-            case _561911: return "Classified Advertising Clerk";
-            case _561912: return "Meter Reader";
-            case _561913: return "Parking Inspector";
-            case _561999: return "Clerical and Office Support Workers nec";
-            case _590000: return "Other Clerical and Administrative Workers nfd";
-            case _591000: return "Logistics Clerks nfd";
-            case _591100: return "Purchasing and Supply Logistics Clerks nfd";
-            case _591111: return "Order Clerk";
-            case _591112: return "Production Clerk";
-            case _591113: return "Purchasing Officer";
-            case _591114: return "591114";
-            case _591115: return "Stock Clerk";
-            case _591116: return "Warehouse Administrator";
-            case _591200: return "Transport and Despatch Clerks nfd";
-            case _591211: return "Despatching and Receiving Clerk";
-            case _591212: return "Import-Export Clerk";
-            case _599000: return "Miscellaneous Clerical and Administrative Workers nfd";
-            case _599100: return "Conveyancers and Legal Executives nfd";
-            case _599111: return "Conveyancer";
-            case _599112: return "Legal Executive";
-            case _599200: return "Court and Legal Clerks nfd";
-            case _599211: return "Clerk of Court";
-            case _599212: return "Court Bailiff or Sheriff";
-            case _599213: return "Court Orderly";
-            case _599214: return "Law Clerk";
-            case _599215: return "Trust Officer";
-            case _599311: return "Debt Collector";
-            case _599411: return "Human Resource Clerk";
-            case _599500: return "Inspectors and Regulatory Officers nfd";
-            case _599511: return "Customs Officer";
-            case _599512: return "Immigration Officer";
-            case _599513: return "Motor Vehicle Licence Examiner";
-            case _599514: return "Noxious Weeds and Pest Inspector";
-            case _599515: return "Social Security Assessor";
-            case _599516: return "Taxation Inspector";
-            case _599517: return "Train Examiner";
-            case _599518: return "Transport Operations Inspector";
-            case _599521: return "Water Inspector";
-            case _599599: return "Inspectors and Regulatory Officers nec";
-            case _599600: return "Insurance Investigators, Loss Adjusters and Risk Surveyors nfd";
-            case _599611: return "Insurance Investigator";
-            case _599612: return "Insurance Loss Adjuster";
-            case _599613: return "Insurance Risk Surveyor";
-            case _599711: return "Library Assistant";
-            case _599900: return "Other Miscellaneous Clerical and Administrative Workers nfd";
-            case _599911: return "Coding Clerk";
-            case _599912: return "Production Assistant (Film, Television, Radio or Stage)";
-            case _599913: return "Proof Reader";
-            case _599914: return "Radio Despatcher";
-            case _599999: return "Clerical and Administrative Workers nec";
-            case _600000: return "Sales Workers nfd";
-            case _610000: return "Sales Representatives and Agents nfd";
-            case _611000: return "Insurance Agents and Sales Representatives nfd";
-            case _611100: return "Auctioneers, and Stock and Station Agents nfd";
-            case _611111: return "Auctioneer";
-            case _611112: return "Stock and Station Agent";
-            case _611211: return "Insurance Agent";
-            case _611300: return "Sales Representatives nfd";
-            case _611311: return "Sales Representative (Building and Plumbing Supplies)";
-            case _611312: return "Sales Representative (Business Services)";
-            case _611313: return "Sales Representative (Motor Vehicle Parts and Accessories)";
-            case _611314: return "Sales Representative (Personal and Household Goods)";
-            case _611399: return "Sales Representatives nec";
-            case _612100: return "Real Estate Sales Agents nfd";
-            case _612111: return "Business Broker";
-            case _612112: return "Property Manager";
-            case _612113: return "Real Estate Agency Principal";
-            case _612114: return "Real Estate Agent";
-            case _612115: return "Real Estate Representative";
-            case _621000: return "Sales Assistants and Salespersons nfd";
-            case _621111: return "Sales Assistant (General)";
-            case _621211: return "ICT Sales Assistant";
-            case _621300: return "Motor Vehicle and Vehicle Parts Salespersons nfd";
-            case _621311: return "Motor Vehicle or Caravan Salesperson";
-            case _621312: return "Motor Vehicle Parts Interpreter";
-            case _621411: return "Pharmacy Sales Assistant";
-            case _621511: return "Retail Supervisor";
-            case _621611: return "Service Station Attendant";
-            case _621700: return "Street Vendors and Related Salespersons nfd";
-            case _621711: return "Cash Van Salesperson";
-            case _621712: return "Door-to-door Salesperson";
-            case _621713: return "Street Vendor";
-            case _621900: return "Other Sales Assistants and Salespersons nfd";
-            case _621911: return "Materials Recycler";
-            case _621912: return "Rental Salesperson";
-            case _621999: return "Sales Assistants and Salespersons nec";
-            case _630000: return "Sales Support Workers nfd";
-            case _631100: return "Checkout Operators and Office Cashiers nfd";
-            case _631111: return "Checkout Operator";
-            case _631112: return "Office Cashier";
-            case _639000: return "Miscellaneous Sales Support Workers nfd";
-            case _639100: return "Models and Sales Demonstrators nfd";
-            case _639111: return "Model";
-            case _639112: return "Sales Demonstrator";
-            case _639200: return "Retail and Wool Buyers nfd";
-            case _639211: return "Retail Buyer";
-            case _639212: return "Wool Buyer";
-            case _639311: return "Telemarketer";
-            case _639400: return "Ticket Salespersons nfd";
-            case _639411: return "Ticket Seller";
-            case _639412: return "Transport Conductor";
-            case _639511: return "Visual Merchandiser";
-            case _639911: return "Other Sales Support Worker";
-            case _700000: return "Machinery Operators and Drivers nfd";
-            case _710000: return "Machine and Stationary Plant Operators nfd";
-            case _711000: return "Machine Operators nfd";
-            case _711100: return "Clay, Concrete, Glass and Stone Processing Machine Operators nfd";
-            case _711111: return "Clay Products Machine Operator";
-            case _711112: return "Concrete Products Machine Operator";
-            case _711113: return "Glass Production Machine Operator";
-            case _711114: return "Stone Processing Machine Operator";
-            case _711199: return "Clay, Concrete, Glass and Stone Processing Machine Operators nec";
-            case _711211: return "Industrial Spraypainter";
-            case _711300: return "Paper and Wood Processing Machine Operators nfd";
-            case _711311: return "Paper Products Machine Operator";
-            case _711312: return "Wood Processing Machine Operator";
-            case _711411: return "Photographic Developer and Printer";
-            case _711500: return "Plastics and Rubber Production Machine Operators nfd";
-            case _711511: return "Plastic Cablemaking Machine Operator";
-            case _711512: return "Plastic Compounding and Reclamation Machine Operator";
-            case _711513: return "Plastics Fabricator or Welder";
-            case _711514: return "Plastics Production Machine Operator (General)";
-            case _711515: return "Reinforced Plastic and Composite Production Worker";
-            case _711516: return "Rubber Production Machine Operator";
-            case _711599: return "Plastics and Rubber Production Machine Operators nec";
-            case _711611: return "Sewing Machinist";
-            case _711700: return "Textile and Footwear Production Machine Operators nfd";
-            case _711711: return "Footwear Production Machine Operator";
-            case _711712: return "Hide and Skin Processing Machine Operator";
-            case _711713: return "Knitting Machine Operator";
-            case _711714: return "Textile Dyeing and Finishing Machine Operator";
-            case _711715: return "Weaving Machine Operator";
-            case _711716: return "Yarn Carding and Spinning Machine Operator";
-            case _711799: return "Textile and Footwear Production Machine Operators nec";
-            case _711900: return "Other Machine Operators nfd";
-            case _711911: return "Chemical Production Machine Operator";
-            case _711912: return "Motion Picture Projectionist";
-            case _711913: return "Sand Blaster";
-            case _711914: return "Sterilisation Technician";
-            case _711999: return "Machine Operators nec";
-            case _712000: return "Stationary Plant Operators nfd";
-            case _712111: return "Crane, Hoist or Lift Operator";
-            case _712200: return "Drillers, Miners and Shot Firers nfd";
-            case _712211: return "Driller";
-            case _712212: return "Miner";
-            case _712213: return "Shot Firer";
-            case _712311: return "Engineering Production Systems Worker";
-            case _712900: return "Other Stationary Plant Operators nfd";
-            case _712911: return "Boiler or Engine Operator";
-            case _712912: return "712912";
-            case _712913: return "Cement Production Plant Operator";
-            case _712914: return "Concrete Batching Plant Operator";
-            case _712915: return "Concrete Pump Operator";
-            case _712916: return "Paper and Pulp Mill Operator";
-            case _712917: return "Railway Signal Operator";
-            case _712918: return "Train Controller";
-            case _712921: return "Waste Water or Water Plant Operator";
-            case _712922: return "Weighbridge Operator";
-            case _712999: return "Stationary Plant Operators nec";
-            case _721000: return "Mobile Plant Operators nfd";
-            case _721100: return "Agricultural, Forestry and Horticultural Plant Operators nfd";
-            case _721111: return "Agricultural and Horticultural Mobile Plant Operator";
-            case _721112: return "Logging Plant Operator";
-            case _721200: return "Earthmoving Plant Operators nfd";
-            case _721211: return "Earthmoving Plant Operator (General)";
-            case _721212: return "Backhoe Operator";
-            case _721213: return "Bulldozer Operator";
-            case _721214: return "Excavator Operator";
-            case _721215: return "Grader Operator";
-            case _721216: return "Loader Operator";
-            case _721311: return "Forklift Driver";
-            case _721900: return "Other Mobile Plant Operators nfd";
-            case _721911: return "Aircraft Baggage Handler and Airline Ground Crew";
-            case _721912: return "Linemarker";
-            case _721913: return "Paving Plant Operator";
-            case _721914: return "Railway Track Plant Operator";
-            case _721915: return "Road Roller Operator";
-            case _721916: return "Streetsweeper Operator";
-            case _721999: return "Mobile Plant Operators nec";
-            case _730000: return "Road and Rail Drivers nfd";
-            case _731000: return "Automobile, Bus and Rail Drivers nfd";
-            case _731100: return "Automobile Drivers nfd";
-            case _731111: return "Chauffeur";
-            case _731112: return "Taxi Driver";
-            case _731199: return "Automobile Drivers nec";
-            case _731200: return "Bus and Coach Drivers nfd";
-            case _731211: return "Bus Driver";
-            case _731212: return "Charter and Tour Bus Driver";
-            case _731213: return "Passenger Coach Driver";
-            case _731300: return "Train and Tram Drivers nfd";
-            case _731311: return "Train Driver";
-            case _731312: return "Tram Driver";
-            case _732111: return "Delivery Driver";
-            case _733100: return "Truck Drivers nfd";
-            case _733111: return "Truck Driver (General)";
-            case _733112: return "Aircraft Refueller";
-            case _733113: return "Furniture Removalist";
-            case _733114: return "Tanker Driver";
-            case _733115: return "Tow Truck Driver";
-            case _741111: return "Storeperson";
-            case _800000: return "Labourers nfd";
-            case _811000: return "Cleaners and Laundry Workers nfd";
-            case _811111: return "Car Detailer";
-            case _811211: return "Commercial Cleaner";
-            case _811311: return "Domestic Cleaner";
-            case _811400: return "Housekeepers nfd";
-            case _811411: return "Commercial Housekeeper";
-            case _811412: return "Domestic Housekeeper";
-            case _811500: return "Laundry Workers nfd";
-            case _811511: return "Laundry Worker (General)";
-            case _811512: return "Drycleaner";
-            case _811513: return "Ironer or Presser";
-            case _811600: return "Other Cleaners nfd";
-            case _811611: return "Carpet Cleaner";
-            case _811612: return "Window Cleaner";
-            case _811699: return "Cleaners nec";
-            case _821000: return "Construction and Mining Labourers nfd";
-            case _821100: return "Building and Plumbing Labourers nfd";
-            case _821111: return "Builder's Labourer";
-            case _821112: return "Drainage, Sewerage and Stormwater Labourer";
-            case _821113: return "Earthmoving Labourer";
-            case _821114: return "Plumber's Assistant";
-            case _821211: return "Concreter";
-            case _821311: return "Fencer";
-            case _821400: return "Insulation and Home Improvement Installers nfd";
-            case _821411: return "Building Insulation Installer";
-            case _821412: return "Home Improvement Installer";
-            case _821511: return "Paving and Surfacing Labourer";
-            case _821611: return "Railway Track Worker";
-            case _821700: return "Structural Steel Construction Workers nfd";
-            case _821711: return "Construction Rigger";
-            case _821712: return "Scaffolder";
-            case _821713: return "Steel Fixer";
-            case _821714: return "Structural Steel Erector";
-            case _821900: return "Other Construction and Mining Labourers nfd";
-            case _821911: return "Crane Chaser";
-            case _821912: return "Driller's Assistant";
-            case _821913: return "Lagger";
-            case _821914: return "Mining Support Worker";
-            case _821915: return "Surveyor's Assistant";
-            case _830000: return "Factory Process Workers nfd";
-            case _831000: return "Food Process Workers nfd";
-            case _831100: return "Food and Drink Factory Workers nfd";
-            case _831111: return "Baking Factory Worker";
-            case _831112: return "Brewery Worker";
-            case _831113: return "Confectionery Maker";
-            case _831114: return "Dairy Products Maker";
-            case _831115: return "Fruit and Vegetable Factory Worker";
-            case _831116: return "Grain Mill Worker";
-            case _831117: return "Sugar Mill Worker";
-            case _831118: return "Winery Cellar Hand";
-            case _831199: return "Food and Drink Factory Workers nec";
-            case _831200: return "Meat Boners and Slicers, and Slaughterers nfd";
-            case _831211: return "Meat Boner and Slicer";
-            case _831212: return "Slaughterer";
-            case _831300: return "Meat, Poultry and Seafood Process Workers nfd";
-            case _831311: return "Meat Process Worker";
-            case _831312: return "Poultry Process Worker";
-            case _831313: return "Seafood Process Worker";
-            case _832000: return "Packers and Product Assemblers nfd";
-            case _832100: return "Packers nfd";
-            case _832111: return "Chocolate Packer";
-            case _832112: return "Container Filler";
-            case _832113: return "Fruit and Vegetable Packer";
-            case _832114: return "Meat Packer";
-            case _832115: return "Seafood Packer";
-            case _832199: return "Packers nec";
-            case _832211: return "Product Assembler";
-            case _839000: return "Miscellaneous Factory Process Workers nfd";
-            case _839111: return "Metal Engineering Process Worker";
-            case _839200: return "Plastics and Rubber Factory Workers nfd";
-            case _839211: return "Plastics Factory Worker";
-            case _839212: return "Rubber Factory Worker";
-            case _839300: return "Product Quality Controllers nfd";
-            case _839311: return "Product Examiner";
-            case _839312: return "Product Grader";
-            case _839313: return "Product Tester";
-            case _839400: return "Timber and Wood Process Workers nfd";
-            case _839411: return "Paper and Pulp Mill Worker";
-            case _839412: return "Sawmill or Timber Yard Worker";
-            case _839413: return "Wood and Wood Products Factory Worker";
-            case _839900: return "Other Factory Process Workers nfd";
-            case _839911: return "Cement and Concrete Plant Worker";
-            case _839912: return "Chemical Plant Worker";
-            case _839913: return "Clay Processing Factory Worker";
-            case _839914: return "Fabric and Textile Factory Worker";
-            case _839915: return "Footwear Factory Worker";
-            case _839916: return "Glass Processing Worker";
-            case _839917: return "Hide and Skin Processing Worker";
-            case _839999: return "Factory Process Workers nec";
-            case _841000: return "Farm, Forestry and Garden Workers nfd";
-            case _841111: return "Aquaculture Worker";
-            case _841200: return "Crop Farm Workers nfd";
-            case _841211: return "Fruit or Nut Farm Worker";
-            case _841212: return "Fruit or Nut Picker";
-            case _841213: return "Grain, Oilseed or Pasture Farm Worker";
-            case _841214: return "Vegetable Farm Worker";
-            case _841215: return "Vegetable Picker";
-            case _841216: return "Vineyard Worker";
-            case _841299: return "Crop Farm Workers nec";
-            case _841300: return "Forestry and Logging Workers nfd";
-            case _841311: return "Forestry Worker";
-            case _841312: return "Logging Assistant";
-            case _841313: return "Tree Faller";
-            case _841400: return "Garden and Nursery Labourers nfd";
-            case _841411: return "Garden Labourer";
-            case _841412: return "Horticultural Nursery Assistant";
-            case _841500: return "Livestock Farm Workers nfd";
-            case _841511: return "Beef Cattle Farm Worker";
-            case _841512: return "Dairy Cattle Farm Worker";
-            case _841513: return "Mixed Livestock Farm Worker";
-            case _841514: return "Poultry Farm Worker";
-            case _841515: return "Sheep Farm Worker";
-            case _841516: return "Stablehand";
-            case _841517: return "Wool Handler";
-            case _841599: return "Livestock Farm Workers nec";
-            case _841611: return "Mixed Crop and Livestock Farm Worker";
-            case _841900: return "Other Farm, Forestry and Garden Workers nfd";
-            case _841911: return "Hunter-Trapper";
-            case _841912: return "841912";
-            case _841999: return "Farm, Forestry and Garden Workers nec";
-            case _851000: return "Food Preparation Assistants nfd";
-            case _851111: return "Fast Food Cook";
-            case _851200: return "Food Trades Assistants nfd";
-            case _851211: return "Pastrycook's Assistant";
-            case _851299: return "Food Trades Assistants nec";
-            case _851311: return "851311";
-            case _890000: return "Other Labourers nfd";
-            case _891000: return "Freight Handlers and Shelf Fillers nfd";
-            case _891100: return "Freight and Furniture Handlers nfd";
-            case _891111: return "Freight Handler (Rail or Road)";
-            case _891112: return "891112";
             case _891113: return "Waterside Worker";
             case _891211: return "Shelf Filler";
             case _899000: return "Miscellaneous Labourers nfd";

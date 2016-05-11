@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ElementsParamTest {
 
@@ -47,6 +48,7 @@ public class ElementsParamTest {
 		ourLastElements = null;
 	}
 
+
 	@Test
 	public void testReadSummaryData() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_elements=name,maritalStatus");
@@ -56,7 +58,7 @@ public class ElementsParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -74,7 +76,7 @@ public class ElementsParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -99,7 +101,6 @@ public class ElementsParamTest {
 		assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
 	}
 
-
 	@Test
 	public void testSearchSummaryText() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_elements=text");
@@ -117,9 +118,11 @@ public class ElementsParamTest {
 		assertThat(ourLastElements, containsInAnyOrder("text"));
 	}
 
+
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass

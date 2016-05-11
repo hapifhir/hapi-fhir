@@ -29,26 +29,28 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
- * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g., Document Completion - has the artifact been legally authenticated), all of which may impact Security, Privacy, and Trust policies.
+ * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
  */
 @ResourceDef(name="Provenance", profile="http://hl7.org/fhir/Profile/Provenance")
 public class Provenance extends DomainResource {
 
     public enum ProvenanceEntityRole {
         /**
-         * A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity
+         * A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.
          */
         DERIVATION, 
         /**
@@ -56,7 +58,7 @@ public class Provenance extends DomainResource {
          */
         REVISION, 
         /**
-         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author
+         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.
          */
         QUOTATION, 
         /**
@@ -100,9 +102,9 @@ public class Provenance extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity";
+            case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.";
             case REVISION: return "A derivation for which the resulting entity is a revised version of some original.";
-            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author";
+            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.";
             case SOURCE: return "A primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic's study, without benefit from hindsight.";
             default: return "?";
           }
@@ -168,17 +170,17 @@ public class Provenance extends DomainResource {
         protected Resource actorTarget;
 
         /**
-         * The identify of the agent as known by the authorization system.
+         * The identity of the agent as known by the authorization system.
          */
         @Child(name = "userId", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identify of the agent as known by the authorization system." )
+        @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identity of the agent as known by the authorization system." )
         protected Identifier userId;
 
         /**
-         * A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.
+         * A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.
          */
         @Child(name = "relatedAgent", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Track delegation between agents", formalDefinition="A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest." )
+        @Description(shortDefinition="Track delegation between agents", formalDefinition="A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest." )
         protected List<ProvenanceAgentRelatedAgentComponent> relatedAgent;
 
         private static final long serialVersionUID = 1792758952L;
@@ -262,7 +264,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #userId} (The identify of the agent as known by the authorization system.)
+         * @return {@link #userId} (The identity of the agent as known by the authorization system.)
          */
         public Identifier getUserId() { 
           if (this.userId == null)
@@ -278,7 +280,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @param value {@link #userId} (The identify of the agent as known by the authorization system.)
+         * @param value {@link #userId} (The identity of the agent as known by the authorization system.)
          */
         public ProvenanceAgentComponent setUserId(Identifier value) { 
           this.userId = value;
@@ -286,7 +288,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.)
          */
         public List<ProvenanceAgentRelatedAgentComponent> getRelatedAgent() { 
           if (this.relatedAgent == null)
@@ -304,7 +306,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.)
          */
     // syntactic sugar
         public ProvenanceAgentRelatedAgentComponent addRelatedAgent() { //3
@@ -329,8 +331,8 @@ public class Provenance extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("userId", "Identifier", "The identify of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
-          childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
+          childrenList.add(new Property("userId", "Identifier", "The identity of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
+          childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
         }
 
       public ProvenanceAgentComponent copy() {
@@ -386,10 +388,10 @@ public class Provenance extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * An internal reference to another agent listed in this provenance by it's id.
+         * An internal reference to another agent listed in this provenance by its identifier.
          */
         @Child(name = "target", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Reference to other agent in this resource by id", formalDefinition="An internal reference to another agent listed in this provenance by it's id." )
+        @Description(shortDefinition="Reference to other agent in this resource by identifier", formalDefinition="An internal reference to another agent listed in this provenance by its identifier." )
         protected UriType target;
 
         private static final long serialVersionUID = 794181198L;
@@ -435,7 +437,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         * @return {@link #target} (An internal reference to another agent listed in this provenance by its identifier.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
          */
         public UriType getTargetElement() { 
           if (this.target == null)
@@ -455,7 +457,7 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @param value {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         * @param value {@link #target} (An internal reference to another agent listed in this provenance by its identifier.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
          */
         public ProvenanceAgentRelatedAgentComponent setTargetElement(UriType value) { 
           this.target = value;
@@ -463,14 +465,14 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return An internal reference to another agent listed in this provenance by it's id.
+         * @return An internal reference to another agent listed in this provenance by its identifier.
          */
         public String getTarget() { 
           return this.target == null ? null : this.target.getValue();
         }
 
         /**
-         * @param value An internal reference to another agent listed in this provenance by it's id.
+         * @param value An internal reference to another agent listed in this provenance by its identifier.
          */
         public ProvenanceAgentRelatedAgentComponent setTarget(String value) { 
             if (this.target == null)
@@ -482,7 +484,7 @@ public class Provenance extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "CodeableConcept", "The type of relationship between agents.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by it's id.", 0, java.lang.Integer.MAX_VALUE, target));
+          childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by its identifier.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
       public ProvenanceAgentRelatedAgentComponent copy() {

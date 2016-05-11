@@ -1,13 +1,15 @@
 package ca.uhn.fhir.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.validation.FhirInstanceValidator;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -16,6 +18,12 @@ import ca.uhn.fhir.validation.ValidationResult;
  */
 public class ValidatorAcrossVersionsTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidatorAcrossVersionsTest.class);
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Test
 	public void testValidateProfileOnDstu2Resource() {

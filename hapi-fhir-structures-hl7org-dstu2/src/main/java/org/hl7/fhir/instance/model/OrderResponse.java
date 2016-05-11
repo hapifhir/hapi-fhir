@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A response to an order.
  */
@@ -64,23 +64,23 @@ public class OrderResponse extends DomainResource {
          */
         ERROR, 
         /**
-         * The order has been accepted, and work is in progress
+         * The order has been accepted, and work is in progress.
          */
         ACCEPTED, 
         /**
-         * Processing the order was halted at the initiators request
+         * Processing the order was halted at the initiators request.
          */
         CANCELLED, 
         /**
-         * The order has been cancelled and replaced by another
+         * The order has been cancelled and replaced by another.
          */
         REPLACED, 
         /**
-         * Processing the order was stopped because of some workflow/business logic reason
+         * Processing the order was stopped because of some workflow/business logic reason.
          */
         ABORTED, 
         /**
-         * The order has been completed
+         * The order has been completed.
          */
         COMPLETED, 
         /**
@@ -144,11 +144,11 @@ public class OrderResponse extends DomainResource {
             case REVIEW: return "The order is undergoing initial processing to determine whether it will be accepted (usually this involves human review)";
             case REJECTED: return "The order was rejected because of a workflow/business logic reason";
             case ERROR: return "The order was unable to be processed because of a technical error (i.e. unexpected error)";
-            case ACCEPTED: return "The order has been accepted, and work is in progress";
-            case CANCELLED: return "Processing the order was halted at the initiators request";
-            case REPLACED: return "The order has been cancelled and replaced by another";
-            case ABORTED: return "Processing the order was stopped because of some workflow/business logic reason";
-            case COMPLETED: return "The order has been completed";
+            case ACCEPTED: return "The order has been accepted, and work is in progress.";
+            case CANCELLED: return "Processing the order was halted at the initiators request.";
+            case REPLACED: return "The order has been cancelled and replaced by another.";
+            case ABORTED: return "Processing the order was stopped because of some workflow/business logic reason.";
+            case COMPLETED: return "The order has been completed.";
             default: return "?";
           }
         }
@@ -269,13 +269,13 @@ public class OrderResponse extends DomainResource {
     protected StringType description;
 
     /**
-     * Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.
+     * Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.
      */
     @Child(name = "fulfillment", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Details of the outcome of performing the order", formalDefinition="Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order." )
+    @Description(shortDefinition="Details of the outcome of performing the order", formalDefinition="Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order." )
     protected List<Reference> fulfillment;
     /**
-     * The actual objects that are the target of the reference (Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
+     * The actual objects that are the target of the reference (Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
      */
     protected List<Resource> fulfillmentTarget;
 
@@ -565,7 +565,7 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #fulfillment} (Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
+     * @return {@link #fulfillment} (Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
      */
     public List<Reference> getFulfillment() { 
       if (this.fulfillment == null)
@@ -583,7 +583,7 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #fulfillment} (Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
+     * @return {@link #fulfillment} (Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
      */
     // syntactic sugar
     public Reference addFulfillment() { //3
@@ -605,7 +605,7 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #fulfillment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
+     * @return {@link #fulfillment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
      */
     public List<Resource> getFulfillmentTarget() { 
       if (this.fulfillmentTarget == null)
@@ -621,7 +621,7 @@ public class OrderResponse extends DomainResource {
         childrenList.add(new Property("who", "Reference(Practitioner|Organization|Device)", "The person, organization, or device credited with making the response.", 0, java.lang.Integer.MAX_VALUE, who));
         childrenList.add(new Property("orderStatus", "code", "What this response says about the status of the original order.", 0, java.lang.Integer.MAX_VALUE, orderStatus));
         childrenList.add(new Property("description", "string", "Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("fulfillment", "Reference(Any)", "Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
+        childrenList.add(new Property("fulfillment", "Reference(Any)", "Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
       }
 
       public OrderResponse copy() {

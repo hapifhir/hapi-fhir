@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -45,8 +46,9 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private boolean myPersistResults = true;
+	private RequestDetails myRequestDetails;
 	private Set<Include> myRevIncludes;
-
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
@@ -102,6 +104,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myCount;
 	}
 
+	public EverythingModeEnum getEverythingMode() {
+		return myEverythingMode;
+	}
+
 	public Set<Include> getIncludes() {
 		if (myIncludes == null) {
 			myIncludes = new HashSet<Include>();
@@ -109,8 +115,30 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myIncludes;
 	}
 
+	/**
+	 * Returns null if there is no last updated value
+	 */
 	public DateRangeParam getLastUpdated() {
+		if (myLastUpdated != null) {
+			if (myLastUpdated.isEmpty()) {
+				myLastUpdated = null;
+			}
+		}
 		return myLastUpdated;
+	}
+
+	/**
+	 * Returns null if there is no last updated value, and removes the lastupdated
+	 * value from this map
+	 */
+	public DateRangeParam getLastUpdatedAndRemove() {
+		DateRangeParam retVal = getLastUpdated();
+		myLastUpdated = null;
+		return retVal;
+	}
+
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
 	}
 
 	public Set<Include> getRevIncludes() {
@@ -124,8 +152,8 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return mySort;
 	}
 
-	public EverythingModeEnum getEverythingMode() {
-		return myEverythingMode;
+	public boolean isPersistResults() {
+		return myPersistResults;
 	}
 
 	public void setCount(Integer theCount) {
@@ -142,6 +170,17 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	/**
+	 * Should results be persisted into a table for paging
+	 */
+	public void setPersistResults(boolean thePersistResults) {
+		myPersistResults = thePersistResults;
+	}
+
+	public void setRequestDetails(RequestDetails theRequestDetails) {
+		myRequestDetails = theRequestDetails;
 	}
 
 	public void setRevIncludes(Set<Include> theRevIncludes) {
@@ -165,35 +204,36 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	public enum EverythingModeEnum {
-		//@formatter:off
-		PATIENT_TYPE(true, false, false), 
-		PATIENT_INSTANCE(true, false, true), 
+		/*
+		 * Don't reorder! We rely on the ordinals
+		 */
+		ENCOUNTER_INSTANCE(false, true, true), 
 		ENCOUNTER_TYPE(false, true, false), 
-		ENCOUNTER_INSTANCE(false, true, true);
-		//@formatter:on
-
-		private final boolean myPatient;
-
-		public boolean isPatient() {
-			return myPatient;
-		}
-
-		public boolean isEncounter() {
-			return myEncounter;
-		}
-
-		public boolean isInstance() {
-			return myInstance;
-		}
+		PATIENT_INSTANCE(true, false, true), 
+		PATIENT_TYPE(true, false, false);
 
 		private final boolean myEncounter;
+
 		private final boolean myInstance;
+
+		private final boolean myPatient;
 
 		private EverythingModeEnum(boolean thePatient, boolean theEncounter, boolean theInstance) {
 			assert thePatient ^ theEncounter;
 			myPatient = thePatient;
 			myEncounter = theEncounter;
 			myInstance = theInstance;
+		}
+
+		public boolean isEncounter() {
+			return myEncounter;
+		}
+		public boolean isInstance() {
+			return myInstance;
+		}
+
+		public boolean isPatient() {
+			return myPatient;
 		}
 	}
 

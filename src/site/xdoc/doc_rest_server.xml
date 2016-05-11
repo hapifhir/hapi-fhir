@@ -45,9 +45,9 @@
 					annotated with special annotations indicating which RESTful operation
 					that method supports. Below is a simple example of a resource provider
 					which supports the
-					<a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a>
+					<a href="http://hl7.org/fhir/http.html#read">read</a>
 					operation (i.e. retrieve a single resource by ID) as well as the
-					<a href="http://hl7.org/implement/standards/fhir/http.html#search">search</a>
+					<a href="http://hl7.org/fhir/http.html#search">search</a>
 					operation (i.e. find any resources matching a given criteria) for a specific
 					search criteria.
 				</p>
@@ -65,6 +65,12 @@
 					to your resource provider. See
 					<a href="./doc_rest_operations.html">RESTful Operations</a> for
 					lots more examples of how to add methods for various operations.
+				</p>
+				<p>
+					For now, we will move on to the next step though, which is creating
+					the actual server to hold your resource providers and deploying that.
+					Once you have this working, you might want to come back and
+					start adding other operations.
 				</p>
 
 			</subsection>
@@ -597,6 +603,15 @@
 			</p>
 			
 		</section>
+		
+		<!-- 
+		<section name="Deploying to Containers">
+		    <Connector port="28081" protocol="HTTP/1.1"
+               connectionTimeout="20000" URIEncoding="UTF-8"
+               redirectPort="8443" maxHttpHeaderSize="32000" />
+		</section>
+		-->
+		
 		
 	</body>
 

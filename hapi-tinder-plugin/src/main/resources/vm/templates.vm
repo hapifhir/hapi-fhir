@@ -267,7 +267,7 @@
 		return this;
 	}
 
-#elseif ( ${child.boundCode} )
+#elseif ( ${child.boundCode} && ${child.referenceTypeForConstructor} != 'IDatatype')
 	/**
 	 * Sets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
@@ -277,11 +277,15 @@
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
+		set${child.methodName}(new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER, theValue));
+		
+/*
 #if ( $child.primitive && $child.repeatable == false )
 		get${child.methodName}Element().setValueAsEnum(theValue);
 #else
 		get${child.methodName}().setValueAsEnum(theValue);
 #end
+*/
 		return this;
 	}
 

@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -50,58 +51,14 @@ import ca.uhn.fhir.util.PortUtil;
 public class ServerFeaturesTest {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
 
-	@Test
-	public void testPrettyPrint() throws Exception {
-		/*
-		 * Not specified
-		 */
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		/*
-		 * Disabled
-		 */
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		/*
-		 * Enabled
-		 */
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
-
-	}
-
-	@Test
-	public void testAcceptHeaderXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
+	@Before
+	public void before() {
+		servlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
 	}
 
 	@Test
@@ -124,6 +81,56 @@ public class ServerFeaturesTest {
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
+
+	}
+
+	/**
+	 * Header value should be application/xml+fhir or application/json+fhir but
+	 * we should also accept application/xml and application/json 
+	 */
+	@Test
+	public void testAcceptHeaderNonFhirTypes() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_XML);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_JSON);
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
+
+	}
+
+	/**
+	 * Header value should be application/xml+fhir or application/json+fhir but
+	 * we should also accept text/xml and text/json 
+	 */
+	@Test
+	public void testAcceptHeaderNonFhirTypesNonStandard() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/xml");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/json");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
@@ -159,41 +166,6 @@ public class ServerFeaturesTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
-
-	}
-
-	@Test
-	public void testAcceptHeaderNonFhirTypes() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_XML);
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_JSON);
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
-
-	}
-
-	@Test
-	public void testHardcodedAddressStrategy() throws Exception {
-
-		servlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("<id>http://foo/bar/Patient/1"));
 
 	}
 
@@ -246,6 +218,32 @@ public class ServerFeaturesTest {
 	}
 
 	@Test
+	public void testAcceptHeaderXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+	}
+
+	@Test
+	public void testHardcodedAddressStrategy() throws Exception {
+
+		servlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<id>http://foo/bar/Patient/1"));
+
+	}
+
+	@Test
 	public void testInternalErrorIfNoId() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=findPatientsWithNoIdSpecified");
@@ -256,6 +254,43 @@ public class ServerFeaturesTest {
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, StringContains.containsString("ID"));
+
+	}
+
+	@Test
+	public void testPrettyPrint() throws Exception {
+		/*
+		 * Not specified
+		 */
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		/*
+		 * Disabled
+		 */
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		/*
+		 * Enabled
+		 */
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, IsNot.not(StringContains.containsString("<identifier><use")));
 
 	}
 
@@ -295,13 +330,9 @@ public class ServerFeaturesTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
-	}
-
-	@Before
-	public void before() {
-		servlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -327,10 +358,45 @@ public class ServerFeaturesTest {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.getGender().setText("M");
+			patient.getId().setValue("1");
+			return patient;
+		}
+
+		@Search(queryName = "findPatientsWithAbsoluteIdSpecified")
+		public List<Patient> findPatientsWithAbsoluteIdSpecified() {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("foo");
+			p.setId("http://absolute.com/Patient/123/_history/22");
+
+			Organization o = new Organization();
+			o.setId("http://foo.com/Organization/222/_history/333");
+			p.getManagingOrganization().setResource(o);
+
+			return Collections.singletonList(p);
+		}
+
+		@Search(queryName = "findPatientsWithNoIdSpecified")
+		public List<Patient> findPatientsWithNoIdSpecified() {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("foo");
+			return Collections.singletonList(p);
+		}
 
 		public Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
@@ -368,14 +434,6 @@ public class ServerFeaturesTest {
 			return retVal;
 		}
 
-		@Search(queryName = "searchWithWildcardRetVal")
-		public List<? extends IResource> searchWithWildcardRetVal() {
-			Patient p = new Patient();
-			p.setId("1234");
-			p.addName().addFamily("searchWithWildcardRetVal");
-			return Collections.singletonList(p);
-		}
-
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
@@ -393,43 +451,17 @@ public class ServerFeaturesTest {
 			}
 		}
 
-		@Search(queryName = "findPatientsWithNoIdSpecified")
-		public List<Patient> findPatientsWithNoIdSpecified() {
-			Patient p = new Patient();
-			p.addIdentifier().setSystem("foo");
-			return Collections.singletonList(p);
-		}
-
-		@Search(queryName = "findPatientsWithAbsoluteIdSpecified")
-		public List<Patient> findPatientsWithAbsoluteIdSpecified() {
-			Patient p = new Patient();
-			p.addIdentifier().setSystem("foo");
-			p.setId("http://absolute.com/Patient/123/_history/22");
-
-			Organization o = new Organization();
-			o.setId("http://foo.com/Organization/222/_history/333");
-			p.getManagingOrganization().setResource(o);
-
-			return Collections.singletonList(p);
-		}
-
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.getGender().setText("M");
-			patient.getId().setValue("1");
-			return patient;
+		@Search(queryName = "searchWithWildcardRetVal")
+		public List<? extends IResource> searchWithWildcardRetVal() {
+			Patient p = new Patient();
+			p.setId("1234");
+			p.addName().addFamily("searchWithWildcardRetVal");
+			return Collections.singletonList(p);
 		}
 
 	}

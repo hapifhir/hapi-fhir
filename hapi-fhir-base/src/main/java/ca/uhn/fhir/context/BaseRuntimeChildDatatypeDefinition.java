@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,17 +43,22 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		// should use RuntimeChildAny
 		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
+		assert Modifier.isAbstract(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
 		myDatatype = theDatatype;
 	}
 
+	/**
+	 * If this child has a bound type, this method will return the Enum type that
+	 * it is bound to. Otherwise, will return <code>null</code>.
+	 */
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return null;
+	}
+
 	@Override
-	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		Class<?> nextType = theDatatype;
-		while (nextType.equals(Object.class) == false) {
-			if (myDatatype.equals(nextType)) {
-				return getElementName();
-			}
-			nextType = nextType.getSuperclass();
+	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
+		if (getElementName().equals(theName)) {
+			return myElementDefinition;
 		}
 		return null;
 	}
@@ -71,9 +76,13 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		if (getElementName().equals(theName)) {
-			return myElementDefinition;
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
+		Class<?> nextType = theDatatype;
+		while (nextType.equals(Object.class) == false) {
+			if (myDatatype.equals(nextType)) {
+				return getElementName();
+			}
+			nextType = nextType.getSuperclass();
 		}
 		return null;
 	}

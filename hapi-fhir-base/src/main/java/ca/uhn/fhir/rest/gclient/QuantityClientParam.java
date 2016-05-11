@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
  * Token parameter type for use in fluent client interfaces
  */
+@SuppressWarnings("deprecation")
 public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 	private String myParamName;
@@ -39,12 +41,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits("~", Long.toString(theNumber));
+				return new AndUnits(ParamPrefixEnum.APPROXIMATE, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits("~", theNumber);
+				return new AndUnits(ParamPrefixEnum.APPROXIMATE, theNumber);
 			}
 		};
 	}
@@ -53,12 +55,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits("", Long.toString(theNumber));
+				return new AndUnits(null, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits("", theNumber);
+				return new AndUnits(null, theNumber);
 			}
 		};
 	}
@@ -72,12 +74,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits(">", Long.toString(theNumber));
+				return new AndUnits(ParamPrefixEnum.GREATERTHAN, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits(">", theNumber);
+				return new AndUnits(ParamPrefixEnum.GREATERTHAN, theNumber);
 			}
 		};
 	}
@@ -86,12 +88,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits(">=", Long.toString(theNumber));
+				return new AndUnits(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits(">=", theNumber);
+				return new AndUnits(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theNumber);
 			}
 		};
 	}
@@ -100,12 +102,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits("<", Long.toString(theNumber));
+				return new AndUnits(ParamPrefixEnum.LESSTHAN, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits("<", theNumber);
+				return new AndUnits(ParamPrefixEnum.LESSTHAN, theNumber);
 			}
 		};
 	}
@@ -114,27 +116,51 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits("<=", Long.toString(theNumber));
+				return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits("<=", theNumber);
+				return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theNumber);
 			}
 		};
 	}
 
+	/**
+	 * @deprecated Use {@link #withPrefix(ParamPrefixEnum)} instead, as {@link QuantityCompararatorEnum} has been deprecated
+	 */
+	@Deprecated
 	public IMatches<IAndUnits> withComparator(QuantityCompararatorEnum theComparator) {
-		final String cmp = theComparator != null ? theComparator.getCode() : "";
+		final String cmpString = theComparator != null ? theComparator.getCode() : "";
+		final ParamPrefixEnum prefix = ParamPrefixEnum.forDstu1Value(cmpString);
 		return new NumberClientParam.IMatches<IAndUnits>() {
 			@Override
 			public IAndUnits number(long theNumber) {
-				return new AndUnits(cmp, Long.toString(theNumber));
+				return new AndUnits(prefix, Long.toString(theNumber));
 			}
 
 			@Override
 			public IAndUnits number(String theNumber) {
-				return new AndUnits(cmp, theNumber);
+				return new AndUnits(prefix, theNumber);
+			}
+		};
+	}
+
+	/**
+	 * Use the given quantity prefix
+	 * 
+	 * @param thePrefix The prefix, or <code>null</code> for no prefix
+	 */
+	public IMatches<IAndUnits> withPrefix(final ParamPrefixEnum thePrefix) {
+		return new NumberClientParam.IMatches<IAndUnits>() {
+			@Override
+			public IAndUnits number(long theNumber) {
+				return new AndUnits(thePrefix, Long.toString(theNumber));
+			}
+
+			@Override
+			public IAndUnits number(String theNumber) {
+				return new AndUnits(thePrefix, theNumber);
 			}
 		};
 	}
@@ -150,10 +176,12 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 	private class AndUnits implements IAndUnits {
 
-		private String myToken1;
+		private ParamPrefixEnum myPrefix;
+		private String myValue;
 
-		public AndUnits(String theComparator, String theNumber) {
-			myToken1 = defaultString(theComparator) + defaultString(theNumber);
+		public AndUnits(ParamPrefixEnum thePrefix, String theNumber) {
+			myPrefix = thePrefix;
+			myValue = theNumber;
 		}
 
 		@Override
@@ -168,7 +196,7 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 		@Override
 		public ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits) {
-			return new QuantityCriterion(getParamName(), myToken1 , defaultString(theSystem) , defaultString(theUnits));
+			return new QuantityCriterion(getParamName(), myPrefix, myValue , defaultString(theSystem) , defaultString(theUnits));
 		}
 
 	}

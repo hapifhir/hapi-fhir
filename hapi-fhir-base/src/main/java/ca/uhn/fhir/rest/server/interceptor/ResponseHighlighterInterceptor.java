@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -53,6 +57,22 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 	public static final String PARAM_RAW_TRUE = "true";
 	public static final String PARAM_RAW = "_raw";
+
+//	private boolean myEncodeHeaders = false;
+//	
+//	/**
+//	 * Should headers be included in the HTML response?
+//	 */
+//	public boolean isEncodeHeaders() {
+//		return myEncodeHeaders;
+//	}
+//
+//	/**
+//	 * Should headers be included in the HTML response?
+//	 */
+//	public void setEncodeHeaders(boolean theEncodeHeaders) {
+//		myEncodeHeaders = theEncodeHeaders;
+//	}
 
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
@@ -164,35 +184,61 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 		return b.toString();
 	}
-
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 
+		boolean force = false;
+		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
+		if (formatParams != null) {
+			for (String next : formatParams) {
+				if (Constants.FORMATS_HTML.contains(next)) {
+					force = true;
+				}
+			}
+		}
+		
 		/*
 		 * It's not a browser...
 		 */
-		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
-		if (highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
+		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
+		if (!force && highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		String requestedWith = theServletRequest.getHeader("X-Requested-With");
-		if (requestedWith != null) {
+		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
+		/*
+		 * If the request has an Origin header, it is probably an AJAX request
+		 */
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+		
 
 		/*
 		 * Not a GET
 		 */
-		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
+		if (!force && theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
+		/*
+		 * Not binary
+		 */
+		if (!force && "Binary".equals(theRequestDetails.getResourceName())) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+
+		/*
+		 * Request for _raw
+		 */
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
-		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
+		if (!force && rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
@@ -242,33 +288,66 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		}
 		rawB.append(PARAM_RAW).append('=').append(PARAM_RAW_TRUE);
 		
+		StringBuilder b = new StringBuilder();
+		b.append("<html lang=\"en\">\n");
+		b.append("	<head>\n");
+		b.append("		<meta charset=\"utf-8\" />\n");
+		b.append("       <style>\n");
+		b.append(".hlQuot {\n");
+		b.append("  color: #88F;\n");
+		b.append("}\n");
+		b.append(".hlAttr {\n");
+		b.append("  color: #888;\n");
+		b.append("}\n");
+		b.append(".hlTagName {\n");
+		b.append("  color: #006699;\n");
+		b.append("}\n");
+		b.append(".hlControl {\n");
+		b.append("  color: #660000;\n");
+		b.append("}\n");
+		b.append(".hlText {\n");
+		b.append("  color: #000000;\n");
+		b.append("}\n");
+		b.append(".hlUrlBase {\n");
+		b.append("}");
+		b.append(".headersDiv {\n");
+		b.append("  background: #EEE;");
+		b.append("}");
+		b.append(".headerName {\n");
+		b.append("  color: #888;\n");
+		b.append("  font-family: monospace;\n");
+		b.append("}");
+		b.append(".headerValue {\n");
+		b.append("  color: #88F;\n");
+		b.append("  font-family: monospace;\n");
+		b.append("}");
+		b.append("BODY {\n");
+		b.append("  font-family: Arial;\n");
+		b.append("}");
+		b.append("       </style>\n");
+		b.append("	</head>\n");
+		b.append("\n");
+		b.append("	<body>");
+		b.append("This result is being rendered in HTML for easy viewing. <a href=\"");
+		b.append(rawB.toString());
+		b.append("\">Click here</a> to disable this.<br/><br/>");
+//		if (isEncodeHeaders()) {
+//			b.append("<h1>Request Headers</h1>");
+//			b.append("<div class=\"headersDiv\">");
+//			for (int next : theRequestDetails.get)
+//			b.append("</div>");
+//			b.append("<h1>Response Headers</h1>");
+//			b.append("<div class=\"headersDiv\">");
+//			b.append("</div>");
+//			b.append("<h1>Response Body</h1>");
+//		}
+		b.append("<pre>");
+		b.append(format(encoded, encoding));
+		b.append("</pre>");
+		b.append("   </body>");
+		b.append("</html>");
 		//@formatter:off
-		String out = "<html lang=\"en\">\n" + 
-		"	<head>\n" + 
-		"		<meta charset=\"utf-8\" />\n" + 
-		"       <style>\n" + ".hlQuot {\n" + 
-		"	color: #88F;\n" + "}\n" + 
-		".hlAttr {\n" +
-		"	color: #888;\n" + 
-		"}\n" + ".hlTagName {\n" + 
-		"	color: #006699;\n" + "}\n" + 
-		".hlControl {\n" + 
-		"	color: #660000;\n" + 
-		"}\n" + ".hlText {\n" + 
-		"	color: #000000;\n" + 
-		"}\n" + 
-		".hlUrlBase {\n" + 
-		"}" + 
-		"       </style>\n" + 
-		"	</head>\n" + 
-		"\n" + 
-		"	<body>" + 
-		"This result is being rendered in HTML for easy viewing. <a href=\"" + rawB.toString() + "\">Click here</a> to disable this.<br/><br/>" +
-		"<pre>" + 
-		format(encoded, encoding) + 
-		"</pre>" + 
-		"   </body>" + 
-		"</html>";
+		String out = b.toString();
 		//@formatter:on
 
 		try {
@@ -284,7 +363,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's not a browser...
 		 */
-		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
+		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!accept.contains(Constants.CT_HTML)) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}

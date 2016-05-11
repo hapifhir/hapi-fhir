@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3RoleClass {
@@ -43,7 +43,7 @@ public enum V3RoleClass {
          */
         _ROLECLASSASSOCIATIVE, 
         /**
-         * A relationship that is based on mutual behavior of the two Entities as being related. The basis of such relationship may be agreements (e.g., spouses, contract parties) or they may be de facto behavior (e.g. friends) or may be an incidental involvement with each other (e.g. parties over a dispute, siblings, children).
+         * A relationship that is based on mutual behavior of the two Entities as being related. The basis of such relationship may be agreements (e.g. spouses, contract parties) or they may be de facto behavior (e.g. friends) or may be an incidental involvement with each other (e.g. parties over a dispute, siblings, children).
          */
         _ROLECLASSMUTUALRELATIONSHIP, 
         /**
@@ -109,7 +109,7 @@ public enum V3RoleClass {
                            Discussion: With respect to liability insurance such as property and casualty insurance, a claimant must file a claim requesting indemnification for a loss that the claimant considers covered under the policy of a named insured.  The claims adjuster for the policy underwriter will review the claim to determine whether the loss meets the benefit coverage criteria under a policy, and base any indemnification or coverage payment on that review.  If a third party is liable in whole or part for the loss, the underwriter may pursue third party liability recovery.  A claimant may be involved in civil or criminal legal proceedings involving claims against a defendant party that is indemnified by an insurance policy or to protest the finding of a claims adjustor. With respect to life insurance, a beneficiary designated by a named insured becomes a claimant of the proceeds of coverage, as in the case of a life insurance policy.  However, a claimant for coverage under life insurance is not necessarily a designated beneficiary.
 
                         
-                           Note: A claimant is not a named insured.  However, a named insured may make a claim under a policy, e.g., an insured driver may make a claim for an injury under his or her comprehensive automobile insurance policy.  Similarly, a program eligible may make a claim under program, e.g., an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.
+                           Note: A claimant is not a named insured.  However, a named insured may make a claim under a policy, e.g. an insured driver may make a claim for an injury under his or her comprehensive automobile insurance policy.  Similarly, a program eligible may make a claim under program, e.g. an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.
 
                         In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that either a named insured or an individual insured has filed a claim for a loss.  In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a "claim" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.
 
@@ -121,10 +121,10 @@ public enum V3RoleClass {
          * Description: A role played by a party to an insurance policy to which the insurer agrees to indemnify for losses, provides benefits for, or renders services.  A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subjects, or organizations.
 
                         
-                           Discussion: The coded concept NAMED should not be used where a more specific child concept in this Specializable value set applies.  In some cases, the named insured may not be the policy holder, e.g., where a policy holder purchases life insurance policy in which another party is the named insured and the policy holder is the beneficiary of the policy.
+                           Discussion: The coded concept NAMED should not be used where a more specific child concept in this Specializable value set applies.  In some cases, the named insured may not be the policy holder, e.g. where a policy holder purchases life insurance policy in which another party is the named insured and the policy holder is the beneficiary of the policy.
 
                         
-                           Note: The party playing the role of a named insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g., e.g., a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy e.g., if injured in an automobile accident and there is no liable third party.  In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that a named insured has filed a claim for a loss.
+                           Note: The party playing the role of a named insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g. e.g. a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy e.g. if injured in an automobile accident and there is no liable third party.  In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that a named insured has filed a claim for a loss.
 
                         
                            Example: The named insured under a comprehensive automobile, disability, or property and casualty policy that is the named insured and may or may not be the policy holder.
@@ -134,7 +134,7 @@ public enum V3RoleClass {
          * Description: A role played by a person covered under a policy or program based on an association with a subscriber, which is recognized by the policy holder.
 
                         
-                           Note:  The party playing the role of a dependent is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a dependent may make a claim under a policy, e.g., a dependent under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a dependent making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the dependent has filed a claim for services covered under the health insurance policy.
+                           Note:  The party playing the role of a dependent is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a dependent may make a claim under a policy, e.g. a dependent under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a dependent making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the dependent has filed a claim for services covered under the health insurance policy.
 
                         
                            Example: The dependent has an association with the subscriber such as a financial dependency or personal relationship such as that of a spouse, or a natural or adopted child.  The policy holder may be required by law to recognize certain associations or may have discretion about the associations.  For example, a policy holder may dictate the criteria for the dependent status of adult children who are students, such as requiring full time enrollment, or may recognize domestic partners as dependents.  Under certain circumstances, the dependent may be under the indirect authority of a responsible party acting as a surrogate for the subscriber, for example, if the subscriber is differently abled or deceased, a guardian ad Lidem or estate executor may be appointed to assume the subscriberaTMs legal standing in the relationship with the dependent.
@@ -144,7 +144,7 @@ public enum V3RoleClass {
          * Description: A role played by a party covered under a policy as the policy holder.  An individual may be either a person or an organization.
 
                         
-                           Note: The party playing the role of an individual insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g., a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy if injured in an automobile accident and there is no liable third party.  In the case of an individual insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that an individual insured has filed a claim for a loss.
+                           Note: The party playing the role of an individual insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g. a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy if injured in an automobile accident and there is no liable third party.  In the case of an individual insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that an individual insured has filed a claim for a loss.
 
                         
                            Example: The individual insured under a comprehensive automobile, disability, or property and casualty policy that is the policy holder.
@@ -157,7 +157,7 @@ public enum V3RoleClass {
                            Discussion: The policy holder holds the contract with the policy or program underwriter.  The subscriber holds a certificate of coverage under the contract.  In legal proceedings concerning the policy or program, the terms of the contract takes precedence over the terms of the certificate of coverage if there are any inconsistencies.
 
                         
-                           Note: The party playing the role of a subscriber is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a subscriber may make a claim under a policy, e.g., a subscriber under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a subscriber making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the subscriber has filed a claim for services covered under the health insurance policy.
+                           Note: The party playing the role of a subscriber is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a subscriber may make a claim under a policy, e.g. a subscriber under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a subscriber making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the subscriber has filed a claim for services covered under the health insurance policy.
 
                         
                            Example: An employee or a member of an association.
@@ -170,12 +170,12 @@ public enum V3RoleClass {
                            Discussion: A program as typically government administered coverage for parties determined eligible under the terms of the program.
 
                         
-                           Note: The party playing a program eligible is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However a program eligible may make a claim under program, e.g., an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.
+                           Note: The party playing a program eligible is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However a program eligible may make a claim under program, e.g. an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.
 
                         In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a "claim" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.
 
                         
-                           Example: A party meeting eligibility criteria related to health or financial status, e.g., in the U.S., persons meeting health, demographic, or financial criteria established by state and federal law are eligible for Medicaid.
+                           Example: A party meeting eligibility criteria related to health or financial status, e.g. in the U.S., persons meeting health, demographic, or financial criteria established by state and federal law are eligible for Medicaid.
          */
         PROG, 
         /**
@@ -214,7 +214,7 @@ public enum V3RoleClass {
          */
         RESBJ, 
         /**
-         * A relationship in which the scoper certifies the player ( e. g. a medical care giver, a medical device or a provider organization) to perform certain activities that fall under the jurisdiction of the scoper (e.g., a health authority licensing healthcare providers, a medical quality authority certifying healthcare professionals).
+         * A relationship in which the scoper certifies the player ( e. g. a medical care giver, a medical device or a provider organization) to perform certain activities that fall under the jurisdiction of the scoper (e.g. a health authority licensing healthcare providers, a medical quality authority certifying healthcare professionals).
          */
         LIC, 
         /**
@@ -322,6 +322,22 @@ public enum V3RoleClass {
          * Links two entities with classCode PSN (person) in a personal relationship. The character of the relationship must be defined by a PersonalRelationshipRoleType code. The player and scoper are determined by PersonalRelationshipRoleType code as well.
          */
         PRS, 
+        /**
+         * The "same" roleclass asserts an identity between playing and scoping entities: that they are in fact instances of the same entity and, in the case of discrepancies (e.g. different DOB, gender), that one or both are in error.
+
+                        
+                           Usage:
+                        
+
+                        playing and scoping entities must have same classcode, but need not have identical attributes or values. 
+
+                        
+                           Example: 
+                        
+
+                        a provider registry maintains sets of conflicting demographic data for what is reported to be the same individual.
+         */
+        SELF, 
         /**
          * An association for a playing Entity that is used, known, treated, handled, built, or destroyed, etc. under the auspices of the scoping Entity. The playing Entity is passive in these roles (even though it may be active in other roles), in the sense that the kinds of things done to it in this role happen without an agreement from the playing Entity.
          */
@@ -466,11 +482,11 @@ public enum V3RoleClass {
          * Description: Specifies the player Entity (the equivalent Entity) as an Entity that is considered to be equivalent to a reference Entity (scoper).  The equivalence is in principle a symmetric relationship, however, it is expected that the scoper is a reference entity which serves as reference entity for multiple different equivalent entities. 
 
                         
-                           Examples: An innovator's medicine formulation is the reference for "generics", i.e., formulations manufactured differently but having been proven to be biologically equivalent to the reference medicine. Another example is a reference ingredient that serves as basis for quantity specifications (basis of strength, e.g., metoprolol succinate specified in terms of metoprolol tartrate.)
+                           Examples: An innovator's medicine formulation is the reference for "generics", i.e., formulations manufactured differently but having been proven to be biologically equivalent to the reference medicine. Another example is a reference ingredient that serves as basis for quantity specifications (basis of strength, e.g. metoprolol succinate specified in terms of metoprolol tartrate.)
          */
         EQUIV, 
         /**
-         * The "same" role asserts an identity between playing and scoping entities, i.e., that they are in fact two records of the same entity instance, and, in the case of discrepancies (e.g different DOB, gender), that one or both are in error.
+         * The "same" role asserts an identity between playing and scoping entities, i.e., that they are in fact two records of the same entity instance, and, in the case of discrepancies (e.g. different DOB, gender), that one or both are in error.
 
                         
                            Usage:
@@ -508,7 +524,13 @@ public enum V3RoleClass {
          */
         INST, 
         /**
-         * An association between two Entities where the playing Entity is considered in some way "part" of the scoping Entity, e.g., as a member, component, ingredient, or content. Being "part" in the broadest sense of the word can mean anything from being an integral structural component to a mere incidental temporary association of a playing Entity with a (generally larger) scoping Entity.
+         * An entity that subsumes the identity of another.  Used in the context of merging documented entity instances. Both the player and scoper must have the same classCode.
+
+                        The use of this code is deprecated in favor of the term SUBY which is its inverse and is more ontologically correct.
+         */
+        SUBS, 
+        /**
+         * An association between two Entities where the playing Entity is considered in some way "part" of the scoping Entity, e.g. as a member, component, ingredient, or content. Being "part" in the broadest sense of the word can mean anything from being an integral structural component to a mere incidental temporary association of a playing Entity with a (generally larger) scoping Entity.
          */
         _ROLECLASSPARTITIVE, 
         /**
@@ -516,19 +538,19 @@ public enum V3RoleClass {
          */
         CONT, 
         /**
-         * An exposure agent carrier is an entity that is capable of conveying an exposure agent from one entity to another.  The scoper of the role must be the exposure agent (e.g., pathogen).
+         * An exposure agent carrier is an entity that is capable of conveying an exposure agent from one entity to another.  The scoper of the role must be the exposure agent (e.g. pathogen).
          */
         EXPAGTCAR, 
         /**
-         * Description: A vector is a living subject that carries an exposure agent.  The vector does not cause the disease itself, but exposes targets to the exposure agent.  A mosquito carrying malaria is an example of a vector.  The scoper of the role must be the exposure agent (e.g., pathogen).
+         * Description: A vector is a living subject that carries an exposure agent.  The vector does not cause the disease itself, but exposes targets to the exposure agent.  A mosquito carrying malaria is an example of a vector.  The scoper of the role must be the exposure agent (e.g. pathogen).
          */
         EXPVECTOR, 
         /**
-         * Description: A fomite is a non-living entity that is capable of conveying exposure agent from one entity to another.  A doorknob contaminated with a Norovirus is an example of a fomite.  Anyone touching the doorknob would be exposed to the virus.  The scoper of the role must be the exposure agent (e.g., pathogen).
+         * Description: A fomite is a non-living entity that is capable of conveying exposure agent from one entity to another.  A doorknob contaminated with a Norovirus is an example of a fomite.  Anyone touching the doorknob would be exposed to the virus.  The scoper of the role must be the exposure agent (e.g. pathogen).
          */
         FOMITE, 
         /**
-         * Relates a component (player) to a mixture (scoper). E.g., Glucose and Water are ingredients of D5W, latex may be an ingredient in a tracheal tube.
+         * Relates a component (player) to a mixture (scoper); e.g. Glucose and Water are ingredients of D5W, latex may be an ingredient in a tracheal tube.
          */
         INGR, 
         /**
@@ -565,7 +587,7 @@ public enum V3RoleClass {
          */
         ADTV, 
         /**
-         * A base ingredient (player) is what comprises the major part of a mixture (scoper). E.g., Water in most i.v. solutions, or Vaseline in salves. Among all ingredients of a material, there should be only one base. A base substance can, in turn, be a mixture.
+         * A base ingredient (player) is what comprises the major part of a mixture (scoper); e.g. Water in most i.v. solutions, or Vaseline in salves. Among all ingredients of a material, there should be only one base. A base substance can, in turn, be a mixture.
          */
         BASE, 
         /**
@@ -573,7 +595,7 @@ public enum V3RoleClass {
          */
         CNTM, 
         /**
-         * An ingredient which is not considered therapeutically active, e.g., colors, flavors, stabilizers, or preservatives, fillers, or structural components added to an active ingredient in order to facilitate administration of the active ingredient but without being considered therapeutically active. An inactive ingredient need not be biologically inert, e.g., might be active as an allergen or might have a pleasant taste, but is not an essential constituent delivering the therapeutic effect.
+         * An ingredient which is not considered therapeutically active, e.g. colors, flavors, stabilizers, or preservatives, fillers, or structural components added to an active ingredient in order to facilitate administration of the active ingredient but without being considered therapeutically active. An inactive ingredient need not be biologically inert, e.g. might be active as an allergen or might have a pleasant taste, but is not an essential constituent delivering the therapeutic effect.
          */
         IACT, 
         /**
@@ -637,6 +659,30 @@ public enum V3RoleClass {
          * A microorganism that has been isolated from other microorganisms or a source matrix.
          */
         ISLT, 
+        /**
+         * The player of the role is a child of the scoping entity, in a generic sense.
+         */
+        CHILD, 
+        /**
+         * A role played by an entity that receives credentials from the scoping entity.
+         */
+        CRED, 
+        /**
+         * nurse practitioner
+         */
+        NURPRAC, 
+        /**
+         * nurse
+         */
+        NURS, 
+        /**
+         * physician assistant
+         */
+        PA, 
+        /**
+         * physician
+         */
+        PHYS, 
         /**
          * added to help the parsers
          */
@@ -728,6 +774,8 @@ public enum V3RoleClass {
           return CAREGIVER;
         if ("PRS".equals(codeString))
           return PRS;
+        if ("SELF".equals(codeString))
+          return SELF;
         if ("_RoleClassPassive".equals(codeString))
           return _ROLECLASSPASSIVE;
         if ("ACCESS".equals(codeString))
@@ -796,6 +844,8 @@ public enum V3RoleClass {
           return GRIC;
         if ("INST".equals(codeString))
           return INST;
+        if ("SUBS".equals(codeString))
+          return SUBS;
         if ("_RoleClassPartitive".equals(codeString))
           return _ROLECLASSPARTITIVE;
         if ("CONT".equals(codeString))
@@ -852,6 +902,18 @@ public enum V3RoleClass {
           return ALQT;
         if ("ISLT".equals(codeString))
           return ISLT;
+        if ("CHILD".equals(codeString))
+          return CHILD;
+        if ("CRED".equals(codeString))
+          return CRED;
+        if ("NURPRAC".equals(codeString))
+          return NURPRAC;
+        if ("NURS".equals(codeString))
+          return NURS;
+        if ("PA".equals(codeString))
+          return PA;
+        if ("PHYS".equals(codeString))
+          return PHYS;
         throw new Exception("Unknown V3RoleClass code '"+codeString+"'");
         }
         public String toCode() {
@@ -898,6 +960,7 @@ public enum V3RoleClass {
             case UNDWRT: return "UNDWRT";
             case CAREGIVER: return "CAREGIVER";
             case PRS: return "PRS";
+            case SELF: return "SELF";
             case _ROLECLASSPASSIVE: return "_RoleClassPassive";
             case ACCESS: return "ACCESS";
             case ADJY: return "ADJY";
@@ -932,6 +995,7 @@ public enum V3RoleClass {
             case GEN: return "GEN";
             case GRIC: return "GRIC";
             case INST: return "INST";
+            case SUBS: return "SUBS";
             case _ROLECLASSPARTITIVE: return "_RoleClassPartitive";
             case CONT: return "CONT";
             case EXPAGTCAR: return "EXPAGTCAR";
@@ -960,6 +1024,12 @@ public enum V3RoleClass {
             case SPEC: return "SPEC";
             case ALQT: return "ALQT";
             case ISLT: return "ISLT";
+            case CHILD: return "CHILD";
+            case CRED: return "CRED";
+            case NURPRAC: return "NURPRAC";
+            case NURS: return "NURS";
+            case PA: return "PA";
+            case PHYS: return "PHYS";
             default: return "?";
           }
         }
@@ -970,7 +1040,7 @@ public enum V3RoleClass {
           switch (this) {
             case ROL: return "Corresponds to the Role class";
             case _ROLECLASSASSOCIATIVE: return "A general association between two entities that is neither partitive nor ontological.";
-            case _ROLECLASSMUTUALRELATIONSHIP: return "A relationship that is based on mutual behavior of the two Entities as being related. The basis of such relationship may be agreements (e.g., spouses, contract parties) or they may be de facto behavior (e.g. friends) or may be an incidental involvement with each other (e.g. parties over a dispute, siblings, children).";
+            case _ROLECLASSMUTUALRELATIONSHIP: return "A relationship that is based on mutual behavior of the two Entities as being related. The basis of such relationship may be agreements (e.g. spouses, contract parties) or they may be de facto behavior (e.g. friends) or may be an incidental involvement with each other (e.g. parties over a dispute, siblings, children).";
             case _ROLECLASSRELATIONSHIPFORMAL: return "A relationship between two entities that is formally recognized, frequently by a contract or similar agreement.";
             case AFFL: return "Player of the Affiliate role has a business/professional relationship with scoper.  Player and scoper may be persons or organization.  The Affiliate relationship does not imply membership in a group, nor does it exist for resource scheduling purposes.\r\n\n                        \n                           Example: A healthcare provider is affiliated with another provider as a business associate.";
             case AGNT: return "An entity (player) that acts or is authorized to act on behalf of another entity (scoper).";
@@ -983,12 +1053,12 @@ public enum V3RoleClass {
             case GUARD: return "Guardian of a ward";
             case CIT: return "Citizen of apolitical entity";
             case COVPTY: return "A role class played by a person who receives benefit coverage under the terms of a particular insurance policy.  The underwriter of that policy is the scoping entity.  The covered party receives coverage because of some contractual or other relationship with the holder of that policy.\r\n\n                        \n                           Discussion:This reason for coverage is captured in 'Role.code' and a relationship link with type code of indirect authority should be included using the policy holder role as the source, and the covered party role as the target.\r\n\n                        Note that a particular policy may cover several individuals one of whom may be, but need not be, the policy holder.  Thus the notion of covered party is a role that is distinct from that of the policy holder.";
-            case CLAIM: return "Description: A role played by a party making a claim for coverage under a policy or program.  A claimant must be either a person or organization, or a group of persons or organizations.  A claimant is not a named insured or a program eligible.\r\n\n                        \n                           Discussion: With respect to liability insurance such as property and casualty insurance, a claimant must file a claim requesting indemnification for a loss that the claimant considers covered under the policy of a named insured.  The claims adjuster for the policy underwriter will review the claim to determine whether the loss meets the benefit coverage criteria under a policy, and base any indemnification or coverage payment on that review.  If a third party is liable in whole or part for the loss, the underwriter may pursue third party liability recovery.  A claimant may be involved in civil or criminal legal proceedings involving claims against a defendant party that is indemnified by an insurance policy or to protest the finding of a claims adjustor. With respect to life insurance, a beneficiary designated by a named insured becomes a claimant of the proceeds of coverage, as in the case of a life insurance policy.  However, a claimant for coverage under life insurance is not necessarily a designated beneficiary.\r\n\n                        \n                           Note: A claimant is not a named insured.  However, a named insured may make a claim under a policy, e.g., an insured driver may make a claim for an injury under his or her comprehensive automobile insurance policy.  Similarly, a program eligible may make a claim under program, e.g., an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.\r\n\n                        In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that either a named insured or an individual insured has filed a claim for a loss.  In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a \"claim\" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.\r\n\n                        \n                           Example: A claimant under automobile policy that is not the named insured.";
-            case NAMED: return "Description: A role played by a party to an insurance policy to which the insurer agrees to indemnify for losses, provides benefits for, or renders services.  A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subjects, or organizations.\r\n\n                        \n                           Discussion: The coded concept NAMED should not be used where a more specific child concept in this Specializable value set applies.  In some cases, the named insured may not be the policy holder, e.g., where a policy holder purchases life insurance policy in which another party is the named insured and the policy holder is the beneficiary of the policy.\r\n\n                        \n                           Note: The party playing the role of a named insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g., e.g., a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy e.g., if injured in an automobile accident and there is no liable third party.  In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that a named insured has filed a claim for a loss.\r\n\n                        \n                           Example: The named insured under a comprehensive automobile, disability, or property and casualty policy that is the named insured and may or may not be the policy holder.";
-            case DEPEN: return "Description: A role played by a person covered under a policy or program based on an association with a subscriber, which is recognized by the policy holder.\r\n\n                        \n                           Note:  The party playing the role of a dependent is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a dependent may make a claim under a policy, e.g., a dependent under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a dependent making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the dependent has filed a claim for services covered under the health insurance policy.\r\n\n                        \n                           Example: The dependent has an association with the subscriber such as a financial dependency or personal relationship such as that of a spouse, or a natural or adopted child.  The policy holder may be required by law to recognize certain associations or may have discretion about the associations.  For example, a policy holder may dictate the criteria for the dependent status of adult children who are students, such as requiring full time enrollment, or may recognize domestic partners as dependents.  Under certain circumstances, the dependent may be under the indirect authority of a responsible party acting as a surrogate for the subscriber, for example, if the subscriber is differently abled or deceased, a guardian ad Lidem or estate executor may be appointed to assume the subscriberaTMs legal standing in the relationship with the dependent.";
-            case INDIV: return "Description: A role played by a party covered under a policy as the policy holder.  An individual may be either a person or an organization.\r\n\n                        \n                           Note: The party playing the role of an individual insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g., a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy if injured in an automobile accident and there is no liable third party.  In the case of an individual insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that an individual insured has filed a claim for a loss.\r\n\n                        \n                           Example: The individual insured under a comprehensive automobile, disability, or property and casualty policy that is the policy holder.";
-            case SUBSCR: return "Description: A role played by a person covered under a policy based on association with a sponsor who is the policy holder, and whose association may provide for the eligibility of dependents for coverage.\r\n\n                        \n                           Discussion: The policy holder holds the contract with the policy or program underwriter.  The subscriber holds a certificate of coverage under the contract.  In legal proceedings concerning the policy or program, the terms of the contract takes precedence over the terms of the certificate of coverage if there are any inconsistencies.\r\n\n                        \n                           Note: The party playing the role of a subscriber is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a subscriber may make a claim under a policy, e.g., a subscriber under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a subscriber making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the subscriber has filed a claim for services covered under the health insurance policy.\r\n\n                        \n                           Example: An employee or a member of an association.";
-            case PROG: return "Description: A role played by a party that meets the eligibility criteria for coverage under a program.  A program eligible may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subjects, or organizations.\r\n\n                        \n                           Discussion: A program as typically government administered coverage for parties determined eligible under the terms of the program.\r\n\n                        \n                           Note: The party playing a program eligible is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However a program eligible may make a claim under program, e.g., an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.\r\n\n                        In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a \"claim\" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.\r\n\n                        \n                           Example: A party meeting eligibility criteria related to health or financial status, e.g., in the U.S., persons meeting health, demographic, or financial criteria established by state and federal law are eligible for Medicaid.";
+            case CLAIM: return "Description: A role played by a party making a claim for coverage under a policy or program.  A claimant must be either a person or organization, or a group of persons or organizations.  A claimant is not a named insured or a program eligible.\r\n\n                        \n                           Discussion: With respect to liability insurance such as property and casualty insurance, a claimant must file a claim requesting indemnification for a loss that the claimant considers covered under the policy of a named insured.  The claims adjuster for the policy underwriter will review the claim to determine whether the loss meets the benefit coverage criteria under a policy, and base any indemnification or coverage payment on that review.  If a third party is liable in whole or part for the loss, the underwriter may pursue third party liability recovery.  A claimant may be involved in civil or criminal legal proceedings involving claims against a defendant party that is indemnified by an insurance policy or to protest the finding of a claims adjustor. With respect to life insurance, a beneficiary designated by a named insured becomes a claimant of the proceeds of coverage, as in the case of a life insurance policy.  However, a claimant for coverage under life insurance is not necessarily a designated beneficiary.\r\n\n                        \n                           Note: A claimant is not a named insured.  However, a named insured may make a claim under a policy, e.g. an insured driver may make a claim for an injury under his or her comprehensive automobile insurance policy.  Similarly, a program eligible may make a claim under program, e.g. an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.\r\n\n                        In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that either a named insured or an individual insured has filed a claim for a loss.  In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a \"claim\" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.\r\n\n                        \n                           Example: A claimant under automobile policy that is not the named insured.";
+            case NAMED: return "Description: A role played by a party to an insurance policy to which the insurer agrees to indemnify for losses, provides benefits for, or renders services.  A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subjects, or organizations.\r\n\n                        \n                           Discussion: The coded concept NAMED should not be used where a more specific child concept in this Specializable value set applies.  In some cases, the named insured may not be the policy holder, e.g. where a policy holder purchases life insurance policy in which another party is the named insured and the policy holder is the beneficiary of the policy.\r\n\n                        \n                           Note: The party playing the role of a named insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g. e.g. a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy e.g. if injured in an automobile accident and there is no liable third party.  In the case of a named insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that a named insured has filed a claim for a loss.\r\n\n                        \n                           Example: The named insured under a comprehensive automobile, disability, or property and casualty policy that is the named insured and may or may not be the policy holder.";
+            case DEPEN: return "Description: A role played by a person covered under a policy or program based on an association with a subscriber, which is recognized by the policy holder.\r\n\n                        \n                           Note:  The party playing the role of a dependent is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a dependent may make a claim under a policy, e.g. a dependent under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a dependent making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the dependent has filed a claim for services covered under the health insurance policy.\r\n\n                        \n                           Example: The dependent has an association with the subscriber such as a financial dependency or personal relationship such as that of a spouse, or a natural or adopted child.  The policy holder may be required by law to recognize certain associations or may have discretion about the associations.  For example, a policy holder may dictate the criteria for the dependent status of adult children who are students, such as requiring full time enrollment, or may recognize domestic partners as dependents.  Under certain circumstances, the dependent may be under the indirect authority of a responsible party acting as a surrogate for the subscriber, for example, if the subscriber is differently abled or deceased, a guardian ad Lidem or estate executor may be appointed to assume the subscriberaTMs legal standing in the relationship with the dependent.";
+            case INDIV: return "Description: A role played by a party covered under a policy as the policy holder.  An individual may be either a person or an organization.\r\n\n                        \n                           Note: The party playing the role of an individual insured is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a named insured may make a claim under a policy, e.g. a party that is the named insured and policy holder under a comprehensive automobile insurance policy may become the claimant for coverage under that policy if injured in an automobile accident and there is no liable third party.  In the case of an individual insured making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that an individual insured has filed a claim for a loss.\r\n\n                        \n                           Example: The individual insured under a comprehensive automobile, disability, or property and casualty policy that is the policy holder.";
+            case SUBSCR: return "Description: A role played by a person covered under a policy based on association with a sponsor who is the policy holder, and whose association may provide for the eligibility of dependents for coverage.\r\n\n                        \n                           Discussion: The policy holder holds the contract with the policy or program underwriter.  The subscriber holds a certificate of coverage under the contract.  In legal proceedings concerning the policy or program, the terms of the contract takes precedence over the terms of the certificate of coverage if there are any inconsistencies.\r\n\n                        \n                           Note: The party playing the role of a subscriber is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However, a subscriber may make a claim under a policy, e.g. a subscriber under a health insurance policy may become the claimant for coverage under that policy for wellness examines or if injured and there is no liable third party.  In the case of a subscriber making a claim, a role type code INSCLM (insured claimant) subtypes the class to indicate that the subscriber has filed a claim for services covered under the health insurance policy.\r\n\n                        \n                           Example: An employee or a member of an association.";
+            case PROG: return "Description: A role played by a party that meets the eligibility criteria for coverage under a program.  A program eligible may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subjects, or organizations.\r\n\n                        \n                           Discussion: A program as typically government administered coverage for parties determined eligible under the terms of the program.\r\n\n                        \n                           Note: The party playing a program eligible is not a claimant in the sense conveyed by the RoleClassCoveredParty CLAIM (claimant).  However a program eligible may make a claim under program, e.g. an unemployed worker may claim benefits under an unemployment insurance program, but parties playing these covered party role classes are not, for purposes of this vocabulary and in an effort to clearly distinguish role classes, considered claimants.\r\n\n                        In the case of a program eligible, a role type code INJWKR (injured worker) subtypes the class to indicate that the covered party in a workers compensation program is an injured worker, and as such, has filed a \"claim\" under the program for benefits.  Likewise, a covered role type code UNEMP (unemployed worker) subtypes the program eligible class to indicate that the covered party in an unemployment insurance program has filed a claim for unemployment benefits.\r\n\n                        \n                           Example: A party meeting eligibility criteria related to health or financial status, e.g. in the U.S., persons meeting health, demographic, or financial criteria established by state and federal law are eligible for Medicaid.";
             case CRINV: return "A role played by a provider, always a person, who has agency authority from a Clinical Research Sponsor to direct the conduct of a clinical research trial or study on behalf of the sponsor.";
             case CRSPNSR: return "A role played by an entity, usually an organization, that is the sponsor of a clinical research trial or study.  The sponsor commissions the study, bears the expenses, is responsible for satisfying all legal requirements concerning subject safety and privacy, and is generally responsible for collection, storage and analysis of the data generated during the trial.  No scoper is necessary, as a clinical research sponsor undertakes the role on its own authority and declaration. Clinical research sponsors are usually educational or other research organizations, government agencies or biopharmaceutical companies.";
             case EMP: return "A relationship between a person or organization and a person or organization formed for the purpose of exchanging work for compensation.  The purpose of the role is to identify the type of relationship the employee has to the employer, rather than the nature of the work actually performed.  (Contrast with AssignedEntity.)";
@@ -997,7 +1067,7 @@ public enum V3RoleClass {
             case INVSBJ: return "An entity that is the subject of an investigation. This role is scoped by the party responsible for the investigation.";
             case CASEBJ: return "A person, non-person living subject, or place that is the subject of an investigation related to a notifiable condition (health circumstance that is reportable within the applicable public health jurisdiction)";
             case RESBJ: return "Definition:Specifies the administrative functionality within a formal experimental design for which the ResearchSubject role was established.\r\n\n                        \n                           Examples: Screening - role is used for pre-enrollment evaluation portion of the design; enrolled - role is used for subjects admitted to the experimental portion of the design.";
-            case LIC: return "A relationship in which the scoper certifies the player ( e. g. a medical care giver, a medical device or a provider organization) to perform certain activities that fall under the jurisdiction of the scoper (e.g., a health authority licensing healthcare providers, a medical quality authority certifying healthcare professionals).";
+            case LIC: return "A relationship in which the scoper certifies the player ( e. g. a medical care giver, a medical device or a provider organization) to perform certain activities that fall under the jurisdiction of the scoper (e.g. a health authority licensing healthcare providers, a medical quality authority certifying healthcare professionals).";
             case NOT: return "notary public";
             case PROV: return "An Entity (player) that is authorized to provide health care services by some authorizing agency (scoper).";
             case PAT: return "A Role of a LivingSubject (player) as an actual or potential recipient of health care services from a healthcare provider organization (scoper).\r\n\n                        \n                           Usage Note: Communication about relationships between patients and specific healthcare practitioners (people) is not done via scoper.  Instead this is generally done using the CareProvision act.  This allows linkage between patient and a particular healthcare practitioner role and also allows description of the type of care involved in the relationship.";
@@ -1010,6 +1080,7 @@ public enum V3RoleClass {
             case UNDWRT: return "A role played by a person or an organization.  It is the party that \r\n\n                        \n                           \n                              accepts fiscal responsibility for insurance plans and the policies created under those plans;\r\n\n                           \n                           \n                              administers and accepts fiscal responsibility for a program that provides coverage for services to eligible individuals; and/or\r\n\n                           \n                           \n                              has the responsibility to assess the merits of each risk and decide a suitable premium for accepting all or part of the risk.  If played by an organization, this role may be further specified by an appropriate RoleCode.\r\n\n                           \n                        \n                        \n                           Example:\n                        \r\n\n                        \n                           \n                              A health insurer; \r\n\n                           \n                           \n                              Medicaid Program;\r\n\n                           \n                           \n                              Lloyd's of London";
             case CAREGIVER: return "A person responsible for the primary care of a patient at home.";
             case PRS: return "Links two entities with classCode PSN (person) in a personal relationship. The character of the relationship must be defined by a PersonalRelationshipRoleType code. The player and scoper are determined by PersonalRelationshipRoleType code as well.";
+            case SELF: return "The \"same\" roleclass asserts an identity between playing and scoping entities: that they are in fact instances of the same entity and, in the case of discrepancies (e.g. different DOB, gender), that one or both are in error.\r\n\n                        \n                           Usage:\n                        \r\n\n                        playing and scoping entities must have same classcode, but need not have identical attributes or values. \r\n\n                        \n                           Example: \n                        \r\n\n                        a provider registry maintains sets of conflicting demographic data for what is reported to be the same individual.";
             case _ROLECLASSPASSIVE: return "An association for a playing Entity that is used, known, treated, handled, built, or destroyed, etc. under the auspices of the scoping Entity. The playing Entity is passive in these roles (even though it may be active in other roles), in the sense that the kinds of things done to it in this role happen without an agreement from the playing Entity.";
             case ACCESS: return "A role in which the playing entity (material) provides access to another entity. The principal use case is intravenous (or other bodily) access lines that preexist and need to be referred to for medication routing instructions.";
             case ADJY: return "A physical association whereby two Entities are in some (even lose) spatial relationship with each other such that they touch each other in some way.\r\n\n                        \n                           Examples: the colon is connected (and therefore adjacent) to the jejunum; the colon is adjacent to the liver (even if not actually connected.)\r\n\n                        \n                           UsageConstraints: Adjacency is in principle a symmetrical connection, but scoper and player of the role should, where applicable, be assigned to have scoper be the larger, more central Entity and player the smaller, more distant, appendage.";
@@ -1038,27 +1109,28 @@ public enum V3RoleClass {
             case USED: return "Description:An entity (player) that is used by another entity (scoper)";
             case WRTE: return "A role a product plays when a guarantee is given to the purchaser by the seller (scoping entity) stating that the product is reliable and free from known defects and that the seller will repair or replace defective parts within a given time limit and under certain conditions.";
             case _ROLECLASSONTOLOGICAL: return "A relationship in which the scoping Entity defines or specifies what the playing Entity is.  Thus, the player's \"being\" (Greek: ontos) is specified.";
-            case EQUIV: return "Description: Specifies the player Entity (the equivalent Entity) as an Entity that is considered to be equivalent to a reference Entity (scoper).  The equivalence is in principle a symmetric relationship, however, it is expected that the scoper is a reference entity which serves as reference entity for multiple different equivalent entities. \r\n\n                        \n                           Examples: An innovator's medicine formulation is the reference for \"generics\", i.e., formulations manufactured differently but having been proven to be biologically equivalent to the reference medicine. Another example is a reference ingredient that serves as basis for quantity specifications (basis of strength, e.g., metoprolol succinate specified in terms of metoprolol tartrate.)";
-            case SAME: return "The \"same\" role asserts an identity between playing and scoping entities, i.e., that they are in fact two records of the same entity instance, and, in the case of discrepancies (e.g different DOB, gender), that one or both are in error.\r\n\n                        \n                           Usage:\n                        \r\n\n                        playing and scoping entities must have same classCode, but need not have identical attributes or values.\r\n\n                        \n                           Example: \n                        \r\n\n                        a provider registry maintains sets of conflicting demographic data for what is reported to be the same individual.";
+            case EQUIV: return "Description: Specifies the player Entity (the equivalent Entity) as an Entity that is considered to be equivalent to a reference Entity (scoper).  The equivalence is in principle a symmetric relationship, however, it is expected that the scoper is a reference entity which serves as reference entity for multiple different equivalent entities. \r\n\n                        \n                           Examples: An innovator's medicine formulation is the reference for \"generics\", i.e., formulations manufactured differently but having been proven to be biologically equivalent to the reference medicine. Another example is a reference ingredient that serves as basis for quantity specifications (basis of strength, e.g. metoprolol succinate specified in terms of metoprolol tartrate.)";
+            case SAME: return "The \"same\" role asserts an identity between playing and scoping entities, i.e., that they are in fact two records of the same entity instance, and, in the case of discrepancies (e.g. different DOB, gender), that one or both are in error.\r\n\n                        \n                           Usage:\n                        \r\n\n                        playing and scoping entities must have same classCode, but need not have identical attributes or values.\r\n\n                        \n                           Example: \n                        \r\n\n                        a provider registry maintains sets of conflicting demographic data for what is reported to be the same individual.";
             case SUBY: return "Relates a prevailing record of an Entity (scoper) with another record (player) that it subsumes.\r\n\n                        \n                           Examples: Show a correct new Person object (scoper) that subsumes one or more duplicate Person objects that had accidentally been created for the same physical person.\r\n\n                        \n                           Constraints: Both the player and scoper must have the same classCode.";
             case GEN: return "Relates a specialized material concept (player) to its generalization (scoper).";
             case GRIC: return "A special link between pharmaceuticals indicating that the target (scoper) is a generic for the source (player).";
             case INST: return "An individual piece of material (player) instantiating a class of material (scoper).";
-            case _ROLECLASSPARTITIVE: return "An association between two Entities where the playing Entity is considered in some way \"part\" of the scoping Entity, e.g., as a member, component, ingredient, or content. Being \"part\" in the broadest sense of the word can mean anything from being an integral structural component to a mere incidental temporary association of a playing Entity with a (generally larger) scoping Entity.";
+            case SUBS: return "An entity that subsumes the identity of another.  Used in the context of merging documented entity instances. Both the player and scoper must have the same classCode.\r\n\n                        The use of this code is deprecated in favor of the term SUBY which is its inverse and is more ontologically correct.";
+            case _ROLECLASSPARTITIVE: return "An association between two Entities where the playing Entity is considered in some way \"part\" of the scoping Entity, e.g. as a member, component, ingredient, or content. Being \"part\" in the broadest sense of the word can mean anything from being an integral structural component to a mere incidental temporary association of a playing Entity with a (generally larger) scoping Entity.";
             case CONT: return "Relates a material as the content (player) to a container (scoper).  Unlike ingredients, the content and a container remain separate (not mixed) and the content can be removed from the container.  A content is not part of an empty container.";
-            case EXPAGTCAR: return "An exposure agent carrier is an entity that is capable of conveying an exposure agent from one entity to another.  The scoper of the role must be the exposure agent (e.g., pathogen).";
-            case EXPVECTOR: return "Description: A vector is a living subject that carries an exposure agent.  The vector does not cause the disease itself, but exposes targets to the exposure agent.  A mosquito carrying malaria is an example of a vector.  The scoper of the role must be the exposure agent (e.g., pathogen).";
-            case FOMITE: return "Description: A fomite is a non-living entity that is capable of conveying exposure agent from one entity to another.  A doorknob contaminated with a Norovirus is an example of a fomite.  Anyone touching the doorknob would be exposed to the virus.  The scoper of the role must be the exposure agent (e.g., pathogen).";
-            case INGR: return "Relates a component (player) to a mixture (scoper). E.g., Glucose and Water are ingredients of D5W, latex may be an ingredient in a tracheal tube.";
+            case EXPAGTCAR: return "An exposure agent carrier is an entity that is capable of conveying an exposure agent from one entity to another.  The scoper of the role must be the exposure agent (e.g. pathogen).";
+            case EXPVECTOR: return "Description: A vector is a living subject that carries an exposure agent.  The vector does not cause the disease itself, but exposes targets to the exposure agent.  A mosquito carrying malaria is an example of a vector.  The scoper of the role must be the exposure agent (e.g. pathogen).";
+            case FOMITE: return "Description: A fomite is a non-living entity that is capable of conveying exposure agent from one entity to another.  A doorknob contaminated with a Norovirus is an example of a fomite.  Anyone touching the doorknob would be exposed to the virus.  The scoper of the role must be the exposure agent (e.g. pathogen).";
+            case INGR: return "Relates a component (player) to a mixture (scoper); e.g. Glucose and Water are ingredients of D5W, latex may be an ingredient in a tracheal tube.";
             case ACTI: return "Definition: a therapeutically active ingredient (player) in a mixture (scoper), where the mixture is typically a manufactured pharmaceutical.  It is unknown if the quantity of such an ingredient is expressed precisely in terms of the playing ingredient substance, or, if it is specified in terms of a closely related substance (active moiety or reference substance).";
             case ACTIB: return "Description:  Active ingredient, where the ingredient substance (player) is itself the \"basis of strength\", i.e., where the Role.quantity specifies exactly the quantity of the player substance in the medicine formulation. \r\n\n                        \n                           Examples: Lopressor 50 mg actually contains 50 mg of metoprolol succinate, even though the active moiety is metoprolol,  but also: Tenormin 50 mg contain 50 mg of atenolol, as free base, i.e., where the active ingredient atenolol is also the active moiety.";
             case ACTIM: return "Description: Active ingredient, where not the ingredient substance (player), but itaTMs active moiety is the \"basis of strength\", i.e., where the Role.quantity specifies the quantity of the player substance's active moiety in the medicine formulation.\r\n\n                        \n                           Examples: 1 mL of Betopic 5mg/mL eye drops contains 5.6 mg betaxolol hydrochloride equivalent to betaxolol base 5 mg.";
             case ACTIR: return "Description: Active ingredient, where not the ingredient substance (player) but another reference substance with the same active moiety, is the \"basis of strength\", i.e., where the Role.quantity specifies the quantity of a reference substance, similar but different from the player substance's in the medicine formulation.\r\n\n                        \n                           Examples: Toprol-XL 50 mg contains 47.5 mg of metoprolol succinate equivalent to 50 mg of metoprolol tartrate.";
             case ADJV: return "A component (player) added to enhance the action of an active ingredient (scoper) (in the manner of a catalyst) but which has no active effect in and of itself.  Such ingredients are significant in defining equivalence of products in a way that inactive ingredients are not.";
             case ADTV: return "An ingredient (player)  that is added to a base (scoper), that amounts to a minor part of the overall mixture.";
-            case BASE: return "A base ingredient (player) is what comprises the major part of a mixture (scoper). E.g., Water in most i.v. solutions, or Vaseline in salves. Among all ingredients of a material, there should be only one base. A base substance can, in turn, be a mixture.";
+            case BASE: return "A base ingredient (player) is what comprises the major part of a mixture (scoper); e.g. Water in most i.v. solutions, or Vaseline in salves. Among all ingredients of a material, there should be only one base. A base substance can, in turn, be a mixture.";
             case CNTM: return "An ingredient whose presence is not intended but may not be reasonably avoided given the circumstances of the mixture's nature or origin.";
-            case IACT: return "An ingredient which is not considered therapeutically active, e.g., colors, flavors, stabilizers, or preservatives, fillers, or structural components added to an active ingredient in order to facilitate administration of the active ingredient but without being considered therapeutically active. An inactive ingredient need not be biologically inert, e.g., might be active as an allergen or might have a pleasant taste, but is not an essential constituent delivering the therapeutic effect.";
+            case IACT: return "An ingredient which is not considered therapeutically active, e.g. colors, flavors, stabilizers, or preservatives, fillers, or structural components added to an active ingredient in order to facilitate administration of the active ingredient but without being considered therapeutically active. An inactive ingredient need not be biologically inert, e.g. might be active as an allergen or might have a pleasant taste, but is not an essential constituent delivering the therapeutic effect.";
             case COLR: return "A substance (player) influencing the optical aspect of material (scoper).";
             case FLVR: return "A substance (player) added to a mixture (scoper) to make it taste a certain way.  In food the use is obvious, in pharmaceuticals flavors can hide disgusting taste of the active ingredient (important in pediatric treatments).";
             case PRSV: return "A substance (player) added to a mixture (scoper) to prevent microorganisms (fungi, bacteria) to spoil the mixture.";
@@ -1072,6 +1144,12 @@ public enum V3RoleClass {
             case SPEC: return "A role played by a material entity that is a specimen for an act. It is scoped by the source of the specimen.";
             case ALQT: return "A portion (player) of an original or source specimen (scoper) used for testing or transportation.";
             case ISLT: return "A microorganism that has been isolated from other microorganisms or a source matrix.";
+            case CHILD: return "The player of the role is a child of the scoping entity, in a generic sense.";
+            case CRED: return "A role played by an entity that receives credentials from the scoping entity.";
+            case NURPRAC: return "nurse practitioner";
+            case NURS: return "nurse";
+            case PA: return "physician assistant";
+            case PHYS: return "physician";
             default: return "?";
           }
         }
@@ -1119,6 +1197,7 @@ public enum V3RoleClass {
             case UNDWRT: return "underwriter";
             case CAREGIVER: return "caregiver";
             case PRS: return "personal relationship";
+            case SELF: return "self";
             case _ROLECLASSPASSIVE: return "RoleClassPassive";
             case ACCESS: return "access";
             case ADJY: return "adjacency";
@@ -1153,6 +1232,7 @@ public enum V3RoleClass {
             case GEN: return "has generalization";
             case GRIC: return "has generic";
             case INST: return "instance";
+            case SUBS: return "subsumer";
             case _ROLECLASSPARTITIVE: return "RoleClassPartitive";
             case CONT: return "content";
             case EXPAGTCAR: return "exposure agent carrier";
@@ -1181,6 +1261,12 @@ public enum V3RoleClass {
             case SPEC: return "specimen";
             case ALQT: return "aliquot";
             case ISLT: return "isolate";
+            case CHILD: return "child";
+            case CRED: return "credentialed entity";
+            case NURPRAC: return "nurse practitioner";
+            case NURS: return "nurse";
+            case PA: return "physician assistant";
+            case PHYS: return "physician";
             default: return "?";
           }
     }

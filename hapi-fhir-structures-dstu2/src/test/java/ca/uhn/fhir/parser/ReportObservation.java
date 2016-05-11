@@ -9,8 +9,10 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-@ResourceDef(name = "Observation", id = "reportobservation")
+@ResourceDef(name = "Observation", id = "http://example.com/reportobservation")
 public class ReportObservation extends Observation {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Each extension is defined in a field. Any valid HAPI Data Type can be used for the field type. Note that the

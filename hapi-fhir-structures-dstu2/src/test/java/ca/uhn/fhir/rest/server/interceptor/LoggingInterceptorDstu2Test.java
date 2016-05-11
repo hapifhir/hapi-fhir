@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +16,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -38,16 +43,21 @@ import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -55,28 +65,18 @@ import ca.uhn.fhir.util.PortUtil;
 public class LoggingInterceptorDstu2Test {
 
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
-	
-	@Test
-	public void testRead() throws Exception {
+	private static Exception ourThrowException;
 
-		LoggingInterceptor interceptor = new LoggingInterceptor();
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
-
-		Logger logger = mock(Logger.class);
-		interceptor.setLogger(logger);
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
+	@Before
+	public void before() {
+		myInterceptor = mock(IServerInterceptor.class);
+		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		ourThrowException = null;
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class LoggingInterceptorDstu2Test {
 		assertTrue(interceptor.isLogExceptions());
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
 		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
-		
+
 		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
 
 		Logger logger = mock(Logger.class);
@@ -100,26 +100,7 @@ public class LoggingInterceptorDstu2Test {
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(2)).info(captor.capture());
 		assertThat(captor.getAllValues().get(0), StringContains.containsString("read - Patient/EX"));
-		assertThat(captor.getAllValues().get(1), StringContains.containsString("ERROR - GET http://localhost:"+ourPort+"/Patient/EX"));
-	}
-
-	@Test
-	public void testSearch() throws Exception {
-
-		LoggingInterceptor interceptor = new LoggingInterceptor();
-		interceptor.setMessageFormat("${operationType} - ${idOrResourceName} - ${requestParameters}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
-
-		Logger logger = mock(Logger.class);
-		interceptor.setLogger(logger);
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+		assertThat(captor.getAllValues().get(1), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
 	}
 
 	@Test
@@ -160,6 +141,99 @@ public class LoggingInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testRequestBodyRead() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertEquals("read -  - Patient/1 - ", captor.getValue());
+	}
+
+	@Test
+	public void testRequestBodyReadWithContentTypeHeader() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertEquals("read -  - Patient/1 - ", captor.getValue());
+	}
+
+	@Test
+	public void testRequestBodyCreate() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		Patient p = new Patient();
+		p.addIdentifier().setValue("VAL");
+		String input = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+	}
+
+	@Test
+	public void testRequestBodyCreateException() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		Patient p = new Patient();
+		p.addIdentifier().setValue("VAL");
+		String input = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		ourThrowException = new NullPointerException("FOO");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+	}
+
+	@Test
 	public void testOperationOnServer() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
@@ -197,15 +271,47 @@ public class LoggingInterceptorDstu2Test {
 		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
+	@Test
+	public void testRead() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
 	}
 
-	@Before
-	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+	@Test
+	public void testSearch() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${idOrResourceName} - ${requestParameters}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -215,10 +321,10 @@ public class LoggingInterceptorDstu2Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		servlet = new RestfulServer(ourCtx);
-		
+
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
 		servlet.setPlainProviders(new PlainProvider());
-		
+
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -235,6 +341,20 @@ public class LoggingInterceptorDstu2Test {
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		private Patient createPatient1() {
+			Patient patient = new Patient();
+			patient.addIdentifier();
+			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setValue("00001");
+			patient.addName();
+			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).addGiven("PatientOne");
+			patient.setGender(AdministrativeGenderEnum.MALE);
+			patient.getId().setValue("1");
+			return patient;
+		}
 
 		public Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
@@ -262,7 +382,7 @@ public class LoggingInterceptorDstu2Test {
 		 * Retrieve the resource by its identifier
 		 * 
 		 * @param theId
-		 *            The resource identity
+		 *           The resource identity
 		 * @return The resource
 		 */
 		@Read()
@@ -279,7 +399,7 @@ public class LoggingInterceptorDstu2Test {
 		 * Retrieve the resource by its identifier
 		 * 
 		 * @param theId
-		 *            The resource identity
+		 *           The resource identity
 		 * @return The resource
 		 */
 		@Search()
@@ -297,12 +417,12 @@ public class LoggingInterceptorDstu2Test {
 			return Patient.class;
 		}
 
-		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@IdParam IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
-
-			Bundle retVal = new Bundle();
-			// Populate bundle with matching resources
-			return retVal;
+		@Create
+		public MethodOutcome create(@ResourceParam Patient thePatient) throws Exception {
+			if (ourThrowException != null) {
+				throw ourThrowException;
+			}
+			return new MethodOutcome(new IdDt("Patient/1"));
 		}
 
 		@Operation(name = "$everything", idempotent = true)
@@ -313,18 +433,12 @@ public class LoggingInterceptorDstu2Test {
 			return retVal;
 		}
 
-		private Patient createPatient1() {
-			Patient patient = new Patient();
-			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-			patient.getIdentifier().get(0).setValue("00001");
-			patient.addName();
-			patient.getName().get(0).addFamily("Test");
-			patient.getName().get(0).addGiven("PatientOne");
-			patient.setGender(AdministrativeGenderEnum.MALE);
-			patient.getId().setValue("1");
-			return patient;
+		@Operation(name = "$everything", idempotent = true)
+		public Bundle patientTypeOperation(@IdParam IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+
+			Bundle retVal = new Bundle();
+			// Populate bundle with matching resources
+			return retVal;
 		}
 
 	}
@@ -340,5 +454,5 @@ public class LoggingInterceptorDstu2Test {
 		}
 
 	}
-	
+
 }

@@ -1,10 +1,12 @@
 package ca.uhn.fhir.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +32,18 @@ public class ObjectUtil {
 			return false;
 		}
 		return object1.equals(object2);
+	}
+	
+	public static <T> T requireNonNull(T obj, String message) {
+        if (obj == null)
+            throw new NullPointerException(message);
+        return obj;
+    }
+
+	public static void requireNotEmpty(String str, String message) {
+		if (StringUtils.isBlank(str)) {
+			throw new IllegalArgumentException(message);
+		}
 	}
 	
 }

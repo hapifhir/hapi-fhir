@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,22 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 
 	ISort<T> sort();
 
+	/**
+	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
+	 * on a single page.
+	 * 
+	 * @deprecated This parameter is badly named, since FHIR calls this parameter "_count" and not "_limit". Use {@link #count(int)} instead (it also sets the _count parameter)
+	 */
+	@Deprecated
 	IQuery<T> limitTo(int theLimitTo);
+
+	/**
+	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
+	 * on a single page.
+	 * 
+	 * @since 1.4
+	 */
+	IQuery<T> count(int theCount);
 
 	/**
 	 * Match only resources where the resource has the given tag. This parameter corresponds to
@@ -62,14 +77,16 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	/**
 	 * Match only resources where the resource has the given profile declaration. This parameter corresponds to
 	 * the <code>_profile</code> URL parameter.
-	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
-	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 * @param theProfileUri The URI of a given profile to search for resources which match  
 	 */
 	IQuery<T> withProfile(String theProfileUri);
 
 	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
-	 * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>)
+	 * <a href="http://www.hl7.org/fhir/search.html">FHIR Search Specification</a>)
+	 * <p>
+	 * This can be used to force the use of an HTTP POST instead of an HTTP GET
+	 * </p>
 	 * 
 	 * @see SearchStyleEnum
 	 * @since 0.6
@@ -96,7 +113,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
-	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
+	<B extends IBaseBundle> IClientExecutable<IQuery<B>, B> returnBundle(Class<B> theClass);
 
 	/**
 	 * {@inheritDoc}
@@ -112,4 +129,13 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	@Override
 	IQuery<T> and(ICriterion<?> theCriterion);
 
+	/**
+	 * @deprecated You should call {@link #returnBundle(Class)} on the method chain before calling
+	 * {@link #execute()} in order to specify why return type to use
+	 */
+	// This is overriding in order to deprecate
+	@Deprecated
+	@Override
+	T execute();
+	
 }

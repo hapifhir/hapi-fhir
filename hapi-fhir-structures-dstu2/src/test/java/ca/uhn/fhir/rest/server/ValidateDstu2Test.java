@@ -36,21 +36,19 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ValidateDstu2Test {
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static EncodingEnum ourLastEncoding;
-	private static String ourLastResourceBody;
-	private static int ourPort;
-	private static Server ourServer;
-	private static BaseOperationOutcome ourOutcomeToReturn;
 	private static ValidationModeEnum ourLastMode;
 	private static String ourLastProfile;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	
+	private static String ourLastResourceBody;
+	private static BaseOperationOutcome ourOutcomeToReturn;
+	private static int ourPort;
+	private static Server ourServer;
+
 	@Before()
 	public void before() {
 		ourLastResourceBody = null;
@@ -58,6 +56,50 @@ public class ValidateDstu2Test {
 		ourOutcomeToReturn = null;
 		ourLastMode = null;
 		ourLastProfile = null;
+	}
+
+
+	@Test
+	public void testValidate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(patient);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+		String resp = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+	}
+
+	@Test
+	public void testValidateWithNoParsed() throws Exception {
+
+		Organization org = new Organization();
+		org.addIdentifier().setValue("001");
+		org.addIdentifier().setValue("002");
+
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(org);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+
 	}
 
 	@Test
@@ -87,28 +129,6 @@ public class ValidateDstu2Test {
 	}
 
 	@Test
-	public void testValidate() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("001");
-		patient.addIdentifier().setValue("002");
-
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(patient);
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-		String resp = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
-	}
-
-	@Test
 	public void testValidateWithResults() throws Exception {
 
 		ourOutcomeToReturn = new OperationOutcome();
@@ -133,30 +153,10 @@ public class ValidateDstu2Test {
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
 	}
 
-	@Test
-	public void testValidateWithNoParsed() throws Exception {
-
-		Organization org = new Organization();
-		org.addIdentifier().setValue("001");
-		org.addIdentifier().setValue("002");
-
-		Parameters params = new Parameters();
-		params.addParameter().setName("resource").setResource(org);
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
-
-	}
-
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -181,7 +181,29 @@ public class ValidateDstu2Test {
 
 	}
 
+	public static class OrganizationProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
+		}
+
+		@Validate()
+		public MethodOutcome validate(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
+			ourLastResourceBody = theResourceBody;
+			ourLastEncoding = theEncoding;
+
+			return new MethodOutcome(new IdDt("001"));
+		}
+
+	}
+
 	public static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
 
 		@Validate()
 		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
@@ -196,28 +218,6 @@ public class ValidateDstu2Test {
 			MethodOutcome outcome = new MethodOutcome(id.withVersion("002"));
 			outcome.setOperationOutcome(ourOutcomeToReturn);
 			return outcome;
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-	}
-
-	public static class OrganizationProvider implements IResourceProvider {
-
-		@Validate()
-		public MethodOutcome validate(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
-			ourLastResourceBody = theResourceBody;
-			ourLastEncoding = theEncoding;
-
-			return new MethodOutcome(new IdDt("001"));
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Organization.class;
 		}
 
 	}

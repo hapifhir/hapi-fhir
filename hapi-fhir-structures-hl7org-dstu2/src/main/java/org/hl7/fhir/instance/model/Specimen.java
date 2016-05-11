@@ -29,19 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
- * Sample for analysis.
+ * A sample to be used for analysis.
  */
 @ResourceDef(name="Specimen", profile="http://hl7.org/fhir/Profile/Specimen")
 public class Specimen extends DomainResource {
@@ -711,10 +713,10 @@ public class Specimen extends DomainResource {
         protected StringType description;
 
         /**
-         * The type of container associated with the specimen (e.g. slide, aliquot, etc).
+         * The type of container associated with the specimen (e.g. slide, aliquot, etc.).
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Kind of container directly associated with specimen", formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc)." )
+        @Description(shortDefinition="Kind of container directly associated with specimen", formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc.)." )
         protected CodeableConcept type;
 
         /**
@@ -732,10 +734,10 @@ public class Specimen extends DomainResource {
         protected SimpleQuantity specimenQuantity;
 
         /**
-         * Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.
+         * Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.
          */
         @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA." )
+        @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA." )
         protected Type additive;
 
         private static final long serialVersionUID = 187274879L;
@@ -837,7 +839,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (The type of container associated with the specimen (e.g. slide, aliquot, etc).)
+         * @return {@link #type} (The type of container associated with the specimen (e.g. slide, aliquot, etc.).)
          */
         public CodeableConcept getType() { 
           if (this.type == null)
@@ -853,7 +855,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The type of container associated with the specimen (e.g. slide, aliquot, etc).)
+         * @param value {@link #type} (The type of container associated with the specimen (e.g. slide, aliquot, etc.).)
          */
         public SpecimenContainerComponent setType(CodeableConcept value) { 
           this.type = value;
@@ -909,14 +911,14 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.)
+         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public Type getAdditive() { 
           return this.additive;
         }
 
         /**
-         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.)
+         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public CodeableConcept getAdditiveCodeableConcept() throws Exception { 
           if (!(this.additive instanceof CodeableConcept))
@@ -929,7 +931,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.)
+         * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public Reference getAdditiveReference() throws Exception { 
           if (!(this.additive instanceof Reference))
@@ -946,7 +948,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @param value {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.)
+         * @param value {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public SpecimenContainerComponent setAdditive(Type value) { 
           this.additive = value;
@@ -957,10 +959,10 @@ public class Specimen extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "Identifier", "Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("description", "string", "Textual description of the container.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("type", "CodeableConcept", "The type of container associated with the specimen (e.g. slide, aliquot, etc).", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("type", "CodeableConcept", "The type of container associated with the specimen (e.g. slide, aliquot, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) the container may contain.", 0, java.lang.Integer.MAX_VALUE, capacity));
           childrenList.add(new Property("specimenQuantity", "SimpleQuantity", "The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.", 0, java.lang.Integer.MAX_VALUE, specimenQuantity));
-          childrenList.add(new Property("additive[x]", "CodeableConcept|Reference(Substance)", "Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
+          childrenList.add(new Property("additive[x]", "CodeableConcept|Reference(Substance)", "Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
         }
 
       public SpecimenContainerComponent copy() {
@@ -1031,13 +1033,13 @@ public class Specimen extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.
+     * Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.
      */
     @Child(name = "parent", type = {Specimen.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Specimen from which this specimen originated", formalDefinition="Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen." )
+    @Description(shortDefinition="Specimen from which this specimen originated", formalDefinition="Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen." )
     protected List<Reference> parent;
     /**
-     * The actual objects that are the target of the reference (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     * The actual objects that are the target of the reference (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.)
      */
     protected List<Specimen> parentTarget;
 
@@ -1086,7 +1088,7 @@ public class Specimen extends DomainResource {
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      */
     @Child(name = "container", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Direct container of specimen (tube/slide, etc)", formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here." )
+    @Description(shortDefinition="Direct container of specimen (tube/slide, etc.)", formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here." )
     protected List<SpecimenContainerComponent> container;
 
     private static final long serialVersionUID = 1025605602L;
@@ -1220,7 +1222,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.)
      */
     public List<Reference> getParent() { 
       if (this.parent == null)
@@ -1238,7 +1240,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.)
      */
     // syntactic sugar
     public Reference addParent() { //3
@@ -1260,7 +1262,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     * @return {@link #parent} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.)
      */
     public List<Specimen> getParentTarget() { 
       if (this.parentTarget == null)
@@ -1270,7 +1272,7 @@ public class Specimen extends DomainResource {
 
     // syntactic sugar
     /**
-     * @return {@link #parent} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     * @return {@link #parent} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.)
      */
     public Specimen addParentTarget() { 
       Specimen r = new Specimen();
@@ -1501,7 +1503,7 @@ public class Specimen extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Id for specimen.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The availability of the specimen.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("type", "CodeableConcept", "The kind of material that forms the specimen.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
+        childrenList.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Substance)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("accessionIdentifier", "Identifier", "The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.", 0, java.lang.Integer.MAX_VALUE, accessionIdentifier));
         childrenList.add(new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, java.lang.Integer.MAX_VALUE, receivedTime));

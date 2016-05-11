@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,27 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
 
 //@formatter:off
+@Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_COORDS" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_COORDS", indexes = { 
-	@org.hibernate.annotations.Index(name = "IDX_SP_COORDS", columnNames = { "RES_TYPE", "SP_NAME", "SP_LATITUDE" }) 
+@Table(name = "HFJ_SPIDX_COORDS", indexes = { 
+	@Index(name = "IDX_SP_COORDS", columnList = "RES_TYPE,SP_NAME,SP_LATITUDE,SP_LONGITUDE"), 
+	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID") 
 })
 //@formatter:on
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
@@ -42,10 +50,18 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
+	@Column(name = "SP_ID")
+	private Long myId;
+
 	@Column(name = "SP_LATITUDE")
+	@Field
 	public double myLatitude;
 
 	@Column(name = "SP_LONGITUDE")
+	@Field
 	public double myLongitude;
 
 	public ResourceIndexedSearchParamCoords() {
@@ -77,6 +93,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return b.isEquals();
 	}
 
+	@Override
+	protected Long getId() {
+		return myId;
+	}
+
 	public double getLatitude() {
 		return myLatitude;
 	}
@@ -102,7 +123,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public void setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
 	}
-	
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);

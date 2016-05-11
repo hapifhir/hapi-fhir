@@ -21,6 +21,8 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -71,6 +73,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredExtension;
+import ca.uhn.fhir.util.TestUtil;
 
 public class XmlParserTest {
 
@@ -710,8 +713,9 @@ public class XmlParserTest {
 		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
-		ourLog.info(val);
 		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueResource><reference value=\"Organization/123\"/></valueResource></extension>"));
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
@@ -874,7 +878,12 @@ public class XmlParserTest {
 		String val = ourCtx.newXmlParser().encodeResourceToString(q);
 		ourLog.info(val);
 
-		assertEquals("<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>", val);
+		String expected = "<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>";
+		
+		ourLog.info("Expected: {}", expected);
+		ourLog.info("Actual  : {}", val);
+		
+		assertEquals(expected, val);
 
 	}
 
@@ -1032,9 +1041,6 @@ public class XmlParserTest {
 				"	<extension url=\"http://foo/#f1\">\n" + 
 				"		<valueString value=\"Foo1Value2\"/>\n" + 
 				"	</extension>\n" + 
-				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
-				"		<valueString value=\"Foo2Value1\"/>\n" + 
-				"	</modifierExtension>\n" + 
 				"	<extension url=\"http://bar/#b1\">\n" + 
 				"		<extension url=\"http://bar/#b1/1\">\n" +
 				"			<valueDate value=\"2013-01-01\"/>\n" +
@@ -1051,6 +1057,9 @@ public class XmlParserTest {
 				"			</extension>\n" + 
 				"		</extension>\n" + 
 				"	</extension>\n" + 
+				"	<modifierExtension url=\"http://foo/#f2\">\n" + 
+				"		<valueString value=\"Foo2Value1\"/>\n" + 
+				"	</modifierExtension>\n" + 
 				"	<identifier>\n" + 
 				"		<label value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
@@ -1246,30 +1255,15 @@ public class XmlParserTest {
 		INarrativeGenerator gen = new INarrativeGenerator() {
 
 			@Override
-			public void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
-				throw new UnsupportedOperationException();
+			public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
+				try {
+					theNarrative.setDivAsString("<div>help</div>");
+				} catch (Exception e) {
+					throw new Error(e);
+				}
+				theNarrative.setStatusAsString("generated");
 			}
 
-			@Override
-			public void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) throws DataFormatException {
-				theNarrative.getDiv().setValueAsString("<div>help</div>");
-				theNarrative.getStatus().setValueAsString("generated");
-			}
-
-			@Override
-			public String generateTitle(IBaseResource theResource) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public String generateTitle(String theProfile, IBaseResource theResource) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void setFhirContext(FhirContext theFhirContext) {
-				// nothing
-			}
 		};
 
 		try {
@@ -1965,4 +1959,10 @@ public class XmlParserTest {
 		 System.setProperty("file.encoding", "ISO-8859-1");
 	}
 	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

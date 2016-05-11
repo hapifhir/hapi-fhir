@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,24 @@ import ca.uhn.fhir.model.api.annotation.Description;
 public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
 
 	private Object myBinder;
-	private Class<?> myEnumerationType;
+	private Class<? extends Enum<?>> myEnumType;
 
-	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<?> theBinderType) {
+	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<? extends Enum<?>> theBinderType) {
 		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
-		myEnumerationType = theBinderType;
+		myEnumType = theBinderType;
+	}
+
+	@Override
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return myEnumType;
 	}
 
 	@Override
 	public Object getInstanceConstructorArguments() {
 		Object retVal = myBinder;
 		if (retVal == null) {
-			retVal = toEnumFactory(myEnumerationType);
+			retVal = toEnumFactory(myEnumType);
 			myBinder = retVal;
 		}
 		return retVal;

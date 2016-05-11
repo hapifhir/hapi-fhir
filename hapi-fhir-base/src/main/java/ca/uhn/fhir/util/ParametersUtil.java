@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -69,13 +68,19 @@ public class ParametersUtil {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
 		IPrimitiveType<?> value;
-		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theName);
-		} else {
-			value = new StringDt(theName);
-		}
+		value = createString(theContext, theName);
 		paramChildElem.getChildByName("name").getMutator().addValue(parameter, value);
 		return parameter;
+	}
+
+	public static IPrimitiveType<?> createString(FhirContext theContext, String theValue) {
+		IPrimitiveType<?> value;
+		if (theContext.getVersion().getVersion().isRi()) {
+			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theValue);
+		} else {
+			value = new StringDt(theValue);
+		}
+		return value;
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {

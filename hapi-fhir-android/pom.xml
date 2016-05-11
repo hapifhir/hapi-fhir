@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>1.3-SNAPSHOT</version>
+		<version>1.6-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -15,10 +15,22 @@
 	<name>HAPI FHIR - Android</name>
 
 	<dependencies>
+	
+		<!-- 
+		This is here, at the top, for the unit tests because otherwise the
+		logger spews out all kinds of junk during unit tests 
+		-->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+	
+	
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
 			<exclusions>
 				<!--
 				<exclusion>
@@ -39,13 +51,19 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>1.6-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -74,7 +92,11 @@
 		</dependency>
 
 		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
-			requires it -->
+			requires it. 
+			
+			We provide a dummy implementation of servlet api to reduce size 
+			and prevent from rewriting the BaseMethodBinding and friends.
+			-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -119,139 +141,152 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.3</version>
+				<configuration>
+					<createDependencyReducedPom>true</createDependencyReducedPom>
+					<createSourcesJar>true</createSourcesJar>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<artifactSet>
+						<includes combine.children="append">
+							<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
+							<include>org.glassfish:javax.json</include>
+							<include>org.codehaus.woodstox:woodstox-core-asl</include>
+							<include>javax.xml.stream:stax-api</include>
+							<include>org.codehaus.woodstox:stax2-api</include>
+							<include>org.glassfish:javax.json</include>
+							<!--
+							<include>net.sourceforge.cobertura:cobertura</include>
+							<include>org.apache.commons:*</include>
+							<include>org.apache.httpcomponents:*</include>
+							<include>commons-codec:commons-codec</include>
+							-->
+							<include>javax.servlet:javax.servlet-api</include>
+						</includes>
+					</artifactSet>
+					<relocations>
+						<relocation>
+							<pattern>javax.xml.stream</pattern>
+							<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>javax.json</pattern>
+							<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
+						</relocation>
+					</relocations>
+					<filters combine.children="append">
+						<!-- Exclude server side stuff, except exceptions which are used clientside -->
+						<filter>	
+							<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
+							<excludes>
+								<!-- Exclude test stuff which depends on httpservlet -->
+								<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
+								<!-- Exclude server side stuff. This could be made nicer if code was divided into shared, server and client -->
+								<!--exclude>ca/uhn/fhir/rest/server/Add*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Apache*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Bundle*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/ETag*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Fifo*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Hard*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/IBundle*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/IDynamic*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Incoming*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/IPaging*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/IServerAdd*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Resource*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Rest*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Search*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/Simple*</exclude>
+								<exclude>ca/uhn/fhir/rest/server/audit/**</exclude>
+								<exclude>ca/uhn/fhir/rest/server/interceptor/**</exclude-->
+								<!-- Exclude Phloc validator to make android libs small -->
+								<exclude>ca/uhn/fhir/validation/schematron/SchematronBaseValidator*</exclude>
+								<!-- Exclude Thymeleaf to make android libs small -->
+								<exclude>ca/uhn/fhir/narrative/*Thymeleaf*</exclude>
+							</excludes>
+						</filter>
+					</filters>
+				</configuration>
 				<executions>
+					<!-- shaded jar -->
 					<execution>
-						<id>normal</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<createSourcesJar>true</createSourcesJar>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<artifactSet>
-								<includes>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
-									<include>org.glassfish:javax.json</include>
-									<include>org.codehaus.woodstox:woodstox-core-asl</include>
-									<include>javax.xml.stream:stax-api</include>
-									<include>org.codehaus.woodstox:stax2-api</include>
-									<include>org.glassfish:javax.json</include>
-								</includes>
-							</artifactSet>
-							<relocations>
-								<relocation>
-									<pattern>javax.xml.stream</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>javax.json</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
-								</relocation>
-							</relocations>
-							<filters>
-								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
-									<excludes>
-										<exclude>**/*.java</exclude>
-									</excludes>
-								</filter>
-							</filters>
-						</configuration>
-					</execution>
+						<id>shaded</id>
+						<phase>package</phase> 
+ 						<goals> 
+ 							<goal>shade</goal> 
+ 						</goals>						
+					</execution>		
+					<!-- dstu jar -->
 					<execution>
 						<id>dstu</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
+						<phase>package</phase> 
+ 						<goals> 
+ 							<goal>shade</goal> 
+ 						</goals>
 						<configuration>
-							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<createSourcesJar>true</createSourcesJar>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>dstu</shadedClassifierName>
 							<artifactSet>
 								<includes>
-									<!--
-									<include>commons-codec:commons-codec</include>
-									-->
-									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-									<include>org.glassfish:javax.json</include>
-									<include>org.codehaus.woodstox:woodstox-core-asl</include>
-									<include>javax.xml.stream:stax-api</include>
-									<!-- <include>javax.servlet:javax.servlet-api</include>-->
-									<include>org.codehaus.woodstox:stax2-api</include>
-									<!-- <include>org.slf4j:slf4j*</include> -->
-									<!--
-									<include>org.apache.commons:*</include>
-									<include>org.apache.httpcomponents:*</include>
-									-->
-									<include>org.glassfish:javax.json</include>
 								</includes>
 							</artifactSet>
-							<relocations>
-								<relocation>
-									<pattern>javax.xml.stream</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>javax.json</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
-								</relocation>
-							</relocations>
-							<filters>
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
 								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</artifact>
 									<excludes>
-										<exclude>**/*.java</exclude>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 									</excludes>
 								</filter>
-							</filters>
+							</filters-->
 						</configuration>
 					</execution>
+					<!-- dstu2 jar -->
 					<execution>
 						<id>dstu2</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
+						<phase>package</phase> 
+ 						<goals> 
+ 							<goal>shade</goal> 
+ 						</goals>
 						<configuration>
-							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<createSourcesJar>true</createSourcesJar>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>dstu2</shadedClassifierName>
 							<artifactSet>
 								<includes>
-									<!--
-									<include>commons-codec:commons-codec</include>
-									-->
-									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
-									<include>org.glassfish:javax.json</include>
-									<include>org.codehaus.woodstox:woodstox-core-asl</include>
-									<include>javax.xml.stream:stax-api</include>
-									<!-- <include>javax.servlet:javax.servlet-api</include>-->
-									<include>org.codehaus.woodstox:stax2-api</include>
-									<!--
-									<include>org.apache.commons:*</include>
-									<include>org.apache.httpcomponents:*</include>
-									-->
-									<include>org.glassfish:javax.json</include>
 								</includes>
 							</artifactSet>
-							<relocations>
-								<relocation>
-									<pattern>javax.xml.stream</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>javax.json</pattern>
-									<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
-								</relocation>
-							</relocations>
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
+									</excludes>
+								</filter>
+							</filters-->
+						</configuration>
+					</execution>
+					<!-- dstu3 jar -->
+					<execution>
+						<id>dstu3</id>
+						<phase>package</phase> 
+ 						<goals> 
+ 							<goal>shade</goal> 
+ 						</goals>
+						<configuration>
+							<shadedClassifierName>dstu3</shadedClassifierName>
+							<artifactSet>
+								<includes>
+									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3</include>
+								</includes>
+							</artifactSet>
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
+									</excludes>
+								</filter>
+							</filters-->
 						</configuration>
 					</execution>
 				</executions>

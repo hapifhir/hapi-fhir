@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,37 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class BaseSearchParamExtractor {
+public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
+	protected static final Pattern SPLIT = Pattern.compile("\\||( or )");
+
+	@Autowired
 	private FhirContext myContext;
 	
-	public BaseSearchParamExtractor(FhirContext theContext) {
-		myContext = theContext;
+	public BaseSearchParamExtractor() {
+		super();
+	}
+	
+	public BaseSearchParamExtractor(FhirContext theCtx) {
+		myContext = theCtx;
 	}
 
-	protected FhirContext getContext() {
-		return myContext;
-	}
-
-	protected List<Object> extractValues(String thePaths, IResource theResource) {
+	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
 		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = thePaths.split("\\|");
+		String[] nextPathsSplit = SPLIT.split(thePaths);
 		FhirTerser t = myContext.newTerser();
 		for (String nextPath : nextPathsSplit) {
 			String nextPathTrimmed = nextPath.trim();
@@ -55,6 +65,31 @@ public class BaseSearchParamExtractor {
 		}
 		return values;
 	}
-
 	
+	protected FhirContext getContext() {
+		return myContext;
+	}
+
+	@VisibleForTesting
+	void setContextForUnitTest(FhirContext theContext) {
+		myContext = theContext;
+	}
+
+	@Override
+	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
+		List<PathAndRef> refs = new ArrayList<PathAndRef>();
+		String[] nextPathsSplit = theNextSpDef.getPath().split("\\|");
+		for (String nextPath : nextPathsSplit) {
+			nextPath = nextPath.trim();
+			for (Object nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject == null) {
+					continue;
+				}
+				refs.add(new PathAndRef(nextPath, nextObject));
+			}
+		}
+		return refs;
+	}
+
+
 }

@@ -27,10 +27,12 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.conf.ServerConformanceProvider;
 import org.hl7.fhir.instance.conf.ServerProfileProvider;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -121,5 +123,10 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
 		return ((Resource)theResource).getMeta().getLastUpdatedElement();
 	}
+
+  @Override
+  public IIdType newIdType() {
+    return new IdType();
+  }
 
 }

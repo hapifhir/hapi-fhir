@@ -8,6 +8,10 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
@@ -23,17 +27,44 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.ValidationSupportChain;
-import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IValidationSupport;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 
 @SuppressWarnings("serial")
 public class ValidatorExamples {
 
+   public void validationIntro() {
+   // START SNIPPET: validationIntro
+      FhirContext ctx = FhirContext.forDstu2();
+      
+      // Ask the context for a validator
+      FhirValidator validator = ctx.newValidator();
+      
+      // Create some modules and register them 
+      IValidatorModule module1 = new SchemaBaseValidator(ctx);
+      validator.registerValidatorModule(module1);
+      IValidatorModule module2 = new SchematronBaseValidator(ctx);
+      validator.registerValidatorModule(module2);
+      
+      // Pass a resource in to be validated. The resource can
+      // be an IBaseResource instance, or can be a raw String
+      // containing a serialized resource as text.
+      Patient resource = new Patient();
+      ValidationResult result = validator.validateWithResult(resource);
+      String resourceText = "<Patient.....>";
+      ValidationResult result2 = validator.validateWithResult(resourceText);
+      
+      // The result object now contains the validation results
+      for (SingleValidationMessage next : result.getMessages()) {
+         System.out.println(next.getLocationString() + " " + next.getMessage());
+      }
+   // END SNIPPET: validationIntro
+   }
+   
    // START SNIPPET: serverValidation
    public class MyRestfulServer extends RestfulServer {
 
@@ -64,7 +95,6 @@ public class ValidatorExamples {
       
    }
    
-   @SuppressWarnings("unused")
    public void parserValidation() {
       // START SNIPPET: parserValidation
       FhirContext ctx = FhirContext.forDstu2();
@@ -94,6 +124,15 @@ public class ValidatorExamples {
 
       // Request a validator and apply it
       FhirValidator val = ctx.newValidator();
+
+      // Create the Schema/Schematron modules and register them. Note that
+      // you might want to consider keeping these modules around as long-term
+      // objects: they parse and then store schemas, which can be an expensive
+      // operation.
+      IValidatorModule module1 = new SchemaBaseValidator(ctx);
+      IValidatorModule module2 = new SchematronBaseValidator(ctx);
+      val.registerValidatorModule(module1);
+      val.registerValidatorModule(module2);
 
       ValidationResult result = val.validateWithResult(p);
       if (result.isSuccessful()) {

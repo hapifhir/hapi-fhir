@@ -4,9 +4,11 @@ import static org.junit.Assert.*;
 
 import java.util.regex.Matcher;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class RestfulServerUtilsTest {
 
@@ -55,6 +57,12 @@ public class RestfulServerUtilsTest {
 		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =  \"minimal\"    "));
 		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =\"minimal\""));
 		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =\"minimal\""));
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

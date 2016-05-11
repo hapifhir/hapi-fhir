@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,13 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
+	@Override
 	protected List<Object> getIncludeValues(FhirTerser t, Include next, IBaseResource nextResource, RuntimeResourceDefinition def) {
 		List<Object> values;
 		if ("*".equals(next.getValue())) {
@@ -54,12 +56,12 @@ public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
 		oo.getIssueFirstRep().getDetailsElement().setValue(theMessage);

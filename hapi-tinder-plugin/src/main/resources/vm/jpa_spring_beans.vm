@@ -25,7 +25,7 @@
 
 	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
 	
-#if ( ${versionCapitalized} == 'Dstu2' )
+#if ( ${versionCapitalized} != 'Dstu1' )
 	<bean id="myFhirContextDstu2Hl7Org" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2Hl7Org"/>
 
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
@@ -44,12 +44,12 @@
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
 ## Some resource types have customized DAOs for resource specific functionality
-#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
+#if ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">
 #end
-		<property name="resourceType" value="ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}"/>
+		<property name="resourceType" value="${resourcePackage}.${res.declaringClassNameComplete}"/>
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>
 	<bean id="my${res.name}Rp${versionCapitalized}" class="${packageBase}.${res.declaringClassNameComplete}ResourceProvider">

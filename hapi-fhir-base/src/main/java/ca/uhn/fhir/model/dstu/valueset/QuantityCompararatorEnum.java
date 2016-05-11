@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,14 @@ package ca.uhn.fhir.model.dstu.valueset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.util.CoverageIgnore;
 
+/**
+ * @deprecated This class has been replaced by {@link ParamPrefixEnum} in HAPI FHIR 1.5
+ */
+@Deprecated
 @CoverageIgnore
 public enum QuantityCompararatorEnum {
 
@@ -106,7 +111,7 @@ public enum QuantityCompararatorEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public QuantityCompararatorEnum forCode(String theCode) {
+	public static QuantityCompararatorEnum forCode(String theCode) {
 		QuantityCompararatorEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}

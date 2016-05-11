@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
-abstract class BaseOrListParam<T extends IQueryParameterType> implements IQueryParameterOr<T> {
+abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType> implements IQueryParameterOr<PT> {
 
-	private List<T> myList=new ArrayList<T>();
+	private List<PT> myList=new ArrayList<PT>();
 
 //	public void addToken(T theParam) {
 //		Validate.notNull(theParam,"Param can not be null");
@@ -40,25 +40,26 @@ abstract class BaseOrListParam<T extends IQueryParameterType> implements IQueryP
 	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
 		myList.clear();
 		for (String next : theParameters) {
-			T nextParam = newInstance();
+			PT nextParam = newInstance();
 			nextParam.setValueAsQueryToken(theParameters.getQualifier(), next);
 			myList.add(nextParam);
 		}
 	}
 
-	abstract T newInstance();
+	abstract PT newInstance();
 
-	public abstract BaseOrListParam<T> addOr(T theParameter);
+	public abstract MT addOr(PT theParameter);
 	
-	public BaseOrListParam<T> add(T theParameter) {
+	@SuppressWarnings("unchecked")
+	public MT add(PT theParameter) {
 		if (theParameter != null) {
 			myList.add(theParameter);
 		}
-		return this;
+		return (MT) this;
 	}
 	
 	@Override
-	public List<T> getValuesAsQueryTokens() {
+	public List<PT> getValuesAsQueryTokens() {
 		return myList;
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,26 +31,32 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Index;
-
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
+//@formatter:off
 @Entity
-@Table(name = "HFJ_RES_VER", uniqueConstraints = { @UniqueConstraint(name = "IDX_RES_VER_ALL", columnNames = { "RES_ID", "RES_TYPE", "RES_VER" }) })
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RES_VER", indexes = { @Index(name = "IDX_RES_VER_DATE", columnNames = { "RES_UPDATED" }) })
+@Table(name = "HFJ_RES_VER", uniqueConstraints = {
+	@UniqueConstraint(name="IDX_RESVER_ID_VER", columnNames = { "RES_ID", "RES_VER" }) 
+}, indexes= {
+	@Index(name="IDX_RESVER_TYPE_DATE", columnList="RES_TYPE,RES_UPDATED"), 
+	@Index(name="IDX_RESVER_ID_DATE", columnList="RES_ID,RES_UPDATED"), 
+	@Index(name="IDX_RESVER_DATE", columnList="RES_UPDATED") 
+})
+//@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@SequenceGenerator(name = "RES_HISTORY_PID", sequenceName = "RES_HISTORY_PID")
+	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
 
@@ -95,8 +101,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public IdDt getIdDt() {
-		Object id = getForcedId() == null ? getResourceId() : getForcedId().getForcedId();
-		return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		if (getForcedId() == null) {
+			Long id = myResourceId;
+			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
 	}
 
 	public Long getResourceId() {
@@ -128,6 +138,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 			}
 		}
 		return false;
+	}
+
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	public void setResourceId(Long theResourceId) {

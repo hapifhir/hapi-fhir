@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+	title="Frequently Asked Questions" toplink="false">
+	<part id="Getting Help">
+		<title>Getting Help</title>
+		<faq id="getting_help">
+			<question>Where can I ask questions or get help?</question>
+			<answer>
+				<p>
+					We ask that any questions about how to use HAPI FHIR be directed to
+					the <a href="https://groups.google.com/d/forum/hapi-fhir">HAPI FHIR Google Group</a>.
+					This group is a great resource, with lots of helpful people who can assist. The
+					HAPI FHIR developers are regular contributors to this group.
+				</p>
+				<p>
+					If you have questions which are about FHIR itself (e.g. which resource should 
+					I use for a specific purpose, how to I model my data, etc.) you might want
+					to also consider posting on <a href="http://stackoverflow.com/questions/tagged/hl7_fhir">Stackoverflow</a>,
+					as there are a number of FHIR experts who aren't HAPI/Java users who monitor
+					that site.
+				</p>
+			</answer>
+		</faq>
+	</part>
+	<part id="JPA Server">
+		<title>JPA Server</title>
+		<faq id="access_underlying_derby_database">
+			<question>
+				I would like to connect to the Derby database using a JDBC database browser (e.g. Squirrel, Toad, DBVisualizer)
+				so that I can access the underlying tables. How do I do that?
+			</question>
+			<answer>
+				<p>
+					By default Derby doesn't actually open any TCP ports for you to connect externally to it. 
+					Being an embedded database, it works a bit differently than other databases in that the 
+					client actually is the database and there's no outside communication with it possible.
+				</p>
+				<p>
+					There are a few options available to work around this fact:
+					<ul>
+						<li>
+							The easiest thing is to just load your data using the FHIR API. E.g. you can 
+							use HTTP/REST creates, transactions, etc to load data into your database directly.
+						</li>
+						<li>
+							If you want to access the underlying database, the next easiest thing is to configure 
+							the database to use a filesystem directory, e.g. 
+							"<code>jdbc:derby:directory:target/jpaserver_derby_files;create=true</code>". You can 
+							then shut the server down and use that same URL to connect a derby client (e.g. 
+							Squirrel or DBVisualizer) to the same path. You may need to use a fully qualified 
+							path instead of a relative one though.
+						</li>
+						<li>
+							Another option is to use a different database (e.g. MySQL, Postgres, Oracle, etc.). 
+							HAPI's JPA server is based on JPA/Hibernate so it will support any database platform 
+							that hibernate supports.
+						</li>
+						<li>
+							A final option is to start up Derby in network mode. Doing this is a bit more 
+							involved since you need to start the derby server separately, and then use a special
+							URL to connect to it. You can find an example of how to start network Derby 
+							<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-uhnfhirtest/src/main/java/ca/uhn/fhirtest/DerbyNetworkServer.java">here</a> 
+							and
+							an example of setting up a datasource 
+							<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-uhnfhirtest/src/main/java/ca/uhn/fhirtest/config/TestDstu21Config.java">here</a>.
+						</li>
+					</ul>
+				</p>
+			</answer>
+		</faq>
+	</part>
+</faqs>

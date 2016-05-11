@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,20 +41,26 @@ public class Constants {
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
+	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String EXTOP_VALIDATE = "$validate";
 	public static final String EXTOP_VALIDATE_MODE = "mode";
 	public static final String EXTOP_VALIDATE_PROFILE = "profile";
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
+	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final Set<String> FORMAT_VAL_JSON;
 	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
 	public static final Set<String> FORMAT_VAL_XML;
 	public static final String FORMAT_XML = "xml";
+	/**
+	 * "text/html" and "html"
+	 */
+	public static final Set<String> FORMATS_HTML;
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
-	public static final String HEADER_ACCEPT_VALUE_ALL = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
+	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
@@ -82,6 +88,7 @@ public class Constants {
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_PREFER_RETURN = "return";
 	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
@@ -96,6 +103,11 @@ public class Constants {
 	public static final String LINK_PREVIOUS = "previous";
 	public static final String LINK_SELF = "self";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
+	/**
+	 * Used in paging links
+	 */
+	public static final Object PARAM_BUNDLETYPE = "_bundletype";
+	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
 	public static final String PARAM_ELEMENTS = "_elements";
@@ -122,10 +134,12 @@ public class Constants {
 	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
 	public static final String PARAM_TAGS = "_tags";
+	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
+	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final int STATUS_HTTP_200_OK = 200;
@@ -144,6 +158,7 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
+	
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
@@ -153,6 +168,8 @@ public class Constants {
 
 		HashSet<String> valXml = new HashSet<String>();
 		valXml.add(CT_FHIR_XML);
+		valXml.add(CT_FHIR_XML.replace('+', ' ')); // See #346
+		valXml.add("text/xml");
 		valXml.add("application/xml");
 		valXml.add("xml");
 		FORMAT_VAL_XML = Collections.unmodifiableSet(valXml);
@@ -162,6 +179,8 @@ public class Constants {
 
 		HashSet<String> valJson = new HashSet<String>();
 		valJson.add(CT_FHIR_JSON);
+		valJson.add(CT_FHIR_JSON.replace('+', ' ')); // See #346
+		valJson.add("text/json");
 		valJson.add("application/json");
 		valJson.add("json");
 		FORMAT_VAL_JSON = Collections.unmodifiableSet(valJson);
@@ -238,6 +257,12 @@ public class Constants {
 		statusNames.put(510, "Not Extended");
 		statusNames.put(511, "Network Authentication Required");
 		HTTP_STATUS_NAMES = Collections.unmodifiableMap(statusNames);
+		
+		Set<String> formatsHtml = new HashSet<String>();
+		formatsHtml.add(CT_HTML);
+		formatsHtml.add(FORMAT_HTML);
+		FORMATS_HTML = Collections.unmodifiableSet(formatsHtml);
+		
 	}
 
 }

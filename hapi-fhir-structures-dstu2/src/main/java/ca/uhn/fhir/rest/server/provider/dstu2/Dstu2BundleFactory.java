@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,14 +29,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -53,21 +50,19 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu2BundleFactory.class);
 	private Bundle myBundle;
 	private FhirContext myContext;
 	private String myBase;
@@ -93,16 +88,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}
-			}
-
-			if (myContext.getNarrativeGenerator() != null) {
-				String title = myContext.getNarrativeGenerator().generateTitle(next);
-				ourLog.trace("Narrative generator created title: {}", title);
-				if (StringUtils.isNotBlank(title)) {
-					ResourceMetadataKeyEnum.TITLE.put(next, title);
-				}
-			} else {
-				ourLog.trace("No narrative generator specified");
 			}
 
 			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
@@ -189,16 +174,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}
-			}
-
-			if (myContext.getNarrativeGenerator() != null) {
-				String title = myContext.getNarrativeGenerator().generateTitle(next);
-				ourLog.trace("Narrative generator created title: {}", title);
-				if (StringUtils.isNotBlank(title)) {
-					ResourceMetadataKeyEnum.TITLE.put(next, title);
-				}
-			} else {
-				ourLog.trace("No narrative generator specified");
 			}
 
 			List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
@@ -324,7 +299,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
+	public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		myBase = theServerBase;
 		
@@ -349,7 +324,11 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 
 			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			if (numToReturn > 0) {
+				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			} else {
+				resourceList = Collections.emptyList();
+			}
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
 			if (theSearchId != null) {
@@ -370,15 +349,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (IBaseResource nextRes : resourceList) {
-				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					RestfulServerUtils.addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
-				}
-			}
-		}
-
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
 
@@ -390,12 +360,12 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (searchId != null) {
 				if (theOffset + numToReturn < theResult.size()) {
 					myBundle.addLink().setRelation(Constants.LINK_NEXT)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - limit);
 					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 			}
 		}

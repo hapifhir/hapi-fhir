@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import java.math.BigDecimal;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -29,19 +31,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcome;
+import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcomeEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import java.math.*;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
@@ -337,24 +341,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class ItemAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc." )
         protected Coding code;
 
         /**
-         * Monitory amount associated with the code.
+         * Monetary amount associated with the code.
          */
         @Child(name = "amount", type = {Money.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monetary amount associated with the code." )
         protected Money amount;
 
         /**
          * A non-monetary value for example a percentage. Mutually exclusive to the amount element above.
          */
         @Child(name = "value", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Non-monitory value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
+        @Description(shortDefinition="Non-monetary value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
         protected DecimalType value;
 
         private static final long serialVersionUID = -949880587L;
@@ -375,7 +379,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -391,7 +395,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public ItemAdjudicationComponent setCode(Coding value) { 
           this.code = value;
@@ -399,7 +403,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Monitory amount associated with the code.)
+         * @return {@link #amount} (Monetary amount associated with the code.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -415,7 +419,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Monitory amount associated with the code.)
+         * @param value {@link #amount} (Monetary amount associated with the code.)
          */
         public ItemAdjudicationComponent setAmount(Money value) { 
           this.amount = value;
@@ -473,8 +477,8 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
           childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
@@ -735,24 +739,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class DetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc." )
         protected Coding code;
 
         /**
-         * Monitory amount associated with the code.
+         * Monetary amount associated with the code.
          */
         @Child(name = "amount", type = {Money.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monetary amount associated with the code." )
         protected Money amount;
 
         /**
          * A non-monetary value for example a percentage. Mutually exclusive to the amount element above.
          */
         @Child(name = "value", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Non-monitory value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
+        @Description(shortDefinition="Non-monetary value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
         protected DecimalType value;
 
         private static final long serialVersionUID = -949880587L;
@@ -773,7 +777,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -789,7 +793,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public DetailAdjudicationComponent setCode(Coding value) { 
           this.code = value;
@@ -797,7 +801,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Monitory amount associated with the code.)
+         * @return {@link #amount} (Monetary amount associated with the code.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -813,7 +817,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Monitory amount associated with the code.)
+         * @param value {@link #amount} (Monetary amount associated with the code.)
          */
         public DetailAdjudicationComponent setAmount(Money value) { 
           this.amount = value;
@@ -871,8 +875,8 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
           childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
@@ -1080,24 +1084,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class SubdetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc." )
         protected Coding code;
 
         /**
-         * Monitory amount associated with the code.
+         * Monetary amount associated with the code.
          */
         @Child(name = "amount", type = {Money.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monetary amount associated with the code." )
         protected Money amount;
 
         /**
          * A non-monetary value for example a percentage. Mutually exclusive to the amount element above.
          */
         @Child(name = "value", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Non-monitory value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
+        @Description(shortDefinition="Non-monetary value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
         protected DecimalType value;
 
         private static final long serialVersionUID = -949880587L;
@@ -1118,7 +1122,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -1134,7 +1138,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public SubdetailAdjudicationComponent setCode(Coding value) { 
           this.code = value;
@@ -1142,7 +1146,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Monitory amount associated with the code.)
+         * @return {@link #amount} (Monetary amount associated with the code.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -1158,7 +1162,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Monitory amount associated with the code.)
+         * @param value {@link #amount} (Monetary amount associated with the code.)
          */
         public SubdetailAdjudicationComponent setAmount(Money value) { 
           this.amount = value;
@@ -1216,8 +1220,8 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
           childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
@@ -1628,24 +1632,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class AddedItemAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc." )
         protected Coding code;
 
         /**
-         * Monitory amount associated with the code.
+         * Monetary amount associated with the code.
          */
         @Child(name = "amount", type = {Money.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monetary amount associated with the code." )
         protected Money amount;
 
         /**
          * A non-monetary value for example a percentage. Mutually exclusive to the amount element above.
          */
         @Child(name = "value", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Non-monitory value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
+        @Description(shortDefinition="Non-monetary value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
         protected DecimalType value;
 
         private static final long serialVersionUID = -949880587L;
@@ -1666,7 +1670,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -1682,7 +1686,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public AddedItemAdjudicationComponent setCode(Coding value) { 
           this.code = value;
@@ -1690,7 +1694,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Monitory amount associated with the code.)
+         * @return {@link #amount} (Monetary amount associated with the code.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -1706,7 +1710,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Monitory amount associated with the code.)
+         * @param value {@link #amount} (Monetary amount associated with the code.)
          */
         public AddedItemAdjudicationComponent setAmount(Money value) { 
           this.amount = value;
@@ -1764,8 +1768,8 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
           childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
@@ -1985,24 +1989,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class AddedItemDetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc." )
         protected Coding code;
 
         /**
-         * Monitory amount associated with the code.
+         * Monetary amount associated with the code.
          */
         @Child(name = "amount", type = {Money.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Monetary amount", formalDefinition="Monitory amount associated with the code." )
+        @Description(shortDefinition="Monetary amount", formalDefinition="Monetary amount associated with the code." )
         protected Money amount;
 
         /**
          * A non-monetary value for example a percentage. Mutually exclusive to the amount element above.
          */
         @Child(name = "value", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Non-monitory value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
+        @Description(shortDefinition="Non-monetary value", formalDefinition="A non-monetary value for example a percentage. Mutually exclusive to the amount element above." )
         protected DecimalType value;
 
         private static final long serialVersionUID = -949880587L;
@@ -2023,7 +2027,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -2039,7 +2043,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #code} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public AddedItemDetailAdjudicationComponent setCode(Coding value) { 
           this.code = value;
@@ -2047,7 +2051,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Monitory amount associated with the code.)
+         * @return {@link #amount} (Monetary amount associated with the code.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -2063,7 +2067,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Monitory amount associated with the code.)
+         * @param value {@link #amount} (Monetary amount associated with the code.)
          */
         public AddedItemDetailAdjudicationComponent setAmount(Money value) { 
           this.amount = value;
@@ -2121,8 +2125,8 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("code", "Coding", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
           childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
@@ -2166,24 +2170,24 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class ErrorsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.
+         * The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
         @Child(name = "sequenceLinkId", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Item sequence number", formalDefinition="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere." )
+        @Description(shortDefinition="Item sequence number", formalDefinition="The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere." )
         protected PositiveIntType sequenceLinkId;
 
         /**
-         * The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         @Child(name = "detailSequenceLinkId", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Detail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition." )
+        @Description(shortDefinition="Detail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
         protected PositiveIntType detailSequenceLinkId;
 
         /**
-         * The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         @Child(name = "subdetailSequenceLinkId", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Subdetail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition." )
+        @Description(shortDefinition="Subdetail sequence number", formalDefinition="The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition." )
         protected PositiveIntType subdetailSequenceLinkId;
 
         /**
@@ -2211,7 +2215,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @return {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
          */
         public PositiveIntType getSequenceLinkIdElement() { 
           if (this.sequenceLinkId == null)
@@ -2231,7 +2235,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
+         * @param value {@link #sequenceLinkId} (The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.). This is the underlying object with id, value and extensions. The accessor "getSequenceLinkId" gives direct access to the value
          */
         public ErrorsComponent setSequenceLinkIdElement(PositiveIntType value) { 
           this.sequenceLinkId = value;
@@ -2239,14 +2243,14 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.
+         * @return The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
         public int getSequenceLinkId() { 
           return this.sequenceLinkId == null || this.sequenceLinkId.isEmpty() ? 0 : this.sequenceLinkId.getValue();
         }
 
         /**
-         * @param value The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.
+         * @param value The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.
          */
         public ErrorsComponent setSequenceLinkId(int value) { 
             if (this.sequenceLinkId == null)
@@ -2256,7 +2260,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
+         * @return {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
          */
         public PositiveIntType getDetailSequenceLinkIdElement() { 
           if (this.detailSequenceLinkId == null)
@@ -2276,7 +2280,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
+         * @param value {@link #detailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getDetailSequenceLinkId" gives direct access to the value
          */
         public ErrorsComponent setDetailSequenceLinkIdElement(PositiveIntType value) { 
           this.detailSequenceLinkId = value;
@@ -2284,14 +2288,14 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * @return The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         public int getDetailSequenceLinkId() { 
           return this.detailSequenceLinkId == null || this.detailSequenceLinkId.isEmpty() ? 0 : this.detailSequenceLinkId.getValue();
         }
 
         /**
-         * @param value The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * @param value The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         public ErrorsComponent setDetailSequenceLinkId(int value) { 
             if (this.detailSequenceLinkId == null)
@@ -2301,7 +2305,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
+         * @return {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
          */
         public PositiveIntType getSubdetailSequenceLinkIdElement() { 
           if (this.subdetailSequenceLinkId == null)
@@ -2321,7 +2325,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
+         * @param value {@link #subdetailSequenceLinkId} (The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.). This is the underlying object with id, value and extensions. The accessor "getSubdetailSequenceLinkId" gives direct access to the value
          */
         public ErrorsComponent setSubdetailSequenceLinkIdElement(PositiveIntType value) { 
           this.subdetailSequenceLinkId = value;
@@ -2329,14 +2333,14 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * @return The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         public int getSubdetailSequenceLinkId() { 
           return this.subdetailSequenceLinkId == null || this.subdetailSequenceLinkId.isEmpty() ? 0 : this.subdetailSequenceLinkId.getValue();
         }
 
         /**
-         * @param value The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.
+         * @param value The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.
          */
         public ErrorsComponent setSubdetailSequenceLinkId(int value) { 
             if (this.subdetailSequenceLinkId == null)
@@ -2371,9 +2375,9 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId));
-          childrenList.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId));
+          childrenList.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
+          childrenList.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId));
+          childrenList.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId));
           childrenList.add(new Property("code", "Coding", "An error code,froma specified code system, which details why the claim could not be adjudicated.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 
@@ -2438,7 +2442,7 @@ public class ClaimResponse extends DomainResource {
          * The note text.
          */
         @Child(name = "text", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Note explanitory text", formalDefinition="The note text." )
+        @Description(shortDefinition="Note explanatory text", formalDefinition="The note text." )
         protected StringType text;
 
         private static final long serialVersionUID = 1768923951L;
@@ -3094,10 +3098,10 @@ public class ClaimResponse extends DomainResource {
   }
 
     /**
-     * The Response Business Identifier.
+     * The Response business identifier.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Response  number", formalDefinition="The Response Business Identifier." )
+    @Description(shortDefinition="Response  number", formalDefinition="The Response business identifier." )
     protected List<Identifier> identifier;
 
     /**
@@ -3219,17 +3223,17 @@ public class ClaimResponse extends DomainResource {
     protected Money totalCost;
 
     /**
-     * The amount of deductable applied which was not allocated to any particular service line.
+     * The amount of deductible applied which was not allocated to any particular service line.
      */
     @Child(name = "unallocDeductable", type = {Money.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Unallocated deductable", formalDefinition="The amount of deductable applied which was not allocated to any particular service line." )
+    @Description(shortDefinition="Unallocated deductible", formalDefinition="The amount of deductible applied which was not allocated to any particular service line." )
     protected Money unallocDeductable;
 
     /**
-     * Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).
+     * Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).
      */
     @Child(name = "totalBenefit", type = {Money.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Total benefit payable for the Claim", formalDefinition="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)." )
+    @Description(shortDefinition="Total benefit payable for the Claim", formalDefinition="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible)." )
     protected Money totalBenefit;
 
     /**
@@ -3261,10 +3265,10 @@ public class ClaimResponse extends DomainResource {
     protected Money paymentAmount;
 
     /**
-     * Payment identifer.
+     * Payment identifier.
      */
     @Child(name = "paymentRef", type = {Identifier.class}, order=21, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Payment identifier", formalDefinition="Payment identifer." )
+    @Description(shortDefinition="Payment identifier", formalDefinition="Payment identifier." )
     protected Identifier paymentRef;
 
     /**
@@ -3305,7 +3309,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response Business Identifier.)
+     * @return {@link #identifier} (The Response business identifier.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -3323,7 +3327,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response Business Identifier.)
+     * @return {@link #identifier} (The Response business identifier.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -3884,7 +3888,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #unallocDeductable} (The amount of deductable applied which was not allocated to any particular service line.)
+     * @return {@link #unallocDeductable} (The amount of deductible applied which was not allocated to any particular service line.)
      */
     public Money getUnallocDeductable() { 
       if (this.unallocDeductable == null)
@@ -3900,7 +3904,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #unallocDeductable} (The amount of deductable applied which was not allocated to any particular service line.)
+     * @param value {@link #unallocDeductable} (The amount of deductible applied which was not allocated to any particular service line.)
      */
     public ClaimResponse setUnallocDeductable(Money value) { 
       this.unallocDeductable = value;
@@ -3908,7 +3912,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).)
+     * @return {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).)
      */
     public Money getTotalBenefit() { 
       if (this.totalBenefit == null)
@@ -3924,7 +3928,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).)
+     * @param value {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).)
      */
     public ClaimResponse setTotalBenefit(Money value) { 
       this.totalBenefit = value;
@@ -4053,7 +4057,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #paymentRef} (Payment identifer.)
+     * @return {@link #paymentRef} (Payment identifier.)
      */
     public Identifier getPaymentRef() { 
       if (this.paymentRef == null)
@@ -4069,7 +4073,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #paymentRef} (Payment identifer.)
+     * @param value {@link #paymentRef} (Payment identifier.)
      */
     public ClaimResponse setPaymentRef(Identifier value) { 
       this.paymentRef = value;
@@ -4206,7 +4210,7 @@ public class ClaimResponse extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response Business Identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
@@ -4221,13 +4225,13 @@ public class ClaimResponse extends DomainResource {
         childrenList.add(new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
         childrenList.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
         childrenList.add(new Property("totalCost", "Money", "The total cost of the services reported.", 0, java.lang.Integer.MAX_VALUE, totalCost));
-        childrenList.add(new Property("unallocDeductable", "Money", "The amount of deductable applied which was not allocated to any particular service line.", 0, java.lang.Integer.MAX_VALUE, unallocDeductable));
-        childrenList.add(new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).", 0, java.lang.Integer.MAX_VALUE, totalBenefit));
+        childrenList.add(new Property("unallocDeductable", "Money", "The amount of deductible applied which was not allocated to any particular service line.", 0, java.lang.Integer.MAX_VALUE, unallocDeductable));
+        childrenList.add(new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).", 0, java.lang.Integer.MAX_VALUE, totalBenefit));
         childrenList.add(new Property("paymentAdjustment", "Money", "Adjustment to the payment of this transaction which is not related to adjudication of this transaction.", 0, java.lang.Integer.MAX_VALUE, paymentAdjustment));
         childrenList.add(new Property("paymentAdjustmentReason", "Coding", "Reason for the payment adjustment.", 0, java.lang.Integer.MAX_VALUE, paymentAdjustmentReason));
         childrenList.add(new Property("paymentDate", "date", "Estimated payment data.", 0, java.lang.Integer.MAX_VALUE, paymentDate));
         childrenList.add(new Property("paymentAmount", "Money", "Payable less any payment adjustment.", 0, java.lang.Integer.MAX_VALUE, paymentAmount));
-        childrenList.add(new Property("paymentRef", "Identifier", "Payment identifer.", 0, java.lang.Integer.MAX_VALUE, paymentRef));
+        childrenList.add(new Property("paymentRef", "Identifier", "Payment identifier.", 0, java.lang.Integer.MAX_VALUE, paymentRef));
         childrenList.add(new Property("reserved", "Coding", "Status of funds reservation (For provider, for Patient, None).", 0, java.lang.Integer.MAX_VALUE, reserved));
         childrenList.add(new Property("form", "Coding", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
         childrenList.add(new Property("note", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, note));

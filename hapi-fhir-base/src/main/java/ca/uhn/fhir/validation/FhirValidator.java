@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.validation.schematron.SchematronProvider;
 
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, profiles, etc.)
@@ -49,9 +50,6 @@ public class FhirValidator {
 
 	private static final String I18N_KEY_NO_PHLOC_ERROR = FhirValidator.class.getName() + ".noPhlocError";
 
-	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName() + ".noPhlocWarningOnStartup";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
-
 	private static volatile Boolean ourPhlocPresentOnClasspath;
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
@@ -63,13 +61,7 @@ public class FhirValidator {
 		myContext = theFhirContext;
 
 		if (ourPhlocPresentOnClasspath == null) {
-			try {
-				Class.forName("com.phloc.schematron.ISchematronResource");
-				ourPhlocPresentOnClasspath = true;
-			} catch (ClassNotFoundException e) {
-				ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_WARNING));
-				ourPhlocPresentOnClasspath = false;
-			}
+			ourPhlocPresentOnClasspath = SchematronProvider.isScematronAvailable(theFhirContext);
 		}
 	}
 
@@ -110,7 +102,12 @@ public class FhirValidator {
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public synchronized boolean isValidateAgainstStandardSchematron() {
-		return haveValidatorOfType(SchematronBaseValidator.class);
+		if (!ourPhlocPresentOnClasspath) {
+			return false; 	// No need to ask since we dont have Phloc. Also Class.forname will complain
+							// about missing phloc import.
+		}
+		Class<? extends IValidatorModule> cls = SchematronProvider.getSchematronValidatorClass();
+		return haveValidatorOfType(cls);
 	}
 
 	/**
@@ -147,7 +144,9 @@ public class FhirValidator {
 		if (theValidateAgainstStandardSchematron && !ourPhlocPresentOnClasspath) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_ERROR));
 		}
-		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator(myContext));
+		Class<? extends IValidatorModule> cls = SchematronProvider.getSchematronValidatorClass();
+		IValidatorModule instance = SchematronProvider.getSchematronValidatorInstance(myContext);
+		addOrRemoveValidator(theValidateAgainstStandardSchematron, cls, instance);
 		return this;
 	}
 
@@ -187,11 +186,13 @@ public class FhirValidator {
 			next.validateBundle(ctx);
 		}
 
-		IBaseOperationOutcome oo = ctx.toResult().toOperationOutcome();
-		if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
-			throw new ValidationFailureException(myContext, oo);
+		if (ctx.toResult().isSuccessful() == false ) {
+			IBaseOperationOutcome oo = ctx.toResult().toOperationOutcome();
+			if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
+				throw new ValidationFailureException(myContext, oo);
+			}
 		}
-
+		
 	}
 
 	private void applyDefaultValidators() {

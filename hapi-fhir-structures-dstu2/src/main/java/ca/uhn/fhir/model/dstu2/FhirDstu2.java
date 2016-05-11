@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -123,6 +124,11 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new CodingDt();
+	}
+
+	@Override
+	public IIdType newIdType() {
+		return new IdDt();
 	}
 
 }

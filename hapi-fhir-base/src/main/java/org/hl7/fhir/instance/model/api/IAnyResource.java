@@ -1,10 +1,13 @@
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +23,43 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-
 public interface IAnyResource extends IBaseResource {
+
+	/**
+	 * Search parameter constant for <b>_language</b>
+	 */
+	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
+	public static final String SP_RES_LANGUAGE = "_language";
+
+
+	/**
+	 * Search parameter constant for <b>_id</b>
+	 */
+	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
+	public static final String SP_RES_ID = "_id";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>_id</b>
+	 * <p>
+	 * Description: <b>the _id of a resource</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Resource._id</b><br>
+	 * </p>
+	 */
+	public static final StringClientParam RES_ID = new StringClientParam(IAnyResource.SP_RES_ID);
 
 	String getId();
 
-	IAnyResource setId(String theId);
-
+	@Override
 	IIdType getIdElement();
 
-	IBaseMetaType getMeta();
-	
+	IPrimitiveType<String> getLanguageElement();
+
+	public Object getUserData(String name);
+
+	@Override
+	IAnyResource setId(String theId);
+
+	public void setUserData(String name, Object value);
+
 }

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
@@ -42,12 +43,12 @@ public class QualifiedParamList extends ArrayList<String> {
 		super(theCapacity);
 	}
 
-	public QualifiedParamList(IQueryParameterOr<?> theNextOr) {
+	public QualifiedParamList(IQueryParameterOr<?> theNextOr, FhirContext theContext) {
 		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
 			if (myQualifier == null) {
 				myQualifier = next.getQueryParameterQualifier();
 			}
-			add(next.getValueAsQueryToken());
+			add(next.getValueAsQueryToken(theContext));
 		}
 	}
 

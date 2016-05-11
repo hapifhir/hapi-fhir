@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -100,8 +102,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
-				nextDef = new RuntimeResourceReferenceDefinition(elementName, types, false);
-				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+				nextDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
 				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
@@ -109,15 +110,20 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				BaseRuntimeElementDefinition<?> nextDefForChoice = nextDef;
+
+				/*
+				 * In HAPI 1.3 the following applied:
+				 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
+				 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
+				 * element fooString when encoded, because markdown is a profile of string. This is according to the
+				 * FHIR spec
+				 * 
+				 * Note that as of HAPI 1.4 this applies only to non-primitive datatypes after discussion
+				 * with Grahame.
+				 */
 				if (nextDef instanceof IRuntimeDatatypeDefinition) {
 					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
-					if (nextDefDatatype.getProfileOf() != null) {
-						/*
-						 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
-						 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
-						 * element fooString when encoded, because markdown is a profile of string. This is according to the
-						 * FHIR spec
-						 */
+					if (nextDefDatatype.getProfileOf() != null && !IPrimitiveType.class.isAssignableFrom(next)) {
 						nextDefForChoice = null;
 						nonPreferred = true;
 						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
@@ -150,7 +156,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (myDatatypeToElementName.containsKey(next)) {
 				String existing = myDatatypeToElementName.get(next);
 				if (!existing.equals(elementName)) {
-					throw new ConfigurationException("Already have element name " + existing + " for datatype " + next.getClass().getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
+					throw new ConfigurationException("Already have element name " + existing + " for datatype " + next.getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
 				}
 			} else {
 				myDatatypeToElementName.put(next, elementName);
@@ -162,6 +168,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
 
 	}
+
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {

@@ -29,33 +29,33 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum RestfulSecurityService {
 
         /**
-         * Oauth (unspecified version see oauth.net)
+         * Oauth (unspecified version see oauth.net).
          */
         OAUTH, 
         /**
-         * OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/)
+         * OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/).
          */
         SMARTONFHIR, 
         /**
-         * Microsoft NTLM Authentication
+         * Microsoft NTLM Authentication.
          */
         NTLM, 
         /**
-         * Basic authentication defined in HTTP specification
+         * Basic authentication defined in HTTP specification.
          */
         BASIC, 
         /**
-         * see http://www.ietf.org/rfc/rfc4120.txt
+         * see http://www.ietf.org/rfc/rfc4120.txt.
          */
         KERBEROS, 
         /**
-         * SSL where client must have a certificate registered with the server
+         * SSL where client must have a certificate registered with the server.
          */
         CERTIFICATES, 
         /**
@@ -95,12 +95,12 @@ public enum RestfulSecurityService {
         }
         public String getDefinition() {
           switch (this) {
-            case OAUTH: return "Oauth (unspecified version see oauth.net)";
-            case SMARTONFHIR: return "OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/)";
-            case NTLM: return "Microsoft NTLM Authentication";
-            case BASIC: return "Basic authentication defined in HTTP specification";
-            case KERBEROS: return "see http://www.ietf.org/rfc/rfc4120.txt";
-            case CERTIFICATES: return "SSL where client must have a certificate registered with the server";
+            case OAUTH: return "Oauth (unspecified version see oauth.net).";
+            case SMARTONFHIR: return "OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/).";
+            case NTLM: return "Microsoft NTLM Authentication.";
+            case BASIC: return "Basic authentication defined in HTTP specification.";
+            case KERBEROS: return "see http://www.ietf.org/rfc/rfc4120.txt.";
+            case CERTIFICATES: return "SSL where client must have a certificate registered with the server.";
             default: return "?";
           }
         }

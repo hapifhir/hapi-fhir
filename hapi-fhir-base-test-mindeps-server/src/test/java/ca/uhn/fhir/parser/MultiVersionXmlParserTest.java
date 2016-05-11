@@ -1,9 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,10 +32,12 @@ public class MultiVersionXmlParserTest {
 		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<units value=\"g/L\"",
 				"</valueQuantity></extension>"));
 
-		str = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
-		ourLog.info(str);
-		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<units value=\"g/L\"",
-				"</valueQuantity></extension>"));
+		try {
+			FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU1", e.getMessage());
+		}
 	}
 
 	@Test
@@ -51,18 +54,17 @@ public class MultiVersionXmlParserTest {
 		
 		String res = ourCtxDstu1.newXmlParser().encodeResourceToString(p);
 		
-		{
-			ca.uhn.fhir.model.dstu2.resource.Patient parsed = ourCtxDstu1.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
-			assertEquals("RR Display", parsed.getManagingOrganization().getDisplayElement().getValue());
-			assertEquals(1, parsed.getContained().getContainedResources().size());
-			assertEquals("<div>DIV</div>", p.getText().getDiv().getValueAsString());
-
+		try {
+			ourCtxDstu1.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("This parser is for FHIR version DSTU1 - Can not parse a structure for version DSTU2", e.getMessage());
 		}
-		{
-			ca.uhn.fhir.model.dstu.resource.Patient parsed = ourCtxDstu2.newXmlParser().parseResource(ca.uhn.fhir.model.dstu.resource.Patient.class, res);
-			assertEquals("RR Display", parsed.getManagingOrganization().getDisplayElement().getValue());
-			assertEquals(1, parsed.getContained().getContainedResources().size());
-			assertEquals("<div>DIV</div>", p.getText().getDiv().getValueAsString());
+		try {
+			ourCtxDstu2.newXmlParser().parseResource(ca.uhn.fhir.model.dstu.resource.Patient.class, res);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("This parser is for FHIR version DSTU2 - Can not parse a structure for version DSTU1", e.getMessage());
 		}
 		
 	}

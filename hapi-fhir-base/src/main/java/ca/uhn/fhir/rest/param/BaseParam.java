@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +42,7 @@ abstract class BaseParam implements IQueryParameterType {
 
 	@Override
 	public final String getQueryParameterQualifier() {
-		if (myMissing != null) {
+		if (myMissing != null && myMissing.booleanValue()) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
 		return doGetQueryParameterQualifier();
@@ -48,22 +50,27 @@ abstract class BaseParam implements IQueryParameterType {
 
 	abstract String doGetQueryParameterQualifier();
 
-	abstract String doGetValueAsQueryToken();
+	abstract String doGetValueAsQueryToken(FhirContext theContext);
 	
 	@Override
-	public final String getValueAsQueryToken() {
+	public final String getValueAsQueryToken(FhirContext theContext) {
 		if (myMissing != null) {
 			return myMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE;
 		}
-		return doGetValueAsQueryToken();
+		return doGetValueAsQueryToken(theContext);
 	}
 
 	/**
-	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
+	 * If set to non-null value, indicates that this parameter has been populated 
+	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a 
+	 * normal value
+	 * 
+	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
 	@Override
-	public void setMissing(Boolean theMissing) {
+	public BaseParam setMissing(Boolean theMissing) {
 		myMissing = theMissing;
+		return this;
 	}
 
 	@Override
@@ -79,23 +86,5 @@ abstract class BaseParam implements IQueryParameterType {
 
 	abstract void doSetValueAsQueryToken(String theQualifier, String theValue);
 
-	static class ComposableBaseParam extends BaseParam{
-
-		@Override
-		String doGetQueryParameterQualifier() {
-			return null;
-		}
-
-		@Override
-		String doGetValueAsQueryToken() {
-			return null;
-		}
-
-		@Override
-		void doSetValueAsQueryToken(String theQualifier, String theValue) {
-			// nothing
-		}
-		
-	}
 	
 }

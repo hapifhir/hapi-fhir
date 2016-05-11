@@ -38,6 +38,12 @@ public class IdTypeTest {
 		assertFalse(id.isLocal());
 	}
 	
+	 @Test
+	  public void testConstructorsWithNullArguments() {
+	    IdType id = new IdType(null, null, null);
+	    assertEquals(null, id.getValue());
+	  }
+
 	@Test
 	public void testDetectLocalBase() {
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());

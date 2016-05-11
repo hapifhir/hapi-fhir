@@ -5,18 +5,20 @@ import java.util.List;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateType;
+import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ResourceType;
 import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Extension;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
+
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
-public class ResourceWithExtensionsA extends Resource {
+public class ResourceWithExtensionsA extends DomainResource {
 
 	/*
 	 * NB: several unit tests depend on the structure here
@@ -191,7 +193,7 @@ public class ResourceWithExtensionsA extends Resource {
 
 
 	@Override
-	public Resource copy() {
+	public DomainResource copy() {
 		// TODO Auto-generated method stub
 		return null;
 	}

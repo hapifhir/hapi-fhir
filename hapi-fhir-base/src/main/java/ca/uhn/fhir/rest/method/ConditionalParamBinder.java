@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -48,7 +50,9 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// nothing
+		if (theOuterCollectionType != null || theInnerCollectionType != null || theParameterType.equals(String.class) == false) {
+			throw new ConfigurationException("Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName()  + " must be of type String, found incorrect parameteter in method \"" + theMethod + "\"");
+		}
 	}
 
 	public boolean isSupportsMultiple() {
@@ -57,14 +61,14 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Can not use @" + getClass().getName() + " annotated parameters in client");
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		if (myOperationType == RestOperationTypeEnum.CREATE) {
-			String retVal = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_EXIST);
+			String retVal = theRequest.getHeader(Constants.HEADER_IF_NONE_EXIST);
 			if (isBlank(retVal)) {
 				return null;
 			}

@@ -29,18 +29,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGenderEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A person who is directly or indirectly involved in the provisioning of healthcare.
  */
@@ -50,14 +52,14 @@ public class Practitioner extends DomainResource {
     @Block()
     public static class PractitionerPractitionerRoleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The Organization where the Practitioner performs the roles associated.
+         * The organization where the Practitioner performs the roles associated.
          */
         @Child(name = "managingOrganization", type = {Organization.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The Organization where the Practitioner performs the roles associated", formalDefinition="The Organization where the Practitioner performs the roles associated." )
+        @Description(shortDefinition="Organization where the roles are performed", formalDefinition="The organization where the Practitioner performs the roles associated." )
         protected Reference managingOrganization;
 
         /**
-         * The actual object that is the target of the reference (The Organization where the Practitioner performs the roles associated.)
+         * The actual object that is the target of the reference (The organization where the Practitioner performs the roles associated.)
          */
         protected Organization managingOrganizationTarget;
 
@@ -116,7 +118,7 @@ public class Practitioner extends DomainResource {
       }
 
         /**
-         * @return {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
+         * @return {@link #managingOrganization} (The organization where the Practitioner performs the roles associated.)
          */
         public Reference getManagingOrganization() { 
           if (this.managingOrganization == null)
@@ -132,7 +134,7 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @param value {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
+         * @param value {@link #managingOrganization} (The organization where the Practitioner performs the roles associated.)
          */
         public PractitionerPractitionerRoleComponent setManagingOrganization(Reference value) { 
           this.managingOrganization = value;
@@ -140,7 +142,7 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
+         * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization where the Practitioner performs the roles associated.)
          */
         public Organization getManagingOrganizationTarget() { 
           if (this.managingOrganizationTarget == null)
@@ -152,7 +154,7 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
+         * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization where the Practitioner performs the roles associated.)
          */
         public PractitionerPractitionerRoleComponent setManagingOrganizationTarget(Organization value) { 
           this.managingOrganizationTarget = value;
@@ -371,7 +373,7 @@ public class Practitioner extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The Organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
+          childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
           childrenList.add(new Property("role", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
           childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
@@ -724,10 +726,10 @@ public class Practitioner extends DomainResource {
     protected List<Attachment> photo;
 
     /**
-     * The list of Roles/Organizations that the Practitioner is associated with.
+     * The list of roles/organizations that the practitioner is associated with.
      */
     @Child(name = "practitionerRole", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The list of Roles/Organizations that the Practitioner is associated with", formalDefinition="The list of Roles/Organizations that the Practitioner is associated with." )
+    @Description(shortDefinition="Roles/organizations the practitioner is associated with", formalDefinition="The list of roles/organizations that the practitioner is associated with." )
     protected List<PractitionerPractitionerRoleComponent> practitionerRole;
 
     /**
@@ -1081,7 +1083,7 @@ public class Practitioner extends DomainResource {
     }
 
     /**
-     * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
+     * @return {@link #practitionerRole} (The list of roles/organizations that the practitioner is associated with.)
      */
     public List<PractitionerPractitionerRoleComponent> getPractitionerRole() { 
       if (this.practitionerRole == null)
@@ -1099,7 +1101,7 @@ public class Practitioner extends DomainResource {
     }
 
     /**
-     * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
+     * @return {@link #practitionerRole} (The list of roles/organizations that the practitioner is associated with.)
      */
     // syntactic sugar
     public PractitionerPractitionerRoleComponent addPractitionerRole() { //3
@@ -1210,7 +1212,7 @@ public class Practitioner extends DomainResource {
         childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
         childrenList.add(new Property("birthDate", "date", "The date of birth for the practitioner.", 0, java.lang.Integer.MAX_VALUE, birthDate));
         childrenList.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("practitionerRole", "", "The list of Roles/Organizations that the Practitioner is associated with.", 0, java.lang.Integer.MAX_VALUE, practitionerRole));
+        childrenList.add(new Property("practitionerRole", "", "The list of roles/organizations that the practitioner is associated with.", 0, java.lang.Integer.MAX_VALUE, practitionerRole));
         childrenList.add(new Property("qualification", "", "Qualifications obtained by training and certification.", 0, java.lang.Integer.MAX_VALUE, qualification));
         childrenList.add(new Property("communication", "CodeableConcept", "A language the practitioner is able to use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication));
       }
@@ -1306,7 +1308,7 @@ public class Practitioner extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string" )
   public static final String SP_GIVEN = "given";
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specailty at an organization", type="token" )
+  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
   public static final String SP_SPECIALTY = "specialty";
   @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";

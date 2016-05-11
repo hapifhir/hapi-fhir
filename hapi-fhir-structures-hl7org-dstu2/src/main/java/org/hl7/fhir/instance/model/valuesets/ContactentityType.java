@@ -29,33 +29,33 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ContactentityType {
 
         /**
-         * Contact details for information regarding to billing/general finance enquiries
+         * Contact details for information regarding to billing/general finance enquiries.
          */
         BILL, 
         /**
-         * Contact details for administrative enquiries
+         * Contact details for administrative enquiries.
          */
         ADMIN, 
         /**
-         * Contact details for issues related to Human Resources, such as staff matters, OH&S etc
+         * Contact details for issues related to Human Resources, such as staff matters, OH&S etc.
          */
         HR, 
         /**
-         * Contact details for dealing with issues related to insurance claims/adjudication/payment
+         * Contact details for dealing with issues related to insurance claims/adjudication/payment.
          */
         PAYOR, 
         /**
-         * Generic information contact for patients
+         * Generic information contact for patients.
          */
         PATINF, 
         /**
-         * Dedicated contact point for matters relating to press enquiries
+         * Dedicated contact point for matters relating to press enquiries.
          */
         PRESS, 
         /**
@@ -95,12 +95,12 @@ public enum ContactentityType {
         }
         public String getDefinition() {
           switch (this) {
-            case BILL: return "Contact details for information regarding to billing/general finance enquiries";
-            case ADMIN: return "Contact details for administrative enquiries";
-            case HR: return "Contact details for issues related to Human Resources, such as staff matters, OH&S etc";
-            case PAYOR: return "Contact details for dealing with issues related to insurance claims/adjudication/payment";
-            case PATINF: return "Generic information contact for patients";
-            case PRESS: return "Dedicated contact point for matters relating to press enquiries";
+            case BILL: return "Contact details for information regarding to billing/general finance enquiries.";
+            case ADMIN: return "Contact details for administrative enquiries.";
+            case HR: return "Contact details for issues related to Human Resources, such as staff matters, OH&S etc.";
+            case PAYOR: return "Contact details for dealing with issues related to insurance claims/adjudication/payment.";
+            case PATINF: return "Generic information contact for patients.";
+            case PRESS: return "Dedicated contact point for matters relating to press enquiries.";
             default: return "?";
           }
         }

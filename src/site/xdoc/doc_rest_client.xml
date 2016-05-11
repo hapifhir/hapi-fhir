@@ -285,7 +285,7 @@
 					FHIR specification for more information on conditional creation.
 				</p>
 				<macro name="snippet">
-					<param name="id" value="updateConditional"/>
+					<param name="id" value="createConditional"/>
 					<param name="file"
 						   value="examples/src/main/java/example/GenericClientExample.java"/>
 				</macro>

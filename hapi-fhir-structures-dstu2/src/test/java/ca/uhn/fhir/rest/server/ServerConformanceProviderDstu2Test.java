@@ -14,27 +14,35 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -51,17 +59,27 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -229,22 +247,10 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		boolean found = false;
-		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
-		for (ResourceBinding resourceBinding : resourceBindings) {
-			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
-				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
-				found = true;
-			}
-		}
-		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
-		ourLog.info(conf);
+		ourLog.info("AAAAAA" + conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
@@ -289,6 +295,49 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
 	}
 
+	@Test
+	public void testProviderForSmart() throws ServletException {
+		
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.createConfiguration();
+		rs.setProviders(new ProviderWithRequiredAndOptional());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
+			@Override
+			public Conformance getServerConformance(HttpServletRequest theRequest) {	 	 
+				Conformance conformance = super.getServerConformance(theRequest); 
+				 ExtensionDt extensionDt = new ExtensionDt();
+				 ExtensionDt extensionDtToken = new ExtensionDt();
+				 ExtensionDt extensionDtAuthorize = new ExtensionDt();
+				 Rest rest = conformance.getRestFirstRep();
+				 RestSecurity restSecurity = rest.getSecurity();
+				 
+				 conformance.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_ELEMENTS_AND_EXTENSIONS);  
+				 restSecurity.addService(RestfulSecurityServiceEnum.SMART_ON_FHIR);
+				 restSecurity.getServiceFirstRep().setText("OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org)");	 
+				 extensionDt.setUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+				 extensionDtToken.setUrl("token");
+				 extensionDtToken.setValue(new UriDt("https://SERVERNAME/token"));
+				 extensionDtAuthorize.setUrl("authorize");
+				 extensionDtAuthorize.setValue(new UriDt("https://SERVERNAME/authorize"));
+				 extensionDt.addUndeclaredExtension(extensionDtToken);
+				extensionDt.addUndeclaredExtension(extensionDtAuthorize);
+				restSecurity.addUndeclaredExtension(extensionDt);
+				
+				return conformance;
+			}
+		};
+	
+		rs.init(createServletConfig());
+
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		Conformance parsed = ourCtx.newJsonParser().parseResource(Conformance.class, conf);
+	}
+	
+	
 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
@@ -376,8 +425,12 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
+				for (IParameter next : binding.getParameters()) {
+					SearchParameter param = (SearchParameter) next;
+					if (param.getDescription().contains("The patient's identifier (MRN or other card number")) {
+						found = true;
+					}
+				}
 				found = true;
 			}
 		}
@@ -389,6 +442,91 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
+
+	}
+	
+	/**
+	 * See #286
+	 */
+	@Test
+	public void testSearchReferenceParameterWithWhitelistDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProviderWithWhitelist());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource resource = findRestResource(conformance, "Patient");
+		
+		RestResourceSearchParam param = resource.getSearchParam().get(0);
+		assertEquals("bar", param.getChain().get(0).getValue());
+		assertEquals("foo", param.getChain().get(1).getValue());
+		assertEquals(2, param.getChain().size());
+	}
+
+	private RestResource findRestResource(Conformance conformance, String wantResource) throws Exception {
+		RestResource resource = null;
+		for (RestResource next : conformance.getRest().get(0).getResource()) {
+			if (next.getType().equals(wantResource)) {
+				resource = next;
+			}
+		}
+		if (resource == null) {
+			throw new Exception("Could not find resource: " + wantResource);
+		}
+		return resource;
+	}
+
+	/**
+	 * See #286
+	 */
+	@Test
+	public void testSearchReferenceParameterDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new PatientResourceProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
 
 	}
 
@@ -491,8 +629,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
 			return null;
 		}
 
@@ -525,8 +662,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
 		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class) })
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId,
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -535,8 +671,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId,
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -551,17 +686,13 @@ public class ServerConformanceProviderDstu2Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
@@ -576,13 +707,27 @@ public class ServerConformanceProviderDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+			return null;
+		}
+
+		@Search(type = Patient.class)
+		public Patient findPatient2(@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = { Patient.class }) ReferenceAndListParam theLink) {
+			return null;
+		}
+
+	}
+
+	public static class SearchProviderWithWhitelist {
+
+		@Search(type = Patient.class)
+		public Patient findPatient1(
+				@Description(shortDefinition = "The organization at which this person is a patient") 
+				@RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist= {"foo", "bar"}) 
+				ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ package ca.uhn.fhir.model.api;
  */
 
 
+import java.io.Serializable;
 
-public interface IValueSetEnumBinder<T extends Enum<?>> {
+public interface IValueSetEnumBinder<T extends Enum<?>> extends Serializable {
 
 	T fromCodeString(String theCodeString);
 	

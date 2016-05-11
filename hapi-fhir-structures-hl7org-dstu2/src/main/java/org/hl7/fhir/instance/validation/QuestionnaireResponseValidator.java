@@ -53,7 +53,8 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 
   // @formatter:off
   /*
-   * ***************************************************************** Note to anyone working on this class -
+   * ***************************************************************** 
+   * Note to anyone working on this class -
    * 
    * This class has unit tests which run within the HAPI project build. Please sync any changes here to HAPI and ensure that unit tests are run.
    * ****************************************************************

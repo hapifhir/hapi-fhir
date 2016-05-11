@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class BaseBinder<T> {
 		try {
 			Class<?>[] types = new Class<?>[myCompositeTypes.size()];
 			for (int i = 0; i < myCompositeTypes.size(); i++) {
-				types[i] = myCompositeTypes.get(i).getClass();
+				types[i] = Class.class;
 			}
 			myConstructor = myType.getConstructor(types);
 		} catch (NoSuchMethodException e) {
@@ -64,15 +64,7 @@ class BaseBinder<T> {
 			
 			T dt = myConstructor.newInstance(args);
 			return dt;
-		} catch (final InstantiationException e) {
-			throw new InternalErrorException(e);
-		} catch (final IllegalAccessException e) {
-			throw new InternalErrorException(e);
-		} catch (final SecurityException e) {
-			throw new InternalErrorException(e);
-		} catch (final IllegalArgumentException e) {
-			throw new InternalErrorException(e);
-		} catch (final InvocationTargetException e) {
+		} catch (final Exception e) {
 			throw new InternalErrorException(e);
 		}
 	}

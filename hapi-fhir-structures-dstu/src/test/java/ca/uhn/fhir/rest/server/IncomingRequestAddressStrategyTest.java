@@ -21,11 +21,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.util.RandomServerPortProvider;
+import ca.uhn.fhir.util.TestUtil;
 
 public class IncomingRequestAddressStrategyTest {
 
@@ -233,6 +235,12 @@ public class IncomingRequestAddressStrategyTest {
 			theResp.getWriter().close();
 		}
 
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

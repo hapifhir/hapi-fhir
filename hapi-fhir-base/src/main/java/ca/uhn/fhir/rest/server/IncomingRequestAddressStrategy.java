@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,11 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 				contextIndex = requestUrl.indexOf(requestPath, startOfPath);
 			}
 		} else {
-			contextIndex = requestUrl.indexOf(servletPath, startOfPath);
+			//servletContextPath can start with servletPath 
+			contextIndex = requestUrl.indexOf(servletPath + "/", startOfPath);
+			if (contextIndex == -1) {
+				contextIndex = requestUrl.indexOf(servletPath, startOfPath);
+			}
 		}
 
 		String fhirServerBase;

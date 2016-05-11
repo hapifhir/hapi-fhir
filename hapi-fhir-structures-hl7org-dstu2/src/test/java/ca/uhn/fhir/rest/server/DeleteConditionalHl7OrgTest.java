@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +13,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -35,7 +37,7 @@ public class DeleteConditionalHl7OrgTest {
 	private static int ourPort;
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Server ourServer;
-	private static IdDt ourLastIdParam;
+	private static IdType ourLastIdParam;
 	
 	
 	
@@ -113,10 +115,10 @@ public class DeleteConditionalHl7OrgTest {
 
 		
 		@Delete()
-		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
-			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
 
 	}

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2016 The MITRE Corporation
+      and the MIT Internet Trust Consortium
+   
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+   
+      http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<bean id="configBean" class="org.mitre.openid.connect.config.ConfigurationPropertiesBean">
+	    
+	    <!-- This property sets the root URL of the server, known as the issuer -->
+		<property name="issuer" value="http://localhost:8080/openid-connect-server-webapp/" />
+		
+		<!-- This property is a URL pointing to a logo image 24px high to be used in the top bar -->
+ 		<property name="logoImageUrl" value="resources/images/openid_connect_small.png" />
+ 		
+ 		<!-- This property sets the display name of the server, displayed in the topbar and page title -->
+ 		<property name="topbarTitle" value="OpenID Connect Server" />
+ 		
+		<!-- This property sets the lifetime of registration access tokens, in seconds. Leave it unset (null) for no rotation. -->
+		<!-- <property name="regTokenLifeTime" value="172800" /> -->
+		
+		<!-- This property forces the issuer value to start with "https", recommended on production servers -->
+		<!-- <property name="forceHttps" value="true" /> -->
+		
+		<!-- This property sets the locale for server text -->
+		<!-- <property name="locale" value="sv" /> -->
+
+		<!-- This property sets the set of namespaces for language translation files. The default is "messages". These are checked in the order presented here. -->
+		<!-- 
+		<property name="languageNamespaces">
+			<list>
+				<value>foo</value>
+				<value>bar</value>
+				<value>messages</value>
+			</list>
+		</property>
+		-->
+
+		<!-- This property indicates if a dynamically registered client supports dual flows, such as client_credentials
+		at the same time with authorization_code or implicit -->
+		<!-- <property name="dualClient" value="true" /> -->
+		
+		<!-- This property turns on HEART compliance mode -->
+		<!-- <property name="heartMode" value="true" /> -->
+
+	</bean>
+	
+</beans>

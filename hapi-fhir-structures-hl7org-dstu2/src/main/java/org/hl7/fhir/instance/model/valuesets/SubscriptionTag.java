@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum SubscriptionTag {
 
         /**
-         * The message has been queued for processing on a destination systems
+         * The message has been queued for processing on a destination systems.
          */
         QUEUED, 
         /**
-         * The message has been delivered to its intended recipient
+         * The message has been delivered to its intended recipient.
          */
         DELIVERED, 
         /**
@@ -67,8 +67,8 @@ public enum SubscriptionTag {
         }
         public String getDefinition() {
           switch (this) {
-            case QUEUED: return "The message has been queued for processing on a destination systems";
-            case DELIVERED: return "The message has been delivered to its intended recipient";
+            case QUEUED: return "The message has been queued for processing on a destination systems.";
+            case DELIVERED: return "The message has been delivered to its intended recipient.";
             default: return "?";
           }
         }

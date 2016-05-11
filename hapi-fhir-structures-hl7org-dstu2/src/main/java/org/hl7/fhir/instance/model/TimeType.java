@@ -29,7 +29,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.instance.model;
 
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a Time datatype, per the FHIR specification. A time is a specification of hours and minutes (and optionally milliseconds), with NO date and NO timezone information attached. It is

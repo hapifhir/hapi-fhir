@@ -29,18 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
  */
@@ -49,23 +50,23 @@ public class AuditEvent extends DomainResource {
 
     public enum AuditEventAction {
         /**
-         * Create a new database object, such as Placing an Order.
+         * Create a new database object, such as placing an order.
          */
         C, 
         /**
-         * Display or print data, such as a Doctor Census
+         * Display or print data, such as a doctor census.
          */
         R, 
         /**
-         * Update data, such as Revise Patient Information
+         * Update data, such as revise patient information.
          */
         U, 
         /**
-         * Delete items, such as a doctor master file record
+         * Delete items, such as a doctor master file record.
          */
         D, 
         /**
-         * Perform a system or application function such as log-on, program execution or use of an object's method, or perform a query/search operation
+         * Perform a system or application function such as log-on, program execution or use of an object's method, or perform a query/search operation.
          */
         E, 
         /**
@@ -109,11 +110,11 @@ public class AuditEvent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case C: return "Create a new database object, such as Placing an Order.";
-            case R: return "Display or print data, such as a Doctor Census";
-            case U: return "Update data, such as Revise Patient Information";
-            case D: return "Delete items, such as a doctor master file record";
-            case E: return "Perform a system or application function such as log-on, program execution or use of an object's method, or perform a query/search operation";
+            case C: return "Create a new database object, such as placing an order.";
+            case R: return "Display or print data, such as a doctor census.";
+            case U: return "Update data, such as revise patient information.";
+            case D: return "Delete items, such as a doctor master file record.";
+            case E: return "Perform a system or application function such as log-on, program execution or use of an object's method, or perform a query/search operation.";
             default: return "?";
           }
         }
@@ -163,19 +164,19 @@ public class AuditEvent extends DomainResource {
 
     public enum AuditEventOutcome {
         /**
-         * The operation completed successfully (whether with warnings or not)
+         * The operation completed successfully (whether with warnings or not).
          */
         _0, 
         /**
-         * The action was not successful due to some kind of catered for error (often equivalent to an HTTP 400 response)
+         * The action was not successful due to some kind of catered for error (often equivalent to an HTTP 400 response).
          */
         _4, 
         /**
-         * The action was not successful due to some kind of unexpected error (often equivalent to an HTTP 500 response)
+         * The action was not successful due to some kind of unexpected error (often equivalent to an HTTP 500 response).
          */
         _8, 
         /**
-         * An error of such magnitude occurred that the system is not longer available for use (i.e. the system died)
+         * An error of such magnitude occurred that the system is no longer available for use (i.e. the system died).
          */
         _12, 
         /**
@@ -215,10 +216,10 @@ public class AuditEvent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case _0: return "The operation completed successfully (whether with warnings or not)";
-            case _4: return "The action was not successful due to some kind of catered for error (often equivalent to an HTTP 400 response)";
-            case _8: return "The action was not successful due to some kind of unexpected error (often equivalent to an HTTP 500 response)";
-            case _12: return "An error of such magnitude occurred that the system is not longer available for use (i.e. the system died)";
+            case _0: return "The operation completed successfully (whether with warnings or not).";
+            case _4: return "The action was not successful due to some kind of catered for error (often equivalent to an HTTP 400 response).";
+            case _8: return "The action was not successful due to some kind of unexpected error (often equivalent to an HTTP 500 response).";
+            case _12: return "An error of such magnitude occurred that the system is no longer available for use (i.e. the system died).";
             default: return "?";
           }
         }
@@ -263,23 +264,23 @@ public class AuditEvent extends DomainResource {
 
     public enum AuditEventParticipantNetworkType {
         /**
-         * Machine Name, including DNS name
+         * The machine name, including DNS name.
          */
         _1, 
         /**
-         * IP Address
+         * The assigned Internet Protocol (IP) address.
          */
         _2, 
         /**
-         * Telephone Number
+         * The assigned telephone number.
          */
         _3, 
         /**
-         * Email address
+         * The assigned email address.
          */
         _4, 
         /**
-         * URI (User directory, HTTP-PUT, ftp, etc.)
+         * URI (User directory, HTTP-PUT, ftp, etc.).
          */
         _5, 
         /**
@@ -323,11 +324,11 @@ public class AuditEvent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case _1: return "Machine Name, including DNS name";
-            case _2: return "IP Address";
-            case _3: return "Telephone Number";
-            case _4: return "Email address";
-            case _5: return "URI (User directory, HTTP-PUT, ftp, etc.)";
+            case _1: return "The machine name, including DNS name.";
+            case _2: return "The assigned Internet Protocol (IP) address.";
+            case _3: return "The assigned telephone number.";
+            case _4: return "The assigned email address.";
+            case _5: return "URI (User directory, HTTP-PUT, ftp, etc.).";
             default: return "?";
           }
         }
@@ -378,10 +379,10 @@ public class AuditEvent extends DomainResource {
     @Block()
     public static class AuditEventEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Identifier for a family of the event.
+         * Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.
          */
         @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type/identifier of event", formalDefinition="Identifier for a family of the event." )
+        @Description(shortDefinition="Type/identifier of event", formalDefinition="Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function." )
         protected Coding type;
 
         /**
@@ -445,7 +446,7 @@ public class AuditEvent extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Identifier for a family of the event.)
+         * @return {@link #type} (Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.)
          */
         public Coding getType() { 
           if (this.type == null)
@@ -461,7 +462,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Identifier for a family of the event.)
+         * @param value {@link #type} (Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.)
          */
         public AuditEventEventComponent setType(Coding value) { 
           this.type = value;
@@ -742,7 +743,7 @@ public class AuditEvent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "Identifier for a family of the event.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("type", "Coding", "Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype));
           childrenList.add(new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, java.lang.Integer.MAX_VALUE, action));
           childrenList.add(new Property("dateTime", "instant", "The time when the event occurred on the source.", 0, java.lang.Integer.MAX_VALUE, dateTime));
@@ -833,10 +834,10 @@ public class AuditEvent extends DomainResource {
         protected Identifier userId;
 
         /**
-         * Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.
+         * Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.
          */
         @Child(name = "altId", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Alternative User id e.g. authentication", formalDefinition="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available." )
+        @Description(shortDefinition="Alternative User id e.g. authentication", formalDefinition="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available." )
         protected StringType altId;
 
         /**
@@ -1014,7 +1015,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #altId} (Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.). This is the underlying object with id, value and extensions. The accessor "getAltId" gives direct access to the value
+         * @return {@link #altId} (Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.). This is the underlying object with id, value and extensions. The accessor "getAltId" gives direct access to the value
          */
         public StringType getAltIdElement() { 
           if (this.altId == null)
@@ -1034,7 +1035,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #altId} (Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.). This is the underlying object with id, value and extensions. The accessor "getAltId" gives direct access to the value
+         * @param value {@link #altId} (Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.). This is the underlying object with id, value and extensions. The accessor "getAltId" gives direct access to the value
          */
         public AuditEventParticipantComponent setAltIdElement(StringType value) { 
           this.altId = value;
@@ -1042,14 +1043,14 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.
+         * @return Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.
          */
         public String getAltId() { 
           return this.altId == null ? null : this.altId.getValue();
         }
 
         /**
-         * @param value Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.
+         * @param value Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.
          */
         public AuditEventParticipantComponent setAltId(String value) { 
           if (Utilities.noString(value))
@@ -1347,7 +1348,7 @@ public class AuditEvent extends DomainResource {
           childrenList.add(new Property("role", "CodeableConcept", "Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("reference", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Direct reference to a resource that identifies the participant.", 0, java.lang.Integer.MAX_VALUE, reference));
           childrenList.add(new Property("userId", "Identifier", "Unique identifier for the user actively participating in the event.", 0, java.lang.Integer.MAX_VALUE, userId));
-          childrenList.add(new Property("altId", "string", "Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available.", 0, java.lang.Integer.MAX_VALUE, altId));
+          childrenList.add(new Property("altId", "string", "Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.", 0, java.lang.Integer.MAX_VALUE, altId));
           childrenList.add(new Property("name", "string", "Human-meaningful name for the user.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("requestor", "boolean", "Indicator that the user is or is not the requestor, or initiator, for the event being audited.", 0, java.lang.Integer.MAX_VALUE, requestor));
           childrenList.add(new Property("location", "Reference(Location)", "Where the event occurred.", 0, java.lang.Integer.MAX_VALUE, location));
@@ -1587,10 +1588,10 @@ public class AuditEvent extends DomainResource {
     @Block()
     public static class AuditEventSourceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Logical source location within the healthcare enterprise network.
+         * Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.
          */
         @Child(name = "site", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Logical source location within the enterprise", formalDefinition="Logical source location within the healthcare enterprise network." )
+        @Description(shortDefinition="Logical source location within the enterprise", formalDefinition="Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group." )
         protected StringType site;
 
         /**
@@ -1625,7 +1626,7 @@ public class AuditEvent extends DomainResource {
       }
 
         /**
-         * @return {@link #site} (Logical source location within the healthcare enterprise network.). This is the underlying object with id, value and extensions. The accessor "getSite" gives direct access to the value
+         * @return {@link #site} (Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.). This is the underlying object with id, value and extensions. The accessor "getSite" gives direct access to the value
          */
         public StringType getSiteElement() { 
           if (this.site == null)
@@ -1645,7 +1646,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #site} (Logical source location within the healthcare enterprise network.). This is the underlying object with id, value and extensions. The accessor "getSite" gives direct access to the value
+         * @param value {@link #site} (Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.). This is the underlying object with id, value and extensions. The accessor "getSite" gives direct access to the value
          */
         public AuditEventSourceComponent setSiteElement(StringType value) { 
           this.site = value;
@@ -1653,14 +1654,14 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return Logical source location within the healthcare enterprise network.
+         * @return Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.
          */
         public String getSite() { 
           return this.site == null ? null : this.site.getValue();
         }
 
         /**
-         * @param value Logical source location within the healthcare enterprise network.
+         * @param value Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.
          */
         public AuditEventSourceComponent setSite(String value) { 
           if (Utilities.noString(value))
@@ -1739,7 +1740,7 @@ public class AuditEvent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("site", "string", "Logical source location within the healthcare enterprise network.", 0, java.lang.Integer.MAX_VALUE, site));
+          childrenList.add(new Property("site", "string", "Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("identifier", "Identifier", "Identifier of the source where the event was detected.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("type", "Coding", "Code specifying the type of source where event originated.", 0, java.lang.Integer.MAX_VALUE, type));
         }

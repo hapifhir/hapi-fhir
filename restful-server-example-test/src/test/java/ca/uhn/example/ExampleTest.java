@@ -2,6 +2,8 @@ package ca.uhn.example;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hamcrest.core.StringContains;
@@ -77,7 +79,7 @@ public class ExampleTest {
 		WebAppContext root = new WebAppContext();
 		root.setAllowDuplicateFragmentNames(true);
 
-		root.setWar("file:../restful-server-example/target/restful-server-example.war");
+		root.setWar(new File("../restful-server-example/target/restful-server-example.war").toURI().toString());
 		root.setContextPath("/");
 		root.setAttribute(WebAppContext.BASETEMPDIR, "target/tempextrtact");
 		root.setParentLoaderPriority(false);

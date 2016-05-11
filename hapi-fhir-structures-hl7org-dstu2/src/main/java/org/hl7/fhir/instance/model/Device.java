@@ -29,34 +29,34 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
- * This resource identifies an instance of a manufactured thing that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non medical devices may includes things such as a machine, a cellphone, a computer, an application, etc.
+ * This resource identifies an instance of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/Profile/Device")
 public class Device extends DomainResource {
 
     public enum DeviceStatus {
         /**
-         * The Device is available for use
+         * The Device is available for use.
          */
         AVAILABLE, 
         /**
-         * The Device is no longer available for use ( e.g lost, expired, damaged)
+         * The Device is no longer available for use (e.g. lost, expired, damaged).
          */
         NOTAVAILABLE, 
         /**
-         * The Device was entered in error and voided
+         * The Device was entered in error and voided.
          */
         ENTEREDINERROR, 
         /**
@@ -92,9 +92,9 @@ public class Device extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case AVAILABLE: return "The Device is available for use";
-            case NOTAVAILABLE: return "The Device is no longer available for use ( e.g lost, expired, damaged)";
-            case ENTEREDINERROR: return "The Device was entered in error and voided";
+            case AVAILABLE: return "The Device is available for use.";
+            case NOTAVAILABLE: return "The Device is no longer available for use (e.g. lost, expired, damaged).";
+            case ENTEREDINERROR: return "The Device was entered in error and voided.";
             default: return "?";
           }
         }
@@ -133,10 +133,10 @@ public class Device extends DomainResource {
     }
 
     /**
-     * Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used.
+     * Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Instance id from manufacturer, owner, and others", formalDefinition="Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used." )
+    @Description(shortDefinition="Instance id from manufacturer, owner, and others", formalDefinition="Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used." )
     protected List<Identifier> identifier;
 
     /**
@@ -168,10 +168,10 @@ public class Device extends DomainResource {
     protected StringType manufacturer;
 
     /**
-     * The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
+     * The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
     @Child(name = "model", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
+    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
     protected StringType model;
 
     /**
@@ -182,10 +182,10 @@ public class Device extends DomainResource {
     protected StringType version;
 
     /**
-     * The Date and time when the device was manufactured.
+     * The date and time when the device was manufactured.
      */
     @Child(name = "manufactureDate", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Manufacture date", formalDefinition="The Date and time when the device was manufactured." )
+    @Description(shortDefinition="Manufacture date", formalDefinition="The date and time when the device was manufactured." )
     protected DateTimeType manufactureDate;
 
     /**
@@ -199,7 +199,7 @@ public class Device extends DomainResource {
      * United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
      */
     @Child(name = "udi", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="FDA Mandated Unique Device Identifier", formalDefinition="United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
+    @Description(shortDefinition="FDA mandated Unique Device Identifier", formalDefinition="United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
     protected StringType udi;
 
     /**
@@ -277,7 +277,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used.)
+     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -295,7 +295,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used.)
+     * @return {@link #identifier} (Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -479,7 +479,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #model} (The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.). This is the underlying object with id, value and extensions. The accessor "getModel" gives direct access to the value
+     * @return {@link #model} (The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.). This is the underlying object with id, value and extensions. The accessor "getModel" gives direct access to the value
      */
     public StringType getModelElement() { 
       if (this.model == null)
@@ -499,7 +499,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @param value {@link #model} (The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.). This is the underlying object with id, value and extensions. The accessor "getModel" gives direct access to the value
+     * @param value {@link #model} (The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.). This is the underlying object with id, value and extensions. The accessor "getModel" gives direct access to the value
      */
     public Device setModelElement(StringType value) { 
       this.model = value;
@@ -507,14 +507,14 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
+     * @return The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
     public String getModel() { 
       return this.model == null ? null : this.model.getValue();
     }
 
     /**
-     * @param value The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
+     * @param value The "model" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
     public Device setModel(String value) { 
       if (Utilities.noString(value))
@@ -577,7 +577,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #manufactureDate} (The Date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     * @return {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
      */
     public DateTimeType getManufactureDateElement() { 
       if (this.manufactureDate == null)
@@ -597,7 +597,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @param value {@link #manufactureDate} (The Date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
+     * @param value {@link #manufactureDate} (The date and time when the device was manufactured.). This is the underlying object with id, value and extensions. The accessor "getManufactureDate" gives direct access to the value
      */
     public Device setManufactureDateElement(DateTimeType value) { 
       this.manufactureDate = value;
@@ -605,14 +605,14 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return The Date and time when the device was manufactured.
+     * @return The date and time when the device was manufactured.
      */
     public Date getManufactureDate() { 
       return this.manufactureDate == null ? null : this.manufactureDate.getValue();
     }
 
     /**
-     * @param value The Date and time when the device was manufactured.
+     * @param value The date and time when the device was manufactured.
      */
     public Device setManufactureDate(Date value) { 
       if (value == null)
@@ -995,14 +995,14 @@ public class Device extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by organizations like manufacturers or owners. If the identifier identifies the type of device, Device.type should be used.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("status", "code", "Status of the Device availability.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("model", "string", "The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
+        childrenList.add(new Property("model", "string", "The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
         childrenList.add(new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("manufactureDate", "dateTime", "The Date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
+        childrenList.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
         childrenList.add(new Property("expiry", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, java.lang.Integer.MAX_VALUE, expiry));
         childrenList.add(new Property("udi", "string", "United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.", 0, java.lang.Integer.MAX_VALUE, udi));
         childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
@@ -1103,7 +1103,7 @@ public class Device extends DomainResource {
   public static final String SP_MODEL = "model";
   @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="udi", path="Device.udi", description="FDA Mandated Unique Device Identifier", type="string" )
+  @SearchParamDefinition(name="udi", path="Device.udi", description="FDA mandated Unique Device Identifier", type="string" )
   public static final String SP_UDI = "udi";
   @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
   public static final String SP_TYPE = "type";

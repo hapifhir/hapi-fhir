@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
@@ -48,27 +48,27 @@ public class Encounter extends DomainResource {
 
     public enum EncounterState {
         /**
-         * The Encounter has not yet started
+         * The Encounter has not yet started.
          */
         PLANNED, 
         /**
-         * The Patient is present for the encounter, however is not currently meeting with a practitioner
+         * The Patient is present for the encounter, however is not currently meeting with a practitioner.
          */
         ARRIVED, 
         /**
-         * The Encounter has begun and the patient is present / the practitioner and the patient are meeting
+         * The Encounter has begun and the patient is present / the practitioner and the patient are meeting.
          */
         INPROGRESS, 
         /**
-         * The Encounter has begun, but the patient is temporarily on leave
+         * The Encounter has begun, but the patient is temporarily on leave.
          */
         ONLEAVE, 
         /**
-         * The Encounter has ended
+         * The Encounter has ended.
          */
         FINISHED, 
         /**
-         * The Encounter has ended before it has begun
+         * The Encounter has ended before it has begun.
          */
         CANCELLED, 
         /**
@@ -116,12 +116,12 @@ public class Encounter extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The Encounter has not yet started";
-            case ARRIVED: return "The Patient is present for the encounter, however is not currently meeting with a practitioner";
-            case INPROGRESS: return "The Encounter has begun and the patient is present / the practitioner and the patient are meeting";
-            case ONLEAVE: return "The Encounter has begun, but the patient is temporarily on leave";
-            case FINISHED: return "The Encounter has ended";
-            case CANCELLED: return "The Encounter has ended before it has begun";
+            case PLANNED: return "The Encounter has not yet started.";
+            case ARRIVED: return "The Patient is present for the encounter, however is not currently meeting with a practitioner.";
+            case INPROGRESS: return "The Encounter has begun and the patient is present / the practitioner and the patient are meeting.";
+            case ONLEAVE: return "The Encounter has begun, but the patient is temporarily on leave.";
+            case FINISHED: return "The Encounter has ended.";
+            case CANCELLED: return "The Encounter has ended before it has begun.";
             default: return "?";
           }
         }
@@ -176,39 +176,39 @@ public class Encounter extends DomainResource {
 
     public enum EncounterClass {
         /**
-         * An encounter during which the patient is hospitalized and stays overnight
+         * An encounter during which the patient is hospitalized and stays overnight.
          */
         INPATIENT, 
         /**
-         * An encounter during which the patient is not hospitalized overnight
+         * An encounter during which the patient is not hospitalized overnight.
          */
         OUTPATIENT, 
         /**
-         * An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit
+         * An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit.
          */
         AMBULATORY, 
         /**
-         * An encounter in the Emergency Care Department
+         * An encounter in the Emergency Care Department.
          */
         EMERGENCY, 
         /**
-         * An encounter where the practitioner visits the patient at his/her home
+         * An encounter where the practitioner visits the patient at his/her home.
          */
         HOME, 
         /**
-         * An encounter taking place outside the regular environment for giving care
+         * An encounter taking place outside the regular environment for giving care.
          */
         FIELD, 
         /**
-         * An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight
+         * An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight.
          */
         DAYTIME, 
         /**
-         * An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact
+         * An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact.
          */
         VIRTUAL, 
         /**
-         * Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is
+         * Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is.
          */
         OTHER, 
         /**
@@ -268,15 +268,15 @@ public class Encounter extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "An encounter during which the patient is hospitalized and stays overnight";
-            case OUTPATIENT: return "An encounter during which the patient is not hospitalized overnight";
-            case AMBULATORY: return "An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit";
-            case EMERGENCY: return "An encounter in the Emergency Care Department";
-            case HOME: return "An encounter where the practitioner visits the patient at his/her home";
-            case FIELD: return "An encounter taking place outside the regular environment for giving care";
-            case DAYTIME: return "An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight";
-            case VIRTUAL: return "An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact";
-            case OTHER: return "Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is";
+            case INPATIENT: return "An encounter during which the patient is hospitalized and stays overnight.";
+            case OUTPATIENT: return "An encounter during which the patient is not hospitalized overnight.";
+            case AMBULATORY: return "An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit.";
+            case EMERGENCY: return "An encounter in the Emergency Care Department.";
+            case HOME: return "An encounter where the practitioner visits the patient at his/her home.";
+            case FIELD: return "An encounter taking place outside the regular environment for giving care.";
+            case DAYTIME: return "An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight.";
+            case VIRTUAL: return "An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact.";
+            case OTHER: return "Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is.";
             default: return "?";
           }
         }
@@ -346,21 +346,21 @@ public class Encounter extends DomainResource {
 
     public enum EncounterLocationStatus {
         /**
-         * The patient is planned to be moved to this location at some point in the future
+         * The patient is planned to be moved to this location at some point in the future.
          */
         PLANNED, 
         /**
-         * The patient is currently at this location, or was between the period specified
+         * The patient is currently at this location, or was between the period specified.
 
 A system may update these records when the patient leaves the location to either reserved, or completed
          */
         ACTIVE, 
         /**
-         * This location is held empty for this patient
+         * This location is held empty for this patient.
          */
         RESERVED, 
         /**
-         * The patient was at this location during the period specified
+         * The patient was at this location during the period specified.
 
 Not to be used when the patient is currently at the location
          */
@@ -402,10 +402,10 @@ Not to be used when the patient is currently at the location
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The patient is planned to be moved to this location at some point in the future";
-            case ACTIVE: return "The patient is currently at this location, or was between the period specified\n\nA system may update these records when the patient leaves the location to either reserved, or completed";
-            case RESERVED: return "This location is held empty for this patient";
-            case COMPLETED: return "The patient was at this location during the period specified\n\nNot to be used when the patient is currently at the location";
+            case PLANNED: return "The patient is planned to be moved to this location at some point in the future.";
+            case ACTIVE: return "The patient is currently at this location, or was between the period specified.\n\nA system may update these records when the patient leaves the location to either reserved, or completed";
+            case RESERVED: return "This location is held empty for this patient.";
+            case COMPLETED: return "The patient was at this location during the period specified.\n\nNot to be used when the patient is currently at the location";
             default: return "?";
           }
         }
@@ -809,13 +809,13 @@ Not to be used when the patient is currently at the location
         protected CodeableConcept admitSource;
 
         /**
-         * The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.
+         * The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.
          */
         @Child(name = "admittingDiagnosis", type = {Condition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="The admitting Diagnosis as reported by admitting practitioner", formalDefinition="The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter." )
+        @Description(shortDefinition="The admitting diagnosis as reported by admitting practitioner", formalDefinition="The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter." )
         protected List<Reference> admittingDiagnosis;
         /**
-         * The actual objects that are the target of the reference (The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * The actual objects that are the target of the reference (The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
          */
         protected List<Condition> admittingDiagnosisTarget;
 
@@ -845,7 +845,7 @@ Not to be used when the patient is currently at the location
          * Wheelchair, translator, stretcher, etc.
          */
         @Child(name = "specialArrangement", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Wheelchair, translator, stretcher, etc", formalDefinition="Wheelchair, translator, stretcher, etc." )
+        @Description(shortDefinition="Wheelchair, translator, stretcher, etc.", formalDefinition="Wheelchair, translator, stretcher, etc." )
         protected List<CodeableConcept> specialArrangement;
 
         /**
@@ -981,7 +981,7 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #admittingDiagnosis} (The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @return {@link #admittingDiagnosis} (The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
          */
         public List<Reference> getAdmittingDiagnosis() { 
           if (this.admittingDiagnosis == null)
@@ -999,7 +999,7 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #admittingDiagnosis} (The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @return {@link #admittingDiagnosis} (The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
          */
     // syntactic sugar
         public Reference addAdmittingDiagnosis() { //3
@@ -1021,7 +1021,7 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #admittingDiagnosis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @return {@link #admittingDiagnosis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
          */
         public List<Condition> getAdmittingDiagnosisTarget() { 
           if (this.admittingDiagnosisTarget == null)
@@ -1031,7 +1031,7 @@ Not to be used when the patient is currently at the location
 
     // syntactic sugar
         /**
-         * @return {@link #admittingDiagnosis} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @return {@link #admittingDiagnosis} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
          */
         public Condition addAdmittingDiagnosisTarget() { 
           Condition r = new Condition();
@@ -1319,7 +1319,7 @@ Not to be used when the patient is currently at the location
           childrenList.add(new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, java.lang.Integer.MAX_VALUE, preAdmissionIdentifier));
           childrenList.add(new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, java.lang.Integer.MAX_VALUE, origin));
           childrenList.add(new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, java.lang.Integer.MAX_VALUE, admitSource));
-          childrenList.add(new Property("admittingDiagnosis", "Reference(Condition)", "The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.", 0, java.lang.Integer.MAX_VALUE, admittingDiagnosis));
+          childrenList.add(new Property("admittingDiagnosis", "Reference(Condition)", "The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.", 0, java.lang.Integer.MAX_VALUE, admittingDiagnosis));
           childrenList.add(new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, java.lang.Integer.MAX_VALUE, reAdmission));
           childrenList.add(new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference));
           childrenList.add(new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy));
@@ -1418,10 +1418,10 @@ Not to be used when the patient is currently at the location
         protected Location locationTarget;
 
         /**
-         * The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
          */
         @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="planned | active | reserved | completed", formalDefinition="The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time." )
+        @Description(shortDefinition="planned | active | reserved | completed", formalDefinition="The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time." )
         protected Enumeration<EncounterLocationStatus> status;
 
         /**
@@ -1493,7 +1493,7 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #status} (The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @return {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public Enumeration<EncounterLocationStatus> getStatusElement() { 
           if (this.status == null)
@@ -1513,7 +1513,7 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @param value {@link #status} (The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @param value {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public EncounterLocationComponent setStatusElement(Enumeration<EncounterLocationStatus> value) { 
           this.status = value;
@@ -1521,14 +1521,14 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * @return The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
          */
         public EncounterLocationStatus getStatus() { 
           return this.status == null ? null : this.status.getValue();
         }
 
         /**
-         * @param value The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * @param value The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
          */
         public EncounterLocationComponent setStatus(EncounterLocationStatus value) { 
           if (value == null)
@@ -1568,7 +1568,7 @@ Not to be used when the patient is currently at the location
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("status", "code", "The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, java.lang.Integer.MAX_VALUE, status));
+          childrenList.add(new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, java.lang.Integer.MAX_VALUE, status));
           childrenList.add(new Property("period", "Period", "Time period during which the patient was present at the location.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
@@ -1624,10 +1624,10 @@ Not to be used when the patient is currently at the location
     protected Enumeration<EncounterState> status;
 
     /**
-     * The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them.
+     * The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.
      */
     @Child(name = "statusHistory", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of Encounter statuses", formalDefinition="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them." )
+    @Description(shortDefinition="List of past encounter statuses", formalDefinition="The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them." )
     protected List<EncounterStatusHistoryComponent> statusHistory;
 
     /**
@@ -1664,25 +1664,25 @@ Not to be used when the patient is currently at the location
     protected Patient patientTarget;
 
     /**
-     * Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).
+     * Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).
      */
     @Child(name = "episodeOfCare", type = {EpisodeOfCare.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Episode(s) of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)." )
+    @Description(shortDefinition="Episode(s) of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)." )
     protected List<Reference> episodeOfCare;
     /**
-     * The actual objects that are the target of the reference (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * The actual objects that are the target of the reference (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     protected List<EpisodeOfCare> episodeOfCareTarget;
 
 
     /**
-     * The referral request that this encounter satisfies (incoming referral).
+     * The referral request this encounter satisfies (incoming referral).
      */
     @Child(name = "incomingReferral", type = {ReferralRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The Referral that initiated this encounter", formalDefinition="The referral request that this encounter satisfies (incoming referral)." )
+    @Description(shortDefinition="The ReferralRequest that initiated this encounter", formalDefinition="The referral request this encounter satisfies (incoming referral)." )
     protected List<Reference> incomingReferral;
     /**
-     * The actual objects that are the target of the reference (The referral request that this encounter satisfies (incoming referral).)
+     * The actual objects that are the target of the reference (The referral request this encounter satisfies (incoming referral).)
      */
     protected List<ReferralRequest> incomingReferralTarget;
 
@@ -1747,21 +1747,21 @@ Not to be used when the patient is currently at the location
     protected EncounterHospitalizationComponent hospitalization;
 
     /**
-     * List of locations at which the patient has been during this encounter.
+     * List of locations where  the patient has been during this encounter.
      */
     @Child(name = "location", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of locations the patient has been at", formalDefinition="List of locations at which the patient has been during this encounter." )
+    @Description(shortDefinition="List of locations where the patient has been", formalDefinition="List of locations where  the patient has been during this encounter." )
     protected List<EncounterLocationComponent> location;
 
     /**
-     * An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.
+     * An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.
      */
     @Child(name = "serviceProvider", type = {Organization.class}, order=17, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The custodian organization of this Encounter record", formalDefinition="An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization." )
+    @Description(shortDefinition="The custodian organization of this Encounter record", formalDefinition="An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization." )
     protected Reference serviceProvider;
 
     /**
-     * The actual object that is the target of the reference (An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * The actual object that is the target of the reference (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
     protected Organization serviceProviderTarget;
 
@@ -1880,7 +1880,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #statusHistory} (The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them.)
+     * @return {@link #statusHistory} (The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.)
      */
     public List<EncounterStatusHistoryComponent> getStatusHistory() { 
       if (this.statusHistory == null)
@@ -1898,7 +1898,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #statusHistory} (The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them.)
+     * @return {@link #statusHistory} (The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.)
      */
     // syntactic sugar
     public EncounterStatusHistoryComponent addStatusHistory() { //3
@@ -2077,7 +2077,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     public List<Reference> getEpisodeOfCare() { 
       if (this.episodeOfCare == null)
@@ -2095,7 +2095,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     // syntactic sugar
     public Reference addEpisodeOfCare() { //3
@@ -2117,7 +2117,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #episodeOfCare} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return {@link #episodeOfCare} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     public List<EpisodeOfCare> getEpisodeOfCareTarget() { 
       if (this.episodeOfCareTarget == null)
@@ -2127,7 +2127,7 @@ Not to be used when the patient is currently at the location
 
     // syntactic sugar
     /**
-     * @return {@link #episodeOfCare} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return {@link #episodeOfCare} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     public EpisodeOfCare addEpisodeOfCareTarget() { 
       EpisodeOfCare r = new EpisodeOfCare();
@@ -2138,7 +2138,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #incomingReferral} (The referral request that this encounter satisfies (incoming referral).)
+     * @return {@link #incomingReferral} (The referral request this encounter satisfies (incoming referral).)
      */
     public List<Reference> getIncomingReferral() { 
       if (this.incomingReferral == null)
@@ -2156,7 +2156,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #incomingReferral} (The referral request that this encounter satisfies (incoming referral).)
+     * @return {@link #incomingReferral} (The referral request this encounter satisfies (incoming referral).)
      */
     // syntactic sugar
     public Reference addIncomingReferral() { //3
@@ -2178,7 +2178,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #incomingReferral} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The referral request that this encounter satisfies (incoming referral).)
+     * @return {@link #incomingReferral} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The referral request this encounter satisfies (incoming referral).)
      */
     public List<ReferralRequest> getIncomingReferralTarget() { 
       if (this.incomingReferralTarget == null)
@@ -2188,7 +2188,7 @@ Not to be used when the patient is currently at the location
 
     // syntactic sugar
     /**
-     * @return {@link #incomingReferral} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The referral request that this encounter satisfies (incoming referral).)
+     * @return {@link #incomingReferral} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The referral request this encounter satisfies (incoming referral).)
      */
     public ReferralRequest addIncomingReferralTarget() { 
       ReferralRequest r = new ReferralRequest();
@@ -2444,7 +2444,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #location} (List of locations at which the patient has been during this encounter.)
+     * @return {@link #location} (List of locations where  the patient has been during this encounter.)
      */
     public List<EncounterLocationComponent> getLocation() { 
       if (this.location == null)
@@ -2462,7 +2462,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #location} (List of locations at which the patient has been during this encounter.)
+     * @return {@link #location} (List of locations where  the patient has been during this encounter.)
      */
     // syntactic sugar
     public EncounterLocationComponent addLocation() { //3
@@ -2484,7 +2484,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @return {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
     public Reference getServiceProvider() { 
       if (this.serviceProvider == null)
@@ -2500,7 +2500,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @param value {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @param value {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
     public Encounter setServiceProvider(Reference value) { 
       this.serviceProvider = value;
@@ -2508,7 +2508,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @return {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
     public Organization getServiceProviderTarget() { 
       if (this.serviceProviderTarget == null)
@@ -2520,7 +2520,7 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
+     * @param value {@link #serviceProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
     public Encounter setServiceProviderTarget(Organization value) { 
       this.serviceProviderTarget = value;
@@ -2575,13 +2575,13 @@ Not to be used when the patient is currently at the location
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "planned | arrived | in-progress | onleave | finished | cancelled.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("statusHistory", "", "The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
+        childrenList.add(new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
         childrenList.add(new Property("class", "code", "inpatient | outpatient | ambulatory | emergency +.", 0, java.lang.Integer.MAX_VALUE, class_));
         childrenList.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient present at the encounter.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
-        childrenList.add(new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request that this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
+        childrenList.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
+        childrenList.add(new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
         childrenList.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
         childrenList.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, java.lang.Integer.MAX_VALUE, appointment));
         childrenList.add(new Property("period", "Period", "The start and end time of the encounter.", 0, java.lang.Integer.MAX_VALUE, period));
@@ -2589,8 +2589,8 @@ Not to be used when the patient is currently at the location
         childrenList.add(new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("indication", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, java.lang.Integer.MAX_VALUE, indication));
         childrenList.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, java.lang.Integer.MAX_VALUE, hospitalization));
-        childrenList.add(new Property("location", "", "List of locations at which the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, java.lang.Integer.MAX_VALUE, serviceProvider));
+        childrenList.add(new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, java.lang.Integer.MAX_VALUE, serviceProvider));
         childrenList.add(new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, java.lang.Integer.MAX_VALUE, partOf));
       }
 
@@ -2713,7 +2713,7 @@ Not to be used when the patient is currently at the location
   public static final String SP_EPISODEOFCARE = "episodeofcare";
   @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
   public static final String SP_PARTICIPANTTYPE = "participant-type";
-  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The Referral that initiated this encounter", type="reference" )
+  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ReferralRequest that initiated this encounter", type="reference" )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
   @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
@@ -2739,7 +2739,7 @@ Not to be used when the patient is currently at the location
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_INDICATION = "indication";
-  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc", type="token" )
+  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc.", type="token" )
   public static final String SP_SPECIALARRANGEMENT = "special-arrangement";
   @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
   public static final String SP_STATUS = "status";

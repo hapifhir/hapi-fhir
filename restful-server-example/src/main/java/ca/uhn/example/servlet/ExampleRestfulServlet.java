@@ -10,6 +10,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 /**
  * This servlet is the actual FHIR server itself
@@ -49,11 +50,17 @@ public class ExampleRestfulServlet extends RestfulServer {
 		getFhirContext().setNarrativeGenerator(narrativeGen);
 
 		/*
-		 * Tells HAPI to use content types which are not technically FHIR compliant when a browser is detected as the
-		 * requesting client. This prevents browsers from trying to download resource responses instead of displaying them
-		 * inline which can be handy for troubleshooting.
+		 * This server interceptor causes the server to return nicely
+		 * formatter and coloured responses instead of plain JSON/XML if
+		 * the request is coming from a browser window. It is optional,
+		 * but can be nice for testing.
 		 */
-		setUseBrowserFriendlyContentTypes(true);
+		registerInterceptor(new ResponseHighlighterInterceptor());
+		
+		/*
+		 * Tells the server to return pretty-printed responses by default
+		 */
+		setDefaultPrettyPrint(true);
 		
 	}
 

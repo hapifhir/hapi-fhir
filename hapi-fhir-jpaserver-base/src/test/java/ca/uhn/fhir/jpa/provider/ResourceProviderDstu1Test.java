@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,9 +25,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -45,6 +50,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -57,10 +63,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
-	private static ClassPathXmlApplicationContext ourAppCtx;
+	private static AnnotationConfigApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
 	private static DaoConfig ourDaoConfig;
 	private static FhirContext ourCtx = FhirContext.forDstu1();
@@ -72,6 +80,14 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	private static Server ourServer;
 	private static String ourServerBase;
 	private static CloseableHttpClient ourHttpClient;
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		ourAppCtx.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -415,7 +431,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		// Read back directly from the DAO
 		{
-			Organization returned = ourOrganizationDao.read(orgId);
+			Organization returned = ourOrganizationDao.read(orgId, mySrd);
 			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
@@ -508,11 +524,6 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	}
 
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-		ourAppCtx.stop();
-	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -523,7 +534,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		
 		ourServerBase = "http://localhost:" + port + "/fhir/context";
 
-		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
+		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
 
 		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
 
@@ -539,7 +550,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		IFhirSystemDao<List<IResource>> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
+		IFhirSystemDao<List<IResource>, MetaDt> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
 		JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(restServer, systemDao);
 		confProvider.setImplementationDescription("THIS IS THE DESC");
 		restServer.setServerConformanceProvider(confProvider);

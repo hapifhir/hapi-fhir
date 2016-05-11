@@ -7,10 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Condition;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class BaseDateTimeDtTest {
@@ -64,7 +67,7 @@ public class BaseDateTimeDtTest {
 		DateTimeDt dt = DateTimeDt.withCurrentTime();
 		String str = dt.getValueAsString();
 		char offset = str.charAt(19);
-		if (offset != '+' && offset != '-') {
+		if (offset != '+' && offset != '-' && offset != 'Z') {
 			fail("No timezone provided: " + str);
 		}
 	}
@@ -74,7 +77,7 @@ public class BaseDateTimeDtTest {
 		InstantDt dt = InstantDt.withCurrentTime();
 		String str = dt.getValueAsString();
 		char offset = str.charAt(23);
-		if (offset != '+' && offset != '-') {
+		if (offset != '+' && offset != '-' && offset != 'Z') {
 			fail("No timezone provided: " + str);
 		}
 	}
@@ -276,6 +279,12 @@ public class BaseDateTimeDtTest {
 
 		assertEquals(1403295729000L, i.getValue().getTime());
 		assertEquals("2014-06-20T20:22:09Z", i.getValueAsString());
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

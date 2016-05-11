@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +24,24 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.cobertura.CoverageIgnore;
-
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.util.CoverageIgnore;
 
-public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
+public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
-	private FhirContext myContext;
 	private IFhirResourceDao<T> myDao;
 
 	public BaseJpaResourceProvider() {
@@ -55,71 +53,63 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 		myDao = theDao;
 	}
 
-	public FhirContext getContext() {
-		return myContext;
-	}
-
 	public IFhirResourceDao<T> getDao() {
 		return myDao;
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theId, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theId, theDate);
+			return myDao.history(theId, theDate, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate);
+			return myDao.history(theDate, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@Override
-	public Class<? extends IResource> getResourceType() {
+	public Class<? extends IBaseResource> getResourceType() {
 		return myDao.getResourceType();
 	}
 
 	@GetTags
-	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theResourceId) {
+	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theResourceId, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.getTags(theResourceId);
+			return myDao.getTags(theResourceId, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@GetTags
-	public TagList getTagsForResourceType(HttpServletRequest theRequest) {
+	public TagList getTagsForResourceType(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.getAllResourceTags();
+			return myDao.getAllResourceTags(theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IdDt theId) {
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.read(theId);
+			return myDao.read(theId, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
-	}
-
-	public void setContext(FhirContext theContext) {
-		myContext = theContext;
 	}
 
 	@Required

@@ -1,0 +1,1515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Questionnaire xmlns="http://hl7.org/fhir">
+   <version value="0.5"/>
+    <status value="draft"/>
+    <date value="2016-03-09"/>
+    <publisher value="Cancer Care Ontario"/>
+    <title value="CT Lung Screening Template"/>
+    <item>
+        <linkId value="g1"/>
+        <text value="CLINICAL INFORMATION"/>
+        <type value="group"/>
+        <item>
+            <linkId value="q1"/>
+            <prefix value="1."/><!-- changed from label extension to prefix -->
+            <text value="Clinical Information:"/>
+            <type value="text"/>
+            <required value="true"/>
+        </item>
+    </item>
+    <item>
+        <linkId value="g2"/>
+        <text value="COMPARISON STUDY (CT)"/>
+        <type value="group"/>
+        <item>
+            <linkId value="q2.1"/>
+            <prefix value="1."/>
+            <text value="Comparison Study:"/>
+            <type value="choice"/>
+            <required value="true"/>
+            <option>
+                <valueCoding>
+                    <code value="2.1a"/>
+                    <display value="None Available"/> 
+                </valueCoding>
+            </option>
+            <option>
+                <valueCoding>
+                    <code value="2.1b"/>
+                    <display value="Previous CT exam(s)"/> 
+                </valueCoding>
+            </option>
+            <item>
+                <type value="date"/>
+                <enableWhen><!-- changed from enableWhen extension, match to Lloyd's transform for STU 3-->
+                    <question value="q2.1"/>
+                    <answerCoding>
+                        <code value="2.1b"/>
+                    </answerCoding>
+                </enableWhen>
+                <repeats value="true"/>
+                <item>
+                    <text value="(dates)"/>
+                    <type value="display"/>
+                </item>
+            </item>
+        </item>
+    </item>
+    <item>
+        <linkId value="g3"/>
+        <text value="IMAGING PROCEDURE DESCRIPTION"/>
+        <type value="group"/>
+        <item>
+            <linkId value="q3.1"/>
+            <prefix value="1."/>
+            <text value="Overall Image Quality:"/>
+            <type value="choice"/>
+            <option><!-- changed fromprevious option -->
+                <valueCoding>
+                    <code value="3.1a"/>
+                    <display value="Adequate"/>
+                </valueCoding>
+            </option>
+            <option>
+                <valueCoding>
+                    <code value="3.1b"/>
+                    <display value="Suboptimal"/>
+                </valueCoding>
+            </option>
+            <option>
+                <valueCoding>
+                    <code value="3.1c"/>
+                    <display value="Non-diagnostic"/>    
+                </valueCoding>
+            </option>
+        </item>
+        <item>
+            <linkId value="q3.2"/>
+            <prefix value="2."/>
+            <text value="Procedure protocol:"/>
+            <type value="choice"/>
+            <option>
+                <valueCoding>
+                    <code value="3.2a"/>
+                    <display value="LDCT Study Protocol"/>    
+                </valueCoding>
+            </option>
+            <option>
+                <valueCoding>
+                    <code value="3.2b"/>
+                    <display value="Other:"/> 
+                </valueCoding>
+            </option>
+            <item>
+                <linkId value="q3.2.other"/>
+                <type value="text"/>
+                <enableWhen>
+                    <question value="q3.2"/>
+                    <answerCoding>
+                        <code value="3.2b"/>
+                    </answerCoding>
+                </enableWhen>
+            </item>
+        </item>
+    </item>
+    <item>
+        <linkId value="g4"/>
+        <text value="FINDINGS"/>
+        <type value="group"/>
+        <item>
+            <linkId value="g4.1"/>
+            <prefix value="A."/>
+            <text value="Nodules"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <text value="The 10 most dominant nodules (≥ 4 mm) need to be measured."/>
+                <type value="display"/>
+            </item>
+            <item><!-- Repeating section to describe nodule. -->
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs" >
+                    <valueInteger value="10"/>
+                </extension>
+                <linkId value="g4.1.nodule"/>
+                <type value="group"/>
+                <required value="false"/>
+                <repeats value="true"/>
+                <item>
+                    <linkId value="q4.1.nodule"/><!-- This requires Clinical PNS WG approval for this to be a user defined field, i.e. Nodule:__ -->
+                    <text value="Nodule:"/>
+                    <type value="string"/>
+                </item>
+                <item>
+                    <linkId value="q4.1.i"/>
+                    <prefix value="i."/>
+                    <type value="group"/>
+                    <item>
+                        <linkId value="q4.1.i.Series"/>
+                        <text value="Series:"/>
+                        <type value="string"/>
+                    </item>
+                    <item>
+                        <linkId value="q4.1.i.Image"/>
+                        <text value="Image:"/>
+                        <type value="string"/>
+                    </item>
+                </item>
+                <item>
+                    <linkId value="q4.1.ii"/>
+                    <prefix value="ii."/>
+                    <text value="Lobe:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iia"/>
+                            <display value="RUL"/>  
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iib"/>
+                            <display value="RML"/>   
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iic"/>
+                            <display value="RLL"/> 
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iid"/>
+                            <display value="LUL"/>  
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iie"/>
+                            <display value="Lingula"/>      
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iiif"/>
+                            <display value="LLL"/>  
+                        </valueCoding>
+                    </option>
+                </item>
+                <item>
+                    <linkId value="q4.1.iii"/>
+                    <prefix value="iii."/>
+                    <text value="Location:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iiia"/>
+                            <display value="Parenchymal"/>  
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iiib"/>
+                            <display value="Parenchymal"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iiic"/>
+                            <display value="Fissural"/>  
+                        </valueCoding>
+                    </option>
+                </item>
+                <item>
+                    <linkId value="q4.1.iv"/>
+                    <prefix value="iv."/>
+                    <text value="Attenuation:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.iva"/>
+                            <display value="Solid:"/> 
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.ivb"/>
+                            <display value="Part-solid:"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.ivc"/>
+                            <display value="Pure ground glass:"/>
+                        </valueCoding>
+                    </option>
+                    <!-- questions based on enable when on above choices -->
+                    <item>
+                        <linkId value="g4.1.iva"/>
+                        <type value="group"/>
+                        <enableWhen>
+                            <question value="q4.1.iv"/> 
+                            <answerCoding>
+                                <code value="4.1.iva"/>
+                            </answerCoding>
+                        </enableWhen>
+                        <item>
+                            <linkId value="q4.1.iva.Mean Size"/>
+                            <text value="Mean Size:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="true"/>
+                            </item>
+                        </item>
+                        <item>
+                            <linkId value="q4.1.iva.length"/>
+                            <text value="length:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="false"/>
+                            </item>
+                        </item>
+                        <item>
+                            <linkId value="q4.1.iva.width"/>
+                            <text value="width:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="false"/>
+                            </item>
+                        </item>
+                    </item>
+                    <item>
+                        <linkId value="g4.1.ivb"/>
+                        <type value="group"/>
+                        <enableWhen>
+                            <question value="q4.1.iv"/>
+                            <answerCoding>
+                                <code value="4.1.ivb"/>
+                            </answerCoding>
+                        </enableWhen>
+                        <item>
+                            <linkId value="g4.1.ivb.Overall Size"/>
+                            <text value="Overall Size:"/>
+                            <type value="group"/>
+                            <item>
+                                <linkId value="q4.1.ivb.i.Mean"/>
+                                <text value="Mean:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="true"/>
+                                </item>
+                            </item>
+                            <item>
+                                <linkId value="q4.1.ivb.i.length"/>
+                                <text value="length:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="false"/>
+                                </item>
+                            </item>
+                            <item>
+                                <linkId value="q4.1.ivb.i.width"/>
+                                <text value="width:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="false"/>
+                                </item>
+                            </item>
+                        </item>
+                        <item>
+                            <linkId value="g4.1.ivb.Size of Solid component"/>
+                            <text value="Size of Solid component:"/>
+                            <type value="group"/>
+                            <item>
+                                <linkId value="q4.1.ivb.ii.Mean"/>
+                                <text value="Mean:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="true"/>
+                                </item>
+                            </item>
+                            <item>
+                                <linkId value="q4.1.ivb.ii.length"/>
+                                <text value="length:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="false"/>
+                                </item>
+                            </item>
+                            <item>
+                                <linkId value="q4.1.ivb.ii.width"/>
+                                <text value="width:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                    <required value="false"/>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                    <item>
+                        <linkId value="g4.1.ivc"/>
+                        <type value="group"/>
+                        <enableWhen>
+                            <question value="q4.1.iv"/>
+                            <answerCoding>
+                                <code value="4.1.ivc"/>
+                            </answerCoding>
+                        </enableWhen>
+                        <item>
+                            <linkId value="q4.1.ivc.Mean Size"/>
+                            <text value="Mean Size:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="true"/>
+                            </item>
+                        </item>
+                        <item>
+                            <linkId value="q4.1.ivc.length"/>
+                            <text value="length:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="false"/>
+                            </item>
+                        </item>
+                        <item>
+                            <linkId value="q4.1.ivc.width"/>
+                            <text value="width:"/>
+                            <type value="integer"/>
+                            <item> 
+                                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                    <valueCodeableConcept>
+                                        <coding>
+                                            <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                            <code value="unit"/>
+                                        </coding>
+                                    </valueCodeableConcept>
+                                </extension>
+                                <text value="mm"/>
+                                <type value="display"/>
+                                <required value="false"/>
+                            </item>
+                        </item>
+                    </item>
+                </item>
+                <item>
+                    <linkId value="G4.1.v"/>
+                    <prefix value="v."/>
+                    <text value="Comparison:"/>
+                    <type value="group"/>
+                    <item>
+                        <linkId value="q4.1.v"/>
+                        <type value="choice"/>
+                        <option>
+                            <valueCoding>
+                                <code value="q4.1.va"/>
+                                <display value="Unchanged"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="q4.1.vb"/>
+                                <display value="New"/>   
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="q4.1.vc"/>
+                                <display value="Interval increase in solid component;"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="q4.1.vd"/>
+                                <display value="Interval increase in ground glass component"/> 
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.1.ve"/>
+                                <display value="Interval decreased in size"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.1.vf"/>
+                                <display value="No Prior Comparison"/>        
+                            </valueCoding>
+                        </option>
+                        <item>
+                            <linkId value="g4.1.vc"/>
+                            <type value="group"/>
+                            <enableWhen>
+                                <question value="q4.1.v"/>
+                                <answerCoding>
+                                    <code value="4.1.vc"/>
+                                </answerCoding>
+                            </enableWhen>
+                            <item>
+                                <linkId value="q4.1.vc.i"/>
+                                <text value="previous mean:"/>
+                                <type value="integer"/>
+                                <item> 
+                                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                                        <valueCodeableConcept>
+                                            <coding>
+                                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-item-control"/>
+                                                <code value="unit"/>
+                                            </coding>
+                                        </valueCodeableConcept>
+                                    </extension>
+                                    <text value="mm"/>
+                                    <type value="display"/>
+                                </item>
+                            </item>
+                            <item>
+                                <linkId value="q4.1.vc.ii"/>
+                                <type value="choice"/>
+                                <option>
+                                    <valueCoding>
+                                        <code value="q4.1.vc.iia"/>
+                                        <display value="Compared to most recent prior "/>  
+                                    </valueCoding>
+                                </option>
+                                <option>
+                                    <valueCoding>
+                                        <code value="q4.1.vc.iib"/>
+                                        <display value="Compared to:"/>
+                                    </valueCoding>
+                                </option>
+                                <item>
+                                    <type value="date"/>
+                                    <enableWhen>
+                                        <question value="q4.1.vc.ii"/>
+                                        <answerCoding>
+                                            <code value="4.1.vc.iib"/>
+                                        </answerCoding>
+                                    </enableWhen>
+                                    <repeats value="true"/>
+                                    <item>
+                                        <text value="(dates)"/>
+                                        <type value="display"/>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </item>
+                <item>
+                    <linkId value="q4.1.vi"/>
+                    <prefix value="vi."/>
+                    <text value="Margins:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.via"/>
+                            <display value="Smooth"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.vib"/>
+                            <display value="Spiculated"/>  
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.vic"/>
+                            <display value="Lobulated"/>    
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.vid"/>
+                            <display value="Halo"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.vie"/>
+                            <display value="Obscured"/>
+                        </valueCoding>
+                    </option>
+                </item>
+                <item>
+                    <linkId value="q4.1.vii"/>
+                    <prefix value="vii."/>
+                    <text value="Calcification:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.viia"/>
+                            <display value="None"/>   
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.viib"/>
+                            <display value="Benign Pattern"/> 
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="4.1.viic"/>
+                            <display value="Indeterminate"/>
+                        </valueCoding>
+                    </option>
+                </item>
+                <item>
+                    <linkId value="q4.1.viii"/>
+                    <prefix value="viii."/>
+                    <text value="Other characteristics:"/>
+                    <type value="choice"/>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.viiia"/>
+                            <display value="None"/>  
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.viiib"/>
+                            <display value="Fat"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.viiic"/>
+                            <display value="Cavitation"/>
+                        </valueCoding>
+                    </option>
+                    <option>
+                        <valueCoding>
+                            <code value="q4.1.viiid"/>
+                            <display value="Other:"/>
+                        </valueCoding>
+                    </option>
+                    <item>
+                        <linkId value="q4.1.viiid.other"/>
+                        <type value="text"/>
+                        <enableWhen>
+                            <question value="q4.1.viiid"/>
+                            <answerCoding>
+                                <code value="4.1.viiid"/>
+                            </answerCoding>
+                        </enableWhen>
+                    </item>
+                </item>
+                <item>
+                    <linkId value="q4.1.ix"/>
+                    <prefix value="ix."/>
+                    <text value="Other:"/>
+                    <type value="text"/>
+                    <required value="false"/> <!--this question is optional, all other in Nodule section is mandatory -->
+                </item>
+            </item><!-- Above is a Repeating section to describe nodule. -->
+            <item>
+                <text value="If there are additional nodules, please repeat Section A for nodules 2-10"/>
+                <type value="display"/>
+            </item>
+            <item>
+                <linkId value="q4.1.1"/>
+                <prefix value="1."/>
+                <text value="Number of lung nodules present in total:"/>
+                <type value="text"/>
+                <required value="true"/> 
+            </item>
+            <item>
+                <linkId value="q4.1.2"/>
+                <prefix value="2."/>
+                <text value="Other comments:"/>
+                <type value="text"/>
+                <required value="false"/> 
+            </item>
+        </item>
+        <item>
+            <linkId value="g4.2"/>
+            <prefix value="B."/>
+            <text value="Other Lung findings"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                    <valueCodeableConcept>
+                        <coding>
+                            <code value="check-box"/>
+                            <display value="Check-box"/>
+                        </coding>
+                    </valueCodeableConcept>
+                </extension>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                    <valueCode value="vertical"/>
+                </extension>
+                <linkId value="q4.2"/>
+                <text value="Check the relevant lung findings and describe as needed"/>
+                <type value="choice"/>
+                <repeats value="true"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.i"/>
+                        <display value="i) Interstitial lung disease/Fibrosis:"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.ii"/>
+                        <display value="ii) Lung infiltrate or consolidation consistent with infection:"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.iii"/>
+                        <display value="iii) Bronchiectasis:"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.iv"/>
+                        <display value="iv) Mucous plugging:"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.v"/>
+                        <display value="v) Atelectasis:"/>   
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.vi"/>
+                        <display value="vi) Emphysema:"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.vii"/>
+                        <display value="vii) Airway abnormality:"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.viii"/>
+                        <display value="viii) Granulomatous disease:"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.2.ix"/>
+                        <display value="ix) Other:"/>
+                    </valueCoding>
+                </option>
+                <item> <!-- Conditional, free text entry, for each list item above -->
+                    <linkId value="q4.2.i"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.i"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item>
+                    <linkId value="q4.2.ii"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.ii"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item> 
+                    <linkId value="q4.2.iii"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.iii"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item> 
+                    <linkId value="q4.2.iv"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.iv"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item> 
+                    <linkId value="q4.2.v"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.v"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item> 
+                    <linkId value="q4.2.vi"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.vi"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item>
+                    <linkId value="q4.2.vii"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.vii"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item> 
+                    <linkId value="q4.2.viii"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.viii"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+                <item>
+                    <linkId value="q4.2.ix"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.2"/>
+                        <answerCoding>
+                            <code value="4.2.ix"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+            </item>         
+        </item>
+        <item>
+            <linkId value="g4.3"/>
+            <prefix value="C."/>
+            <text value="Lymph Nodes"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <linkId value="q4.3.1"/>
+                <prefix value="1."/>
+                <text value="Lymph nodes: "/>
+                <type value="choice"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.3.1a"/>
+                        <display value="Normal"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.3.1b"/>
+                        <display value="Benign, calcified "/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.3.1c"/>
+                        <display value="Enlarged:"/>
+                    </valueCoding>
+                </option>
+                <item>
+                    <linkId value="q.4.3.enlarged"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.3.1c"/> <!-- Question for Jon, why is choice 'c' appropriate here, but not above? should c be dropped? -->
+                        <answerCoding>
+                            <code value="4.3.1c"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+            </item>
+            <item>
+                <text value="(describe the enlarged nodes)"/>
+                <type value="display"/>
+            </item>
+        </item>
+        <item>
+            <linkId value="g4.4"/>
+            <prefix value="D."/>
+            <text value="Pleural Space"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <linkId value="q4.4.1"/>
+                <text value="Pleural Space:"/>
+                <type value="choice"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.4.1.a"/>
+                        <display value="Normal"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.4.1.b"/>
+                        <display value="Abnormal*"/>
+                    </valueCoding>
+                </option>
+                <item>
+                    <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory">
+                        <valueCodeableConcept>
+                            <coding>
+                                <system value="http://hl7.org/fhir/ValueSet/questionnaire-display-category"/>
+                                <code value="instructions"/>
+                            </coding>
+                        </valueCodeableConcept>
+                    </extension>
+                    <text value="*If abnormal, answer the questions below"/>
+                    <type value="display"/>
+                </item>
+                <item>
+                    <linkId value="g4.4.1.b"/>
+                    <type value="group"/>
+                    <enableWhen>
+                        <question value="q4.4.1"/>  
+                        <answerString value="4.4.1.b"/>
+                    </enableWhen>
+                    <item>
+                        <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                            <valueCode value="vertical"/>
+                        </extension>
+                        <linkId value="q4.4.1.b"/>
+                        <type value="choice"/>
+                        <repeats value="true"/>
+                        <option>
+                            <valueCoding>
+                                <code value="4.4.1.b.i"/>
+                                <display value="Effusion:"/>   
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.4.1.b.ii"/>
+                                <display value="Thickening:"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.4.1.b.iii"/>
+                                <display value="Pneumothorax:"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.4.1.b.iv"/>
+                                <display value="Pleural Plaques:"/>
+                            </valueCoding>
+                        </option>
+                        <option>
+                            <valueCoding>
+                                <code value="4.4.1.b.v"/>
+                                <display value="Other"/>
+                            </valueCoding>
+                        </option>
+                        <item> <!-- REPEAT THESE  - Conditional, LEFT and/or RIGHT, for each list item above. -->
+                            <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                                <valueCode value="horizontal"/>
+                            </extension>
+                            <linkId value="q4.4.1.b.i"/>
+                            <type value="choice"/>
+                            <enableWhen>
+                                <question value="q4.4.1.b"/>  
+                                <answerString value="4.4.1.b.i"/>
+                            </enableWhen>
+                            <repeats value="true"/>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.i.R"/>
+                                    <display value="Right:"/> 
+                                </valueCoding>
+                            </option>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.i.L"/>
+                                    <display value="Left:"/>
+                                </valueCoding>
+                            </option>
+                            <item>
+                                <linkId value="q4.4.1.b.i.R"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.i"/> 
+                                    <answerString value="4.4.1.b.i.R"/>
+                                </enableWhen>
+                            </item>
+                            <item>
+                                <linkId value="q4.4.1.b.i.L"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.i"/>
+                                    <answerString value="4.4.1.b.i.L"/>
+                                </enableWhen>
+                            </item>
+                        </item>
+                        <item> <!-- REPEAT THESE  - Conditional, LEFT and/or RIGHT, for each list item above. -->
+                            <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                                <valueCode value="horizontal"/>
+                            </extension>
+                            <linkId value="q4.4.1.b.ii"/>
+                            <type value="choice"/>
+                            <enableWhen>
+                                <question value="q4.4.1.b"/> 
+                                <answerString value="4.4.1.b.ii"/>
+                            </enableWhen>
+                            <repeats value="true"/>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.ii.R"/>
+                                    <display value="Right:"/>  
+                                </valueCoding>
+                            </option>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.ii.L"/>
+                                    <display value="Left:"/>
+                                </valueCoding>
+                            </option>
+                            <item>
+                                <linkId value="q4.4.1.b.ii.R"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.ii"/>
+                                    <answerString value="4.4.1.b.ii.R"/>
+                                </enableWhen>
+                            </item>
+                            <item>
+                                <linkId value="q4.4.1.b.ii.L"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.ii"/>
+                                    <answerString value="4.4.1.b.ii.L"/>
+                                </enableWhen>
+                            </item>
+                        </item>
+                        <item> <!-- REPEAT THESE  - Conditional, LEFT and/or RIGHT, for each list item above. -->
+                            <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                                <valueCode value="horizontal"/>
+                            </extension>
+                            <linkId value="q4.4.1.b.iii"/>
+                            <type value="choice"/>
+                            <enableWhen>
+                                <question value="q4.4.1.b"/> 
+                                <answerString value="4.4.1.b.iii"/>
+                            </enableWhen>
+                            <repeats value="true"/>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.iii.R"/>
+                                    <display value="Right:"/>
+                                </valueCoding>
+                            </option>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.iii.L"/>
+                                    <display value="Left:"/>
+                                </valueCoding>
+                            </option>
+                            <item>
+                                <linkId value="q4.4.1.b.iii.R"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.iii"/>
+                                    <answerString value="4.4.1.b.iii.R"/>
+                                </enableWhen>
+                            </item>
+                            <item>
+                                <linkId value="q4.4.1.b.iii.L"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.iii"/>
+                                    <answerString value="4.4.1.b.iii.L"/>
+                                </enableWhen>
+                            </item>
+                        </item>
+                        <item> <!-- REPEAT THESE  - Conditional, LEFT and/or RIGHT, for each list item above. -->
+                            <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                                <valueCode value="horizontal"/>
+                            </extension>
+                            <linkId value="q4.4.1.b.iv"/>
+                            <type value="choice"/>
+                            <enableWhen>
+                                <question value="q4.4.1.b"/> 
+                                <answerString value="4.4.1.b.iv"/>
+                            </enableWhen>
+                            <repeats value="true"/>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.iv.R"/>
+                                    <display value="Right:"/>
+                                </valueCoding>
+                            </option>
+                            <option>
+                                <valueCoding>
+                                    <code value="4.4.1.b.iv.L"/>
+                                    <display value="Left:"/>
+                                </valueCoding>
+                            </option>
+                            <item>
+                                <linkId value="q4.4.1.b.iv.R"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.iv"/>
+                                    <answerString value="4.4.1.b.iv.R"/>
+                                </enableWhen>
+                            </item>
+                            <item>
+                                <linkId value="q4.4.1.b.iv.L"/>
+                                <type value="text"/>
+                                <enableWhen>
+                                    <question value="q4.4.1.b.iv"/>
+                                    <answerString value="4.4.1.b.iv.L"/>
+                                </enableWhen>
+                            </item>
+                        </item>
+                        <item> 
+                            <linkId value="q4.4.1.b.v"/>
+                            <type value="text"/>
+                            <enableWhen>
+                                <question value="q4.4.1.b.v"/> 
+                                <answerCoding>
+                                    <code value="4.4.1.b.v"/>
+                                </answerCoding>
+                            </enableWhen>
+                        </item>
+                    </item>
+                </item>
+            </item>
+        </item>
+        <item>
+            <linkId value="g4.5"/>
+            <prefix value="E."/>
+            <text value="Heart &amp; Mediastinal vessels"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <text value="Indicate the relevant findings and describe"/>
+                <type value="display"/>
+            </item>
+            <item>
+                <linkId value="q4.5.i"/>
+                <prefix value="i."/>
+                <text value="Heart:"/>
+                <type value="choice"/>
+                <required value="false"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.ia"/>
+                        <display value="Normal"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.ib"/>
+                        <display value="Enlarged"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.ic"/>
+                        <display value="Other:"/> 
+                    </valueCoding>
+                </option>
+                <item>
+                    <linkId value="q4.5.i.other"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.5.i"/>
+                        <answerCoding>
+                            <code value="4.5.ic"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+            </item>
+            <item>
+                <linkId value="q4.5.ii"/>
+                <prefix value="ii."/>
+                <text value="Coronary calcification:"/>
+                <type value="choice"/>
+                <required value="false"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.iia"/>
+                        <display value="Absent"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.iib"/>
+                        <display value="Present"/>
+                    </valueCoding>
+                </option>
+            </item>
+            <item>
+                <linkId value="q4.5.iii"/>
+                <prefix value="iii."/>
+                <text value="Pericardium:"/>
+                <type value="text"/>
+                <required value="false"/>
+            </item>
+            <item>
+                <linkId value="q4.5.iv"/>
+                <prefix value="iv."/>
+                <text value="Aorta:"/>
+                <type value="choice"/>
+                <required value="false"/>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.iva"/>
+                        <display value="Normal"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.ivb"/>
+                        <display value="Dilated"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4.5.ivc"/>
+                        <display value="Other:"/>  
+                    </valueCoding>
+                </option>
+                <item>
+                    <linkId value="q4.5.iv.other"/>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q4.5.iv"/> 
+                        <answerCoding>
+                            <code value="4.5.ivc"/>
+                        </answerCoding>
+                    </enableWhen>
+                </item>
+            </item>
+            <item>
+                <linkId value="q4.5.v"/>
+                <prefix value="v."/>
+                <text value="Pulmonary arteries:"/>
+                <type value="text"/>
+                <required value="false"/>
+            </item>
+            <item>
+                <linkId value="q4.5.vi"/>
+                <prefix value="vi."/>
+                <text value="Other:"/>
+                <type value="text"/>
+                <required value="false"/>
+            </item>
+        </item>
+        <item>
+            <linkId value="g4.6"/>
+            <prefix value="F."/>
+            <text value="Other findings"/>
+            <type value="group"/>
+            <required value="true"/>
+            <item>
+                <text value="Indicate Normal or Abnormal and describe the findings below"/>
+                <type value="display"/>
+            </item>
+            <item>
+                <linkId value="g4.6.i"/>
+                <prefix value="i."/>
+                <text value="i.	Chest wall/skin:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.ii"/>
+                <prefix value="ii."/>
+                <text value="Breast:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.iii"/>
+                <prefix value="iii."/>
+                <text value="Base of neck:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.iv"/>
+                <prefix value="iv."/>
+                <text value="Thyroid:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.v"/>
+                <prefix value="v."/>
+                <text value="Esophageal/upper GI:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.vi"/>
+                <prefix value="vi."/>
+                <text value="Upper abdomen:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.vii"/>
+                <prefix value="vii."/>
+                <text value="bone:"/>
+                <type value="text"/>
+            </item>
+            <item>
+                <linkId value="g4.6.viii"/>
+                <prefix value="viii."/>
+                <text value="other:"/>
+                <type value="text"/>
+                <required value="false"/>
+            </item>
+        </item>
+    </item>
+    <item>
+        <linkId value="g5"/>
+        <text value="IMPRESSIONS"/>
+        <type value="group"/>
+        <required value="true"/>
+        <item>
+            <linkId value="q5.1"/>
+            <prefix value="1."/>
+            <text value="Summary:"/>
+            <type value="text"/>
+        </item>
+        <item>
+            <linkId value="g5.2"/>
+            <prefix value="2."/>
+            <text value="Nodules ACR Lung-RADS™ Category:"/>
+            <type value="group"/>
+            <item>
+                <text value="The most worrisome nodule described above is assigned a Lung-RADS category"/>
+                <type value="display"/>
+            </item>
+            <item>
+                <linkId value="q5.2"/>
+                <prefix value="a)"/>
+                <text value="Nodule:"/>
+                <type value="string"/>
+                <required value="true"/>
+            </item>
+            <item>
+               <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
+                    <valueCodeableConcept>
+                        <coding>
+                            <code value="radio-button"/>
+                            <display value="Radio Button"/>
+                        </coding>
+                    </valueCodeableConcept>
+                </extension>
+                <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
+                    <valueCode value="vertical"/>
+                </extension>
+                <linkId value="5.3"/>
+                <type value="choice"/>
+                <option>
+                    <valueCoding>
+                        <code value="0"/>
+                        <display value="0 - Additional lung cancer screening CT images and/or comparison to prior chest CT examination is needed"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="1"/>
+                        <display value="1 - LDCT in 12 months"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="2"/>
+                        <display value="2 - LDCT in 12 months"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="3"/>
+                        <display value="3 - LDCT in 6 months"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4A"/>
+                        <display value="1 - LDCT in 3 months"/> 
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4B"/>
+                        <display value="4B - Chest CT with or without contrast, and/or tissue sampling depending on probability of malignancy and comorbidities"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="4X"/>
+                        <display value="4X - Chest CT with or without contrast, and/or tissue sampling depending on probability of malignancy and comorbidities"/>
+                    </valueCoding>
+                </option>
+            </item>
+        </item>
+        <item>
+            <linkId value="g5.3"/>
+            <text value="Modifiers:"/>
+            <type value="group"/>
+            <item>
+                <linkId value="q5.3.1"/>
+                <prefix value="3."/>
+                <text value="Modifiers:"/>
+                <type value="choice"/>
+                <option>
+                    <valueCoding>
+                        <code value="5.3a"/>
+                        <display value="S"/>
+                    </valueCoding>
+                </option>
+                <option>
+                    <valueCoding>
+                        <code value="5.3b"/>
+                        <display value="C"/> 
+                    </valueCoding>
+                </option>
+                <item>
+                    <type value="text"/>
+                    <enableWhen>
+                        <question value="q5.3"/> 
+                        <answerCoding>
+                            <code value="5.3a"/>
+                        </answerCoding>
+                    </enableWhen>
+                    <repeats value="true"/>
+                    <item>
+                        <text value="(provide guidance related to incidental finding)"/>
+                        <type value="display"/>
+                    </item>
+                </item>
+             </item>        
+        </item>
+        <item>
+            <linkId value="q5.4"/>
+            <prefix value="4."/>
+            <text value="+Other Comments:"/>
+            <type value="text"/>
+            <required value="false"/>
+        </item>
+    </item>
+    <item>  
+        <text value="+Data elements proceeded with this symbol are optional"/>
+        <type value="display"/>
+    </item>
+</Questionnaire>

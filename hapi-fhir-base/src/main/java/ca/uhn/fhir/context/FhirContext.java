@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
@@ -47,11 +47,13 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
@@ -76,7 +78,9 @@ public class FhirContext {
 
 	private static final List<Class<? extends IBaseResource>> EMPTY_LIST = Collections.emptyList();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContext.class);
+	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
+	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
@@ -88,7 +92,7 @@ public class FhirContext {
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private final IFhirVersion myVersion;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
-
+	
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
@@ -113,6 +117,8 @@ public class FhirContext {
 	}
 
 	private FhirContext(FhirVersionEnum theVersion, Collection<Class<? extends IBaseResource>> theResourceTypes) {
+		VersionUtil.getVersion();
+		
 		if (theVersion != null) {
 			if (!theVersion.isPresentOnClasspath()) {
 				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
@@ -124,8 +130,6 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
-		} else if (FhirVersionEnum.DEV.isPresentOnClasspath()) {
-			myVersion = FhirVersionEnum.DEV.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
@@ -144,6 +148,26 @@ public class FhirContext {
 	}
 
 	/**
+	 * When encoding resources, this setting configures the parser to include
+	 * an entry in the resource's metadata section which indicates which profile(s) the
+	 * resource claims to conform to. The default is {@link AddProfileTagEnum#ONLY_FOR_CUSTOM}.
+	 * 
+	 * @see #setAddProfileTagWhenEncoding(AddProfileTagEnum) for more information
+	 */
+	public AddProfileTagEnum getAddProfileTagWhenEncoding() {
+		return myAddProfileTagWhenEncoding;
+	}
+
+	/**
+	 * Returns the default resource type for the given profile
+	 * 
+	 * @see #setDefaultTypeForProfile(String, Class)
+	 */
+	public Class<? extends IBaseResource> getDefaultTypeForProfile(String theProfile) {
+		return myDefaultTypeForProfile.get(theProfile);
+	}
+
+	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
@@ -159,9 +183,12 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
-		return myNameToElementDefinition.get(theElementName);
+		return myNameToElementDefinition.get(theElementName.toLowerCase());
 	}
 	
 	/** For unit tests only */
@@ -242,35 +269,28 @@ public class FhirContext {
 	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IBaseResource theResource) {
+		Validate.notNull(theResource, "theResource must not be null");
 		return getResourceDefinition(theResource.getClass());
 	}
 
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
 		
-		String resourceName = theResourceName;
-
-		/*
-		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or
-		 * something so that we can detect names like diagnosticreport
-		 */
-		if (Character.isLowerCase(resourceName.charAt(0))) {
-			resourceName = WordUtils.capitalize(resourceName);
-		}
-
-		Validate.notBlank(resourceName, "Resource name must not be blank");
-
+		String resourceName = theResourceName.toLowerCase();
 		RuntimeResourceDefinition retVal = myNameToResourceDefinition.get(resourceName);
 
 		if (retVal == null) {
 			Class<? extends IBaseResource> clazz = myNameToResourceType.get(resourceName.toLowerCase());
 			if (clazz == null) {
-				throw new DataFormatException(createUnknownResourceNameError(resourceName, myVersion.getVersion()));
+				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {
 				retVal = scanResourceType((Class<? extends IResource>) clazz);
@@ -296,9 +316,14 @@ public class FhirContext {
 		return myIdToResourceDefinition.values();
 	}
 
+	/**
+	 * Get the restful client factory. If no factory has been set, this will be initialized with 
+	 * a new ApacheRestfulClientFactory.
+	 * @return the factory used to create the restful clients
+	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new RestfulClientFactory(this);
+			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
 		}
 		return myRestfulClientFactory;
 	}
@@ -309,6 +334,17 @@ public class FhirContext {
 
 	public IFhirVersion getVersion() {
 		return myVersion;
+	}
+
+	/**
+	 * Returns <code>true</code> if any default types for specific profiles have been defined
+	 * within this context.
+	 * 
+	 * @see #setDefaultTypeForProfile(String, Class)
+	 * @see #getDefaultTypeForProfile(String)
+	 */
+	public boolean hasDefaultTypeForProfile() {
+		return !myDefaultTypeForProfile.isEmpty();
 	}
 
 	/**
@@ -443,6 +479,15 @@ public class FhirContext {
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
+		for (BaseRuntimeElementDefinition<?> next : classToElementDefinition.values()) {
+			if (next instanceof RuntimeResourceDefinition) {
+				if ("Bundle".equals(next.getName())) {
+					if (!IBaseBundle.class.isAssignableFrom(next.getImplementingClass())) {
+						throw new ConfigurationException("Resource type declares resource name Bundle but does not implement IBaseBundle");
+					}
+				}
+			}
+		}
 
 		Map<String, RuntimeResourceDefinition> idToElementDefinition = new HashMap<String, RuntimeResourceDefinition>();
 		idToElementDefinition.putAll(myIdToResourceDefinition);
@@ -457,6 +502,50 @@ public class FhirContext {
 
 		return classToElementDefinition;
 	}
+	
+	/**
+	 * When encoding resources, this setting configures the parser to include
+	 * an entry in the resource's metadata section which indicates which profile(s) the
+	 * resource claims to conform to. The default is {@link AddProfileTagEnum#ONLY_FOR_CUSTOM}.
+	 * <p>
+	 * This feature is intended for situations where custom resource types are being used,
+	 * avoiding the need to manually add profile declarations for these custom types.
+	 * </p>  
+	 * <p>
+	 * See <a href="http://jamesagnew.gihhub.io/hapi-fhir/doc_extensions.html">Profiling and Extensions</a>
+	 * for more information on using custom types.
+	 * </p>
+	 * <p>
+	 * Note that this feature automatically adds the profile, but leaves any profile tags
+	 * which have been manually added in place as well.
+	 * </p>
+	 * 
+	 * @param theAddProfileTagWhenEncoding
+	 *           The add profile mode (must not be <code>null</code>)
+	 */
+	public void setAddProfileTagWhenEncoding(AddProfileTagEnum theAddProfileTagWhenEncoding) {
+		Validate.notNull(theAddProfileTagWhenEncoding, "theAddProfileTagWhenEncoding must not be null");
+		myAddProfileTagWhenEncoding = theAddProfileTagWhenEncoding;
+	}
+
+	/**
+	 * Sets the default type which will be used when parsing a resource that is found to be
+	 * of the given profile. 
+	 * <p>
+	 * For example, this method is invoked with the profile string of
+	 * <code>"http://example.com/some_patient_profile"</code> and the type of <code>MyPatient.class</code>,
+	 * if the parser is parsing a resource and finds that it declares that it conforms to that profile,
+	 * the <code>MyPatient</code> type will be used unless otherwise specified.
+	 * </p>
+	 * 
+	 * @param theProfile The profile string, e.g. <code>"http://example.com/some_patient_profile"</code>. Must not be <code>null</code> or empty.
+	 * @param theClass The resource type. Must not be <code>null</code> or empty.
+	 */
+	public void setDefaultTypeForProfile(String theProfile, Class<? extends IBaseResource> theClass) {
+		Validate.notBlank(theProfile, "theProfile must not be null or empty");
+		Validate.notNull(theClass, "theProfile must not be null");
+		myDefaultTypeForProfile.put(theProfile, theClass);
+	}
 
 	/**
 	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with
@@ -467,9 +556,6 @@ public class FhirContext {
 	}
 
 	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		if (theNarrativeGenerator != null) {
-			theNarrativeGenerator.setFhirContext(this);
-		}
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
@@ -483,7 +569,16 @@ public class FhirContext {
 		myParserErrorHandler = theParserErrorHandler;
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Set the restful client factory
+	 * @param theRestfulClientFactory
+	 */
+	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		Validate.notNull(theRestfulClientFactory, "theRestfulClientFactory must not be null");
+		this.myRestfulClientFactory = theRestfulClientFactory;
+	}
+
+	@SuppressWarnings({ "cast" })
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
 			return null;
@@ -496,31 +591,33 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
-	 * 
-	 * @deprecated Support for DEV resources will be removed, you should use DSTU2 resources instead 
-	 */
-	@Deprecated
-	public static FhirContext forDev() {
-		return new FhirContext(FhirVersionEnum.DEV);
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1}
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1 DSTU1}
 	 */
 	public static FhirContext forDstu1() {
 		return new FhirContext(FhirVersionEnum.DSTU1);
 	}
 
 	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2}
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2 DSTU2}
 	 */
 	public static FhirContext forDstu2() {
 		return new FhirContext(FhirVersionEnum.DSTU2);
 	}
 
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2_HL7ORG DSTU2} (using the Reference Implementation Structures)
+	 */
 	public static FhirContext forDstu2Hl7Org() {
 		return new FhirContext(FhirVersionEnum.DSTU2_HL7ORG);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU3}
+	 * 
+	 * @since 1.4
+	 */
+	public static FhirContext forDstu3() {
+		return new FhirContext(FhirVersionEnum.DSTU3);
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {

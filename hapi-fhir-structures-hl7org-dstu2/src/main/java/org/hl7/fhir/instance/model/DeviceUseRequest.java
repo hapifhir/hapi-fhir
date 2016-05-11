@@ -29,17 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
@@ -48,43 +46,43 @@ public class DeviceUseRequest extends DomainResource {
 
     public enum DeviceUseRequestStatus {
         /**
-         * The request has been proposed
+         * The request has been proposed.
          */
         PROPOSED, 
         /**
-         * The request has been planned
+         * The request has been planned.
          */
         PLANNED, 
         /**
-         * The request has been placed
+         * The request has been placed.
          */
         REQUESTED, 
         /**
-         * The receiving system has received the request but not yet decided whether it will be performed
+         * The receiving system has received the request but not yet decided whether it will be performed.
          */
         RECEIVED, 
         /**
-         * The receiving system has accepted the request but work has not yet commenced
+         * The receiving system has accepted the request but work has not yet commenced.
          */
         ACCEPTED, 
         /**
-         * The work to fulfill the order is happening
+         * The work to fulfill the order is happening.
          */
         INPROGRESS, 
         /**
-         * The work has been complete, the report(s) released, and no further work is planned
+         * The work has been complete, the report(s) released, and no further work is planned.
          */
         COMPLETED, 
         /**
-         * The request has been held by originating system/user request
+         * The request has been held by originating system/user request.
          */
         SUSPENDED, 
         /**
-         * The receiving system has declined to fulfill the request
+         * The receiving system has declined to fulfill the request.
          */
         REJECTED, 
         /**
-         * The request was attempted, but due to some procedural error, it could not be completed
+         * The request was attempted, but due to some procedural error, it could not be completed.
          */
         ABORTED, 
         /**
@@ -148,16 +146,16 @@ public class DeviceUseRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The request has been proposed";
-            case PLANNED: return "The request has been planned";
-            case REQUESTED: return "The request has been placed";
-            case RECEIVED: return "The receiving system has received the request but not yet decided whether it will be performed";
-            case ACCEPTED: return "The receiving system has accepted the request but work has not yet commenced";
-            case INPROGRESS: return "The work to fulfill the order is happening";
-            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned";
-            case SUSPENDED: return "The request has been held by originating system/user request";
-            case REJECTED: return "The receiving system has declined to fulfill the request";
-            case ABORTED: return "The request was attempted, but due to some procedural error, it could not be completed";
+            case PROPOSED: return "The request has been proposed.";
+            case PLANNED: return "The request has been planned.";
+            case REQUESTED: return "The request has been placed.";
+            case RECEIVED: return "The receiving system has received the request but not yet decided whether it will be performed.";
+            case ACCEPTED: return "The receiving system has accepted the request but work has not yet commenced.";
+            case INPROGRESS: return "The work to fulfill the order is happening.";
+            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned.";
+            case SUSPENDED: return "The request has been held by originating system/user request.";
+            case REJECTED: return "The receiving system has declined to fulfill the request.";
+            case ABORTED: return "The request was attempted, but due to some procedural error, it could not be completed.";
             default: return "?";
           }
         }

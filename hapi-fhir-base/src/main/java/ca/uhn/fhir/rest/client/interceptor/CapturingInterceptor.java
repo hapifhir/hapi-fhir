@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * Client interceptor which simply captures request and response objects and stores them so that they can be inspected after a client
@@ -31,8 +30,8 @@ import ca.uhn.fhir.rest.client.IClientInterceptor;
  */
 public class CapturingInterceptor implements IClientInterceptor {
 
-	private HttpRequestBase myLastRequest;
-	private HttpResponse myLastResponse;
+	private IHttpRequest myLastRequest;
+	private IHttpResponse myLastResponse;
 
 	/**
 	 * Clear the last request and response values
@@ -42,21 +41,21 @@ public class CapturingInterceptor implements IClientInterceptor {
 		myLastResponse = null;
 	}
 
-	public HttpRequestBase getLastRequest() {
+	public IHttpRequest getLastRequest() {
 		return myLastRequest;
 	}
 
-	public HttpResponse getLastResponse() {
+	public IHttpResponse getLastResponse() {
 		return myLastResponse;
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequest theRequest) {
 		myLastRequest = theRequest;
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theRequest) {
+	public void interceptResponse(IHttpResponse theRequest) {
 		myLastResponse = theRequest;
 	}
 

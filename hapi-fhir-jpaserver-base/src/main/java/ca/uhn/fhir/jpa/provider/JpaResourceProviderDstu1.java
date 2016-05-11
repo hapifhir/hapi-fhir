@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class JpaResourceProviderDstu1<T extends IResource> extends BaseJpaResourceProvider<T> {
@@ -49,35 +50,35 @@ public class JpaResourceProviderDstu1<T extends IResource> extends BaseJpaResour
 	}
 
 	@Create
-	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource) {
+	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return getDao().create(theResource);
+			return getDao().create(theResource, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@Delete
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource) {
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return getDao().delete(theResource);
+			return getDao().delete(theResource, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@Update
-	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId) {
+	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			theResource.setId(theId);
-			return getDao().update(theResource);
+			return getDao().update(theResource, theRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Can't update resource with ID[" + theId.getValue() + "] because it doesn't exist, going to create it instead");
 			theResource.setId(theId);
-			return getDao().create(theResource);
+			return getDao().create(theResource, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ReasonMedicationNotGivenCodes {
 
         /**
-         * No reason known
+         * No reason known.
          */
         A, 
         /**
-         * The patient was not available when the dose was scheduled
+         * The patient was not available when the dose was scheduled.
          */
         B, 
         /**
-         * The patient was asleep when the dose was scheduled
+         * The patient was asleep when the dose was scheduled.
          */
         C, 
         /**
-         * The patient was given the medication and immediately vomited it back
+         * The patient was given the medication and immediately vomited it back.
          */
         D, 
         /**
@@ -81,10 +81,10 @@ public enum ReasonMedicationNotGivenCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case A: return "No reason known";
-            case B: return "The patient was not available when the dose was scheduled";
-            case C: return "The patient was asleep when the dose was scheduled";
-            case D: return "The patient was given the medication and immediately vomited it back";
+            case A: return "No reason known.";
+            case B: return "The patient was not available when the dose was scheduled.";
+            case C: return "The patient was asleep when the dose was scheduled.";
+            case D: return "The patient was given the medication and immediately vomited it back.";
             default: return "?";
           }
         }

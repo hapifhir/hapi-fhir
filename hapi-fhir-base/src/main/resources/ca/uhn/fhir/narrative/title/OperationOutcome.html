@@ -1,5 +1,0 @@
-<div>
-	Operation Outcome
-	<th:block th:if="${resource.issue.size} == 1" th:text="'(' + ${resource.issueFirstRep.severityElement.value} + ')'"/>
-	<th:block th:if="${resource.issue.size} != 1" th:text="'(' + ${resource.issue.size} + ' issues)'"/>
-</div>

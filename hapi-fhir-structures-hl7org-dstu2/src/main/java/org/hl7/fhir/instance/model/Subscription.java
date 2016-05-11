@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
@@ -48,19 +50,19 @@ public class Subscription extends DomainResource {
 
     public enum SubscriptionStatus {
         /**
-         * The client has requested the subscription, and the server has not yet set it up
+         * The client has requested the subscription, and the server has not yet set it up.
          */
         REQUESTED, 
         /**
-         * The subscription is active
+         * The subscription is active.
          */
         ACTIVE, 
         /**
-         * The server has an error executing the notification
+         * The server has an error executing the notification.
          */
         ERROR, 
         /**
-         * Too many errors have occurred or the subscription has expired
+         * Too many errors have occurred or the subscription has expired.
          */
         OFF, 
         /**
@@ -100,10 +102,10 @@ public class Subscription extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REQUESTED: return "The client has requested the subscription, and the server has not yet set it up";
-            case ACTIVE: return "The subscription is active";
-            case ERROR: return "The server has an error executing the notification";
-            case OFF: return "Too many errors have occurred or the subscription has expired";
+            case REQUESTED: return "The client has requested the subscription, and the server has not yet set it up.";
+            case ACTIVE: return "The subscription is active.";
+            case ERROR: return "The server has an error executing the notification.";
+            case OFF: return "Too many errors have occurred or the subscription has expired.";
             default: return "?";
           }
         }
@@ -148,23 +150,23 @@ public class Subscription extends DomainResource {
 
     public enum SubscriptionChannelType {
         /**
-         * The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made
+         * The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made.
          */
         RESTHOOK, 
         /**
-         * The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL
+         * The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL.
          */
         WEBSOCKET, 
         /**
-         * The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:)
+         * The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:).
          */
         EMAIL, 
         /**
-         * The channel is executed by sending an SMS message to the phone number identified in the URL (tel:)
+         * The channel is executed by sending an SMS message to the phone number identified in the URL (tel:).
          */
         SMS, 
         /**
-         * The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI
+         * The channel is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc.) to the application identified in the URI.
          */
         MESSAGE, 
         /**
@@ -208,11 +210,11 @@ public class Subscription extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case RESTHOOK: return "The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made";
-            case WEBSOCKET: return "The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL";
-            case EMAIL: return "The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:)";
-            case SMS: return "The channel is executed by sending an SMS message to the phone number identified in the URL (tel:)";
-            case MESSAGE: return "The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI";
+            case RESTHOOK: return "The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made.";
+            case WEBSOCKET: return "The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL.";
+            case EMAIL: return "The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:).";
+            case SMS: return "The channel is executed by sending an SMS message to the phone number identified in the URL (tel:).";
+            case MESSAGE: return "The channel is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc.) to the application identified in the URI.";
             default: return "?";
           }
         }
@@ -263,17 +265,17 @@ public class Subscription extends DomainResource {
     @Block()
     public static class SubscriptionChannelComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The type of channel to send notififcations on.
+         * The type of channel to send notifications on.
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="The type of channel to send notififcations on." )
+        @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="The type of channel to send notifications on." )
         protected Enumeration<SubscriptionChannelType> type;
 
         /**
-         * The uri that describes tha actual end point to send messages to.
+         * The uri that describes the actual end-point to send messages to.
          */
         @Child(name = "endpoint", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Where the channel points to", formalDefinition="The uri that describes tha actual end point to send messages to." )
+        @Description(shortDefinition="Where the channel points to", formalDefinition="The uri that describes the actual end-point to send messages to." )
         protected UriType endpoint;
 
         /**
@@ -309,7 +311,7 @@ public class Subscription extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (The type of channel to send notififcations on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (The type of channel to send notifications on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public Enumeration<SubscriptionChannelType> getTypeElement() { 
           if (this.type == null)
@@ -329,7 +331,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The type of channel to send notififcations on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (The type of channel to send notifications on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public SubscriptionChannelComponent setTypeElement(Enumeration<SubscriptionChannelType> value) { 
           this.type = value;
@@ -337,14 +339,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return The type of channel to send notififcations on.
+         * @return The type of channel to send notifications on.
          */
         public SubscriptionChannelType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
-         * @param value The type of channel to send notififcations on.
+         * @param value The type of channel to send notifications on.
          */
         public SubscriptionChannelComponent setType(SubscriptionChannelType value) { 
             if (this.type == null)
@@ -354,7 +356,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #endpoint} (The uri that describes tha actual end point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
+         * @return {@link #endpoint} (The uri that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
         public UriType getEndpointElement() { 
           if (this.endpoint == null)
@@ -374,7 +376,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #endpoint} (The uri that describes tha actual end point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
+         * @param value {@link #endpoint} (The uri that describes the actual end-point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
         public SubscriptionChannelComponent setEndpointElement(UriType value) { 
           this.endpoint = value;
@@ -382,14 +384,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return The uri that describes tha actual end point to send messages to.
+         * @return The uri that describes the actual end-point to send messages to.
          */
         public String getEndpoint() { 
           return this.endpoint == null ? null : this.endpoint.getValue();
         }
 
         /**
-         * @param value The uri that describes tha actual end point to send messages to.
+         * @param value The uri that describes the actual end-point to send messages to.
          */
         public SubscriptionChannelComponent setEndpoint(String value) { 
           if (Utilities.noString(value))
@@ -498,8 +500,8 @@ public class Subscription extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of channel to send notififcations on.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("endpoint", "uri", "The uri that describes tha actual end point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          childrenList.add(new Property("type", "code", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
           childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }

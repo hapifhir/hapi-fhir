@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
@@ -48,7 +50,7 @@ public class Composition extends DomainResource {
 
     public enum CompositionStatus {
         /**
-         * This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified
+         * This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.
          */
         PRELIMINARY, 
         /**
@@ -56,11 +58,11 @@ public class Composition extends DomainResource {
          */
         FINAL, 
         /**
-         * The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as "final" and the composition is complete and verified by an authorized person
+         * The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as "final" and the composition is complete and verified by an authorized person.
          */
         AMENDED, 
         /**
-         * The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid
+         * The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.
          */
         ENTEREDINERROR, 
         /**
@@ -100,10 +102,10 @@ public class Composition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified";
+            case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.";
             case FINAL: return "This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.";
-            case AMENDED: return "The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as \"final\" and the composition is complete and verified by an authorized person";
-            case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid";
+            case AMENDED: return "The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as \"final\" and the composition is complete and verified by an authorized person.";
+            case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.";
             default: return "?";
           }
         }
@@ -148,19 +150,19 @@ public class Composition extends DomainResource {
 
     public enum CompositionAttestationMode {
         /**
-         * The person authenticated the content in their personal capacity
+         * The person authenticated the content in their personal capacity.
          */
         PERSONAL, 
         /**
-         * The person authenticated the content in their professional capacity
+         * The person authenticated the content in their professional capacity.
          */
         PROFESSIONAL, 
         /**
-         * The person authenticated the content and accepted legal responsibility for its content
+         * The person authenticated the content and accepted legal responsibility for its content.
          */
         LEGAL, 
         /**
-         * The organization authenticated the content as consistent with their policies and procedures
+         * The organization authenticated the content as consistent with their policies and procedures.
          */
         OFFICIAL, 
         /**
@@ -200,10 +202,10 @@ public class Composition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSONAL: return "The person authenticated the content in their personal capacity";
-            case PROFESSIONAL: return "The person authenticated the content in their professional capacity";
-            case LEGAL: return "The person authenticated the content and accepted legal responsibility for its content";
-            case OFFICIAL: return "The organization authenticated the content as consistent with their policies and procedures";
+            case PERSONAL: return "The person authenticated the content in their personal capacity.";
+            case PROFESSIONAL: return "The person authenticated the content in their professional capacity.";
+            case LEGAL: return "The person authenticated the content and accepted legal responsibility for its content.";
+            case OFFICIAL: return "The organization authenticated the content as consistent with their policies and procedures.";
             default: return "?";
           }
         }
@@ -706,10 +708,10 @@ public class Composition extends DomainResource {
         protected CodeType mode;
 
         /**
-         * What order applies to the items in the section entries.
+         * Specifies the order applied to the items in the section entries.
          */
         @Child(name = "orderedBy", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="What order the section entries are in", formalDefinition="What order applies to the items in the section entries." )
+        @Description(shortDefinition="Order of section entries", formalDefinition="Specifies the order applied to the items in the section entries." )
         protected CodeableConcept orderedBy;
 
         /**
@@ -894,7 +896,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #orderedBy} (What order applies to the items in the section entries.)
+         * @return {@link #orderedBy} (Specifies the order applied to the items in the section entries.)
          */
         public CodeableConcept getOrderedBy() { 
           if (this.orderedBy == null)
@@ -910,7 +912,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @param value {@link #orderedBy} (What order applies to the items in the section entries.)
+         * @param value {@link #orderedBy} (Specifies the order applied to the items in the section entries.)
          */
         public SectionComponent setOrderedBy(CodeableConcept value) { 
           this.orderedBy = value;
@@ -1036,7 +1038,7 @@ public class Composition extends DomainResource {
           childrenList.add(new Property("code", "CodeableConcept", "A code identifying the kind of content contained within the section. This must be consistent with the section title.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("text", "Narrative", "A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("mode", "code", "How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, java.lang.Integer.MAX_VALUE, mode));
-          childrenList.add(new Property("orderedBy", "CodeableConcept", "What order applies to the items in the section entries.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
+          childrenList.add(new Property("orderedBy", "CodeableConcept", "Specifies the order applied to the items in the section entries.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
           childrenList.add(new Property("entry", "Reference(Any)", "A reference to the actual resource from which the narrative in the section is derived.", 0, java.lang.Integer.MAX_VALUE, entry));
           childrenList.add(new Property("emptyReason", "CodeableConcept", "If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.", 0, java.lang.Integer.MAX_VALUE, emptyReason));
           childrenList.add(new Property("section", "@Composition.section", "A nested sub-section within this section.", 0, java.lang.Integer.MAX_VALUE, section));
@@ -1096,10 +1098,10 @@ public class Composition extends DomainResource {
   }
 
     /**
-     * Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.
+     * Logical identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical identifier of composition (version-independent)", formalDefinition="Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time." )
+    @Description(shortDefinition="Logical identifier of composition (version-independent)", formalDefinition="Logical identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time." )
     protected Identifier identifier;
 
     /**
@@ -1145,25 +1147,25 @@ public class Composition extends DomainResource {
     protected CodeType confidentiality;
 
     /**
-     * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
+     * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
      */
     @Child(name = "subject", type = {}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what the composition is about", formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)." )
+    @Description(shortDefinition="Who and/or what the composition is about", formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
+     * The actual object that is the target of the reference (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
      */
     protected Resource subjectTarget;
 
     /**
-     * Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).
+     * Identifies who is responsible for the information in the composition, not necessarily who typed it in.
      */
     @Child(name = "author", type = {Practitioner.class, Device.class, Patient.class, RelatedPerson.class}, order=8, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what authored the composition", formalDefinition="Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.)." )
+    @Description(shortDefinition="Who and/or what authored the composition", formalDefinition="Identifies who is responsible for the information in the composition, not necessarily who typed it in." )
     protected List<Reference> author;
     /**
-     * The actual objects that are the target of the reference (Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).)
+     * The actual objects that are the target of the reference (Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
      */
     protected List<Resource> authorTarget;
 
@@ -1179,7 +1181,7 @@ public class Composition extends DomainResource {
      * Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information.
      */
     @Child(name = "custodian", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Org which maintains the composition", formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information." )
+    @Description(shortDefinition="Organization which maintains the composition", formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information." )
     protected Reference custodian;
 
     /**
@@ -1198,7 +1200,7 @@ public class Composition extends DomainResource {
      * Describes the clinical encounter or type of care this documentation is associated with.
      */
     @Child(name = "encounter", type = {Encounter.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Context of the conposition", formalDefinition="Describes the clinical encounter or type of care this documentation is associated with." )
+    @Description(shortDefinition="Context of the Composition", formalDefinition="Describes the clinical encounter or type of care this documentation is associated with." )
     protected Reference encounter;
 
     /**
@@ -1235,7 +1237,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.)
+     * @return {@link #identifier} (Logical identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -1251,7 +1253,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @param value {@link #identifier} (Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.)
+     * @param value {@link #identifier} (Logical identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.)
      */
     public Composition setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -1491,7 +1493,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
+     * @return {@link #subject} (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -1507,7 +1509,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
+     * @param value {@link #subject} (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
      */
     public Composition setSubject(Reference value) { 
       this.subject = value;
@@ -1515,14 +1517,14 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).)
      */
     public Composition setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -1530,7 +1532,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).)
+     * @return {@link #author} (Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
      */
     public List<Reference> getAuthor() { 
       if (this.author == null)
@@ -1548,7 +1550,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).)
+     * @return {@link #author} (Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
      */
     // syntactic sugar
     public Reference addAuthor() { //3
@@ -1570,7 +1572,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).)
+     * @return {@link #author} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
      */
     public List<Resource> getAuthorTarget() { 
       if (this.authorTarget == null)
@@ -1788,15 +1790,15 @@ public class Composition extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Logical identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("date", "dateTime", "The composition editing time, when the composition was last logically changed by the author.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
         childrenList.add(new Property("title", "string", "Official human-readable label for the composition.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("confidentiality", "code", "The code specifying the level of confidentiality of the Composition.", 0, java.lang.Integer.MAX_VALUE, confidentiality));
-        childrenList.add(new Property("subject", "Reference(Any)", "Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("author", "Reference(Practitioner|Device|Patient|RelatedPerson)", "Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("subject", "Reference(Any)", "Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("author", "Reference(Practitioner|Device|Patient|RelatedPerson)", "Identifies who is responsible for the information in the composition, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("attester", "", "A participant who has attested to the accuracy of the composition/document.", 0, java.lang.Integer.MAX_VALUE, attester));
         childrenList.add(new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information.", 0, java.lang.Integer.MAX_VALUE, custodian));
         childrenList.add(new Property("event", "", "The clinical service, such as a colonoscopy or an appendectomy, being documented.", 0, java.lang.Integer.MAX_VALUE, event));
@@ -1898,7 +1900,7 @@ public class Composition extends DomainResource {
   public static final String SP_CONFIDENTIALITY = "confidentiality";
   @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
-  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the conposition", type="reference" )
+  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";

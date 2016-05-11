@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
  */
@@ -47,10 +47,10 @@ import org.hl7.fhir.instance.model.api.*;
 public class Meta extends Type implements IBaseMetaType {
 
     /**
-     * The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.
+     * The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.
      */
     @Child(name = "versionId", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Version specific identifier", formalDefinition="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted." )
+    @Description(shortDefinition="Version specific identifier", formalDefinition="The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted." )
     protected IdType versionId;
 
     /**
@@ -75,10 +75,10 @@ public class Meta extends Type implements IBaseMetaType {
     protected List<Coding> security;
 
     /**
-     * Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.
+     * Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.
      */
     @Child(name = "tag", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Tags applied", formalDefinition="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource." )
+    @Description(shortDefinition="Tags applied to this resource", formalDefinition="Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource." )
     protected List<Coding> tag;
 
     private static final long serialVersionUID = 867134915L;
@@ -91,7 +91,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return {@link #versionId} (The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.). This is the underlying object with id, value and extensions. The accessor "getVersionId" gives direct access to the value
+     * @return {@link #versionId} (The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.). This is the underlying object with id, value and extensions. The accessor "getVersionId" gives direct access to the value
      */
     public IdType getVersionIdElement() { 
       if (this.versionId == null)
@@ -111,7 +111,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @param value {@link #versionId} (The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.). This is the underlying object with id, value and extensions. The accessor "getVersionId" gives direct access to the value
+     * @param value {@link #versionId} (The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.). This is the underlying object with id, value and extensions. The accessor "getVersionId" gives direct access to the value
      */
     public Meta setVersionIdElement(IdType value) { 
       this.versionId = value;
@@ -119,14 +119,14 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.
+     * @return The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.
      */
     public String getVersionId() { 
       return this.versionId == null ? null : this.versionId.getValue();
     }
 
     /**
-     * @param value The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.
+     * @param value The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.
      */
     public Meta setVersionId(String value) { 
       if (Utilities.noString(value))
@@ -283,7 +283,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return {@link #tag} (Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.)
+     * @return {@link #tag} (Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.)
      */
     public List<Coding> getTag() { 
       if (this.tag == null)
@@ -301,7 +301,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return {@link #tag} (Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.)
+     * @return {@link #tag} (Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.)
      */
     // syntactic sugar
     public Coding addTag() { //3
@@ -324,11 +324,11 @@ public class Meta extends Type implements IBaseMetaType {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));
+        childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));
         childrenList.add(new Property("lastUpdated", "instant", "When the resource last changed - e.g. when the version changed.", 0, java.lang.Integer.MAX_VALUE, lastUpdated));
         childrenList.add(new Property("profile", "uri", "A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security));
-        childrenList.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
+        childrenList.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
 
       public Meta copy() {
@@ -387,6 +387,31 @@ public class Meta extends Type implements IBaseMetaType {
           ;
       }
 
+      /**
+       * Returns the first tag (if any) that has the given system and code, or returns
+       * <code>null</code> if none
+       */
+      public Coding getTag(String theSystem, String theCode) {
+        for (Coding next : getTag()) {
+          if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+            return next;
+          }
+        }
+        return null;
+      }
+
+      /**
+       * Returns the first security label (if any) that has the given system and code, or returns
+       * <code>null</code> if none
+       */
+      public Coding getSecurity(String theSystem, String theCode) {
+        for (Coding next : getTag()) {
+          if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+            return next;
+          }
+        }
+        return null;
+      }
 
 }
 

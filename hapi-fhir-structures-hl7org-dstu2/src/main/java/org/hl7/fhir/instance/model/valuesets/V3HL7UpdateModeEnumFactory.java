@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -55,6 +55,22 @@ public class V3HL7UpdateModeEnumFactory implements EnumFactory<V3HL7UpdateMode> 
       return V3HL7UpdateMode.REF;
     if ("U".equals(codeString))
       return V3HL7UpdateMode.U;
+    if ("_SetUpdateMode".equals(codeString))
+      return V3HL7UpdateMode._SETUPDATEMODE;
+    if ("ESA".equals(codeString))
+      return V3HL7UpdateMode.ESA;
+    if ("ESAC".equals(codeString))
+      return V3HL7UpdateMode.ESAC;
+    if ("ESC".equals(codeString))
+      return V3HL7UpdateMode.ESC;
+    if ("ESD".equals(codeString))
+      return V3HL7UpdateMode.ESD;
+    if ("AU".equals(codeString))
+      return V3HL7UpdateMode.AU;
+    if ("I".equals(codeString))
+      return V3HL7UpdateMode.I;
+    if ("V".equals(codeString))
+      return V3HL7UpdateMode.V;
     throw new IllegalArgumentException("Unknown V3HL7UpdateMode code '"+codeString+"'");
   }
 
@@ -75,6 +91,22 @@ public class V3HL7UpdateModeEnumFactory implements EnumFactory<V3HL7UpdateMode> 
       return "REF";
     if (code == V3HL7UpdateMode.U)
       return "U";
+    if (code == V3HL7UpdateMode._SETUPDATEMODE)
+      return "_SetUpdateMode";
+    if (code == V3HL7UpdateMode.ESA)
+      return "ESA";
+    if (code == V3HL7UpdateMode.ESAC)
+      return "ESAC";
+    if (code == V3HL7UpdateMode.ESC)
+      return "ESC";
+    if (code == V3HL7UpdateMode.ESD)
+      return "ESD";
+    if (code == V3HL7UpdateMode.AU)
+      return "AU";
+    if (code == V3HL7UpdateMode.I)
+      return "I";
+    if (code == V3HL7UpdateMode.V)
+      return "V";
     return "?";
   }
 

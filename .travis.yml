@@ -6,7 +6,7 @@ jdk:
   - oraclejdk8
 env:
   global:
-    - MAVEN_OPTS="-XX:MaxPermSize=512m -Xmx4g"
+    - MAVEN_OPTS="-Xmx1024m"
 
 cache:
   directories:
@@ -19,6 +19,7 @@ before_script:
   - export MAVEN_SKIP_RC=true
 
 script:
-  - mvn -B clean install && cd hapi-fhir-cobertura && mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:cobertura coveralls:report 
+#  - mvn -e -B clean install && cd hapi-fhir-cobertura && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
+  - mvn -e -B clean install && cd hapi-fhir-cobertura && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:cobertura coveralls:report 
 
 

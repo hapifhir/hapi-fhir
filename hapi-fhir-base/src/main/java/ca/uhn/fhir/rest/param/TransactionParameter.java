@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class TransactionParameter implements IParameter {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionParameter.class);	
 	private FhirContext myContext;
 	private ParamStyle myParamStyle;
 	private Class<? extends IBaseResource> myResourceBundleType;
@@ -96,35 +97,35 @@ public class TransactionParameter implements IParameter {
 		// nothing
 
 	}
-
+	
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		// TODO: don't use a default encoding, just fail!
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
 
-		IParser parser = encoding.newParser(myContext);
+		IParser parser = encoding.newParser(theRequest.getServer().getFhirContext());
 
-		Reader reader = ResourceParameter.createRequestReader(theRequest, theRequestContents);
-		
+		Reader reader;
+		reader = ResourceParameter.createRequestReader(theRequest);
+
 		switch (myParamStyle) {
-		case DSTU1_BUNDLE: {
-			Bundle bundle;
-			bundle = parser.parseBundle(reader);
-			return bundle;
-		}
-		case RESOURCE_LIST: {
-			Bundle bundle = parser.parseBundle(reader);
-			ArrayList<IResource> resourceList = new ArrayList<IResource>();
-			for (BundleEntry next : bundle.getEntries()) {
-				if (next.getResource() != null) {
-					resourceList.add(next.getResource());
-				}
+			case DSTU1_BUNDLE: {
+				Bundle bundle;
+				bundle = parser.parseBundle(reader);
+				return bundle;
 			}
-			return resourceList;
-		}
-		case RESOURCE_BUNDLE:
-			return parser.parseResource(myResourceBundleType, reader);
+			case RESOURCE_LIST: {
+				Bundle bundle = parser.parseBundle(reader);
+				ArrayList<IResource> resourceList = new ArrayList<IResource>();
+				for (BundleEntry next : bundle.getEntries()) {
+					if (next.getResource() != null) {
+						resourceList.add(next.getResource());
+					}
+				}
+				return resourceList;
+			}
+			case RESOURCE_BUNDLE:
+				return parser.parseResource(myResourceBundleType, reader);
 		}
 
 		throw new IllegalStateException("Unknown type: " + myParamStyle); // should not happen

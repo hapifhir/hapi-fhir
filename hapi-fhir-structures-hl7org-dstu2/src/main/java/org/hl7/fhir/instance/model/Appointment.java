@@ -29,17 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
@@ -48,31 +50,31 @@ public class Appointment extends DomainResource {
 
     public enum AppointmentStatus {
         /**
-         * None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet
+         * None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet.
          */
         PROPOSED, 
         /**
-         * Some or all of the participant(s) have not finalized their acceptance of the appointment request
+         * Some or all of the participant(s) have not finalized their acceptance of the appointment request.
          */
         PENDING, 
         /**
-         * All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified
+         * All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.
          */
         BOOKED, 
         /**
-         * Some of the patients have arrived
+         * Some of the patients have arrived.
          */
         ARRIVED, 
         /**
-         * This appointment has completed and may have resulted in an encounter
+         * This appointment has completed and may have resulted in an encounter.
          */
         FULFILLED, 
         /**
-         * The appointment has been cancelled
+         * The appointment has been cancelled.
          */
         CANCELLED, 
         /**
-         * Some or all of the participant(s) have not/did not appear for the appointment (usually the patient)
+         * Some or all of the participant(s) have not/did not appear for the appointment (usually the patient).
          */
         NOSHOW, 
         /**
@@ -124,13 +126,13 @@ public class Appointment extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet";
-            case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request";
-            case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified";
-            case ARRIVED: return "Some of the patients have arrived";
-            case FULFILLED: return "This appointment has completed and may have resulted in an encounter";
-            case CANCELLED: return "The appointment has been cancelled";
-            case NOSHOW: return "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient)";
+            case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet.";
+            case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request.";
+            case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.";
+            case ARRIVED: return "Some of the patients have arrived.";
+            case FULFILLED: return "This appointment has completed and may have resulted in an encounter.";
+            case CANCELLED: return "The appointment has been cancelled.";
+            case NOSHOW: return "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient).";
             default: return "?";
           }
         }
@@ -190,15 +192,15 @@ public class Appointment extends DomainResource {
 
     public enum ParticipantRequired {
         /**
-         * The participant is required to attend the appointment
+         * The participant is required to attend the appointment.
          */
         REQUIRED, 
         /**
-         * The participant may optionally attend the appointment
+         * The participant may optionally attend the appointment.
          */
         OPTIONAL, 
         /**
-         * The participant is excluded from the appointment, and may not be informed of the appointment taking place. (appointment is about them, not for them - such as 2 doctors discussing results about a patient's test)
+         * The participant is excluded from the appointment, and may not be informed of the appointment taking place. (Appointment is about them, not for them - such as 2 doctors discussing results about a patient's test).
          */
         INFORMATIONONLY, 
         /**
@@ -234,9 +236,9 @@ public class Appointment extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REQUIRED: return "The participant is required to attend the appointment";
-            case OPTIONAL: return "The participant may optionally attend the appointment";
-            case INFORMATIONONLY: return "The participant is excluded from the appointment, and may not be informed of the appointment taking place. (appointment is about them, not for them - such as 2 doctors discussing results about a patient's test)";
+            case REQUIRED: return "The participant is required to attend the appointment.";
+            case OPTIONAL: return "The participant may optionally attend the appointment.";
+            case INFORMATIONONLY: return "The participant is excluded from the appointment, and may not be informed of the appointment taking place. (Appointment is about them, not for them - such as 2 doctors discussing results about a patient's test).";
             default: return "?";
           }
         }
@@ -276,19 +278,19 @@ public class Appointment extends DomainResource {
 
     public enum ParticipationStatus {
         /**
-         * The participant has accepted the appointment
+         * The participant has accepted the appointment.
          */
         ACCEPTED, 
         /**
-         * The participant has declined the appointment and will not participate in the appointment
+         * The participant has declined the appointment and will not participate in the appointment.
          */
         DECLINED, 
         /**
-         * The participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur
+         * The participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur.
          */
         TENTATIVE, 
         /**
-         * The participant needs to indicate if they accept the appointment by changing this status to one of the other statuses
+         * The participant needs to indicate if they accept the appointment by changing this status to one of the other statuses.
          */
         NEEDSACTION, 
         /**
@@ -328,10 +330,10 @@ public class Appointment extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACCEPTED: return "The participant has accepted the appointment";
-            case DECLINED: return "The participant has declined the appointment and will not participate in the appointment";
-            case TENTATIVE: return "The participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur";
-            case NEEDSACTION: return "The participant needs to indicate if they accept the appointment by changing this status to one of the other statuses";
+            case ACCEPTED: return "The participant has accepted the appointment.";
+            case DECLINED: return "The participant has declined the appointment and will not participate in the appointment.";
+            case TENTATIVE: return "The participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur.";
+            case NEEDSACTION: return "The participant needs to indicate if they accept the appointment by changing this status to one of the other statuses.";
             default: return "?";
           }
         }
@@ -387,7 +389,7 @@ public class Appointment extends DomainResource {
          * A Person, Location/HealthcareService or Device that is participating in the appointment.
          */
         @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
+        @Description(shortDefinition="Person, Location/HealthcareService or Device", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
         protected Reference actor;
 
         /**
@@ -650,10 +652,10 @@ public class Appointment extends DomainResource {
   }
 
     /**
-     * This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
@@ -671,52 +673,52 @@ public class Appointment extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * The reason that this appointment is being scheduled, this is more clinical than administrative.
+     * The reason that this appointment is being scheduled. This is more clinical than administrative.
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative", formalDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative." )
+    @Description(shortDefinition="Reason this appointment is scheduled", formalDefinition="The reason that this appointment is being scheduled. This is more clinical than administrative." )
     protected CodeableConcept reason;
 
     /**
      * The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).
      */
     @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)." )
+    @Description(shortDefinition="Used to make informed decisions if needing to re-prioritize", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)." )
     protected UnsignedIntType priority;
 
     /**
      * The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.
      */
     @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
+    @Description(shortDefinition="Shown on a subject line in a meeting request, or appointment list", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
     protected StringType description;
 
     /**
      * Date/Time that the appointment is to take place.
      */
     @Child(name = "start", type = {InstantType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date/Time that the appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
+    @Description(shortDefinition="When appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
     @Child(name = "end", type = {InstantType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date/Time that the appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
+    @Description(shortDefinition="When appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
      * Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).
      */
     @Child(name = "minutesDuration", type = {PositiveIntType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)", formalDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)." )
+    @Description(shortDefinition="Can be less than start/end (e.g. estimate)", formalDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)." )
     protected PositiveIntType minutesDuration;
 
     /**
      * The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.
      */
     @Child(name = "slot", type = {Slot.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
+    @Description(shortDefinition="If provided, then no schedule and start/end values MUST match slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
     protected List<Reference> slot;
     /**
      * The actual objects that are the target of the reference (The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.)
@@ -728,14 +730,14 @@ public class Appointment extends DomainResource {
      * Additional comments about the appointment.
      */
     @Child(name = "comment", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Additional comments about the appointment", formalDefinition="Additional comments about the appointment." )
+    @Description(shortDefinition="Additional comments", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
      * List of participants involved in the appointment.
      */
     @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of participants involved in the appointment", formalDefinition="List of participants involved in the appointment." )
+    @Description(shortDefinition="Participants involved in appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
     private static final long serialVersionUID = -1403944125L;
@@ -756,7 +758,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -774,7 +776,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -865,7 +867,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (The reason that this appointment is being scheduled, this is more clinical than administrative.)
+     * @return {@link #reason} (The reason that this appointment is being scheduled. This is more clinical than administrative.)
      */
     public CodeableConcept getReason() { 
       if (this.reason == null)
@@ -881,7 +883,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @param value {@link #reason} (The reason that this appointment is being scheduled, this is more clinical than administrative.)
+     * @param value {@link #reason} (The reason that this appointment is being scheduled. This is more clinical than administrative.)
      */
     public Appointment setReason(CodeableConcept value) { 
       this.reason = value;
@@ -1277,10 +1279,10 @@ public class Appointment extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("type", "CodeableConcept", "The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("reason", "CodeableConcept", "The reason that this appointment is being scheduled, this is more clinical than administrative.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("reason", "CodeableConcept", "The reason that this appointment is being scheduled. This is more clinical than administrative.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("priority", "unsignedInt", "The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("description", "string", "The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("start", "instant", "Date/Time that the appointment is to take place.", 0, java.lang.Integer.MAX_VALUE, start));

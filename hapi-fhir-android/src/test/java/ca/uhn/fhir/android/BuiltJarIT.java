@@ -54,6 +54,9 @@ public class BuiltJarIT {
 	
 	@Test
 	public void testParserJson() {
+		ourLog.info("AAAAA");
+		ourLog.info("AAAAA");
+		
 		FhirContext ctx = FhirContext.forDstu2();
 		
 		Observation o = new Observation();

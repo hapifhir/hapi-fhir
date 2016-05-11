@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,28 +34,94 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.Index;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
+import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
+import org.apache.lucene.analysis.ngram.NGramFilterFactory;
+import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
+import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
+import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
+import org.apache.lucene.analysis.standard.StandardFilterFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.AnalyzerDef;
+import org.hibernate.search.annotations.AnalyzerDefs;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.Parameter;
+import org.hibernate.search.annotations.Store;
+import org.hibernate.search.annotations.TokenFilterDef;
+import org.hibernate.search.annotations.TokenizerDef;
 
+import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 //@formatter:off
+@Indexed(interceptor=IndexNonDeletedInterceptor.class)	
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
-@Inheritance(strategy = InheritanceType.JOINED)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", 
-	indexes = { 
-		@Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }), 
-		@Index(name = "IDX_RES_LANG", columnNames = { "RES_TYPE", "RES_LANGUAGE" }), 
-		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }),
-		@Index(name = "IDX_INDEXSTATUS", columnNames = { "SP_INDEX_STATUS" }) 
-	})
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
+	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
+	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
+	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+})
+@AnalyzerDefs({
+	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
+		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
+			@Parameter(name="pattern", value="(.*)"),
+			@Parameter(name="group", value="1")
+		}),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+			@TokenFilterDef(factory = StopFilterFactory.class),
+			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
+				@Parameter(name = "minGramSize", value = "3"),
+				@Parameter(name = "maxGramSize", value = "50") 
+			}), 
+		}),
+	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
+		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory=StandardFilterFactory.class),
+			@TokenFilterDef(factory=StopFilterFactory.class),
+			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
+				@Parameter(name="encoder", value="DoubleMetaphone")
+			}),
+			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
+				@Parameter(name="language", value="English") 
+			})
+		}),
+	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
+				@Parameter(name = "minGramSize", value = "3"),
+				@Parameter(name = "maxGramSize", value = "20") 
+			}),
+		}),
+	@AnalyzerDef(name = "standardAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+		}) // Def
+	}
+)
 //@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final int MAX_LANGUAGE_LENGTH = 20;
@@ -65,11 +131,26 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	//@formatter:off
+	@Transient()
+	@Fields({
+		@Field(name = "myContentText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
+		@Field(name = "myContentTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
+		@Field(name = "myContentTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
+		@Field(name = "myContentTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
+	})
+	//@formatter:on
+	private String myContentText;
+
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name="SEQ_RESOURCE_ID", sequenceName="SEQ_RESOURCE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	private Long myId;
 
@@ -79,8 +160,18 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
+	@Column(name = "IS_CONTAINED", nullable = true)
+	private boolean myIsContainedResource;
+
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	private String myLanguage;
+
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	@Transient()
+	@Field()
+	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
@@ -96,7 +187,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
-
+	
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
 
@@ -128,9 +219,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private String myProfile;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@IndexedEmbedded()
 	private Collection<ResourceLink> myResourceLinks;
 
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
+	@Field
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -153,8 +246,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Override
 	public IdDt getIdDt() {
-		Object id = getForcedId() == null ? myId : getForcedId().getForcedId();
-		return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		if (getForcedId() == null) {
+			Long id = myId;
+			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		} else {
+			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+		}
 	}
 
 	public Long getIndexStatus() {
@@ -256,6 +353,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myHasLinks;
 	}
 
+	public boolean isIsContainedResource() {
+		return myIsContainedResource;
+	}
+
 	public boolean isParamsCoordsPopulated() {
 		return myParamsCoordsPopulated;
 	}
@@ -284,6 +385,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myParamsUriPopulated;
 	}
 
+	public void setContentTextParsedIntoWords(String theContentText) {
+		myContentText = theContentText;
+	}
+
 	public void setHasLinks(boolean theHasLinks) {
 		myHasLinks = theHasLinks;
 	}
@@ -296,11 +401,19 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myIndexStatus = theIndexStatus;
 	}
 
+	public void setIsContainedResource(boolean theIsContainedResource) {
+		myIsContainedResource = theIsContainedResource;
+	}
+
 	public void setLanguage(String theLanguage) {
 		if (defaultString(theLanguage).length() > MAX_LANGUAGE_LENGTH) {
 			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
 		}
 		myLanguage = theLanguage;
+	}
+
+	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
+		myNarrativeText = theNarrativeText;
 	}
 
 	public void setParamsCoords(Collection<ResourceIndexedSearchParamCoords> theParamsCoords) {
@@ -410,8 +523,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myVersion = theVersion;
 	}
 
-	public ResourceHistoryTable toHistory() {
-		ResourceHistoryTable retVal = new ResourceHistoryTable();
+	public ResourceHistoryTable toHistory(ResourceHistoryTable theResourceHistoryTable) {
+		ResourceHistoryTable retVal = theResourceHistoryTable != null ? theResourceHistoryTable : new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
@@ -426,11 +539,24 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 
-		for (ResourceTag next : getTags()) {
-			retVal.addTag(next);
+		retVal.getTags().clear();
+		
+		retVal.setHasTags(isHasTags());
+		if (isHasTags()) {
+			for (ResourceTag next : getTags()) {
+				retVal.addTag(next);
+			}
 		}
-
+		
 		return retVal;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", myResourceType);
+		b.append("pid", myId);
+		return b.build();
 	}
 
 }

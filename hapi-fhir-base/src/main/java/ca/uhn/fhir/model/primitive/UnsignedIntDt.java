@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @DatatypeDef(name = "unsignedInt", profileOf=IntegerDt.class)
 @CoverageIgnore

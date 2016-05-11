@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -51,16 +52,16 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		myChildren.add(theNext);
 	}
 
+	public BaseRuntimeChildDefinition getChildByName(String theName){
+		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
+		return retVal;
+	}
+
 	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
 		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
 			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName() + " - Valid names are: " + new TreeSet<String>(myNameToChild.keySet()));
 		}
-		return retVal;
-	}
-
-	public BaseRuntimeChildDefinition getChildByName(String theName){
-		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		return retVal;
 	}
 
@@ -72,8 +73,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		return myChildrenAndExtensions;
 	}
 
-	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	@Override 
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		for (BaseRuntimeChildDefinition next : myChildren) {
@@ -100,9 +101,55 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		
 		List<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
 		children.addAll(myChildren);
-		children.addAll(getExtensionsModifier());
-		children.addAll(getExtensionsNonModifier());
+		
+		/*
+		 * Because of the way the type hierarchy works for DSTU2 resources,
+		 * things end up in the wrong order
+		 */
+		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			int extIndex = findIndex(children, "extension", false);
+			int containedIndex = findIndex(children, "contained", false);
+			if (containedIndex != -1 && extIndex != -1 && extIndex < containedIndex) {
+				BaseRuntimeChildDefinition extension = children.remove(extIndex);
+				if (containedIndex > children.size()) {
+					children.add(extension);
+				} else {
+					children.add(containedIndex, extension);
+				}
+				int modIndex = findIndex(children, "modifierExtension", false);
+				if (modIndex < containedIndex) {
+					extension = children.remove(modIndex);
+					if (containedIndex > children.size()) {
+						children.add(extension);
+					} else {
+						children.add(containedIndex, extension);
+					}
+				}
+			}
+		}
+		
+		/*
+		 * Add declared extensions alongside the undeclared ones
+		 */
+		if (getExtensionsNonModifier().isEmpty() == false) {
+			children.addAll(findIndex(children, "extension", true), getExtensionsNonModifier());
+		}
+		if (getExtensionsModifier().isEmpty() == false) {
+			children.addAll(findIndex(children, "modifierExtension", true), getExtensionsModifier());
+		}
+		
 		myChildrenAndExtensions=Collections.unmodifiableList(children);
+	}
+
+	private static int findIndex(List<BaseRuntimeChildDefinition> theChildren, String theName, boolean theDefaultAtEnd) {
+		int index = theDefaultAtEnd ? theChildren.size() : -1;
+		for (ListIterator<BaseRuntimeChildDefinition> iter = theChildren.listIterator(); iter.hasNext(); ) {
+			if (iter.next().getElementName().equals(theName)) {
+				index = iter.previousIndex();
+				break;
+			}
+		}
+		return index;
 	}
 
 }

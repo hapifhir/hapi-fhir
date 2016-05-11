@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.TagList;
 
 public interface IGetTags extends IClientExecutable<IGetTags, TagList> {
 
-	IGetTags forResource(Class<? extends IResource> theClass);
+	IGetTags forResource(Class<? extends IBaseResource> theClass);
 
-	IGetTags forResource(Class<? extends IResource> theClass, String theId);
+	IGetTags forResource(Class<? extends IBaseResource> theClass, String theId);
 
-	IGetTags forResource(Class<? extends IResource> theClass, String theId, String theVersionId);
+	IGetTags forResource(Class<? extends IBaseResource> theClass, String theId, String theVersionId);
 
 }

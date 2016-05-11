@@ -11,9 +11,9 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.6-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+	<url>https://github.com/jamesagnew/hapi-fhir</url>
 
 	<organization>
 		<name>University Health Network</name>
@@ -45,18 +45,8 @@
 
 	<dependencies>
 		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
-		<dependency>
-			<groupId>net.sourceforge.cobertura</groupId>
-			<artifactId>cobertura</artifactId>
-			<version>2.1.1</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>jetty</artifactId>
-					<groupId>org.mortbay.jetty</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+		<!-- <dependency> <groupId>net.sourceforge.cobertura</groupId> <artifactId>cobertura</artifactId> <version>2.1.1</version> <scope>provided</scope> <exclusions> <exclusion> <artifactId>jetty</artifactId> 
+			<groupId>org.mortbay.jetty</groupId> </exclusion> </exclusions> </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -190,6 +180,54 @@
 			<id>botunge</id>
 			<name>Thomas Andersen</name>
 		</developer>
+		<developer>
+			<id>samlanfranchi</id>
+			<name>Sam Lanfranchi</name>
+		</developer>
+		<developer>
+			<id>jkiddo</id>
+			<name>Jens Kristian Villadsen</name>
+		</developer>
+		<developer>
+			<id>cmikeb1</id>
+			<name>C. Mike Bylund</name>
+		</developer>
+		<developer>
+			<id>nrpeterson</id>
+			<name>Nick Peterson</name>
+		</developer>
+		<developer>
+			<id>petervanhoute</id>
+			<name>Peter Van Houte</name>
+		</developer>
+		<developer>
+			<id>karlmdavis</id>
+			<name>Karl M. Davis</name>
+		</developer>
+		<developer>
+			<id>matt-blanchette</id>
+			<name>Matt Blanchette</name>
+		</developer>
+		<developer>
+			<id>petromykhailysyn</id>
+			<name>Petro Mykhaylyshyn</name>
+		</developer>
+		<developer>
+			<id>adam-carbone</id>
+			<name>Adam Carbone</name>
+		</developer>
+		<developer>
+			<id>joelsch</id>
+			<name>joelsch</name>
+		</developer>
+		<developer>
+			<id>euvitudo</id>
+			<name>Phillip Warner</name>
+		</developer>
+		<developer>
+			<id>subhrajyotim</id>
+			<name>Subhro</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -204,7 +242,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
 		<!-- This property is used in some of the site documentation where the version is shown, so that we can deploy the site even if the project is on a snapshot version. -->
-		<hapi_stable_version>1.1</hapi_stable_version>
+		<hapi_stable_version>1.4</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -213,38 +251,26 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
-		<apache_httpclient_version>4.4</apache_httpclient_version>
-		<apache_httpcore_version>4.4</apache_httpcore_version>
-		<derby_version>10.11.1.1</derby_version>
-		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this 
-			version with caution! Also note that if you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration 
-			for that plugin... -->
-		<hibernate_version>5.0.1.Final</hibernate_version>
-		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
-		<jetty_version>9.2.6.v20141205</jetty_version>
-		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
+		<derby_version>10.12.1.1</derby_version>
+		<jersey_version>2.22.2</jersey_version>
+		<jetty_version>9.3.8.v20160314</jetty_version>
+		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
+			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
+		<hibernate_version>5.1.0.Final</hibernate_version>
+		<hibernate_validator_version>5.2.4.Final</hibernate_validator_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
-		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<maven_project_info_plugin_version>2.8</maven_project_info_plugin_version>
-		<maven_surefire_plugin_version>2.18.1</maven_surefire_plugin_version>
-		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
-		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
-		<phloc_commons_version>4.3.6</phloc_commons_version>
-		<spring_version>4.2.1.RELEASE</spring_version>
+		<phloc_commons_version>4.4.4</phloc_commons_version>
+		<spring_version>4.2.5.RELEASE</spring_version>
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
-		
-		<!--
-		We are aiming to still work on a very old version of SLF4j even though
-		we depend on the newest, just to be nice to users of the API. This version
-		is tested in the hapi-fhir-cobertura. 
-		-->
+
+		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
 		<slf4j_target_version>1.6.0</slf4j_target_version>
-		
+
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
@@ -258,12 +284,12 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.2</version>
+				<version>1.1.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>18.0</version>
+				<version>19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.phloc</groupId>
@@ -291,6 +317,11 @@
 				<version>2.4</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.ejb</groupId>
+				<artifactId>ejb-api</artifactId>
+				<version>3.0</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.el</groupId>
 				<artifactId>javax.el-api</artifactId>
 				<version>3.0.0</version>
@@ -303,7 +334,7 @@
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>javax.mail-api</artifactId>
-				<version>1.5.0</version>
+				<version>1.5.5</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -312,13 +343,18 @@
 			</dependency>
 			<dependency>
 				<groupId>javax.transaction</groupId>
-				<artifactId>jta</artifactId>
-				<version>1.1</version>
+				<artifactId>javax.transaction-api</artifactId>
+				<version>1.2</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>1.1.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>2.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>lt.velykis.maven.skins</groupId>
@@ -333,7 +369,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.3.2</version>
+				<version>3.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
@@ -353,7 +389,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.4</version>
+				<version>4.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -363,7 +399,17 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4</version>
+				<version>4.4.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-highlighter</artifactId>
+				<version>5.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-phonetic</artifactId>
+				<version>5.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
@@ -373,22 +419,22 @@
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-api</artifactId>
-				<version>1.9</version>
+				<version>1.9.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
-				<version>1.9</version>
+				<version>1.9.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.9</version>
+				<version>1.9.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-scm</artifactId>
-				<version>2.2</version>
+				<version>2.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -413,47 +459,47 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-http</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlets</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlet</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-util</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-api</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-client</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-server</artifactId>
-				<version>9.2.6.v20141205</version>
+				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
@@ -469,6 +515,26 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-server</artifactId>
+				<version>${jersey_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.containers</groupId>
+				<artifactId>jersey-container-servlet-core</artifactId>
+				<version>${jersey_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.containers</groupId>
+				<artifactId>jersey-container-jetty-http</artifactId>
+				<version>${jersey_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-moxy</artifactId>
+				<version>${jersey_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jscience</groupId>
@@ -496,19 +562,29 @@
 				<version>${hibernate_validator_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search-orm</artifactId>
+				<version>5.5.2.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.20.0-GA</version>
+			</dependency>
+			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -533,7 +609,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.9.0.RELEASE</version>
+				<version>1.9.2.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -576,6 +652,11 @@
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf-spring4</artifactId>
+				<version>${thymeleaf-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>xmlunit</groupId>
 				<artifactId>xmlunit</artifactId>
 				<version>1.6</version>
@@ -594,7 +675,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>2.5.4</version>
+					<version>3.0.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -604,7 +685,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.5.1</version>
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
@@ -616,17 +697,22 @@
 						<dependency>
 							<groupId>com.google.errorprone</groupId>
 							<artifactId>error_prone_core</artifactId>
-							<version>2.0.1</version>
+							<version>2.0.9</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac</artifactId>
-							<version>2.5</version>
+							<version>2.7</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac-errorprone</artifactId>
-							<version>2.5</version>
+							<version>2.7</version>
+						</dependency>
+						<dependency>
+							<groupId>org.codehaus.plexus</groupId>
+							<artifactId>plexus-utils</artifactId>
+							<version>3.0.22</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -648,7 +734,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.1</version>
+					<version>2.10.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -658,21 +744,35 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>2.4.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.0.0</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.codehaus.plexus</groupId>
+							<artifactId>plexus-utils</artifactId>
+							<version>3.0.22</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8</argLine>
+						<argLine>-Dfile.encoding=UTF-8 -Xmx712m</argLine>
+						<forkCount>1</forkCount>
+						<!--<reuseForks>false</reuseForks> -->
 					</configuration>
 				</plugin>
 				<plugin>
@@ -682,13 +782,13 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.10</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.14</version>
+					<version>1.15</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -708,14 +808,19 @@
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.2.6.v20141205</version>
+					<version>${jetty_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.0.0</version>
+					<version>4.1.0</version>
 					<configuration>
 						<coberturaReports>
 						</coberturaReports>
@@ -724,6 +829,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
+					<!-- Be careful upgrading the version of this plugin- 3.5 breaks the relow-maven-skin that we use currently. Also once we move to 3.5 the site.xml <head> tag needs to have its contents put in a CDATA 
+						block. What an unpleasant misadventure to figure that all out...... -->
 					<version>3.4</version>
 					<configuration>
 						<skip>false</skip>
@@ -748,6 +855,7 @@
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-api</artifactId>
 						</dependency>
+						<!-- <dependency> <groupId>org.apache.maven.doxia</groupId> <artifactId>doxia-core</artifactId> </dependency> -->
 						<dependency>
 							<groupId>org.apache.maven.doxia</groupId>
 							<artifactId>doxia-module-markdown</artifactId>
@@ -856,12 +964,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.15</version>
+					<version>2.17</version>
 					<dependencies>
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>6.7</version>
+							<version>6.17</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -876,6 +984,28 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-java</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[1.8,)</version>
+									<message>
+										The hapi-fhir Maven build requires JDK version 1.8 or higher.
+									</message>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
@@ -906,43 +1036,58 @@
 						<configuration>
 							<target>
 								<copy todir="target/site/apidocs">
-									<fileset dir="hapi-fhir-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu">
-									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs" />
-								</copy>
-								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu2">
-									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu3">
+									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
 								<copy todir="target/site/xref-base">
-									<fileset dir="hapi-fhir-base/target/site/xref" />
+									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
 								<!-- <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy> -->
 								<copy todir="target/site">
-									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*" />
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
 								<echo>Fixing Checkstyle Report</echo>
 								<replace dir="target/site" summary="true">
-									<include name="checkstyle.html" />
+									<include name="checkstyle.html"/>
 									<replacetoken>"../../</replacetoken>
 									<replacevalue>"./</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
 									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="index.html" />
+									<include name="*.html"/>
+									<replacetoken>http://netdna.bootstrapcd</replacetoken>
+									<replacevalue>https://netdna.bootstrapcd</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacetoken>
+									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>http://ajax.googleapis</replacetoken>
+									<replacevalue>https://ajax.googleapis</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
 									<replacevalue><![CDATA[<div class="jumbotron subhead">
 		<div class="row" id="banner">
@@ -971,33 +1116,33 @@
 							<target>
 								<echo>Adding Fontawesome</echo>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
-									<include name="doc_*.html" />
+									<include name="doc_*.html"/>
 									<replacetoken><![CDATA[<li class="divider">/</li>]]></replacetoken>
 									<replacevalue><![CDATA[<li  class="divider">/</li>
 			<li><a href="docindex.html" title="Documentation">Documentation</a></li>
@@ -1048,8 +1193,8 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
-									<replacefilter token="#build#" value="${label}" />
-									<replacefilter token="#version#" value="${project.version}" />
+									<replacefilter token="#build#" value="${label}"/>
+									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script>
@@ -1103,7 +1248,7 @@
 					<signature>
 						<groupId>org.codehaus.mojo.signature</groupId>
 						<artifactId>java16</artifactId>
-						<version>1.01</version>
+						<version>1.1</version>
 					</signature>
 				</configuration>
 			</plugin>
@@ -1126,23 +1271,24 @@
 					<dependency>
 						<groupId>org.apache.maven.wagon</groupId>
 						<artifactId>wagon-scm</artifactId>
-						<version>2.2</version>
+						<version>2.10</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
 						<artifactId>maven-scm-manager-plexus</artifactId>
-						<version>1.9</version>
+						<version>1.9.4</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
 						<artifactId>maven-scm-provider-gitexe</artifactId>
-						<version>1.9</version>
+						<version>1.9.4</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
 						<artifactId>maven-scm-api</artifactId>
-						<version>1.9</version>
+						<version>1.9.4</version>
 					</dependency>
+					<!-- <dependency> <groupId>org.apache.maven.doxia</groupId> <artifactId>doxia-core</artifactId> <version>1.7</version> </dependency> -->
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
@@ -1182,14 +1328,15 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- <plugin> <groupId>com.github.github</groupId> <artifactId>site-maven-plugin</artifactId> <version>0.12</version> <configuration> <message>Building site for ${project.version}</message> <server>github</server> 
+				</configuration> <executions> <execution> <goals> <goal>site</goal> </goals> <phase>site-deploy</phase> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
 
 	<reporting>
 		<plugins>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> 
-				</reportSet> </reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> 
-				</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
+				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -1213,7 +1360,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.18.1</version>
+				<version>2.19.1</version>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -1233,7 +1380,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${maven_project_info_plugin_version}</version>
+				<version>2.8.1</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
@@ -1253,6 +1400,9 @@
 	<profiles>
 		<profile>
 			<id>DIST</id>
+			<modules>
+				<module>hapi-fhir-osgi-core</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>ROOT</id>
@@ -1264,9 +1414,8 @@
 			</modules>
 			<build>
 				<plugins>
-					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> 
-						<goals> <goal>single</goal> </goals> <configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> 
-						</descriptors> </configuration> </execution> </executions> </plugin> -->
+					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals> 
+						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
 
@@ -1302,8 +1451,9 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-hl7org-dstu2</module>
+				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->
 				<module>examples</module>
 			</modules>
@@ -1312,7 +1462,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.0</version>
+						<version>3.0.3</version>
 						<configuration>
 							<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
 						</configuration>
@@ -1341,9 +1491,13 @@
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>
-				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-validation-resources-dstu2</module>
+				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
+				<module>hapi-fhir-validation-resources-dstu3</module>
+				<module>hapi-fhir-structures-dstu3</module>
+				<module>hapi-fhir-jaxrsserver-base</module>
+				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>
@@ -1354,7 +1508,7 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>hapi-fhir-osgi-core</module>
+				<module>hapi-fhir-base-example-embedded-ws</module>
 			</modules>
 		</profile>
 		<profile>
@@ -1366,6 +1520,5 @@
 	</profiles>
 
 	<modules>
-		<module>hapi-fhir-base-example-embedded-ws</module>
 	</modules>
 </project>

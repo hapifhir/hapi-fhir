@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>1.3-SNAPSHOT</version>
+		<version>1.6-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -41,22 +41,32 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>1.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+			<version>1.6-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -73,6 +83,11 @@
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
 		</dependency>
 
 		<dependency>
@@ -210,7 +225,7 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
+			<artifactId>javax.transaction-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -232,9 +247,16 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-search-orm</artifactId>
-			<version>5.5.0.Final</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-highlighter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-phonetic</artifactId>
+		</dependency>
+
 		<!-- Misc -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -313,12 +335,13 @@
 				<configuration>
 					<!-- These tests all use a shared database, so it's easier if they run in a predictable order -->
 					<runOrder>alphabetical</runOrder>
+					<!--<reuseForks>false</reuseForks>-->
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>1.3-SNAPSHOT</version>
+				<version>1.6-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>build_dstu1</id>
@@ -327,6 +350,7 @@
 						</goals>
 						<configuration>
 							<version>dstu</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
@@ -339,12 +363,28 @@
 						</goals>
 						<configuration>
 							<version>dstu2</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
-								<excludeResourceName>OperationDefinition</excludeResourceName>
-								<excludeResourceName>OperationOutcome</excludeResourceName>
+								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
+							</excludeResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_dstu3</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>dstu3</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+							<excludeResourceNames>
+								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
 							</excludeResourceNames>
 						</configuration>
 					</execution>
@@ -353,12 +393,22 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu</artifactId>
-						<version>1.3-SNAPSHOT</version>
+						<version>1.6-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
-						<version>1.3-SNAPSHOT</version>
+						<version>1.6-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu3</artifactId>
+						<version>1.6-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+						<version>1.6-SNAPSHOT</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -392,6 +442,7 @@
 				<skip-hib4>true</skip-hib4>
 			</properties>
 		</profile>
+			<!-- 
 		<profile>
 			<id>DIST</id>
 			<build>
@@ -404,8 +455,13 @@
 							<target>SCRIPT</target>
 							<skip>${skip-hib4}</skip>
 						</configuration>
-						<!-- This needs to be uncommented in order for this plugin to work with Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5) <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
-							<version>${hibernate_version}</version> </dependency> </dependencies> -->
+						<dependencies>
+							<dependency>
+								<groupId>org.hibernate</groupId>
+								<artifactId>hibernate-core</artifactId>
+								<version>${hibernate_version}</version>
+							</dependency>
+						</dependencies>
 						<executions>
 							<execution>
 								<id>o10g</id>
@@ -456,6 +512,7 @@
 				</plugins>
 			</build>
 		</profile>
+		 -->
 	</profiles>
 
 </project>

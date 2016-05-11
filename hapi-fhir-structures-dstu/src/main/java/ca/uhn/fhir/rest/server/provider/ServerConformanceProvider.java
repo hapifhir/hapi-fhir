@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,22 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.jar.Manifest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
-import ca.uhn.fhir.parser.DataFormatException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
@@ -49,6 +51,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
@@ -59,9 +62,8 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
 import ca.uhn.fhir.util.ExtensionConstants;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -78,12 +80,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
 	private String myPublisher = "Not provided";
-	private RestfulServer myRestfulServer;
+	private RestulfulServerConfiguration myServerConfiguration;
 
-	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
-	}
-	
 	/*
 	 * Add a no-arg constructor and seetter so that the
 	 * ServerConfirmanceProvider can be Spring-wired with
@@ -95,9 +93,13 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 	
 	public void setRestfulServer (RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
+		myServerConfiguration = theRestfulServer.createConfiguration();
 	}
-
+	
+	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myServerConfiguration = theRestfulServer.createConfiguration();
+	}	
+	
 	/**
 	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this
 	 * is a mandatory element, the value should not be null (although this is not enforced). The value defaults
@@ -126,9 +128,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setFhirVersion("0.0.82-3059"); // TODO: pull from model
 		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser needs to be modified to actually allow it
 		
-		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
-		retVal.getSoftware().setName(myRestfulServer.getServerName());
-		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
+		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
+		retVal.getSoftware().setName(myServerConfiguration.getServerName());
+		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
 		retVal.addFormat(Constants.CT_FHIR_JSON);
 
@@ -137,7 +139,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		Set<RestfulOperationSystemEnum> systemOps = new HashSet<RestfulOperationSystemEnum>();
 
-		List<ResourceBinding> bindings = new ArrayList<ResourceBinding>(myRestfulServer.getResourceBindings());
+		List<ResourceBinding> bindings = new ArrayList<ResourceBinding>(myServerConfiguration.getResourceBindings());
 		Collections.sort(bindings, new Comparator<ResourceBinding>() {
 			@Override
 			public int compare(ResourceBinding theArg0, ResourceBinding theArg1) {
@@ -151,9 +153,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			RestResource resource = rest.addResource();
 
 			String resourceName = next.getResourceName();
-			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
+			RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
-			resource.getProfile().setReference(new IdDt(def.getResourceProfile(myRestfulServer.getServerBaseForRequest(theRequest))));
+			ServletContext servletContext  = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+			String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+            resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
 			TreeSet<String> includes = new TreeSet<String>();
 
@@ -215,7 +219,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private DateTimeDt conformanceDate() {
-		String buildDate = getBuildDateFromManifest();
+		String buildDate = myServerConfiguration.getConformanceDate();
 		if (buildDate != null) {
 			try {
 				return new DateTimeDt(buildDate);
@@ -224,21 +228,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			}
 		}
 		return DateTimeDt.withCurrentTime();
-	}
-
-	private String getBuildDateFromManifest() {
-		if (myRestfulServer != null && myRestfulServer.getServletContext() != null) {
-			InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
-			if (inputStream != null) {
-				try {
-					Manifest manifest = new Manifest(inputStream);
-					return manifest.getMainAttributes().getValue("Build-Time");
-				} catch (IOException e) {
-					// fall through
-				}
-			}
-		}
-		return null;
 	}
 
 	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
@@ -347,8 +336,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// }
 				param.setDocumentation(nextParamDescription);
 				param.getTypeElement().setValue(nextParameter.getParamType().getCode());
-				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
-					RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
+				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
+					RuntimeResourceDefinition targetDef = myServerConfiguration.getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
 						if (code != null) {

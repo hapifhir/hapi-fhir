@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
@@ -11,7 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,40 +34,66 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class DaoConfig {
 
-	private boolean myAllowMultipleDelete;
+	// ***
+	// update setter javadoc if default changes
+	// ***
+	private boolean myAllowInlineMatchUrlReferences = false; 
+
+	private boolean myAllowMultipleDelete; 
+
+	// ***
+	// update setter javadoc if default changes
+	// ***
+	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
 	private int myHardSearchLimit = 1000;
 	private int myHardTagListLimit = 1000;
 	private int myIncludeLimit = 2000;
+	
+	// ***
+	// update setter javadoc if default changes
+	// ***
+	private boolean myIndexContainedResources = true;
+	
 	private List<IServerInterceptor> myInterceptors;
+
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+
+	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
-
+	/**
+	 * Search results are stored in the database so that they can be paged through. After this
+	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * 
+	 * @since 1.5
+	 */
+	public long getExpireSearchResultsAfterMillis() {
+		return myExpireSearchResultsAfterMillis;
+	}
 	/**
 	 * See {@link #setIncludeLimit(int)}
 	 */
 	public int getHardSearchLimit() {
 		return myHardSearchLimit;
 	}
-
 	public int getHardTagListLimit() {
 		return myHardTagListLimit;
 	}
-
 	public int getIncludeLimit() {
 		return myIncludeLimit;
 	}
-
 	/**
 	 * Returns the interceptors which will be notified of operations.
 	 * 
 	 * @see #setInterceptors(List)
 	 */
 	public List<IServerInterceptor> getInterceptors() {
+		if (myInterceptors == null) {
+			return Collections.emptyList();
+		}
 		return myInterceptors;
 	}
-
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
@@ -79,8 +106,27 @@ public class DaoConfig {
 		return mySubscriptionPurgeInactiveAfterMillis;
 	}
 
+	/**
+	 * @see #setAllowInlineMatchUrlReferences(boolean)
+	 */
+	public boolean isAllowInlineMatchUrlReferences() {
+		return myAllowInlineMatchUrlReferences;
+	}
+
 	public boolean isAllowMultipleDelete() {
 		return myAllowMultipleDelete;
+	}
+
+	/**
+	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
+	 * <code>true</code>) 
+	 */
+	public boolean isIndexContainedResources() {
+		return myIndexContainedResources;
+	}
+
+	public boolean isSchedulingDisabled() {
+		return mySchedulingDisabled;
 	}
 
 	/**
@@ -90,8 +136,32 @@ public class DaoConfig {
 		return mySubscriptionEnabled;
 	}
 
+	/**
+	 * Should references containing match URLs be resolved and replaced in create and update operations. For
+	 * example, if this property is set to true and a resource is created containing a reference
+	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
+	 * to the usual match URL rules.
+	 * <p>
+	 * Default is false for now, as this is an experimental feature.
+	 * </p>
+	 * @since 1.5
+	 */
+	public void setAllowInlineMatchUrlReferences(boolean theAllowInlineMatchUrlReferences) {
+		myAllowInlineMatchUrlReferences = theAllowInlineMatchUrlReferences;
+	}
+
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
+	}
+
+	/**
+	 * Search results are stored in the database so that they can be paged through. After this
+	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * 
+	 * @since 1.5
+	 */
+	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
+		myExpireSearchResultsAfterMillis = theExpireSearchResultsAfterMillis;
 	}
 
 	public void setHardSearchLimit(int theHardSearchLimit) {
@@ -109,6 +179,14 @@ public class DaoConfig {
 	 */
 	public void setIncludeLimit(int theIncludeLimit) {
 		myIncludeLimit = theIncludeLimit;
+	}
+
+	/**
+	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
+	 * <code>true</code>) 
+	 */
+	public void setIndexContainedResources(boolean theIndexContainedResources) {
+		myIndexContainedResources = theIndexContainedResources;
 	}
 
 	/**
@@ -142,6 +220,10 @@ public class DaoConfig {
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+
+	public void setSchedulingDisabled(boolean theSchedulingDisabled) {
+		mySchedulingDisabled = theSchedulingDisabled;
 	}
 
 	/**

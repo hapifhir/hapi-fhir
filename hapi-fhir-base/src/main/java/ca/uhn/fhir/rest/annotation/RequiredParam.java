@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ package ca.uhn.fhir.rest.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 //import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
@@ -97,6 +98,6 @@ public @interface RequiredParam {
 	 * If the parameter annotated with this annotation is not a {@link ReferenceParam}, this value must not be populated.
 	 * </p>
 	 */
-	Class<? extends IResource>[] targetTypes() default {};
+	Class<? extends IBaseResource>[] targetTypes() default {};
 
 }

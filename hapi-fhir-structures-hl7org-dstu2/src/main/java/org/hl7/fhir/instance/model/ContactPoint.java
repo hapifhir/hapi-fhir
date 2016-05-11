@@ -29,18 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
- * Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
+ * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
  */
 @DatatypeDef(name="ContactPoint")
 public class ContactPoint extends Type implements ICompositeType {
@@ -55,15 +54,15 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         FAX, 
         /**
-         * The value is an email address
+         * The value is an email address.
          */
         EMAIL, 
         /**
-         * The value is a pager number. These may be local pager numbers that are only usable on a particular pager system
+         * The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.
          */
         PAGER, 
         /**
-         * A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation
+         * A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation.
          */
         OTHER, 
         /**
@@ -109,9 +108,9 @@ public class ContactPoint extends Type implements ICompositeType {
           switch (this) {
             case PHONE: return "The value is a telephone number used for voice calls. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case FAX: return "The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
-            case EMAIL: return "The value is an email address";
-            case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system";
-            case OTHER: return "A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation";
+            case EMAIL: return "The value is an email address.";
+            case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.";
+            case OTHER: return "A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation.";
             default: return "?";
           }
         }
@@ -173,11 +172,11 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         TEMP, 
         /**
-         * This contact point is no longer in use (or was never correct, but retained for records)
+         * This contact point is no longer in use (or was never correct, but retained for records).
          */
         OLD, 
         /**
-         * A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business
+         * A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business.
          */
         MOBILE, 
         /**
@@ -224,8 +223,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case HOME: return "A communication contact point at a home; attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available.";
             case WORK: return "An office contact point. First choice for business related contacts during business hours.";
             case TEMP: return "A temporary contact point. The period can provide more detailed information.";
-            case OLD: return "This contact point is no longer in use (or was never correct, but retained for records)";
-            case MOBILE: return "A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business";
+            case OLD: return "This contact point is no longer in use (or was never correct, but retained for records).";
+            case MOBILE: return "A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business.";
             default: return "?";
           }
         }

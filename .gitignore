@@ -2,8 +2,6 @@
 /target
 target/
 .idea/
-.project
-.settings/
 .metadata/
 RemoteSystemsTempFiles/
 Servers/
@@ -14,6 +12,10 @@ nohup.out
 .DS_Store
 *.orig
 tmp.txt
+*.hprof
+tmp.txt
+ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
+ca.uhn.fhir.jpa.entity.ResourceTable/
 
 # Vagrant stuff.
 .vagrant
@@ -120,11 +122,7 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
-
-# Eclipse Core
-.project
 
 # External tool builders
 .externalToolBuilders/
@@ -136,7 +134,9 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-.classpath
+#.project
+#.settings/
+#.classpath
 
 # PDT-specific
 .buildpath

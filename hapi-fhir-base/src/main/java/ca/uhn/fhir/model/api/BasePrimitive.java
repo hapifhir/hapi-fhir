@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 	}
 
 	@Override
-	public IPrimitiveType<T> setValue(T theValue) throws DataFormatException {
+	public BasePrimitive<T> setValue(T theValue) throws DataFormatException {
 		myCoercedValue = theValue;
 		updateStringValue();
 		return this;

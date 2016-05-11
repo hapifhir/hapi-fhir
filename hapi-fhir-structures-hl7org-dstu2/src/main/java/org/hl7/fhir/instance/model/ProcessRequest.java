@@ -29,18 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
  */
@@ -49,11 +50,11 @@ public class ProcessRequest extends DomainResource {
 
     public enum ActionList {
         /**
-         * Cancel, Reverse or nullify the target resource.
+         * Cancel, reverse or nullify the target resource.
          */
         CANCEL, 
         /**
-         * Check for previously un-read/ not-retrieved resources
+         * Check for previously un-read/ not-retrieved resources.
          */
         POLL, 
         /**
@@ -101,8 +102,8 @@ public class ProcessRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case CANCEL: return "Cancel, Reverse or nullify the target resource.";
-            case POLL: return "Check for previously un-read/ not-retrieved resources";
+            case CANCEL: return "Cancel, reverse or nullify the target resource.";
+            case POLL: return "Check for previously un-read/ not-retrieved resources.";
             case REPROCESS: return "Re-process the target resource.";
             case STATUS: return "Retrieve the processing status of the target resource.";
             default: return "?";
@@ -257,17 +258,17 @@ public class ProcessRequest extends DomainResource {
   }
 
     /**
-     * The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
     @Child(name = "action", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest." )
+    @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest." )
     protected Enumeration<ActionList> action;
 
     /**
-     * The ProcessRequest Business Identifier.
+     * The ProcessRequest business identifier.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Business Identifier", formalDefinition="The ProcessRequest Business Identifier." )
+    @Description(shortDefinition="Business Identifier", formalDefinition="The ProcessRequest business identifier." )
     protected List<Identifier> identifier;
 
     /**
@@ -292,14 +293,14 @@ public class ProcessRequest extends DomainResource {
     protected DateTimeType created;
 
     /**
-     * The organization which is target  of the request.
+     * The organization which is the target of the request.
      */
     @Child(name = "target", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Target of the request", formalDefinition="The organization which is target  of the request." )
+    @Description(shortDefinition="Target of the request", formalDefinition="The organization which is the target of the request." )
     protected Reference target;
 
     /**
-     * The actual object that is the target of the reference (The organization which is target  of the request.)
+     * The actual object that is the target of the reference (The organization which is the target of the request.)
      */
     protected Organization targetTarget;
 
@@ -411,7 +412,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #action} (The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
+     * @return {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
     public Enumeration<ActionList> getActionElement() { 
       if (this.action == null)
@@ -431,7 +432,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #action} (The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
+     * @param value {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
     public ProcessRequest setActionElement(Enumeration<ActionList> value) { 
       this.action = value;
@@ -439,14 +440,14 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * @return The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
     public ActionList getAction() { 
       return this.action == null ? null : this.action.getValue();
     }
 
     /**
-     * @param value The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * @param value The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
     public ProcessRequest setAction(ActionList value) { 
         if (this.action == null)
@@ -456,7 +457,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The ProcessRequest Business Identifier.)
+     * @return {@link #identifier} (The ProcessRequest business identifier.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -474,7 +475,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The ProcessRequest Business Identifier.)
+     * @return {@link #identifier} (The ProcessRequest business identifier.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -593,7 +594,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #target} (The organization which is target  of the request.)
+     * @return {@link #target} (The organization which is the target of the request.)
      */
     public Reference getTarget() { 
       if (this.target == null)
@@ -609,7 +610,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #target} (The organization which is target  of the request.)
+     * @param value {@link #target} (The organization which is the target of the request.)
      */
     public ProcessRequest setTarget(Reference value) { 
       this.target = value;
@@ -617,7 +618,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #target} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is target  of the request.)
+     * @return {@link #target} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is the target of the request.)
      */
     public Organization getTargetTarget() { 
       if (this.targetTarget == null)
@@ -629,7 +630,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #target} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is target  of the request.)
+     * @param value {@link #target} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is the target of the request.)
      */
     public ProcessRequest setTargetTarget(Organization value) { 
       this.targetTarget = value;
@@ -1070,12 +1071,12 @@ public class ProcessRequest extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("action", "code", "The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.", 0, java.lang.Integer.MAX_VALUE, action));
-        childrenList.add(new Property("identifier", "Identifier", "The ProcessRequest Business Identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.", 0, java.lang.Integer.MAX_VALUE, action));
+        childrenList.add(new Property("identifier", "Identifier", "The ProcessRequest business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("target", "Reference(Organization)", "The organization which is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
+        childrenList.add(new Property("target", "Reference(Organization)", "The organization which is the target of the request.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the action specified in thise request.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the action speccified in thise request.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("request", "Reference(Any)", "Reference of resource which is the target or subject of this action.", 0, java.lang.Integer.MAX_VALUE, request));
@@ -1174,7 +1175,7 @@ public class ProcessRequest extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="ProcessRequest.identifier", description="The business identifier of the ProcessRequest", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="provider", path="ProcessRequest.provider", description="The provider who renerated this request", type="reference" )
+  @SearchParamDefinition(name="provider", path="ProcessRequest.provider", description="The provider who regenerated this request", type="reference" )
   public static final String SP_PROVIDER = "provider";
   @SearchParamDefinition(name="organization", path="ProcessRequest.organization", description="The organization who generated this request", type="reference" )
   public static final String SP_ORGANIZATION = "organization";

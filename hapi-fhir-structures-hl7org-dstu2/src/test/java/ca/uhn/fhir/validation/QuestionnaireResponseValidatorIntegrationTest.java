@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.hapi.validation.FhirQuestionnaireResponseValidator;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.IntegerType;

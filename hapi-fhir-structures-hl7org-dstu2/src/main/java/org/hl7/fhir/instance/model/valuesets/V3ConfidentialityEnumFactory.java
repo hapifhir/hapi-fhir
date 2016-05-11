@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -53,6 +53,32 @@ public class V3ConfidentialityEnumFactory implements EnumFactory<V3Confidentiali
       return V3Confidentiality.U;
     if ("V".equals(codeString))
       return V3Confidentiality.V;
+    if ("_ConfidentialityByAccessKind".equals(codeString))
+      return V3Confidentiality._CONFIDENTIALITYBYACCESSKIND;
+    if ("B".equals(codeString))
+      return V3Confidentiality.B;
+    if ("D".equals(codeString))
+      return V3Confidentiality.D;
+    if ("I".equals(codeString))
+      return V3Confidentiality.I;
+    if ("_ConfidentialityByInfoType".equals(codeString))
+      return V3Confidentiality._CONFIDENTIALITYBYINFOTYPE;
+    if ("ETH".equals(codeString))
+      return V3Confidentiality.ETH;
+    if ("HIV".equals(codeString))
+      return V3Confidentiality.HIV;
+    if ("PSY".equals(codeString))
+      return V3Confidentiality.PSY;
+    if ("SDV".equals(codeString))
+      return V3Confidentiality.SDV;
+    if ("_ConfidentialityModifiers".equals(codeString))
+      return V3Confidentiality._CONFIDENTIALITYMODIFIERS;
+    if ("C".equals(codeString))
+      return V3Confidentiality.C;
+    if ("S".equals(codeString))
+      return V3Confidentiality.S;
+    if ("T".equals(codeString))
+      return V3Confidentiality.T;
     throw new IllegalArgumentException("Unknown V3Confidentiality code '"+codeString+"'");
   }
 
@@ -71,6 +97,32 @@ public class V3ConfidentialityEnumFactory implements EnumFactory<V3Confidentiali
       return "U";
     if (code == V3Confidentiality.V)
       return "V";
+    if (code == V3Confidentiality._CONFIDENTIALITYBYACCESSKIND)
+      return "_ConfidentialityByAccessKind";
+    if (code == V3Confidentiality.B)
+      return "B";
+    if (code == V3Confidentiality.D)
+      return "D";
+    if (code == V3Confidentiality.I)
+      return "I";
+    if (code == V3Confidentiality._CONFIDENTIALITYBYINFOTYPE)
+      return "_ConfidentialityByInfoType";
+    if (code == V3Confidentiality.ETH)
+      return "ETH";
+    if (code == V3Confidentiality.HIV)
+      return "HIV";
+    if (code == V3Confidentiality.PSY)
+      return "PSY";
+    if (code == V3Confidentiality.SDV)
+      return "SDV";
+    if (code == V3Confidentiality._CONFIDENTIALITYMODIFIERS)
+      return "_ConfidentialityModifiers";
+    if (code == V3Confidentiality.C)
+      return "C";
+    if (code == V3Confidentiality.S)
+      return "S";
+    if (code == V3Confidentiality.T)
+      return "T";
     return "?";
   }
 

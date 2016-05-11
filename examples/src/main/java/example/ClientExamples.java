@@ -3,6 +3,7 @@ package example;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
@@ -90,6 +91,18 @@ public class ClientExamples {
       // END SNIPPET: cookie
    }
 
+   @SuppressWarnings("unused")
+   public void gzip() {
+      // START SNIPPET: gzip
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = FhirContext.forDstu2();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+
+      // Register the interceptor with your client (either style)
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(new GZipContentInterceptor());
+      // END SNIPPET: gzip
+   }
    
    @SuppressWarnings("unused")
    public void createSecurityBearer() {

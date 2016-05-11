@@ -2,6 +2,7 @@ package ca.uhn.fhir.context;
 
 import junit.framework.TestCase;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.IResource;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by Bill de Beaubien on 12/10/2014.
@@ -79,4 +81,10 @@ public class DuplicateExtensionTest extends TestCase {
 	@ProvidesResources(resources = CustomPatient.class)
 	public static class CustomPatientProvider {
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 }

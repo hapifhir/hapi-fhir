@@ -18,7 +18,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class MyPatientUse {
 
-   @ResourceDef
+   @ResourceDef()
    public static class MyPatient extends Patient {
 
       @Child(name="petName")  

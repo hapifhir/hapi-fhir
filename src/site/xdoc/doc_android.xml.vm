@@ -32,20 +32,24 @@
 			</p>
 			
 			<subsection name="Get the Android JAR">
-				<p>
-					To use the Android JAR from Maven, add the following dependency:
-				</p>
-				<source><![CDATA[<dependency>
-   <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-android</artifactId>
-   <version>${project.version}</version>
-</dependency>]]></source>
 			
 				<p>
-					Gradle users can use the following:
+					To add the HAPI library via Gradle, use the following 
+					dependency. Note the following things:
 				</p>
+				<ul>
+					<li>The classifier should be set to the version of FHIR you want to support.</li>
+					<li>
+						You need to excluded a few things in order to get this to work. This is
+						a quirk because the way HAPI is built and will hopefully be resolved in a future
+						release. 
+					</li>
+				</ul>
 				<source><![CDATA[dependencies {
-    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}'
+    compile (group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}', classifier: 'dstu2') {
+        exclude module: 'javax.servlet-api'
+        exclude module: 'hapi-fhir-base'
+    }
     }]]></source>
 			
 				<p>

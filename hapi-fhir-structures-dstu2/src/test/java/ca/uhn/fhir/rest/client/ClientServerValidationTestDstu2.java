@@ -19,6 +19,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerExcept
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ClientServerValidationTestDstu2 {
 
@@ -44,6 +46,12 @@ public class ClientServerValidationTestDstu2 {
 	private boolean myFirstResponse;
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {

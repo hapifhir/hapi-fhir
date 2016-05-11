@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,20 +36,34 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 
 public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 
-	private String myImplementationDescription;
-	private IFhirSystemDao<List<IResource>> mySystemDao;
 	private volatile Conformance myCachedValue;
+	private String myImplementationDescription;
 	private RestfulServer myRestfulServer;
+	private IFhirSystemDao<List<IResource>, ca.uhn.fhir.model.dstu2.composite.MetaDt> mySystemDao;
 
-	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao<List<IResource>> theSystemDao) {
+	/**
+	 * Constructor
+	 */
+	@CoverageIgnore
+	public JpaConformanceProviderDstu1(){
+		super();
+		super.setCache(false);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao<List<IResource>, ca.uhn.fhir.model.dstu2.composite.MetaDt> theSystemDao) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -95,8 +109,20 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 		return retVal;
 	}
 
+	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		this.myRestfulServer = theRestfulServer;
+		super.setRestfulServer(theRestfulServer);
+	}
+
+	@CoverageIgnore
+	public void setSystemDao(IFhirSystemDao<List<IResource>, MetaDt> mySystemDao) {
+		this.mySystemDao = mySystemDao;
 	}
 
 }

@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ConditionClinical {
 
         /**
-         * The subject is currently experiencing the symptoms of the condition
+         * The subject is currently experiencing the symptoms of the condition.
          */
         ACTIVE, 
         /**
-         * The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution
+         * The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution.
          */
         RELAPSE, 
         /**
-         * The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning
+         * The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning.
          */
         REMISSION, 
         /**
-         * The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning
+         * The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning.
          */
         RESOLVED, 
         /**
@@ -81,10 +81,10 @@ public enum ConditionClinical {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The subject is currently experiencing the symptoms of the condition";
-            case RELAPSE: return "The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution";
-            case REMISSION: return "The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning";
-            case RESOLVED: return "The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning";
+            case ACTIVE: return "The subject is currently experiencing the symptoms of the condition.";
+            case RELAPSE: return "The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution.";
+            case REMISSION: return "The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning.";
+            case RESOLVED: return "The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning.";
             default: return "?";
           }
         }

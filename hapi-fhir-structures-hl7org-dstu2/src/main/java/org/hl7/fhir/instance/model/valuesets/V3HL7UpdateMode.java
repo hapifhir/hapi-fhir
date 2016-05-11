@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3HL7UpdateMode {
@@ -67,6 +67,38 @@ public enum V3HL7UpdateMode {
          */
         U, 
         /**
+         * These concepts apply when the element and/or message is updating a set of items.
+         */
+        _SETUPDATEMODE, 
+        /**
+         * Add the message element to the collection of items on the receiving system that correspond to the message element.
+         */
+        ESA, 
+        /**
+         * Change the item on the receiving system that corresponds to this message element; if a matching element does not exist, add a new one created with the values in the message.
+         */
+        ESAC, 
+        /**
+         * Change the item on the receiving system that corresponds to this message element; do not process if a matching element does not exist.
+         */
+        ESC, 
+        /**
+         * Delete the item on the receiving system that corresponds to this message element.
+         */
+        ESD, 
+        /**
+         * Description: AU: If this item exists, update it with these values. If it does not exist, create it with these values. If the item is part of the collection, update each item that matches this item, and if no items match, add a new item to the collection.
+         */
+        AU, 
+        /**
+         * Ignore this role, it is not relevant to the update.
+         */
+        I, 
+        /**
+         * Verify - this message element must match a value already in the receiving systems database in order to process the message.
+         */
+        V, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -89,6 +121,22 @@ public enum V3HL7UpdateMode {
           return REF;
         if ("U".equals(codeString))
           return U;
+        if ("_SetUpdateMode".equals(codeString))
+          return _SETUPDATEMODE;
+        if ("ESA".equals(codeString))
+          return ESA;
+        if ("ESAC".equals(codeString))
+          return ESAC;
+        if ("ESC".equals(codeString))
+          return ESC;
+        if ("ESD".equals(codeString))
+          return ESD;
+        if ("AU".equals(codeString))
+          return AU;
+        if ("I".equals(codeString))
+          return I;
+        if ("V".equals(codeString))
+          return V;
         throw new Exception("Unknown V3HL7UpdateMode code '"+codeString+"'");
         }
         public String toCode() {
@@ -101,6 +149,14 @@ public enum V3HL7UpdateMode {
             case R: return "R";
             case REF: return "REF";
             case U: return "U";
+            case _SETUPDATEMODE: return "_SetUpdateMode";
+            case ESA: return "ESA";
+            case ESAC: return "ESAC";
+            case ESC: return "ESC";
+            case ESD: return "ESD";
+            case AU: return "AU";
+            case I: return "I";
+            case V: return "V";
             default: return "?";
           }
         }
@@ -117,6 +173,14 @@ public enum V3HL7UpdateMode {
             case R: return "Description:The item existed previously and has (or is to be) revised. (If an item does not already exist, this may be treated as an error condition.)";
             case REF: return "Description:This item provides enough information to allow a processing system to locate the full applicable record by identifying the object.";
             case U: return "Description:Description:</b>It is not specified whether or what kind of change has occurred to the item, or whether the item is present as a reference or identifying property.";
+            case _SETUPDATEMODE: return "These concepts apply when the element and/or message is updating a set of items.";
+            case ESA: return "Add the message element to the collection of items on the receiving system that correspond to the message element.";
+            case ESAC: return "Change the item on the receiving system that corresponds to this message element; if a matching element does not exist, add a new one created with the values in the message.";
+            case ESC: return "Change the item on the receiving system that corresponds to this message element; do not process if a matching element does not exist.";
+            case ESD: return "Delete the item on the receiving system that corresponds to this message element.";
+            case AU: return "Description: AU: If this item exists, update it with these values. If it does not exist, create it with these values. If the item is part of the collection, update each item that matches this item, and if no items match, add a new item to the collection.";
+            case I: return "Ignore this role, it is not relevant to the update.";
+            case V: return "Verify - this message element must match a value already in the receiving systems database in order to process the message.";
             default: return "?";
           }
         }
@@ -130,6 +194,14 @@ public enum V3HL7UpdateMode {
             case R: return "Replace";
             case REF: return "Reference";
             case U: return "Unknown";
+            case _SETUPDATEMODE: return "SetUpdateMode";
+            case ESA: return "Set Add";
+            case ESAC: return "Set Add or Change";
+            case ESC: return "Set Change";
+            case ESD: return "Set Delete";
+            case AU: return "Add or Update";
+            case I: return "Ignore";
+            case V: return "Verify";
             default: return "?";
           }
     }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,20 +41,22 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private int myTransactionParamIndex;
 	private ParamStyle myTransactionParamStyle;
 
-	public TransactionMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
-		super(null, theMethod, theConetxt, theProvider);
+	public TransactionMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(null, theMethod, theContext, theProvider);
 
 		myTransactionParamIndex = -1;
 		int index = 0;
@@ -119,7 +121,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 
 		/*
 		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a
@@ -174,6 +176,23 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		return retVal;
+	}
+
+	
+	@Override
+	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
+		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+		
+		/*
+		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
+		 */
+		if (myTransactionParamIndex != -1) {
+			theDetails.setResource((IBaseResource) theMethodParams[myTransactionParamIndex]);
+		} else {
+			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
+			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
+		}
+
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {

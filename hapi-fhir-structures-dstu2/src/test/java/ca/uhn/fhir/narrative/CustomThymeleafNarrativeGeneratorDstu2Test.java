@@ -3,18 +3,26 @@ package ca.uhn.fhir.narrative;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CustomThymeleafNarrativeGeneratorDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorDstu2Test.class);
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+
 	@Test
 	public void testGenerator() {
 
@@ -29,7 +37,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 		p.getName().addFamily("fam1").addGiven("given");
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(p, narrative);
+		gen.generateNarrative(ourCtx, p, narrative);
 
 		String actual = narrative.getDiv().getValueAsString();
 		ourLog.info(actual);

@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +29,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -37,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 
 public class OperationClientDstu2Test {
 
@@ -45,6 +48,12 @@ public class OperationClientDstu2Test {
 	private HttpClient ourHttpClient;
 
 	private HttpResponse ourHttpResponse;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 	@Before
 	public void before() {
@@ -86,6 +95,46 @@ public class OperationClientDstu2Test {
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newXmlParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/Patient/222/$OP_INSTANCE", value.getURI().toASCIIString());
+		assertEquals(2, request.getParameter().size());
+		assertEquals("PARAM1", request.getParameter().get(0).getName());
+		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
+		assertEquals("PARAM2", request.getParameter().get(1).getName());
+		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(1).getResource()).getActive());
+		idx++;
+	}
+
+	@Test
+	public void testOpInstanceWithBundleReturn() throws Exception {
+		Bundle retResource = new Bundle();
+		retResource.setTotal(100);
+		
+//		Parameters outParams = new Parameters();
+//		outParams.addParameter().setName("return").setResource(retResource);
+		final String retVal = ourCtx.newXmlParser().encodeResourceToString(retResource);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
+		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(retVal), Charset.forName("UTF-8"));
+			}
+		});
+
+		IOpClient client = ourCtx.newRestfulClient(IOpClient.class, "http://foo");
+
+		int idx = 0;
+
+		Bundle response = client.opInstanceWithBundleReturn(new IdDt("222"), new StringDt("PARAM1str"), new Patient().setActive(true));
+		assertEquals(100, response.getTotal().intValue());
+		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
+		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
+		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
+		ourLog.info(requestBody);
+		Parameters request = ourCtx.newXmlParser().parseResource(Parameters.class, requestBody);
+		assertEquals("http://foo/Patient/222/$OP_INSTANCE_WITH_BUNDLE_RETURN", value.getURI().toASCIIString());
 		assertEquals(2, request.getParameter().size());
 		assertEquals("PARAM1", request.getParameter().get(0).getName());
 		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
@@ -269,9 +318,19 @@ public class OperationClientDstu2Test {
 	}
 
 	public interface IOpClient extends IBasicClient {
+
 		//@formatter:off
 		@Operation(name="$OP_INSTANCE", type=Patient.class)
 		public Parameters opInstance(
+				@IdParam IdDt theId,
+				@OperationParam(name="PARAM1") StringDt theParam1,
+				@OperationParam(name="PARAM2") Patient theParam2
+				);
+		//@formatter:on
+
+		//@formatter:off
+		@Operation(name="$OP_INSTANCE_WITH_BUNDLE_RETURN", type=Patient.class)
+		public Bundle opInstanceWithBundleReturn(
 				@IdParam IdDt theId,
 				@OperationParam(name="PARAM1") StringDt theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2

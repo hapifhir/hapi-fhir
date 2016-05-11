@@ -29,34 +29,36 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
- * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient.  E.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
+ * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
  */
 @ResourceDef(name="DetectedIssue", profile="http://hl7.org/fhir/Profile/DetectedIssue")
 public class DetectedIssue extends DomainResource {
 
     public enum DetectedIssueSeverity {
         /**
-         * Indicates the issue may be life-threatening or has the potential to cause permanent injury
+         * Indicates the issue may be life-threatening or has the potential to cause permanent injury.
          */
         HIGH, 
         /**
-         * Indicates the issue may result in noticable adverse adverse consequences but is unlikely to be life-threatening or cause permanent injury
+         * Indicates the issue may result in noticeable adverse consequences but is unlikely to be life-threatening or cause permanent injury.
          */
         MODERATE, 
         /**
-         * Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subjec
+         * Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subject.
          */
         LOW, 
         /**
@@ -92,9 +94,9 @@ public class DetectedIssue extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case HIGH: return "Indicates the issue may be life-threatening or has the potential to cause permanent injury";
-            case MODERATE: return "Indicates the issue may result in noticable adverse adverse consequences but is unlikely to be life-threatening or cause permanent injury";
-            case LOW: return "Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subjec";
+            case HIGH: return "Indicates the issue may be life-threatening or has the potential to cause permanent injury.";
+            case MODERATE: return "Indicates the issue may result in noticeable adverse consequences but is unlikely to be life-threatening or cause permanent injury.";
+            case LOW: return "Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subject.";
             default: return "?";
           }
         }
@@ -354,7 +356,7 @@ public class DetectedIssue extends DomainResource {
      * Identifies the general type of issue identified.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="E.g. Drug-drug, duplicate therapy, etc.", formalDefinition="Identifies the general type of issue identified." )
+    @Description(shortDefinition="Issue Category, e.g. drug-drug, duplicate therapy, etc.", formalDefinition="Identifies the general type of issue identified." )
     protected CodeableConcept category;
 
     /**
@@ -403,10 +405,10 @@ public class DetectedIssue extends DomainResource {
     protected Resource authorTarget;
 
     /**
-     * Business identifier associated with the detected issuerecord.
+     * Business identifier associated with the detected issue record.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Unique id for the detected issue", formalDefinition="Business identifier associated with the detected issuerecord." )
+    @Description(shortDefinition="Unique id for the detected issue", formalDefinition="Business identifier associated with the detected issue record." )
     protected Identifier identifier;
 
     /**
@@ -736,7 +738,7 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Business identifier associated with the detected issuerecord.)
+     * @return {@link #identifier} (Business identifier associated with the detected issue record.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -752,7 +754,7 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @param value {@link #identifier} (Business identifier associated with the detected issuerecord.)
+     * @param value {@link #identifier} (Business identifier associated with the detected issue record.)
      */
     public DetectedIssue setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -857,7 +859,7 @@ public class DetectedIssue extends DomainResource {
         childrenList.add(new Property("detail", "string", "A textual explanation of the detected issue.", 0, java.lang.Integer.MAX_VALUE, detail));
         childrenList.add(new Property("date", "dateTime", "The date or date-time when the detected issue was initially identified.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("author", "Reference(Practitioner|Device)", "Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issuerecord.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, java.lang.Integer.MAX_VALUE, reference));
         childrenList.add(new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation));
       }
@@ -937,7 +939,7 @@ public class DetectedIssue extends DomainResource {
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="implicated", path="DetectedIssue.implicated", description="Problem resource", type="reference" )
   public static final String SP_IMPLICATED = "implicated";
-  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="E.g. Drug-drug, duplicate therapy, etc.", type="token" )
+  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
 
 }

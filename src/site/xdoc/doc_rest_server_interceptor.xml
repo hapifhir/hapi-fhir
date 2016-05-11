@@ -251,6 +251,45 @@
 				
 			</subsection>
 
+			<subsection name="Request/Response Validation">
+			
+				<p>
+					The 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/RequestValidatingInterceptor.html">RequestValidatingInterceptor</a>
+					and
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/ResponseValidatingInterceptor.html">ResponseValidatingInterceptor</a>
+					can be used to perform validation of resources on their way into and out of the server respectively.
+				</p>
+				<p>
+					The RequestValidatingInterceptor looks at resources coming into the server (e.g. for create, 
+					update, $operations, transactions, etc.) and validates them. The ResponseValidatingInterceptor
+					looks at resources being returned by the server (e.g. for read, search, $operations, etc.) and
+					validates them.
+				</p>
+				<p>
+					These interceptors can be configured to add headers to the response, fail the response 
+					(returning an HTTP 422 and throwing an exception in the process), or to add to the
+					OperationOutcome returned by the server.
+				</p>
+				<p>
+					See the <a href="./doc_validation.html">Validation Page</a> for information on
+					available 
+					<a href="./apidocs/ca/uhn/fhir/validation/IValidatorModule.html">IValidatorModule</a> 
+					validation modules. Any of the <b>Resource Validators</b>
+					listed on that page can be enabled in these interceptors (note that the <b>Parser Validators</b>
+					can not).					
+				</p>
+				<p>
+					The following example shows how to register this interceptor within
+					a FHIR RESTful server.
+				</p>					
+				<macro name="snippet">
+					<param name="id" value="validatingInterceptor" />
+					<param name="file" value="examples/src/main/java/example/ServletExamples.java" />
+				</macro>
+				
+			</subsection>
+
 		</section>
 				
 		<section name="Creating Interceptors">
@@ -274,6 +313,33 @@
 				<param name="file" value="examples/src/main/java/example/RequestExceptionInterceptor.java" />
 			</macro>
 			
+		</section>
+
+		<section name="JPA Server Interceptors">
+			
+			<p>
+				The HAPI <a href="./doc_jpa.html">JPA Server</a> is an added layer on top of the HAPI
+				REST server framework. If you are using it, you may wish to also register interceptors
+				against the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig</a>
+				bean that you create using Spring configuration. 
+			</p>
+		
+			<p>
+				By registering an interceptor against the DaoConfig, the server will invoke 
+				interceptor methods for operations such as <b>create</b>, <b>update</b>, etc even
+				when these operations are found nested within a transaction. This is useful
+				if you are using interceptors to make access control decisions because
+				it avoids clients using transactions as a means of bypassing these controls.
+			</p>
+			
+			<p>
+				You may also choose to create interceptors which implement the 
+				more specialized
+				<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>
+				interface, as this interceptor adds additional methods which are called during the JPA
+				lifecycle. 
+			</p>
+		
 		</section>
 		
 	</body>

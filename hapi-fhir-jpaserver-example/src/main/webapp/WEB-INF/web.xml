@@ -1,34 +1,34 @@
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>
+			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+		</param-value>
+	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
-			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
-			/WEB-INF/hapi-fhir-server-database-config.xml
-			/WEB-INF/hapi-fhir-server-config.xml
-			/WEB-INF/hapi-fhir-tester-application-context.xml
-			/WEB-INF/hapi-fhir-tester-config.xml
+			ca.uhn.fhir.jpa.demo.FhirServerConfig
 		</param-value>
 	</context-param>
 
-  <!-- Servlets -->
+	<!-- Servlets -->
 
 	<servlet>
 		<servlet-name>spring</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+		</init-param>
+		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>
-				/WEB-INF/hapi-fhir-tester-application-context.xml
-				/WEB-INF/hapi-fhir-tester-config.xml
-			</param-value>
+			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfig</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
@@ -56,7 +56,7 @@
 		<servlet-name>spring</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
-	
+
 
 
 	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->

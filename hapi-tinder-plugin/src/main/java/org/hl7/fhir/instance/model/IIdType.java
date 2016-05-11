@@ -22,7 +22,7 @@ package org.hl7.fhir.instance.model;
  */
 
 
-public interface IIdType {
+public interface IIdType extends IBase {
 
 	boolean isEmpty();
 

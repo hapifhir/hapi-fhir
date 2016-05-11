@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Map;
 
@@ -74,7 +73,14 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		if (myProfileOfType != null) {
 			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 			if (myProfileOf == null) {
-				throw new ConfigurationException("Unknown profileOf value: " + myProfileOfType + " in type " + getImplementingClass().getName());
+				StringBuilder b = new StringBuilder();
+				b.append("Unknown profileOf value: ");
+				b.append(myProfileOfType);
+				b.append(" in type ");
+				b.append(getImplementingClass().getName());
+				b.append(" - Valid types: ");
+				b.append(theClassToElementDefinitions.keySet());
+				throw new ConfigurationException(b.toString());
 			}
 		}
 	}

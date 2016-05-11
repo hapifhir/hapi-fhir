@@ -29,18 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.utilities.Utilities;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
  */
@@ -49,15 +52,15 @@ public class NamingSystem extends DomainResource {
 
     public enum NamingSystemType {
         /**
-         * The namingsystem is used to define concepts and symbols to represent those concepts.  E.g. UCUM, LOINC, NDC code, local lab codes, etc.
+         * The naming system is used to define concepts and symbols to represent those concepts; e.g. UCUM, LOINC, NDC code, local lab codes, etc.
          */
         CODESYSTEM, 
         /**
-         * The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.)
+         * The naming system is used to manage identifiers (e.g. license numbers, order numbers, etc.).
          */
         IDENTIFIER, 
         /**
-         * The namingsystem is used as the root for other identifiers and namingsystems
+         * The naming system is used as the root for other identifiers and naming systems.
          */
         ROOT, 
         /**
@@ -93,9 +96,9 @@ public class NamingSystem extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case CODESYSTEM: return "The namingsystem is used to define concepts and symbols to represent those concepts.  E.g. UCUM, LOINC, NDC code, local lab codes, etc.";
-            case IDENTIFIER: return "The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.)";
-            case ROOT: return "The namingsystem is used as the root for other identifiers and namingsystems";
+            case CODESYSTEM: return "The naming system is used to define concepts and symbols to represent those concepts; e.g. UCUM, LOINC, NDC code, local lab codes, etc.";
+            case IDENTIFIER: return "The naming system is used to manage identifiers (e.g. license numbers, order numbers, etc.).";
+            case ROOT: return "The naming system is used as the root for other identifiers and naming systems.";
             default: return "?";
           }
         }
@@ -135,19 +138,19 @@ public class NamingSystem extends DomainResource {
 
     public enum NamingSystemIdentifierType {
         /**
-         * An ISO object identifier.  E.g. 1.2.3.4.5
+         * An ISO object identifier; e.g. 1.2.3.4.5.
          */
         OID, 
         /**
-         * A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11
+         * A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11.
          */
         UUID, 
         /**
-         * A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org
+         * A uniform resource identifier (ideally a URL - uniform resource locator); e.g. http://unitsofmeasure.org.
          */
         URI, 
         /**
-         * Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC
+         * Some other type of unique identifier; e.g. HL7-assigned reserved string such as LN for LOINC.
          */
         OTHER, 
         /**
@@ -187,10 +190,10 @@ public class NamingSystem extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case OID: return "An ISO object identifier.  E.g. 1.2.3.4.5";
-            case UUID: return "A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11";
-            case URI: return "A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org";
-            case OTHER: return "Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC";
+            case OID: return "An ISO object identifier; e.g. 1.2.3.4.5.";
+            case UUID: return "A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11.";
+            case URI: return "A uniform resource identifier (ideally a URL - uniform resource locator); e.g. http://unitsofmeasure.org.";
+            case OTHER: return "Some other type of unique identifier; e.g. HL7-assigned reserved string such as LN for LOINC.";
             default: return "?";
           }
         }
@@ -416,10 +419,10 @@ public class NamingSystem extends DomainResource {
         protected BooleanType preferred;
 
         /**
-         * Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.
+         * Identifies the period of time over which this identifier is considered appropriate to refer to the naming system.  Outside of this window, the identifier might be non-deterministic.
          */
         @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="When is identifier valid?", formalDefinition="Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic." )
+        @Description(shortDefinition="When is identifier valid?", formalDefinition="Identifies the period of time over which this identifier is considered appropriate to refer to the naming system.  Outside of this window, the identifier might be non-deterministic." )
         protected Period period;
 
         private static final long serialVersionUID = -193711840L;
@@ -576,7 +579,7 @@ public class NamingSystem extends DomainResource {
         }
 
         /**
-         * @return {@link #period} (Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.)
+         * @return {@link #period} (Identifies the period of time over which this identifier is considered appropriate to refer to the naming system.  Outside of this window, the identifier might be non-deterministic.)
          */
         public Period getPeriod() { 
           if (this.period == null)
@@ -592,7 +595,7 @@ public class NamingSystem extends DomainResource {
         }
 
         /**
-         * @param value {@link #period} (Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.)
+         * @param value {@link #period} (Identifies the period of time over which this identifier is considered appropriate to refer to the naming system.  Outside of this window, the identifier might be non-deterministic.)
          */
         public NamingSystemUniqueIdComponent setPeriod(Period value) { 
           this.period = value;
@@ -604,7 +607,7 @@ public class NamingSystem extends DomainResource {
           childrenList.add(new Property("type", "code", "Identifies the unique identifier scheme used for this particular identifier.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("value", "string", "The string that should be sent over the wire to identify the code system or identifier system.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("preferred", "boolean", "Indicates whether this identifier is the \"preferred\" identifier of this type.", 0, java.lang.Integer.MAX_VALUE, preferred));
-          childrenList.add(new Property("period", "Period", "Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("period", "Period", "Identifies the period of time over which this identifier is considered appropriate to refer to the naming system.  Outside of this window, the identifier might be non-deterministic.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
       public NamingSystemUniqueIdComponent copy() {
@@ -654,17 +657,17 @@ public class NamingSystem extends DomainResource {
     protected StringType name;
 
     /**
-     * Indicates whether the namingsystem is "ready for use" or not.
+     * Indicates whether the naming system is "ready for use" or not.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=false)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the namingsystem is \"ready for use\" or not." )
+    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the naming system is \"ready for use\" or not." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
-     * Indicates the purpose for the namingsystem - what kinds of things does it make unique?
+     * Indicates the purpose for the naming system - what kinds of things does it make unique?
      */
     @Child(name = "kind", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?" )
+    @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the naming system - what kinds of things does it make unique?" )
     protected Enumeration<NamingSystemType> kind;
 
     /**
@@ -689,24 +692,24 @@ public class NamingSystem extends DomainResource {
     protected StringType responsible;
 
     /**
-     * The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     * The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes." )
+    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes." )
     protected DateTimeType date;
 
     /**
-     * Categorizes a namingsystem for easier search by grouping related namingsystems.
+     * Categorizes a naming system for easier search by grouping related naming systems.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc", formalDefinition="Categorizes a namingsystem for easier search by grouping related namingsystems." )
+    @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc.", formalDefinition="Categorizes a naming system for easier search by grouping related naming systems." )
     protected CodeableConcept type;
 
     /**
      * Details about what the namespace identifies including scope, granularity, version labeling, etc.
      */
     @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="What does namingsystem identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
+    @Description(shortDefinition="What does naming system identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
     protected StringType description;
 
     /**
@@ -731,14 +734,14 @@ public class NamingSystem extends DomainResource {
     protected List<NamingSystemUniqueIdComponent> uniqueId;
 
     /**
-     * For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).
+     * For naming systems that are retired, indicates the naming system that should be used in their place (if any).
      */
     @Child(name = "replacedBy", type = {NamingSystem.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use this instead", formalDefinition="For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any)." )
+    @Description(shortDefinition="Use this instead", formalDefinition="For naming systems that are retired, indicates the naming system that should be used in their place (if any)." )
     protected Reference replacedBy;
 
     /**
-     * The actual object that is the target of the reference (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
+     * The actual object that is the target of the reference (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
      */
     protected NamingSystem replacedByTarget;
 
@@ -808,7 +811,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Indicates whether the namingsystem is "ready for use" or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (Indicates whether the naming system is "ready for use" or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<ConformanceResourceStatus> getStatusElement() { 
       if (this.status == null)
@@ -828,7 +831,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Indicates whether the namingsystem is "ready for use" or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (Indicates whether the naming system is "ready for use" or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public NamingSystem setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
       this.status = value;
@@ -836,14 +839,14 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return Indicates whether the namingsystem is "ready for use" or not.
+     * @return Indicates whether the naming system is "ready for use" or not.
      */
     public ConformanceResourceStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Indicates whether the namingsystem is "ready for use" or not.
+     * @param value Indicates whether the naming system is "ready for use" or not.
      */
     public NamingSystem setStatus(ConformanceResourceStatus value) { 
         if (this.status == null)
@@ -853,7 +856,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #kind} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @return {@link #kind} (Indicates the purpose for the naming system - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public Enumeration<NamingSystemType> getKindElement() { 
       if (this.kind == null)
@@ -873,7 +876,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #kind} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @param value {@link #kind} (Indicates the purpose for the naming system - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public NamingSystem setKindElement(Enumeration<NamingSystemType> value) { 
       this.kind = value;
@@ -881,14 +884,14 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return Indicates the purpose for the namingsystem - what kinds of things does it make unique?
+     * @return Indicates the purpose for the naming system - what kinds of things does it make unique?
      */
     public NamingSystemType getKind() { 
       return this.kind == null ? null : this.kind.getValue();
     }
 
     /**
-     * @param value Indicates the purpose for the namingsystem - what kinds of things does it make unique?
+     * @param value Indicates the purpose for the naming system - what kinds of things does it make unique?
      */
     public NamingSystem setKind(NamingSystemType value) { 
         if (this.kind == null)
@@ -1036,7 +1039,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1056,7 +1059,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public NamingSystem setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1064,14 +1067,14 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     * @return The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     * @param value The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.
      */
     public NamingSystem setDate(Date value) { 
         if (this.date == null)
@@ -1081,7 +1084,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
+     * @return {@link #type} (Categorizes a naming system for easier search by grouping related naming systems.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -1097,7 +1100,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
+     * @param value {@link #type} (Categorizes a naming system for easier search by grouping related naming systems.)
      */
     public NamingSystem setType(CodeableConcept value) { 
       this.type = value;
@@ -1283,7 +1286,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #replacedBy} (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
+     * @return {@link #replacedBy} (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
      */
     public Reference getReplacedBy() { 
       if (this.replacedBy == null)
@@ -1299,7 +1302,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #replacedBy} (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
+     * @param value {@link #replacedBy} (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
      */
     public NamingSystem setReplacedBy(Reference value) { 
       this.replacedBy = value;
@@ -1307,7 +1310,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
+     * @return {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
      */
     public NamingSystem getReplacedByTarget() { 
       if (this.replacedByTarget == null)
@@ -1319,7 +1322,7 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @param value {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
+     * @param value {@link #replacedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (For naming systems that are retired, indicates the naming system that should be used in their place (if any).)
      */
     public NamingSystem setReplacedByTarget(NamingSystem value) { 
       this.replacedByTarget = value;
@@ -1329,18 +1332,18 @@ public class NamingSystem extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("name", "string", "The descriptive name of this particular identifier type or code system.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "Indicates whether the namingsystem is \"ready for use\" or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("kind", "code", "Indicates the purpose for the namingsystem - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, kind));
+        childrenList.add(new Property("status", "code", "Indicates whether the naming system is \"ready for use\" or not.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("kind", "code", "Indicates the purpose for the naming system - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, java.lang.Integer.MAX_VALUE, responsible));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("type", "CodeableConcept", "Categorizes a namingsystem for easier search by grouping related namingsystems.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("type", "CodeableConcept", "Categorizes a naming system for easier search by grouping related naming systems.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("description", "string", "Details about what the namespace identifies including scope, granularity, version labeling, etc.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, java.lang.Integer.MAX_VALUE, usage));
         childrenList.add(new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId));
-        childrenList.add(new Property("replacedBy", "Reference(NamingSystem)", "For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).", 0, java.lang.Integer.MAX_VALUE, replacedBy));
+        childrenList.add(new Property("replacedBy", "Reference(NamingSystem)", "For naming systems that are retired, indicates the naming system that should be used in their place (if any).", 0, java.lang.Integer.MAX_VALUE, replacedBy));
       }
 
       public NamingSystem copy() {
@@ -1424,7 +1427,7 @@ public class NamingSystem extends DomainResource {
   public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
   public static final String SP_KIND = "kind";
-  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc", type="token" )
+  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
   public static final String SP_IDTYPE = "id-type";

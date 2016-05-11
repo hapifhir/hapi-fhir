@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ServiceProvisionConditions {
 
         /**
-         * This service is available for no patient cost
+         * This service is available for no patient cost.
          */
         FREE, 
         /**
-         * There are discounts available on this service for qualifying patients
+         * There are discounts available on this service for qualifying patients.
          */
         DISC, 
         /**
-         * Fees apply for this service
+         * Fees apply for this service.
          */
         COST, 
         /**
@@ -74,9 +74,9 @@ public enum ServiceProvisionConditions {
         }
         public String getDefinition() {
           switch (this) {
-            case FREE: return "This service is available for no patient cost";
-            case DISC: return "There are discounts available on this service for qualifying patients";
-            case COST: return "Fees apply for this service";
+            case FREE: return "This service is available for no patient cost.";
+            case DISC: return "There are discounts available on this service for qualifying patients.";
+            case COST: return "Fees apply for this service.";
             default: return "?";
           }
         }

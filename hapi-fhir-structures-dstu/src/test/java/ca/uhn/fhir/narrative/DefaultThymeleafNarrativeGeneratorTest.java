@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +34,7 @@ import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class DefaultThymeleafNarrativeGeneratorTest {
 	private FhirContext myCtx;
@@ -62,13 +64,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(value, narrative);
+		gen.generateNarrative(myCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
-
-		String title = gen.generateTitle(value);
-		assertEquals("joe john BLOW (123456)", title);
-		ourLog.info(title);
 
 		// Removed because label is gone in DSTU2
 //		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
@@ -79,6 +77,24 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
+	public void testGeneratePatientWithoutData() throws DataFormatException {
+		Patient value = new Patient();
+
+		NarrativeDt narrative = new NarrativeDt();
+		gen.generateNarrative(myCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
+		assertThat(output, StringContains.containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">"));
+
+		// Removed because label is gone in DSTU2
+//		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
+//		title = gen.generateTitle(value);
+//		assertEquals("joe john BLOW (FOO MRN 123)", title);
+//		ourLog.info(title);
+
+	}
+
+
+	@Test
 	public void testGenerateEncounter() throws DataFormatException {
 		Encounter enc = new Encounter();
 
@@ -86,11 +102,6 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		enc.setClassElement(EncounterClassEnum.AMBULATORY);
 		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
 		enc.setType(EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
-
-		String title = gen.generateTitle(enc);
-		title = title.replaceAll("00 [A-Z]+ 2001", "00 TZ 2001"); // account for whatever time zone
-		assertEquals("1234567 / ADMS / ambulatory / Tue Jan 02 11:11:00 TZ 2001 - ?", title);
-		ourLog.info(title);
 
 	}
 
@@ -102,10 +113,6 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		enc.setName("Some Test Org");
 		enc.addAddress().addLine("123 Fake St").setCity("Toronto").setState("ON").setCountry("Canada").setZip("12345");
 
-		String title = gen.generateTitle(enc);
-		assertEquals("Some Test Org", title);
-		ourLog.info(title);
-
 	}
 
 	@Test
@@ -113,7 +120,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		Conformance value = myCtx.newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(value, narrative);
+		gen.generateNarrative(myCtx, value, narrative);
 		String output =narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -129,7 +136,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		value.addResult().setReference("Observation/3");
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value, narrative);
+		gen.generateNarrative(myCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -158,7 +165,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		// assertEquals("Operation Outcome (2 issues)", output);
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(null, oo, narrative);
+		gen.generateNarrative(myCtx, oo, narrative);
 		String nar = narrative.getDiv().getValueAsString();
 		ourLog.info(nar);
 
@@ -201,15 +208,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		}
 		
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value, narrative);
+		gen.generateNarrative(myCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
-
-		String title = gen.generateTitle(value);
-		// ourLog.info(title);
-		assertEquals("Some & Diagnostic Report - final - 3 observations", title);
 
 		// Now try it with the parser
 
@@ -231,13 +234,16 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(mp, narrative);
+		gen.generateNarrative(myCtx, mp, narrative);
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
 		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
 
-		String title = gen.generateTitle(mp);
-		assertEquals("ciprofloaxin", title);
+	}
 
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

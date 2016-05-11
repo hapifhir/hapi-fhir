@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,6 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -38,9 +39,6 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class UpdateConditionalHl7OrgDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
@@ -49,7 +47,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Server ourServer;
 	private static String ourLastId;
-	private static IdDt ourLastIdParam;
+	private static IdType ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
 	
 	
@@ -92,6 +90,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 	public void testUpdateWithoutConditionalUrl() throws Exception {
 
 		Patient patient = new Patient();
+		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
@@ -179,11 +178,11 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		}
 		
 		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;
-			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
 
 	}

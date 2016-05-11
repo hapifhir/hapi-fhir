@@ -3,11 +3,13 @@ package ca.uhn.fhir.context;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirContextDstu1Test {
 
@@ -35,12 +37,33 @@ public class FhirContextDstu1Test {
 
 	@Test
 	public void testUnknownVersion() {
+		
 		try {
-			new FhirContext(FhirVersionEnum.DEV);
+			Class.forName("org.hl7.fhir.dstu3.model.Patient");
+			
+			/*
+			 * If we found this class, DSTU3 structures are on the classpath so we're probably doing
+			 * the cobertura tests.. This one won't work since all structures are on the classpath for 
+			 * cobertura tests
+			 */
+			return;
+			
+		} catch (ClassNotFoundException e1) {
+			// good
+		}
+		
+		try {
+			new FhirContext(FhirVersionEnum.DSTU2);
 			fail();
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage(), containsString("Could not find the HAPI-FHIR structure JAR on the classpath for version DEV"));
+			assertThat(e.getMessage(), containsString("Could not find the HAPI-FHIR structure JAR on the classpath for version DSTU2"));
 		}
+	}
+
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

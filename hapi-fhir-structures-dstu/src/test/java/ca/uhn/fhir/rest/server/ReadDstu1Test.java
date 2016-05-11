@@ -31,96 +31,15 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ReadDstu1Test {
 
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu1Test.class);
-
-	@Test
-	public void testReadXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
-
-		assertEquals("1", dt.getSystem().getValueAsString());
-		assertEquals(null, dt.getValue().getValueAsString());
-
-		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-		assertNotNull(cl);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
-
-		assertThat(responseContent, stringContainsInOrder("1", "\""));
-		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
-	}
-
-	@Test
-	public void testEncodeConvertsReferencesToRelative() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String ref = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getManagingOrganization().getReference().getValue();
-		assertEquals("Organization/555", ref);
-	}
-
-	@Test
-	public void testReadJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		IdentifierDt dt = ourCtx.newJsonParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
-
-		assertEquals("1", dt.getSystem().getValueAsString());
-		assertEquals(null, dt.getValue().getValueAsString());
-
-		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-		assertNotNull(cl);
-		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
-
-		assertThat(responseContent, stringContainsInOrder("1", "\""));
-		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
-	}
-
-	@Test
-	public void testReadForProviderWithAbstractReturnType() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization/1");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Organization.class, responseContent).getIdentifierFirstRep();
-
-			assertEquals("1", dt.getSystem().getValueAsString());
-			assertEquals(null, dt.getValue().getValueAsString());
-
-			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-			assertNotNull(cl);
-			assertEquals("http://localhost:" + ourPort + "/Organization/1/_history/1", cl.getValue());
-
-		}
-
-	}
+	private static int ourPort;
+	private static Server ourServer;
 
 	@Test
 	public void testBinaryRead() throws Exception {
@@ -151,6 +70,104 @@ public class ReadDstu1Test {
 	}
 
 	@Test
+	public void testEncodeConvertsReferencesToRelative() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String ref = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getManagingOrganization().getReference().getValue();
+		assertEquals("Organization/555", ref);
+	}
+
+	@Test
+	public void testReadForProviderWithAbstractReturnType() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization/1");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Organization.class, responseContent).getIdentifierFirstRep();
+
+			assertEquals("1", dt.getSystem().getValueAsString());
+			assertEquals(null, dt.getValue().getValueAsString());
+
+			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			assertNotNull(cl);
+			assertEquals("http://localhost:" + ourPort + "/Organization/1/_history/1", cl.getValue());
+
+		}
+
+	}
+
+	@Test
+	public void testReadJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newJsonParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+
+		assertEquals("1", dt.getSystem().getValueAsString());
+		assertEquals(null, dt.getValue().getValueAsString());
+
+		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		assertNotNull(cl);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+
+		assertThat(responseContent, stringContainsInOrder("1", "\""));
+		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
+	}
+
+	@Test
+	public void testReadWithEscapedCharsInId() throws Exception {
+		String id = "ABC!@#$--DEF";
+		String idEscaped = URLEncoder.encode(id, "UTF-8");
+
+		String vid = "GHI:/:/JKL";
+		String vidEscaped = URLEncoder.encode(vid, "UTF-8");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/" + idEscaped + "/_history/" + vidEscaped);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+		assertEquals(id, dt.getSystem().getValueAsString());
+		assertEquals(vid, dt.getValue().getValueAsString());
+	}
+
+	@Test
+	public void testReadXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+
+		assertEquals("1", dt.getSystem().getValueAsString());
+		assertEquals(null, dt.getValue().getValueAsString());
+
+		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		assertNotNull(cl);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+
+		assertThat(responseContent, stringContainsInOrder("1", "\""));
+		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
+	}
+
+	@Test
 	public void testVRead() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history/2");
@@ -169,28 +186,10 @@ public class ReadDstu1Test {
 		}
 	}
 
-	@Test
-	public void testReadWithEscapedCharsInId() throws Exception {
-		String id = "ABC!@#$%DEF";
-		String idEscaped = URLEncoder.encode(id, "UTF-8");
-
-		String vid = "GHI:/:/JKL";
-		String vidEscaped = URLEncoder.encode(vid, "UTF-8");
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/" + idEscaped + "/_history/" + vidEscaped);
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
-		assertEquals(id, dt.getSystem().getValueAsString());
-		assertEquals(vid, dt.getValue().getValueAsString());
-	}
-
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
@@ -219,20 +218,20 @@ public class ReadDstu1Test {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	public static class PatientProvider implements IResourceProvider {
+	public static class BinaryProvider implements IResourceProvider {
 
 		@Read(version = true)
-		public Patient read(@IdParam IdDt theId) {
-			Patient patient = new Patient();
-			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
-			patient.setId("Patient/1/_history/1");
-			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
-			return patient;
+		public Binary findPatient(@IdParam IdDt theId) {
+			Binary bin = new Binary();
+			bin.setContentType("application/x-foo");
+			bin.setContent(new byte[] { 1, 2, 3, 4 });
+			bin.setId("Binary/1/_history/1");
+			return bin;
 		}
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
+			return Binary.class;
 		}
 
 	}
@@ -257,23 +256,24 @@ public class ReadDstu1Test {
 
 	}
 
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	public static class BinaryProvider implements IResourceProvider {
-
-		@Read(version = true)
-		public Binary findPatient(@IdParam IdDt theId) {
-			Binary bin = new Binary();
-			bin.setContentType("application/x-foo");
-			bin.setContent(new byte[] { 1, 2, 3, 4 });
-			bin.setId("Binary/1/_history/1");
-			return bin;
-		}
+	public static class PatientProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
-			return Binary.class;
+			return Patient.class;
+		}
+
+		@Read(version = true)
+		public Patient read(@IdParam IdDt theId) {
+			Patient patient = new Patient();
+			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
+			patient.setId("Patient/1/_history/1");
+			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
+			return patient;
 		}
 
 	}

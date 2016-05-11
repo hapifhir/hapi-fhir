@@ -1,6 +1,7 @@
 package ca.uhn.fhirtest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -8,19 +9,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -30,14 +33,20 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhirtest.config.TestDstu2Config;
 
 public class TestRestfulServer extends RestfulServer {
+
+	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
+	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
+	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
 
 	private static final long serialVersionUID = 1L;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
-	private ApplicationContext myAppCtx;
+	private AnnotationConfigWebApplicationContext myAppCtx;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -46,7 +55,6 @@ public class TestRestfulServer extends RestfulServer {
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		WebApplicationContext parentAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myAppCtx = (parentAppCtx);
 
 		// These two parmeters are also declared in web.xml
 		String implDesc = getInitParameter("ImplementationDescription");
@@ -61,12 +69,18 @@ public class TestRestfulServer extends RestfulServer {
 		List<IResourceProvider> beans;
 		JpaSystemProviderDstu1 systemProviderDstu1 = null;
 		JpaSystemProviderDstu2 systemProviderDstu2 = null;
+		JpaSystemProviderDstu3 systemProviderDstu3 = null;
 		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU1": {
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
+			myAppCtx.setParent(parentAppCtx);
+			myAppCtx.register(ca.uhn.fhirtest.config.TestDstu1Config.class);
+			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
@@ -75,10 +89,15 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu1";
+			baseUrlProperty = FHIR_BASEURL_DSTU1;
 			break;
 		}
 		case "DSTU2": {
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
+			myAppCtx.setParent(parentAppCtx);
+			myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
 			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
@@ -87,8 +106,24 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu2";
-			registerInterceptor(myAppCtx.getBean("mySubscriptionSecurityInterceptor", SubscriptionsRequireManualActivationInterceptor.class));
+			baseUrlProperty = FHIR_BASEURL_DSTU2;
+			break;
+		}
+		case "DSTU3": {
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
+			myAppCtx.setParent(parentAppCtx);
+			myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+			myAppCtx.refresh();
+			setFhirContext(FhirContext.forDstu3());
+			beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
+			systemProviderDstu3 = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+			systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+			etagSupport = ETagSupportEnum.ENABLED;
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+			confProvider.setImplementationDescription(implDesc);
+			setServerConformanceProvider(confProvider);
+			baseUrlProperty = FHIR_BASEURL_DSTU3;
 			break;
 		}
 		default:
@@ -117,10 +152,15 @@ public class TestRestfulServer extends RestfulServer {
 		setResourceProviders(beans);
 
 		List<Object> provList = new ArrayList<Object>();
-		if (systemProviderDstu1 != null)
+		if (systemProviderDstu1 != null) {
 			provList.add(systemProviderDstu1);
-		if (systemProviderDstu2 != null)
+		}
+		if (systemProviderDstu2 != null) {
 			provList.add(systemProviderDstu2);
+		}
+		if (systemProviderDstu3 != null) {
+			provList.add(systemProviderDstu3);
+		}
 		setPlainProviders(provList);
 
 		/*
@@ -157,13 +197,20 @@ public class TestRestfulServer extends RestfulServer {
 		setPagingProvider(new FifoMemoryPagingProvider(10));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in hapi-fhir-server-config.xml
+		 * Load interceptors for the server from Spring
 		 */
-		List<IServerInterceptor> interceptorBeans = myAppCtx.getBean("myServerInterceptors", List.class);
+		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
 		for (IServerInterceptor interceptor : interceptorBeans) {
 			this.registerInterceptor(interceptor);
 		}
 
+	}
+
+	@Override
+	public void destroy() {
+		super.destroy();
+		ourLog.info("Server is shutting down");
+		myAppCtx.destroy();
 	}
 
 	/**

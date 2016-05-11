@@ -6,7 +6,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2016 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	void pollForNewUndeliveredResources();
+	int pollForNewUndeliveredResources();
 
 	List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid);
 
 	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId);
 
 	void purgeInactiveSubscriptions();
+
+	void pollForNewUndeliveredResourcesScheduler();
 
 }
