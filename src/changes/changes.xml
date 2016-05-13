@@ -163,6 +163,13 @@
 				This option disables some features (e.g. fulltext search) in order to allow the
 				server to start in memory-constrained environments (e.g Raspberry Pi)
 			</action>
+			<action type="add">
+				When updating a resource via an update operation on the server, if the ID of the
+				resource is not present in the resource body but is present on the URL, this will
+				now be treated as a warning instead of as a failure in order to be a bit more
+				tolerant of errors. If the ID is present in the body but does not agree with the 
+				ID in the URL this remains an error.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

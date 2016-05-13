@@ -92,12 +92,6 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		// TODO Auto-generated method stub
-		return super.incomingServerRequestMatchesMethod(theRequest);
-	}
-
-	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
 		if (idDt == null) {
@@ -142,15 +136,16 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isBlank(theMatchUrl)) {
 			if (isBlank(theResourceId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				throw new InvalidRequestException(msg);
+//				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
+				ourLog.warn("No resource ID found in resource body for update");
+			} else {
+				if (!theResourceId.equals(theUrlId)) {
+					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+					throw new InvalidRequestException(msg);
+				}
 			}
 			if (isBlank(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
-				throw new InvalidRequestException(msg);
-			}
-			if (!theResourceId.equals(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
 				throw new InvalidRequestException(msg);
 			}
 		}
