@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -42,7 +44,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * {@link #setUpperBound(DateParam)}
 	 */
 	public DateRangeParam() {
-		// nothing
+		super();
 	}
 
 	/**
@@ -149,13 +151,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
-		if (theParsed.getPrefix() == null) {
+		if (theParsed.getPrefix() == null || theParsed.getPrefix() == ParamPrefixEnum.EQUAL) {
 			if (myLowerBound != null || myUpperBound != null) {
 				throw new InvalidRequestException("Can not have multiple date range parameters for the same param without a qualifier");
 			}
 
-			myLowerBound = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theParsed.getValueAsString());
-			myUpperBound = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theParsed.getValueAsString());
+			myLowerBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
+			myUpperBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
 
 		} else {
 
@@ -195,6 +197,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			case GREATERTHAN:
 				retVal = myLowerBound.getPrecision().add(retVal, 1);
 				break;
+			case EQUAL:
 			case GREATERTHAN_OR_EQUALS:
 				break;
 			case LESSTHAN:
@@ -219,6 +222,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			case LESSTHAN:
 				retVal = new Date(retVal.getTime() - 1L);
 				break;
+			case EQUAL:
 			case LESSTHAN_OR_EQUALS:
 				retVal = myUpperBound.getPrecision().add(retVal, 1);
 				retVal = new Date(retVal.getTime() - 1L);
@@ -329,6 +333,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
 		myLowerBound = theLowerBound != null ? new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
 		myUpperBound = theUpperBound != null ? new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		if (isNotBlank(theLowerBound) && isNotBlank(theUpperBound) && theLowerBound.equals(theUpperBound)) {
+			myLowerBound.setPrefix(ParamPrefixEnum.EQUAL);
+			myUpperBound.setPrefix(ParamPrefixEnum.EQUAL);
+		}
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 

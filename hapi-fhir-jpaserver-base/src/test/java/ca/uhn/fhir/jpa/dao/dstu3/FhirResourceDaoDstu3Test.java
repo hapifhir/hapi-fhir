@@ -327,6 +327,35 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testChoiceParamDateEquals() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().setStartElement(new DateTimeType("2016-05-10")).setEndElement(new DateTimeType("2016-05-20"));
+		String id = myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless().getValue();
+		
+		List<String> ids;
+		
+		/*
+		 * This should not match, per the definition of eq
+		 */
+		
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("2016-05-15")));
+		assertThat(ids, empty());
+
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("eq2016-05-15")));
+		assertThat(ids, empty());
+		
+		// Should match
+		
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("eq2016")));
+		assertThat(ids, contains(id));
+
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("2016")));
+		assertThat(ids, contains(id));
+
+	}
+
+	
+	@Test
 	public void testChoiceParamDateRange() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateRange01");

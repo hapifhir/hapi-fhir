@@ -170,6 +170,12 @@
 				tolerant of errors. If the ID is present in the body but does not agree with the 
 				ID in the URL this remains an error.
 			</action>
+			<action type="fix">
+				Server / JPA server date range search params (e.g. Encounter:date) now treat
+				a single date with no comparator (or the eq comparator) as requiring that the
+				value be completely contained by the range specified. Thanks to Chris Moesel
+				for the suggestion.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
