@@ -295,7 +295,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_DATE, new DateParam("2001-01-02"));
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_DATE, new DateParam("2001"));
 			assertEquals(1, found.size());
 			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}

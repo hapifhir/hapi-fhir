@@ -490,17 +490,17 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	public void testSearchCompositeParamDate() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11")));
+		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11")).setEnd(new DateTimeDt("2001-01-01T12:11:11")));
 		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T12:12:12")));
+		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-02T12:12:12")).setEnd(new DateTimeDt("2001-01-02T12:11:11")));
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
-			DateParam v1 = new DateParam("2001-01-01T11:11:11");
+			DateParam v1 = new DateParam("2001-01-01");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(Observation.SP_CODE_VALUE_DATE, val);
 			assertEquals(1, result.size());

@@ -74,6 +74,8 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -610,17 +612,17 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchCompositeParamDate() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o1.setValue(new Period().setStartElement(new DateTimeType("2001-01-01T11:11:11")));
+		o1.setValue(new Period().setStartElement(new DateTimeType("2001-01-01T11:11:11")).setEndElement(new DateTimeType("2001-01-01T12:11:11")));
 		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o2.setValue(new Period().setStartElement(new DateTimeType("2001-01-01T12:12:12")));
+		o1.setValue(new Period().setStartElement(new DateTimeType("2001-01-02T11:11:11")).setEndElement(new DateTimeType("2001-01-02T12:11:11")));
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
-			DateParam v1 = new DateParam("2001-01-01T11:11:11");
+			DateParam v1 = new DateParam("2001-01-01");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(Observation.SP_CODE_VALUE_DATE, val);
 			assertEquals(1, result.size());

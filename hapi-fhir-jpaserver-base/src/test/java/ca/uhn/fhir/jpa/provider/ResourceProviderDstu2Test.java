@@ -2012,7 +2012,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateInvalidReference() throws IOException, Exception {
+	public void testUpdateInvalidUrl() throws IOException, Exception {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
@@ -2027,7 +2027,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, resource body must contain an ID element for update (PUT) operation"));
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
 		} finally {
 			response.close();
 		}
