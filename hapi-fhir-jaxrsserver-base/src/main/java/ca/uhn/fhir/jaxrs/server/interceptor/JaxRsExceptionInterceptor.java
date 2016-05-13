@@ -74,7 +74,16 @@ public class JaxRsExceptionInterceptor {
         }
     }
 
-	private JaxRsResponseException convertException(final AbstractJaxRsProvider theServer, final Exception theException) {
+    /**
+     * This method convert an exception to a JaxRsResponseException
+     * @param theServer the provider
+     * @param theException the exception to convert
+     * @return JaxRsResponseException
+     */
+	public JaxRsResponseException convertException(final AbstractJaxRsProvider theServer, final Throwable theException) {
+        if (theServer.withStackTrace()) {
+            exceptionHandler.setReturnStackTracesForExceptionTypes(Throwable.class);
+        }
 		JaxRsRequest requestDetails = theServer.getRequest(null, null).build();
 		BaseServerResponseException convertedException = preprocessException(theException, requestDetails);
 		return new JaxRsResponseException(convertedException);
@@ -92,7 +101,7 @@ public class JaxRsExceptionInterceptor {
 		return handleExceptionWithoutServletError(theRequest, theException);
 	}	
 
-	private BaseServerResponseException preprocessException(final Exception theException, JaxRsRequest requestDetails) {
+	private BaseServerResponseException preprocessException(final Throwable theException, JaxRsRequest requestDetails) {
 		try {
 			return exceptionHandler.preProcessOutgoingException(requestDetails, theException, null);
 		} catch(ServletException e) {

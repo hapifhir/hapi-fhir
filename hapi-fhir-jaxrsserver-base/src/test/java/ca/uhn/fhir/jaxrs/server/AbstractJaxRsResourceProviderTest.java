@@ -80,6 +80,7 @@ public class AbstractJaxRsResourceProviderTest {
 	private static Server jettyServer;
 	private TestJaxRsMockPatientRestProvider mock;
 	private ArgumentCaptor<IdDt> idCaptor;
+    private ArgumentCaptor<String> conditionalCaptor;	
 	private ArgumentCaptor<Patient> patientCaptor;
 
 	private void compareResultId(int id, IResource resource) {
@@ -133,6 +134,7 @@ public class AbstractJaxRsResourceProviderTest {
 		this.mock = TestJaxRsMockPatientRestProvider.mock;
 		idCaptor = ArgumentCaptor.forClass(IdDt.class);
 		patientCaptor = ArgumentCaptor.forClass(Patient.class);
+		conditionalCaptor = ArgumentCaptor.forClass(String.class);
 		reset(mock);
 	}
 
@@ -180,11 +182,18 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testDeletePatient() {
-		when(mock.delete(idCaptor.capture())).thenReturn(new MethodOutcome());
+		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		final BaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 
+    @Test
+    public void testConditionalDelete() throws Exception {
+        when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
+        client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+        assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+    }
+    
 	/** Extended Operations */
 	@Test
 	public void testExtendedOperations() {
@@ -344,17 +353,28 @@ public class AbstractJaxRsResourceProviderTest {
 	
 	@Test
 	public void testUpdateById() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture())).thenReturn(new MethodOutcome());
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update("1", createPatient(1));
 		assertEquals("1", idCaptor.getValue().getIdPart());
 		compareResultId(1, patientCaptor.getValue());
 	}
-	
+
+
+    @Test
+    public void testConditionalUpdate() throws Exception {
+        when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
+        client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+
+        assertEquals("1", patientCaptor.getValue().getId().getIdPart());
+        assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+        compareResultId(1, patientCaptor.getValue());
+    }
+    
 	@SuppressWarnings("unchecked")
 	@Ignore
 	@Test
 	public void testResourceNotFound() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture())).thenThrow(ResourceNotFoundException.class);
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
 		try {
 			client.update("1", createPatient(2));
 			fail();

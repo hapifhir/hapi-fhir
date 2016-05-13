@@ -64,6 +64,7 @@ public class JaxRsRequest extends RequestDetails {
 		private String myVersion;
 		private String myCompartment;
 		private String myRequestUrl;
+        private final String myResourceName;		
 
 		/**
 		 * Utility Constructor
@@ -73,11 +74,12 @@ public class JaxRsRequest extends RequestDetails {
 		 * @param theRequestUrl 
 		 */
 		public Builder(AbstractJaxRsProvider theServer, RequestTypeEnum theRequestType,
-				RestOperationTypeEnum theRestOperation, String theRequestUrl) {
+				RestOperationTypeEnum theRestOperation, String theRequestUrl, String theResourceName) {
 			this.myServer = theServer;
 			this.myRequestType = theRequestType;
 			this.myRestOperation = theRestOperation;
 			this.myRequestUrl = theRequestUrl;
+			this.myResourceName = theResourceName;
 		}
 
 		/**
@@ -125,44 +127,45 @@ public class JaxRsRequest extends RequestDetails {
 		 * @return the jax-rs request
 		 */
 		public JaxRsRequest build() {
-			JaxRsRequest result = new JaxRsRequest(myServer, myResource, myRequestType, myRestOperation);
-			if ((StringUtils.isNotBlank(myVersion) || StringUtils.isNotBlank(myCompartment))
-					&& StringUtils.isBlank(myId)) {
-				throw new InvalidRequestException("Don't know how to handle request path: "
-						+ myServer.getUriInfo().getRequestUri().toASCIIString());
-			}
-			
-			FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
+         JaxRsRequest result = new JaxRsRequest(myServer, myResource, myRequestType, myRestOperation);
+         if ((StringUtils.isNotBlank(myVersion) || StringUtils.isNotBlank(myCompartment))
+                 && StringUtils.isBlank(myId)) {
+             throw new InvalidRequestException("Don't know how to handle request path: "
+                     + myServer.getUriInfo().getRequestUri().toASCIIString());
+         }
+         
+         FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
 
-			if (StringUtils.isNotBlank(myVersion)) {
-			    if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
-    				result.setId(
-    						new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-			    } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-			        result.setId(
-			                new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-			    }
-			} else if (StringUtils.isNotBlank(myId)) {
-                if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
-                    result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-                } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                    result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-                }
-			}
+         if (StringUtils.isNotBlank(myVersion)) {
+             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+                 result.setId(
+                         new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+                 result.setId(
+                         new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+             }
+         } else if (StringUtils.isNotBlank(myId)) {
+             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+                 result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+                 result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+             }
+         }
 
-			if (myRestOperation == RestOperationTypeEnum.UPDATE) {
-				String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
-				if (contentLocation != null) {
-	                if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
-	                    result.setId(new IdType(contentLocation));
-	                } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-	                    result.setId(new IdDt(contentLocation));
-	                }
-				}
-			}
-			
-			result.setCompartmentName(myCompartment);			
-			result.setCompleteUrl(myRequestUrl);
+         if (myRestOperation == RestOperationTypeEnum.UPDATE) {
+             String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
+             if (contentLocation != null) {
+                 if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+                     result.setId(new IdType(contentLocation));
+                 } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
+                     result.setId(new IdDt(contentLocation));
+                 }
+             }
+         }
+         
+         result.setCompartmentName(myCompartment);           
+         result.setCompleteUrl(myRequestUrl);
+			result.setResourceName(myResourceName);
 			
 			return result;
 		}

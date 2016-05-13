@@ -22,6 +22,8 @@ package ca.uhn.fhir.jaxrs.server;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
@@ -62,6 +64,7 @@ import ca.uhn.fhir.rest.server.IRestfulServer;
 		Constants.CT_FHIR_XML })
 @Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> extends AbstractJaxRsProvider
+
 		implements IRestfulServer<JaxRsRequest>, IResourceProvider {
 
 	/** the method bindings for this class */
@@ -75,16 +78,17 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	    super();
 		theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
 	}
-
-	/**
-	 * Provides the ability to specify the {@link FhirContext}.
-	 * @param ctx the {@link FhirContext} instance.
-	 */
-	protected AbstractJaxRsResourceProvider(FhirContext ctx) {
-	    super(ctx);
-	    theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
-	}
 	
+	/**
+     * Provides the ability to specify the {@link FhirContext}.
+     * @param ctx the {@link FhirContext} instance.
+     */
+    protected AbstractJaxRsResourceProvider(FhirContext ctx) {
+        super(ctx);
+        theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
+    }
+    
+
 	/**
 	 * This constructor takes in an explicit interface class. This subclass
 	 * should be identical to the class being constructed but is given
@@ -98,20 +102,20 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 		theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
 	}
 
-	/**
-	 * This constructor takes in an explicit interface class. This subclass
-	 * should be identical to the class being constructed but is given
-	 * explicitly in order to avoid issues with proxy classes in a jee
-	 * environment.
-	 * 
-	 * @param ctx the {@link FhirContext} instance.
-	 * @param theProviderClass the interface of the class
-	 */
-	protected AbstractJaxRsResourceProvider(FhirContext ctx, Class<? extends AbstractJaxRsProvider> theProviderClass) {
-	    super(ctx);
-	    theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
-	}
-	
+    /**
+     * This constructor takes in an explicit interface class. This subclass
+     * should be identical to the class being constructed but is given
+     * explicitly in order to avoid issues with proxy classes in a jee
+     * environment.
+     * 
+     * @param ctx the {@link FhirContext} instance.
+     * @param theProviderClass the interface of the class
+     */
+    protected AbstractJaxRsResourceProvider(FhirContext ctx, Class<? extends AbstractJaxRsProvider> theProviderClass) {
+        super(ctx);
+        theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
+    }
+
 	/**
 	 * The base for request for a resource provider has the following form:</br>
 	 * {@link AbstractJaxRsResourceProvider#getBaseForServer()
@@ -138,7 +142,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	 */
 	@POST
 	public Response create(final String resource) throws IOException {
-		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.CREATE).resource(resource));
+		return execute(getResourceRequest(RequestTypeEnum.POST, RestOperationTypeEnum.CREATE).resource(resource));
 	}
 
 	/**
@@ -150,7 +154,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@POST
 	@Path("/_search")
 	public Response searchWithPost() throws IOException {
-		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE));
+		return execute(getResourceRequest(RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE));
 	}
 
 	/**
@@ -161,9 +165,20 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	 */
 	@GET
 	public Response search() throws IOException {
-		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
+		return execute(getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
 	}
 
+    /**
+     * Update an existing resource based on the given condition
+     * @param resource the body contents for the put method
+     * @return the response
+     * @see <a href="https://www.hl7.org/fhir/http.html#update">https://www.hl7.org/fhir/http.html#update</a>
+     */
+    @PUT
+    public Response conditionalUpdate(final String resource) throws IOException {
+        return execute(getResourceRequest(RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE).resource(resource));
+    }
+    
 	/**
 	 * Update an existing resource by its id (or create it if it is new)
 	 * 
@@ -175,9 +190,20 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@PUT
 	@Path("/{id}")
 	public Response update(@PathParam("id") final String id, final String resource) throws IOException {
-		return execute(getRequest(RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE).id(id).resource(resource));
+		return execute(getResourceRequest(RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE).id(id).resource(resource));
 	}
 
+    /**
+     * Delete a resource based on the given condition
+     *
+     * @return the response
+     * @see <a href="https://www.hl7.org/fhir/http.html#delete">https://www.hl7.org/fhir/http.html#delete</a>
+     */
+    @DELETE
+    public Response delete() throws IOException {
+        return execute(getResourceRequest(RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE));
+    }
+    
 	/**
 	 * Delete a resource
 	 * 
@@ -188,7 +214,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@DELETE
 	@Path("/{id}")
 	public Response delete(@PathParam("id") final String id) throws IOException {
-		return execute(getRequest(RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE).id(id));
+		return execute(getResourceRequest(RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE).id(id));
 	}
 
 	/**
@@ -201,7 +227,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@GET
 	@Path("/{id}")
 	public Response find(@PathParam("id") final String id) throws IOException {
-		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.READ).id(id));
+		return execute(getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.READ).id(id));
 	}
 
 	/**
@@ -217,7 +243,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	 */
 	protected Response customOperation(final String resource, RequestTypeEnum requestType, String id,
 			String operationName, RestOperationTypeEnum operationType) throws IOException {
-		Builder request = getRequest(requestType, operationType).resource(resource).id(id);
+		Builder request = getResourceRequest(requestType, operationType).resource(resource).id(id);
 		return execute(request, operationName);
 	}
 
@@ -233,7 +259,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@Path("/{id}/_history/{version}")
 	public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String version)
 			throws IOException {
-		Builder theRequest = getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.VREAD).id(id)
+		Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.VREAD).id(id)
 				.version(version);
 		return execute(theRequest);
 	}
@@ -251,7 +277,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	@Path("/{id}/{compartment}")
 	public Response findCompartment(@PathParam("id") final String id,
 			@PathParam("compartment") final String compartment) throws IOException {
-		Builder theRequest = getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE).id(id)
+		Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE).id(id)
 				.compartment(compartment);
 		return execute(theRequest, compartment);
 	}
@@ -326,4 +352,13 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 		return theBindings;
 	}
 
+    /**
+     * Return the request builder based on the resource name for the server
+     * @param requestType the type of the request
+     * @param restOperation the rest operation type
+     * @return the requestbuilder
+     */
+    private Builder getResourceRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation) {
+        return getRequest(requestType, restOperation, getResourceType().getSimpleName());
+    }
 }
