@@ -176,6 +176,11 @@
 				value be completely contained by the range specified. Thanks to Chris Moesel
 				for the suggestion.
 			</action>
+			<action type="fix">
+				In server, if a parameter was annotated with the <![CDATA[@Count]]> annotation, the
+				count would not appear in the self/prev/next links and would not actually be applied
+				to the search results by the server. Thanks to Jim Steele for letting us know!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

@@ -325,6 +325,96 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	}
 	
+	/**
+	 * ?identifier=
+	 */
+	@Test
+	public void testTransactionCreateMatchUrlWithOneMatchNoResourceName1() {
+		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		Entry respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = (Observation) myObservationDao.read(new IdDt(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals("1", o.getId().getVersionIdPart());
+
+	}
+
+	/**
+	 * identifier=
+	 */
+	@Test
+	public void testTransactionCreateMatchUrlWithOneMatchNoResourceName2() {
+		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		Entry respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = (Observation) myObservationDao.read(new IdDt(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals("1", o.getId().getVersionIdPart());
+
+	}
+
 	@Test
 	public void testTransactionCreateMatchUrlWithTwoMatch() {
 		String methodName = "testTransactionCreateMatchUrlWithTwoMatch";

@@ -81,6 +81,30 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
+	public void testTransactionFromBundle2() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"));
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle response = mySystemDao.transaction(mySrd, bundle);
+		
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		assertEquals("201 Created", response.getEntryFirstRep().getResponse().getStatus());
+		assertEquals("Practitioner/1/_history/1", response.getEntryFirstRep().getResponse().getLocation());
+
+		/*
+		 * Now a second time
+		 */
+		
+		bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		response = mySystemDao.transaction(mySrd, bundle);
+		
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
+		assertEquals("Practitioner/1/_history/1", response.getEntryFirstRep().getResponse().getLocation());
+
+	}
+	
+	
+	@Test
 	public void testTransactionWithNullReference() {
 		Patient p = new Patient();
 		p.addName().addFamily("family");
