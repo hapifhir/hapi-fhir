@@ -83,38 +83,6 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-	@Test
-	public void testValidateCarePlan() {
-		//@formatter:off
-		String input = "{\n" + 
-			"  \"resourceType\": \"Basic\",\n" + 
-			"  \"meta\": {\n" + 
-			"    \"profile\": [\n" + 
-			"      \"http://localhost:8080/baseDstu3/StructureDefinition/testBasic\"\n" + 
-			"    ]\n" + 
-			"  },\n" + 
-			"  \"code\": {\n" + 
-			"    \"coding\": [\n" + 
-			"      {\n" + 
-			"        \"system\": \"http://hl7.org/fhir/basic-resource-type\",\n" + 
-			"        \"code\": \"consent\",\n" + 
-			"        \"display\": \"Consent\"\n" + 
-			"      }\n" + 
-			"    ],\n" + 
-			"    \"text\": \"Consent\"\n" + 
-			"  },\n" + 
-			"  \"subject\": {\n" + 
-			"    \"reference\": \"Patient/2676\",\n" + 
-			"    \"display\": \"Lucy Turner\"\n" + 
-			"  }\n" + 
-			"}";
-		//@formatter:on
-		
-		ValidationResult output = myVal.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors, empty());
-
-	}
 	
 	@Test
 	// @Ignore

@@ -116,6 +116,22 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map.add(Subscription.SP_STATUS, new TokenParam(null, SubscriptionStatus.ACTIVE.toCode()));
 		assertThat(toUnqualifiedVersionlessIds(mySubscriptionDao.search(map)), contains(id));
 	}
+	
+	@Test
+	public void testDatePeriod() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().setStartElement(new DateTimeType("2016-05-10")).setEndElement(new DateTimeType("2016-05-20"));
+		String id = myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless().getValue();
+		
+		List<String> ids;
+		
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("2016-05-15")));
+		assertThat(ids, contains(id));
+
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("eq2016-05-15")));
+		assertThat(ids, contains(id));
+	}
+	
 
 
 	@Test

@@ -154,10 +154,12 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletRequestDetails reqDetails = new ServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setParameters(new HashMap<String, String[]>());
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
+		// This can be null depending on the exception type
+		// reqDetails.setParameters(null);
+		
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
 		exception.setOperationOutcome(new OperationOutcome().addIssue(new Issue().setDiagnostics("Hello")));
 
@@ -167,6 +169,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>OperationOutcome</span>"));
 	}
+
 
 	@Test
 	public void testHighlightNormalResponseForcePrettyPrint() throws Exception {

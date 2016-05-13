@@ -190,6 +190,16 @@ public class BaseJpaTest {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
 				entityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
+				for (TermCodeSystem next : entityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
+					next.setCurrentVersion(null);
+					entityManager.merge(next);
+				}
+				return null;
+			}
+		});
+		txTemplate.execute(new TransactionCallback<Void>() {
+			@Override
+			public Void doInTransaction(TransactionStatus theStatus) {
 				entityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
 				return null;

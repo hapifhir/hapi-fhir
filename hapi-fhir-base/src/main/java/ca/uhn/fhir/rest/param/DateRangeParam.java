@@ -77,6 +77,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
 		} else {
 			switch (theDateParam.getPrefix()) {
+			case EQUAL:
+				setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
+				break;
 			case STARTS_AFTER:
 			case GREATERTHAN:
 			case GREATERTHAN_OR_EQUALS:

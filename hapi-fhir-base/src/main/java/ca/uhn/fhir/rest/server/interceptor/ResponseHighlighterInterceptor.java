@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -249,7 +250,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 
 	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource) {
 		IParser p;
-		if (theRequestDetails.getParameters().containsKey(Constants.PARAM_FORMAT)) {
+		Map<String, String[]> parameters = theRequestDetails.getParameters();
+		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
 			p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), theRequestDetails);
 		} else {
 			EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
@@ -263,11 +265,11 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
 
 		StringBuilder rawB = new StringBuilder();
-		for (String next : theRequestDetails.getParameters().keySet()) {
+		for (String next : parameters.keySet()) {
 			if (next.equals(PARAM_RAW)) {
 				continue;
 			}
-			for (String nextValue : theRequestDetails.getParameters().get(next)) {
+			for (String nextValue : parameters.get(next)) {
 				if (isBlank(nextValue)) {
 					continue;
 				}

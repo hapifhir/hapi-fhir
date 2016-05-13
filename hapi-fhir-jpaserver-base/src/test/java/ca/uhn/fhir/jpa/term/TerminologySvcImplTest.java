@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -202,7 +203,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		try {
 			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
 			fail();
-		} catch (InvalidRequestException e) {
+		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));
 		}
 

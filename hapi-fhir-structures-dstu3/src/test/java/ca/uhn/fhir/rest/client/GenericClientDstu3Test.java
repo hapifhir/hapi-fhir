@@ -490,6 +490,43 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
+	public void testValidate() throws Exception {
+		final IParser p = ourCtx.newXmlParser();
+
+		final OperationOutcome resp0 = new OperationOutcome();
+		resp0.getText().setDivAsString("OK!");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+				return new Header[] { };
+			}
+		});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient pt = new Patient();
+		pt.setId("Patient/222");
+		pt.getText().setDivAsString("A PATIENT");
+
+		MethodOutcome outcome = client.validate().resource(pt).execute();
+
+		assertNotNull(outcome.getOperationOutcome());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+
+	}
+
+	@Test
 	public void testUpdateWithPreferRepresentationServerReturnsResource() throws Exception {
 		final IParser p = ourCtx.newXmlParser();
 

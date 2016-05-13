@@ -112,6 +112,9 @@ public abstract class RequestDetails {
 	}
 
 	public Map<String, String[]> getParameters() {
+		if (myParameters == null) {
+			return Collections.emptyMap();
+		}
 		return myParameters;
 	}
 

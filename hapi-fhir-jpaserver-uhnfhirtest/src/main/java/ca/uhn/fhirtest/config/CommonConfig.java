@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
 
 @Configuration
 public class CommonConfig {
@@ -33,6 +34,16 @@ public class CommonConfig {
 		retVal.setMessageFormat("${requestVerb} ${servletPath} -\n${requestBodyFhir}");
 		retVal.setLogExceptions(false);
 		return retVal;
+	}
+	
+	/**
+	 * This is a joke
+	 * 
+	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Unsupported.20search.20parameters
+	 */
+	@Bean
+	public IServerInterceptor holyFooCowInterceptor() {
+		return new HolyFooCowInterceptor();
 	}
 
 }
