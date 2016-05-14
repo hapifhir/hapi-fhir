@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
-import ca.uhn.fhir.jpa.term.ITerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -77,7 +77,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -111,7 +110,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired()
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	@Autowired()
-	protected ITerminologySvc myTerminologySvc;
+	protected IHapiTerminologySvc myTerminologySvc;
 	
 	private String mySecondaryPrimaryKeyParamName;
 
@@ -986,7 +985,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			/* Note: resourcdeId will not be null or empty here, because
 			 * we check it and reject requests in BaseOutcomeReturningMethodBindingWithResourceParam
 			 */
-			// 
 			resourceId = theResource.getIdElement();
 			
 			try {

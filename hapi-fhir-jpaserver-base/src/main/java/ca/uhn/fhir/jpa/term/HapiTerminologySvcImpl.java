@@ -26,8 +26,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 
-public class TerminologySvcImpl implements ITerminologySvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologySvcImpl.class);
+public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 
 	@Autowired
@@ -142,7 +142,7 @@ public class TerminologySvcImpl implements ITerminologySvc {
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystem.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(TerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				String msg = myContext.getLocalizer().getMessage(HapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
 		}

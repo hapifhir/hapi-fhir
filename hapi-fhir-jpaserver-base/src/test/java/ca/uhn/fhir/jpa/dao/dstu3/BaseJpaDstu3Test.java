@@ -73,7 +73,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.ITerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
@@ -198,7 +198,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("mySystemProviderDstu3")
 	protected JpaSystemProviderDstu3 mySystemProvider;
 	@Autowired
-	protected ITerminologySvc myTermSvc;
+	protected IHapiTerminologySvc myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired

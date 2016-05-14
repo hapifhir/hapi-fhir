@@ -25,7 +25,7 @@ import java.util.Set;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 
-public interface ITerminologySvc {
+public interface IHapiTerminologySvc {
 
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 

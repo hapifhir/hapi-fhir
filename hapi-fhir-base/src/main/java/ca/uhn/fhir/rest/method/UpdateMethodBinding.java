@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -133,20 +134,21 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isBlank(theMatchUrl)) {
+			if (isBlank(theUrlId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
+				throw new InvalidRequestException(msg);
+			}
 			if (isBlank(theResourceId)) {
 //				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
 				ourLog.warn("No resource ID found in resource body for update");
+				theResource.setId(theUrlId);				
 			} else {
 				if (!theResourceId.equals(theUrlId)) {
 					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
 					throw new InvalidRequestException(msg);
 				}
-			}
-			if (isBlank(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
-				throw new InvalidRequestException(msg);
 			}
 		}
 	}

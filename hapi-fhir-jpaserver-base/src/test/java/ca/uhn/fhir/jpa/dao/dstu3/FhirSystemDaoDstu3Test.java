@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -17,7 +18,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -88,7 +88,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("201 Created", response.getEntryFirstRep().getResponse().getStatus());
-		assertEquals("Practitioner/1/_history/1", response.getEntryFirstRep().getResponse().getLocation());
+		assertThat(response.getEntryFirstRep().getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
 		/*
 		 * Now a second time
@@ -99,7 +99,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
-		assertEquals("Practitioner/1/_history/1", response.getEntryFirstRep().getResponse().getLocation());
+		assertThat(response.getEntryFirstRep().getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
 	}
 	

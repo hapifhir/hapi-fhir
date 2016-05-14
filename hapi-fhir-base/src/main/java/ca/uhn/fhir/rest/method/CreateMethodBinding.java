@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -72,7 +74,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isNotBlank(theUrlId)) {
 			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
 			throw new InvalidRequestException(msg);

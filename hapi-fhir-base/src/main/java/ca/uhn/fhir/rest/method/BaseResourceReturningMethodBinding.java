@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -318,15 +318,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				boolean first = true;
 				Map<String, String[]> parameters = theRequest.getParameters();
-				for (Entry<String, String[]> nextParams : parameters.entrySet()) {
-					for (String nextParamValue : nextParams.getValue()) {
+				for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
+					for (String nextParamValue : parameters.get(nextParamName)) {
 						if (first) {
 							b.append('?');
 							first = false;
 						} else {
 							b.append('&');
 						}
-						b.append(UrlUtil.escape(nextParams.getKey()));
+						b.append(UrlUtil.escape(nextParamName));
 						b.append('=');
 						b.append(UrlUtil.escape(nextParamValue));
 					}

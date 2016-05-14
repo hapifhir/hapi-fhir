@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -40,14 +36,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.ITerminologySvc;
-import ca.uhn.fhir.jpa.term.TerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 
 @Configuration
 @EnableScheduling
@@ -135,8 +130,8 @@ public class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ITerminologySvc terminologyService() {
-		return new TerminologySvcImpl();
+	public IHapiTerminologySvc terminologyService() {
+		return new HapiTerminologySvcImpl();
 	}
 	
 	// @PostConstruct
