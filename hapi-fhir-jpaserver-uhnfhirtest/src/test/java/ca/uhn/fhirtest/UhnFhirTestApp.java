@@ -49,7 +49,6 @@ public class UhnFhirTestApp {
 		} catch (Exception e) {
 			ourLog.error("Failure during startup", e);
 		}
-		server.stop();
 
 		// base = "http://fhir.healthintersections.com.au/open";
 		// base = "http://spark.furore.com/fhir";
