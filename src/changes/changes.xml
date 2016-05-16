@@ -181,6 +181,11 @@
 				count would not appear in the self/prev/next links and would not actually be applied
 				to the search results by the server. Thanks to Jim Steele for letting us know!
 			</action>
+			<action type="fix">
+				Conditional update on server failed to process if the conditional URL did not have any
+				search parameters that did not start with an underscore. E.g. "Patient?_id=1" failed
+				even though this is a valid conditional reference.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
