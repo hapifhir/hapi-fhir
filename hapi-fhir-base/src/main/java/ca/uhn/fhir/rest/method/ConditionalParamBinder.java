@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -85,6 +86,9 @@ class ConditionalParamBinder implements IParameter {
 		}
 		
 		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
+		if (questionMarkIndex == -1) {
+			return null;
+		}
 		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
 	}
 

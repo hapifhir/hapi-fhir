@@ -213,9 +213,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theRequestDetails);
 
 		CodeSystem cs = (CodeSystem) theResource;
-		String codeSystemUrl = cs.getUrl();
 
-		if (isNotBlank(codeSystemUrl)) {
+		if (cs != null && isNotBlank(cs.getUrl())) {
+			String codeSystemUrl = cs.getUrl();
 			if (cs.getContent() == CodeSystemContentMode.COMPLETE) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContent().toCode());
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();

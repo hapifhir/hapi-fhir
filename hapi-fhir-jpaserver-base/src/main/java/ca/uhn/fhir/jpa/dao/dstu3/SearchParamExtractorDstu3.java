@@ -57,6 +57,8 @@ import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Range;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -431,6 +433,19 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 						ContactPoint nextContact = (ContactPoint) nextObject;
 						if (nextContact.getValueElement().isEmpty() == false) {
 							addSearchTerm(theEntity, retVal, resourceName, nextContact.getValue());
+						}
+					} else if (nextObject instanceof Quantity) {
+						BigDecimal value = ((Quantity) nextObject).getValue();
+						if (value != null) {
+							addSearchTerm(theEntity, retVal, resourceName, value.toPlainString());
+						}
+					} else if (nextObject instanceof Range) {
+						SimpleQuantity low = ((Range) nextObject).getLow();
+						if (low != null) {
+							BigDecimal value = low.getValue();
+							if (value != null) {
+								addSearchTerm(theEntity, retVal, resourceName, value.toPlainString());
+							}
 						}
 					} else {
 						if (!multiType) {

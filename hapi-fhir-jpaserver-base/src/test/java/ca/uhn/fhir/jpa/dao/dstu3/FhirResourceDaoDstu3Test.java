@@ -35,23 +35,27 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.Age;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.NamingSystem;
@@ -66,7 +70,9 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Quantity.QuantityComparator;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Range;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Timing;
@@ -134,6 +140,41 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testCodeSystemCreateAndDelete() {
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(ConformanceResourceStatus.DRAFT);
+		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
+		
+		myCodeSystemDao.delete(id, mySrd);
+		
+		assertGone(id.toUnqualifiedVersionless());
+	}
+
+	@Test
+	public void testIndexConditionWithAllOnsetTypes() {
+		// DateTimeType.class, Age.class, Period.class, Range.class, StringType.class
+		
+		Condition c0 = new Condition();
+		c0.setOnset(new DateTimeType("2011-01-01"));
+		IIdType id0 = myConditionDao.create(c0, mySrd).getId().toUnqualifiedVersionless();
+		
+		Condition c1 = new Condition();
+		c1.setOnset(new Age().setValue(100l).setCode("AGECODE"));
+		IIdType id1 = myConditionDao.create(c1, mySrd).getId().toUnqualifiedVersionless();
+
+		Condition c2 = new Condition();
+		c2.setOnset(new Period().setStart(new Date()).setEnd(new Date()));
+		IIdType id2 = myConditionDao.create(c2, mySrd).getId().toUnqualifiedVersionless();
+
+		Condition c3 = new Condition();
+		c3.setOnset(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(200L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(300L)));
+		IIdType id3 = myConditionDao.create(c3, mySrd).getId().toUnqualifiedVersionless();
+
+		Condition c4 = new Condition();
+		c4.setOnset(new StringType("FOO"));
+		IIdType id4 = myConditionDao.create(c4, mySrd).getId().toUnqualifiedVersionless();
+}
 	
 	@Test
 	@Ignore
