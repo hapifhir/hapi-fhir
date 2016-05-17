@@ -13,6 +13,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -95,11 +96,20 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myAppointmentDaoDstu3")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
 	@Autowired
+	@Qualifier("myAuditEventDaoDstu3")
+	protected IFhirResourceDao<AuditEvent> myAuditEventDao;
+	@Autowired
 	@Qualifier("myBundleDaoDstu3")
 	protected IFhirResourceDao<Bundle> myBundleDao;
 	@Autowired
+	@Qualifier("myCarePlanDaoDstu3")
+	protected IFhirResourceDao<CarePlan> myCarePlanDao;
+	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
 	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Autowired
+	@Qualifier("myCompartmentDefinitionDaoDstu3")
+	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
@@ -144,20 +154,18 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-
 	@Autowired
 	@Qualifier("myObservationDaoDstu3")
 	protected IFhirResourceDao<Observation> myObservationDao;
-
+	@Autowired
+	@Qualifier("myOperationDefinitionDaoDstu3")
+	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
-	@Autowired
-	@Qualifier("myCarePlanDaoDstu3")
-	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu3")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
@@ -179,12 +187,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu3")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-	@Autowired
-	@Qualifier("myCompartmentDefinitionDaoDstu3")
-	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-	@Autowired
-	@Qualifier("myOperationDefinitionDaoDstu3")
-	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;

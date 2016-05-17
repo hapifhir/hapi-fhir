@@ -41,7 +41,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 
 @Configuration
@@ -127,11 +127,6 @@ public class BaseConfig implements SchedulingConfigurer {
 //		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
 //		retVal.setPoolSize(5);
 //		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvc terminologyService() {
-		return new HapiTerminologySvcImpl();
 	}
 	
 	// @PostConstruct

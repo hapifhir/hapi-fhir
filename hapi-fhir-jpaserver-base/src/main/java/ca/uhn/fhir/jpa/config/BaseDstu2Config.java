@@ -31,11 +31,19 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu2;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 @EnableTransactionManagement
 public class BaseDstu2Config extends BaseConfig {
+
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologySvc terminologyService() {
+		return new HapiTerminologySvcDstu2();
+	}
+
 
 	@Bean
 	@Primary

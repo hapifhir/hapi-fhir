@@ -100,6 +100,7 @@ import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -156,8 +157,8 @@ public class SearchBuilder {
 	private ISearchResultDao mySearchResultDao;
 	private IHapiTerminologySvc myTerminologySvc;
 
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
-			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc) {
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
+			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
@@ -270,12 +271,12 @@ public class SearchBuilder {
 			} catch (DataFormatException e) {
 				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
 			}
-			
+
 			RuntimeSearchParam owningParameterDef = targetResourceDefinition.getSearchParam(parameterName.replaceAll("\\..*", ""));
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 			}
-			
+
 			owningParameterDef = targetResourceDefinition.getSearchParam(owningParameter);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
@@ -287,7 +288,7 @@ public class SearchBuilder {
 				doSetPids(new ArrayList<Long>());
 				return;
 			}
-			
+
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 			Root<ResourceLink> from = cq.from(ResourceLink.class);
@@ -380,8 +381,7 @@ public class SearchBuilder {
 		return;
 	}
 
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -395,8 +395,7 @@ public class SearchBuilder {
 		return missingFalse;
 	}
 
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -745,15 +744,21 @@ public class SearchBuilder {
 		}
 
 		/*
-		 * CriteriaBuilder builder = myEntityManager.getCriteriaBuilder(); CriteriaQuery<Long> cq = builder.createQuery(Long.class); Root<ResourceTable> from = cq.from(ResourceTable.class);
+		 * CriteriaBuilder builder = myEntityManager.getCriteriaBuilder(); CriteriaQuery<Long> cq =
+		 * builder.createQuery(Long.class); Root<ResourceTable> from = cq.from(ResourceTable.class);
 		 * cq.select(from.get("myId").as(Long.class));
 		 * 
-		 * Subquery<Long> subQ = cq.subquery(Long.class); Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable); subQ.select(subQfrom.get("myResourcePid").as(Long.class));
-		 * Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName); Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
+		 * Subquery<Long> subQ = cq.subquery(Long.class); Root<? extends BaseResourceIndexedSearchParam> subQfrom =
+		 * subQ.from(theParamTable); subQ.select(subQfrom.get("myResourcePid").as(Long.class));
+		 * Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName); Predicate subQtype =
+		 * builder.equal(subQfrom.get("myResourceType"), myResourceName);
 		 * subQ.where(builder.and(subQtype, subQname));
 		 * 
-		 * List<Predicate> predicates = new ArrayList<Predicate>(); predicates.add(builder.not(builder.in(from.get("myId")).value(subQ))); predicates.add(builder.equal(from.get("myResourceType"),
-		 * myResourceName)); predicates.add(builder.isNull(from.get("myDeleted"))); createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+		 * List<Predicate> predicates = new ArrayList<Predicate>();
+		 * predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
+		 * predicates.add(builder.equal(from.get("myResourceType"),
+		 * myResourceName)); predicates.add(builder.isNull(from.get("myDeleted"))); createPredicateResourceId(builder, cq,
+		 * predicates, from.get("myId").as(Long.class));
 		 */
 
 		List<Pair<String, String>> notTags = Lists.newArrayList();
@@ -935,6 +940,10 @@ public class SearchBuilder {
 			}
 
 			Predicate singleCode = createPredicateToken(nextOr, theParamName, builder, from);
+			if (singleCode == null) {
+				doSetPids(new ArrayList<Long>());
+				return;
+			}
 			codePredicates.add(singleCode);
 		}
 
@@ -986,10 +995,13 @@ public class SearchBuilder {
 				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
 
 					/*
-					 * :above is an inefficient query- It means that the user is supplying a more specific URL (say http://example.com/foo/bar/baz) and that we should match on any URLs that are less
-					 * specific but otherwise the same. For example http://example.com and http://example.com/foo would both match.
+					 * :above is an inefficient query- It means that the user is supplying a more specific URL (say
+					 * http://example.com/foo/bar/baz) and that we should match on any URLs that are less
+					 * specific but otherwise the same. For example http://example.com and http://example.com/foo would both
+					 * match.
 					 * 
-					 * We do this by querying the DB for all candidate URIs and then manually checking each one. This isn't very efficient, but this is also probably not a very common type of query to do.
+					 * We do this by querying the DB for all candidate URIs and then manually checking each one. This isn't
+					 * very efficient, but this is also probably not a very common type of query to do.
 					 * 
 					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
 					 */
@@ -1148,8 +1160,7 @@ public class SearchBuilder {
 		predicates.addAll(createLastUpdatedPredicates(myParams.getLastUpdatedAndRemove(), builder, from));
 	}
 
-	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path,
-			String invalidMessageName, String theValueString) {
+	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path, String invalidMessageName, String theValueString) {
 		Predicate num;
 		switch (cmpValue) {
 		case GREATERTHAN:
@@ -1265,8 +1276,7 @@ public class SearchBuilder {
 
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
-			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1285,8 +1295,7 @@ public class SearchBuilder {
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
-					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
@@ -1316,8 +1325,7 @@ public class SearchBuilder {
 		return orPredicates;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
-			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		TokenParamModifier modifier = null;
@@ -1339,14 +1347,42 @@ public class SearchBuilder {
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 		}
 
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 		}
+
+		/*
+		 * Process token modifiers (:in, :below, :above)
+		 */
+
+		List<VersionIndependentConcept> codes = null;
+		if (modifier == TokenParamModifier.IN) {
+			codes = myTerminologySvc.expandValueSet(code);
+		} else if (modifier == TokenParamModifier.ABOVE) {
+			codes = myTerminologySvc.findCodesAbove(system, code);
+		} else if (modifier == TokenParamModifier.BELOW) {
+			codes = myTerminologySvc.findCodesBelow(system, code);
+		}
+		if (codes != null) {
+			if (codes.isEmpty()) {
+				return null;
+			}
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			for (VersionIndependentConcept nextCode : codes) {
+				Predicate systemPredicate = theBuilder.equal(theFrom.get("mySystem"), nextCode.getSystem());
+				Predicate codePredicate = theBuilder.equal(theFrom.get("myValue"), nextCode.getCode());
+				orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
+			}
+
+			return theBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+		}
+
+		/*
+		 * Ok, this is a normal query
+		 */
 
 		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
 		if (StringUtils.isNotBlank(system)) {
@@ -1357,39 +1393,19 @@ public class SearchBuilder {
 			// If the system is "", we only match on null systems
 			singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
 		}
-		
+
 		if (StringUtils.isNotBlank(code)) {
-			
-			if (modifier != null) {
-				switch (modifier) {
-				case IN:
-				case NOT_IN:
-					system = defaultString(system);
-					if (!myTerminologySvc.supportsSystem(system)) {
-						throw new InvalidRequestException("Unable to perform :in search for system: " + system);
-					}
-					Set<TermConcept> codeConcepts = myTerminologySvc.findCodesBelow(system, code);
-					Set<String> codeCodes = toCodes(codeConcepts);
-					if (modifier == TokenParamModifier.IN) {
-						singleCodePredicates.add(theFrom.get("myValue").in(codeCodes));
-					} else {
-						singleCodePredicates.add(theBuilder.not(theFrom.get("myValue").in(codeCodes)));
-					}
-					break;
-				default:
-					throw new InvalidRequestException("Invalid modifier " + modifier.getValue() + " for param " + theParamName);
-				}
-			} else {
-				singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
-			}
+			singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
 		} else {
 			/*
-			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to match all tokens with the given value.
+			 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
+			 * match all tokens with the given value.
 			 * 
 			 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
 			 */
 			// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
 		}
+
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
 		return singleCode;
 	}
@@ -2004,7 +2020,8 @@ public class SearchBuilder {
 	}
 
 	/**
-	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method returns <code>0.005</code> because we shold actually match values which are
+	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
+	 * returns <code>0.005</code> because we shold actually match values which are
 	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
 	 */
 	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
@@ -2059,8 +2076,7 @@ public class SearchBuilder {
 		return resultList;
 	}
 
-	public static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
-			EntityManager entityManager, FhirContext context, IDao theDao) {
+	public static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -2109,8 +2125,7 @@ public class SearchBuilder {
 	 * 
 	 * @param theLastUpdated
 	 */
-	public static HashSet<Long> loadReverseIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-			DateRangeParam theLastUpdated) {
+	public static HashSet<Long> loadReverseIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}

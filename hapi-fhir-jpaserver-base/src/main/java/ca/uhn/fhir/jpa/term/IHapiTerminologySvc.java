@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -31,10 +33,14 @@ public interface IHapiTerminologySvc {
 
 	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
-	Set<TermConcept> findCodesBelow(String theSystem, String theCode);
+	List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
 
 	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSytem);
 
-	public boolean supportsSystem(String system);
+	public boolean supportsSystem(String theCodeSystem);
+
+	List<VersionIndependentConcept> expandValueSet(String theValueSet);
+
+	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
 
 }

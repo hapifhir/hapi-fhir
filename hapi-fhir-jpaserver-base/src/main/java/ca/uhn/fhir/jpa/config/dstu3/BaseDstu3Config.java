@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.config.dstu3;
 
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
+import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
 
 /*
@@ -37,6 +40,8 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -44,13 +49,23 @@ import ca.uhn.fhir.validation.IValidatorModule;
 @EnableTransactionManagement
 public class BaseDstu3Config extends BaseConfig {
 
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologySvc terminologyService() {
+		return new HapiTerminologySvcDstu3();
+	}
+
+	@Bean
+	public HapiWorkerContext workerContext() {
+		return new HapiWorkerContext(defaultFhirContext(), validationSupportChainDstu3());
+	}
+
 	@Bean
 	@Primary
 	public FhirContext defaultFhirContext() {
 		return fhirContextDstu3();
 	}
 
-	@Bean(name="myInstanceValidatorDstu3")
+	@Bean(name = "myInstanceValidatorDstu3")
 	@Lazy
 	public IValidatorModule instanceValidatorDstu3() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
@@ -64,7 +79,7 @@ public class BaseDstu3Config extends BaseConfig {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
 		return retVal;
 	}
-	
+
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IFulltextSearchSvc searchDaoDstu3() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
@@ -85,14 +100,14 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Primary
-	@Bean(autowire=Autowire.BY_NAME, name="myJpaValidationSupportChainDstu3")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
 		return new JpaValidationSupportChainDstu3();
 	}
 
-	@Bean(autowire=Autowire.BY_TYPE)
+	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorDstu3 searchParamExtractor() {
 		return new SearchParamExtractorDstu3();
 	}
-	
+
 }

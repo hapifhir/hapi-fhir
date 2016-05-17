@@ -56,12 +56,17 @@ public class DaoConfig {
 	
 	private List<IServerInterceptor> myInterceptors;
 
+	// ***
+	// update setter javadoc if default changes
+	// ***
+	private int myMaximumExpansionSize = 5000;
+	
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
-
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
+	
 	/**
 	 * Search results are stored in the database so that they can be paged through. After this
 	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
@@ -94,10 +99,15 @@ public class DaoConfig {
 		}
 		return myInterceptors;
 	}
+	/**
+	 * See {@link #setMaximumExpansionSize(int)}
+	 */
+	public int getMaximumExpansionSize() {
+		return myMaximumExpansionSize;
+	}
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
-
 	public long getSubscriptionPollDelay() {
 		return mySubscriptionPollDelay;
 	}
@@ -216,6 +226,15 @@ public class DaoConfig {
 	 */
 	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
 		myInterceptors = theInterceptors;
+	}
+
+	/**
+	 * Sets the maximum number of codes that will be added to a valueset expansion before
+	 * the operation will be failed as too costly
+	 */
+	public void setMaximumExpansionSize(int theMaximumExpansionSize) {
+		Validate.isTrue(theMaximumExpansionSize > 0, "theMaximumExpansionSize must be > 0");
+		myMaximumExpansionSize = theMaximumExpansionSize;
 	}
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {

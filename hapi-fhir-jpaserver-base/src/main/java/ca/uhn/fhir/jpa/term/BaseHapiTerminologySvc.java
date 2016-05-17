@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Stopwatch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -26,8 +29,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 
-public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcImpl.class);
+public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvc.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 
 	@Autowired
@@ -40,18 +43,32 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 	private ITermConceptDao myConceptDao;
 
 	@Autowired
+	private DaoConfig myDaoConfig;
+	
+	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
-	private FhirContext myContext;
+	protected FhirContext myContext;
 
 	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
 		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
 			TermConcept nextChild = nextChildLink.getChild();
-			if (theSetToPopulate.add(nextChild)) {
+			if (addToSet(theSetToPopulate, nextChild)) {
 				fetchChildren(nextChild, theSetToPopulate);
 			}
 		}
+	}
+
+	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
+		boolean retVal = theSetToPopulate.add(theConcept);
+		if (retVal) {
+			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+				throw new InvalidRequestException(msg);
+			}			
+		}
+		return retVal;
 	}
 
 	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -63,7 +80,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 	private void fetchParents(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
 		for (TermConceptParentChildLink nextChildLink : theConcept.getParents()) {
 			TermConcept nextChild = nextChildLink.getParent();
-			if (theSetToPopulate.add(nextChild)) {
+			if (addToSet(theSetToPopulate, nextChild)) {
 				fetchParents(nextChild, theSetToPopulate);
 			}
 		}
@@ -88,6 +105,16 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		return retVal;
 	}
 
+	@Override
+	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		
+		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
+		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
+		return retVal;
+	}
+
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -104,6 +131,16 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		fetchChildren(concept, retVal);
 
 		ourLog.info("Fetched {} codes below code {} in {}ms", new Object[] { retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS) });
+		return retVal;
+	}
+
+	@Override
+	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		
+		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
+		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
 	}
 
@@ -142,7 +179,7 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystem.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(HapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
 		}
@@ -170,6 +207,14 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		return cs != null;
 	}
 
+	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>(codes.size());
+		for (TermConcept next : codes) {
+			retVal.add(new VersionIndependentConcept(theSystem, next.getCode()));
+		}
+		return retVal;
+	}
+
 	private void validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
 		ValidateUtil.isNotNullOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "Codesystem contains a code which does not reference the codesystem");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code which does not reference the codesystem");
@@ -183,14 +228,6 @@ public class HapiTerminologySvcImpl implements IHapiTerminologySvc {
 		}
 
 		theConceptsStack.remove(theConcept);
-	}
-
-	@Override
-	public Set<TermConcept> findCodesBelow(String theSystem, String theCode) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		
-		return findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 	}
 
 }

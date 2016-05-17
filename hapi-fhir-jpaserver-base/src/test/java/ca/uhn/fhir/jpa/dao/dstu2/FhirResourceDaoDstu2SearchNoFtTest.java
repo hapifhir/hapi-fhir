@@ -1430,20 +1430,20 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 		{
 			SearchParameterMap map = new SearchParameterMap();
-			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
-			assertEquals(0, myPatientDao.search(map).size());
-		}
-		{
-			SearchParameterMap map = new SearchParameterMap();
-			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
-			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
-			assertEquals(0, myPatientDao.search(map).size());
-		}
-		{
-			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamComText", true));
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
 			assertEquals(1, myPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
+			assertEquals(0, myPatientDao.search(map).size());
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
+			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
+			assertEquals(0, myPatientDao.search(map).size());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
