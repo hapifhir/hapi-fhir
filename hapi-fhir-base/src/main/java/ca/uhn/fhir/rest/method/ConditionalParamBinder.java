@@ -83,16 +83,6 @@ class ConditionalParamBinder implements IParameter {
 		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
 			return null;
 		}
-		boolean haveParam = false;
-		for (String next : theRequest.getParameters().keySet()) {
-			if (!next.startsWith("_")) {
-				haveParam=true;
-				break;
-			}
-		}
-		if (!haveParam) {
-			return null;
-		}
 		
 		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
 		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);

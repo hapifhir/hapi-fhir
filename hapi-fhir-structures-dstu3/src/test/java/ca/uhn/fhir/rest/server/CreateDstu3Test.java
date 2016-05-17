@@ -31,6 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -49,33 +50,6 @@ public class CreateDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Test
-	public void testRead() throws Exception {
-
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2?_format=xml&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"2\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
-		//@formatter:on
-	}
-
 	/**
 	 * #342
 	 */
@@ -93,7 +67,34 @@ public class CreateDstu3Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		String expected = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F' (code 70) in prolog; expected '&lt;'&#xa; at [row,col {unknown-source}]: [1,1]\"/></issue></OperationOutcome>";
 		assertEquals(expected, responseContent);
-		
+
+	}
+
+	@Test
+	public void testRead() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2?_format=xml&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		//@formatter:off
+		assertThat(responseContent, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
+				"<id value=\"2\"/>", 
+				"<meta>", 
+					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
+				"</meta>", 
+				"<modifierExtension url=\"http://example.com/ext/date\">", 
+					"<valueDate value=\"2011-01-01\"/>", 
+				"</modifierExtension>", 
+			"</Patient>"));
+		//@formatter:on
 	}
 
 	@Test
@@ -108,7 +109,7 @@ public class CreateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		//@formatter:off
 		assertThat(responseContent, stringContainsInOrder(
 			"<Patient xmlns=\"http://hl7.org/fhir\">", 
@@ -121,7 +122,7 @@ public class CreateDstu3Test {
 				"</modifierExtension>", 
 			"</Patient>"));
 		//@formatter:on
-		
+
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
 	}
 
@@ -156,6 +157,11 @@ public class CreateDstu3Test {
 
 	public static class PatientProvider implements IResourceProvider {
 
+		@Create()
+		public MethodOutcome create(@ResourceParam Patient theIdParam) {
+			return new MethodOutcome(new IdType("Patient", "1"), true);
+		}
+
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
@@ -167,11 +173,6 @@ public class CreateDstu3Test {
 			p0.setId(theIdParam);
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
-		}
-
-		@Create()
-		public MethodOutcome read(@ResourceParam Patient theIdParam) {
-			return new MethodOutcome(new IdType("Patient", "1"), true);
 		}
 
 		@Search

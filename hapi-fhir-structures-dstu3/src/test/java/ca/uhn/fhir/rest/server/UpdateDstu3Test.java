@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -19,11 +20,13 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -64,6 +67,53 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
+	public void testUpdateConditional() throws Exception {
+
+		Patient patient = new Patient();
+		patient.setId("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?_id=001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("Patient?_id=001",ourConditionalUrl);
+			assertEquals(null, ourId);
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testUpdateNormal() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertNull(ourConditionalUrl);
+			assertEquals("Patient/001", ourId.getValue());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
 	public void testUpdateWrongUrlInBody() throws Exception {
 
 		Patient patient = new Patient();
@@ -81,7 +131,9 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"3\" does not match URL ID of \"001\"", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(
+				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"3\" does not match URL ID of \"001\"",
+				oo.getIssueFirstRep().getDiagnostics());
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));
@@ -115,7 +167,15 @@ public class UpdateDstu3Test {
 
 	}
 
+	private static String ourConditionalUrl;
 
+	@Before
+	public void before() {
+		ourConditionalUrl = null;
+		ourId = null;
+	}
+
+	private static IdType ourId;
 
 	public static class PatientProvider implements IResourceProvider {
 
@@ -125,11 +185,13 @@ public class UpdateDstu3Test {
 		}
 
 		@Update()
-		public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient) {
-			IdType id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue());
+		public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+			ourId = theId;
+			ourConditionalUrl = theConditionalUrl;
+			IdType id = theId != null ? theId.withVersion(thePatient.getIdentifierFirstRep().getValue()) : new IdType("Patient/1");
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics("OODETAILS");
-			if (theId.getValueAsString().contains("CREATE")) {
+			if (id.getValueAsString().contains("CREATE")) {
 				return new MethodOutcome(id, oo, true);
 			}
 
