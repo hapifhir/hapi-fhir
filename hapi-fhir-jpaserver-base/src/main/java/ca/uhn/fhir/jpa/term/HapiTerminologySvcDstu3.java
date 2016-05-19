@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
@@ -10,6 +11,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcom
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc {
@@ -37,6 +39,12 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc {
 		} catch (Exception e) {
 			throw new InternalErrorException(e);
 		}
+		
+	}
+
+	@Override
+	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion) {
+		CodeSystem cs = new org.hl7.fhir.dstu3.model.CodeSystem();
 		
 	}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -17,10 +19,14 @@ import ca.uhn.fhir.util.TestUtil;
 public class TerminologyLoaderSvcTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcTest.class);
 	private TerminologyLoaderSvc mySvc;
+	private IHapiTerminologySvc myTermSvc;
 	
 	@Before
 	public void before() {
+		myTermSvc = mock(IHapiTerminologySvc.class);
+		
 		mySvc = new TerminologyLoaderSvc();
+		mySvc.setTermSvcForUnitTests(myTermSvc);
 	}
 	
 	@AfterClass

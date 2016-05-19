@@ -35,12 +35,14 @@ public interface IHapiTerminologySvc {
 
 	List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSytem);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSytemVersion);
 
 	public boolean supportsSystem(String theCodeSystem);
 
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
 	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
+
+	void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion);
 
 }
