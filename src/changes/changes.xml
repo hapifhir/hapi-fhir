@@ -203,6 +203,11 @@
 				<![CDATA[<a href="./doc_jpa.html">JPA Documentation</a>]]> for information on
 				how to use this. Thanks to Naminder Soorma for the suggestion! 
 			</action>
+			<action type="fix" issue="366">
+				When posting a resource to a server that contains an invalid value in a boolean field
+				(e.g. Patient with an active value of "1") the server should return an HTTP 400, not
+				an HTTP 500. Thanks to Jim Steel for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

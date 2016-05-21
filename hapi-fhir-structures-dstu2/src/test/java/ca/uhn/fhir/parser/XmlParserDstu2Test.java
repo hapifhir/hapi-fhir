@@ -2264,6 +2264,20 @@ public class XmlParserDstu2Test {
 	}
 
 	/**
+	 * See #366
+	 */
+	@Test(expected=DataFormatException.class)
+	public void testParseInvalidBoolean() {
+		//@formatter:off
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"   <active value=\"1\"/>\n" + 
+			"</Patient>";
+		//@formatter:on
+		
+		ourCtx.newXmlParser().parseResource(resource);
+	}
+
+	/**
 	 * See #216
 	 */
 	@Test
