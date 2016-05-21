@@ -7,6 +7,17 @@
 	</properties>
 	<body>
 		<release version="1.6" date="TBD">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Spring (JPA, Web Tester): 4.2.5 -&gt; 4.2.6</li>
+						<li>Spring-Data (JPA): 1.9.2 -&gt; 1.10.1</li>
+						<li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.3</li>
+					</ul>
+				]]>
+			</action>
 			<action type="fix" issue="345">
 				ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations
 				that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!
