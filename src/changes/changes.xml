@@ -208,6 +208,9 @@
 				(e.g. Patient with an active value of "1") the server should return an HTTP 400, not
 				an HTTP 500. Thanks to Jim Steel for reporting!
 			</action>
+			<action type="fix" issue="364">
+				Enable parsers to parse and serialize custom resources that contain custom datatypes
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

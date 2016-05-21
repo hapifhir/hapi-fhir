@@ -11,11 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationOrder;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.CustomResource364Dstu3.CustomResource364CustomDate;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -46,6 +49,63 @@ public class CustomTypeDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+
+	/**
+	 * See #364
+	 */
+	@Test
+	public void testCustomTypeWithCustomDatatype() {
+		FhirContext context = FhirContext.forDstu3();
+		context.registerCustomType(CustomResource364Dstu3.class);
+		context.registerCustomType(CustomResource364CustomDate.class);
+		IParser parser = context.newXmlParser();
+
+		CustomResource364Dstu3 resource = new CustomResource364Dstu3();
+		resource.setBaseValues(new CustomResource364CustomDate().setDate(new DateTimeType("2016-05-13")));
+
+		String xml = parser.encodeResourceToString(resource);
+		ourLog.info(xml);
+
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
+		CustomResource364Dstu3 parsedResource = parser.parseResource(CustomResource364Dstu3.class, xml);
+		assertEquals("2016-05-13", ((CustomResource364CustomDate)parsedResource.getBaseValues()).getDate().getValueAsString());
+	}
+
+	/**
+	 * See #364
+	 */
+	@Test
+	public void testCustomTypeWithPrimitiveType() {
+		FhirContext context = FhirContext.forDstu3();
+		context.registerCustomTypes(new ArrayList<Class<? extends IBase>>());
+		
+		IParser parser = context.newXmlParser();
+
+		CustomResource364Dstu3 resource = new CustomResource364Dstu3();
+		resource.setBaseValues(new StringType("2016-05-13"));
+
+		String xml = parser.encodeResourceToString(resource);
+
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueString value=\"2016-05-13\"/>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
+		CustomResource364Dstu3 parsedResource = parser.parseResource(CustomResource364Dstu3.class, xml);
+		assertEquals("2016-05-13", ((StringType)parsedResource.getBaseValues()).getValueAsString());
+	}
 
 	
 	@Test

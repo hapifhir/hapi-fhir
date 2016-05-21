@@ -102,7 +102,7 @@ class ModelScanner {
 	private Set<Class<? extends IBase>> myVersionTypes;
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions,
-			Collection<Class<? extends IElement>> theResourceTypes) throws ConfigurationException {
+			Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
 		myVersion = theVersion;
 		Set<Class<? extends IBase>> toScan;
@@ -467,7 +467,7 @@ class ModelScanner {
 			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any given IDs and can be figured out later
 			 */
 			if (order == Child.ORDER_UNKNOWN) {
-				order = Integer.MIN_VALUE;
+				order = Integer.valueOf(0);
 				while (orderMap.containsKey(order)) {
 					order++;
 				}
