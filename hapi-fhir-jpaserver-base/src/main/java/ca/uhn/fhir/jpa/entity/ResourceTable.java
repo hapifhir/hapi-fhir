@@ -149,8 +149,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private boolean myHasLinks;
 
 	@Id
-	@SequenceGenerator(name="SEQ_RESOURCE_ID", sequenceName="SEQ_RESOURCE_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_RESOURCE_ID")
+	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	private Long myId;
 
@@ -187,7 +187,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
-	
+
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
 
@@ -540,14 +540,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setForcedId(getForcedId());
 
 		retVal.getTags().clear();
-		
+
 		retVal.setHasTags(isHasTags());
 		if (isHasTags()) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
 		}
-		
+
 		return retVal;
 	}
 

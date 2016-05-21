@@ -88,6 +88,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
@@ -706,6 +707,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+			}
+		}
+
+		/*
+		 * Replace absolute references with relative ones if configured to
+		 * do so
+		 */
+		if (getConfig().getTreatBaseUrlsAsLocal().isEmpty() == false) {
+			FhirTerser t = getContext().newTerser();
+			List<ResourceReferenceInfo> refs = t.getAllResourceReferences(theResource);
+			for (ResourceReferenceInfo nextRef : refs) {
+				IIdType refId = nextRef.getResourceReference().getReferenceElement();
+				if (refId != null && refId.hasBaseUrl()) {
+					if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
+						IIdType newRefId = refId.toUnqualified();
+						nextRef.getResourceReference().setReference(newRefId.getValue());
+					}
+				}
 			}
 		}
 	}

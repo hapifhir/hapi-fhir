@@ -3,8 +3,11 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -37,16 +40,21 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
+	private boolean myAllowExternalReferences = false; 
+
+	// ***
+	// update setter javadoc if default changes
+	// ***
 	private boolean myAllowInlineMatchUrlReferences = false; 
 
-	private boolean myAllowMultipleDelete; 
-
+	private boolean myAllowMultipleDelete;
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
 	private int myHardSearchLimit = 1000;
 	private int myHardTagListLimit = 1000;
+	
 	private int myIncludeLimit = 2000;
 	
 	// ***
@@ -55,39 +63,49 @@ public class DaoConfig {
 	private boolean myIndexContainedResources = true;
 	
 	private List<IServerInterceptor> myInterceptors;
-
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
-	
+
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+
 	private boolean mySchedulingDisabled;
+	
 	private boolean mySubscriptionEnabled;
+	
 	private long mySubscriptionPollDelay = 1000;
+
 	private Long mySubscriptionPurgeInactiveAfterMillis;
+	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	
 	/**
-	 * Search results are stored in the database so that they can be paged through. After this
-	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * Sets the number of milliseconds that search results for a given client search 
+	 * should be preserved before being purged from the database.
+	 * <p>
+	 * Search results are stored in the database so that they can be paged over multiple 
+	 * requests. After this
+	 * number of milliseconds, they will be deleted from the database, and any paging links
+	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
+	 * </p>
 	 * 
 	 * @since 1.5
 	 */
 	public long getExpireSearchResultsAfterMillis() {
 		return myExpireSearchResultsAfterMillis;
 	}
+	
 	/**
-	 * See {@link #setIncludeLimit(int)}
+	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
 	 */
-	public int getHardSearchLimit() {
-		return myHardSearchLimit;
-	}
 	public int getHardTagListLimit() {
 		return myHardTagListLimit;
 	}
+	
 	public int getIncludeLimit() {
 		return myIncludeLimit;
 	}
+	
 	/**
 	 * Returns the interceptors which will be notified of operations.
 	 * 
@@ -111,11 +129,51 @@ public class DaoConfig {
 	public long getSubscriptionPollDelay() {
 		return mySubscriptionPollDelay;
 	}
-
 	public Long getSubscriptionPurgeInactiveAfterMillis() {
 		return mySubscriptionPurgeInactiveAfterMillis;
 	}
-
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 */
+	public Set<String> getTreatBaseUrlsAsLocal() {
+		return myTreatBaseUrlsAsLocal;
+	}
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
+	 * resources to have references to external servers. For example if this server is
+	 * running at <code>http://example.com/fhir</code> and this setting is set to
+	 * <code>true</code> the server will allow a Patient resource to be saved with a
+	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
+	 * <p>
+	 * Under the default behaviour if this value has not been changed, the above
+	 * resource would be rejected by the server because it requires all references
+	 * to be resolvable on the local server.
+	 * </p>
+	 * <p>
+	 * Note that external references will be indexed by the server and may be searched
+	 * (e.g. <code>Patient:organization</code>), but
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across 
+	 * these references.
+	 * </p>
+	 * <p>
+	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
+	 * is set to <code>true</code>
+	 * </p>
+	 * 
+	 * @see #setTreatBaseUrlsAsLocal(Set)
+	 * @see #setAllowExternalReferences(boolean)
+	 */
+	public boolean isAllowExternalReferences() {
+		return myAllowExternalReferences;
+	}
 	/**
 	 * @see #setAllowInlineMatchUrlReferences(boolean)
 	 */
@@ -147,6 +205,35 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
+	 * resources to have references to external servers. For example if this server is
+	 * running at <code>http://example.com/fhir</code> and this setting is set to
+	 * <code>true</code> the server will allow a Patient resource to be saved with a
+	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
+	 * <p>
+	 * Under the default behaviour if this value has not been changed, the above
+	 * resource would be rejected by the server because it requires all references
+	 * to be resolvable on the local server.
+	 * </p>
+	 * <p>
+	 * Note that external references will be indexed by the server and may be searched
+	 * (e.g. <code>Patient:organization</code>), but
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across 
+	 * these references.
+	 * </p>
+	 * <p>
+	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
+	 * is set to <code>true</code>
+	 * </p>
+	 * 
+	 * @see #setTreatBaseUrlsAsLocal(Set)
+	 * @see #setAllowExternalReferences(boolean)
+	 */
+	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
+		myAllowExternalReferences = theAllowExternalReferences;
+	}
+
+	/**
 	 * Should references containing match URLs be resolved and replaced in create and update operations. For
 	 * example, if this property is set to true and a resource is created containing a reference
 	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
@@ -165,8 +252,14 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Search results are stored in the database so that they can be paged through. After this
-	 * number of milliseconds, they will be deleted from the database. Defaults to 1 hour. 
+	 * Sets the number of milliseconds that search results for a given client search 
+	 * should be preserved before being purged from the database.
+	 * <p>
+	 * Search results are stored in the database so that they can be paged over multiple 
+	 * requests. After this
+	 * number of milliseconds, they will be deleted from the database, and any paging links
+	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
+	 * </p>
 	 * 
 	 * @since 1.5
 	 */
@@ -178,6 +271,9 @@ public class DaoConfig {
 		myHardSearchLimit = theHardSearchLimit;
 	}
 
+	/**
+	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
+	 */
 	public void setHardTagListLimit(int theHardTagListLimit) {
 		myHardTagListLimit = theHardTagListLimit;
 	}
@@ -246,8 +342,8 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Does this server support subscription? If set to true, the server will enable the subscription monitoring mode,
-	 * which adds a bit of overhead. Note that if this is enabled, you must also include Spring task scanning to your XML
+	 * If set to true, the server will enable support for subscriptions. Subscriptions
+	 * will by default be handled via a polling task. Note that if this is enabled, you must also include Spring task scanning to your XML
 	 * config for the scheduled tasks used by the subscription module.
 	 */
 	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
@@ -267,6 +363,31 @@ public class DaoConfig {
 
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 * 
+	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
+	 * means no references will be treated as external
+	 */
+	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
+		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
+		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
+			while (next.endsWith("/")) {
+				next = next.substring(0, next.length() - 1);
+			}
+			treatBaseUrlsAsLocal.add(next);
+		}
+		myTreatBaseUrlsAsLocal = treatBaseUrlsAsLocal;
 	}
 
 }

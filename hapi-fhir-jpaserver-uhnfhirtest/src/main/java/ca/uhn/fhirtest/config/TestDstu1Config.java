@@ -43,6 +43,9 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(false);
 		retVal.setAllowMultipleDelete(false);
+		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu1");
+		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu1");
 		return retVal;
 	}
 

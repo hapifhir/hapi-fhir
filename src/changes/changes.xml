@@ -197,6 +197,12 @@
 				search parameters that did not start with an underscore. E.g. "Patient?_id=1" failed
 				even though this is a valid conditional reference.
 			</action>
+			<action type="add" issue="363">
+				JPA server can now be configured to allow external references (i.e. references that
+				point to resources on other servers). See 
+				<![CDATA[<a href="./doc_jpa.html">JPA Documentation</a>]]> for information on
+				how to use this. Thanks to Naminder Soorma for the suggestion! 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

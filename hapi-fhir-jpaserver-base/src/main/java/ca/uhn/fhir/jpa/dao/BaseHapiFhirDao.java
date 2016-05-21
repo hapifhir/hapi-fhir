@@ -243,14 +243,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Set<ResourceLink> extractResourceLinks(ResourceTable theEntity, IBaseResource theResource) {
-		Set<ResourceLink> retVal = new HashSet<ResourceLink>();
+	protected void extractResourceLinks(ResourceTable theEntity, IBaseResource theResource, Set<ResourceLink> theLinks) {
 
 		/*
 		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
 		 */
 		if (theResource instanceof IBaseBundle) {
-			return retVal;
+			return;
 		}
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -274,7 +273,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (PathAndRef nextPathAndRef : refs) {
 				Object nextObject = nextPathAndRef.getRef();
 
-				ResourceLink nextEntity;
 				IIdType nextId;
 				if (nextObject instanceof IBaseReference) {
 					IBaseReference nextValue = (IBaseReference) nextObject;
@@ -304,6 +302,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
+				String baseUrl = nextId.getBaseUrl();
 				String typeString = nextId.getResourceType();
 				if (isBlank(typeString)) {
 					throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextId.getValue());
@@ -316,6 +315,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 							"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextId.getValue());
 				}
 
+				if (isNotBlank(baseUrl)) {
+					if (!getConfig().getTreatBaseUrlsAsLocal().contains(baseUrl) && !getConfig().isAllowExternalReferences()) {
+						String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
+						throw new InvalidRequestException(msg);
+					} else {
+						if (theLinks.add(new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId))) {
+							ourLog.info("Indexing remote resource reference URL: {}", nextId);
+						}
+						continue;
+					}
+				}
+				
 				Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 				String id = nextId.getIdPart();
 				if (StringUtils.isBlank(id)) {
@@ -357,45 +368,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					continue;
 				}
 
-				// /*
-				// * Is the target type an allowable type of resource for the path where it is referenced?
-				// */
-				//
-				// if (allowedTypesInField == null) {
-				// BaseRuntimeChildDefinition childDef = getContext().newTerser().getDefinition(theResource.getClass(), nextPathAndRef.getPath());
-				// if (childDef instanceof RuntimeChildResourceDefinition) {
-				// RuntimeChildResourceDefinition resRefDef = (RuntimeChildResourceDefinition) childDef;
-				// allowedTypesInField = resRefDef.getResourceTypes();
-				// } else {
-				// allowedTypesInField = new ArrayList<Class<? extends IBaseResource>>();
-				// allowedTypesInField.add(IBaseResource.class);
-				// }
-				// }
-				//
-				// boolean acceptableLink = false;
-				// for (Class<? extends IBaseResource> next : allowedTypesInField) {
-				// if (next.isAssignableFrom(targetResourceDef.getImplementingClass())) {
-				// acceptableLink = true;
-				// break;
-				// }
-				// }
-				//
-				// if (!acceptableLink) {
-				// throw new UnprocessableEntityException(
-				// "Invalid reference found at path '" + nextPathAndRef.getPath() + "'. Resource type '" + targetResourceDef.getName() + "' is not valid for this path");
-				// }
-
-				nextEntity = new ResourceLink(nextPathAndRef.getPath(), theEntity, target);
-				if (nextEntity != null) {
-					retVal.add(nextEntity);
-				}
+				theLinks.add(new ResourceLink(nextPathAndRef.getPath(), theEntity, target));
 			}
 
 		}
 
-		theEntity.setHasLinks(retVal.size() > 0);
+		theEntity.setHasLinks(theLinks.size() > 0);
 
-		return retVal;
 	}
 
 	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
@@ -1268,7 +1247,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
-				links = extractResourceLinks(theEntity, theResource);
+				links = new HashSet<ResourceLink>();
+				extractResourceLinks(theEntity, theResource, links);
 
 				/*
 				 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them

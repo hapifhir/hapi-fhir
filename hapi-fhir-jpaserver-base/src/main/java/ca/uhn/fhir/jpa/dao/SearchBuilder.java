@@ -67,6 +67,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -577,9 +578,26 @@ public class SearchBuilder {
 				ReferenceParam ref = (ReferenceParam) params;
 
 				if (isBlank(ref.getChain())) {
-					String resourceId = ref.getValueAsQueryToken(myContext);
-					IIdType dt = new IdDt(resourceId);
-					List<Long> targetPid = myCallingDao.translateForcedIdToPids(dt);
+					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
+					
+					if (dt.hasBaseUrl()) {
+						if (myCallingDao.getConfig().getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+							dt = dt.toUnqualified();
+						} else {
+							ourLog.debug("Searching for resource link with target URL: {}", dt.getValue());
+							Predicate eq = builder.equal(from.get("myTargetResourceUrl"), dt.getValue());
+							codePredicates.add(eq);
+							continue;
+						}
+					}
+					
+					List<Long> targetPid;
+					try {
+						targetPid = myCallingDao.translateForcedIdToPids(dt);
+					} catch (ResourceNotFoundException e) {
+						doSetPids(new ArrayList<Long>());
+						return;
+					}
 					for (Long next : targetPid) {
 						ourLog.debug("Searching for resource link with target PID: {}", next);
 						Predicate eq = builder.equal(from.get("myTargetResourcePid"), next);

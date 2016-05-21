@@ -147,6 +147,89 @@ $ mvn install]]></source>
 					Configures the database connection settings 
 				</li>
 			</ul>
+			
+		</section>
+			
+		<section name="DaoConfig">
+				
+			<p>
+				The Spring confguration contains a definition for a bean called <code>daoConfig</code>,
+				which will look something like the following:
+			</p>
+			<pre><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	retVal.setAllowMultipleDelete(true);
+	retVal.setAllowInlineMatchUrlReferences(true);
+	return retVal;
+}]]></pre>
+				
+			<p>
+				You can use this method to change various configuration settings on the DaoConfig bean
+				which define the way that the JPA server will behave.
+				See the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig JavaDoc</a>
+				for information about the available settings.
+			</p>
+
+			<subsection name="External/Absolute Resource References">
+				
+				<p>
+					Clients may sometimes post resources to your server that contain
+					absolute resource references. For example, consider the following resource:
+				</p>
+				<pre><![CDATA[<Patient xmlns="http://hl7.org/fhir">
+   <id value="patient-infant-01"/>
+   <name>
+      <use value="official"/>
+      <family value="Miller"/>
+      <given value="Samuel"/>
+   </name>
+   <managingOrganization>
+      <reference value="http://example.com/fhir/Organization/123"/>
+   </managingOrganization>
+</Patient>]]></pre>
+				
+				<p>
+					By default, the server will reject this reference, as only
+					local references are permitted by the server. This can be changed
+					however.
+				</p>
+				<p>
+					If you want the server to recognize that this URL is actually a local
+					reference (i.e. because the server will be deployed to the base URL 
+					<code>http://example.com/fhir/</code>) you can
+					configure the server to recognize this URL via the following DaoConfig
+					setting:
+				</p>
+				<pre><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	// ... other config ...
+	retVal.getTreatBaseUrlsAsLocal().add("http://example.com/fhir/");
+	return retVal;
+}]]></pre>
+
+				<p>
+					On the other hand, if you want the server to be configurable to
+					allow remote references, you can set this with the confguration below.
+					Using the <code>setAllowInlineMatchUrlReferences</code> means that
+					it will be possible to search for references that refer to these
+					external references.
+				</p>
+				
+				<pre><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	// Allow external references
+	retVal.setAllowInlineMatchUrlReferences(true);
+	
+	// If you are allowing external references, it is recommended to
+	// also tell the server which references actually will be local
+	retVal.getTreatBaseUrlsAsLocal().add("http://mydomain.com/fhir");
+	return retVal;
+}]]></pre>
+			</subsection>
+			
 		</section>
 		
 		<section name="Not yet complete">
