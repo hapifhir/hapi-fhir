@@ -217,6 +217,18 @@
 				JSON parser was incorrectly encoding resource language attribute in JSON as an 
 				array instead of a string. Thanks to David Hay for reporting! 
 			</action>
+			<action type="add" issue="367">
+				Sébastien Rivière contributed an excellent pull request which adds a 
+				number of enhancements to JAX-RS module:
+				<![CDATA[
+				<ul>
+				<li>Enable the conditional update and delete</li>
+				<li>Creation of a bundle provider, and support of the @Transaction</li>
+				<li>Bug fix on the exceptions handling as some exceptions throw outside bean context were not intercept.</li>
+				<li>Add the possibility to have the stacktrace in the jaxrsException</li>
+				</ul>
+				]]>
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
