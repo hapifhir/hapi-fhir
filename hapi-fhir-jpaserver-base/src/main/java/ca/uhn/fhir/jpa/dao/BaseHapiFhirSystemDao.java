@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -109,7 +111,8 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 						 */
 						ForcedId forcedId = resourceTable.getForcedId();
 						if (forcedId != null) {
-							if (forcedId.getResourceType() == null) {
+							if (isBlank(forcedId.getResourceType())) {
+								ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), resourceTable.getResourceType());
 								forcedId.setResourceType(resourceTable.getResourceType());
 								myForcedIdDao.save(forcedId);
 							}
