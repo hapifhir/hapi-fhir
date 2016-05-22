@@ -209,7 +209,9 @@
 				an HTTP 500. Thanks to Jim Steel for reporting!
 			</action>
 			<action type="fix" issue="364">
-				Enable parsers to parse and serialize custom resources that contain custom datatypes
+				Enable parsers to parse and serialize custom resources that contain custom datatypes.
+				An example has been added which shows how to do this
+				<![CDATA[<a href="./doc_custom_structures.html">here</a>]]>
 			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
