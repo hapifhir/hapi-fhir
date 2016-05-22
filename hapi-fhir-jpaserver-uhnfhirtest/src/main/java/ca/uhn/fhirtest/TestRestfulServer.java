@@ -34,13 +34,17 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhirtest.config.TdlDstu2Config;
+import ca.uhn.fhirtest.config.TdlDstu3Config;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 
 public class TestRestfulServer extends RestfulServer {
 
+	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
-	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
+	public static final String FHIR_BASEURL_TDL2 = "fhir.baseurl.tdl2";
+	public static final String FHIR_BASEURL_TDL3 = "fhir.baseurl.tdl3";
 
 	private static final long serialVersionUID = 1L;
 
@@ -92,11 +96,18 @@ public class TestRestfulServer extends RestfulServer {
 			baseUrlProperty = FHIR_BASEURL_DSTU1;
 			break;
 		}
+		case "TDL2":
 		case "DSTU2": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+			if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
+				myAppCtx.register(TdlDstu2Config.class);
+				baseUrlProperty = FHIR_BASEURL_TDL2;
+			} else {
+				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU2;
+			}
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
@@ -106,14 +117,20 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = FHIR_BASEURL_DSTU2;
 			break;
 		}
+		case "TDL3":
 		case "DSTU3": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+			if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
+				myAppCtx.register(TdlDstu3Config.class);
+				baseUrlProperty = FHIR_BASEURL_TDL3;
+			} else {
+				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU3;
+			}
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu3());
 			beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
@@ -123,7 +140,6 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = FHIR_BASEURL_DSTU3;
 			break;
 		}
 		default:

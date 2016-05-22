@@ -18,63 +18,28 @@
 		</param-value>
 	</context-param>
 	
-	<!-- 
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>
-			/WEB-INF/hapi-fhir-server-config.xml
-			/WEB-INF/hapi-fhir-tester-application-context.xml
-			/WEB-INF/hapi-fhir-tester-config.xml
-		</param-value>
-	</context-param>
-	-->
-	 
-	<!-- 
-			classpath:/hapi-fhir-server-database-config-dstu1.xml 
-			classpath:/hapi-fhir-server-database-config-dstu2.xml 
-			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
-			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
-			classpath:fhir-spring-subscription-config-dstu2.xml
-			classpath:fhir-spring-search-config-dstu2.xml
-	-->
 	
-  <!-- Servlets -->
-
+	<!-- Servlets -->
 	<servlet>
 		<servlet-name>spring</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+		</init-param>
+		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>
-				/WEB-INF/hapi-fhir-tester-application-context.xml
-				/WEB-INF/hapi-fhir-tester-config.xml
-			</param-value>
+			<param-value>ca.uhn.fhirtest.config.FhirTesterConfig</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 
-	<!-- 
-	<servlet>
-		<servlet-name>fhirServletBase</servlet-name>
-		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
-		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (Base / DSTU1 Resources)</param-value>
-		</init-param>
-		<init-param>
-			<param-name>FhirVersion</param-name>
-			<param-value>BASE</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	-->
-	
 	<servlet>
 		<servlet-name>fhirServletDstu1</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU 1 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU1 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
@@ -88,7 +53,7 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU 2 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU2 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
@@ -102,11 +67,39 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU 3 Resources)</param-value>
+			<param-value>UHN Test Server (STU3 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>DSTU3</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletTdl2</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>Test Data Library (DSTU2 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>TDL2</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletTdl3</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>FHIR Test Data Library (STU3 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>TDL3</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -133,6 +126,24 @@
 	<servlet-mapping>
 		<servlet-name>fhirServletDstu3</servlet-name>
 		<url-pattern>/baseDstu3/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServletDstu3</servlet-name>
+		<url-pattern>/baseStu3/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>fhirServletTdl2</servlet-name>
+		<url-pattern>/testDataLibraryDstu2/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>fhirServletTdl3</servlet-name>
+		<url-pattern>/testDataLibraryDstu3/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServletTdl3</servlet-name>
+		<url-pattern>/testDataLibraryStu3/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
