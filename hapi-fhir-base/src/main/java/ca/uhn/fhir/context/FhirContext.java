@@ -32,7 +32,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.util.Assert;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
@@ -497,7 +496,7 @@ public class FhirContext {
 	 *           The custom type to add (must not be <code>null</code>)
 	 */
 	public void registerCustomType(Class<? extends IBase> theType) {
-		Assert.notNull(theType, "theType must not be null");
+		Validate.notNull(theType, "theType must not be null");
 
 		ensureCustomTypeList();
 		myCustomTypes.add(theType);
@@ -517,8 +516,8 @@ public class FhirContext {
 	 *           The custom types to add (must not be <code>null</code> or contain null elements in the collection)
 	 */
 	public void registerCustomTypes(Collection<Class<? extends IBase>> theTypes) {
-		Assert.notNull(theTypes, "theTypes must not be null");
-		Assert.noNullElements(theTypes.toArray(), "theTypes must not contain any null elements");
+		Validate.notNull(theTypes, "theTypes must not be null");
+		Validate.noNullElements(theTypes.toArray(), "theTypes must not contain any null elements");
 
 		ensureCustomTypeList();
 

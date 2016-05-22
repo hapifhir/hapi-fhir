@@ -19,7 +19,7 @@ public class RandomServerPortProvider {
 			int port = server.getLocalPort();
 			ourPorts.add(port);
 			server.close();
-			Thread.sleep(500);
+			Thread.sleep(2000);
 			return port;
 		} catch (IOException e) {
 			throw new Error(e);

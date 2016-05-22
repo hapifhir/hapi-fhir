@@ -160,7 +160,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id0 = myConditionDao.create(c0, mySrd).getId().toUnqualifiedVersionless();
 		
 		Condition c1 = new Condition();
-		c1.setOnset(new Age().setValue(100l).setCode("AGECODE"));
+		c1.setOnset(new Age().setValue(100L).setCode("AGECODE"));
 		IIdType id1 = myConditionDao.create(c1, mySrd).getId().toUnqualifiedVersionless();
 
 		Condition c2 = new Condition();
@@ -212,8 +212,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.read(theId, mySrd);
 		} else if ("Organization".equals(theId.getResourceType())) {
 			myOrganizationDao.read(theId, mySrd);
+		} else if ("CodeSystem".equals(theId.getResourceType())) {
+			myCodeSystemDao.read(theId, mySrd);
 		} else {
-			fail("No type");
+			fail("Can't handle type: " + theId.getResourceType());
 		}
 	}
 

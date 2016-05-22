@@ -1376,17 +1376,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertEquals(1, result.size());
 		assertEquals(obsId01.getIdPart(), result.get(0).getIdElement().getIdPart());
 
-		try {
-			myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"));
-			fail();
-		} catch (ResourceNotFoundException e) {
-			// good
-		}
-
-		/*
-		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list
-		 * for numeric IDs that don't exist
-		 */
+		result = toList(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99")));
+		assertEquals(0, result.size());
 
 		result = toList(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999999")));
 		assertEquals(0, result.size());

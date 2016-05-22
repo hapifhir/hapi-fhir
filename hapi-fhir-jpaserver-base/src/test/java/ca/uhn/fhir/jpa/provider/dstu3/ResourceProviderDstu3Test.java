@@ -1703,12 +1703,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IdType o1id = (IdType) ourClient.create().resource(o1).execute().getId();
+		IdType o1id = (IdType) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new Reference(o1id));
+		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
 		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
@@ -1949,7 +1949,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
-		pat.getManagingOrganization().setReferenceElement(orgId);
+		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		//@formatter:off
