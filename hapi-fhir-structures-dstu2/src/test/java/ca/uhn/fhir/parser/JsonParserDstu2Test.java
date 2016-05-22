@@ -64,6 +64,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -496,7 +497,24 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, not(containsString("tag")));
 	}
 
-	
+
+	@Test
+	public void testEncodeAndParseLanguage() {
+		Patient p = new Patient();
+		p.setLanguage(new CodeDt("en_CA"));
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(encoded);
+		
+		assertEquals("{\"resourceType\":\"Patient\",\"language\":\"en_CA\"}", encoded);
+		
+		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
+		assertEquals("en_CA", p.getLanguage().getValue());
+		
+		p = (Patient) ourCtx.newJsonParser().parseResource("{\"resourceType\":\"Patient\",\"language\":[\"en_CA\"]}");
+		assertEquals("en_CA", p.getLanguage().getValue());
+	}
+
 	/**
 	 * #158
 	 */

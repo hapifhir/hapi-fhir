@@ -213,6 +213,10 @@
 				An example has been added which shows how to do this
 				<![CDATA[<a href="./doc_custom_structures.html">here</a>]]>
 			</action>
+			<action type="fix">
+				JSON parser was incorrectly encoding resource language attribute in JSON as an 
+				array instead of a string. Thanks to David Hay for reporting! 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
