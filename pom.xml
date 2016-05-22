@@ -1087,6 +1087,11 @@
 									<replacevalue>https://ajax.googleapis</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>\t</replacetoken>
+									<replacevalue>   </replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
 									<replacevalue><![CDATA[<div class="jumbotron subhead">
