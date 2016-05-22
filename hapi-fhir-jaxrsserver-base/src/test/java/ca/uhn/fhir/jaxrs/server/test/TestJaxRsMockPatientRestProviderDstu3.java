@@ -78,8 +78,8 @@ public class TestJaxRsMockPatientRestProviderDstu3 extends AbstractJaxRsResource
 	}
 
 	@Update
-	public MethodOutcome update(@IdParam final IdType theId, @ResourceParam final Patient patient) throws Exception {
-		return mock.update(theId, patient);
+	public MethodOutcome update(@IdParam final IdType theId, @ResourceParam final Patient patient,@ConditionalUrlParam final String theConditional) throws Exception {
+		return mock.update(theId, patient, theConditional);
 	}
 
 	@Read
@@ -99,8 +99,8 @@ public class TestJaxRsMockPatientRestProviderDstu3 extends AbstractJaxRsResource
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam final IdType theId) {
-		return mock.delete(theId);
+	public MethodOutcome delete(@IdParam final IdType theId, @ConditionalUrlParam final String theConditional) {
+		return mock.delete(theId, theConditional);
 	}
 
     @Search(compartmentName = "Condition")
