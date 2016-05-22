@@ -5,8 +5,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
@@ -43,6 +43,47 @@ public class CustomTypeDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See #368
+	 */
+	@Test
+	public void testConstrainedFieldContainedResource() {
+		Medication medication = new Medication();
+		medication.getCode().setText("MED TEXT");
+		
+		CustomMedicationOrderDstu2 mo = new CustomMedicationOrderDstu2();
+		mo.setMedication(new ResourceReferenceDt());
+		mo.getMedication().setResource(medication);
+		
+		String string = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
+		ourLog.info(string);
+		
+		//@formatter:on
+		assertThat(string, stringContainsInOrder(
+				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
+				"   <contained>", 
+				"      <Medication xmlns=\"http://hl7.org/fhir\">", 
+				"         <id value=\"1\"/>", 
+				"         <code>", 
+				"            <text value=\"MED TEXT\"/>", 
+				"         </code>", 
+				"      </Medication>", 
+				"   </contained>", 
+				"   <medication>", 
+				"      <reference value=\"#1\"/>", 
+				"   </medication>", 
+				"</MedicationOrder>"));
+		//@formatter:on
+		
+		mo = ourCtx.newXmlParser().parseResource(CustomMedicationOrderDstu2.class, string);
+		
+		medication = (Medication) mo.getMedication().getResource();
+		assertNotNull(medication);
+		assertEquals("#1", medication.getId().getValue());
+		assertEquals("MED TEXT", medication.getCode().getText());
+		
+	}
+	
 	/**
 	 * See #364
 	 */
