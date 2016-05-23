@@ -11,8 +11,21 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.MarkdownType;
+import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Patient.LinkType;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.junit.AfterClass;
@@ -22,28 +35,17 @@ import org.mockito.ArgumentCaptor;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.MarkdownDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class FhirTerserDstu2Test {
+public class FhirTerserDstu3Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Test
 	public void testCloneIntoComposite() {
-		QuantityDt source = new QuantityDt();
+		Quantity source = new Quantity();
 		source.setCode("CODE");
-		MoneyDt target = new MoneyDt();
+		Money target = new Money();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 
@@ -52,10 +54,10 @@ public class FhirTerserDstu2Test {
    
 	@Test
 	public void testCloneIntoCompositeMismatchedFields() {
-		QuantityDt source = new QuantityDt();
+		Quantity source = new Quantity();
 		source.setSystem("SYSTEM");
 		source.setUnit("UNIT");
-		IdentifierDt target = new IdentifierDt();
+		Identifier target = new Identifier();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 
@@ -76,21 +78,21 @@ public class FhirTerserDstu2Test {
    public void testCloneIntoExtension() {
        Patient patient = new Patient();
 
-       patient.addUndeclaredExtension(new ExtensionDt(false, "http://example.com", new StringDt("FOO")));
+       patient.addExtension(new Extension("http://example.com", new StringType("FOO")));
 
        Patient target = new Patient();
 		ourCtx.newTerser().cloneInto(patient, target, false);
 		
-		List<ExtensionDt> exts = target.getUndeclaredExtensionsByUrl("http://example.com");
+		List<Extension> exts = target.getExtensionsByUrl("http://example.com");
 		assertEquals(1, exts.size());
-		assertEquals("FOO", ((StringDt)exts.get(0).getValue()).getValue());
+		assertEquals("FOO", ((StringType)exts.get(0).getValue()).getValue());
    }
 
 
 	@Test
 	public void testCloneIntoPrimitive() {
-		StringDt source = new StringDt("STR");
-		MarkdownDt target = new MarkdownDt();
+		StringType source = new StringType("STR");
+		MarkdownType target = new MarkdownType();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 
@@ -100,8 +102,8 @@ public class FhirTerserDstu2Test {
 
 	@Test
 	public void testCloneIntoPrimitiveFails() {
-		StringDt source = new StringDt("STR");
-		MoneyDt target = new MoneyDt();
+		StringType source = new StringType("STR");
+		Money target = new Money();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 		assertTrue(target.isEmpty());
@@ -121,14 +123,14 @@ public class FhirTerserDstu2Test {
    @Test
    public void testCloneIntoValues() {
        Observation obs = new Observation();
-       obs.setValue(new StringDt("AAA"));
-       obs.setComments("COMMENTS");
+       obs.setValue(new StringType("AAA"));
+       obs.setComment("COMMENTS");
 
        Observation target = new Observation();
 		ourCtx.newTerser().cloneInto(obs, target, false);
 		
-		assertEquals("AAA", ((StringDt)obs.getValue()).getValue());
-		assertEquals("COMMENTS", obs.getComments());
+		assertEquals("AAA", ((StringType)obs.getValue()).getValue());
+		assertEquals("COMMENTS", obs.getComment());
    }
 
 	@Test
@@ -138,13 +140,12 @@ public class FhirTerserDstu2Test {
 
 		Organization o = new Organization();
 		o.getNameElement().setValue("ORGANIZATION");
-		p.getContained().getContainedResources().add(o);
+		p.getContained().add(o);
 
 		FhirTerser t = ourCtx.newTerser();
-		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(p, StringDt.class);
+		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
 
-		assertEquals(2, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringDt("PATIENT"), new StringDt("ORGANIZATION")));
+		assertThat(toStrings(strings), containsInAnyOrder("PATIENT","ORGANIZATION"));
 
 	}
 
@@ -158,10 +159,10 @@ public class FhirTerserDstu2Test {
 		b.addLink().setRelation("BUNDLE");
 
 		FhirTerser t = ourCtx.newTerser();
-		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(b, StringDt.class);
+		List<StringType> strings = t.getAllPopulatedChildElementsOfType(b, StringType.class);
 
 		assertEquals(1, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringDt("BUNDLE")));
+		assertThat(toStrings(strings), containsInAnyOrder("BUNDLE"));
 
 	}
 
@@ -172,15 +173,16 @@ public class FhirTerserDstu2Test {
 
 		Organization o = new Organization();
 		o.setName("ORG");
-		ResourceReferenceDt ref = new ResourceReferenceDt(o);
-		ExtensionDt ext = new ExtensionDt(false, "urn:foo", ref);
-		p.addUndeclaredExtension(ext);
+		Reference ref = new Reference(o);
+		Extension ext = new Extension("urn:foo", ref);
+		p.addExtension(ext);
 
-		List<IBaseReference> refs = ourCtx.newTerser().getAllPopulatedChildElementsOfType(p, IBaseReference.class);
+		FhirTerser t = ourCtx.newTerser();
+		List<IBaseReference> refs = t.getAllPopulatedChildElementsOfType(p, IBaseReference.class);
 		assertEquals(1, refs.size());
 		assertSame(ref, refs.get(0));
 	}
-	
+
 	@Test
 	public void testVisitWithModelVisitor2() {
 		IModelVisitor2 visitor = mock(IModelVisitor2.class);
@@ -192,7 +194,7 @@ public class FhirTerserDstu2Test {
 		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
 
 		Patient p = new Patient();
-		p.addLink().getTypeElement().setValue("CODE");
+		p.addLink().getTypeElement().setValue(LinkType.REFER);
 		ourCtx.newTerser().visit(p, visitor);
 
 		assertEquals(3, element.getAllValues().size());
@@ -205,6 +207,14 @@ public class FhirTerserDstu2Test {
 		// assertEquals(1, containingElementPath.getAllValues().get(1).size());
 		// assertEquals(2, containingElementPath.getAllValues().get(2).size());
 
+	}
+	
+	private List<String> toStrings(List<StringType> theStrings) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (StringType next : theStrings) {
+			retVal.add(next.getValue());
+		}
+		return retVal;
 	}
 
 	@AfterClass

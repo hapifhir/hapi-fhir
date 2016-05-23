@@ -43,6 +43,10 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 		return myChildren;
 	}
 
+	public List<BaseRuntimeChildDefinition> getChildrenIncludingUrl() {
+		return super.getChildren();
+	}
+
 	@Override
 	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);

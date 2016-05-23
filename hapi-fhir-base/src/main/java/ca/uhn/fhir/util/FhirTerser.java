@@ -48,6 +48,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildDirectResource;
+import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -88,16 +89,17 @@ public class FhirTerser {
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
 		}
-		
-		if (theElement instanceof IBaseHasExtensions) {
-			for (IBaseExtension<?, ?> nextExt : ((IBaseHasExtensions)theElement).getExtension()) {
-				if (nextExt == null) {
-					continue;
-				}
-				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
-				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
-			}
-		}
+
+		// Commented out because FhirTerserDstu3Test#testGetResourceReferenceInExtension
+//		if (theElement instanceof IBaseHasExtensions) {
+//			for (IBaseExtension<?, ?> nextExt : ((IBaseHasExtensions)theElement).getExtension()) {
+//				if (nextExt == null) {
+//					continue;
+//				}
+//				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
+//				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
+//			}
+//		}
 		
 		if (theElement instanceof IBaseHasModifierExtensions) {
 			for (IBaseExtension<?, ?> nextExt : ((IBaseHasModifierExtensions)theElement).getModifierExtension()) {
@@ -137,18 +139,25 @@ public class FhirTerser {
 		BaseRuntimeElementCompositeDefinition<?> sourceDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSource.getClass()); 
 		BaseRuntimeElementCompositeDefinition<?> targetDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theTarget.getClass());
 		
-		for (BaseRuntimeChildDefinition nextChild : sourceDef.getChildren()) {
+		List<BaseRuntimeChildDefinition> children = sourceDef.getChildren();
+		if (sourceDef instanceof RuntimeExtensionDtDefinition) {
+			children = ((RuntimeExtensionDtDefinition)sourceDef).getChildrenIncludingUrl();
+		}
+		
+		for (BaseRuntimeChildDefinition nextChild : children) {
 			for (IBase nextValue : nextChild.getAccessor().getValues(theSource)) {
-				BaseRuntimeChildDefinition targetChild = targetDef.getChildByName(nextChild.getElementName());
+				String elementName = nextChild.getChildNameByDatatype(nextValue.getClass());
+				BaseRuntimeChildDefinition targetChild = targetDef.getChildByName(elementName);
 				if (targetChild == null) {
 					if (theIgnoreMissingFields) {
 						continue;
 					} else {
-						throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + nextChild.getElementName());
+						throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
 					}
 				}
 				
-				IBase target = targetChild.getChildByName(nextChild.getElementName()).newInstance();
+				BaseRuntimeElementDefinition<?> childDef = targetChild.getChildByName(elementName);
+				IBase target = childDef.newInstance();
 				targetChild.getMutator().addValue(theTarget, target);
 				cloneInto(nextValue, target, theIgnoreMissingFields);
 			}

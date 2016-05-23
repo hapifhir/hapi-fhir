@@ -229,6 +229,11 @@
 				</ul>
 				]]>
 			</action>
+			<action type="fix" issue="369">
+				FhirTerser.cloneInto method failed to clone correctly if the source 
+				had any extensions. Thanks to GitHub user @Virdulys for submitting and
+				providing a test case!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
