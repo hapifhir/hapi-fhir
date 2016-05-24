@@ -186,6 +186,9 @@
 				search parameters that did not start with an underscore. E.g. "Patient?_id=1" failed
 				even though this is a valid conditional reference.
 			</action>
+			<action type="fix">
+				Web Testing UI was not able to correctly post an STU3 transaction
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
