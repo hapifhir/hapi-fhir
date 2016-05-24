@@ -36,6 +36,7 @@ import com.google.common.base.Stopwatch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -52,9 +54,9 @@ import ca.uhn.fhir.util.ValidateUtil;
 public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvc.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
-
+	
 	@Autowired
-	private ITermCodeSystemDao myCodeSystemDao;
+	protected ITermCodeSystemDao myCodeSystemDao;
 
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
@@ -169,6 +171,10 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			return;
 		}
 
+		if (theConceptsStack.size() % 10000 == 0) {
+			ourLog.info("Have saved {} concepts",theConceptsStack.size());
+		}
+		
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			persistChildren(next.getChild(), theCodeSystem, theConceptsStack);
 		}
@@ -204,16 +210,24 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			}
 		}
 
+		ourLog.info("Validating code system");
+		
 		// Validate the code system
 		IdentityHashMap<TermConcept, Object> conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystem.getConcepts()) {
 			validateConceptForStorage(next, theCodeSystem, conceptsStack);
 		}
 
+		ourLog.info("Saving version");
+
 		myCodeSystemVersionDao.save(theCodeSystem);
-		
+
+		ourLog.info("Saving code system");
+
 		codeSystem.setCurrentVersion(theCodeSystem);
 		myCodeSystemDao.save(codeSystem);
+
+		ourLog.info("Saving concepts...");
 
 		conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystem.getConcepts()) {
@@ -244,10 +258,12 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			next.setCodeSystem(theCodeSystem);
 			validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack);
 		}
 
 		theConceptsStack.remove(theConcept);
 	}
+
 
 }

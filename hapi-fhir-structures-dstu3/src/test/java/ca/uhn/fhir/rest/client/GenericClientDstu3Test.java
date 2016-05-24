@@ -39,6 +39,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
@@ -65,7 +66,7 @@ public class GenericClientDstu3Test {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR DSTU3; apache)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; apache)";
 	}
 
 	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {

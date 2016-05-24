@@ -60,6 +60,7 @@ import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -188,7 +189,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDateElement(conformanceDate());
-		retVal.setFhirVersion("1.4.0"); // TODO: pull from model
+		retVal.setFhirVersion(FhirVersionEnum.DSTU3.getFhirVersionString());
 		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
 																					// effort since the parser
 		// needs to be modified to actually allow it

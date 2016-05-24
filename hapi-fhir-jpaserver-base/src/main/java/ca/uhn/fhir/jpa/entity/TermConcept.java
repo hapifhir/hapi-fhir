@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -43,12 +45,18 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 
 @Entity
 @Table(name="TRM_CONCEPT", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
 })
 public class TermConcept implements Serializable {
+	private static final int MAX_DESC_LENGTH = 400;
+
 	private static final long serialVersionUID = 1L;
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="myParent")
@@ -61,7 +69,7 @@ public class TermConcept implements Serializable {
 	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 	
-	@Column(name="DISPLAY", length=200, nullable=true)
+	@Column(name="DISPLAY", length=MAX_DESC_LENGTH, nullable=true)
 	private String myDisplay;
 
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="myChild")
@@ -82,12 +90,12 @@ public class TermConcept implements Serializable {
 		setCode(theCode);
 	}
 
-	public TermConcept addChild(TermConcept theChild) {
-		Validate.notNull(theChild.getCodeSystem(), "theChild.getCodeSystem() must not return null");
+	public TermConcept addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
+		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
 		link.setParent(this);
-		link.setCodeSystem(theChild.getCodeSystem());
 		link.setChild(theChild);
+		link.setRelationshipType(theRelationshipType);
 		getChildren().add(link);
 		return this;
 	}
@@ -109,6 +117,11 @@ public class TermConcept implements Serializable {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(myPid, obj.myPid);
 		return b.isEquals();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("code", myCode).append("display", myDisplay).build();
 	}
 
 	public Collection<TermConceptParentChildLink> getChildren() {
@@ -154,11 +167,14 @@ public class TermConcept implements Serializable {
 
 	public void setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
+		if (isNotBlank(theDisplay) && theDisplay.length() > MAX_DESC_LENGTH) {
+			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
+		}
 	}
 
-	public void addChildren(List<TermConcept> theChildren) {
+	public void addChildren(List<TermConcept> theChildren, RelationshipTypeEnum theRelationshipType) {
 		for (TermConcept next : theChildren) {
-			addChild(next);
+			addChild(next, theRelationshipType);
 		}
 	}
 

@@ -34,19 +34,23 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -54,9 +58,15 @@ import com.google.common.annotations.VisibleForTesting;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class TerminologyLoaderSvc {
+	static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
+	static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
+	static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvc.class);
 
 	@Autowired
@@ -67,10 +77,8 @@ public class TerminologyLoaderSvc {
 		myTermSvc = theTermSvc;
 	}
 
-	public void loadSnomedCt(byte[] theZipBytes) {
-		String filenameDescription = "Terminology/sct2_Description_Full";
-		String filenameRelationship = "Terminology/sct2_Relationship_Full";
-		List<String> allFilenames = Arrays.asList(filenameDescription, filenameRelationship);
+	public void loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
+		List<String> allFilenames = Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
 
 		Map<String, File> filenameToFile = new HashMap<String, File>();
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(theZipBytes)));
@@ -87,7 +95,6 @@ public class TerminologyLoaderSvc {
 				
 				if (!want) {
 					ourLog.info("Ignoring zip entry: {}", nextEntry.getName());
-					IOUtils.copy(inputStream, new SinkOutputStream());
 					continue;
 				}
 				
@@ -95,9 +102,9 @@ public class TerminologyLoaderSvc {
 
 				File nextOutFile = File.createTempFile("hapi_fhir", ".csv");
 				nextOutFile.deleteOnExit();
-				OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(nextOutFile, false));
+				OutputStream outputStream = new SinkOutputStream(new FileOutputStream(nextOutFile, false), nextEntry.getName());
 				try {
-					IOUtils.copy(inputStream, outputStream);
+					IOUtils.copyLarge(inputStream, outputStream);
 				} finally {
 					IOUtils.closeQuietly(outputStream);
 				}
@@ -112,71 +119,55 @@ public class TerminologyLoaderSvc {
 
 		ourLog.info("Beginning SNOMED CT processing");
 
+		processSnomedCtFiles(filenameToFile,theRequestDetails);
+	}
+
+	void processSnomedCtFiles(Map<String, File> filenameToFile, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> id2concept = new HashMap<String, TermConcept>();
 		final Map<String, TermConcept> code2concept = new HashMap<String, TermConcept>();
+		final Set<String> validConceptIds = new HashSet<String>();
 		final List<TermConceptParentChildLink> links = new ArrayList<TermConceptParentChildLink>();
 
-		IRecordHandler handler = new IRecordHandler() {
-			@Override
-			public void accept(CSVRecord theRecord) {
-				String id = theRecord.get("id");
-				boolean active = "1".equals(theRecord.get("active"));
-				if (!active) {
-					return;
-				}
-				String conceptId = theRecord.get("conceptId");
-				String term = theRecord.get("term");
+		IRecordHandler handler = new SctHandlerConcept(validConceptIds);
+		iterateOverZipFile(filenameToFile, SCT_FILE_CONCEPT, handler);
 
-				TermConcept concept = getOrCreateConcept(codeSystemVersion, id2concept, id);
-				concept.setCode(conceptId);
-				concept.setDisplay(term);
-				code2concept.put(conceptId, concept);
-			}
-		};
-		iterateOverZipFile(filenameToFile, filenameDescription, handler);
+		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
+		
+		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
+		iterateOverZipFile(filenameToFile, SCT_FILE_DESCRIPTION, handler);
 
-		final HashSet<TermConcept> rootConcepts = new HashSet<TermConcept>();
-		rootConcepts.addAll(code2concept.values());
-
-		handler = new IRecordHandler() {
-			@Override
-			public void accept(CSVRecord theRecord) {
-				String sourceId = theRecord.get("sourceId");
-				String destinationId = theRecord.get("destinationId");
-				String typeId = theRecord.get("typeId");
-				boolean active = "1".equals(theRecord.get("active"));
-				if (!active) {
-					return;
-				}
-				TermConcept typeConcept = findConcept(code2concept, typeId);
-				TermConcept sourceConcept = findConcept(code2concept, sourceId);
-				TermConcept targetConcept = findConcept(code2concept, destinationId);
-				if (typeConcept.getDisplay().equals("Is a")) {
-					TermConceptParentChildLink link = new TermConceptParentChildLink();
-					link.setChild(sourceConcept);
-					link.setParent(targetConcept);
-					link.setCodeSystem(codeSystemVersion);
-					rootConcepts.remove(link.getChild());
-				} else {
-					ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
-				}
-			}
-
-			private TermConcept findConcept(final Map<String, TermConcept> code2concept, String typeId) {
-				TermConcept typeConcept = code2concept.get(typeId);
-				if (typeConcept == null) {
-					throw new InternalErrorException("Unknown type ID: " + typeId);
-				}
-				return typeConcept;
-			}
-		};
-		iterateOverZipFile(filenameToFile, filenameRelationship, handler);
+		ourLog.info("Got {} concepts, cloning map", code2concept.size());
+		final HashMap<String, TermConcept> rootConcepts = new HashMap<String, TermConcept>(code2concept);
+		
+		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
+		iterateOverZipFile(filenameToFile, SCT_FILE_RELATIONSHIP, handler);
 
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
-		codeSystemVersion.getConcepts().addAll(rootConcepts);
-		myTermSvc.storeNewCodeSystemVersion("http://snomed.info/sct", codeSystemVersion);
+		
+		for (TermConcept next : rootConcepts.values()){
+			dropCircularRefs(next, new HashSet<String>());
+		}
+		
+		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
+		myTermSvc.storeNewCodeSystemVersion("http://snomed.info/sct", codeSystemVersion, theRequestDetails);
+	}
+
+	private void dropCircularRefs(TermConcept theConcept, HashSet<String> theChain) {
+		
+		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
+			TermConceptParentChildLink next = childIter.next();
+			TermConcept nextChild = next.getChild();
+			if (theChain.contains(nextChild.getCode())) {
+				ourLog.info("Removing circular reference code {} from parent {}", nextChild.getCode(), theConcept.getCode());
+				childIter.remove();
+			} else {
+				theChain.add(theConcept.getCode());
+				dropCircularRefs(nextChild, theChain);
+				theChain.remove(theConcept.getCode());
+			}
+		}
 	}
 
 	private void iterateOverZipFile(Map<String, File> theFilenameToFile, String fileNamePart, IRecordHandler handler) {
@@ -193,9 +184,17 @@ public class TerminologyLoaderSvc {
 					Iterator<CSVRecord> iter = parsed.iterator();
 					ourLog.debug("Header map: {}", parsed.getHeaderMap());
 
+					int count = 0;
+					int logIncrement = 100000;
+					int nextLoggedCount = logIncrement;
 					while (iter.hasNext()) {
 						CSVRecord nextRecord = iter.next();
 						handler.accept(nextRecord);
+						count++;
+						if (count >= nextLoggedCount) {
+							ourLog.info(" * Processed {} records in {}", count, fileNamePart);
+							nextLoggedCount += logIncrement;
+						}
 					}
 				} catch (IOException e) {
 					throw new InternalErrorException(e);
@@ -215,6 +214,118 @@ public class TerminologyLoaderSvc {
 			concept.setCodeSystem(codeSystemVersion);
 		}
 		return concept;
+	}
+
+	private final class SctHandlerRelationship implements IRecordHandler {
+		private final TermCodeSystemVersion myCodeSystemVersion;
+		private final Map<String, TermConcept> myRootConcepts;
+		private final Map<String, TermConcept> myCode2concept;
+
+		private SctHandlerRelationship(TermCodeSystemVersion theCodeSystemVersion, HashMap<String,TermConcept> theRootConcepts, Map<String, TermConcept> theCode2concept) {
+			myCodeSystemVersion = theCodeSystemVersion;
+			myRootConcepts = theRootConcepts;
+			myCode2concept = theCode2concept;
+		}
+
+		@Override
+		public void accept(CSVRecord theRecord) {
+			Set<String> ignoredTypes = new HashSet<String>();
+			ignoredTypes.add("Method (attribute)");
+			ignoredTypes.add("Direct device (attribute)");
+			ignoredTypes.add("Has focus (attribute)");
+			ignoredTypes.add("Access instrument");
+			ignoredTypes.add("Procedure site (attribute)");
+			ignoredTypes.add("Causative agent (attribute)");
+			ignoredTypes.add("Course (attribute)");
+			ignoredTypes.add("Finding site (attribute)");
+			ignoredTypes.add("Has definitional manifestation (attribute)");
+			
+			String sourceId = theRecord.get("sourceId");
+			String destinationId = theRecord.get("destinationId");
+			String typeId = theRecord.get("typeId");
+			boolean active = "1".equals(theRecord.get("active"));
+			if (!active) {
+				return;
+			}
+			TermConcept typeConcept = findConcept(myCode2concept, typeId);
+			TermConcept sourceConcept = findConcept(myCode2concept, sourceId);
+			TermConcept targetConcept = findConcept(myCode2concept, destinationId);
+			if (typeConcept.getDisplay().equals("Is a (attribute)")) {
+				TermConceptParentChildLink link = new TermConceptParentChildLink();
+				link.setChild(sourceConcept);
+				link.setParent(targetConcept);
+				link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+				link.setCodeSystem(myCodeSystemVersion);
+				myRootConcepts.remove(link.getChild().getCode());
+				
+				targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
+				// ignore
+			} else {
+//				ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
+			}
+		}
+
+		private TermConcept findConcept(final Map<String, TermConcept> code2concept, String typeId) {
+			TermConcept typeConcept = code2concept.get(typeId);
+			if (typeConcept == null) {
+				throw new InternalErrorException("Unknown type ID: " + typeId);
+			}
+			return typeConcept;
+		}
+	}
+
+	private final class SctHandlerDescription implements IRecordHandler {
+		private final Map<String, TermConcept> myCode2concept;
+		private final Map<String, TermConcept> myId2concept;
+		private final TermCodeSystemVersion myCodeSystemVersion;
+		private Set<String> myValidConceptIds;
+
+		private SctHandlerDescription(Set<String> theValidConceptIds, Map<String, TermConcept> theCode2concept, Map<String, TermConcept> theId2concept, TermCodeSystemVersion theCodeSystemVersion) {
+			myCode2concept = theCode2concept;
+			myId2concept = theId2concept;
+			myCodeSystemVersion = theCodeSystemVersion;
+			myValidConceptIds = theValidConceptIds;
+		}
+
+		@Override
+		public void accept(CSVRecord theRecord) {
+			String id = theRecord.get("id");
+			boolean active = "1".equals(theRecord.get("active"));
+			if (!active) {
+				return;
+			}
+			String conceptId = theRecord.get("conceptId");
+			if (!myValidConceptIds.contains(conceptId)) {
+				return;
+			}
+
+			String term = theRecord.get("term");
+
+			TermConcept concept = getOrCreateConcept(myCodeSystemVersion, myId2concept, id);
+			concept.setCode(conceptId);
+			concept.setDisplay(term);
+			myCode2concept.put(conceptId, concept);
+		}
+	}
+
+	private final class SctHandlerConcept implements IRecordHandler {
+
+		private Set<String> myValidConceptIds;
+
+		public SctHandlerConcept(Set<String> theValidConceptIds) {
+			myValidConceptIds = theValidConceptIds;
+		}
+
+		@Override
+		public void accept(CSVRecord theRecord) {
+			String id = theRecord.get("id");
+			boolean active = "1".equals(theRecord.get("active"));
+			if (!active) {
+				return;
+			}
+			myValidConceptIds.add(id);
+		}
 	}
 
 	private static class ZippedFileInputStream extends InputStream {
@@ -241,26 +352,65 @@ public class TerminologyLoaderSvc {
 	}
 
 	public static void main(String[] args) throws Exception {
-		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
 		TerminologyLoaderSvc svc = new TerminologyLoaderSvc();
-		svc.loadSnomedCt(bytes);
+		
+//		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
+//		svc.loadSnomedCt(bytes);
+
+		Map<String, File> files = new HashMap<String, File>();
+		files.put(SCT_FILE_CONCEPT, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Concept_Full_INT_20160131.txt"));
+		files.put(SCT_FILE_DESCRIPTION, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Description_Full-en_INT_20160131.txt"));
+		files.put(SCT_FILE_RELATIONSHIP, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Relationship_Full_INT_20160131.txt"));
+		svc.processSnomedCtFiles(files, null);
 	}
 
 	private static class SinkOutputStream extends OutputStream {
 
+		private static final long LOG_INCREMENT = 10 * FileUtils.ONE_MB;
+		private FileOutputStream myWrap;
+		private int myBytes;
+		private long myNextLogCount = LOG_INCREMENT;
+		private String myFilename;
+
+		public SinkOutputStream(FileOutputStream theWrap, String theFilename) {
+			myWrap = theWrap;
+			myFilename = theFilename;
+		}
+
 		@Override
 		public void write(int theB) throws IOException {
-			// ignore
+			myWrap.write(theB);
+			addCount(1);
+		}
+
+		private void addCount(int theCount) {
+			myBytes += theCount;
+			if (myBytes > myNextLogCount) {
+				ourLog.info(" * Wrote {} of {}", FileUtils.byteCountToDisplaySize(myBytes), myFilename);
+				myNextLogCount = myBytes + LOG_INCREMENT;
+			}
 		}
 
 		@Override
 		public void write(byte[] theB) throws IOException {
-			// ignore
+			myWrap.write(theB);
+			addCount(theB.length);
 		}
 
 		@Override
 		public void write(byte[] theB, int theOff, int theLen) throws IOException {
-			// ignore
+			myWrap.write(theB, theOff, theLen);
+			addCount(theLen);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			myWrap.flush();
+		}
+
+		@Override
+		public void close() throws IOException {
+			myWrap.close();
 		}
 		
 	}

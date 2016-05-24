@@ -152,7 +152,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
-		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + myFhirContext.getVersion().getVersion().name() + ")");
+		StringBuilder b = new StringBuilder();
+		b.append("HAPI FHIR ");
+		b.append(VersionUtil.getVersion());
+		b.append(" REST Server (FHIR Server; FHIR ");
+		b.append(myFhirContext.getVersion().getVersion().getFhirVersionString());
+		b.append('/');
+		b.append(myFhirContext.getVersion().getVersion().name());
+		b.append(")");
+		theHttpResponse.addHeader("X-Powered-By", b.toString());
 	}
 
 	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {

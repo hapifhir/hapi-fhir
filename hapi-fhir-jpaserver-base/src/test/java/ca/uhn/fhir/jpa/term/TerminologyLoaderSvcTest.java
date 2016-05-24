@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class TerminologyLoaderSvcTest {
@@ -35,7 +36,6 @@ public class TerminologyLoaderSvcTest {
 	}
 	
 	@Test
-//	@Ignore
 	public void testLoadSnomedCt() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
@@ -50,7 +50,8 @@ public class TerminologyLoaderSvcTest {
 		
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 		
-		mySvc.loadSnomedCt(bos.toByteArray());
+		RequestDetails details = mock(RequestDetails.class);
+		mySvc.loadSnomedCt(bos.toByteArray(), details);
 	}
 
 	private void addEntry(ZipOutputStream zos, String fileName) throws IOException {

@@ -24,6 +24,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,6 +34,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 
 @Entity
 @Table(name="TRM_CONCEPT_PC_LINK")
@@ -55,6 +59,10 @@ public class TermConceptParentChildLink implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PC_PID")
 	@Column(name="PID")
 	private Long myPid;
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="REL_TYPE", length=5, nullable=true)
+	private RelationshipTypeEnum myRelationshipType;
 
 	public TermConcept getChild() {
 		return myChild;
@@ -80,4 +88,13 @@ public class TermConceptParentChildLink implements Serializable {
 		myParent = theParent;
 	}
 	
+	
+	public void setRelationshipType(RelationshipTypeEnum theRelationshipType) {
+		myRelationshipType = theRelationshipType;
+	}
+
+
+	public enum RelationshipTypeEnum{
+		ISA
+	}
 }

@@ -23,11 +23,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.VersionUtil;
 
 public class MetadataDstu3Test2 {
 
@@ -47,6 +49,8 @@ public class MetadataDstu3Test2 {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(output, containsString("<Conformance"));
+		
+		assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3)", status.getFirstHeader("X-Powered-By").getValue());
 		
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/metadata");
 		status = ourClient.execute(httpPost);

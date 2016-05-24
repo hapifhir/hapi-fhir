@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -199,7 +200,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 				termConcept.setCode(next.getCode());
 				termConcept.setCodeSystem(theCodeSystemVersion);
 				termConcept.setDisplay(next.getDisplay());
-				termConcept.addChildren(toPersistedConcepts(next.getConcept(), theCodeSystemVersion));
+				termConcept.addChildren(toPersistedConcepts(next.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 				retVal.add(termConcept);
 			}
 		}

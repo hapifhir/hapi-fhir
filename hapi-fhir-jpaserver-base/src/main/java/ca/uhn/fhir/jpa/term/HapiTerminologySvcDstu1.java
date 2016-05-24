@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import java.util.List;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.rest.method.RequestDetails;
 
 public class HapiTerminologySvcDstu1 extends BaseHapiTerminologySvc {
 
@@ -32,7 +33,7 @@ public class HapiTerminologySvcDstu1 extends BaseHapiTerminologySvc {
 	}
 
 	@Override
-	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion) {
+	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.rest.method.RequestDetails;
 
 public interface IHapiTerminologySvc {
 
@@ -43,6 +44,6 @@ public interface IHapiTerminologySvc {
 
 	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
 
-	void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion);
+	void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails);
 
 }

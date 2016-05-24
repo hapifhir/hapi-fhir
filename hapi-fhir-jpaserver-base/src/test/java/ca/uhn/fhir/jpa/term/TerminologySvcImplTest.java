@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -53,9 +54,9 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		TermConcept child = new TermConcept();
 		child.setCodeSystem(cs);
 		child.setCode("child");
-		parent.addChild(child);
+		parent.addChild(child, RelationshipTypeEnum.ISA);
 
-		child.addChild(parent);
+		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
 			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
@@ -82,16 +83,16 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.getConcepts().add(parentA);
 
 		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA);
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAA.addChild(childAAA);
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAA.addChild(childAAB);
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB);
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
 
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
@@ -133,16 +134,16 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.getConcepts().add(parentA);
 
 		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA);
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAA.addChild(childAAA);
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAA.addChild(childAAB);
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB);
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
 
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
