@@ -237,6 +237,9 @@
 			<action type="add">
 				Update DSTU2 InstanceValidator to latest version from upstream 
 			</action>
+			<action type="fix">
+				Web Testing UI was not able to correctly post an STU3 transaction
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

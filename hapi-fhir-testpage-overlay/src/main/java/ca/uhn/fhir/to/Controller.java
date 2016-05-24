@@ -18,10 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -515,16 +514,16 @@ public class Controller extends BaseController {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+		FhirContext context = getContext(theRequest);
+		GenericClient client = theRequest.newClient(theServletRequest, context, myConfig, interceptor);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
-		Bundle bundle;
 		try {
 			if (body.startsWith("{")) {
-				bundle = getContext(theRequest).newJsonParser().parseBundle(body);
+				// JSON content
 			} else if (body.startsWith("<")) {
-				bundle = getContext(theRequest).newXmlParser().parseBundle(body);
+				// XML content
 			} else {
 				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 				return "home";
@@ -538,8 +537,8 @@ public class Controller extends BaseController {
 		ResultType returnsResource = ResultType.BUNDLE;
 		long start = System.currentTimeMillis();
 		try {
-			ourLog.info(logPrefix(theModel) + "Executing transaction with {} resources", bundle.size());
-			client.transaction().withBundle(bundle).execute();
+			ourLog.info(logPrefix(theModel) + "Executing transaction");
+			client.transaction().withBundle(body).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
