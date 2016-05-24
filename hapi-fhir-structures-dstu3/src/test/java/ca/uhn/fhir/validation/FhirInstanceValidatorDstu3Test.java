@@ -83,7 +83,6 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-	
 	@Test
 	// @Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
@@ -94,7 +93,7 @@ public class FhirInstanceValidatorDstu3Test {
 		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/profile/" + name + ".xml"), "UTF-8");
 
 		TreeSet<String> ids = new TreeSet<String>();
-		
+
 		bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
@@ -126,28 +125,28 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	 @Ignore
+	@Ignore
 	public void testValidateBundleWithObservations() throws Exception {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String inputString;
 		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), "UTF-8");
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
-		
+
 		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
 		List<Base> fpOutput;
 		BooleanType bool;
-		
+
 		fpOutput = fp.evaluate(bundle.getEntry().get(0).getResource(), "component.where(code = %resource.code).empty()");
 		assertEquals(1, fpOutput.size());
 		bool = (BooleanType) fpOutput.get(0);
 		assertTrue(bool.getValue());
-//		
-//		fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
-//		assertEquals(1, fpOutput.size());
-//		bool = (BooleanType) fpOutput.get(0);
-//		assertTrue(bool.getValue());
-		
+		//		
+		//		fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
+		//		assertEquals(1, fpOutput.size());
+		//		bool = (BooleanType) fpOutput.get(0);
+		//		assertTrue(bool.getValue());
+
 		ValidationResult output = myVal.validateWithResult(inputString);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors, empty());
@@ -266,8 +265,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {}:{} {} - {}",
-					new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
+			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
 			index++;
 
 			retVal.add(next);
@@ -482,12 +480,9 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithDefaultValuesetBadCode() {
-		String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n"
-				+ "</Observation>";
+		String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(
-				"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
-				output.getMessages().get(0).getMessage());
+		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -565,9 +560,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
-		assertEquals(
-				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code",
-				all.get(0).getMessage());
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

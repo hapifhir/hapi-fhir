@@ -1,0 +1,152 @@
+{
+  "resourceType": "AllergyIntolerance",
+  "id": "84651",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2016-05-19T15:43:49.815-04:00",
+    "profile": [
+      "http://fhir.hl7.org.nz/dstu2/StructureDefinition/ohAllergyIntolerance"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-endDate",
+      "valueDateTime": "2016-05-03"
+    },
+    {
+      "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-informantRole",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/32506021000036107/version/20150531",
+            "code": "133932002",
+            "display": "Carer"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-reasonClosed",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://orionhealth.com/problem-list/adverse-reaction-reason-closed",
+            "code": "1",
+            "display": "Disproven"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-classification",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "version": "http://snomed.info/sct/32506021000036107/version/20150531",
+            "code": "419076005",
+            "display": "Allergic reaction"
+          }
+        ]
+      }
+    }
+  ],
+  "language": [
+    "en"
+  ],
+  "identifier": [
+    {
+      "system": "http://orionhealth.com/identifier/problem-list/ORGNISATION_ORION",
+      "value": "2.25.148135789146703435349240718177383549558.8.4.4.0/522911"
+    }
+  ],
+  "patient": {
+    "reference": "Patient/64909"
+  },
+  "substance": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/32506021000036107/version/20150531",
+        "code": "84430008",
+        "display": "Cross reacting antibody"
+      }
+    ]
+  },
+  "status": "inactive",
+  "criticality": "CRITH",
+  "category": "environment",
+  "reaction": [
+    {
+      "certainty": "likely",
+      "_certainty": {
+        "extension": [
+          {
+            "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/originalValue",
+            "valueCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://orionhealth.com/problem-list/adverse-reaction-certainty",
+                  "code": "SUSPECTED",
+                  "display": "Suspected"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "manifestation": [
+        {
+          "extension": [
+            {
+              "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-manifestationSeverity",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "version": "http://snomed.info/sct/900000000000207008/version/20150531",
+                    "code": "442452003",
+                    "display": "Life-Threatening"
+                  }
+                ]
+              }
+            }
+          ],
+          "coding": [
+            {
+              "system": "http://orionhealth.com/problem-list/clinical-manifestation",
+              "code": "FT",
+              "display": "rlo"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-manifestationSeverity",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://orionhealth.com/problem-list/severity",
+                    "code": "UNKNOWN",
+                    "display": "Unknown"
+                  }
+                ]
+              }
+            }
+          ],
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "http://snomed.info/sct/32506021000036107/version/20150531",
+              "code": "95332009",
+              "display": "Rash of systemic lupus erythematosus"
+            }
+          ]
+        }
+      ],
+      "severity": "severe"
+    }
+  ]
+}

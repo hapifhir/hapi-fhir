@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -41,6 +42,7 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.api.Bundle;
@@ -2185,6 +2187,53 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 	}
+	
+	/**
+	 * From example from david hay - moved to the hl7org_dstu2 project
+	 */
+	@Test
+	@Ignore
+	public void testValidateDavidsAllergyIntolerance() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+		
+		/*
+		 * Upload structurredef 
+		 */
+		
+		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+		HttpEntityEnclosingRequestBase post = new HttpPut(ourServerBase + "/StructureDefinition/ohAllergyIntolerance");
+		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+		
+		/*
+		 * Validate
+		 */
+		
+		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+
+		post = new HttpPost(ourServerBase + "/AllergyIntolerance/$validate?_pretty=true");
+		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, not(containsString("Resource has no id")));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
 
 	@Test
 	public void testValidateResourceHuge() throws IOException {
@@ -2318,4 +2367,5 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	
 }
