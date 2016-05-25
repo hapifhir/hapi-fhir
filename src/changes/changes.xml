@@ -240,6 +240,10 @@
 			<action type="fix">
 				Web Testing UI was not able to correctly post an STU3 transaction
 			</action>
+			<action type="fix">
+				DateTime parser incorrectly parsed times where more than 3 digits of
+				precision were provided on the seconds after the decimal point
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

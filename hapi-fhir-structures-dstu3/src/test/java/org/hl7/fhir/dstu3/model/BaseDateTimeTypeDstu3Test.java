@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.primitive;
+package org.hl7.fhir.dstu3.model;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -16,13 +16,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
-public class BaseDateTimeDtDstu2Test {
+public class BaseDateTimeTypeDstu3Test {
 	private static Locale ourDefaultLocale;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeTypeDstu3Test.class);
 	private SimpleDateFormat myDateInstantParser;
 
 	@AfterClass
@@ -37,16 +36,26 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testParseInvalidZoneOffset() {
+		try {
+			new DateTimeType("2010-01-01T00:00:00.1234-09:00Z");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid FHIR date/time string: 2010-01-01T00:00:00.1234-09:00Z", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testParseInvalid() {
 		try {
-			DateTimeDt dt = new DateTimeDt();
+			DateTimeType dt = new DateTimeType();
 			dt.setValueAsString("1974-12-25+10:00");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
 			assertEquals("Invalid date/time string (invalid length): 1974-12-25+10:00", e.getMessage());
 		}
 		try {
-			DateTimeDt dt = new DateTimeDt();
+			DateTimeType dt = new DateTimeType();
 			dt.setValueAsString("1974-12-25Z");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
@@ -58,7 +67,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseTimeZoneOffsetCorrectly0millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00-09:00");
 		
 		assertEquals("2010-01-01T00:00:00-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.000", myDateInstantParser.format(dt.getValue()));
@@ -73,7 +82,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseTimeZoneOffsetCorrectly1millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00.1-09:00");
 		
 		assertEquals("2010-01-01T00:00:00.1-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.001", myDateInstantParser.format(dt.getValue()));
@@ -88,7 +97,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseTimeZoneOffsetCorrectly2millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00.12-09:00");
 		
 		assertEquals("2010-01-01T00:00:00.12-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.012", myDateInstantParser.format(dt.getValue()));
@@ -103,7 +112,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseTimeZoneOffsetCorrectly3millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.123-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00.123-09:00");
 		
 		assertEquals("2010-01-01T00:00:00.123-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
@@ -115,20 +124,10 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testParseInvalidZoneOffset() {
-		try {
-			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Invalid FHIR date/time string: 2010-01-01T00:00:00.1234-09:00Z", e.getMessage());
-		}
-	}
-	
-	@Test
 	public void testParseTimeZoneOffsetCorrectly4millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1234-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00.1234-09:00");
 		
 		assertEquals("2010-01-01T00:00:00.1234-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
@@ -143,7 +142,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseTimeZoneOffsetCorrectly5millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		
-		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12345-09:00");
+		DateTimeType dt = new DateTimeType("2010-01-01T00:00:00.12345-09:00");
 		
 		assertEquals("2010-01-01T00:00:00.12345-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
@@ -165,7 +164,7 @@ public class BaseDateTimeDtDstu2Test {
 
 		Date time = cal.getTime();
 
-		DateDt date = new DateDt();
+		DateType date = new DateType();
 		date.setValue(time);
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
@@ -176,7 +175,7 @@ public class BaseDateTimeDtDstu2Test {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
 		
-		DateTimeDt date = new DateTimeDt();
+		DateTimeType date = new DateTimeType();
 		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
 		date.setTimeZone(TimeZone.getTimeZone("EST"));
 		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
@@ -196,14 +195,14 @@ public class BaseDateTimeDtDstu2Test {
 
 		Date time = cal.getTime();
 
-		DateDt date = new DateDt();
+		DateType date = new DateType();
 		date.setValue(time, TemporalPrecisionEnum.DAY);
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
 
 	@Test
 	public void testToHumanDisplay() {
-		DateTimeDt dt = new DateTimeDt("2012-01-05T12:00:00-08:00");
+		DateTimeType dt = new DateTimeType("2012-01-05T12:00:00-08:00");
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
 		assertThat(human, containsString("2012"));
