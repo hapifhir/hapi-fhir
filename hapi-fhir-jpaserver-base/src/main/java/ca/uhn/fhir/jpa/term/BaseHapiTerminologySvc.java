@@ -36,7 +36,6 @@ import com.google.common.base.Stopwatch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -45,7 +44,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -62,7 +60,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
 	@Autowired
-	private ITermConceptDao myConceptDao;
+	protected ITermConceptDao myConceptDao;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -129,7 +127,10 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 	@Override
 	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			return Collections.emptyList();
+		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		
 		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
@@ -158,7 +159,10 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 	@Override
 	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			return Collections.emptyList();
+		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		
 		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
@@ -194,7 +198,10 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		ValidateUtil.isNotNullOrThrowInvalidRequest(theCodeSystem.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
-		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
+		// Grab the existing versions so we can delete them later
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+		
+		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
 			if (codeSystem == null) {
@@ -233,12 +240,31 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		for (TermConcept next : theCodeSystem.getConcepts()) {
 			persistChildren(next, theCodeSystem, conceptsStack);
 		}
+		
+		/*
+		 * For now we always delete old versions.. At some point it would be
+		 * nice to allow configuration to keep old versions
+		 */
+		
+		ourLog.info("Deleting old sode system versions");
+		for (TermCodeSystemVersion next : existing) {
+			ourLog.info(" * Deleting code system version {}", next.getPid());
+			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
+			myConceptDao.deleteByCodeSystemVersion(next.getPid());
+		}
+		
+		ourLog.info("Done saving code system");
 	}
 
 	@Override
 	public boolean supportsSystem(String theSystem) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystem cs = getCodeSystem(theSystem);
 		return cs != null;
+	}
+
+	private TermCodeSystem getCodeSystem(String theSystem) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		return cs;
 	}
 
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
@@ -263,6 +289,16 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 
 		theConceptsStack.remove(theConcept);
+	}
+
+	public TermConcept findCode(String theCodeSystem, String theCode) {
+		TermCodeSystem cs = getCodeSystem(theCodeSystem);
+		if (cs == null || cs.getCurrentVersion() == null) {
+			return null;
+		}
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		
+		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 	}
 
 

@@ -22,7 +22,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -121,6 +124,87 @@ public class FhirResourceDaoTerminologyDstu3Test extends BaseJpaDstu3Test {
 		
 	}
 
+	@Test
+	public void testSearchCodeInExternalCodesystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+
+		createLocalVs(codeSystem);
+		
+		Observation obsPA = new Observation();
+		obsPA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("ParentA");
+		IIdType idPA = myObservationDao.create(obsPA, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obsAAA = new Observation();
+		obsAAA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("childAAA");
+		IIdType idAAA = myObservationDao.create(obsAAA, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obsAAB = new Observation();
+		obsAAB.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("childAAB");
+		IIdType idAAB = myObservationDao.create(obsAAB, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obsCA = new Observation();
+		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
+		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();		
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAAA.getValue(), idAAB.getValue()));
+
+		params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.ABOVE));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue()));
+
+		params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue(), idAAA.getValue(), idAAB.getValue()));
+		
+	}
+
+	@Test
+	public void testSearchCodeBelowAndAboveUnknownCodeSystem() {
+
+		SearchParameterMap params = new SearchParameterMap();
+		
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.ABOVE));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+
+		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		
+	}
+	
 	@Test
 	public void testSearchCodeInFhirCodesystem() {
 		createLocalCsAndVs();
@@ -255,6 +339,11 @@ public class FhirResourceDaoTerminologyDstu3Test extends BaseJpaDstu3Test {
 		//@formatter:on
 		myCodeSystemDao.create(codeSystem, new ServletRequestDetails());
 
+		createLocalVs(codeSystem);
+	}
+
+
+	private void createLocalVs(CodeSystem codeSystem) {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());

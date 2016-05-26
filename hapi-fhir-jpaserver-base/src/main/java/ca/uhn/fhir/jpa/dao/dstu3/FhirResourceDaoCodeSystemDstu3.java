@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -35,10 +35,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
-import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -53,7 +50,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
@@ -77,29 +73,29 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		return valueSetIds;
 	}
 
-	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {
-		for (ValueSetExpansionContainsComponent nextCode : theContains) {
-
-			String system = nextCode.getSystem();
-			String code = nextCode.getCode();
-			if (theSystem.equals(system) && theCode.equals(code)) {
-				LookupCodeResult retVal = new LookupCodeResult();
-				retVal.setSearchedForCode(code);
-				retVal.setSearchedForSystem(system);
-				retVal.setFound(true);
-				if (nextCode.getAbstractElement().getValue() != null) {
-					retVal.setCodeIsAbstract(nextCode.getAbstractElement().booleanValue());
-				}
-				retVal.setCodeDisplay(nextCode.getDisplay());
-				retVal.setCodeSystemVersion(nextCode.getVersion());
-				retVal.setCodeSystemDisplayName("Unknown"); // TODO: implement
-				return retVal;
-			}
-
-		}
-
-		return null;
-	}
+//	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {
+//		for (ValueSetExpansionContainsComponent nextCode : theContains) {
+//
+//			String system = nextCode.getSystem();
+//			String code = nextCode.getCode();
+//			if (theSystem.equals(system) && theCode.equals(code)) {
+//				LookupCodeResult retVal = new LookupCodeResult();
+//				retVal.setSearchedForCode(code);
+//				retVal.setSearchedForSystem(system);
+//				retVal.setFound(true);
+//				if (nextCode.getAbstractElement().getValue() != null) {
+//					retVal.setCodeIsAbstract(nextCode.getAbstractElement().booleanValue());
+//				}
+//				retVal.setCodeDisplay(nextCode.getDisplay());
+//				retVal.setCodeSystemVersion(nextCode.getVersion());
+//				retVal.setCodeSystemDisplayName("Unknown"); // TODO: implement
+//				return retVal;
+//			}
+//
+//		}
+//
+//		return null;
+//	}
 
 	@Override
 	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
@@ -138,47 +134,40 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		// return result;
 
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
-			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
-			ValueSetExpander expander = ctx.getExpander();
-			ValueSet source = new ValueSet();
-			source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
-
-			ValueSetExpansionOutcome expansion;
-			try {
-				expansion = expander.expand(source);
-			} catch (Exception e) {
-				throw new InternalErrorException(e);
-			}
-
-			if (expansion.getValueset() != null) {
-				List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
-				LookupCodeResult result = lookup(contains, system, code);
-				if (result != null) {
-					return result;
+			
+			CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, null);
+			if (result != null) {
+				if (result.isOk()) {
+					LookupCodeResult retVal = new LookupCodeResult();
+					retVal.setFound(true);
+					retVal.setSearchedForCode(code);
+					retVal.setSearchedForSystem(system);
+					retVal.setCodeDisplay(result.getDisplay());
+					retVal.setCodeSystemDisplayName("Unknown");
+					retVal.setCodeSystemVersion("");
+					return retVal;
 				}
 			}
-
-		} else {
-
-			/*
-			 * If it's not a built-in code system, use ones from the database
-			 */
-
-			List<IIdType> valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
-			for (IIdType nextId : valueSetIds) {
-				CodeSystem expansion = read(nextId, theRequestDetails);
-				for (ConceptDefinitionComponent next : expansion.getConcept()) {
-					if (code.equals(next.getCode())) {
-						LookupCodeResult retVal = new LookupCodeResult();
-						retVal.setSearchedForCode(code);
-						retVal.setSearchedForSystem(system);
-						retVal.setFound(true);
-						retVal.setCodeDisplay(next.getDisplay());
-						retVal.setCodeSystemDisplayName("Unknown"); // TODO: implement
-						return retVal;
-					}
-				}
-			}
+			
+//			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
+//			ValueSetExpander expander = ctx.getExpander();
+//			ValueSet source = new ValueSet();
+//			source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
+//
+//			ValueSetExpansionOutcome expansion;
+//			try {
+//				expansion = expander.expand(source);
+//			} catch (Exception e) {
+//				throw new InternalErrorException(e);
+//			}
+//
+//			if (expansion.getValueset() != null) {
+//				List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+//				LookupCodeResult result = lookup(contains, system, code);
+//				if (result != null) {
+//					return result;
+//				}
+//			}
 
 		}
 
@@ -217,8 +206,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 
 		if (cs != null && isNotBlank(cs.getUrl())) {
 			String codeSystemUrl = cs.getUrl();
-			if (cs.getContent() == CodeSystemContentMode.COMPLETE) {
-				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContent().toCode());
+			if (cs.getContent() == CodeSystemContentMode.COMPLETE || cs.getContent() == null) {
+				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 				persCs.setResource(retVal);
 				persCs.setResourceVersionId(retVal.getVersion());

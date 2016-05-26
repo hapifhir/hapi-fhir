@@ -54,7 +54,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
-	private Long myPid;
+	private Long myId;
 
 	@OneToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_CODESYSVER_RES_ID"))
@@ -68,6 +68,10 @@ public class TermCodeSystemVersion implements Serializable {
 			myConcepts = new ArrayList<TermConcept>();
 		}
 		return myConcepts;
+	}
+
+	public Long getPid() {
+		return myId;
 	}
 
 	public ResourceTable getResource() {
