@@ -67,7 +67,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -1384,6 +1383,7 @@ public class SearchBuilder {
 		} else if (modifier == TokenParamModifier.BELOW) {
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
+		
 		if (codes != null) {
 			if (codes.isEmpty()) {
 				return null;

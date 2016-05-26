@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.config.dstu3;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
 
 /*
@@ -41,7 +39,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -50,7 +48,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 public class BaseDstu3Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvc terminologyService() {
+	public IHapiTerminologySvcDstu3 terminologyService() {
 		return new HapiTerminologySvcDstu3();
 	}
 

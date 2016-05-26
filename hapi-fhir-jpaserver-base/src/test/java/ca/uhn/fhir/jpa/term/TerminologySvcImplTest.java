@@ -27,6 +27,9 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 
+	private static final String CS_URL = "http://example.com/my_code_system";
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -36,7 +39,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 	@Test
 	public void testStoreCodeSystemInvalidCyclicLoop() {
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/my_code_system");
+		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
 
@@ -67,37 +70,18 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testFindCodesAboveAndBelowUnknown() {
+		createCodeSystem();
+
+		assertThat(myTermSvc.findCodesBelow("http://foo", "code"), empty());
+		assertThat(myTermSvc.findCodesBelow(CS_URL, "code"), empty());
+		assertThat(myTermSvc.findCodesAbove("http://foo", "code"), empty());
+		assertThat(myTermSvc.findCodesAbove(CS_URL, "code"), empty());
+	}
+	
+	@Test
 	public void testFindCodesBelowA() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/my_code_system");
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
-
-		TermConcept parentA = new TermConcept(cs, "ParentA");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB");
-		cs.getConcepts().add(parentB);
-
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
+		IIdType id = createCodeSystem();
 
 		Set<TermConcept> concepts;
 		Set<String> codes;
@@ -116,11 +100,11 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		assertThat(codes, empty());
 
 	}
-	
-	@Test
-	public void testFindCodesAbove() {
+
+
+	private IIdType createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/my_code_system");
+		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
 
@@ -149,6 +133,12 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.getConcepts().add(parentB);
 
 		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", cs);
+		return id;
+	}
+	
+	@Test
+	public void testFindCodesAbove() {
+		IIdType id = createCodeSystem();
 
 		Set<TermConcept> concepts;
 		Set<String> codes;
@@ -171,7 +161,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 	@Test
 	public void testCreateDuplicateCodeSystemUri() {
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/my_code_system");
+		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
 
@@ -181,7 +171,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -191,18 +181,18 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://example.com/my_code_system");
+		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
 		try {
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://example.com/my_code_system", cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, cs);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -28,6 +30,9 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 
 public interface ITermCodeSystemVersionDao  extends JpaRepository<TermCodeSystemVersion, Long> {
 
+	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myId = :resource_id")
+	List<TermCodeSystemVersion> findByCodeSystemResource(@Param("resource_id") Long theCodeSystemResourcePid);
+	
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myId = :resource_id AND cs.myResourceVersionId = :version_id")
 	TermCodeSystemVersion findByCodeSystemResourceAndVersion(@Param("resource_id") Long theCodeSystemResourcePid, @Param("version_id") Long theCodeSystemVersionPid);
 
