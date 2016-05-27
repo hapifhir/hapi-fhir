@@ -131,7 +131,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	}
 
 	@Override
-	public void loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
+	public UploadStatistics loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
 		List<String> allFilenames = Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
 
 		Map<String, File> filenameToFile = new HashMap<String, File>();
@@ -174,7 +174,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Beginning SNOMED CT processing");
 
 		try {
-			processSnomedCtFiles(filenameToFile, theRequestDetails);
+			return processSnomedCtFiles(filenameToFile, theRequestDetails);
 		} finally {
 			ourLog.info("Finished SNOMED CT file import, cleaning up temporary files");
 			for (File nextFile : filenameToFile.values()) {
@@ -183,7 +183,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		}
 	}
 
-	void processSnomedCtFiles(Map<String, File> filenameToFile, RequestDetails theRequestDetails) {
+	UploadStatistics processSnomedCtFiles(Map<String, File> filenameToFile, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> id2concept = new HashMap<String, TermConcept>();
 		final Map<String, TermConcept> code2concept = new HashMap<String, TermConcept>();
@@ -211,6 +211,8 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
 		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
+		
+		return new UploadStatistics().setConceptCount(code2concept.size());
 	}
 
 	@VisibleForTesting

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -34,17 +37,23 @@ public class TerminologyUploaderProviderDstu3 extends BaseJpaProvider {
 		
 		startRequest(theServletRequest);
 		try {
+			if (thePackage == null || thePackage.getData() == null || thePackage.getData().length == 0) {
+				throw new InvalidRequestException("Missing mandatory 'package' parameter, or package had no data");
+			}
+			
 			byte[] data = thePackage.getData();
-			String url = theUrl.getValueAsString();
+			String url = theUrl != null ? theUrl.getValueAsString() : null;
+			url = defaultString(url);
 
+			UploadStatistics stats;
 			if (IHapiTerminologyLoaderSvc.SCT_URL.equals(url)) {
-				myTerminologyLoaderSvc.loadSnomedCt(data, theRequestDetails);
+				stats = myTerminologyLoaderSvc.loadSnomedCt(data, theRequestDetails);
 			} else {
 				throw new InvalidRequestException("Unknown URL: " + url);
 			}
 			
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("conceptCount").setValue(new IntegerType(0));
+			retVal.addParameter().setName("conceptCount").setValue(new IntegerType(stats.getConceptCount()));
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);
