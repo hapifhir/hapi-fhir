@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -12,12 +16,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -47,6 +49,32 @@ public class TerminologyProviderDstu3Test extends BaseResourceProviderDstu3Test 
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
 			.andParameter("package", new Attachment().setData(packageBytes))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+	}
+
+	@Test
+	public void testUploadSctLocalFile() throws Exception {
+		byte[] packageBytes = createSctZip();
+		File tempFile = File.createTempFile("tmp", ".zip");
+		tempFile.deleteOnExit();
+		
+		FileOutputStream fos = new FileOutputStream(tempFile);
+		fos.write(packageBytes);
+		fos.close();
+		
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onServer()
+			.named("upload-external-code-system")
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
+			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
 			.execute();
 		//@formatter:on
 
@@ -107,7 +135,7 @@ public class TerminologyProviderDstu3Test extends BaseResourceProviderDstu3Test 
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Missing mandatory 'package' parameter, or package had no data", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: No 'localfile' or 'package' parameter, or package had no data", e.getMessage());
 		}
 		//@formatter:on
 	}
