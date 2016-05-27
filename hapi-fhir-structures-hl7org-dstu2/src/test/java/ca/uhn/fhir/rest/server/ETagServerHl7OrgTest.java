@@ -93,7 +93,7 @@ public class ETagServerHl7OrgTest {
 
     Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
     assertNotNull(cl);
-    assertEquals("Sun, 25 Nov 2012 02:34:47 GMT", cl.getValue());
+    assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
   }
 
   @Before
