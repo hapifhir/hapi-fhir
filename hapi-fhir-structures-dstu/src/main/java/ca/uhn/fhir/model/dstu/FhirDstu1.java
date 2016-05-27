@@ -19,8 +19,8 @@ package ca.uhn.fhir.model.dstu;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -59,7 +59,6 @@ import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -168,22 +167,6 @@ public class FhirDstu1 implements IFhirVersion {
 
 	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
 		assert nextDef != null;
-		
-		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
-//			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-//			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
-//				StructureElementDefinitionType type = elem.getDefinition().addType();
-//				type.getCode().setValue("ResourceReference");
-//
-//				if (next != IResource.class) {
-//					@SuppressWarnings("unchecked")
-//					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
-//					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
-//				}
-//			}
-
-			return;
-		}
 
 		StructureElementDefinitionType type = elem.getDefinition().addType();
 		String name = nextDef.getName();

@@ -38,8 +38,11 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -50,6 +53,11 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologySvcDstu3 terminologyService() {
 		return new HapiTerminologySvcDstu3();
+	}
+	
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
+		return new TerminologyLoaderSvc();
 	}
 
 	@Bean
@@ -107,5 +115,13 @@ public class BaseDstu3Config extends BaseConfig {
 	public SearchParamExtractorDstu3 searchParamExtractor() {
 		return new SearchParamExtractorDstu3();
 	}
+
+	@Bean(autowire=Autowire.BY_TYPE)
+	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
+		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
+		retVal.setContext(defaultFhirContext());
+		return retVal;
+	}
+	
 
 }

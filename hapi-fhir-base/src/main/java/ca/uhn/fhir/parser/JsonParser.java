@@ -471,7 +471,6 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 			break;
 		}
-		case RESOURCE_REF:
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			if (theChildName != null) {

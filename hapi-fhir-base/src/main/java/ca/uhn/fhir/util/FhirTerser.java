@@ -422,16 +422,6 @@ public class FhirTerser {
 		case PRIMITIVE_DATATYPE:
 			// These are primitive types, so we don't need to visit their children
 			break;
-		case RESOURCE_REF:
-			IBaseReference resRefDt = (IBaseReference) theElement;
-			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
-				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
-					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-					visit(theResource, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
-				}
-			}
-			break;
 		case RESOURCE:
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
@@ -575,7 +565,6 @@ public class FhirTerser {
 		case PRIMITIVE_DATATYPE:
 			// These are primitive types
 			break;
-		case RESOURCE_REF:
 		case RESOURCE:
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {

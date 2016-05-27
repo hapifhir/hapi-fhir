@@ -40,6 +40,7 @@ public class App {
 		ourCommands.add(new ValidateCommand());
 		ourCommands.add(new ValidationDataUploader());
 		ourCommands.add(new WebsocketSubscribeCommand());
+		ourCommands.add(new UploadTerminologyCommand());
 
 		Collections.sort(ourCommands);
 	}
