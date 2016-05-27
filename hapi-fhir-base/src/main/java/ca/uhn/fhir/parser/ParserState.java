@@ -91,6 +91,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 class ParserState<T> {
 
@@ -128,16 +129,6 @@ class ParserState<T> {
 		}
 	}
 
-	private BaseState createResourceReferenceState(ParserState<T>.PreResourceState thePreResourceState, IBase newChildInstance) {
-		BaseState newState;
-		if (newChildInstance instanceof IBaseReference) {
-			newState = new ResourceReferenceStateHl7Org(thePreResourceState, (IBaseReference) newChildInstance);
-		} else {
-			newState = new ResourceReferenceStateHapi(thePreResourceState, (BaseResourceReferenceDt) newChildInstance);
-		}
-		return newState;
-	}
-
 	public void endingElement() throws DataFormatException {
 		myState.endingElement();
 	}
@@ -159,31 +150,7 @@ class ParserState<T> {
 	}
 
 	private Object newContainedDt(IResource theTarget) {
-
-		Object newChildInstance;
-		try {
-			newChildInstance = theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType().newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		}
-		return newChildInstance;
-	}
-
-	private IBase newResourceReferenceDt(IBaseResource theTarget) {
-
-		IBase newChildInstance;
-		try {
-			IFhirVersion version;
-			version = theTarget.getStructureFhirVersionEnum().getVersionImplementation();
-			newChildInstance = version.getResourceReferenceType().newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		}
-		return newChildInstance;
+		return ReflectionUtil.newInstance(theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1539,13 +1506,6 @@ class ParserState<T> {
 				push(newState);
 				return;
 			}
-			case RESOURCE_REF: {
-				IBase newChildInstance = newResourceReferenceDt(myPreResourceState.myInstance);
-				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				BaseState newState = createResourceReferenceState(getPreResourceState(), newChildInstance);
-				push(newState);
-				return;
-			}
 			case PRIMITIVE_XHTML:
 			case RESOURCE:
 			case RESOURCE_BLOCK:
@@ -1607,7 +1567,6 @@ class ParserState<T> {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void endingElement() {
 			pop();
@@ -1663,13 +1622,6 @@ class ParserState<T> {
 				newChildInstance = primitiveTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
-				push(newState);
-				return;
-			}
-			case RESOURCE_REF: {
-				IBase newChildInstance = newResourceReferenceDt(getPreResourceState().myInstance);
-				child.getMutator().addValue(myInstance, newChildInstance);
-				BaseState newState = createResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1844,18 +1796,6 @@ class ParserState<T> {
 				myExtension.setValue(newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
-				return;
-			}
-			case RESOURCE_REF: {
-				ICompositeType newChildInstance = (ICompositeType) newResourceReferenceDt(getPreResourceState().myInstance);
-				myExtension.setValue(newChildInstance);
-				if (myContext.getVersion().getVersion().isRi()) {
-					ParserState<T>.ResourceReferenceStateHl7Org newState = new ResourceReferenceStateHl7Org(getPreResourceState(), (IBaseReference) newChildInstance);
-					push(newState);
-				} else {
-					ResourceReferenceStateHapi newState = new ResourceReferenceStateHapi(getPreResourceState(), (BaseResourceReferenceDt) newChildInstance);
-					push(newState);
-				}
 				return;
 			}
 			case PRIMITIVE_XHTML:
@@ -2304,7 +2244,6 @@ class ParserState<T> {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
 			super.wereBack();
@@ -2347,7 +2286,6 @@ class ParserState<T> {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
 			super.wereBack();
@@ -2458,151 +2396,6 @@ class ParserState<T> {
 			return myInstance;
 		}
 
-	}
-
-	private class ResourceReferenceStateHapi extends BaseState {
-
-		private BaseResourceReferenceDt myInstance;
-		private ResourceReferenceSubState mySubState;
-
-		public ResourceReferenceStateHapi(PreResourceState thePreResourceState, BaseResourceReferenceDt theInstance) {
-			super(thePreResourceState);
-			myInstance = theInstance;
-			mySubState = ResourceReferenceSubState.INITIAL;
-		}
-
-		@Override
-		public void attributeValue(String theName, String theValue) throws DataFormatException {
-			if (!"value".equals(theName)) {
-				return;
-			}
-
-			switch (mySubState) {
-			case DISPLAY:
-				myInstance.getDisplayElement().setValue(theValue);
-				break;
-			case INITIAL:
-				throw new DataFormatException("Unexpected attribute: " + theValue);
-			case REFERENCE:
-				myInstance.getReference().setValue(theValue);
-				break;
-			}
-		}
-
-		@Override
-		public void endingElement() {
-			switch (mySubState) {
-			case INITIAL:
-				pop();
-				break;
-			case DISPLAY:
-			case REFERENCE:
-				mySubState = ResourceReferenceSubState.INITIAL;
-			}
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			switch (mySubState) {
-			case INITIAL:
-				if ("display".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.DISPLAY;
-					break;
-				} else if ("reference".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.REFERENCE;
-					break;
-				} else if ("resource".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.REFERENCE;
-					break;
-				}
-				//$FALL-THROUGH$
-			case DISPLAY:
-			case REFERENCE:
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
-			}
-		}
-
-		@Override
-		protected IElement getCurrentElement() {
-			return myInstance;
-		}
-
-	}
-
-	private class ResourceReferenceStateHl7Org extends BaseState {
-
-		private IBaseReference myInstance;
-		private ResourceReferenceSubState mySubState;
-
-		public ResourceReferenceStateHl7Org(PreResourceState thePreResourceState, IBaseReference theInstance) {
-			super(thePreResourceState);
-			myInstance = theInstance;
-			mySubState = ResourceReferenceSubState.INITIAL;
-		}
-
-		@Override
-		public void attributeValue(String theName, String theValue) throws DataFormatException {
-			if (!"value".equals(theName)) {
-				return;
-			}
-
-			switch (mySubState) {
-			case DISPLAY:
-				myInstance.setDisplay(theValue);
-				break;
-			case INITIAL:
-				throw new DataFormatException("Unexpected attribute: " + theValue);
-			case REFERENCE:
-				myInstance.setReference(theValue);
-				break;
-			}
-		}
-
-		@Override
-		public void endingElement() {
-			switch (mySubState) {
-			case INITIAL:
-				pop();
-				break;
-			case DISPLAY:
-			case REFERENCE:
-				mySubState = ResourceReferenceSubState.INITIAL;
-			}
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			switch (mySubState) {
-			case INITIAL:
-				if ("display".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.DISPLAY;
-					break;
-				} else if ("reference".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.REFERENCE;
-					break;
-				} else if ("resource".equals(theLocalPart)) {
-					mySubState = ResourceReferenceSubState.REFERENCE;
-					break;
-				} else {
-					logAndSwallowUnexpectedElement(theLocalPart);
-					break;
-				}
-			case DISPLAY:
-			case REFERENCE:
-				logAndSwallowUnexpectedElement(theLocalPart);
-				break;
-			}
-		}
-
-		@Override
-		protected IBaseReference getCurrentElement() {
-			return myInstance;
-		}
-
-	}
-
-	private enum ResourceReferenceSubState {
-		DISPLAY, INITIAL, REFERENCE
 	}
 
 	private class ResourceStateHapi extends ElementCompositeState {

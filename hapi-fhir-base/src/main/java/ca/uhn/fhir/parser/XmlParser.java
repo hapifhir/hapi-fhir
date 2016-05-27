@@ -531,7 +531,6 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			break;
 		}
-		case RESOURCE_REF: 
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			theEventWriter.writeStartElement(childName);
