@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -69,7 +70,7 @@ public class ReferralRequest extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ReferralStatus fromCode(String codeString) throws FHIRException {
@@ -85,7 +86,10 @@ public class ReferralRequest extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown ReferralStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ReferralStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -196,7 +200,7 @@ public class ReferralRequest extends DomainResource {
          */
         REQUEST, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ReferralCategory fromCode(String codeString) throws FHIRException {
@@ -208,7 +212,10 @@ public class ReferralRequest extends DomainResource {
           return PLAN;
         if ("request".equals(codeString))
           return REQUEST;
-        throw new FHIRException("Unknown ReferralCategory code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ReferralCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -469,16 +476,6 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ReferralRequest setIdentifier(List<Identifier> theIdentifier) { 
@@ -495,10 +492,6 @@ public class ReferralRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Business identifier that uniquely identifies the referral/care transfer request instance.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -507,7 +500,6 @@ public class ReferralRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ReferralRequest addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -518,22 +510,22 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
      * @return {@link #basedOn} (Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.)
      */
     public List<Reference> getBasedOn() { 
       if (this.basedOn == null)
         this.basedOn = new ArrayList<Reference>();
       return this.basedOn;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
-     */
-    public Reference getBasedOnFirstRep() { 
-      if (getBasedOn().isEmpty()) {
-        addBasedOn();
-      }
-      return getBasedOn().get(0);
     }
 
     /**
@@ -553,10 +545,6 @@ public class ReferralRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #basedOn} (Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.)
-     */
-    // syntactic sugar
     public Reference addBasedOn() { //3
       Reference t = new Reference();
       if (this.basedOn == null)
@@ -565,7 +553,6 @@ public class ReferralRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ReferralRequest addBasedOn(Reference t) { //3
       if (t == null)
         return this;
@@ -576,8 +563,19 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #basedOn} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.)
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
      */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getBasedOnTarget() { 
       if (this.basedOnTarget == null)
         this.basedOnTarget = new ArrayList<Resource>();
@@ -975,16 +973,6 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
-     */
-    public Reference getRecipientFirstRep() { 
-      if (getRecipient().isEmpty()) {
-        addRecipient();
-      }
-      return getRecipient().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ReferralRequest setRecipient(List<Reference> theRecipient) { 
@@ -1001,10 +989,6 @@ public class ReferralRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #recipient} (The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.)
-     */
-    // syntactic sugar
     public Reference addRecipient() { //3
       Reference t = new Reference();
       if (this.recipient == null)
@@ -1013,7 +997,6 @@ public class ReferralRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ReferralRequest addRecipient(Reference t) { //3
       if (t == null)
         return this;
@@ -1024,8 +1007,19 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #recipient} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.)
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
      */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getRecipientTarget() { 
       if (this.recipientTarget == null)
         this.recipientTarget = new ArrayList<Resource>();
@@ -1115,16 +1109,6 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #serviceRequested}, creating it if it does not already exist
-     */
-    public CodeableConcept getServiceRequestedFirstRep() { 
-      if (getServiceRequested().isEmpty()) {
-        addServiceRequested();
-      }
-      return getServiceRequested().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ReferralRequest setServiceRequested(List<CodeableConcept> theServiceRequested) { 
@@ -1141,10 +1125,6 @@ public class ReferralRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #serviceRequested} (The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.)
-     */
-    // syntactic sugar
     public CodeableConcept addServiceRequested() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.serviceRequested == null)
@@ -1153,7 +1133,6 @@ public class ReferralRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ReferralRequest addServiceRequested(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1164,22 +1143,22 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #serviceRequested}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceRequestedFirstRep() { 
+      if (getServiceRequested().isEmpty()) {
+        addServiceRequested();
+      }
+      return getServiceRequested().get(0);
+    }
+
+    /**
      * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
      */
     public List<Reference> getSupportingInformation() { 
       if (this.supportingInformation == null)
         this.supportingInformation = new ArrayList<Reference>();
       return this.supportingInformation;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
-     */
-    public Reference getSupportingInformationFirstRep() { 
-      if (getSupportingInformation().isEmpty()) {
-        addSupportingInformation();
-      }
-      return getSupportingInformation().get(0);
     }
 
     /**
@@ -1199,10 +1178,6 @@ public class ReferralRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #supportingInformation} (Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
-     */
-    // syntactic sugar
     public Reference addSupportingInformation() { //3
       Reference t = new Reference();
       if (this.supportingInformation == null)
@@ -1211,7 +1186,6 @@ public class ReferralRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ReferralRequest addSupportingInformation(Reference t) { //3
       if (t == null)
         return this;
@@ -1222,8 +1196,19 @@ public class ReferralRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.)
+     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
      */
+    public Reference getSupportingInformationFirstRep() { 
+      if (getSupportingInformation().isEmpty()) {
+        addSupportingInformation();
+      }
+      return getSupportingInformation().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getSupportingInformationTarget() { 
       if (this.supportingInformationTarget == null)
         this.supportingInformationTarget = new ArrayList<Resource>();
@@ -1558,9 +1543,10 @@ public class ReferralRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent, status
-          , category, type, priority, patient, context, fulfillmentTime, authored, requester, specialty
-          , recipient, reason, description, serviceRequested, supportingInformation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
+          , status, category, type, priority, patient, context, fulfillmentTime, authored
+          , requester, specialty, recipient, reason, description, serviceRequested, supportingInformation
+          );
       }
 
   @Override
@@ -1576,7 +1562,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1596,7 +1582,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -1622,7 +1608,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token", target={} )
+  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token" )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1642,7 +1628,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token", target={} )
+  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token" )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1662,7 +1648,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1688,7 +1674,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", target={Practitioner.class, Organization.class} )
+  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1714,7 +1700,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference", target={EpisodeOfCare.class, Encounter.class} )
+  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1740,7 +1726,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token", target={} )
+  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1760,7 +1746,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token", target={} )
+  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -1780,7 +1766,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token", target={} )
+  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1800,7 +1786,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={ReferralRequest.class, CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class} )
+  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference" )
   public static final String SP_BASEDON = "basedon";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
@@ -1826,7 +1812,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

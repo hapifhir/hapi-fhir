@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -165,16 +166,6 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public BodySite setIdentifier(List<Identifier> theIdentifier) { 
@@ -191,10 +182,6 @@ public class BodySite extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier for this instance of the anatomical location.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -203,7 +190,6 @@ public class BodySite extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public BodySite addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -211,6 +197,16 @@ public class BodySite extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -247,16 +243,6 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
-     */
-    public CodeableConcept getModifierFirstRep() { 
-      if (getModifier().isEmpty()) {
-        addModifier();
-      }
-      return getModifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public BodySite setModifier(List<CodeableConcept> theModifier) { 
@@ -273,10 +259,6 @@ public class BodySite extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #modifier} (Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.)
-     */
-    // syntactic sugar
     public CodeableConcept addModifier() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.modifier == null)
@@ -285,7 +267,6 @@ public class BodySite extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public BodySite addModifier(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -293,6 +274,16 @@ public class BodySite extends DomainResource {
         this.modifier = new ArrayList<CodeableConcept>();
       this.modifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+     */
+    public CodeableConcept getModifierFirstRep() { 
+      if (getModifier().isEmpty()) {
+        addModifier();
+      }
+      return getModifier().get(0);
     }
 
     /**
@@ -354,16 +345,6 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #image}, creating it if it does not already exist
-     */
-    public Attachment getImageFirstRep() { 
-      if (getImage().isEmpty()) {
-        addImage();
-      }
-      return getImage().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public BodySite setImage(List<Attachment> theImage) { 
@@ -380,10 +361,6 @@ public class BodySite extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #image} (Image or images used to identify a location.)
-     */
-    // syntactic sugar
     public Attachment addImage() { //3
       Attachment t = new Attachment();
       if (this.image == null)
@@ -392,7 +369,6 @@ public class BodySite extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public BodySite addImage(Attachment t) { //3
       if (t == null)
         return this;
@@ -400,6 +376,16 @@ public class BodySite extends DomainResource {
         this.image = new ArrayList<Attachment>();
       this.image.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #image}, creating it if it does not already exist
+     */
+    public Attachment getImageFirstRep() { 
+      if (getImage().isEmpty()) {
+        addImage();
+      }
+      return getImage().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -566,8 +552,8 @@ public class BodySite extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, identifier, code, modifier
-          , description, image);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, identifier, code
+          , modifier, description, image);
       }
 
   @Override
@@ -583,7 +569,7 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="BodySite.identifier", description="Identifier for this instance of the anatomical location", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="BodySite.identifier", description="Identifier for this instance of the anatomical location", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -603,7 +589,7 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token", target={} )
+  @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -623,7 +609,7 @@ public class BodySite extends DomainResource {
    * Path: <b>BodySite.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

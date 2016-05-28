@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -77,7 +78,7 @@ public class Appointment extends DomainResource {
          */
         NOSHOW, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AppointmentStatus fromCode(String codeString) throws FHIRException {
@@ -97,7 +98,10 @@ public class Appointment extends DomainResource {
           return CANCELLED;
         if ("noshow".equals(codeString))
           return NOSHOW;
-        throw new FHIRException("Unknown AppointmentStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AppointmentStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -228,7 +232,7 @@ public class Appointment extends DomainResource {
          */
         INFORMATIONONLY, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ParticipantRequired fromCode(String codeString) throws FHIRException {
@@ -240,7 +244,10 @@ public class Appointment extends DomainResource {
           return OPTIONAL;
         if ("information-only".equals(codeString))
           return INFORMATIONONLY;
-        throw new FHIRException("Unknown ParticipantRequired code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ParticipantRequired code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -335,7 +342,7 @@ public class Appointment extends DomainResource {
          */
         NEEDSACTION, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ParticipationStatus fromCode(String codeString) throws FHIRException {
@@ -349,7 +356,10 @@ public class Appointment extends DomainResource {
           return TENTATIVE;
         if ("needs-action".equals(codeString))
           return NEEDSACTION;
-        throw new FHIRException("Unknown ParticipationStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ParticipationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -498,16 +508,6 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-         */
-        public CodeableConcept getTypeFirstRep() { 
-          if (getType().isEmpty()) {
-            addType();
-          }
-          return getType().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AppointmentParticipantComponent setType(List<CodeableConcept> theType) { 
@@ -524,10 +524,6 @@ public class Appointment extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #type} (Role of participant in the appointment.)
-         */
-    // syntactic sugar
         public CodeableConcept addType() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.type == null)
@@ -536,7 +532,6 @@ public class Appointment extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AppointmentParticipantComponent addType(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -544,6 +539,16 @@ public class Appointment extends DomainResource {
             this.type = new ArrayList<CodeableConcept>();
           this.type.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public CodeableConcept getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addType();
+          }
+          return getType().get(0);
         }
 
         /**
@@ -800,7 +805,8 @@ public class Appointment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, actor, required, status);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, actor, required, status
+          );
       }
 
   public String fhirType() {
@@ -954,16 +960,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Appointment setIdentifier(List<Identifier> theIdentifier) { 
@@ -980,10 +976,6 @@ public class Appointment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -992,7 +984,6 @@ public class Appointment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Appointment addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1000,6 +991,16 @@ public class Appointment extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1081,16 +1082,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #serviceType}, creating it if it does not already exist
-     */
-    public CodeableConcept getServiceTypeFirstRep() { 
-      if (getServiceType().isEmpty()) {
-        addServiceType();
-      }
-      return getServiceType().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Appointment setServiceType(List<CodeableConcept> theServiceType) { 
@@ -1107,10 +1098,6 @@ public class Appointment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #serviceType} (The specific service that is to be performed during this appointment.)
-     */
-    // syntactic sugar
     public CodeableConcept addServiceType() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.serviceType == null)
@@ -1119,7 +1106,6 @@ public class Appointment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Appointment addServiceType(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1130,22 +1116,22 @@ public class Appointment extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #serviceType}, creating it if it does not already exist
+     */
+    public CodeableConcept getServiceTypeFirstRep() { 
+      if (getServiceType().isEmpty()) {
+        addServiceType();
+      }
+      return getServiceType().get(0);
+    }
+
+    /**
      * @return {@link #specialty} (The specialty of a practitioner that would be required to perform the service requested in this appointment.)
      */
     public List<CodeableConcept> getSpecialty() { 
       if (this.specialty == null)
         this.specialty = new ArrayList<CodeableConcept>();
       return this.specialty;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
-     */
-    public CodeableConcept getSpecialtyFirstRep() { 
-      if (getSpecialty().isEmpty()) {
-        addSpecialty();
-      }
-      return getSpecialty().get(0);
     }
 
     /**
@@ -1165,10 +1151,6 @@ public class Appointment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #specialty} (The specialty of a practitioner that would be required to perform the service requested in this appointment.)
-     */
-    // syntactic sugar
     public CodeableConcept addSpecialty() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.specialty == null)
@@ -1177,7 +1159,6 @@ public class Appointment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Appointment addSpecialty(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1185,6 +1166,16 @@ public class Appointment extends DomainResource {
         this.specialty = new ArrayList<CodeableConcept>();
       this.specialty.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+     */
+    public CodeableConcept getSpecialtyFirstRep() { 
+      if (getSpecialty().isEmpty()) {
+        addSpecialty();
+      }
+      return getSpecialty().get(0);
     }
 
     /**
@@ -1482,16 +1473,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #slot}, creating it if it does not already exist
-     */
-    public Reference getSlotFirstRep() { 
-      if (getSlot().isEmpty()) {
-        addSlot();
-      }
-      return getSlot().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Appointment setSlot(List<Reference> theSlot) { 
@@ -1508,10 +1489,6 @@ public class Appointment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #slot} (The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.)
-     */
-    // syntactic sugar
     public Reference addSlot() { //3
       Reference t = new Reference();
       if (this.slot == null)
@@ -1520,7 +1497,6 @@ public class Appointment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Appointment addSlot(Reference t) { //3
       if (t == null)
         return this;
@@ -1531,18 +1507,29 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #slot} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.)
+     * @return The first repetition of repeating field {@link #slot}, creating it if it does not already exist
      */
+    public Reference getSlotFirstRep() { 
+      if (getSlot().isEmpty()) {
+        addSlot();
+      }
+      return getSlot().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Slot> getSlotTarget() { 
       if (this.slotTarget == null)
         this.slotTarget = new ArrayList<Slot>();
       return this.slotTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #slot} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public Slot addSlotTarget() { 
       Slot r = new Slot();
       if (this.slotTarget == null)
@@ -1659,16 +1646,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
-     */
-    public AppointmentParticipantComponent getParticipantFirstRep() { 
-      if (getParticipant().isEmpty()) {
-        addParticipant();
-      }
-      return getParticipant().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Appointment setParticipant(List<AppointmentParticipantComponent> theParticipant) { 
@@ -1685,10 +1662,6 @@ public class Appointment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #participant} (List of participants involved in the appointment.)
-     */
-    // syntactic sugar
     public AppointmentParticipantComponent addParticipant() { //3
       AppointmentParticipantComponent t = new AppointmentParticipantComponent();
       if (this.participant == null)
@@ -1697,7 +1670,6 @@ public class Appointment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Appointment addParticipant(AppointmentParticipantComponent t) { //3
       if (t == null)
         return this;
@@ -1705,6 +1677,16 @@ public class Appointment extends DomainResource {
         this.participant = new ArrayList<AppointmentParticipantComponent>();
       this.participant.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     */
+    public AppointmentParticipantComponent getParticipantFirstRep() { 
+      if (getParticipant().isEmpty()) {
+        addParticipant();
+      }
+      return getParticipant().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2006,8 +1988,8 @@ public class Appointment extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, serviceCategory
-          , serviceType, specialty, appointmentType, reason, priority, description, start, end, minutesDuration
-          , slot, created, comment, participant);
+          , serviceType, specialty, appointmentType, reason, priority, description, start
+          , end, minutesDuration, slot, created, comment, participant);
       }
 
   @Override
@@ -2023,7 +2005,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2043,7 +2025,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class} )
+  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2069,7 +2051,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2089,7 +2071,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -2115,7 +2097,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token", target={} )
+  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
   public static final String SP_PART_STATUS = "part-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-status</b>
@@ -2135,7 +2117,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2161,7 +2143,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.appointmentType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token", target={} )
+  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token" )
   public static final String SP_APPOINTMENT_TYPE = "appointment-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment-type</b>
@@ -2181,7 +2163,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token", target={} )
+  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token" )
   public static final String SP_SERVICE_TYPE = "service-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
@@ -2201,7 +2183,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2227,7 +2209,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

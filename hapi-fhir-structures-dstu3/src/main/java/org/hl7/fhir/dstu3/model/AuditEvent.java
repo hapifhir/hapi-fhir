@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -70,7 +71,7 @@ public class AuditEvent extends DomainResource {
          */
         E, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AuditEventAction fromCode(String codeString) throws FHIRException {
@@ -86,7 +87,10 @@ public class AuditEvent extends DomainResource {
           return D;
         if ("E".equals(codeString))
           return E;
-        throw new FHIRException("Unknown AuditEventAction code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AuditEventAction code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -201,7 +205,7 @@ public class AuditEvent extends DomainResource {
          */
         _12, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AuditEventOutcome fromCode(String codeString) throws FHIRException {
@@ -215,7 +219,10 @@ public class AuditEvent extends DomainResource {
           return _8;
         if ("12".equals(codeString))
           return _12;
-        throw new FHIRException("Unknown AuditEventOutcome code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AuditEventOutcome code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -324,7 +331,7 @@ public class AuditEvent extends DomainResource {
          */
         _5, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AuditEventParticipantNetworkType fromCode(String codeString) throws FHIRException {
@@ -340,7 +347,10 @@ public class AuditEvent extends DomainResource {
           return _4;
         if ("5".equals(codeString))
           return _5;
-        throw new FHIRException("Unknown AuditEventParticipantNetworkType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AuditEventParticipantNetworkType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -553,16 +563,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
-         */
-        public CodeableConcept getRoleFirstRep() { 
-          if (getRole().isEmpty()) {
-            addRole();
-          }
-          return getRole().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventAgentComponent setRole(List<CodeableConcept> theRole) { 
@@ -579,10 +579,6 @@ public class AuditEvent extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #role} (Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.)
-         */
-    // syntactic sugar
         public CodeableConcept addRole() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.role == null)
@@ -591,7 +587,6 @@ public class AuditEvent extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AuditEventAgentComponent addRole(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -599,6 +594,16 @@ public class AuditEvent extends DomainResource {
             this.role = new ArrayList<CodeableConcept>();
           this.role.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
+         */
+        public CodeableConcept getRoleFirstRep() { 
+          if (getRole().isEmpty()) {
+            addRole();
+          }
+          return getRole().get(0);
         }
 
         /**
@@ -861,16 +866,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #policy}, creating it if it does not already exist
-         */
-        public UriType getPolicyFirstRep() { 
-          if (getPolicy().isEmpty()) {
-            addPolicyElement();
-          }
-          return getPolicy().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventAgentComponent setPolicy(List<UriType> thePolicy) { 
@@ -890,7 +885,6 @@ public class AuditEvent extends DomainResource {
         /**
          * @return {@link #policy} (The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used.)
          */
-    // syntactic sugar
         public UriType addPolicyElement() {//2 
           UriType t = new UriType();
           if (this.policy == null)
@@ -981,16 +975,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #purposeOfUse}, creating it if it does not already exist
-         */
-        public Coding getPurposeOfUseFirstRep() { 
-          if (getPurposeOfUse().isEmpty()) {
-            addPurposeOfUse();
-          }
-          return getPurposeOfUse().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventAgentComponent setPurposeOfUse(List<Coding> thePurposeOfUse) { 
@@ -1007,10 +991,6 @@ public class AuditEvent extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #purposeOfUse} (The reason (purpose of use), specific to this agent, that was used during the event being recorded.)
-         */
-    // syntactic sugar
         public Coding addPurposeOfUse() { //3
           Coding t = new Coding();
           if (this.purposeOfUse == null)
@@ -1019,7 +999,6 @@ public class AuditEvent extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AuditEventAgentComponent addPurposeOfUse(Coding t) { //3
           if (t == null)
             return this;
@@ -1027,6 +1006,16 @@ public class AuditEvent extends DomainResource {
             this.purposeOfUse = new ArrayList<Coding>();
           this.purposeOfUse.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #purposeOfUse}, creating it if it does not already exist
+         */
+        public Coding getPurposeOfUseFirstRep() { 
+          if (getPurposeOfUse().isEmpty()) {
+            addPurposeOfUse();
+          }
+          return getPurposeOfUse().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1249,8 +1238,8 @@ public class AuditEvent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, reference, userId, altId
-          , name, requestor, location, policy, media, network, purposeOfUse);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, reference, userId
+          , altId, name, requestor, location, policy, media, network, purposeOfUse);
       }
 
   public String fhirType() {
@@ -1607,16 +1596,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-         */
-        public Coding getTypeFirstRep() { 
-          if (getType().isEmpty()) {
-            addType();
-          }
-          return getType().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventSourceComponent setType(List<Coding> theType) { 
@@ -1633,10 +1612,6 @@ public class AuditEvent extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #type} (Code specifying the type of source where event originated.)
-         */
-    // syntactic sugar
         public Coding addType() { //3
           Coding t = new Coding();
           if (this.type == null)
@@ -1645,7 +1620,6 @@ public class AuditEvent extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AuditEventSourceComponent addType(Coding t) { //3
           if (t == null)
             return this;
@@ -1653,6 +1627,16 @@ public class AuditEvent extends DomainResource {
             this.type = new ArrayList<Coding>();
           this.type.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public Coding getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addType();
+          }
+          return getType().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2005,16 +1989,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
-         */
-        public Coding getSecurityLabelFirstRep() { 
-          if (getSecurityLabel().isEmpty()) {
-            addSecurityLabel();
-          }
-          return getSecurityLabel().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventEntityComponent setSecurityLabel(List<Coding> theSecurityLabel) { 
@@ -2031,10 +2005,6 @@ public class AuditEvent extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #securityLabel} (Denotes security labels for the identified entity.)
-         */
-    // syntactic sugar
         public Coding addSecurityLabel() { //3
           Coding t = new Coding();
           if (this.securityLabel == null)
@@ -2043,7 +2013,6 @@ public class AuditEvent extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AuditEventEntityComponent addSecurityLabel(Coding t) { //3
           if (t == null)
             return this;
@@ -2051,6 +2020,16 @@ public class AuditEvent extends DomainResource {
             this.securityLabel = new ArrayList<Coding>();
           this.securityLabel.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
+         */
+        public Coding getSecurityLabelFirstRep() { 
+          if (getSecurityLabel().isEmpty()) {
+            addSecurityLabel();
+          }
+          return getSecurityLabel().get(0);
         }
 
         /**
@@ -2210,16 +2189,6 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
-         */
-        public AuditEventEntityDetailComponent getDetailFirstRep() { 
-          if (getDetail().isEmpty()) {
-            addDetail();
-          }
-          return getDetail().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AuditEventEntityComponent setDetail(List<AuditEventEntityDetailComponent> theDetail) { 
@@ -2236,10 +2205,6 @@ public class AuditEvent extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #detail} (Additional Information about the entity.)
-         */
-    // syntactic sugar
         public AuditEventEntityDetailComponent addDetail() { //3
           AuditEventEntityDetailComponent t = new AuditEventEntityDetailComponent();
           if (this.detail == null)
@@ -2248,7 +2213,6 @@ public class AuditEvent extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AuditEventEntityComponent addDetail(AuditEventEntityDetailComponent t) { //3
           if (t == null)
             return this;
@@ -2256,6 +2220,16 @@ public class AuditEvent extends DomainResource {
             this.detail = new ArrayList<AuditEventEntityDetailComponent>();
           this.detail.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
+         */
+        public AuditEventEntityDetailComponent getDetailFirstRep() { 
+          if (getDetail().isEmpty()) {
+            addDetail();
+          }
+          return getDetail().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2462,8 +2436,8 @@ public class AuditEvent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, reference, type, role
-          , lifecycle, securityLabel, name, description, query, detail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, reference, type
+          , role, lifecycle, securityLabel, name, description, query, detail);
       }
 
   public String fhirType() {
@@ -2821,16 +2795,6 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #subtype}, creating it if it does not already exist
-     */
-    public Coding getSubtypeFirstRep() { 
-      if (getSubtype().isEmpty()) {
-        addSubtype();
-      }
-      return getSubtype().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public AuditEvent setSubtype(List<Coding> theSubtype) { 
@@ -2847,10 +2811,6 @@ public class AuditEvent extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #subtype} (Identifier for the category of event.)
-     */
-    // syntactic sugar
     public Coding addSubtype() { //3
       Coding t = new Coding();
       if (this.subtype == null)
@@ -2859,7 +2819,6 @@ public class AuditEvent extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AuditEvent addSubtype(Coding t) { //3
       if (t == null)
         return this;
@@ -2867,6 +2826,16 @@ public class AuditEvent extends DomainResource {
         this.subtype = new ArrayList<Coding>();
       this.subtype.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #subtype}, creating it if it does not already exist
+     */
+    public Coding getSubtypeFirstRep() { 
+      if (getSubtype().isEmpty()) {
+        addSubtype();
+      }
+      return getSubtype().get(0);
     }
 
     /**
@@ -3071,16 +3040,6 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #purposeOfEvent}, creating it if it does not already exist
-     */
-    public Coding getPurposeOfEventFirstRep() { 
-      if (getPurposeOfEvent().isEmpty()) {
-        addPurposeOfEvent();
-      }
-      return getPurposeOfEvent().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public AuditEvent setPurposeOfEvent(List<Coding> thePurposeOfEvent) { 
@@ -3097,10 +3056,6 @@ public class AuditEvent extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #purposeOfEvent} (The purposeOfUse (reason) that was used during the event being recorded.)
-     */
-    // syntactic sugar
     public Coding addPurposeOfEvent() { //3
       Coding t = new Coding();
       if (this.purposeOfEvent == null)
@@ -3109,7 +3064,6 @@ public class AuditEvent extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AuditEvent addPurposeOfEvent(Coding t) { //3
       if (t == null)
         return this;
@@ -3120,22 +3074,22 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #purposeOfEvent}, creating it if it does not already exist
+     */
+    public Coding getPurposeOfEventFirstRep() { 
+      if (getPurposeOfEvent().isEmpty()) {
+        addPurposeOfEvent();
+      }
+      return getPurposeOfEvent().get(0);
+    }
+
+    /**
      * @return {@link #agent} (An actor taking an active role in the event or activity that is logged.)
      */
     public List<AuditEventAgentComponent> getAgent() { 
       if (this.agent == null)
         this.agent = new ArrayList<AuditEventAgentComponent>();
       return this.agent;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
-     */
-    public AuditEventAgentComponent getAgentFirstRep() { 
-      if (getAgent().isEmpty()) {
-        addAgent();
-      }
-      return getAgent().get(0);
     }
 
     /**
@@ -3155,10 +3109,6 @@ public class AuditEvent extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #agent} (An actor taking an active role in the event or activity that is logged.)
-     */
-    // syntactic sugar
     public AuditEventAgentComponent addAgent() { //3
       AuditEventAgentComponent t = new AuditEventAgentComponent();
       if (this.agent == null)
@@ -3167,7 +3117,6 @@ public class AuditEvent extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AuditEvent addAgent(AuditEventAgentComponent t) { //3
       if (t == null)
         return this;
@@ -3175,6 +3124,16 @@ public class AuditEvent extends DomainResource {
         this.agent = new ArrayList<AuditEventAgentComponent>();
       this.agent.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
+     */
+    public AuditEventAgentComponent getAgentFirstRep() { 
+      if (getAgent().isEmpty()) {
+        addAgent();
+      }
+      return getAgent().get(0);
     }
 
     /**
@@ -3211,16 +3170,6 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #entity}, creating it if it does not already exist
-     */
-    public AuditEventEntityComponent getEntityFirstRep() { 
-      if (getEntity().isEmpty()) {
-        addEntity();
-      }
-      return getEntity().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public AuditEvent setEntity(List<AuditEventEntityComponent> theEntity) { 
@@ -3237,10 +3186,6 @@ public class AuditEvent extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #entity} (Specific instances of data or objects that have been accessed.)
-     */
-    // syntactic sugar
     public AuditEventEntityComponent addEntity() { //3
       AuditEventEntityComponent t = new AuditEventEntityComponent();
       if (this.entity == null)
@@ -3249,7 +3194,6 @@ public class AuditEvent extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AuditEvent addEntity(AuditEventEntityComponent t) { //3
       if (t == null)
         return this;
@@ -3257,6 +3201,16 @@ public class AuditEvent extends DomainResource {
         this.entity = new ArrayList<AuditEventEntityComponent>();
       this.entity.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #entity}, creating it if it does not already exist
+     */
+    public AuditEventEntityComponent getEntityFirstRep() { 
+      if (getEntity().isEmpty()) {
+        addEntity();
+      }
+      return getEntity().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -3494,7 +3448,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.recorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event occurred on source", type="date", target={} )
+  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event occurred on source", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3514,7 +3468,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-type", path="AuditEvent.entity.type", description="Type of object involved", type="token", target={} )
+  @SearchParamDefinition(name="entity-type", path="AuditEvent.entity.type", description="Type of object involved", type="token" )
   public static final String SP_ENTITY_TYPE = "entity-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-type</b>
@@ -3534,7 +3488,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="AuditEvent.agent.reference", description="Direct reference to resource", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="agent", path="AuditEvent.agent.reference", description="Direct reference to resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -3560,7 +3514,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.network.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="AuditEvent.agent.network.address", description="Identifier for the network access point of the user device", type="token", target={} )
+  @SearchParamDefinition(name="address", path="AuditEvent.agent.network.address", description="Identifier for the network access point of the user device", type="token" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -3580,7 +3534,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.source.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="AuditEvent.source.identifier", description="The identity of source detecting the event", type="token", target={} )
+  @SearchParamDefinition(name="source", path="AuditEvent.source.identifier", description="The identity of source detecting the event", type="token" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -3600,7 +3554,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="AuditEvent.type", description="Type/identifier of event", type="token", target={} )
+  @SearchParamDefinition(name="type", path="AuditEvent.type", description="Type/identifier of event", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -3620,7 +3574,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.altId</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="altid", path="AuditEvent.agent.altId", description="Alternative User id e.g. authentication", type="token", target={} )
+  @SearchParamDefinition(name="altid", path="AuditEvent.agent.altId", description="Alternative User id e.g. authentication", type="token" )
   public static final String SP_ALTID = "altid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>altid</b>
@@ -3640,7 +3594,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.source.site</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="site", path="AuditEvent.source.site", description="Logical source location within the enterprise", type="token", target={} )
+  @SearchParamDefinition(name="site", path="AuditEvent.source.site", description="Logical source location within the enterprise", type="token" )
   public static final String SP_SITE = "site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>site</b>
@@ -3660,7 +3614,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent-name", path="AuditEvent.agent.name", description="Human-meaningful name for the agent", type="string", target={} )
+  @SearchParamDefinition(name="agent-name", path="AuditEvent.agent.name", description="Human-meaningful name for the agent", type="string" )
   public static final String SP_AGENT_NAME = "agent-name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent-name</b>
@@ -3680,7 +3634,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-name", path="AuditEvent.entity.name", description="Descriptor for entity", type="string", target={} )
+  @SearchParamDefinition(name="entity-name", path="AuditEvent.entity.name", description="Descriptor for entity", type="string" )
   public static final String SP_ENTITY_NAME = "entity-name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-name</b>
@@ -3700,7 +3654,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.subtype</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subtype", path="AuditEvent.subtype", description="More specific type/id for the event", type="token", target={} )
+  @SearchParamDefinition(name="subtype", path="AuditEvent.subtype", description="More specific type/id for the event", type="token" )
   public static final String SP_SUBTYPE = "subtype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
@@ -3720,7 +3674,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.reference, AuditEvent.entity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="AuditEvent.agent.reference | AuditEvent.entity.reference", description="Direct reference to resource", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="AuditEvent.agent.reference | AuditEvent.entity.reference", description="Direct reference to resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3746,7 +3700,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="AuditEvent.action", description="Type of action performed during the event", type="token", target={} )
+  @SearchParamDefinition(name="action", path="AuditEvent.action", description="Type of action performed during the event", type="token" )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -3766,7 +3720,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.userId</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="user", path="AuditEvent.agent.userId", description="Unique identifier for the user", type="token", target={} )
+  @SearchParamDefinition(name="user", path="AuditEvent.agent.userId", description="Unique identifier for the user", type="token" )
   public static final String SP_USER = "user";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>user</b>
@@ -3812,7 +3766,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.entity.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-id", path="AuditEvent.entity.identifier", description="Specific instance of object (e.g. versioned)", type="token", target={} )
+  @SearchParamDefinition(name="entity-id", path="AuditEvent.entity.identifier", description="Specific instance of object (e.g. versioned)", type="token" )
   public static final String SP_ENTITY_ID = "entity-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-id</b>
@@ -3832,7 +3786,7 @@ public class AuditEvent extends DomainResource {
    * Path: <b>AuditEvent.agent.policy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="policy", path="AuditEvent.agent.policy", description="Policy that authorized event", type="uri", target={} )
+  @SearchParamDefinition(name="policy", path="AuditEvent.agent.policy", description="Policy that authorized event", type="uri" )
   public static final String SP_POLICY = "policy";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>policy</b>

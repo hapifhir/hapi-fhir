@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -239,16 +240,6 @@ public class EligibilityResponse extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #financial}, creating it if it does not already exist
-         */
-        public BenefitComponent getFinancialFirstRep() { 
-          if (getFinancial().isEmpty()) {
-            addFinancial();
-          }
-          return getFinancial().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public BenefitsComponent setFinancial(List<BenefitComponent> theFinancial) { 
@@ -265,10 +256,6 @@ public class EligibilityResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #financial} (Benefits Used to date.)
-         */
-    // syntactic sugar
         public BenefitComponent addFinancial() { //3
           BenefitComponent t = new BenefitComponent();
           if (this.financial == null)
@@ -277,7 +264,6 @@ public class EligibilityResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public BenefitsComponent addFinancial(BenefitComponent t) { //3
           if (t == null)
             return this;
@@ -285,6 +271,16 @@ public class EligibilityResponse extends DomainResource {
             this.financial = new ArrayList<BenefitComponent>();
           this.financial.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #financial}, creating it if it does not already exist
+         */
+        public BenefitComponent getFinancialFirstRep() { 
+          if (getFinancial().isEmpty()) {
+            addFinancial();
+          }
+          return getFinancial().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -717,7 +713,8 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, benefit, benefitUsed);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, benefit, benefitUsed
+          );
       }
 
   public String fhirType() {
@@ -996,16 +993,6 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EligibilityResponse setIdentifier(List<Identifier> theIdentifier) { 
@@ -1022,10 +1009,6 @@ public class EligibilityResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (The Response business identifier.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1034,7 +1017,6 @@ public class EligibilityResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EligibilityResponse addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1042,6 +1024,16 @@ public class EligibilityResponse extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1542,16 +1534,6 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #benefitBalance}, creating it if it does not already exist
-     */
-    public BenefitsComponent getBenefitBalanceFirstRep() { 
-      if (getBenefitBalance().isEmpty()) {
-        addBenefitBalance();
-      }
-      return getBenefitBalance().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EligibilityResponse setBenefitBalance(List<BenefitsComponent> theBenefitBalance) { 
@@ -1568,10 +1550,6 @@ public class EligibilityResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #benefitBalance} (Benefits and optionally current balances by Category.)
-     */
-    // syntactic sugar
     public BenefitsComponent addBenefitBalance() { //3
       BenefitsComponent t = new BenefitsComponent();
       if (this.benefitBalance == null)
@@ -1580,7 +1558,6 @@ public class EligibilityResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EligibilityResponse addBenefitBalance(BenefitsComponent t) { //3
       if (t == null)
         return this;
@@ -1591,22 +1568,22 @@ public class EligibilityResponse extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #benefitBalance}, creating it if it does not already exist
+     */
+    public BenefitsComponent getBenefitBalanceFirstRep() { 
+      if (getBenefitBalance().isEmpty()) {
+        addBenefitBalance();
+      }
+      return getBenefitBalance().get(0);
+    }
+
+    /**
      * @return {@link #error} (Mutually exclusive with Services Provided (Item).)
      */
     public List<ErrorsComponent> getError() { 
       if (this.error == null)
         this.error = new ArrayList<ErrorsComponent>();
       return this.error;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #error}, creating it if it does not already exist
-     */
-    public ErrorsComponent getErrorFirstRep() { 
-      if (getError().isEmpty()) {
-        addError();
-      }
-      return getError().get(0);
     }
 
     /**
@@ -1626,10 +1603,6 @@ public class EligibilityResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #error} (Mutually exclusive with Services Provided (Item).)
-     */
-    // syntactic sugar
     public ErrorsComponent addError() { //3
       ErrorsComponent t = new ErrorsComponent();
       if (this.error == null)
@@ -1638,7 +1611,6 @@ public class EligibilityResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EligibilityResponse addError(ErrorsComponent t) { //3
       if (t == null)
         return this;
@@ -1646,6 +1618,16 @@ public class EligibilityResponse extends DomainResource {
         this.error = new ArrayList<ErrorsComponent>();
       this.error.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #error}, creating it if it does not already exist
+     */
+    public ErrorsComponent getErrorFirstRep() { 
+      if (getError().isEmpty()) {
+        addError();
+      }
+      return getError().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1946,9 +1928,9 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, outcome, disposition
-          , ruleset, originalRuleset, created, organization, requestProvider, requestOrganization, inforce
-          , contract, form, benefitBalance, error);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, outcome
+          , disposition, ruleset, originalRuleset, created, organization, requestProvider
+          , requestOrganization, inforce, contract, form, benefitBalance, error);
       }
 
   @Override
@@ -1964,7 +1946,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestprovideridentifier", path="EligibilityResponse.requestProvider.as(Identifier)", description="The EligibilityRequest provider", type="token", target={} )
+  @SearchParamDefinition(name="requestprovideridentifier", path="EligibilityResponse.requestProvider.as(Identifier)", description="The EligibilityRequest provider", type="token" )
   public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
@@ -1984,7 +1966,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="EligibilityResponse.requestOrganization.as(Identifier)", description="The EligibilityRequest organization", type="token", target={} )
+  @SearchParamDefinition(name="requestorganizationidentifier", path="EligibilityResponse.requestOrganization.as(Identifier)", description="The EligibilityRequest organization", type="token" )
   public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
@@ -2004,7 +1986,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EligibilityResponse.identifier", description="The business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="EligibilityResponse.identifier", description="The business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2024,7 +2006,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.disposition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="disposition", path="EligibilityResponse.disposition", description="The contents of the disposition message", type="string", target={} )
+  @SearchParamDefinition(name="disposition", path="EligibilityResponse.disposition", description="The contents of the disposition message", type="string" )
   public static final String SP_DISPOSITION = "disposition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>disposition</b>
@@ -2044,7 +2026,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="EligibilityResponse.organization.as(Identifier)", description="The organization which generated this resource", type="token", target={} )
+  @SearchParamDefinition(name="organizationidentifier", path="EligibilityResponse.organization.as(Identifier)", description="The organization which generated this resource", type="token" )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -2064,7 +2046,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="EligibilityResponse.created", description="The creation date", type="date", target={} )
+  @SearchParamDefinition(name="created", path="EligibilityResponse.created", description="The creation date", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -2084,7 +2066,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="EligibilityResponse.request.as(Identifier)", description="The EligibilityRequest reference", type="token", target={} )
+  @SearchParamDefinition(name="requestidentifier", path="EligibilityResponse.request.as(Identifier)", description="The EligibilityRequest reference", type="token" )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -2104,7 +2086,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="EligibilityResponse.organization.as(Reference)", description="The organization which generated this resource", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organizationreference", path="EligibilityResponse.organization.as(Reference)", description="The organization which generated this resource", type="reference" )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -2130,7 +2112,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProviderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestproviderreference", path="EligibilityResponse.requestProvider.as(Reference)", description="The EligibilityRequest provider", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="requestproviderreference", path="EligibilityResponse.requestProvider.as(Reference)", description="The EligibilityRequest provider", type="reference" )
   public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
@@ -2156,7 +2138,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestOrganizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationreference", path="EligibilityResponse.requestOrganization.as(Reference)", description="The EligibilityRequest organization", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="requestorganizationreference", path="EligibilityResponse.requestOrganization.as(Reference)", description="The EligibilityRequest organization", type="reference" )
   public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>
@@ -2182,7 +2164,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestreference", path="EligibilityResponse.request.as(Reference)", description="The EligibilityRequest reference", type="reference", target={EligibilityRequest.class} )
+  @SearchParamDefinition(name="requestreference", path="EligibilityResponse.request.as(Reference)", description="The EligibilityRequest reference", type="reference" )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
@@ -2208,7 +2190,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.outcome</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="outcome", path="EligibilityResponse.outcome", description="The processing outcome", type="token", target={} )
+  @SearchParamDefinition(name="outcome", path="EligibilityResponse.outcome", description="The processing outcome", type="token" )
   public static final String SP_OUTCOME = "outcome";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>outcome</b>

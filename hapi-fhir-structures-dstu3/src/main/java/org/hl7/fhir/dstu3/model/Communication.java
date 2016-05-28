@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -69,7 +70,7 @@ public class Communication extends DomainResource {
          */
         FAILED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static CommunicationStatus fromCode(String codeString) throws FHIRException {
@@ -85,7 +86,10 @@ public class Communication extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new FHIRException("Unknown CommunicationStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CommunicationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -499,16 +503,6 @@ public class Communication extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Communication setIdentifier(List<Identifier> theIdentifier) { 
@@ -525,10 +519,6 @@ public class Communication extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -537,7 +527,6 @@ public class Communication extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Communication addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -545,6 +534,16 @@ public class Communication extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -620,16 +619,6 @@ public class Communication extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
-     */
-    public Reference getRecipientFirstRep() { 
-      if (getRecipient().isEmpty()) {
-        addRecipient();
-      }
-      return getRecipient().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Communication setRecipient(List<Reference> theRecipient) { 
@@ -646,10 +635,6 @@ public class Communication extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #recipient} (The entity (e.g. person, organization, clinical information system, or device) which was the target of the communication. If receipts need to be tracked by individual, a separate resource instance will need to be created for each recipient.  Multiple recipient communications are intended where either a receipt(s) is not tracked (e.g. a mass mail-out) or is captured in aggregate (all emails confirmed received by a particular time).)
-     */
-    // syntactic sugar
     public Reference addRecipient() { //3
       Reference t = new Reference();
       if (this.recipient == null)
@@ -658,7 +643,6 @@ public class Communication extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Communication addRecipient(Reference t) { //3
       if (t == null)
         return this;
@@ -669,8 +653,19 @@ public class Communication extends DomainResource {
     }
 
     /**
-     * @return {@link #recipient} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The entity (e.g. person, organization, clinical information system, or device) which was the target of the communication. If receipts need to be tracked by individual, a separate resource instance will need to be created for each recipient.  Multiple recipient communications are intended where either a receipt(s) is not tracked (e.g. a mass mail-out) or is captured in aggregate (all emails confirmed received by a particular time).)
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
      */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getRecipientTarget() { 
       if (this.recipientTarget == null)
         this.recipientTarget = new ArrayList<Resource>();
@@ -684,16 +679,6 @@ public class Communication extends DomainResource {
       if (this.payload == null)
         this.payload = new ArrayList<CommunicationPayloadComponent>();
       return this.payload;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #payload}, creating it if it does not already exist
-     */
-    public CommunicationPayloadComponent getPayloadFirstRep() { 
-      if (getPayload().isEmpty()) {
-        addPayload();
-      }
-      return getPayload().get(0);
     }
 
     /**
@@ -713,10 +698,6 @@ public class Communication extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #payload} (Text, attachment(s), or resource(s) that was communicated to the recipient.)
-     */
-    // syntactic sugar
     public CommunicationPayloadComponent addPayload() { //3
       CommunicationPayloadComponent t = new CommunicationPayloadComponent();
       if (this.payload == null)
@@ -725,7 +706,6 @@ public class Communication extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Communication addPayload(CommunicationPayloadComponent t) { //3
       if (t == null)
         return this;
@@ -736,22 +716,22 @@ public class Communication extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #payload}, creating it if it does not already exist
+     */
+    public CommunicationPayloadComponent getPayloadFirstRep() { 
+      if (getPayload().isEmpty()) {
+        addPayload();
+      }
+      return getPayload().get(0);
+    }
+
+    /**
      * @return {@link #medium} (A channel that was used for this communication (e.g. email, fax).)
      */
     public List<CodeableConcept> getMedium() { 
       if (this.medium == null)
         this.medium = new ArrayList<CodeableConcept>();
       return this.medium;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #medium}, creating it if it does not already exist
-     */
-    public CodeableConcept getMediumFirstRep() { 
-      if (getMedium().isEmpty()) {
-        addMedium();
-      }
-      return getMedium().get(0);
     }
 
     /**
@@ -771,10 +751,6 @@ public class Communication extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #medium} (A channel that was used for this communication (e.g. email, fax).)
-     */
-    // syntactic sugar
     public CodeableConcept addMedium() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.medium == null)
@@ -783,7 +759,6 @@ public class Communication extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Communication addMedium(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -791,6 +766,16 @@ public class Communication extends DomainResource {
         this.medium = new ArrayList<CodeableConcept>();
       this.medium.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #medium}, creating it if it does not already exist
+     */
+    public CodeableConcept getMediumFirstRep() { 
+      if (getMedium().isEmpty()) {
+        addMedium();
+      }
+      return getMedium().get(0);
     }
 
     /**
@@ -994,16 +979,6 @@ public class Communication extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
-     */
-    public CodeableConcept getReasonFirstRep() { 
-      if (getReason().isEmpty()) {
-        addReason();
-      }
-      return getReason().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Communication setReason(List<CodeableConcept> theReason) { 
@@ -1020,10 +995,6 @@ public class Communication extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #reason} (The reason or justification for the communication.)
-     */
-    // syntactic sugar
     public CodeableConcept addReason() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.reason == null)
@@ -1032,7 +1003,6 @@ public class Communication extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Communication addReason(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1040,6 +1010,16 @@ public class Communication extends DomainResource {
         this.reason = new ArrayList<CodeableConcept>();
       this.reason.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
     }
 
     /**
@@ -1392,8 +1372,9 @@ public class Communication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, category, sender, recipient
-          , payload, medium, status, encounter, sent, received, reason, subject, requestDetail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, category, sender
+          , recipient, payload, medium, status, encounter, sent, received, reason, subject
+          , requestDetail);
       }
 
   @Override
@@ -1409,7 +1390,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Communication.identifier", description="Unique identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Communication.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1429,7 +1410,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.requestDetail</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="Communication.requestDetail", description="CommunicationRequest producing this message", type="reference", target={CommunicationRequest.class} )
+  @SearchParamDefinition(name="request", path="Communication.requestDetail", description="CommunicationRequest producing this message", type="reference" )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -1455,7 +1436,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.sender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SENDER = "sender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sender</b>
@@ -1481,7 +1462,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1507,7 +1488,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1533,7 +1514,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference", target={Practitioner.class, Group.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1559,7 +1540,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.received</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date", target={} )
+  @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date" )
   public static final String SP_RECEIVED = "received";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>received</b>
@@ -1579,7 +1560,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.medium</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medium", path="Communication.medium", description="A channel of communication", type="token", target={} )
+  @SearchParamDefinition(name="medium", path="Communication.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medium</b>
@@ -1599,7 +1580,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1625,7 +1606,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1645,7 +1626,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.sent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date", target={} )
+  @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date" )
   public static final String SP_SENT = "sent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sent</b>
@@ -1665,7 +1646,7 @@ public class Communication extends DomainResource {
    * Path: <b>Communication.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Communication.status", description="in-progress | completed | suspended | rejected | failed", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Communication.status", description="in-progress | completed | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

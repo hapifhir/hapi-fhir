@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -65,7 +66,7 @@ public class Composition extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static CompositionStatus fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Composition extends DomainResource {
           return AMENDED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown CompositionStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CompositionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -184,7 +188,7 @@ public class Composition extends DomainResource {
          */
         OFFICIAL, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static CompositionAttestationMode fromCode(String codeString) throws FHIRException {
@@ -198,7 +202,10 @@ public class Composition extends DomainResource {
           return LEGAL;
         if ("official".equals(codeString))
           return OFFICIAL;
-        throw new FHIRException("Unknown CompositionAttestationMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CompositionAttestationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -332,16 +339,6 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #mode}, creating it if it does not already exist
-         */
-        public Enumeration<CompositionAttestationMode> getModeFirstRep() { 
-          if (getMode().isEmpty()) {
-            addModeElement();
-          }
-          return getMode().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public CompositionAttesterComponent setMode(List<Enumeration<CompositionAttestationMode>> theMode) { 
@@ -361,7 +358,6 @@ public class Composition extends DomainResource {
         /**
          * @return {@link #mode} (The type of attestation the authenticator offers.)
          */
-    // syntactic sugar
         public Enumeration<CompositionAttestationMode> addModeElement() {//2 
           Enumeration<CompositionAttestationMode> t = new Enumeration<CompositionAttestationMode>(new CompositionAttestationModeEnumFactory());
           if (this.mode == null)
@@ -648,16 +644,6 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
-         */
-        public CodeableConcept getCodeFirstRep() { 
-          if (getCode().isEmpty()) {
-            addCode();
-          }
-          return getCode().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public CompositionEventComponent setCode(List<CodeableConcept> theCode) { 
@@ -674,10 +660,6 @@ public class Composition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #code} (This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.)
-         */
-    // syntactic sugar
         public CodeableConcept addCode() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.code == null)
@@ -686,7 +668,6 @@ public class Composition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public CompositionEventComponent addCode(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -694,6 +675,16 @@ public class Composition extends DomainResource {
             this.code = new ArrayList<CodeableConcept>();
           this.code.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
+         */
+        public CodeableConcept getCodeFirstRep() { 
+          if (getCode().isEmpty()) {
+            addCode();
+          }
+          return getCode().get(0);
         }
 
         /**
@@ -730,16 +721,6 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
-         */
-        public Reference getDetailFirstRep() { 
-          if (getDetail().isEmpty()) {
-            addDetail();
-          }
-          return getDetail().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public CompositionEventComponent setDetail(List<Reference> theDetail) { 
@@ -756,10 +737,6 @@ public class Composition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #detail} (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
-         */
-    // syntactic sugar
         public Reference addDetail() { //3
           Reference t = new Reference();
           if (this.detail == null)
@@ -768,7 +745,6 @@ public class Composition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public CompositionEventComponent addDetail(Reference t) { //3
           if (t == null)
             return this;
@@ -779,8 +755,19 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
+         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
          */
+        public Reference getDetailFirstRep() { 
+          if (getDetail().isEmpty()) {
+            addDetail();
+          }
+          return getDetail().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getDetailTarget() { 
           if (this.detailTarget == null)
             this.detailTarget = new ArrayList<Resource>();
@@ -1162,16 +1149,6 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #entry}, creating it if it does not already exist
-         */
-        public Reference getEntryFirstRep() { 
-          if (getEntry().isEmpty()) {
-            addEntry();
-          }
-          return getEntry().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SectionComponent setEntry(List<Reference> theEntry) { 
@@ -1188,10 +1165,6 @@ public class Composition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #entry} (A reference to the actual resource from which the narrative in the section is derived.)
-         */
-    // syntactic sugar
         public Reference addEntry() { //3
           Reference t = new Reference();
           if (this.entry == null)
@@ -1200,7 +1173,6 @@ public class Composition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SectionComponent addEntry(Reference t) { //3
           if (t == null)
             return this;
@@ -1211,8 +1183,19 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #entry} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A reference to the actual resource from which the narrative in the section is derived.)
+         * @return The first repetition of repeating field {@link #entry}, creating it if it does not already exist
          */
+        public Reference getEntryFirstRep() { 
+          if (getEntry().isEmpty()) {
+            addEntry();
+          }
+          return getEntry().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getEntryTarget() { 
           if (this.entryTarget == null)
             this.entryTarget = new ArrayList<Resource>();
@@ -1253,16 +1236,6 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #section}, creating it if it does not already exist
-         */
-        public SectionComponent getSectionFirstRep() { 
-          if (getSection().isEmpty()) {
-            addSection();
-          }
-          return getSection().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SectionComponent setSection(List<SectionComponent> theSection) { 
@@ -1279,10 +1252,6 @@ public class Composition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #section} (A nested sub-section within this section.)
-         */
-    // syntactic sugar
         public SectionComponent addSection() { //3
           SectionComponent t = new SectionComponent();
           if (this.section == null)
@@ -1291,7 +1260,6 @@ public class Composition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SectionComponent addSection(SectionComponent t) { //3
           if (t == null)
             return this;
@@ -1299,6 +1267,16 @@ public class Composition extends DomainResource {
             this.section = new ArrayList<SectionComponent>();
           this.section.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #section}, creating it if it does not already exist
+         */
+        public SectionComponent getSectionFirstRep() { 
+          if (getSection().isEmpty()) {
+            addSection();
+          }
+          return getSection().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1478,8 +1456,8 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(title, code, text, mode, orderedBy
-          , entry, emptyReason, section);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(title, code, text, mode
+          , orderedBy, entry, emptyReason, section);
       }
 
   public String fhirType() {
@@ -1933,16 +1911,6 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
-     */
-    public Reference getAuthorFirstRep() { 
-      if (getAuthor().isEmpty()) {
-        addAuthor();
-      }
-      return getAuthor().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Composition setAuthor(List<Reference> theAuthor) { 
@@ -1959,10 +1927,6 @@ public class Composition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #author} (Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
-     */
-    // syntactic sugar
     public Reference addAuthor() { //3
       Reference t = new Reference();
       if (this.author == null)
@@ -1971,7 +1935,6 @@ public class Composition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Composition addAuthor(Reference t) { //3
       if (t == null)
         return this;
@@ -1982,8 +1945,19 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies who is responsible for the information in the composition, not necessarily who typed it in.)
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
      */
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
+      }
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getAuthorTarget() { 
       if (this.authorTarget == null)
         this.authorTarget = new ArrayList<Resource>();
@@ -1997,16 +1971,6 @@ public class Composition extends DomainResource {
       if (this.attester == null)
         this.attester = new ArrayList<CompositionAttesterComponent>();
       return this.attester;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #attester}, creating it if it does not already exist
-     */
-    public CompositionAttesterComponent getAttesterFirstRep() { 
-      if (getAttester().isEmpty()) {
-        addAttester();
-      }
-      return getAttester().get(0);
     }
 
     /**
@@ -2026,10 +1990,6 @@ public class Composition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #attester} (A participant who has attested to the accuracy of the composition/document.)
-     */
-    // syntactic sugar
     public CompositionAttesterComponent addAttester() { //3
       CompositionAttesterComponent t = new CompositionAttesterComponent();
       if (this.attester == null)
@@ -2038,7 +1998,6 @@ public class Composition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Composition addAttester(CompositionAttesterComponent t) { //3
       if (t == null)
         return this;
@@ -2046,6 +2005,16 @@ public class Composition extends DomainResource {
         this.attester = new ArrayList<CompositionAttesterComponent>();
       this.attester.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #attester}, creating it if it does not already exist
+     */
+    public CompositionAttesterComponent getAttesterFirstRep() { 
+      if (getAttester().isEmpty()) {
+        addAttester();
+      }
+      return getAttester().get(0);
     }
 
     /**
@@ -2102,16 +2071,6 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
-     */
-    public CompositionEventComponent getEventFirstRep() { 
-      if (getEvent().isEmpty()) {
-        addEvent();
-      }
-      return getEvent().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Composition setEvent(List<CompositionEventComponent> theEvent) { 
@@ -2128,10 +2087,6 @@ public class Composition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #event} (The clinical service, such as a colonoscopy or an appendectomy, being documented.)
-     */
-    // syntactic sugar
     public CompositionEventComponent addEvent() { //3
       CompositionEventComponent t = new CompositionEventComponent();
       if (this.event == null)
@@ -2140,7 +2095,6 @@ public class Composition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Composition addEvent(CompositionEventComponent t) { //3
       if (t == null)
         return this;
@@ -2148,6 +2102,16 @@ public class Composition extends DomainResource {
         this.event = new ArrayList<CompositionEventComponent>();
       this.event.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
+     */
+    public CompositionEventComponent getEventFirstRep() { 
+      if (getEvent().isEmpty()) {
+        addEvent();
+      }
+      return getEvent().get(0);
     }
 
     /**
@@ -2204,16 +2168,6 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #section}, creating it if it does not already exist
-     */
-    public SectionComponent getSectionFirstRep() { 
-      if (getSection().isEmpty()) {
-        addSection();
-      }
-      return getSection().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Composition setSection(List<SectionComponent> theSection) { 
@@ -2230,10 +2184,6 @@ public class Composition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #section} (The root of the sections that make up the composition.)
-     */
-    // syntactic sugar
     public SectionComponent addSection() { //3
       SectionComponent t = new SectionComponent();
       if (this.section == null)
@@ -2242,7 +2192,6 @@ public class Composition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Composition addSection(SectionComponent t) { //3
       if (t == null)
         return this;
@@ -2250,6 +2199,16 @@ public class Composition extends DomainResource {
         this.section = new ArrayList<SectionComponent>();
       this.section.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #section}, creating it if it does not already exist
+     */
+    public SectionComponent getSectionFirstRep() { 
+      if (getSection().isEmpty()) {
+        addSection();
+      }
+      return getSection().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2525,8 +2484,8 @@ public class Composition extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, date, type, class_
-          , title, status, confidentiality, subject, author, attester, custodian, event, encounter, section
-          );
+          , title, status, confidentiality, subject, author, attester, custodian, event
+          , encounter, section);
       }
 
   @Override
@@ -2542,7 +2501,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2562,7 +2521,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2582,7 +2541,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date", target={} )
+  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -2602,7 +2561,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
+  @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2628,7 +2587,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2654,7 +2613,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.confidentiality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token", target={} )
+  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
@@ -2674,7 +2633,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.section.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token", target={} )
+  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>section</b>
@@ -2694,7 +2653,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2720,7 +2679,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2740,7 +2699,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -2760,7 +2719,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.attester.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ATTESTER = "attester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>attester</b>
@@ -2812,7 +2771,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2838,7 +2797,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token", target={} )
+  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2858,7 +2817,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token", target={} )
+  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
@@ -2878,7 +2837,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

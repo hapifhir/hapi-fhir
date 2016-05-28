@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class Linkage extends DomainResource {
          */
         HISTORICAL, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static LinkageType fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class Linkage extends DomainResource {
           return ALTERNATE;
         if ("historical".equals(codeString))
           return HISTORICAL;
-        throw new FHIRException("Unknown LinkageType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown LinkageType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -432,16 +436,6 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-     */
-    public LinkageItemComponent getItemFirstRep() { 
-      if (getItem().isEmpty()) {
-        addItem();
-      }
-      return getItem().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Linkage setItem(List<LinkageItemComponent> theItem) { 
@@ -458,10 +452,6 @@ public class Linkage extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #item} (Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.)
-     */
-    // syntactic sugar
     public LinkageItemComponent addItem() { //3
       LinkageItemComponent t = new LinkageItemComponent();
       if (this.item == null)
@@ -470,7 +460,6 @@ public class Linkage extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Linkage addItem(LinkageItemComponent t) { //3
       if (t == null)
         return this;
@@ -478,6 +467,16 @@ public class Linkage extends DomainResource {
         this.item = new ArrayList<LinkageItemComponent>();
       this.item.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public LinkageItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -601,7 +600,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference", target={} )
+  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference" )
   public static final String SP_ITEM = "item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item</b>
@@ -627,7 +626,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", target={Practitioner.class, Organization.class} )
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -653,7 +652,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference", target={} )
+  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -208,16 +209,6 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
-         */
-        public CodeableConcept getSpecialtyFirstRep() { 
-          if (getSpecialty().isEmpty()) {
-            addSpecialty();
-          }
-          return getSpecialty().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public PractitionerPractitionerRoleComponent setSpecialty(List<CodeableConcept> theSpecialty) { 
@@ -234,10 +225,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #specialty} (Specific specialty of the practitioner.)
-         */
-    // syntactic sugar
         public CodeableConcept addSpecialty() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.specialty == null)
@@ -246,7 +233,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerPractitionerRoleComponent addSpecialty(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -257,22 +243,22 @@ public class Practitioner extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialtyFirstRep() { 
+          if (getSpecialty().isEmpty()) {
+            addSpecialty();
+          }
+          return getSpecialty().get(0);
+        }
+
+        /**
          * @return {@link #identifier} (Business Identifiers that are specific to a role/location.)
          */
         public List<Identifier> getIdentifier() { 
           if (this.identifier == null)
             this.identifier = new ArrayList<Identifier>();
           return this.identifier;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-         */
-        public Identifier getIdentifierFirstRep() { 
-          if (getIdentifier().isEmpty()) {
-            addIdentifier();
-          }
-          return getIdentifier().get(0);
         }
 
         /**
@@ -292,10 +278,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #identifier} (Business Identifiers that are specific to a role/location.)
-         */
-    // syntactic sugar
         public Identifier addIdentifier() { //3
           Identifier t = new Identifier();
           if (this.identifier == null)
@@ -304,7 +286,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerPractitionerRoleComponent addIdentifier(Identifier t) { //3
           if (t == null)
             return this;
@@ -315,22 +296,22 @@ public class Practitioner extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
+
+        /**
          * @return {@link #telecom} (Contact details that are specific to the role/location/service.)
          */
         public List<ContactPoint> getTelecom() { 
           if (this.telecom == null)
             this.telecom = new ArrayList<ContactPoint>();
           return this.telecom;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
         }
 
         /**
@@ -350,10 +331,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details that are specific to the role/location/service.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -362,7 +339,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerPractitionerRoleComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -370,6 +346,16 @@ public class Practitioner extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         /**
@@ -406,16 +392,6 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
-         */
-        public Reference getLocationFirstRep() { 
-          if (getLocation().isEmpty()) {
-            addLocation();
-          }
-          return getLocation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public PractitionerPractitionerRoleComponent setLocation(List<Reference> theLocation) { 
@@ -432,10 +408,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #location} (The location(s) at which this practitioner provides care.)
-         */
-    // syntactic sugar
         public Reference addLocation() { //3
           Reference t = new Reference();
           if (this.location == null)
@@ -444,7 +416,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerPractitionerRoleComponent addLocation(Reference t) { //3
           if (t == null)
             return this;
@@ -455,18 +426,29 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+         * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
          */
+        public Reference getLocationFirstRep() { 
+          if (getLocation().isEmpty()) {
+            addLocation();
+          }
+          return getLocation().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Location> getLocationTarget() { 
           if (this.locationTarget == null)
             this.locationTarget = new ArrayList<Location>();
           return this.locationTarget;
         }
 
-    // syntactic sugar
         /**
-         * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+         * @deprecated Use Reference#setResource(IBaseResource) instead
          */
+        @Deprecated
         public Location addLocationTarget() { 
           Location r = new Location();
           if (this.locationTarget == null)
@@ -482,16 +464,6 @@ public class Practitioner extends DomainResource {
           if (this.healthcareService == null)
             this.healthcareService = new ArrayList<Reference>();
           return this.healthcareService;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #healthcareService}, creating it if it does not already exist
-         */
-        public Reference getHealthcareServiceFirstRep() { 
-          if (getHealthcareService().isEmpty()) {
-            addHealthcareService();
-          }
-          return getHealthcareService().get(0);
         }
 
         /**
@@ -511,10 +483,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #healthcareService} (The list of healthcare services that this worker provides for this role's Organization/Location(s).)
-         */
-    // syntactic sugar
         public Reference addHealthcareService() { //3
           Reference t = new Reference();
           if (this.healthcareService == null)
@@ -523,7 +491,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerPractitionerRoleComponent addHealthcareService(Reference t) { //3
           if (t == null)
             return this;
@@ -534,18 +501,29 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return {@link #healthcareService} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker provides for this role's Organization/Location(s).)
+         * @return The first repetition of repeating field {@link #healthcareService}, creating it if it does not already exist
          */
+        public Reference getHealthcareServiceFirstRep() { 
+          if (getHealthcareService().isEmpty()) {
+            addHealthcareService();
+          }
+          return getHealthcareService().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<HealthcareService> getHealthcareServiceTarget() { 
           if (this.healthcareServiceTarget == null)
             this.healthcareServiceTarget = new ArrayList<HealthcareService>();
           return this.healthcareServiceTarget;
         }
 
-    // syntactic sugar
         /**
-         * @return {@link #healthcareService} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker provides for this role's Organization/Location(s).)
+         * @deprecated Use Reference#setResource(IBaseResource) instead
          */
+        @Deprecated
         public HealthcareService addHealthcareServiceTarget() { 
           HealthcareService r = new HealthcareService();
           if (this.healthcareServiceTarget == null)
@@ -743,8 +721,8 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty, identifier
-          , telecom, period, location, healthcareService);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty
+          , identifier, telecom, period, location, healthcareService);
       }
 
   public String fhirType() {
@@ -816,16 +794,6 @@ public class Practitioner extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-         */
-        public Identifier getIdentifierFirstRep() { 
-          if (getIdentifier().isEmpty()) {
-            addIdentifier();
-          }
-          return getIdentifier().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public PractitionerQualificationComponent setIdentifier(List<Identifier> theIdentifier) { 
@@ -842,10 +810,6 @@ public class Practitioner extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #identifier} (An identifier that applies to this person's qualification in this role.)
-         */
-    // syntactic sugar
         public Identifier addIdentifier() { //3
           Identifier t = new Identifier();
           if (this.identifier == null)
@@ -854,7 +818,6 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public PractitionerQualificationComponent addIdentifier(Identifier t) { //3
           if (t == null)
             return this;
@@ -862,6 +825,16 @@ public class Practitioner extends DomainResource {
             this.identifier = new ArrayList<Identifier>();
           this.identifier.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
         }
 
         /**
@@ -1079,8 +1052,8 @@ public class Practitioner extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, period, issuer
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, period
+          , issuer);
       }
 
   public String fhirType() {
@@ -1187,16 +1160,6 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Practitioner setIdentifier(List<Identifier> theIdentifier) { 
@@ -1213,10 +1176,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (An identifier that applies to this person in this role.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1225,7 +1184,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1233,6 +1191,16 @@ Work addresses are not typically entered in this property as they are usually ro
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1290,16 +1258,6 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
-     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
-     */
-    public HumanName getNameFirstRep() { 
-      if (getName().isEmpty()) {
-        addName();
-      }
-      return getName().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Practitioner setName(List<HumanName> theName) { 
@@ -1316,10 +1274,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #name} (The name(s) associated with the practitioner.)
-     */
-    // syntactic sugar
     public HumanName addName() { //3
       HumanName t = new HumanName();
       if (this.name == null)
@@ -1328,7 +1282,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addName(HumanName t) { //3
       if (t == null)
         return this;
@@ -1339,22 +1292,22 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
+     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
+     */
+    public HumanName getNameFirstRep() { 
+      if (getName().isEmpty()) {
+        addName();
+      }
+      return getName().get(0);
+    }
+
+    /**
      * @return {@link #telecom} (A contact detail for the practitioner, e.g. a telephone number or an email address.)
      */
     public List<ContactPoint> getTelecom() { 
       if (this.telecom == null)
         this.telecom = new ArrayList<ContactPoint>();
       return this.telecom;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
     }
 
     /**
@@ -1374,10 +1327,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (A contact detail for the practitioner, e.g. a telephone number or an email address.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -1386,7 +1335,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -1397,6 +1345,16 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
      * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). 
 Work addresses are not typically entered in this property as they are usually role dependent.)
      */
@@ -1404,16 +1362,6 @@ Work addresses are not typically entered in this property as they are usually ro
       if (this.address == null)
         this.address = new ArrayList<Address>();
       return this.address;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
-     */
-    public Address getAddressFirstRep() { 
-      if (getAddress().isEmpty()) {
-        addAddress();
-      }
-      return getAddress().get(0);
     }
 
     /**
@@ -1433,11 +1381,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). 
-Work addresses are not typically entered in this property as they are usually role dependent.)
-     */
-    // syntactic sugar
     public Address addAddress() { //3
       Address t = new Address();
       if (this.address == null)
@@ -1446,7 +1389,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addAddress(Address t) { //3
       if (t == null)
         return this;
@@ -1454,6 +1396,16 @@ Work addresses are not typically entered in this property as they are usually ro
         this.address = new ArrayList<Address>();
       this.address.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
     }
 
     /**
@@ -1564,16 +1516,6 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
-     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
-     */
-    public Attachment getPhotoFirstRep() { 
-      if (getPhoto().isEmpty()) {
-        addPhoto();
-      }
-      return getPhoto().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Practitioner setPhoto(List<Attachment> thePhoto) { 
@@ -1590,10 +1532,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #photo} (Image of the person.)
-     */
-    // syntactic sugar
     public Attachment addPhoto() { //3
       Attachment t = new Attachment();
       if (this.photo == null)
@@ -1602,7 +1540,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addPhoto(Attachment t) { //3
       if (t == null)
         return this;
@@ -1613,22 +1550,22 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
+     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
+     */
+    public Attachment getPhotoFirstRep() { 
+      if (getPhoto().isEmpty()) {
+        addPhoto();
+      }
+      return getPhoto().get(0);
+    }
+
+    /**
      * @return {@link #practitionerRole} (The list of roles/organizations that the practitioner is associated with.)
      */
     public List<PractitionerPractitionerRoleComponent> getPractitionerRole() { 
       if (this.practitionerRole == null)
         this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
       return this.practitionerRole;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #practitionerRole}, creating it if it does not already exist
-     */
-    public PractitionerPractitionerRoleComponent getPractitionerRoleFirstRep() { 
-      if (getPractitionerRole().isEmpty()) {
-        addPractitionerRole();
-      }
-      return getPractitionerRole().get(0);
     }
 
     /**
@@ -1648,10 +1585,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #practitionerRole} (The list of roles/organizations that the practitioner is associated with.)
-     */
-    // syntactic sugar
     public PractitionerPractitionerRoleComponent addPractitionerRole() { //3
       PractitionerPractitionerRoleComponent t = new PractitionerPractitionerRoleComponent();
       if (this.practitionerRole == null)
@@ -1660,7 +1593,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addPractitionerRole(PractitionerPractitionerRoleComponent t) { //3
       if (t == null)
         return this;
@@ -1671,22 +1603,22 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
+     * @return The first repetition of repeating field {@link #practitionerRole}, creating it if it does not already exist
+     */
+    public PractitionerPractitionerRoleComponent getPractitionerRoleFirstRep() { 
+      if (getPractitionerRole().isEmpty()) {
+        addPractitionerRole();
+      }
+      return getPractitionerRole().get(0);
+    }
+
+    /**
      * @return {@link #qualification} (Qualifications obtained by training and certification.)
      */
     public List<PractitionerQualificationComponent> getQualification() { 
       if (this.qualification == null)
         this.qualification = new ArrayList<PractitionerQualificationComponent>();
       return this.qualification;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #qualification}, creating it if it does not already exist
-     */
-    public PractitionerQualificationComponent getQualificationFirstRep() { 
-      if (getQualification().isEmpty()) {
-        addQualification();
-      }
-      return getQualification().get(0);
     }
 
     /**
@@ -1706,10 +1638,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #qualification} (Qualifications obtained by training and certification.)
-     */
-    // syntactic sugar
     public PractitionerQualificationComponent addQualification() { //3
       PractitionerQualificationComponent t = new PractitionerQualificationComponent();
       if (this.qualification == null)
@@ -1718,7 +1646,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addQualification(PractitionerQualificationComponent t) { //3
       if (t == null)
         return this;
@@ -1729,22 +1656,22 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
+     * @return The first repetition of repeating field {@link #qualification}, creating it if it does not already exist
+     */
+    public PractitionerQualificationComponent getQualificationFirstRep() { 
+      if (getQualification().isEmpty()) {
+        addQualification();
+      }
+      return getQualification().get(0);
+    }
+
+    /**
      * @return {@link #communication} (A language the practitioner is able to use in patient communication.)
      */
     public List<CodeableConcept> getCommunication() { 
       if (this.communication == null)
         this.communication = new ArrayList<CodeableConcept>();
       return this.communication;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
-     */
-    public CodeableConcept getCommunicationFirstRep() { 
-      if (getCommunication().isEmpty()) {
-        addCommunication();
-      }
-      return getCommunication().get(0);
     }
 
     /**
@@ -1764,10 +1691,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return false;
     }
 
-    /**
-     * @return {@link #communication} (A language the practitioner is able to use in patient communication.)
-     */
-    // syntactic sugar
     public CodeableConcept addCommunication() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.communication == null)
@@ -1776,7 +1699,6 @@ Work addresses are not typically entered in this property as they are usually ro
       return t;
     }
 
-    // syntactic sugar
     public Practitioner addCommunication(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1784,6 +1706,16 @@ Work addresses are not typically entered in this property as they are usually ro
         this.communication = new ArrayList<CodeableConcept>();
       this.communication.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
+     */
+    public CodeableConcept getCommunicationFirstRep() { 
+      if (getCommunication().isEmpty()) {
+        addCommunication();
+      }
+      return getCommunication().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2031,8 +1963,9 @@ Work addresses are not typically entered in this property as they are usually ro
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name, telecom
-          , address, gender, birthDate, photo, practitionerRole, qualification, communication);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name
+          , telecom, address, gender, birthDate, photo, practitionerRole, qualification
+          , communication);
       }
 
   @Override
@@ -2048,7 +1981,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.identifier, Practitioner.practitionerRole.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2068,7 +2001,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.given</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string", target={} )
+  @SearchParamDefinition(name="given", path="Practitioner.name.given", description="A portion of the given name", type="string" )
   public static final String SP_GIVEN = "given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>given</b>
@@ -2088,7 +2021,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token", target={} )
+  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -2108,7 +2041,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string", target={} )
+  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -2128,7 +2061,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.role</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token", target={} )
+  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
@@ -2148,7 +2081,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -2168,7 +2101,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -2188,7 +2121,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -2208,7 +2141,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -2228,7 +2161,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
+  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -2248,7 +2181,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=phone), Practitioner.practitionerRole.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
+  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -2268,7 +2201,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -2294,7 +2227,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2314,7 +2247,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -2334,7 +2267,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom, Practitioner.practitionerRole.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -2354,7 +2287,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.practitionerRole.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2380,7 +2313,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.name.family</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string", target={} )
+  @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string" )
   public static final String SP_FAMILY = "family";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>family</b>
@@ -2400,7 +2333,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -2420,7 +2353,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.communication</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token", target={} )
+  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
   public static final String SP_COMMUNICATION = "communication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>communication</b>
@@ -2440,7 +2373,7 @@ Work addresses are not typically entered in this property as they are usually ro
    * Path: <b>Practitioner.telecom(system=email), Practitioner.practitionerRole.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
+  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

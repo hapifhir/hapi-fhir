@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -358,16 +359,6 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcessResponse setIdentifier(List<Identifier> theIdentifier) { 
@@ -384,10 +375,6 @@ public class ProcessResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (The Response business identifier.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -396,7 +383,6 @@ public class ProcessResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcessResponse addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -404,6 +390,16 @@ public class ProcessResponse extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -790,16 +786,6 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
-     */
-    public ProcessResponseNotesComponent getNotesFirstRep() { 
-      if (getNotes().isEmpty()) {
-        addNotes();
-      }
-      return getNotes().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcessResponse setNotes(List<ProcessResponseNotesComponent> theNotes) { 
@@ -816,10 +802,6 @@ public class ProcessResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #notes} (Suite of processing note or additional requirements is the processing has been held.)
-     */
-    // syntactic sugar
     public ProcessResponseNotesComponent addNotes() { //3
       ProcessResponseNotesComponent t = new ProcessResponseNotesComponent();
       if (this.notes == null)
@@ -828,7 +810,6 @@ public class ProcessResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcessResponse addNotes(ProcessResponseNotesComponent t) { //3
       if (t == null)
         return this;
@@ -839,22 +820,22 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
+     */
+    public ProcessResponseNotesComponent getNotesFirstRep() { 
+      if (getNotes().isEmpty()) {
+        addNotes();
+      }
+      return getNotes().get(0);
+    }
+
+    /**
      * @return {@link #error} (Processing errors.)
      */
     public List<Coding> getError() { 
       if (this.error == null)
         this.error = new ArrayList<Coding>();
       return this.error;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #error}, creating it if it does not already exist
-     */
-    public Coding getErrorFirstRep() { 
-      if (getError().isEmpty()) {
-        addError();
-      }
-      return getError().get(0);
     }
 
     /**
@@ -874,10 +855,6 @@ public class ProcessResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #error} (Processing errors.)
-     */
-    // syntactic sugar
     public Coding addError() { //3
       Coding t = new Coding();
       if (this.error == null)
@@ -886,7 +863,6 @@ public class ProcessResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcessResponse addError(Coding t) { //3
       if (t == null)
         return this;
@@ -894,6 +870,16 @@ public class ProcessResponse extends DomainResource {
         this.error = new ArrayList<Coding>();
       this.error.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #error}, creating it if it does not already exist
+     */
+    public Coding getErrorFirstRep() { 
+      if (getError().isEmpty()) {
+        addError();
+      }
+      return getError().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1168,9 +1154,9 @@ public class ProcessResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, outcome, disposition
-          , ruleset, originalRuleset, created, organization, requestProvider, requestOrganization, form
-          , notes, error);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, outcome
+          , disposition, ruleset, originalRuleset, created, organization, requestProvider
+          , requestOrganization, form, notes, error);
       }
 
   @Override
@@ -1186,7 +1172,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestProviderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestprovideridentifier", path="ProcessResponse.requestProvider.as(Identifier)", description="The Provider who is responsible the request transaction", type="token", target={} )
+  @SearchParamDefinition(name="requestprovideridentifier", path="ProcessResponse.requestProvider.as(Identifier)", description="The Provider who is responsible the request transaction", type="token" )
   public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
@@ -1206,7 +1192,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="ProcessResponse.requestOrganization.as(Identifier)", description="The Organization who is responsible the request transaction", type="token", target={} )
+  @SearchParamDefinition(name="requestorganizationidentifier", path="ProcessResponse.requestOrganization.as(Identifier)", description="The Organization who is responsible the request transaction", type="token" )
   public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
@@ -1226,7 +1212,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1246,7 +1232,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="ProcessResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token", target={} )
+  @SearchParamDefinition(name="organizationidentifier", path="ProcessResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1266,7 +1252,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="ProcessResponse.request.as(Identifier)", description="The reference to the claim", type="token", target={} )
+  @SearchParamDefinition(name="requestidentifier", path="ProcessResponse.request.as(Identifier)", description="The reference to the claim", type="token" )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -1286,7 +1272,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="ProcessResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organizationreference", path="ProcessResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference" )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1312,7 +1298,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestProviderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestproviderreference", path="ProcessResponse.requestProvider.as(Reference)", description="The Provider who is responsible the request transaction", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="requestproviderreference", path="ProcessResponse.requestProvider.as(Reference)", description="The Provider who is responsible the request transaction", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
@@ -1338,7 +1324,7 @@ public class ProcessResponse extends DomainResource {
    * Path: <b>ProcessResponse.requestOrganizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestorganizationreference", path="ProcessResponse.requestOrganization.as(Reference)", description="The Organization who is responsible the request transaction", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="requestorganizationreference", path="ProcessResponse.requestOrganization.as(Reference)", description="The Organization who is responsible the request transaction", type="reference" )
   public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>

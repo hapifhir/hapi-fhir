@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -66,7 +67,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         HEALTHUNKNOWN, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static FamilyHistoryStatus fromCode(String codeString) throws FHIRException {
@@ -80,7 +81,10 @@ public class FamilyMemberHistory extends DomainResource {
           return ENTEREDINERROR;
         if ("health-unknown".equals(codeString))
           return HEALTHUNKNOWN;
-        throw new FHIRException("Unknown FamilyHistoryStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown FamilyHistoryStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -489,7 +493,8 @@ public class FamilyMemberHistory extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, outcome, onset, note);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, outcome, onset, note
+          );
       }
 
   public String fhirType() {
@@ -617,16 +622,6 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public FamilyMemberHistory setIdentifier(List<Identifier> theIdentifier) { 
@@ -643,10 +638,6 @@ public class FamilyMemberHistory extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -655,7 +646,6 @@ public class FamilyMemberHistory extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public FamilyMemberHistory addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -663,6 +653,16 @@ public class FamilyMemberHistory extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1159,16 +1159,6 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
-     */
-    public FamilyMemberHistoryConditionComponent getConditionFirstRep() { 
-      if (getCondition().isEmpty()) {
-        addCondition();
-      }
-      return getCondition().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public FamilyMemberHistory setCondition(List<FamilyMemberHistoryConditionComponent> theCondition) { 
@@ -1185,10 +1175,6 @@ public class FamilyMemberHistory extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #condition} (The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition.)
-     */
-    // syntactic sugar
     public FamilyMemberHistoryConditionComponent addCondition() { //3
       FamilyMemberHistoryConditionComponent t = new FamilyMemberHistoryConditionComponent();
       if (this.condition == null)
@@ -1197,7 +1183,6 @@ public class FamilyMemberHistory extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public FamilyMemberHistory addCondition(FamilyMemberHistoryConditionComponent t) { //3
       if (t == null)
         return this;
@@ -1205,6 +1190,16 @@ public class FamilyMemberHistory extends DomainResource {
         this.condition = new ArrayList<FamilyMemberHistoryConditionComponent>();
       this.condition.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
+     */
+    public FamilyMemberHistoryConditionComponent getConditionFirstRep() { 
+      if (getCondition().isEmpty()) {
+        addCondition();
+      }
+      return getCondition().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1478,8 +1473,9 @@ public class FamilyMemberHistory extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, date, status
-          , name, relationship, gender, born, age, deceased, note, condition);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, date
+          , status, name, relationship, gender, born, age, deceased, note, condition
+          );
       }
 
   @Override
@@ -1495,7 +1491,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date", target={} )
+  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1515,7 +1511,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1535,7 +1531,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token", target={} )
+  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1555,7 +1551,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -1575,7 +1571,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1601,7 +1597,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.relationship</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token", target={} )
+  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token" )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>

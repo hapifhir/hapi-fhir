@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -46,109 +47,6 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
  */
 @ResourceDef(name="Task", profile="http://hl7.org/fhir/Profile/Task")
 public class Task extends DomainResource {
-
-    public enum TaskPriority {
-        /**
-         * This task has low priority.
-         */
-        LOW, 
-        /**
-         * This task has normal priority.
-         */
-        NORMAL, 
-        /**
-         * This task has high priority.
-         */
-        HIGH, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static TaskPriority fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("low".equals(codeString))
-          return LOW;
-        if ("normal".equals(codeString))
-          return NORMAL;
-        if ("high".equals(codeString))
-          return HIGH;
-        throw new FHIRException("Unknown TaskPriority code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case LOW: return "low";
-            case NORMAL: return "normal";
-            case HIGH: return "high";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case LOW: return "http://hl7.org/fhir/task-priority";
-            case NORMAL: return "http://hl7.org/fhir/task-priority";
-            case HIGH: return "http://hl7.org/fhir/task-priority";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case LOW: return "This task has low priority.";
-            case NORMAL: return "This task has normal priority.";
-            case HIGH: return "This task has high priority.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case LOW: return "Low";
-            case NORMAL: return "Normal";
-            case HIGH: return "High";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class TaskPriorityEnumFactory implements EnumFactory<TaskPriority> {
-    public TaskPriority fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("low".equals(codeString))
-          return TaskPriority.LOW;
-        if ("normal".equals(codeString))
-          return TaskPriority.NORMAL;
-        if ("high".equals(codeString))
-          return TaskPriority.HIGH;
-        throw new IllegalArgumentException("Unknown TaskPriority code '"+codeString+"'");
-        }
-        public Enumeration<TaskPriority> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("low".equals(codeString))
-          return new Enumeration<TaskPriority>(this, TaskPriority.LOW);
-        if ("normal".equals(codeString))
-          return new Enumeration<TaskPriority>(this, TaskPriority.NORMAL);
-        if ("high".equals(codeString))
-          return new Enumeration<TaskPriority>(this, TaskPriority.HIGH);
-        throw new FHIRException("Unknown TaskPriority code '"+codeString+"'");
-        }
-    public String toCode(TaskPriority code) {
-      if (code == TaskPriority.LOW)
-        return "low";
-      if (code == TaskPriority.NORMAL)
-        return "normal";
-      if (code == TaskPriority.HIGH)
-        return "high";
-      return "?";
-      }
-    public String toSystem(TaskPriority code) {
-      return code.getSystem();
-      }
-    }
 
     public enum TaskStatus {
         /**
@@ -192,7 +90,7 @@ public class Task extends DomainResource {
          */
         COMPLETED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static TaskStatus fromCode(String codeString) throws FHIRException {
@@ -218,7 +116,10 @@ public class Task extends DomainResource {
           return FAILED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new FHIRException("Unknown TaskStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown TaskStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -364,6 +265,401 @@ public class Task extends DomainResource {
       return code.getSystem();
       }
     }
+
+    public enum TaskPriority {
+        /**
+         * This task has low priority.
+         */
+        LOW, 
+        /**
+         * This task has normal priority.
+         */
+        NORMAL, 
+        /**
+         * This task has high priority.
+         */
+        HIGH, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static TaskPriority fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("low".equals(codeString))
+          return LOW;
+        if ("normal".equals(codeString))
+          return NORMAL;
+        if ("high".equals(codeString))
+          return HIGH;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown TaskPriority code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case LOW: return "low";
+            case NORMAL: return "normal";
+            case HIGH: return "high";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case LOW: return "http://hl7.org/fhir/task-priority";
+            case NORMAL: return "http://hl7.org/fhir/task-priority";
+            case HIGH: return "http://hl7.org/fhir/task-priority";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case LOW: return "This task has low priority.";
+            case NORMAL: return "This task has normal priority.";
+            case HIGH: return "This task has high priority.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case LOW: return "Low";
+            case NORMAL: return "Normal";
+            case HIGH: return "High";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class TaskPriorityEnumFactory implements EnumFactory<TaskPriority> {
+    public TaskPriority fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("low".equals(codeString))
+          return TaskPriority.LOW;
+        if ("normal".equals(codeString))
+          return TaskPriority.NORMAL;
+        if ("high".equals(codeString))
+          return TaskPriority.HIGH;
+        throw new IllegalArgumentException("Unknown TaskPriority code '"+codeString+"'");
+        }
+        public Enumeration<TaskPriority> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("low".equals(codeString))
+          return new Enumeration<TaskPriority>(this, TaskPriority.LOW);
+        if ("normal".equals(codeString))
+          return new Enumeration<TaskPriority>(this, TaskPriority.NORMAL);
+        if ("high".equals(codeString))
+          return new Enumeration<TaskPriority>(this, TaskPriority.HIGH);
+        throw new FHIRException("Unknown TaskPriority code '"+codeString+"'");
+        }
+    public String toCode(TaskPriority code) {
+      if (code == TaskPriority.LOW)
+        return "low";
+      if (code == TaskPriority.NORMAL)
+        return "normal";
+      if (code == TaskPriority.HIGH)
+        return "high";
+      return "?";
+      }
+    public String toSystem(TaskPriority code) {
+      return code.getSystem();
+      }
+    }
+
+    @Block()
+    public static class TaskFulfillmentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Indicates the number of times the requested action should occur.
+         */
+        @Child(name = "repetitions", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="How many times to repeat", formalDefinition="Indicates the number of times the requested action should occur." )
+        protected PositiveIntType repetitions;
+
+        /**
+         * Over what time-period is fulfillment sought.
+         */
+        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Over what time-period is fulfillment sought", formalDefinition="Over what time-period is fulfillment sought." )
+        protected Period period;
+
+        /**
+         * For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?
+         */
+        @Child(name = "recipients", type = {Patient.class, Practitioner.class, RelatedPerson.class, Group.class, Organization.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="For whom is fulfillment sought?", formalDefinition="For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?" )
+        protected List<Reference> recipients;
+        /**
+         * The actual objects that are the target of the reference (For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?)
+         */
+        protected List<Resource> recipientsTarget;
+
+
+        private static final long serialVersionUID = -805919764L;
+
+    /**
+     * Constructor
+     */
+      public TaskFulfillmentComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #repetitions} (Indicates the number of times the requested action should occur.). This is the underlying object with id, value and extensions. The accessor "getRepetitions" gives direct access to the value
+         */
+        public PositiveIntType getRepetitionsElement() { 
+          if (this.repetitions == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TaskFulfillmentComponent.repetitions");
+            else if (Configuration.doAutoCreate())
+              this.repetitions = new PositiveIntType(); // bb
+          return this.repetitions;
+        }
+
+        public boolean hasRepetitionsElement() { 
+          return this.repetitions != null && !this.repetitions.isEmpty();
+        }
+
+        public boolean hasRepetitions() { 
+          return this.repetitions != null && !this.repetitions.isEmpty();
+        }
+
+        /**
+         * @param value {@link #repetitions} (Indicates the number of times the requested action should occur.). This is the underlying object with id, value and extensions. The accessor "getRepetitions" gives direct access to the value
+         */
+        public TaskFulfillmentComponent setRepetitionsElement(PositiveIntType value) { 
+          this.repetitions = value;
+          return this;
+        }
+
+        /**
+         * @return Indicates the number of times the requested action should occur.
+         */
+        public int getRepetitions() { 
+          return this.repetitions == null || this.repetitions.isEmpty() ? 0 : this.repetitions.getValue();
+        }
+
+        /**
+         * @param value Indicates the number of times the requested action should occur.
+         */
+        public TaskFulfillmentComponent setRepetitions(int value) { 
+            if (this.repetitions == null)
+              this.repetitions = new PositiveIntType();
+            this.repetitions.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #period} (Over what time-period is fulfillment sought.)
+         */
+        public Period getPeriod() { 
+          if (this.period == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TaskFulfillmentComponent.period");
+            else if (Configuration.doAutoCreate())
+              this.period = new Period(); // cc
+          return this.period;
+        }
+
+        public boolean hasPeriod() { 
+          return this.period != null && !this.period.isEmpty();
+        }
+
+        /**
+         * @param value {@link #period} (Over what time-period is fulfillment sought.)
+         */
+        public TaskFulfillmentComponent setPeriod(Period value) { 
+          this.period = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #recipients} (For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?)
+         */
+        public List<Reference> getRecipients() { 
+          if (this.recipients == null)
+            this.recipients = new ArrayList<Reference>();
+          return this.recipients;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TaskFulfillmentComponent setRecipients(List<Reference> theRecipients) { 
+          this.recipients = theRecipients;
+          return this;
+        }
+
+        public boolean hasRecipients() { 
+          if (this.recipients == null)
+            return false;
+          for (Reference item : this.recipients)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addRecipients() { //3
+          Reference t = new Reference();
+          if (this.recipients == null)
+            this.recipients = new ArrayList<Reference>();
+          this.recipients.add(t);
+          return t;
+        }
+
+        public TaskFulfillmentComponent addRecipients(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.recipients == null)
+            this.recipients = new ArrayList<Reference>();
+          this.recipients.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #recipients}, creating it if it does not already exist
+         */
+        public Reference getRecipientsFirstRep() { 
+          if (getRecipients().isEmpty()) {
+            addRecipients();
+          }
+          return getRecipients().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Resource> getRecipientsTarget() { 
+          if (this.recipientsTarget == null)
+            this.recipientsTarget = new ArrayList<Resource>();
+          return this.recipientsTarget;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("repetitions", "positiveInt", "Indicates the number of times the requested action should occur.", 0, java.lang.Integer.MAX_VALUE, repetitions));
+          childrenList.add(new Property("period", "Period", "Over what time-period is fulfillment sought.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("recipients", "Reference(Patient|Practitioner|RelatedPerson|Group|Organization)", "For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?", 0, java.lang.Integer.MAX_VALUE, recipients));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 984367650: /*repetitions*/ return this.repetitions == null ? new Base[0] : new Base[] {this.repetitions}; // PositiveIntType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -347287174: /*recipients*/ return this.recipients == null ? new Base[0] : this.recipients.toArray(new Base[this.recipients.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 984367650: // repetitions
+          this.repetitions = castToPositiveInt(value); // PositiveIntType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        case -347287174: // recipients
+          this.getRecipients().add(castToReference(value)); // Reference
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("repetitions"))
+          this.repetitions = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("recipients"))
+          this.getRecipients().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 984367650: throw new FHIRException("Cannot make property repetitions as it is not a complex type"); // PositiveIntType
+        case -991726143:  return getPeriod(); // Period
+        case -347287174:  return addRecipients(); // Reference
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("repetitions")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Task.repetitions");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("recipients")) {
+          return addRecipients();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public TaskFulfillmentComponent copy() {
+        TaskFulfillmentComponent dst = new TaskFulfillmentComponent();
+        copyValues(dst);
+        dst.repetitions = repetitions == null ? null : repetitions.copy();
+        dst.period = period == null ? null : period.copy();
+        if (recipients != null) {
+          dst.recipients = new ArrayList<Reference>();
+          for (Reference i : recipients)
+            dst.recipients.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TaskFulfillmentComponent))
+          return false;
+        TaskFulfillmentComponent o = (TaskFulfillmentComponent) other;
+        return compareDeep(repetitions, o.repetitions, true) && compareDeep(period, o.period, true) && compareDeep(recipients, o.recipients, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TaskFulfillmentComponent))
+          return false;
+        TaskFulfillmentComponent o = (TaskFulfillmentComponent) other;
+        return compareValues(repetitions, o.repetitions, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(repetitions, period, recipients
+          );
+      }
+
+  public String fhirType() {
+    return "Task.fulfillment";
+
+  }
+
+  }
 
     @Block()
     public static class ParameterComponent extends BackboneElement implements IBaseBackboneElement {
@@ -1029,63 +1325,101 @@ public class Task extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * A name or code (or both) briefly describing what the task involves.
+     * Identifies a plan, proposal or order that this task has been created in fulfillment of.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Type", formalDefinition="A name or code (or both) briefly describing what the task involves." )
-    protected CodeableConcept type;
+    @Child(name = "basedOn", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Request fulfilled by this request", formalDefinition="Identifies a plan, proposal or order that this task has been created in fulfillment of." )
+    protected List<Reference> basedOn;
+    /**
+     * The actual objects that are the target of the reference (Identifies a plan, proposal or order that this task has been created in fulfillment of.)
+     */
+    protected List<Resource> basedOnTarget;
+
 
     /**
-     * A description of this task.
+     * An identifier that links together multiple tasks and other requests that were created in the same context.
      */
-    @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Description", formalDefinition="A description of this task." )
-    protected StringType description;
+    @Child(name = "requisition", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Composite request this is part of", formalDefinition="An identifier that links together multiple tasks and other requests that were created in the same context." )
+    protected Identifier requisition;
 
     /**
-     * The type of participant that can execute the task.
+     * Task that this particular task is part of.
      */
-    @Child(name = "performerType", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="requester | dispatcher | scheduler | performer | monitor | manager | acquirer | reviewer", formalDefinition="The type of participant that can execute the task." )
-    protected List<Coding> performerType;
-
+    @Child(name = "parent", type = {Task.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Composite task", formalDefinition="Task that this particular task is part of." )
+    protected List<Reference> parent;
     /**
-     * The priority of the task among other tasks of the same type.
+     * The actual objects that are the target of the reference (Task that this particular task is part of.)
      */
-    @Child(name = "priority", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="low | normal | high", formalDefinition="The priority of the task among other tasks of the same type." )
-    protected Enumeration<TaskPriority> priority;
+    protected List<Task> parentTarget;
+
 
     /**
      * The current status of the task.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="draft | requested | received | accepted | +", formalDefinition="The current status of the task." )
     protected Enumeration<TaskStatus> status;
 
     /**
-     * An explaination as to why this task failed.
+     * An explanation as to why this task is held, failed, was refused, etc.
      */
-    @Child(name = "failureReason", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Failure Reason", formalDefinition="An explaination as to why this task failed." )
-    protected CodeableConcept failureReason;
+    @Child(name = "statusReason", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Reason for current status", formalDefinition="An explanation as to why this task is held, failed, was refused, etc." )
+    protected CodeableConcept statusReason;
 
     /**
-     * The subject of the task.
+     * Contains business-specific nuances of the business state.
      */
-    @Child(name = "subject", type = {}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Task Subject", formalDefinition="The subject of the task." )
-    protected Reference subject;
+    @Child(name = "businessStatus", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="E.g. \"Specimen collected\", \"IV prepped\"", formalDefinition="Contains business-specific nuances of the business state." )
+    protected CodeableConcept businessStatus;
 
     /**
-     * The actual object that is the target of the reference (The subject of the task.)
+     * Indicates the "level" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.
      */
-    protected Resource subjectTarget;
+    @Child(name = "stage", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="proposed | planned | actionable +", formalDefinition="Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc." )
+    protected CodeableConcept stage;
+
+    /**
+     * A name or code (or both) briefly describing what the task involves.
+     */
+    @Child(name = "code", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Task Type", formalDefinition="A name or code (or both) briefly describing what the task involves." )
+    protected CodeableConcept code;
+
+    /**
+     * The priority of the task among other tasks of the same type.
+     */
+    @Child(name = "priority", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="low | normal | high", formalDefinition="The priority of the task among other tasks of the same type." )
+    protected Enumeration<TaskPriority> priority;
+
+    /**
+     * A description of this task.
+     */
+    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Task Description", formalDefinition="A description of this task." )
+    protected StringType description;
+
+    /**
+     * The request being actioned or the resource being manipulated by this task.
+     */
+    @Child(name = "focus", type = {}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What task is acting on", formalDefinition="The request being actioned or the resource being manipulated by this task." )
+    protected Reference focus;
+
+    /**
+     * The actual object that is the target of the reference (The request being actioned or the resource being manipulated by this task.)
+     */
+    protected Resource focusTarget;
 
     /**
      * The entity who benefits from the performance of the service specified in the task (e.g., the patient).
      */
-    @Child(name = "for", type = {}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "for", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Beneficiary of the Task", formalDefinition="The entity who benefits from the performance of the service specified in the task (e.g., the patient)." )
     protected Reference for_;
 
@@ -1095,42 +1429,47 @@ public class Task extends DomainResource {
     protected Resource for_Target;
 
     /**
-     * A reference to a formal or informal definition of the task.
+     * The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.
      */
-    @Child(name = "definition", type = {UriType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Definition", formalDefinition="A reference to a formal or informal definition of the task." )
-    protected UriType definition;
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Healthcare event during which this task originated", formalDefinition="The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
+     */
+    protected Resource contextTarget;
 
     /**
      * The date and time this task was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=10, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "created", type = {DateTimeType.class}, order=14, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Task Creation Date", formalDefinition="The date and time this task was created." )
     protected DateTimeType created;
 
     /**
      * The date and time of last modification to this task.
      */
-    @Child(name = "lastModified", type = {DateTimeType.class}, order=11, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "lastModified", type = {DateTimeType.class}, order=15, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Task Last Modified Date", formalDefinition="The date and time of last modification to this task." )
     protected DateTimeType lastModified;
 
     /**
      * The creator of the task.
      */
-    @Child(name = "creator", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=12, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "requester", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=16, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Task Creator", formalDefinition="The creator of the task." )
-    protected Reference creator;
+    protected Reference requester;
 
     /**
      * The actual object that is the target of the reference (The creator of the task.)
      */
-    protected Resource creatorTarget;
+    protected Resource requesterTarget;
 
     /**
      * The owner of this task.  The participant who can execute this task.
      */
-    @Child(name = "owner", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "owner", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Task Owner", formalDefinition="The owner of this task.  The participant who can execute this task." )
     protected Reference owner;
 
@@ -1140,32 +1479,55 @@ public class Task extends DomainResource {
     protected Resource ownerTarget;
 
     /**
-     * Task that this particular task is part of.
+     * The type of participant that can execute the task.
      */
-    @Child(name = "parent", type = {Task.class}, order=14, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Composite task", formalDefinition="Task that this particular task is part of." )
-    protected Reference parent;
+    @Child(name = "performerType", type = {CodeableConcept.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="requester | dispatcher | scheduler | performer | monitor | manager | acquirer | reviewer", formalDefinition="The type of participant that can execute the task." )
+    protected List<CodeableConcept> performerType;
 
     /**
-     * The actual object that is the target of the reference (Task that this particular task is part of.)
+     * A description or code indicating why this task needs to be performed.
      */
-    protected Task parentTarget;
+    @Child(name = "reason", type = {CodeableConcept.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why task is needed", formalDefinition="A description or code indicating why this task needs to be performed." )
+    protected CodeableConcept reason;
+
+    /**
+     * Free-text information captured about the task as it progresses.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Comments made about the task", formalDefinition="Free-text information captured about the task as it progresses." )
+    protected List<Annotation> note;
+
+    /**
+     * Identifies any limitations on what part of a referenced task subject request should be actioned.
+     */
+    @Child(name = "fulfillment", type = {}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Constraints on fulfillment tasks", formalDefinition="Identifies any limitations on what part of a referenced task subject request should be actioned." )
+    protected TaskFulfillmentComponent fulfillment;
+
+    /**
+     * A reference to a formal or informal definition of the task.
+     */
+    @Child(name = "definition", type = {UriType.class}, order=22, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Task Definition", formalDefinition="A reference to a formal or informal definition of the task." )
+    protected UriType definition;
 
     /**
      * Inputs to the task.
      */
-    @Child(name = "input", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "input", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Task Input", formalDefinition="Inputs to the task." )
     protected List<ParameterComponent> input;
 
     /**
      * Outputs produced by the Task.
      */
-    @Child(name = "output", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "output", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Task Output", formalDefinition="Outputs produced by the Task." )
     protected List<TaskOutputComponent> output;
 
-    private static final long serialVersionUID = 969281174L;
+    private static final long serialVersionUID = 564776279L;
 
   /**
    * Constructor
@@ -1177,12 +1539,13 @@ public class Task extends DomainResource {
   /**
    * Constructor
    */
-    public Task(Enumeration<TaskStatus> status, DateTimeType created, DateTimeType lastModified, Reference creator) {
+    public Task(Enumeration<TaskStatus> status, CodeableConcept stage, DateTimeType created, DateTimeType lastModified, Reference requester) {
       super();
       this.status = status;
+      this.stage = stage;
       this.created = created;
       this.lastModified = lastModified;
-      this.creator = creator;
+      this.requester = requester;
     }
 
     /**
@@ -1210,133 +1573,305 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (A name or code (or both) briefly describing what the task involves.)
+     * @return {@link #basedOn} (Identifies a plan, proposal or order that this task has been created in fulfillment of.)
      */
-    public CodeableConcept getType() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
-    }
-
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (A name or code (or both) briefly describing what the task involves.)
-     */
-    public Task setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public StringType getDescriptionElement() { 
-      if (this.description == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.description");
-        else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
-      return this.description;
-    }
-
-    public boolean hasDescriptionElement() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    public boolean hasDescription() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    /**
-     * @param value {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public Task setDescriptionElement(StringType value) { 
-      this.description = value;
-      return this;
-    }
-
-    /**
-     * @return A description of this task.
-     */
-    public String getDescription() { 
-      return this.description == null ? null : this.description.getValue();
-    }
-
-    /**
-     * @param value A description of this task.
-     */
-    public Task setDescription(String value) { 
-      if (Utilities.noString(value))
-        this.description = null;
-      else {
-        if (this.description == null)
-          this.description = new StringType();
-        this.description.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #performerType} (The type of participant that can execute the task.)
-     */
-    public List<Coding> getPerformerType() { 
-      if (this.performerType == null)
-        this.performerType = new ArrayList<Coding>();
-      return this.performerType;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #performerType}, creating it if it does not already exist
-     */
-    public Coding getPerformerTypeFirstRep() { 
-      if (getPerformerType().isEmpty()) {
-        addPerformerType();
-      }
-      return getPerformerType().get(0);
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Task setPerformerType(List<Coding> thePerformerType) { 
-      this.performerType = thePerformerType;
+    public Task setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
       return this;
     }
 
-    public boolean hasPerformerType() { 
-      if (this.performerType == null)
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
         return false;
-      for (Coding item : this.performerType)
+      for (Reference item : this.basedOn)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #performerType} (The type of participant that can execute the task.)
-     */
-    // syntactic sugar
-    public Coding addPerformerType() { //3
-      Coding t = new Coding();
-      if (this.performerType == null)
-        this.performerType = new ArrayList<Coding>();
-      this.performerType.add(t);
+    public Reference addBasedOn() { //3
+      Reference t = new Reference();
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
       return t;
     }
 
-    // syntactic sugar
-    public Task addPerformerType(Coding t) { //3
+    public Task addBasedOn(Reference t) { //3
       if (t == null)
         return this;
-      if (this.performerType == null)
-        this.performerType = new ArrayList<Coding>();
-      this.performerType.add(t);
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<Resource>();
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @return {@link #requisition} (An identifier that links together multiple tasks and other requests that were created in the same context.)
+     */
+    public Identifier getRequisition() { 
+      if (this.requisition == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.requisition");
+        else if (Configuration.doAutoCreate())
+          this.requisition = new Identifier(); // cc
+      return this.requisition;
+    }
+
+    public boolean hasRequisition() { 
+      return this.requisition != null && !this.requisition.isEmpty();
+    }
+
+    /**
+     * @param value {@link #requisition} (An identifier that links together multiple tasks and other requests that were created in the same context.)
+     */
+    public Task setRequisition(Identifier value) { 
+      this.requisition = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #parent} (Task that this particular task is part of.)
+     */
+    public List<Reference> getParent() { 
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      return this.parent;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Task setParent(List<Reference> theParent) { 
+      this.parent = theParent;
+      return this;
+    }
+
+    public boolean hasParent() { 
+      if (this.parent == null)
+        return false;
+      for (Reference item : this.parent)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addParent() { //3
+      Reference t = new Reference();
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
+      return t;
+    }
+
+    public Task addParent(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #parent}, creating it if it does not already exist
+     */
+    public Reference getParentFirstRep() { 
+      if (getParent().isEmpty()) {
+        addParent();
+      }
+      return getParent().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Task> getParentTarget() { 
+      if (this.parentTarget == null)
+        this.parentTarget = new ArrayList<Task>();
+      return this.parentTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Task addParentTarget() { 
+      Task r = new Task();
+      if (this.parentTarget == null)
+        this.parentTarget = new ArrayList<Task>();
+      this.parentTarget.add(r);
+      return r;
+    }
+
+    /**
+     * @return {@link #status} (The current status of the task.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<TaskStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<TaskStatus>(new TaskStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The current status of the task.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Task setStatusElement(Enumeration<TaskStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The current status of the task.
+     */
+    public TaskStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The current status of the task.
+     */
+    public Task setStatus(TaskStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<TaskStatus>(new TaskStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #statusReason} (An explanation as to why this task is held, failed, was refused, etc.)
+     */
+    public CodeableConcept getStatusReason() { 
+      if (this.statusReason == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.statusReason");
+        else if (Configuration.doAutoCreate())
+          this.statusReason = new CodeableConcept(); // cc
+      return this.statusReason;
+    }
+
+    public boolean hasStatusReason() { 
+      return this.statusReason != null && !this.statusReason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #statusReason} (An explanation as to why this task is held, failed, was refused, etc.)
+     */
+    public Task setStatusReason(CodeableConcept value) { 
+      this.statusReason = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #businessStatus} (Contains business-specific nuances of the business state.)
+     */
+    public CodeableConcept getBusinessStatus() { 
+      if (this.businessStatus == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.businessStatus");
+        else if (Configuration.doAutoCreate())
+          this.businessStatus = new CodeableConcept(); // cc
+      return this.businessStatus;
+    }
+
+    public boolean hasBusinessStatus() { 
+      return this.businessStatus != null && !this.businessStatus.isEmpty();
+    }
+
+    /**
+     * @param value {@link #businessStatus} (Contains business-specific nuances of the business state.)
+     */
+    public Task setBusinessStatus(CodeableConcept value) { 
+      this.businessStatus = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #stage} (Indicates the "level" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.)
+     */
+    public CodeableConcept getStage() { 
+      if (this.stage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.stage");
+        else if (Configuration.doAutoCreate())
+          this.stage = new CodeableConcept(); // cc
+      return this.stage;
+    }
+
+    public boolean hasStage() { 
+      return this.stage != null && !this.stage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #stage} (Indicates the "level" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.)
+     */
+    public Task setStage(CodeableConcept value) { 
+      this.stage = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #code} (A name or code (or both) briefly describing what the task involves.)
+     */
+    public CodeableConcept getCode() { 
+      if (this.code == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.code");
+        else if (Configuration.doAutoCreate())
+          this.code = new CodeableConcept(); // cc
+      return this.code;
+    }
+
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
+    }
+
+    /**
+     * @param value {@link #code} (A name or code (or both) briefly describing what the task involves.)
+     */
+    public Task setCode(CodeableConcept value) { 
+      this.code = value;
       return this;
     }
 
@@ -1390,110 +1925,90 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The current status of the task.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public Enumeration<TaskStatus> getStatusElement() { 
-      if (this.status == null)
+    public StringType getDescriptionElement() { 
+      if (this.description == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.status");
+          throw new Error("Attempt to auto-create Task.description");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<TaskStatus>(new TaskStatusEnumFactory()); // bb
-      return this.status;
+          this.description = new StringType(); // bb
+      return this.description;
     }
 
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
     }
 
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
     }
 
     /**
-     * @param value {@link #status} (The current status of the task.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public Task setStatusElement(Enumeration<TaskStatus> value) { 
-      this.status = value;
+    public Task setDescriptionElement(StringType value) { 
+      this.description = value;
       return this;
     }
 
     /**
-     * @return The current status of the task.
+     * @return A description of this task.
      */
-    public TaskStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value The current status of the task.
+     * @param value A description of this task.
      */
-    public Task setStatus(TaskStatus value) { 
-        if (this.status == null)
-          this.status = new Enumeration<TaskStatus>(new TaskStatusEnumFactory());
-        this.status.setValue(value);
+    public Task setDescription(String value) { 
+      if (Utilities.noString(value))
+        this.description = null;
+      else {
+        if (this.description == null)
+          this.description = new StringType();
+        this.description.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #failureReason} (An explaination as to why this task failed.)
+     * @return {@link #focus} (The request being actioned or the resource being manipulated by this task.)
      */
-    public CodeableConcept getFailureReason() { 
-      if (this.failureReason == null)
+    public Reference getFocus() { 
+      if (this.focus == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.failureReason");
+          throw new Error("Attempt to auto-create Task.focus");
         else if (Configuration.doAutoCreate())
-          this.failureReason = new CodeableConcept(); // cc
-      return this.failureReason;
+          this.focus = new Reference(); // cc
+      return this.focus;
     }
 
-    public boolean hasFailureReason() { 
-      return this.failureReason != null && !this.failureReason.isEmpty();
+    public boolean hasFocus() { 
+      return this.focus != null && !this.focus.isEmpty();
     }
 
     /**
-     * @param value {@link #failureReason} (An explaination as to why this task failed.)
+     * @param value {@link #focus} (The request being actioned or the resource being manipulated by this task.)
      */
-    public Task setFailureReason(CodeableConcept value) { 
-      this.failureReason = value;
+    public Task setFocus(Reference value) { 
+      this.focus = value;
       return this;
     }
 
     /**
-     * @return {@link #subject} (The subject of the task.)
+     * @return {@link #focus} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The request being actioned or the resource being manipulated by this task.)
      */
-    public Reference getSubject() { 
-      if (this.subject == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.subject");
-        else if (Configuration.doAutoCreate())
-          this.subject = new Reference(); // cc
-      return this.subject;
-    }
-
-    public boolean hasSubject() { 
-      return this.subject != null && !this.subject.isEmpty();
+    public Resource getFocusTarget() { 
+      return this.focusTarget;
     }
 
     /**
-     * @param value {@link #subject} (The subject of the task.)
+     * @param value {@link #focus} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The request being actioned or the resource being manipulated by this task.)
      */
-    public Task setSubject(Reference value) { 
-      this.subject = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The subject of the task.)
-     */
-    public Resource getSubjectTarget() { 
-      return this.subjectTarget;
-    }
-
-    /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The subject of the task.)
-     */
-    public Task setSubjectTarget(Resource value) { 
-      this.subjectTarget = value;
+    public Task setFocusTarget(Resource value) { 
+      this.focusTarget = value;
       return this;
     }
 
@@ -1537,51 +2052,41 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @return {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
      */
-    public UriType getDefinitionElement() { 
-      if (this.definition == null)
+    public Reference getContext() { 
+      if (this.context == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.definition");
+          throw new Error("Attempt to auto-create Task.context");
         else if (Configuration.doAutoCreate())
-          this.definition = new UriType(); // bb
-      return this.definition;
+          this.context = new Reference(); // cc
+      return this.context;
     }
 
-    public boolean hasDefinitionElement() { 
-      return this.definition != null && !this.definition.isEmpty();
-    }
-
-    public boolean hasDefinition() { 
-      return this.definition != null && !this.definition.isEmpty();
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
     }
 
     /**
-     * @param value {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @param value {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
      */
-    public Task setDefinitionElement(UriType value) { 
-      this.definition = value;
+    public Task setContext(Reference value) { 
+      this.context = value;
       return this;
     }
 
     /**
-     * @return A reference to a formal or informal definition of the task.
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
      */
-    public String getDefinition() { 
-      return this.definition == null ? null : this.definition.getValue();
+    public Resource getContextTarget() { 
+      return this.contextTarget;
     }
 
     /**
-     * @param value A reference to a formal or informal definition of the task.
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
      */
-    public Task setDefinition(String value) { 
-      if (Utilities.noString(value))
-        this.definition = null;
-      else {
-        if (this.definition == null)
-          this.definition = new UriType();
-        this.definition.setValue(value);
-      }
+    public Task setContextTarget(Resource value) { 
+      this.contextTarget = value;
       return this;
     }
 
@@ -1676,41 +2181,41 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #creator} (The creator of the task.)
+     * @return {@link #requester} (The creator of the task.)
      */
-    public Reference getCreator() { 
-      if (this.creator == null)
+    public Reference getRequester() { 
+      if (this.requester == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.creator");
+          throw new Error("Attempt to auto-create Task.requester");
         else if (Configuration.doAutoCreate())
-          this.creator = new Reference(); // cc
-      return this.creator;
+          this.requester = new Reference(); // cc
+      return this.requester;
     }
 
-    public boolean hasCreator() { 
-      return this.creator != null && !this.creator.isEmpty();
+    public boolean hasRequester() { 
+      return this.requester != null && !this.requester.isEmpty();
     }
 
     /**
-     * @param value {@link #creator} (The creator of the task.)
+     * @param value {@link #requester} (The creator of the task.)
      */
-    public Task setCreator(Reference value) { 
-      this.creator = value;
+    public Task setRequester(Reference value) { 
+      this.requester = value;
       return this;
     }
 
     /**
-     * @return {@link #creator} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The creator of the task.)
+     * @return {@link #requester} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The creator of the task.)
      */
-    public Resource getCreatorTarget() { 
-      return this.creatorTarget;
+    public Resource getRequesterTarget() { 
+      return this.requesterTarget;
     }
 
     /**
-     * @param value {@link #creator} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The creator of the task.)
+     * @param value {@link #requester} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The creator of the task.)
      */
-    public Task setCreatorTarget(Resource value) { 
-      this.creatorTarget = value;
+    public Task setRequesterTarget(Resource value) { 
+      this.requesterTarget = value;
       return this;
     }
 
@@ -1754,46 +2259,205 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (Task that this particular task is part of.)
+     * @return {@link #performerType} (The type of participant that can execute the task.)
      */
-    public Reference getParent() { 
-      if (this.parent == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.parent");
-        else if (Configuration.doAutoCreate())
-          this.parent = new Reference(); // cc
-      return this.parent;
-    }
-
-    public boolean hasParent() { 
-      return this.parent != null && !this.parent.isEmpty();
+    public List<CodeableConcept> getPerformerType() { 
+      if (this.performerType == null)
+        this.performerType = new ArrayList<CodeableConcept>();
+      return this.performerType;
     }
 
     /**
-     * @param value {@link #parent} (Task that this particular task is part of.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Task setParent(Reference value) { 
-      this.parent = value;
+    public Task setPerformerType(List<CodeableConcept> thePerformerType) { 
+      this.performerType = thePerformerType;
+      return this;
+    }
+
+    public boolean hasPerformerType() { 
+      if (this.performerType == null)
+        return false;
+      for (CodeableConcept item : this.performerType)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addPerformerType() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.performerType == null)
+        this.performerType = new ArrayList<CodeableConcept>();
+      this.performerType.add(t);
+      return t;
+    }
+
+    public Task addPerformerType(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.performerType == null)
+        this.performerType = new ArrayList<CodeableConcept>();
+      this.performerType.add(t);
       return this;
     }
 
     /**
-     * @return {@link #parent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Task that this particular task is part of.)
+     * @return The first repetition of repeating field {@link #performerType}, creating it if it does not already exist
      */
-    public Task getParentTarget() { 
-      if (this.parentTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Task.parent");
-        else if (Configuration.doAutoCreate())
-          this.parentTarget = new Task(); // aa
-      return this.parentTarget;
+    public CodeableConcept getPerformerTypeFirstRep() { 
+      if (getPerformerType().isEmpty()) {
+        addPerformerType();
+      }
+      return getPerformerType().get(0);
     }
 
     /**
-     * @param value {@link #parent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Task that this particular task is part of.)
+     * @return {@link #reason} (A description or code indicating why this task needs to be performed.)
      */
-    public Task setParentTarget(Task value) { 
-      this.parentTarget = value;
+    public CodeableConcept getReason() { 
+      if (this.reason == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.reason");
+        else if (Configuration.doAutoCreate())
+          this.reason = new CodeableConcept(); // cc
+      return this.reason;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reason} (A description or code indicating why this task needs to be performed.)
+     */
+    public Task setReason(CodeableConcept value) { 
+      this.reason = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #note} (Free-text information captured about the task as it progresses.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Task setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public Task addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
+     * @return {@link #fulfillment} (Identifies any limitations on what part of a referenced task subject request should be actioned.)
+     */
+    public TaskFulfillmentComponent getFulfillment() { 
+      if (this.fulfillment == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.fulfillment");
+        else if (Configuration.doAutoCreate())
+          this.fulfillment = new TaskFulfillmentComponent(); // cc
+      return this.fulfillment;
+    }
+
+    public boolean hasFulfillment() { 
+      return this.fulfillment != null && !this.fulfillment.isEmpty();
+    }
+
+    /**
+     * @param value {@link #fulfillment} (Identifies any limitations on what part of a referenced task subject request should be actioned.)
+     */
+    public Task setFulfillment(TaskFulfillmentComponent value) { 
+      this.fulfillment = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     */
+    public UriType getDefinitionElement() { 
+      if (this.definition == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Task.definition");
+        else if (Configuration.doAutoCreate())
+          this.definition = new UriType(); // bb
+      return this.definition;
+    }
+
+    public boolean hasDefinitionElement() { 
+      return this.definition != null && !this.definition.isEmpty();
+    }
+
+    public boolean hasDefinition() { 
+      return this.definition != null && !this.definition.isEmpty();
+    }
+
+    /**
+     * @param value {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     */
+    public Task setDefinitionElement(UriType value) { 
+      this.definition = value;
+      return this;
+    }
+
+    /**
+     * @return A reference to a formal or informal definition of the task.
+     */
+    public String getDefinition() { 
+      return this.definition == null ? null : this.definition.getValue();
+    }
+
+    /**
+     * @param value A reference to a formal or informal definition of the task.
+     */
+    public Task setDefinition(String value) { 
+      if (Utilities.noString(value))
+        this.definition = null;
+      else {
+        if (this.definition == null)
+          this.definition = new UriType();
+        this.definition.setValue(value);
+      }
       return this;
     }
 
@@ -1804,16 +2468,6 @@ public class Task extends DomainResource {
       if (this.input == null)
         this.input = new ArrayList<ParameterComponent>();
       return this.input;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
-     */
-    public ParameterComponent getInputFirstRep() { 
-      if (getInput().isEmpty()) {
-        addInput();
-      }
-      return getInput().get(0);
     }
 
     /**
@@ -1833,10 +2487,6 @@ public class Task extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #input} (Inputs to the task.)
-     */
-    // syntactic sugar
     public ParameterComponent addInput() { //3
       ParameterComponent t = new ParameterComponent();
       if (this.input == null)
@@ -1845,7 +2495,6 @@ public class Task extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Task addInput(ParameterComponent t) { //3
       if (t == null)
         return this;
@@ -1856,22 +2505,22 @@ public class Task extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
+     */
+    public ParameterComponent getInputFirstRep() { 
+      if (getInput().isEmpty()) {
+        addInput();
+      }
+      return getInput().get(0);
+    }
+
+    /**
      * @return {@link #output} (Outputs produced by the Task.)
      */
     public List<TaskOutputComponent> getOutput() { 
       if (this.output == null)
         this.output = new ArrayList<TaskOutputComponent>();
       return this.output;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #output}, creating it if it does not already exist
-     */
-    public TaskOutputComponent getOutputFirstRep() { 
-      if (getOutput().isEmpty()) {
-        addOutput();
-      }
-      return getOutput().get(0);
     }
 
     /**
@@ -1891,10 +2540,6 @@ public class Task extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #output} (Outputs produced by the Task.)
-     */
-    // syntactic sugar
     public TaskOutputComponent addOutput() { //3
       TaskOutputComponent t = new TaskOutputComponent();
       if (this.output == null)
@@ -1903,7 +2548,6 @@ public class Task extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Task addOutput(TaskOutputComponent t) { //3
       if (t == null)
         return this;
@@ -1913,23 +2557,41 @@ public class Task extends DomainResource {
       return this;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #output}, creating it if it does not already exist
+     */
+    public TaskOutputComponent getOutputFirstRep() { 
+      if (getOutput().isEmpty()) {
+        addOutput();
+      }
+      return getOutput().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The business identifier for this task.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("description", "string", "A description of this task.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("performerType", "Coding", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType));
-        childrenList.add(new Property("priority", "code", "The priority of the task among other tasks of the same type.", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("basedOn", "Reference(Any)", "Identifies a plan, proposal or order that this task has been created in fulfillment of.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("requisition", "Identifier", "An identifier that links together multiple tasks and other requests that were created in the same context.", 0, java.lang.Integer.MAX_VALUE, requisition));
+        childrenList.add(new Property("parent", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("status", "code", "The current status of the task.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("failureReason", "CodeableConcept", "An explaination as to why this task failed.", 0, java.lang.Integer.MAX_VALUE, failureReason));
-        childrenList.add(new Property("subject", "Reference(Any)", "The subject of the task.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("statusReason", "CodeableConcept", "An explanation as to why this task is held, failed, was refused, etc.", 0, java.lang.Integer.MAX_VALUE, statusReason));
+        childrenList.add(new Property("businessStatus", "CodeableConcept", "Contains business-specific nuances of the business state.", 0, java.lang.Integer.MAX_VALUE, businessStatus));
+        childrenList.add(new Property("stage", "CodeableConcept", "Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.", 0, java.lang.Integer.MAX_VALUE, stage));
+        childrenList.add(new Property("code", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("priority", "code", "The priority of the task among other tasks of the same type.", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("description", "string", "A description of this task.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("focus", "Reference(Any)", "The request being actioned or the resource being manipulated by this task.", 0, java.lang.Integer.MAX_VALUE, focus));
         childrenList.add(new Property("for", "Reference(Any)", "The entity who benefits from the performance of the service specified in the task (e.g., the patient).", 0, java.lang.Integer.MAX_VALUE, for_));
-        childrenList.add(new Property("definition", "uri", "A reference to a formal or informal definition of the task.", 0, java.lang.Integer.MAX_VALUE, definition));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("created", "dateTime", "The date and time this task was created.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("lastModified", "dateTime", "The date and time of last modification to this task.", 0, java.lang.Integer.MAX_VALUE, lastModified));
-        childrenList.add(new Property("creator", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The creator of the task.", 0, java.lang.Integer.MAX_VALUE, creator));
+        childrenList.add(new Property("requester", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The creator of the task.", 0, java.lang.Integer.MAX_VALUE, requester));
         childrenList.add(new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The owner of this task.  The participant who can execute this task.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("parent", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, parent));
+        childrenList.add(new Property("performerType", "CodeableConcept", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType));
+        childrenList.add(new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("fulfillment", "", "Identifies any limitations on what part of a referenced task subject request should be actioned.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
+        childrenList.add(new Property("definition", "uri", "A reference to a formal or informal definition of the task.", 0, java.lang.Integer.MAX_VALUE, definition));
         childrenList.add(new Property("input", "", "Inputs to the task.", 0, java.lang.Integer.MAX_VALUE, input));
         childrenList.add(new Property("output", "", "Outputs produced by the Task.", 0, java.lang.Integer.MAX_VALUE, output));
       }
@@ -1938,20 +2600,28 @@ public class Task extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -901444568: /*performerType*/ return this.performerType == null ? new Base[0] : this.performerType.toArray(new Base[this.performerType.size()]); // Coding
-        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<TaskPriority>
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
+        case 395923612: /*requisition*/ return this.requisition == null ? new Base[0] : new Base[] {this.requisition}; // Identifier
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<TaskStatus>
-        case -1990598546: /*failureReason*/ return this.failureReason == null ? new Base[0] : new Base[] {this.failureReason}; // CodeableConcept
-        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 2051346646: /*statusReason*/ return this.statusReason == null ? new Base[0] : new Base[] {this.statusReason}; // CodeableConcept
+        case 2008591314: /*businessStatus*/ return this.businessStatus == null ? new Base[0] : new Base[] {this.businessStatus}; // CodeableConcept
+        case 109757182: /*stage*/ return this.stage == null ? new Base[0] : new Base[] {this.stage}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<TaskPriority>
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 97604824: /*focus*/ return this.focus == null ? new Base[0] : new Base[] {this.focus}; // Reference
         case 101577: /*for*/ return this.for_ == null ? new Base[0] : new Base[] {this.for_}; // Reference
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case 1959003007: /*lastModified*/ return this.lastModified == null ? new Base[0] : new Base[] {this.lastModified}; // DateTimeType
-        case 1028554796: /*creator*/ return this.creator == null ? new Base[0] : new Base[] {this.creator}; // Reference
+        case 693933948: /*requester*/ return this.requester == null ? new Base[0] : new Base[] {this.requester}; // Reference
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
-        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
+        case -901444568: /*performerType*/ return this.performerType == null ? new Base[0] : this.performerType.toArray(new Base[this.performerType.size()]); // CodeableConcept
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case 1512395230: /*fulfillment*/ return this.fulfillment == null ? new Base[0] : new Base[] {this.fulfillment}; // TaskFulfillmentComponent
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
         case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // ParameterComponent
         case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // TaskOutputComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1965,32 +2635,44 @@ public class Task extends DomainResource {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
           break;
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
           break;
-        case -1724546052: // description
-          this.description = castToString(value); // StringType
+        case 395923612: // requisition
+          this.requisition = castToIdentifier(value); // Identifier
           break;
-        case -901444568: // performerType
-          this.getPerformerType().add(castToCoding(value)); // Coding
-          break;
-        case -1165461084: // priority
-          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
+        case -995424086: // parent
+          this.getParent().add(castToReference(value)); // Reference
           break;
         case -892481550: // status
           this.status = new TaskStatusEnumFactory().fromType(value); // Enumeration<TaskStatus>
           break;
-        case -1990598546: // failureReason
-          this.failureReason = castToCodeableConcept(value); // CodeableConcept
+        case 2051346646: // statusReason
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
           break;
-        case -1867885268: // subject
-          this.subject = castToReference(value); // Reference
+        case 2008591314: // businessStatus
+          this.businessStatus = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 109757182: // stage
+          this.stage = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case -1165461084: // priority
+          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case 97604824: // focus
+          this.focus = castToReference(value); // Reference
           break;
         case 101577: // for
           this.for_ = castToReference(value); // Reference
           break;
-        case -1014418093: // definition
-          this.definition = castToUri(value); // UriType
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
           break;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
@@ -1998,14 +2680,26 @@ public class Task extends DomainResource {
         case 1959003007: // lastModified
           this.lastModified = castToDateTime(value); // DateTimeType
           break;
-        case 1028554796: // creator
-          this.creator = castToReference(value); // Reference
+        case 693933948: // requester
+          this.requester = castToReference(value); // Reference
           break;
         case 106164915: // owner
           this.owner = castToReference(value); // Reference
           break;
-        case -995424086: // parent
-          this.parent = castToReference(value); // Reference
+        case -901444568: // performerType
+          this.getPerformerType().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -934964668: // reason
+          this.reason = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
+        case 1512395230: // fulfillment
+          this.fulfillment = (TaskFulfillmentComponent) value; // TaskFulfillmentComponent
+          break;
+        case -1014418093: // definition
+          this.definition = castToUri(value); // UriType
           break;
         case 100358090: // input
           this.getInput().add((ParameterComponent) value); // ParameterComponent
@@ -2022,34 +2716,50 @@ public class Task extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("description"))
-          this.description = castToString(value); // StringType
-        else if (name.equals("performerType"))
-          this.getPerformerType().add(castToCoding(value));
-        else if (name.equals("priority"))
-          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
+        else if (name.equals("basedOn"))
+          this.getBasedOn().add(castToReference(value));
+        else if (name.equals("requisition"))
+          this.requisition = castToIdentifier(value); // Identifier
+        else if (name.equals("parent"))
+          this.getParent().add(castToReference(value));
         else if (name.equals("status"))
           this.status = new TaskStatusEnumFactory().fromType(value); // Enumeration<TaskStatus>
-        else if (name.equals("failureReason"))
-          this.failureReason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("subject"))
-          this.subject = castToReference(value); // Reference
+        else if (name.equals("statusReason"))
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("businessStatus"))
+          this.businessStatus = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("stage"))
+          this.stage = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("priority"))
+          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("focus"))
+          this.focus = castToReference(value); // Reference
         else if (name.equals("for"))
           this.for_ = castToReference(value); // Reference
-        else if (name.equals("definition"))
-          this.definition = castToUri(value); // UriType
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("lastModified"))
           this.lastModified = castToDateTime(value); // DateTimeType
-        else if (name.equals("creator"))
-          this.creator = castToReference(value); // Reference
+        else if (name.equals("requester"))
+          this.requester = castToReference(value); // Reference
         else if (name.equals("owner"))
           this.owner = castToReference(value); // Reference
-        else if (name.equals("parent"))
-          this.parent = castToReference(value); // Reference
+        else if (name.equals("performerType"))
+          this.getPerformerType().add(castToCodeableConcept(value));
+        else if (name.equals("reason"))
+          this.reason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
+        else if (name.equals("fulfillment"))
+          this.fulfillment = (TaskFulfillmentComponent) value; // TaskFulfillmentComponent
+        else if (name.equals("definition"))
+          this.definition = castToUri(value); // UriType
         else if (name.equals("input"))
           this.getInput().add((ParameterComponent) value);
         else if (name.equals("output"))
@@ -2062,20 +2772,28 @@ public class Task extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return getIdentifier(); // Identifier
-        case 3575610:  return getType(); // CodeableConcept
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -901444568:  return addPerformerType(); // Coding
-        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<TaskPriority>
+        case -332612366:  return addBasedOn(); // Reference
+        case 395923612:  return getRequisition(); // Identifier
+        case -995424086:  return addParent(); // Reference
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<TaskStatus>
-        case -1990598546:  return getFailureReason(); // CodeableConcept
-        case -1867885268:  return getSubject(); // Reference
+        case 2051346646:  return getStatusReason(); // CodeableConcept
+        case 2008591314:  return getBusinessStatus(); // CodeableConcept
+        case 109757182:  return getStage(); // CodeableConcept
+        case 3059181:  return getCode(); // CodeableConcept
+        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<TaskPriority>
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case 97604824:  return getFocus(); // Reference
         case 101577:  return getFor(); // Reference
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
+        case 951530927:  return getContext(); // Reference
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
         case 1959003007: throw new FHIRException("Cannot make property lastModified as it is not a complex type"); // DateTimeType
-        case 1028554796:  return getCreator(); // Reference
+        case 693933948:  return getRequester(); // Reference
         case 106164915:  return getOwner(); // Reference
-        case -995424086:  return getParent(); // Reference
+        case -901444568:  return addPerformerType(); // CodeableConcept
+        case -934964668:  return getReason(); // CodeableConcept
+        case 3387378:  return addNote(); // Annotation
+        case 1512395230:  return getFulfillment(); // TaskFulfillmentComponent
+        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
         case 100358090:  return addInput(); // ParameterComponent
         case -1005512447:  return addOutput(); // TaskOutputComponent
         default: return super.makeProperty(hash, name);
@@ -2089,36 +2807,52 @@ public class Task extends DomainResource {
           this.identifier = new Identifier();
           return this.identifier;
         }
-        else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
         }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Task.description");
+        else if (name.equals("requisition")) {
+          this.requisition = new Identifier();
+          return this.requisition;
         }
-        else if (name.equals("performerType")) {
-          return addPerformerType();
-        }
-        else if (name.equals("priority")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Task.priority");
+        else if (name.equals("parent")) {
+          return addParent();
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Task.status");
         }
-        else if (name.equals("failureReason")) {
-          this.failureReason = new CodeableConcept();
-          return this.failureReason;
+        else if (name.equals("statusReason")) {
+          this.statusReason = new CodeableConcept();
+          return this.statusReason;
         }
-        else if (name.equals("subject")) {
-          this.subject = new Reference();
-          return this.subject;
+        else if (name.equals("businessStatus")) {
+          this.businessStatus = new CodeableConcept();
+          return this.businessStatus;
+        }
+        else if (name.equals("stage")) {
+          this.stage = new CodeableConcept();
+          return this.stage;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Task.priority");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Task.description");
+        }
+        else if (name.equals("focus")) {
+          this.focus = new Reference();
+          return this.focus;
         }
         else if (name.equals("for")) {
           this.for_ = new Reference();
           return this.for_;
         }
-        else if (name.equals("definition")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Task.definition");
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
         }
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type Task.created");
@@ -2126,17 +2860,30 @@ public class Task extends DomainResource {
         else if (name.equals("lastModified")) {
           throw new FHIRException("Cannot call addChild on a primitive type Task.lastModified");
         }
-        else if (name.equals("creator")) {
-          this.creator = new Reference();
-          return this.creator;
+        else if (name.equals("requester")) {
+          this.requester = new Reference();
+          return this.requester;
         }
         else if (name.equals("owner")) {
           this.owner = new Reference();
           return this.owner;
         }
-        else if (name.equals("parent")) {
-          this.parent = new Reference();
-          return this.parent;
+        else if (name.equals("performerType")) {
+          return addPerformerType();
+        }
+        else if (name.equals("reason")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else if (name.equals("fulfillment")) {
+          this.fulfillment = new TaskFulfillmentComponent();
+          return this.fulfillment;
+        }
+        else if (name.equals("definition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Task.definition");
         }
         else if (name.equals("input")) {
           return addInput();
@@ -2157,24 +2904,44 @@ public class Task extends DomainResource {
         Task dst = new Task();
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
-        dst.type = type == null ? null : type.copy();
-        dst.description = description == null ? null : description.copy();
-        if (performerType != null) {
-          dst.performerType = new ArrayList<Coding>();
-          for (Coding i : performerType)
-            dst.performerType.add(i.copy());
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
         };
-        dst.priority = priority == null ? null : priority.copy();
+        dst.requisition = requisition == null ? null : requisition.copy();
+        if (parent != null) {
+          dst.parent = new ArrayList<Reference>();
+          for (Reference i : parent)
+            dst.parent.add(i.copy());
+        };
         dst.status = status == null ? null : status.copy();
-        dst.failureReason = failureReason == null ? null : failureReason.copy();
-        dst.subject = subject == null ? null : subject.copy();
+        dst.statusReason = statusReason == null ? null : statusReason.copy();
+        dst.businessStatus = businessStatus == null ? null : businessStatus.copy();
+        dst.stage = stage == null ? null : stage.copy();
+        dst.code = code == null ? null : code.copy();
+        dst.priority = priority == null ? null : priority.copy();
+        dst.description = description == null ? null : description.copy();
+        dst.focus = focus == null ? null : focus.copy();
         dst.for_ = for_ == null ? null : for_.copy();
-        dst.definition = definition == null ? null : definition.copy();
+        dst.context = context == null ? null : context.copy();
         dst.created = created == null ? null : created.copy();
         dst.lastModified = lastModified == null ? null : lastModified.copy();
-        dst.creator = creator == null ? null : creator.copy();
+        dst.requester = requester == null ? null : requester.copy();
         dst.owner = owner == null ? null : owner.copy();
-        dst.parent = parent == null ? null : parent.copy();
+        if (performerType != null) {
+          dst.performerType = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : performerType)
+            dst.performerType.add(i.copy());
+        };
+        dst.reason = reason == null ? null : reason.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
+        dst.fulfillment = fulfillment == null ? null : fulfillment.copy();
+        dst.definition = definition == null ? null : definition.copy();
         if (input != null) {
           dst.input = new ArrayList<ParameterComponent>();
           for (ParameterComponent i : input)
@@ -2199,13 +2966,15 @@ public class Task extends DomainResource {
         if (!(other instanceof Task))
           return false;
         Task o = (Task) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
-           && compareDeep(performerType, o.performerType, true) && compareDeep(priority, o.priority, true)
-           && compareDeep(status, o.status, true) && compareDeep(failureReason, o.failureReason, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(for_, o.for_, true) && compareDeep(definition, o.definition, true) && compareDeep(created, o.created, true)
-           && compareDeep(lastModified, o.lastModified, true) && compareDeep(creator, o.creator, true) && compareDeep(owner, o.owner, true)
-           && compareDeep(parent, o.parent, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(requisition, o.requisition, true)
+           && compareDeep(parent, o.parent, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
+           && compareDeep(businessStatus, o.businessStatus, true) && compareDeep(stage, o.stage, true) && compareDeep(code, o.code, true)
+           && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true) && compareDeep(focus, o.focus, true)
+           && compareDeep(for_, o.for_, true) && compareDeep(context, o.context, true) && compareDeep(created, o.created, true)
+           && compareDeep(lastModified, o.lastModified, true) && compareDeep(requester, o.requester, true)
+           && compareDeep(owner, o.owner, true) && compareDeep(performerType, o.performerType, true) && compareDeep(reason, o.reason, true)
+           && compareDeep(note, o.note, true) && compareDeep(fulfillment, o.fulfillment, true) && compareDeep(definition, o.definition, true)
+           && compareDeep(input, o.input, true) && compareDeep(output, o.output, true);
       }
 
       @Override
@@ -2215,15 +2984,16 @@ public class Task extends DomainResource {
         if (!(other instanceof Task))
           return false;
         Task o = (Task) other;
-        return compareValues(description, o.description, true) && compareValues(priority, o.priority, true)
-           && compareValues(status, o.status, true) && compareValues(definition, o.definition, true) && compareValues(created, o.created, true)
-           && compareValues(lastModified, o.lastModified, true);
+        return compareValues(status, o.status, true) && compareValues(priority, o.priority, true) && compareValues(description, o.description, true)
+           && compareValues(created, o.created, true) && compareValues(lastModified, o.lastModified, true) && compareValues(definition, o.definition, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, description, performerType
-          , priority, status, failureReason, subject, for_, definition, created, lastModified, creator
-          , owner, parent, input, output);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, requisition
+          , parent, status, statusReason, businessStatus, stage, code, priority, description
+          , focus, for_, context, created, lastModified, requester, owner, performerType
+          , reason, note, fulfillment, definition, input, output);
       }
 
   @Override
@@ -2239,7 +3009,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="owner", path="Task.owner", description="Search by task owner", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="owner", path="Task.owner", description="Search by task owner", type="reference" )
   public static final String SP_OWNER = "owner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>owner</b>
@@ -2258,6 +3028,32 @@ public class Task extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_OWNER = new ca.uhn.fhir.model.api.Include("Task:owner").toLocked();
 
  /**
+   * Search parameter: <b>requester</b>
+   * <p>
+   * Description: <b>Search by task requester</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.requester</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="requester", path="Task.requester", description="Search by task requester", type="reference" )
+  public static final String SP_REQUESTER = "requester";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>requester</b>
+   * <p>
+   * Description: <b>Search by task requester</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.requester</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Task:requester</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("Task:requester").toLocked();
+
+ /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>Search for a task instance by its business identifier</b><br>
@@ -2265,7 +3061,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Task.identifier", description="Search for a task instance by its business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Task.identifier", description="Search for a task instance by its business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2285,7 +3081,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="Task.parent", description="Search by parent task", type="reference", target={Task.class} )
+  @SearchParamDefinition(name="parent", path="Task.parent", description="Search by parent task", type="reference" )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -2304,30 +3100,24 @@ public class Task extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("Task:parent").toLocked();
 
  /**
-   * Search parameter: <b>creator</b>
+   * Search parameter: <b>code</b>
    * <p>
-   * Description: <b>Search by task creator</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.creator</b><br>
+   * Description: <b>Search by task code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Task.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="creator", path="Task.creator", description="Search by task creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
-  public static final String SP_CREATOR = "creator";
+  @SearchParamDefinition(name="code", path="Task.code", description="Search by task code", type="token" )
+  public static final String SP_CODE = "code";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>creator</b>
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
    * <p>
-   * Description: <b>Search by task creator</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.creator</b><br>
+   * Description: <b>Search by task code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Task.code</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CREATOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CREATOR);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Task:creator</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CREATOR = new ca.uhn.fhir.model.api.Include("Task:creator").toLocked();
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
    * Search parameter: <b>performer</b>
@@ -2337,7 +3127,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.performerType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Task.performerType", description="Search by recommended type of performer (e.g., Requester, Performer, Scheduler).", type="token", target={} )
+  @SearchParamDefinition(name="performer", path="Task.performerType", description="Search by recommended type of performer (e.g., Requester, Performer, Scheduler).", type="token" )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2350,32 +3140,6 @@ public class Task extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PERFORMER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PERFORMER);
 
  /**
-   * Search parameter: <b>subject</b>
-   * <p>
-   * Description: <b>Search by task subject</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.subject</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="subject", path="Task.subject", description="Search by task subject", type="reference" )
-  public static final String SP_SUBJECT = "subject";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
-   * <p>
-   * Description: <b>Search by task subject</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.subject</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Task:subject</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Task:subject").toLocked();
-
- /**
    * Search parameter: <b>created</b>
    * <p>
    * Description: <b>Search by creation date</b><br>
@@ -2383,7 +3147,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Task.created", description="Search by creation date", type="date", target={} )
+  @SearchParamDefinition(name="created", path="Task.created", description="Search by creation date", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -2396,24 +3160,30 @@ public class Task extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>type</b>
+   * Search parameter: <b>focus</b>
    * <p>
-   * Description: <b>Search by task type</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Task.type</b><br>
+   * Description: <b>Search by task focus</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.focus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Task.type", description="Search by task type", type="token", target={} )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="focus", path="Task.focus", description="Search by task focus", type="reference" )
+  public static final String SP_FOCUS = "focus";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <b>Fluent Client</b> search parameter constant for <b>focus</b>
    * <p>
-   * Description: <b>Search by task type</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Task.type</b><br>
+   * Description: <b>Search by task focus</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.focus</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FOCUS = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FOCUS);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Task:focus</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_FOCUS = new ca.uhn.fhir.model.api.Include("Task:focus").toLocked();
 
  /**
    * Search parameter: <b>priority</b>
@@ -2423,7 +3193,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="Task.priority", description="Search by task priority", type="token", target={} )
+  @SearchParamDefinition(name="priority", path="Task.priority", description="Search by task priority", type="token" )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -2436,24 +3206,70 @@ public class Task extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PRIORITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PRIORITY);
 
  /**
-   * Search parameter: <b>failure</b>
+   * Search parameter: <b>stage</b>
    * <p>
-   * Description: <b>Search by failure reason</b><br>
+   * Description: <b>Search by task stage</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Task.failureReason</b><br>
+   * Path: <b>Task.stage</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="failure", path="Task.failureReason", description="Search by failure reason", type="token", target={} )
-  public static final String SP_FAILURE = "failure";
+  @SearchParamDefinition(name="stage", path="Task.stage", description="Search by task stage", type="token" )
+  public static final String SP_STAGE = "stage";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>failure</b>
+   * <b>Fluent Client</b> search parameter constant for <b>stage</b>
    * <p>
-   * Description: <b>Search by failure reason</b><br>
+   * Description: <b>Search by task stage</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Task.failureReason</b><br>
+   * Path: <b>Task.stage</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FAILURE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FAILURE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STAGE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STAGE);
+
+ /**
+   * Search parameter: <b>statusreason</b>
+   * <p>
+   * Description: <b>Search by status reason</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Task.statusReason</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="statusreason", path="Task.statusReason", description="Search by status reason", type="token" )
+  public static final String SP_STATUSREASON = "statusreason";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>statusreason</b>
+   * <p>
+   * Description: <b>Search by status reason</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Task.statusReason</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUSREASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUSREASON);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Search by patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.for</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="Task.for", description="Search by patient", type="reference" )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Search by patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Task.for</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Task:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Task:patient").toLocked();
 
  /**
    * Search parameter: <b>modified</b>
@@ -2463,7 +3279,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.lastModified</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="modified", path="Task.lastModified", description="Search by last modification date", type="date", target={} )
+  @SearchParamDefinition(name="modified", path="Task.lastModified", description="Search by last modification date", type="date" )
   public static final String SP_MODIFIED = "modified";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>modified</b>
@@ -2483,7 +3299,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.definition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="definition", path="Task.definition", description="Search by task definition", type="uri", target={} )
+  @SearchParamDefinition(name="definition", path="Task.definition", description="Search by task definition", type="uri" )
   public static final String SP_DEFINITION = "definition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>definition</b>
@@ -2503,7 +3319,7 @@ public class Task extends DomainResource {
    * Path: <b>Task.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Task.status", description="Search by task status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Task.status", description="Search by task status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,13 +29,14 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -117,16 +118,6 @@ public class DecisionSupportServiceModule extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #trigger}, creating it if it does not already exist
-     */
-    public TriggerDefinition getTriggerFirstRep() { 
-      if (getTrigger().isEmpty()) {
-        addTrigger();
-      }
-      return getTrigger().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DecisionSupportServiceModule setTrigger(List<TriggerDefinition> theTrigger) { 
@@ -143,10 +134,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #trigger} (The trigger element defines when the rule should be invoked. This information is used by consumers of the rule to determine how to integrate the rule into a specific workflow.)
-     */
-    // syntactic sugar
     public TriggerDefinition addTrigger() { //3
       TriggerDefinition t = new TriggerDefinition();
       if (this.trigger == null)
@@ -155,7 +142,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DecisionSupportServiceModule addTrigger(TriggerDefinition t) { //3
       if (t == null)
         return this;
@@ -166,22 +152,22 @@ public class DecisionSupportServiceModule extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #trigger}, creating it if it does not already exist
+     */
+    public TriggerDefinition getTriggerFirstRep() { 
+      if (getTrigger().isEmpty()) {
+        addTrigger();
+      }
+      return getTrigger().get(0);
+    }
+
+    /**
      * @return {@link #parameter} (The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.)
      */
     public List<ParameterDefinition> getParameter() { 
       if (this.parameter == null)
         this.parameter = new ArrayList<ParameterDefinition>();
       return this.parameter;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-     */
-    public ParameterDefinition getParameterFirstRep() { 
-      if (getParameter().isEmpty()) {
-        addParameter();
-      }
-      return getParameter().get(0);
     }
 
     /**
@@ -201,10 +187,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #parameter} (The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.)
-     */
-    // syntactic sugar
     public ParameterDefinition addParameter() { //3
       ParameterDefinition t = new ParameterDefinition();
       if (this.parameter == null)
@@ -213,7 +195,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DecisionSupportServiceModule addParameter(ParameterDefinition t) { //3
       if (t == null)
         return this;
@@ -224,22 +205,22 @@ public class DecisionSupportServiceModule extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParameterDefinition getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
      * @return {@link #dataRequirement} (Data requirements are a machine processable description of the data required by the module in order to perform a successful evaluation.)
      */
     public List<DataRequirement> getDataRequirement() { 
       if (this.dataRequirement == null)
         this.dataRequirement = new ArrayList<DataRequirement>();
       return this.dataRequirement;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
-     */
-    public DataRequirement getDataRequirementFirstRep() { 
-      if (getDataRequirement().isEmpty()) {
-        addDataRequirement();
-      }
-      return getDataRequirement().get(0);
     }
 
     /**
@@ -259,10 +240,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #dataRequirement} (Data requirements are a machine processable description of the data required by the module in order to perform a successful evaluation.)
-     */
-    // syntactic sugar
     public DataRequirement addDataRequirement() { //3
       DataRequirement t = new DataRequirement();
       if (this.dataRequirement == null)
@@ -271,7 +248,6 @@ public class DecisionSupportServiceModule extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DecisionSupportServiceModule addDataRequirement(DataRequirement t) { //3
       if (t == null)
         return this;
@@ -279,6 +255,16 @@ public class DecisionSupportServiceModule extends DomainResource {
         this.dataRequirement = new ArrayList<DataRequirement>();
       this.dataRequirement.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
+     */
+    public DataRequirement getDataRequirementFirstRep() { 
+      if (getDataRequirement().isEmpty()) {
+        addDataRequirement();
+      }
+      return getDataRequirement().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -437,7 +423,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DecisionSupportServiceModule.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DecisionSupportServiceModule.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -457,7 +443,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="DecisionSupportServiceModule.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
+  @SearchParamDefinition(name="topic", path="DecisionSupportServiceModule.moduleMetadata.topic", description="Topics associated with the module", type="token" )
   public static final String SP_TOPIC = "topic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>topic</b>
@@ -477,7 +463,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DecisionSupportServiceModule.moduleMetadata.description", description="Text search against the description", type="string", target={} )
+  @SearchParamDefinition(name="description", path="DecisionSupportServiceModule.moduleMetadata.description", description="Text search against the description", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -497,7 +483,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="DecisionSupportServiceModule.moduleMetadata.title", description="Text search against the title", type="string", target={} )
+  @SearchParamDefinition(name="title", path="DecisionSupportServiceModule.moduleMetadata.title", description="Text search against the title", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -517,7 +503,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="DecisionSupportServiceModule.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
+  @SearchParamDefinition(name="version", path="DecisionSupportServiceModule.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -537,7 +523,7 @@ public class DecisionSupportServiceModule extends DomainResource {
    * Path: <b>DecisionSupportServiceModule.moduleMetadata.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DecisionSupportServiceModule.moduleMetadata.status", description="Status of the module", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DecisionSupportServiceModule.moduleMetadata.status", description="Status of the module", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

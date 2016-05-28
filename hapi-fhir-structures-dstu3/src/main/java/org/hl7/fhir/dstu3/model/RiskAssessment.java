@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -877,16 +878,6 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #basis}, creating it if it does not already exist
-     */
-    public Reference getBasisFirstRep() { 
-      if (getBasis().isEmpty()) {
-        addBasis();
-      }
-      return getBasis().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public RiskAssessment setBasis(List<Reference> theBasis) { 
@@ -903,10 +894,6 @@ public class RiskAssessment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #basis} (Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).)
-     */
-    // syntactic sugar
     public Reference addBasis() { //3
       Reference t = new Reference();
       if (this.basis == null)
@@ -915,7 +902,6 @@ public class RiskAssessment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RiskAssessment addBasis(Reference t) { //3
       if (t == null)
         return this;
@@ -926,8 +912,19 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #basis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).)
+     * @return The first repetition of repeating field {@link #basis}, creating it if it does not already exist
      */
+    public Reference getBasisFirstRep() { 
+      if (getBasis().isEmpty()) {
+        addBasis();
+      }
+      return getBasis().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getBasisTarget() { 
       if (this.basisTarget == null)
         this.basisTarget = new ArrayList<Resource>();
@@ -941,16 +938,6 @@ public class RiskAssessment extends DomainResource {
       if (this.prediction == null)
         this.prediction = new ArrayList<RiskAssessmentPredictionComponent>();
       return this.prediction;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #prediction}, creating it if it does not already exist
-     */
-    public RiskAssessmentPredictionComponent getPredictionFirstRep() { 
-      if (getPrediction().isEmpty()) {
-        addPrediction();
-      }
-      return getPrediction().get(0);
     }
 
     /**
@@ -970,10 +957,6 @@ public class RiskAssessment extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #prediction} (Describes the expected outcome for the subject.)
-     */
-    // syntactic sugar
     public RiskAssessmentPredictionComponent addPrediction() { //3
       RiskAssessmentPredictionComponent t = new RiskAssessmentPredictionComponent();
       if (this.prediction == null)
@@ -982,7 +965,6 @@ public class RiskAssessment extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RiskAssessment addPrediction(RiskAssessmentPredictionComponent t) { //3
       if (t == null)
         return this;
@@ -990,6 +972,16 @@ public class RiskAssessment extends DomainResource {
         this.prediction = new ArrayList<RiskAssessmentPredictionComponent>();
       this.prediction.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #prediction}, creating it if it does not already exist
+     */
+    public RiskAssessmentPredictionComponent getPredictionFirstRep() { 
+      if (getPrediction().isEmpty()) {
+        addPrediction();
+      }
+      return getPrediction().get(0);
     }
 
     /**
@@ -1254,8 +1246,8 @@ public class RiskAssessment extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, date, condition, encounter
-          , performer, identifier, method, basis, prediction, mitigation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, date, condition
+          , encounter, performer, identifier, method, basis, prediction, mitigation);
       }
 
   @Override
@@ -1271,7 +1263,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="RiskAssessment.date", description="When was assessment made?", type="date", target={} )
+  @SearchParamDefinition(name="date", path="RiskAssessment.date", description="When was assessment made?", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1291,7 +1283,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="RiskAssessment.identifier", description="Unique identifier for the assessment", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="RiskAssessment.identifier", description="Unique identifier for the assessment", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1311,7 +1303,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="RiskAssessment.condition", description="Condition assessed", type="reference", target={Condition.class} )
+  @SearchParamDefinition(name="condition", path="RiskAssessment.condition", description="Condition assessed", type="reference" )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -1337,7 +1329,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference", target={Practitioner.class, Device.class} )
+  @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1363,7 +1355,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.method</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="method", path="RiskAssessment.method", description="Evaluation mechanism", type="token", target={} )
+  @SearchParamDefinition(name="method", path="RiskAssessment.method", description="Evaluation mechanism", type="token" )
   public static final String SP_METHOD = "method";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>method</b>
@@ -1383,7 +1375,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1409,7 +1401,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1435,7 +1427,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

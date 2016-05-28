@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -73,7 +74,7 @@ public class EpisodeOfCare extends DomainResource {
          */
         CANCELLED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EpisodeOfCareStatus fromCode(String codeString) throws FHIRException {
@@ -91,7 +92,10 @@ public class EpisodeOfCare extends DomainResource {
           return FINISHED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new FHIRException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -538,16 +542,6 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EpisodeOfCare setIdentifier(List<Identifier> theIdentifier) { 
@@ -564,10 +558,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier(s) by which this EpisodeOfCare is known.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -576,7 +566,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -584,6 +573,16 @@ public class EpisodeOfCare extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -641,16 +640,6 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #statusHistory}, creating it if it does not already exist
-     */
-    public EpisodeOfCareStatusHistoryComponent getStatusHistoryFirstRep() { 
-      if (getStatusHistory().isEmpty()) {
-        addStatusHistory();
-      }
-      return getStatusHistory().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EpisodeOfCare setStatusHistory(List<EpisodeOfCareStatusHistoryComponent> theStatusHistory) { 
@@ -667,10 +656,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #statusHistory} (The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).)
-     */
-    // syntactic sugar
     public EpisodeOfCareStatusHistoryComponent addStatusHistory() { //3
       EpisodeOfCareStatusHistoryComponent t = new EpisodeOfCareStatusHistoryComponent();
       if (this.statusHistory == null)
@@ -679,7 +664,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addStatusHistory(EpisodeOfCareStatusHistoryComponent t) { //3
       if (t == null)
         return this;
@@ -690,22 +674,22 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #statusHistory}, creating it if it does not already exist
+     */
+    public EpisodeOfCareStatusHistoryComponent getStatusHistoryFirstRep() { 
+      if (getStatusHistory().isEmpty()) {
+        addStatusHistory();
+      }
+      return getStatusHistory().get(0);
+    }
+
+    /**
      * @return {@link #type} (A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.)
      */
     public List<CodeableConcept> getType() { 
       if (this.type == null)
         this.type = new ArrayList<CodeableConcept>();
       return this.type;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-     */
-    public CodeableConcept getTypeFirstRep() { 
-      if (getType().isEmpty()) {
-        addType();
-      }
-      return getType().get(0);
     }
 
     /**
@@ -725,10 +709,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #type} (A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.)
-     */
-    // syntactic sugar
     public CodeableConcept addType() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.type == null)
@@ -737,7 +717,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addType(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -748,22 +727,22 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
+    }
+
+    /**
      * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
      */
     public List<Reference> getCondition() { 
       if (this.condition == null)
         this.condition = new ArrayList<Reference>();
       return this.condition;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
-     */
-    public Reference getConditionFirstRep() { 
-      if (getCondition().isEmpty()) {
-        addCondition();
-      }
-      return getCondition().get(0);
     }
 
     /**
@@ -783,10 +762,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    // syntactic sugar
     public Reference addCondition() { //3
       Reference t = new Reference();
       if (this.condition == null)
@@ -795,7 +770,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addCondition(Reference t) { //3
       if (t == null)
         return this;
@@ -806,18 +780,29 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #condition} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
      */
+    public Reference getConditionFirstRep() { 
+      if (getCondition().isEmpty()) {
+        addCondition();
+      }
+      return getCondition().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Condition> getConditionTarget() { 
       if (this.conditionTarget == null)
         this.conditionTarget = new ArrayList<Condition>();
       return this.conditionTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #condition} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public Condition addConditionTarget() { 
       Condition r = new Condition();
       if (this.conditionTarget == null)
@@ -948,16 +933,6 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #referralRequest}, creating it if it does not already exist
-     */
-    public Reference getReferralRequestFirstRep() { 
-      if (getReferralRequest().isEmpty()) {
-        addReferralRequest();
-      }
-      return getReferralRequest().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EpisodeOfCare setReferralRequest(List<Reference> theReferralRequest) { 
@@ -974,10 +949,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #referralRequest} (Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.)
-     */
-    // syntactic sugar
     public Reference addReferralRequest() { //3
       Reference t = new Reference();
       if (this.referralRequest == null)
@@ -986,7 +957,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addReferralRequest(Reference t) { //3
       if (t == null)
         return this;
@@ -997,18 +967,29 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #referralRequest} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.)
+     * @return The first repetition of repeating field {@link #referralRequest}, creating it if it does not already exist
      */
+    public Reference getReferralRequestFirstRep() { 
+      if (getReferralRequest().isEmpty()) {
+        addReferralRequest();
+      }
+      return getReferralRequest().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<ReferralRequest> getReferralRequestTarget() { 
       if (this.referralRequestTarget == null)
         this.referralRequestTarget = new ArrayList<ReferralRequest>();
       return this.referralRequestTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #referralRequest} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public ReferralRequest addReferralRequestTarget() { 
       ReferralRequest r = new ReferralRequest();
       if (this.referralRequestTarget == null)
@@ -1071,16 +1052,6 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #team}, creating it if it does not already exist
-     */
-    public Reference getTeamFirstRep() { 
-      if (getTeam().isEmpty()) {
-        addTeam();
-      }
-      return getTeam().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public EpisodeOfCare setTeam(List<Reference> theTeam) { 
@@ -1097,10 +1068,6 @@ public class EpisodeOfCare extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #team} (The list of practitioners that may be facilitating this episode of care for specific purposes.)
-     */
-    // syntactic sugar
     public Reference addTeam() { //3
       Reference t = new Reference();
       if (this.team == null)
@@ -1109,7 +1076,6 @@ public class EpisodeOfCare extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public EpisodeOfCare addTeam(Reference t) { //3
       if (t == null)
         return this;
@@ -1120,18 +1086,29 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #team} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The list of practitioners that may be facilitating this episode of care for specific purposes.)
+     * @return The first repetition of repeating field {@link #team}, creating it if it does not already exist
      */
+    public Reference getTeamFirstRep() { 
+      if (getTeam().isEmpty()) {
+        addTeam();
+      }
+      return getTeam().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<CareTeam> getTeamTarget() { 
       if (this.teamTarget == null)
         this.teamTarget = new ArrayList<CareTeam>();
       return this.teamTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #team} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The list of practitioners that may be facilitating this episode of care for specific purposes.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public CareTeam addTeamTarget() { 
       CareTeam r = new CareTeam();
       if (this.teamTarget == null)
@@ -1381,8 +1358,8 @@ public class EpisodeOfCare extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
-          , type, condition, patient, managingOrganization, period, referralRequest, careManager, team
-          );
+          , type, condition, patient, managingOrganization, period, referralRequest, careManager
+          , team);
       }
 
   @Override
@@ -1398,7 +1375,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="EpisodeOfCare.period", description="The provided date search value falls within the episode of care's period", type="date", target={} )
+  @SearchParamDefinition(name="date", path="EpisodeOfCare.period", description="The provided date search value falls within the episode of care's period", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1418,7 +1395,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) for the EpisodeOfCare", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) for the EpisodeOfCare", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1438,7 +1415,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class} )
+  @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference" )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -1464,7 +1441,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.referralRequest</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference", target={ReferralRequest.class} )
+  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference" )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
@@ -1490,7 +1467,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1516,7 +1493,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1542,7 +1519,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Type/class  - e.g. specialist referral, disease management", type="token", target={} )
+  @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Type/class  - e.g. specialist referral, disease management", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1562,7 +1539,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_CARE_MANAGER = "care-manager";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-manager</b>
@@ -1588,7 +1565,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="EpisodeOfCare.status", description="The current status of the Episode of Care as provided (does not check the status history collection)", type="token", target={} )
+  @SearchParamDefinition(name="status", path="EpisodeOfCare.status", description="The current status of the Episode of Care as provided (does not check the status history collection)", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

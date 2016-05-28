@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -336,7 +337,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          );
       }
 
   public String fhirType() {
@@ -699,8 +701,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version, document
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          , document);
       }
 
   public String fhirType() {
@@ -995,7 +997,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          );
       }
 
   public String fhirType() {
@@ -1202,16 +1205,6 @@ public class ModuleDefinition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-         */
-        public StringType getCodeSystemFirstRep() { 
-          if (getCodeSystem().isEmpty()) {
-            addCodeSystemElement();
-          }
-          return getCodeSystem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleDefinitionValueSetComponent setCodeSystem(List<StringType> theCodeSystem) { 
@@ -1231,7 +1224,6 @@ public class ModuleDefinition extends DomainResource {
         /**
          * @return {@link #codeSystem} (The code systems in use within the value set. These must refer to previously defined code systems within this knowledge module or a referenced library.)
          */
-    // syntactic sugar
         public StringType addCodeSystemElement() {//2 
           StringType t = new StringType();
           if (this.codeSystem == null)
@@ -1385,8 +1377,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version, codeSystem
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          , codeSystem);
       }
 
   public String fhirType() {
@@ -1815,8 +1807,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, use, documentation, type
-          , profile);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, use, documentation
+          , type, profile);
       }
 
   public String fhirType() {
@@ -1984,16 +1976,6 @@ public class ModuleDefinition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #mustSupport}, creating it if it does not already exist
-         */
-        public StringType getMustSupportFirstRep() { 
-          if (getMustSupport().isEmpty()) {
-            addMustSupportElement();
-          }
-          return getMustSupport().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleDefinitionDataComponent setMustSupport(List<StringType> theMustSupport) { 
@@ -2013,7 +1995,6 @@ public class ModuleDefinition extends DomainResource {
         /**
          * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.)
          */
-    // syntactic sugar
         public StringType addMustSupportElement() {//2 
           StringType t = new StringType();
           if (this.mustSupport == null)
@@ -2056,16 +2037,6 @@ public class ModuleDefinition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #codeFilter}, creating it if it does not already exist
-         */
-        public ModuleDefinitionDataCodeFilterComponent getCodeFilterFirstRep() { 
-          if (getCodeFilter().isEmpty()) {
-            addCodeFilter();
-          }
-          return getCodeFilter().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleDefinitionDataComponent setCodeFilter(List<ModuleDefinitionDataCodeFilterComponent> theCodeFilter) { 
@@ -2082,10 +2053,6 @@ public class ModuleDefinition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #codeFilter} (Code filters for the required data, if any.)
-         */
-    // syntactic sugar
         public ModuleDefinitionDataCodeFilterComponent addCodeFilter() { //3
           ModuleDefinitionDataCodeFilterComponent t = new ModuleDefinitionDataCodeFilterComponent();
           if (this.codeFilter == null)
@@ -2094,7 +2061,6 @@ public class ModuleDefinition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ModuleDefinitionDataComponent addCodeFilter(ModuleDefinitionDataCodeFilterComponent t) { //3
           if (t == null)
             return this;
@@ -2105,22 +2071,22 @@ public class ModuleDefinition extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #codeFilter}, creating it if it does not already exist
+         */
+        public ModuleDefinitionDataCodeFilterComponent getCodeFilterFirstRep() { 
+          if (getCodeFilter().isEmpty()) {
+            addCodeFilter();
+          }
+          return getCodeFilter().get(0);
+        }
+
+        /**
          * @return {@link #dateFilter} (Date filters for the required data, if any.)
          */
         public List<ModuleDefinitionDataDateFilterComponent> getDateFilter() { 
           if (this.dateFilter == null)
             this.dateFilter = new ArrayList<ModuleDefinitionDataDateFilterComponent>();
           return this.dateFilter;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #dateFilter}, creating it if it does not already exist
-         */
-        public ModuleDefinitionDataDateFilterComponent getDateFilterFirstRep() { 
-          if (getDateFilter().isEmpty()) {
-            addDateFilter();
-          }
-          return getDateFilter().get(0);
         }
 
         /**
@@ -2140,10 +2106,6 @@ public class ModuleDefinition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dateFilter} (Date filters for the required data, if any.)
-         */
-    // syntactic sugar
         public ModuleDefinitionDataDateFilterComponent addDateFilter() { //3
           ModuleDefinitionDataDateFilterComponent t = new ModuleDefinitionDataDateFilterComponent();
           if (this.dateFilter == null)
@@ -2152,7 +2114,6 @@ public class ModuleDefinition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ModuleDefinitionDataComponent addDateFilter(ModuleDefinitionDataDateFilterComponent t) { //3
           if (t == null)
             return this;
@@ -2160,6 +2121,16 @@ public class ModuleDefinition extends DomainResource {
             this.dateFilter = new ArrayList<ModuleDefinitionDataDateFilterComponent>();
           this.dateFilter.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #dateFilter}, creating it if it does not already exist
+         */
+        public ModuleDefinitionDataDateFilterComponent getDateFilterFirstRep() { 
+          if (getDateFilter().isEmpty()) {
+            addDateFilter();
+          }
+          return getDateFilter().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2303,8 +2274,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, mustSupport, codeFilter
-          , dateFilter);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, mustSupport
+          , codeFilter, dateFilter);
       }
 
   public String fhirType() {
@@ -2454,16 +2425,6 @@ public class ModuleDefinition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #codeableConcept}, creating it if it does not already exist
-         */
-        public CodeableConcept getCodeableConceptFirstRep() { 
-          if (getCodeableConcept().isEmpty()) {
-            addCodeableConcept();
-          }
-          return getCodeableConcept().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleDefinitionDataCodeFilterComponent setCodeableConcept(List<CodeableConcept> theCodeableConcept) { 
@@ -2480,10 +2441,6 @@ public class ModuleDefinition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #codeableConcept} (The codeable concept for the code filter. Only one of valueSet or codeableConcept may be specified. If codeableConcepts are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codeable concepts.)
-         */
-    // syntactic sugar
         public CodeableConcept addCodeableConcept() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.codeableConcept == null)
@@ -2492,7 +2449,6 @@ public class ModuleDefinition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ModuleDefinitionDataCodeFilterComponent addCodeableConcept(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -2500,6 +2456,16 @@ public class ModuleDefinition extends DomainResource {
             this.codeableConcept = new ArrayList<CodeableConcept>();
           this.codeableConcept.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #codeableConcept}, creating it if it does not already exist
+         */
+        public CodeableConcept getCodeableConceptFirstRep() { 
+          if (getCodeableConcept().isEmpty()) {
+            addCodeableConcept();
+          }
+          return getCodeableConcept().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2930,16 +2896,6 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleDefinition setIdentifier(List<Identifier> theIdentifier) { 
@@ -2956,10 +2912,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -2968,7 +2920,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -2976,6 +2927,16 @@ public class ModuleDefinition extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -3037,16 +2998,6 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #model}, creating it if it does not already exist
-     */
-    public ModuleDefinitionModelComponent getModelFirstRep() { 
-      if (getModel().isEmpty()) {
-        addModel();
-      }
-      return getModel().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleDefinition setModel(List<ModuleDefinitionModelComponent> theModel) { 
@@ -3063,10 +3014,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #model} (A model reference used by the content.)
-     */
-    // syntactic sugar
     public ModuleDefinitionModelComponent addModel() { //3
       ModuleDefinitionModelComponent t = new ModuleDefinitionModelComponent();
       if (this.model == null)
@@ -3075,7 +3022,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addModel(ModuleDefinitionModelComponent t) { //3
       if (t == null)
         return this;
@@ -3086,22 +3032,22 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #model}, creating it if it does not already exist
+     */
+    public ModuleDefinitionModelComponent getModelFirstRep() { 
+      if (getModel().isEmpty()) {
+        addModel();
+      }
+      return getModel().get(0);
+    }
+
+    /**
      * @return {@link #library} (A library referenced by the module. The reference must consist of either an id, or a document reference.)
      */
     public List<ModuleDefinitionLibraryComponent> getLibrary() { 
       if (this.library == null)
         this.library = new ArrayList<ModuleDefinitionLibraryComponent>();
       return this.library;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
-     */
-    public ModuleDefinitionLibraryComponent getLibraryFirstRep() { 
-      if (getLibrary().isEmpty()) {
-        addLibrary();
-      }
-      return getLibrary().get(0);
     }
 
     /**
@@ -3121,10 +3067,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #library} (A library referenced by the module. The reference must consist of either an id, or a document reference.)
-     */
-    // syntactic sugar
     public ModuleDefinitionLibraryComponent addLibrary() { //3
       ModuleDefinitionLibraryComponent t = new ModuleDefinitionLibraryComponent();
       if (this.library == null)
@@ -3133,7 +3075,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addLibrary(ModuleDefinitionLibraryComponent t) { //3
       if (t == null)
         return this;
@@ -3144,22 +3085,22 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
+     */
+    public ModuleDefinitionLibraryComponent getLibraryFirstRep() { 
+      if (getLibrary().isEmpty()) {
+        addLibrary();
+      }
+      return getLibrary().get(0);
+    }
+
+    /**
      * @return {@link #codeSystem} (A code system definition used within the knowledge module.)
      */
     public List<ModuleDefinitionCodeSystemComponent> getCodeSystem() { 
       if (this.codeSystem == null)
         this.codeSystem = new ArrayList<ModuleDefinitionCodeSystemComponent>();
       return this.codeSystem;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-     */
-    public ModuleDefinitionCodeSystemComponent getCodeSystemFirstRep() { 
-      if (getCodeSystem().isEmpty()) {
-        addCodeSystem();
-      }
-      return getCodeSystem().get(0);
     }
 
     /**
@@ -3179,10 +3120,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #codeSystem} (A code system definition used within the knowledge module.)
-     */
-    // syntactic sugar
     public ModuleDefinitionCodeSystemComponent addCodeSystem() { //3
       ModuleDefinitionCodeSystemComponent t = new ModuleDefinitionCodeSystemComponent();
       if (this.codeSystem == null)
@@ -3191,7 +3128,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addCodeSystem(ModuleDefinitionCodeSystemComponent t) { //3
       if (t == null)
         return this;
@@ -3202,22 +3138,22 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
+     */
+    public ModuleDefinitionCodeSystemComponent getCodeSystemFirstRep() { 
+      if (getCodeSystem().isEmpty()) {
+        addCodeSystem();
+      }
+      return getCodeSystem().get(0);
+    }
+
+    /**
      * @return {@link #valueSet} (A value set definition used by the knowledge module.)
      */
     public List<ModuleDefinitionValueSetComponent> getValueSet() { 
       if (this.valueSet == null)
         this.valueSet = new ArrayList<ModuleDefinitionValueSetComponent>();
       return this.valueSet;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #valueSet}, creating it if it does not already exist
-     */
-    public ModuleDefinitionValueSetComponent getValueSetFirstRep() { 
-      if (getValueSet().isEmpty()) {
-        addValueSet();
-      }
-      return getValueSet().get(0);
     }
 
     /**
@@ -3237,10 +3173,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #valueSet} (A value set definition used by the knowledge module.)
-     */
-    // syntactic sugar
     public ModuleDefinitionValueSetComponent addValueSet() { //3
       ModuleDefinitionValueSetComponent t = new ModuleDefinitionValueSetComponent();
       if (this.valueSet == null)
@@ -3249,7 +3181,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addValueSet(ModuleDefinitionValueSetComponent t) { //3
       if (t == null)
         return this;
@@ -3260,22 +3191,22 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #valueSet}, creating it if it does not already exist
+     */
+    public ModuleDefinitionValueSetComponent getValueSetFirstRep() { 
+      if (getValueSet().isEmpty()) {
+        addValueSet();
+      }
+      return getValueSet().get(0);
+    }
+
+    /**
      * @return {@link #parameter} (Parameters to the module.)
      */
     public List<ModuleDefinitionParameterComponent> getParameter() { 
       if (this.parameter == null)
         this.parameter = new ArrayList<ModuleDefinitionParameterComponent>();
       return this.parameter;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-     */
-    public ModuleDefinitionParameterComponent getParameterFirstRep() { 
-      if (getParameter().isEmpty()) {
-        addParameter();
-      }
-      return getParameter().get(0);
     }
 
     /**
@@ -3295,10 +3226,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #parameter} (Parameters to the module.)
-     */
-    // syntactic sugar
     public ModuleDefinitionParameterComponent addParameter() { //3
       ModuleDefinitionParameterComponent t = new ModuleDefinitionParameterComponent();
       if (this.parameter == null)
@@ -3307,7 +3234,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addParameter(ModuleDefinitionParameterComponent t) { //3
       if (t == null)
         return this;
@@ -3318,22 +3244,22 @@ public class ModuleDefinition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ModuleDefinitionParameterComponent getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
      * @return {@link #data} (Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.)
      */
     public List<ModuleDefinitionDataComponent> getData() { 
       if (this.data == null)
         this.data = new ArrayList<ModuleDefinitionDataComponent>();
       return this.data;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #data}, creating it if it does not already exist
-     */
-    public ModuleDefinitionDataComponent getDataFirstRep() { 
-      if (getData().isEmpty()) {
-        addData();
-      }
-      return getData().get(0);
     }
 
     /**
@@ -3353,10 +3279,6 @@ public class ModuleDefinition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #data} (Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.)
-     */
-    // syntactic sugar
     public ModuleDefinitionDataComponent addData() { //3
       ModuleDefinitionDataComponent t = new ModuleDefinitionDataComponent();
       if (this.data == null)
@@ -3365,7 +3287,6 @@ public class ModuleDefinition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ModuleDefinition addData(ModuleDefinitionDataComponent t) { //3
       if (t == null)
         return this;
@@ -3373,6 +3294,16 @@ public class ModuleDefinition extends DomainResource {
         this.data = new ArrayList<ModuleDefinitionDataComponent>();
       this.data.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #data}, creating it if it does not already exist
+     */
+    public ModuleDefinitionDataComponent getDataFirstRep() { 
+      if (getData().isEmpty()) {
+        addData();
+      }
+      return getData().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -3577,8 +3508,8 @@ public class ModuleDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, version, model, library
-          , codeSystem, valueSet, parameter, data);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, version, model
+          , library, codeSystem, valueSet, parameter, data);
       }
 
   @Override

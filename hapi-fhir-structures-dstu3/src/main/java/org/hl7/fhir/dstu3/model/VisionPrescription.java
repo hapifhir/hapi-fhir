@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -58,7 +59,7 @@ public class VisionPrescription extends DomainResource {
          */
         LEFT, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static VisionEyes fromCode(String codeString) throws FHIRException {
@@ -68,7 +69,10 @@ public class VisionPrescription extends DomainResource {
           return RIGHT;
         if ("left".equals(codeString))
           return LEFT;
-        throw new FHIRException("Unknown VisionEyes code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown VisionEyes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -153,7 +157,7 @@ public class VisionPrescription extends DomainResource {
          */
         OUT, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static VisionBase fromCode(String codeString) throws FHIRException {
@@ -167,7 +171,10 @@ public class VisionPrescription extends DomainResource {
           return IN;
         if ("out".equals(codeString))
           return OUT;
-        throw new FHIRException("Unknown VisionBase code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown VisionBase code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -1444,7 +1451,8 @@ public class VisionPrescription extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(product, eye, sphere, cylinder
-          , axis, prism, base, add, power, backCurve, diameter, duration, color, brand, notes);
+          , axis, prism, base, add, power, backCurve, diameter, duration, color, brand
+          , notes);
       }
 
   public String fhirType() {
@@ -1537,16 +1545,6 @@ public class VisionPrescription extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public VisionPrescription setIdentifier(List<Identifier> theIdentifier) { 
@@ -1563,10 +1561,6 @@ public class VisionPrescription extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Business identifier which may be used by other parties to reference or identify the prescription.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1575,7 +1569,6 @@ public class VisionPrescription extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public VisionPrescription addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1583,6 +1576,16 @@ public class VisionPrescription extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1821,16 +1824,6 @@ public class VisionPrescription extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #dispense}, creating it if it does not already exist
-     */
-    public VisionPrescriptionDispenseComponent getDispenseFirstRep() { 
-      if (getDispense().isEmpty()) {
-        addDispense();
-      }
-      return getDispense().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public VisionPrescription setDispense(List<VisionPrescriptionDispenseComponent> theDispense) { 
@@ -1847,10 +1840,6 @@ public class VisionPrescription extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #dispense} (Deals with details of the dispense part of the supply specification.)
-     */
-    // syntactic sugar
     public VisionPrescriptionDispenseComponent addDispense() { //3
       VisionPrescriptionDispenseComponent t = new VisionPrescriptionDispenseComponent();
       if (this.dispense == null)
@@ -1859,7 +1848,6 @@ public class VisionPrescription extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public VisionPrescription addDispense(VisionPrescriptionDispenseComponent t) { //3
       if (t == null)
         return this;
@@ -1867,6 +1855,16 @@ public class VisionPrescription extends DomainResource {
         this.dispense = new ArrayList<VisionPrescriptionDispenseComponent>();
       this.dispense.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dispense}, creating it if it does not already exist
+     */
+    public VisionPrescriptionDispenseComponent getDispenseFirstRep() { 
+      if (getDispense().isEmpty()) {
+        addDispense();
+      }
+      return getDispense().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2064,7 +2062,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.prescriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescriber</b>
@@ -2090,7 +2088,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2110,7 +2108,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2136,7 +2134,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.dateWritten</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date", target={} )
+  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
   public static final String SP_DATEWRITTEN = "datewritten";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>datewritten</b>
@@ -2156,7 +2154,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identifier", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identifier", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

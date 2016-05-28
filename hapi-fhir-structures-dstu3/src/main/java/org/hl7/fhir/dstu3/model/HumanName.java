@@ -29,12 +29,13 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -76,7 +77,7 @@ public class HumanName extends Type implements ICompositeType {
          */
         MAIDEN, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static NameUse fromCode(String codeString) throws FHIRException {
@@ -96,7 +97,10 @@ public class HumanName extends Type implements ICompositeType {
           return OLD;
         if ("maiden".equals(codeString))
           return MAIDEN;
-        throw new FHIRException("Unknown NameUse code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown NameUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -379,16 +383,6 @@ public class HumanName extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #family}, creating it if it does not already exist
-     */
-    public StringType getFamilyFirstRep() { 
-      if (getFamily().isEmpty()) {
-        addFamilyElement();
-      }
-      return getFamily().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public HumanName setFamily(List<StringType> theFamily) { 
@@ -408,7 +402,6 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * @return {@link #family} (The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.)
      */
-    // syntactic sugar
     public StringType addFamilyElement() {//2 
       StringType t = new StringType();
       if (this.family == null)
@@ -451,16 +444,6 @@ public class HumanName extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #given}, creating it if it does not already exist
-     */
-    public StringType getGivenFirstRep() { 
-      if (getGiven().isEmpty()) {
-        addGivenElement();
-      }
-      return getGiven().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public HumanName setGiven(List<StringType> theGiven) { 
@@ -480,7 +463,6 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * @return {@link #given} (Given name.)
      */
-    // syntactic sugar
     public StringType addGivenElement() {//2 
       StringType t = new StringType();
       if (this.given == null)
@@ -523,16 +505,6 @@ public class HumanName extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #prefix}, creating it if it does not already exist
-     */
-    public StringType getPrefixFirstRep() { 
-      if (getPrefix().isEmpty()) {
-        addPrefixElement();
-      }
-      return getPrefix().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public HumanName setPrefix(List<StringType> thePrefix) { 
@@ -552,7 +524,6 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * @return {@link #prefix} (Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name.)
      */
-    // syntactic sugar
     public StringType addPrefixElement() {//2 
       StringType t = new StringType();
       if (this.prefix == null)
@@ -595,16 +566,6 @@ public class HumanName extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #suffix}, creating it if it does not already exist
-     */
-    public StringType getSuffixFirstRep() { 
-      if (getSuffix().isEmpty()) {
-        addSuffixElement();
-      }
-      return getSuffix().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public HumanName setSuffix(List<StringType> theSuffix) { 
@@ -624,7 +585,6 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * @return {@link #suffix} (Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.)
      */
-    // syntactic sugar
     public StringType addSuffixElement() {//2 
       StringType t = new StringType();
       if (this.suffix == null)
@@ -936,8 +896,8 @@ public class HumanName extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, text, family, given, prefix
-          , suffix, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, text, family, given
+          , prefix, suffix, period);
       }
 
 

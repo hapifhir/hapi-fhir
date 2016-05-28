@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -187,16 +188,6 @@ public class Parameters extends Resource implements IBaseParameters {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #part}, creating it if it does not already exist
-         */
-        public ParametersParameterComponent getPartFirstRep() { 
-          if (getPart().isEmpty()) {
-            addPart();
-          }
-          return getPart().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ParametersParameterComponent setPart(List<ParametersParameterComponent> thePart) { 
@@ -213,10 +204,6 @@ public class Parameters extends Resource implements IBaseParameters {
           return false;
         }
 
-        /**
-         * @return {@link #part} (A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".)
-         */
-    // syntactic sugar
         public ParametersParameterComponent addPart() { //3
           ParametersParameterComponent t = new ParametersParameterComponent();
           if (this.part == null)
@@ -225,7 +212,6 @@ public class Parameters extends Resource implements IBaseParameters {
           return t;
         }
 
-    // syntactic sugar
         public ParametersParameterComponent addPart(ParametersParameterComponent t) { //3
           if (t == null)
             return this;
@@ -233,6 +219,16 @@ public class Parameters extends Resource implements IBaseParameters {
             this.part = new ArrayList<ParametersParameterComponent>();
           this.part.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #part}, creating it if it does not already exist
+         */
+        public ParametersParameterComponent getPartFirstRep() { 
+          if (getPart().isEmpty()) {
+            addPart();
+          }
+          return getPart().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -484,7 +480,8 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value, resource, part);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value, resource, part
+          );
       }
 
   public String fhirType() {
@@ -520,16 +517,6 @@ public class Parameters extends Resource implements IBaseParameters {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-     */
-    public ParametersParameterComponent getParameterFirstRep() { 
-      if (getParameter().isEmpty()) {
-        addParameter();
-      }
-      return getParameter().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Parameters setParameter(List<ParametersParameterComponent> theParameter) { 
@@ -546,10 +533,6 @@ public class Parameters extends Resource implements IBaseParameters {
       return false;
     }
 
-    /**
-     * @return {@link #parameter} (A parameter passed to or received from the operation.)
-     */
-    // syntactic sugar
     public ParametersParameterComponent addParameter() { //3
       ParametersParameterComponent t = new ParametersParameterComponent();
       if (this.parameter == null)
@@ -558,7 +541,6 @@ public class Parameters extends Resource implements IBaseParameters {
       return t;
     }
 
-    // syntactic sugar
     public Parameters addParameter(ParametersParameterComponent t) { //3
       if (t == null)
         return this;
@@ -566,6 +548,16 @@ public class Parameters extends Resource implements IBaseParameters {
         this.parameter = new ArrayList<ParametersParameterComponent>();
       this.parameter.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParametersParameterComponent getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {

@@ -29,8 +29,13 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
+import java.util.*;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -38,19 +43,64 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
-@DatatypeDef(name="Count", profileOf=Quantity.class)
-public class Count extends Quantity {
+@DatatypeDef(name="Count")
+public class Count extends Quantity implements ICompositeType {
 
-    private static final long serialVersionUID = 1069574054L;
+    private static final long serialVersionUID = 0L;
+
+  /**
+   * Constructor
+   */
+    public Count() {
+      super();
+    }
+
+      protected void listChildren(List<Property> childrenList) {
+        super.listChildren(childrenList);
+      }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Count";
+
+  }
 
       public Count copy() {
         Count dst = new Count();
         copyValues(dst);
-        dst.value = value == null ? null : value.copy();
-        dst.comparator = comparator == null ? null : comparator.copy();
-        dst.unit = unit == null ? null : unit.copy();
-        dst.system = system == null ? null : system.copy();
-        dst.code = code == null ? null : code.copy();
         return dst;
       }
 
@@ -65,8 +115,7 @@ public class Count extends Quantity {
         if (!(other instanceof Count))
           return false;
         Count o = (Count) other;
-        return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(unit, o.unit, true)
-           && compareDeep(system, o.system, true) && compareDeep(code, o.code, true);
+        return true;
       }
 
       @Override
@@ -76,13 +125,11 @@ public class Count extends Quantity {
         if (!(other instanceof Count))
           return false;
         Count o = (Count) other;
-        return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(unit, o.unit, true)
-           && compareValues(system, o.system, true) && compareValues(code, o.code, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, comparator, unit, system
-          , code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty();
       }
 
 

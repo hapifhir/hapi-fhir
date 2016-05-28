@@ -29,13 +29,14 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -65,7 +66,7 @@ public class Quantity extends Type implements ICompositeType {
          */
         GREATER_THAN, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static QuantityComparator fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Quantity extends Type implements ICompositeType {
           return GREATER_OR_EQUAL;
         if (">".equals(codeString))
           return GREATER_THAN;
-        throw new FHIRException("Unknown QuantityComparator code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown QuantityComparator code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -662,8 +666,8 @@ public class Quantity extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, comparator, unit, system
-          , code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, comparator, unit
+          , system, code);
       }
 
 

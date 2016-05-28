@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -73,7 +74,7 @@ public class Group extends DomainResource {
          */
         SUBSTANCE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static GroupType fromCode(String codeString) throws FHIRException {
@@ -91,7 +92,10 @@ public class Group extends DomainResource {
           return MEDICATION;
         if ("substance".equals(codeString))
           return SUBSTANCE;
-        throw new FHIRException("Unknown GroupType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown GroupType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -542,7 +546,8 @@ public class Group extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, value, exclude, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, value, exclude, period
+          );
       }
 
   public String fhirType() {
@@ -811,7 +816,8 @@ public class Group extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(entity, period, inactive);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(entity, period, inactive
+          );
       }
 
   public String fhirType() {
@@ -912,16 +918,6 @@ public class Group extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Group setIdentifier(List<Identifier> theIdentifier) { 
@@ -938,10 +934,6 @@ public class Group extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (A unique business identifier for this group.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -950,7 +942,6 @@ public class Group extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Group addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -958,6 +949,16 @@ public class Group extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1223,16 +1224,6 @@ public class Group extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #characteristic}, creating it if it does not already exist
-     */
-    public GroupCharacteristicComponent getCharacteristicFirstRep() { 
-      if (getCharacteristic().isEmpty()) {
-        addCharacteristic();
-      }
-      return getCharacteristic().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Group setCharacteristic(List<GroupCharacteristicComponent> theCharacteristic) { 
@@ -1249,10 +1240,6 @@ public class Group extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #characteristic} (Identifies the traits shared by members of the group.)
-     */
-    // syntactic sugar
     public GroupCharacteristicComponent addCharacteristic() { //3
       GroupCharacteristicComponent t = new GroupCharacteristicComponent();
       if (this.characteristic == null)
@@ -1261,7 +1248,6 @@ public class Group extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Group addCharacteristic(GroupCharacteristicComponent t) { //3
       if (t == null)
         return this;
@@ -1272,22 +1258,22 @@ public class Group extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #characteristic}, creating it if it does not already exist
+     */
+    public GroupCharacteristicComponent getCharacteristicFirstRep() { 
+      if (getCharacteristic().isEmpty()) {
+        addCharacteristic();
+      }
+      return getCharacteristic().get(0);
+    }
+
+    /**
      * @return {@link #member} (Identifies the resource instances that are members of the group.)
      */
     public List<GroupMemberComponent> getMember() { 
       if (this.member == null)
         this.member = new ArrayList<GroupMemberComponent>();
       return this.member;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #member}, creating it if it does not already exist
-     */
-    public GroupMemberComponent getMemberFirstRep() { 
-      if (getMember().isEmpty()) {
-        addMember();
-      }
-      return getMember().get(0);
     }
 
     /**
@@ -1307,10 +1293,6 @@ public class Group extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #member} (Identifies the resource instances that are members of the group.)
-     */
-    // syntactic sugar
     public GroupMemberComponent addMember() { //3
       GroupMemberComponent t = new GroupMemberComponent();
       if (this.member == null)
@@ -1319,7 +1301,6 @@ public class Group extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Group addMember(GroupMemberComponent t) { //3
       if (t == null)
         return this;
@@ -1327,6 +1308,16 @@ public class Group extends DomainResource {
         this.member = new ArrayList<GroupMemberComponent>();
       this.member.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #member}, creating it if it does not already exist
+     */
+    public GroupMemberComponent getMemberFirstRep() { 
+      if (getMember().isEmpty()) {
+        addMember();
+      }
+      return getMember().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1530,8 +1521,8 @@ public class Group extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, actual, active
-          , code, name, quantity, characteristic, member);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, actual
+          , active, code, name, quantity, characteristic, member);
       }
 
   @Override
@@ -1547,7 +1538,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.actual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token", target={} )
+  @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token" )
   public static final String SP_ACTUAL = "actual";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actual</b>
@@ -1567,7 +1558,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1587,7 +1578,7 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"}, target={} )
+  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"} )
   public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>
@@ -1607,7 +1598,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1627,7 +1618,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.member.entity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", target={Practitioner.class, Device.class, Medication.class, Patient.class, Substance.class} )
+  @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_MEMBER = "member";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>member</b>
@@ -1653,7 +1644,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.exclude</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token", target={} )
+  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token" )
   public static final String SP_EXCLUDE = "exclude";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>exclude</b>
@@ -1673,7 +1664,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1693,7 +1684,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value", path="Group.characteristic.value", description="Value held by characteristic", type="token", target={} )
+  @SearchParamDefinition(name="value", path="Group.characteristic.value", description="Value held by characteristic", type="token" )
   public static final String SP_VALUE = "value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value</b>
@@ -1713,7 +1704,7 @@ public class Group extends DomainResource {
    * Path: <b>Group.characteristic.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token", target={} )
+  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token" )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>

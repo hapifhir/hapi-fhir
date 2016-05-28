@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -150,16 +151,6 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public RelatedPerson setIdentifier(List<Identifier> theIdentifier) { 
@@ -176,10 +167,6 @@ public class RelatedPerson extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier for a person within a particular scope.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -188,7 +175,6 @@ public class RelatedPerson extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RelatedPerson addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -196,6 +182,16 @@ public class RelatedPerson extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -300,16 +296,6 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public RelatedPerson setTelecom(List<ContactPoint> theTelecom) { 
@@ -326,10 +312,6 @@ public class RelatedPerson extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (A contact detail for the person, e.g. a telephone number or an email address.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -338,7 +320,6 @@ public class RelatedPerson extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RelatedPerson addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -346,6 +327,16 @@ public class RelatedPerson extends DomainResource {
         this.telecom = new ArrayList<ContactPoint>();
       this.telecom.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
     }
 
     /**
@@ -456,16 +447,6 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
-     */
-    public Address getAddressFirstRep() { 
-      if (getAddress().isEmpty()) {
-        addAddress();
-      }
-      return getAddress().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public RelatedPerson setAddress(List<Address> theAddress) { 
@@ -482,10 +463,6 @@ public class RelatedPerson extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #address} (Address where the related person can be contacted or visited.)
-     */
-    // syntactic sugar
     public Address addAddress() { //3
       Address t = new Address();
       if (this.address == null)
@@ -494,7 +471,6 @@ public class RelatedPerson extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RelatedPerson addAddress(Address t) { //3
       if (t == null)
         return this;
@@ -505,22 +481,22 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
+    }
+
+    /**
      * @return {@link #photo} (Image of the person.)
      */
     public List<Attachment> getPhoto() { 
       if (this.photo == null)
         this.photo = new ArrayList<Attachment>();
       return this.photo;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
-     */
-    public Attachment getPhotoFirstRep() { 
-      if (getPhoto().isEmpty()) {
-        addPhoto();
-      }
-      return getPhoto().get(0);
     }
 
     /**
@@ -540,10 +516,6 @@ public class RelatedPerson extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #photo} (Image of the person.)
-     */
-    // syntactic sugar
     public Attachment addPhoto() { //3
       Attachment t = new Attachment();
       if (this.photo == null)
@@ -552,7 +524,6 @@ public class RelatedPerson extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public RelatedPerson addPhoto(Attachment t) { //3
       if (t == null)
         return this;
@@ -560,6 +531,16 @@ public class RelatedPerson extends DomainResource {
         this.photo = new ArrayList<Attachment>();
       this.photo.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
+     */
+    public Attachment getPhotoFirstRep() { 
+      if (getPhoto().isEmpty()) {
+        addPhoto();
+      }
+      return getPhoto().get(0);
     }
 
     /**
@@ -822,7 +803,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -842,7 +823,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string", target={} )
+  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -862,7 +843,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.birthDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="birthdate", path="RelatedPerson.birthDate", description="The Related Person's date of birth", type="date", target={} )
+  @SearchParamDefinition(name="birthdate", path="RelatedPerson.birthDate", description="The Related Person's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
@@ -882,7 +863,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="RelatedPerson.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="RelatedPerson.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -902,7 +883,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -922,7 +903,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="RelatedPerson.address.postalCode", description="A postal code specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="RelatedPerson.address.postalCode", description="A postal code specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -942,7 +923,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="RelatedPerson.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="RelatedPerson.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -962,7 +943,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="RelatedPerson.name", description="A portion of name using some kind of phonetic matching algorithm", type="string", target={} )
+  @SearchParamDefinition(name="phonetic", path="RelatedPerson.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -982,7 +963,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="RelatedPerson.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
+  @SearchParamDefinition(name="phone", path="RelatedPerson.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -1002,7 +983,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1028,7 +1009,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string", target={} )
+  @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1048,7 +1029,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="RelatedPerson.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="RelatedPerson.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1068,7 +1049,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1088,7 +1069,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1108,7 +1089,7 @@ public class RelatedPerson extends DomainResource {
    * Path: <b>RelatedPerson.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="RelatedPerson.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
+  @SearchParamDefinition(name="email", path="RelatedPerson.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

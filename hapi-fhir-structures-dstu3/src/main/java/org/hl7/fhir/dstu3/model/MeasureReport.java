@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -62,7 +63,7 @@ public class MeasureReport extends DomainResource {
          */
         SUMMARY, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static MeasureReportType fromCode(String codeString) throws FHIRException {
@@ -74,7 +75,10 @@ public class MeasureReport extends DomainResource {
           return PATIENTLIST;
         if ("summary".equals(codeString))
           return SUMMARY;
-        throw new FHIRException("Unknown MeasureReportType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown MeasureReportType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -165,7 +169,7 @@ public class MeasureReport extends DomainResource {
          */
         ERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static MeasureReportStatus fromCode(String codeString) throws FHIRException {
@@ -177,7 +181,10 @@ public class MeasureReport extends DomainResource {
           return PENDING;
         if ("error".equals(codeString))
           return ERROR;
-        throw new FHIRException("Unknown MeasureReportStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown MeasureReportStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -342,16 +349,6 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #population}, creating it if it does not already exist
-         */
-        public MeasureReportGroupPopulationComponent getPopulationFirstRep() { 
-          if (getPopulation().isEmpty()) {
-            addPopulation();
-          }
-          return getPopulation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MeasureReportGroupComponent setPopulation(List<MeasureReportGroupPopulationComponent> thePopulation) { 
@@ -368,10 +365,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #population} (The populations that make up the population group, one for each type of population appropriate for the measure.)
-         */
-    // syntactic sugar
         public MeasureReportGroupPopulationComponent addPopulation() { //3
           MeasureReportGroupPopulationComponent t = new MeasureReportGroupPopulationComponent();
           if (this.population == null)
@@ -380,7 +373,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupComponent addPopulation(MeasureReportGroupPopulationComponent t) { //3
           if (t == null)
             return this;
@@ -388,6 +380,16 @@ public class MeasureReport extends DomainResource {
             this.population = new ArrayList<MeasureReportGroupPopulationComponent>();
           this.population.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #population}, creating it if it does not already exist
+         */
+        public MeasureReportGroupPopulationComponent getPopulationFirstRep() { 
+          if (getPopulation().isEmpty()) {
+            addPopulation();
+          }
+          return getPopulation().get(0);
         }
 
         /**
@@ -467,16 +469,6 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #stratifier}, creating it if it does not already exist
-         */
-        public MeasureReportGroupStratifierComponent getStratifierFirstRep() { 
-          if (getStratifier().isEmpty()) {
-            addStratifier();
-          }
-          return getStratifier().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MeasureReportGroupComponent setStratifier(List<MeasureReportGroupStratifierComponent> theStratifier) { 
@@ -493,10 +485,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #stratifier} (When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure.)
-         */
-    // syntactic sugar
         public MeasureReportGroupStratifierComponent addStratifier() { //3
           MeasureReportGroupStratifierComponent t = new MeasureReportGroupStratifierComponent();
           if (this.stratifier == null)
@@ -505,7 +493,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupComponent addStratifier(MeasureReportGroupStratifierComponent t) { //3
           if (t == null)
             return this;
@@ -516,22 +503,22 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #stratifier}, creating it if it does not already exist
+         */
+        public MeasureReportGroupStratifierComponent getStratifierFirstRep() { 
+          if (getStratifier().isEmpty()) {
+            addStratifier();
+          }
+          return getStratifier().get(0);
+        }
+
+        /**
          * @return {@link #supplementalData} (Supplemental data elements for the measure provide additional information requested by the measure for each patient involved in the populations.)
          */
         public List<MeasureReportGroupSupplementalDataComponent> getSupplementalData() { 
           if (this.supplementalData == null)
             this.supplementalData = new ArrayList<MeasureReportGroupSupplementalDataComponent>();
           return this.supplementalData;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #supplementalData}, creating it if it does not already exist
-         */
-        public MeasureReportGroupSupplementalDataComponent getSupplementalDataFirstRep() { 
-          if (getSupplementalData().isEmpty()) {
-            addSupplementalData();
-          }
-          return getSupplementalData().get(0);
         }
 
         /**
@@ -551,10 +538,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #supplementalData} (Supplemental data elements for the measure provide additional information requested by the measure for each patient involved in the populations.)
-         */
-    // syntactic sugar
         public MeasureReportGroupSupplementalDataComponent addSupplementalData() { //3
           MeasureReportGroupSupplementalDataComponent t = new MeasureReportGroupSupplementalDataComponent();
           if (this.supplementalData == null)
@@ -563,7 +546,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupComponent addSupplementalData(MeasureReportGroupSupplementalDataComponent t) { //3
           if (t == null)
             return this;
@@ -571,6 +553,16 @@ public class MeasureReport extends DomainResource {
             this.supplementalData = new ArrayList<MeasureReportGroupSupplementalDataComponent>();
           this.supplementalData.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #supplementalData}, creating it if it does not already exist
+         */
+        public MeasureReportGroupSupplementalDataComponent getSupplementalDataFirstRep() { 
+          if (getSupplementalData().isEmpty()) {
+            addSupplementalData();
+          }
+          return getSupplementalData().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1087,16 +1079,6 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
-         */
-        public MeasureReportGroupStratifierGroupComponent getGroupFirstRep() { 
-          if (getGroup().isEmpty()) {
-            addGroup();
-          }
-          return getGroup().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MeasureReportGroupStratifierComponent setGroup(List<MeasureReportGroupStratifierGroupComponent> theGroup) { 
@@ -1113,10 +1095,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #group} (This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.)
-         */
-    // syntactic sugar
         public MeasureReportGroupStratifierGroupComponent addGroup() { //3
           MeasureReportGroupStratifierGroupComponent t = new MeasureReportGroupStratifierGroupComponent();
           if (this.group == null)
@@ -1125,7 +1103,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupStratifierComponent addGroup(MeasureReportGroupStratifierGroupComponent t) { //3
           if (t == null)
             return this;
@@ -1133,6 +1110,16 @@ public class MeasureReport extends DomainResource {
             this.group = new ArrayList<MeasureReportGroupStratifierGroupComponent>();
           this.group.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
+         */
+        public MeasureReportGroupStratifierGroupComponent getGroupFirstRep() { 
+          if (getGroup().isEmpty()) {
+            addGroup();
+          }
+          return getGroup().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1336,16 +1323,6 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #population}, creating it if it does not already exist
-         */
-        public MeasureReportGroupStratifierGroupPopulationComponent getPopulationFirstRep() { 
-          if (getPopulation().isEmpty()) {
-            addPopulation();
-          }
-          return getPopulation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MeasureReportGroupStratifierGroupComponent setPopulation(List<MeasureReportGroupStratifierGroupPopulationComponent> thePopulation) { 
@@ -1362,10 +1339,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #population} (The populations that make up the stratum, one for each type of population appropriate to the measure.)
-         */
-    // syntactic sugar
         public MeasureReportGroupStratifierGroupPopulationComponent addPopulation() { //3
           MeasureReportGroupStratifierGroupPopulationComponent t = new MeasureReportGroupStratifierGroupPopulationComponent();
           if (this.population == null)
@@ -1374,7 +1347,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupStratifierGroupComponent addPopulation(MeasureReportGroupStratifierGroupPopulationComponent t) { //3
           if (t == null)
             return this;
@@ -1382,6 +1354,16 @@ public class MeasureReport extends DomainResource {
             this.population = new ArrayList<MeasureReportGroupStratifierGroupPopulationComponent>();
           this.population.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #population}, creating it if it does not already exist
+         */
+        public MeasureReportGroupStratifierGroupPopulationComponent getPopulationFirstRep() { 
+          if (getPopulation().isEmpty()) {
+            addPopulation();
+          }
+          return getPopulation().get(0);
         }
 
         /**
@@ -1931,16 +1913,6 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
-         */
-        public MeasureReportGroupSupplementalDataGroupComponent getGroupFirstRep() { 
-          if (getGroup().isEmpty()) {
-            addGroup();
-          }
-          return getGroup().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MeasureReportGroupSupplementalDataComponent setGroup(List<MeasureReportGroupSupplementalDataGroupComponent> theGroup) { 
@@ -1957,10 +1929,6 @@ public class MeasureReport extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #group} (This element contains the results for a single value within the supplemental data. For example, when reporting supplemental data for administrative gender, there will be four groups, one for each possible gender value.)
-         */
-    // syntactic sugar
         public MeasureReportGroupSupplementalDataGroupComponent addGroup() { //3
           MeasureReportGroupSupplementalDataGroupComponent t = new MeasureReportGroupSupplementalDataGroupComponent();
           if (this.group == null)
@@ -1969,7 +1937,6 @@ public class MeasureReport extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MeasureReportGroupSupplementalDataComponent addGroup(MeasureReportGroupSupplementalDataGroupComponent t) { //3
           if (t == null)
             return this;
@@ -1977,6 +1944,16 @@ public class MeasureReport extends DomainResource {
             this.group = new ArrayList<MeasureReportGroupSupplementalDataGroupComponent>();
           this.group.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
+         */
+        public MeasureReportGroupSupplementalDataGroupComponent getGroupFirstRep() { 
+          if (getGroup().isEmpty()) {
+            addGroup();
+          }
+          return getGroup().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2787,16 +2764,6 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
-     */
-    public MeasureReportGroupComponent getGroupFirstRep() { 
-      if (getGroup().isEmpty()) {
-        addGroup();
-      }
-      return getGroup().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public MeasureReport setGroup(List<MeasureReportGroupComponent> theGroup) { 
@@ -2813,10 +2780,6 @@ public class MeasureReport extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #group} (The results of the calculation, one for each population group in the measure.)
-     */
-    // syntactic sugar
     public MeasureReportGroupComponent addGroup() { //3
       MeasureReportGroupComponent t = new MeasureReportGroupComponent();
       if (this.group == null)
@@ -2825,7 +2788,6 @@ public class MeasureReport extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public MeasureReport addGroup(MeasureReportGroupComponent t) { //3
       if (t == null)
         return this;
@@ -2833,6 +2795,16 @@ public class MeasureReport extends DomainResource {
         this.group = new ArrayList<MeasureReportGroupComponent>();
       this.group.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
+     */
+    public MeasureReportGroupComponent getGroupFirstRep() { 
+      if (getGroup().isEmpty()) {
+        addGroup();
+      }
+      return getGroup().get(0);
     }
 
     /**
@@ -3093,7 +3065,7 @@ public class MeasureReport extends DomainResource {
    * Path: <b>MeasureReport.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MeasureReport.patient", description="The identity of a patient to search for individual measure report results for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="MeasureReport.patient", description="The identity of a patient to search for individual measure report results for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

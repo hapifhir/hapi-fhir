@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -65,7 +66,7 @@ public class Procedure extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ProcedureStatus fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Procedure extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown ProcedureStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ProcedureStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -777,16 +781,6 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Procedure setIdentifier(List<Identifier> theIdentifier) { 
@@ -803,10 +797,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -815,7 +805,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -823,6 +812,16 @@ public class Procedure extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1012,16 +1011,6 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #reasonNotPerformed}, creating it if it does not already exist
-     */
-    public CodeableConcept getReasonNotPerformedFirstRep() { 
-      if (getReasonNotPerformed().isEmpty()) {
-        addReasonNotPerformed();
-      }
-      return getReasonNotPerformed().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Procedure setReasonNotPerformed(List<CodeableConcept> theReasonNotPerformed) { 
@@ -1038,10 +1027,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #reasonNotPerformed} (A code indicating why the procedure was not performed.)
-     */
-    // syntactic sugar
     public CodeableConcept addReasonNotPerformed() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.reasonNotPerformed == null)
@@ -1050,7 +1035,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addReasonNotPerformed(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1061,22 +1045,22 @@ public class Procedure extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #reasonNotPerformed}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonNotPerformedFirstRep() { 
+      if (getReasonNotPerformed().isEmpty()) {
+        addReasonNotPerformed();
+      }
+      return getReasonNotPerformed().get(0);
+    }
+
+    /**
      * @return {@link #bodySite} (Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.)
      */
     public List<CodeableConcept> getBodySite() { 
       if (this.bodySite == null)
         this.bodySite = new ArrayList<CodeableConcept>();
       return this.bodySite;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
-     */
-    public CodeableConcept getBodySiteFirstRep() { 
-      if (getBodySite().isEmpty()) {
-        addBodySite();
-      }
-      return getBodySite().get(0);
     }
 
     /**
@@ -1096,10 +1080,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #bodySite} (Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.)
-     */
-    // syntactic sugar
     public CodeableConcept addBodySite() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.bodySite == null)
@@ -1108,7 +1088,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addBodySite(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1116,6 +1095,16 @@ public class Procedure extends DomainResource {
         this.bodySite = new ArrayList<CodeableConcept>();
       this.bodySite.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
+     */
+    public CodeableConcept getBodySiteFirstRep() { 
+      if (getBodySite().isEmpty()) {
+        addBodySite();
+      }
+      return getBodySite().get(0);
     }
 
     /**
@@ -1173,16 +1162,6 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
-     */
-    public ProcedurePerformerComponent getPerformerFirstRep() { 
-      if (getPerformer().isEmpty()) {
-        addPerformer();
-      }
-      return getPerformer().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Procedure setPerformer(List<ProcedurePerformerComponent> thePerformer) { 
@@ -1199,10 +1178,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #performer} (Limited to 'real' people rather than equipment.)
-     */
-    // syntactic sugar
     public ProcedurePerformerComponent addPerformer() { //3
       ProcedurePerformerComponent t = new ProcedurePerformerComponent();
       if (this.performer == null)
@@ -1211,7 +1186,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addPerformer(ProcedurePerformerComponent t) { //3
       if (t == null)
         return this;
@@ -1219,6 +1193,16 @@ public class Procedure extends DomainResource {
         this.performer = new ArrayList<ProcedurePerformerComponent>();
       this.performer.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
+     */
+    public ProcedurePerformerComponent getPerformerFirstRep() { 
+      if (getPerformer().isEmpty()) {
+        addPerformer();
+      }
+      return getPerformer().get(0);
     }
 
     /**
@@ -1388,16 +1372,6 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #report}, creating it if it does not already exist
-     */
-    public Reference getReportFirstRep() { 
-      if (getReport().isEmpty()) {
-        addReport();
-      }
-      return getReport().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Procedure setReport(List<Reference> theReport) { 
@@ -1414,10 +1388,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #report} (This could be a histology result, pathology report, surgical report, etc..)
-     */
-    // syntactic sugar
     public Reference addReport() { //3
       Reference t = new Reference();
       if (this.report == null)
@@ -1426,7 +1396,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addReport(Reference t) { //3
       if (t == null)
         return this;
@@ -1437,18 +1406,29 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #report} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. This could be a histology result, pathology report, surgical report, etc..)
+     * @return The first repetition of repeating field {@link #report}, creating it if it does not already exist
      */
+    public Reference getReportFirstRep() { 
+      if (getReport().isEmpty()) {
+        addReport();
+      }
+      return getReport().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<DiagnosticReport> getReportTarget() { 
       if (this.reportTarget == null)
         this.reportTarget = new ArrayList<DiagnosticReport>();
       return this.reportTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #report} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. This could be a histology result, pathology report, surgical report, etc..)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public DiagnosticReport addReportTarget() { 
       DiagnosticReport r = new DiagnosticReport();
       if (this.reportTarget == null)
@@ -1464,16 +1444,6 @@ public class Procedure extends DomainResource {
       if (this.complication == null)
         this.complication = new ArrayList<CodeableConcept>();
       return this.complication;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #complication}, creating it if it does not already exist
-     */
-    public CodeableConcept getComplicationFirstRep() { 
-      if (getComplication().isEmpty()) {
-        addComplication();
-      }
-      return getComplication().get(0);
     }
 
     /**
@@ -1493,10 +1463,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #complication} (Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.)
-     */
-    // syntactic sugar
     public CodeableConcept addComplication() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.complication == null)
@@ -1505,7 +1471,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addComplication(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1516,22 +1481,22 @@ public class Procedure extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #complication}, creating it if it does not already exist
+     */
+    public CodeableConcept getComplicationFirstRep() { 
+      if (getComplication().isEmpty()) {
+        addComplication();
+      }
+      return getComplication().get(0);
+    }
+
+    /**
      * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.)
      */
     public List<CodeableConcept> getFollowUp() { 
       if (this.followUp == null)
         this.followUp = new ArrayList<CodeableConcept>();
       return this.followUp;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #followUp}, creating it if it does not already exist
-     */
-    public CodeableConcept getFollowUpFirstRep() { 
-      if (getFollowUp().isEmpty()) {
-        addFollowUp();
-      }
-      return getFollowUp().get(0);
     }
 
     /**
@@ -1551,10 +1516,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.)
-     */
-    // syntactic sugar
     public CodeableConcept addFollowUp() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.followUp == null)
@@ -1563,7 +1524,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addFollowUp(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1571,6 +1531,16 @@ public class Procedure extends DomainResource {
         this.followUp = new ArrayList<CodeableConcept>();
       this.followUp.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #followUp}, creating it if it does not already exist
+     */
+    public CodeableConcept getFollowUpFirstRep() { 
+      if (getFollowUp().isEmpty()) {
+        addFollowUp();
+      }
+      return getFollowUp().get(0);
     }
 
     /**
@@ -1622,16 +1592,6 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
-     */
-    public Annotation getNotesFirstRep() { 
-      if (getNotes().isEmpty()) {
-        addNotes();
-      }
-      return getNotes().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Procedure setNotes(List<Annotation> theNotes) { 
@@ -1648,10 +1608,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #notes} (Any other notes about the procedure.  E.g. the operative notes.)
-     */
-    // syntactic sugar
     public Annotation addNotes() { //3
       Annotation t = new Annotation();
       if (this.notes == null)
@@ -1660,7 +1616,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addNotes(Annotation t) { //3
       if (t == null)
         return this;
@@ -1671,22 +1626,22 @@ public class Procedure extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
+     */
+    public Annotation getNotesFirstRep() { 
+      if (getNotes().isEmpty()) {
+        addNotes();
+      }
+      return getNotes().get(0);
+    }
+
+    /**
      * @return {@link #focalDevice} (A device that is implanted, removed or otherwise manipulated (calibration, battery replacement, fitting a prosthesis, attaching a wound-vac, etc.) as a focal portion of the Procedure.)
      */
     public List<ProcedureFocalDeviceComponent> getFocalDevice() { 
       if (this.focalDevice == null)
         this.focalDevice = new ArrayList<ProcedureFocalDeviceComponent>();
       return this.focalDevice;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #focalDevice}, creating it if it does not already exist
-     */
-    public ProcedureFocalDeviceComponent getFocalDeviceFirstRep() { 
-      if (getFocalDevice().isEmpty()) {
-        addFocalDevice();
-      }
-      return getFocalDevice().get(0);
     }
 
     /**
@@ -1706,10 +1661,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #focalDevice} (A device that is implanted, removed or otherwise manipulated (calibration, battery replacement, fitting a prosthesis, attaching a wound-vac, etc.) as a focal portion of the Procedure.)
-     */
-    // syntactic sugar
     public ProcedureFocalDeviceComponent addFocalDevice() { //3
       ProcedureFocalDeviceComponent t = new ProcedureFocalDeviceComponent();
       if (this.focalDevice == null)
@@ -1718,7 +1669,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addFocalDevice(ProcedureFocalDeviceComponent t) { //3
       if (t == null)
         return this;
@@ -1729,22 +1679,22 @@ public class Procedure extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #focalDevice}, creating it if it does not already exist
+     */
+    public ProcedureFocalDeviceComponent getFocalDeviceFirstRep() { 
+      if (getFocalDevice().isEmpty()) {
+        addFocalDevice();
+      }
+      return getFocalDevice().get(0);
+    }
+
+    /**
      * @return {@link #used} (Identifies medications, devices and any other substance used as part of the procedure.)
      */
     public List<Reference> getUsed() { 
       if (this.used == null)
         this.used = new ArrayList<Reference>();
       return this.used;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #used}, creating it if it does not already exist
-     */
-    public Reference getUsedFirstRep() { 
-      if (getUsed().isEmpty()) {
-        addUsed();
-      }
-      return getUsed().get(0);
     }
 
     /**
@@ -1764,10 +1714,6 @@ public class Procedure extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #used} (Identifies medications, devices and any other substance used as part of the procedure.)
-     */
-    // syntactic sugar
     public Reference addUsed() { //3
       Reference t = new Reference();
       if (this.used == null)
@@ -1776,7 +1722,6 @@ public class Procedure extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Procedure addUsed(Reference t) { //3
       if (t == null)
         return this;
@@ -1787,8 +1732,19 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #used} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies medications, devices and any other substance used as part of the procedure.)
+     * @return The first repetition of repeating field {@link #used}, creating it if it does not already exist
      */
+    public Reference getUsedFirstRep() { 
+      if (getUsed().isEmpty()) {
+        addUsed();
+      }
+      return getUsed().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getUsedTarget() { 
       if (this.usedTarget == null)
         this.usedTarget = new ArrayList<Resource>();
@@ -2187,9 +2143,10 @@ public class Procedure extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, status, category
-          , code, notPerformed, reasonNotPerformed, bodySite, reason, performer, performed, encounter
-          , location, outcome, report, complication, followUp, request, notes, focalDevice, used);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, status
+          , category, code, notPerformed, reasonNotPerformed, bodySite, reason, performer
+          , performed, encounter, location, outcome, report, complication, followUp, request
+          , notes, focalDevice, used);
       }
 
   @Override
@@ -2205,7 +2162,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performed[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2225,7 +2182,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2245,7 +2202,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2265,7 +2222,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2291,7 +2248,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2317,7 +2274,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2343,7 +2300,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2369,7 +2326,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2395,7 +2352,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

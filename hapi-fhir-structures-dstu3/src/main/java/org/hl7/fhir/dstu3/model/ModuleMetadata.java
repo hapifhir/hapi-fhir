@@ -29,12 +29,13 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -68,7 +69,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
          */
         ORDERSET, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ModuleMetadataType fromCode(String codeString) throws FHIRException {
@@ -84,7 +85,10 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return DOCUMENTATIONTEMPLATE;
         if ("order-set".equals(codeString))
           return ORDERSET;
-        throw new FHIRException("Unknown ModuleMetadataType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ModuleMetadataType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -195,7 +199,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
          */
         INACTIVE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ModuleMetadataStatus fromCode(String codeString) throws FHIRException {
@@ -207,7 +211,10 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new FHIRException("Unknown ModuleMetadataStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ModuleMetadataStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -302,7 +309,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
          */
         ENDORSER, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ModuleMetadataContributorType fromCode(String codeString) throws FHIRException {
@@ -316,7 +323,10 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return REVIEWER;
         if ("endorser".equals(codeString))
           return ENDORSER;
-        throw new FHIRException("Unknown ModuleMetadataContributorType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ModuleMetadataContributorType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -429,7 +439,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
          */
         DERIVEDFROM, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ModuleMetadataResourceType fromCode(String codeString) throws FHIRException {
@@ -447,7 +457,10 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return SUCCESSOR;
         if ("derived-from".equals(codeString))
           return DERIVEDFROM;
-        throw new FHIRException("Unknown ModuleMetadataResourceType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ModuleMetadataResourceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -880,16 +893,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-         */
-        public ModuleMetadataContributorContactComponent getContactFirstRep() { 
-          if (getContact().isEmpty()) {
-            addContact();
-          }
-          return getContact().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleMetadataContributorComponent setContact(List<ModuleMetadataContributorContactComponent> theContact) { 
@@ -906,10 +909,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return false;
         }
 
-        /**
-         * @return {@link #contact} (Contacts to assist a user in finding and communicating with the contributor.)
-         */
-    // syntactic sugar
         public ModuleMetadataContributorContactComponent addContact() { //3
           ModuleMetadataContributorContactComponent t = new ModuleMetadataContributorContactComponent();
           if (this.contact == null)
@@ -918,7 +917,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return t;
         }
 
-    // syntactic sugar
         public ModuleMetadataContributorComponent addContact(ModuleMetadataContributorContactComponent t) { //3
           if (t == null)
             return this;
@@ -926,6 +924,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
             this.contact = new ArrayList<ModuleMetadataContributorContactComponent>();
           this.contact.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+         */
+        public ModuleMetadataContributorContactComponent getContactFirstRep() { 
+          if (getContact().isEmpty()) {
+            addContact();
+          }
+          return getContact().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1130,16 +1138,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleMetadataContributorContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -1156,10 +1154,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details for the individual (if a name was provided) or the contributor.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -1168,7 +1162,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return t;
         }
 
-    // syntactic sugar
         public ModuleMetadataContributorContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -1176,6 +1169,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1367,16 +1370,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ModuleMetadataContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -1393,10 +1386,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details for the individual (if a name was provided) or the publisher.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -1405,7 +1394,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
           return t;
         }
 
-    // syntactic sugar
         public ModuleMetadataContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -1413,6 +1401,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1779,7 +1777,8 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, document, resource);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, document, resource
+          );
       }
 
   public String fhirType() {
@@ -2013,16 +2012,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleMetadata setIdentifier(List<Identifier> theIdentifier) { 
@@ -2039,10 +2028,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -2051,7 +2036,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -2059,6 +2043,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2622,16 +2616,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
-     */
-    public ModuleMetadataCoverageComponent getCoverageFirstRep() { 
-      if (getCoverage().isEmpty()) {
-        addCoverage();
-      }
-      return getCoverage().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleMetadata setCoverage(List<ModuleMetadataCoverageComponent> theCoverage) { 
@@ -2648,10 +2632,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #coverage} (Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.)
-     */
-    // syntactic sugar
     public ModuleMetadataCoverageComponent addCoverage() { //3
       ModuleMetadataCoverageComponent t = new ModuleMetadataCoverageComponent();
       if (this.coverage == null)
@@ -2660,7 +2640,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addCoverage(ModuleMetadataCoverageComponent t) { //3
       if (t == null)
         return this;
@@ -2671,22 +2650,22 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public ModuleMetadataCoverageComponent getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
+    }
+
+    /**
      * @return {@link #topic} (Clinical topics related to the content of the module.)
      */
     public List<CodeableConcept> getTopic() { 
       if (this.topic == null)
         this.topic = new ArrayList<CodeableConcept>();
       return this.topic;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #topic}, creating it if it does not already exist
-     */
-    public CodeableConcept getTopicFirstRep() { 
-      if (getTopic().isEmpty()) {
-        addTopic();
-      }
-      return getTopic().get(0);
     }
 
     /**
@@ -2706,10 +2685,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #topic} (Clinical topics related to the content of the module.)
-     */
-    // syntactic sugar
     public CodeableConcept addTopic() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.topic == null)
@@ -2718,7 +2693,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addTopic(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -2729,22 +2703,22 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #topic}, creating it if it does not already exist
+     */
+    public CodeableConcept getTopicFirstRep() { 
+      if (getTopic().isEmpty()) {
+        addTopic();
+      }
+      return getTopic().get(0);
+    }
+
+    /**
      * @return {@link #contributor} (A contributor to the content of the module, including authors, editors, reviewers, and endorsers.)
      */
     public List<ModuleMetadataContributorComponent> getContributor() { 
       if (this.contributor == null)
         this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
       return this.contributor;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #contributor}, creating it if it does not already exist
-     */
-    public ModuleMetadataContributorComponent getContributorFirstRep() { 
-      if (getContributor().isEmpty()) {
-        addContributor();
-      }
-      return getContributor().get(0);
     }
 
     /**
@@ -2764,10 +2738,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #contributor} (A contributor to the content of the module, including authors, editors, reviewers, and endorsers.)
-     */
-    // syntactic sugar
     public ModuleMetadataContributorComponent addContributor() { //3
       ModuleMetadataContributorComponent t = new ModuleMetadataContributorComponent();
       if (this.contributor == null)
@@ -2776,7 +2746,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addContributor(ModuleMetadataContributorComponent t) { //3
       if (t == null)
         return this;
@@ -2784,6 +2753,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
         this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
       this.contributor.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contributor}, creating it if it does not already exist
+     */
+    public ModuleMetadataContributorComponent getContributorFirstRep() { 
+      if (getContributor().isEmpty()) {
+        addContributor();
+      }
+      return getContributor().get(0);
     }
 
     /**
@@ -2845,16 +2824,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ModuleMetadataContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleMetadata setContact(List<ModuleMetadataContactComponent> theContact) { 
@@ -2871,10 +2840,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
-     */
-    // syntactic sugar
     public ModuleMetadataContactComponent addContact() { //3
       ModuleMetadataContactComponent t = new ModuleMetadataContactComponent();
       if (this.contact == null)
@@ -2883,7 +2848,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addContact(ModuleMetadataContactComponent t) { //3
       if (t == null)
         return this;
@@ -2891,6 +2855,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
         this.contact = new ArrayList<ModuleMetadataContactComponent>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ModuleMetadataContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -2952,16 +2926,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
-     */
-    public ModuleMetadataRelatedResourceComponent getRelatedResourceFirstRep() { 
-      if (getRelatedResource().isEmpty()) {
-        addRelatedResource();
-      }
-      return getRelatedResource().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ModuleMetadata setRelatedResource(List<ModuleMetadataRelatedResourceComponent> theRelatedResource) { 
@@ -2978,10 +2942,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #relatedResource} (Related resources such as additional documentation, justification, or bibliographic references.)
-     */
-    // syntactic sugar
     public ModuleMetadataRelatedResourceComponent addRelatedResource() { //3
       ModuleMetadataRelatedResourceComponent t = new ModuleMetadataRelatedResourceComponent();
       if (this.relatedResource == null)
@@ -2990,7 +2950,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public ModuleMetadata addRelatedResource(ModuleMetadataRelatedResourceComponent t) { //3
       if (t == null)
         return this;
@@ -2998,6 +2957,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
         this.relatedResource = new ArrayList<ModuleMetadataRelatedResourceComponent>();
       this.relatedResource.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
+     */
+    public ModuleMetadataRelatedResourceComponent getRelatedResourceFirstRep() { 
+      if (getRelatedResource().isEmpty()) {
+        addRelatedResource();
+      }
+      return getRelatedResource().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -3365,10 +3334,10 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
-          , title, type, status, experimental, description, purpose, usage, publicationDate, lastReviewDate
-          , effectivePeriod, coverage, topic, contributor, publisher, contact, copyright, relatedResource
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version
+          , name, title, type, status, experimental, description, purpose, usage, publicationDate
+          , lastReviewDate, effectivePeriod, coverage, topic, contributor, publisher, contact
+          , copyright, relatedResource);
       }
 
 

@@ -29,12 +29,13 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -76,7 +77,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
          */
         DATAACCESSENDED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static TriggerType fromCode(String codeString) throws FHIRException {
@@ -96,7 +97,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return DATAACCESSED;
         if ("data-access-ended".equals(codeString))
           return DATAACCESSENDED;
-        throw new FHIRException("Unknown TriggerType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown TriggerType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -586,8 +590,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, eventName, eventTiming, eventData
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, eventName, eventTiming
+          , eventData);
       }
 
 

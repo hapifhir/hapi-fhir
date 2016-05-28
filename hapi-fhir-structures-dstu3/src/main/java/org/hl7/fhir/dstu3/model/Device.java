@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class Device extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class Device extends DomainResource {
           return NOTAVAILABLE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -304,16 +308,6 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Device setIdentifier(List<Identifier> theIdentifier) { 
@@ -330,10 +324,6 @@ public class Device extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Unique instance identifiers assigned to a device by manufacturers other organizations or owners.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -342,7 +332,6 @@ public class Device extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Device addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -350,6 +339,16 @@ public class Device extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -841,16 +840,6 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactPoint getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Device setContact(List<ContactPoint> theContact) { 
@@ -867,10 +856,6 @@ public class Device extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contact details for an organization or a particular human that is responsible for the device.)
-     */
-    // syntactic sugar
     public ContactPoint addContact() { //3
       ContactPoint t = new ContactPoint();
       if (this.contact == null)
@@ -879,7 +864,6 @@ public class Device extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Device addContact(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -887,6 +871,16 @@ public class Device extends DomainResource {
         this.contact = new ArrayList<ContactPoint>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactPoint getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -992,16 +986,6 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Device setNote(List<Annotation> theNote) { 
@@ -1018,10 +1002,6 @@ public class Device extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Descriptive information, usage information or implantation information that is not captured in an existing element.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -1030,7 +1010,6 @@ public class Device extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Device addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -1038,6 +1017,16 @@ public class Device extends DomainResource {
         this.note = new ArrayList<Annotation>();
       this.note.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1335,8 +1324,8 @@ public class Device extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, udiCarrier, status
-          , type, lotNumber, manufacturer, manufactureDate, expirationDate, model, version, patient, owner
-          , contact, location, url, note);
+          , type, lotNumber, manufacturer, manufactureDate, expirationDate, model, version
+          , patient, owner, contact, location, url, note);
       }
 
   @Override
@@ -1352,7 +1341,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1372,7 +1361,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1398,7 +1387,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1424,7 +1413,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.model</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string", target={} )
+  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string" )
   public static final String SP_MODEL = "model";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>model</b>
@@ -1444,7 +1433,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1470,7 +1459,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1490,7 +1479,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token", target={} )
+  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token" )
   public static final String SP_UDICARRIER = "udicarrier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>udicarrier</b>
@@ -1510,7 +1499,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1530,7 +1519,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string", target={} )
+  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

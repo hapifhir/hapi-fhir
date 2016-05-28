@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -65,7 +66,7 @@ public class SupplyRequest extends DomainResource {
          */
         CANCELLED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static SupplyRequestStatus fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class SupplyRequest extends DomainResource {
           return FAILED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new FHIRException("Unknown SupplyRequestStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SupplyRequestStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -395,16 +399,11 @@ public class SupplyRequest extends DomainResource {
     protected CodeableConcept kind;
 
     /**
-     * The item that is requested to be supplied.
+     * The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.
      */
-    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied." )
-    protected Reference orderedItem;
-
-    /**
-     * The actual object that is the target of the reference (The item that is requested to be supplied.)
-     */
-    protected Resource orderedItemTarget;
+    @Child(name = "orderedItem", type = {CodeableConcept.class, Medication.class, Substance.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list." )
+    protected Type orderedItem;
 
     /**
      * Who is intended to fulfill the request.
@@ -432,7 +431,7 @@ public class SupplyRequest extends DomainResource {
     @Description(shortDefinition="When the request should be fulfilled", formalDefinition="When the request should be fulfilled." )
     protected SupplyRequestWhenComponent when;
 
-    private static final long serialVersionUID = 1649766198L;
+    private static final long serialVersionUID = 1042306034L;
 
   /**
    * Constructor
@@ -671,15 +670,36 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #orderedItem} (The item that is requested to be supplied.)
+     * @return {@link #orderedItem} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
      */
-    public Reference getOrderedItem() { 
-      if (this.orderedItem == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SupplyRequest.orderedItem");
-        else if (Configuration.doAutoCreate())
-          this.orderedItem = new Reference(); // cc
+    public Type getOrderedItem() { 
       return this.orderedItem;
+    }
+
+    /**
+     * @return {@link #orderedItem} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
+     */
+    public CodeableConcept getOrderedItemCodeableConcept() throws FHIRException { 
+      if (!(this.orderedItem instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.orderedItem.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.orderedItem;
+    }
+
+    public boolean hasOrderedItemCodeableConcept() { 
+      return this.orderedItem instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #orderedItem} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
+     */
+    public Reference getOrderedItemReference() throws FHIRException { 
+      if (!(this.orderedItem instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.orderedItem.getClass().getName()+" was encountered");
+      return (Reference) this.orderedItem;
+    }
+
+    public boolean hasOrderedItemReference() { 
+      return this.orderedItem instanceof Reference;
     }
 
     public boolean hasOrderedItem() { 
@@ -687,25 +707,10 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #orderedItem} (The item that is requested to be supplied.)
+     * @param value {@link #orderedItem} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
      */
-    public SupplyRequest setOrderedItem(Reference value) { 
+    public SupplyRequest setOrderedItem(Type value) { 
       this.orderedItem = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #orderedItem} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The item that is requested to be supplied.)
-     */
-    public Resource getOrderedItemTarget() { 
-      return this.orderedItemTarget;
-    }
-
-    /**
-     * @param value {@link #orderedItem} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The item that is requested to be supplied.)
-     */
-    public SupplyRequest setOrderedItemTarget(Resource value) { 
-      this.orderedItemTarget = value;
       return this;
     }
 
@@ -716,16 +721,6 @@ public class SupplyRequest extends DomainResource {
       if (this.supplier == null)
         this.supplier = new ArrayList<Reference>();
       return this.supplier;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #supplier}, creating it if it does not already exist
-     */
-    public Reference getSupplierFirstRep() { 
-      if (getSupplier().isEmpty()) {
-        addSupplier();
-      }
-      return getSupplier().get(0);
     }
 
     /**
@@ -745,10 +740,6 @@ public class SupplyRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #supplier} (Who is intended to fulfill the request.)
-     */
-    // syntactic sugar
     public Reference addSupplier() { //3
       Reference t = new Reference();
       if (this.supplier == null)
@@ -757,7 +748,6 @@ public class SupplyRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public SupplyRequest addSupplier(Reference t) { //3
       if (t == null)
         return this;
@@ -768,18 +758,29 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supplier} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Who is intended to fulfill the request.)
+     * @return The first repetition of repeating field {@link #supplier}, creating it if it does not already exist
      */
+    public Reference getSupplierFirstRep() { 
+      if (getSupplier().isEmpty()) {
+        addSupplier();
+      }
+      return getSupplier().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Organization> getSupplierTarget() { 
       if (this.supplierTarget == null)
         this.supplierTarget = new ArrayList<Organization>();
       return this.supplierTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #supplier} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Who is intended to fulfill the request.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public Organization addSupplierTarget() { 
       Organization r = new Organization();
       if (this.supplierTarget == null)
@@ -865,7 +866,7 @@ public class SupplyRequest extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this supply request.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "Status of the supply request.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("kind", "CodeableConcept", "Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.", 0, java.lang.Integer.MAX_VALUE, kind));
-        childrenList.add(new Property("orderedItem", "Reference(Medication|Substance|Device)", "The item that is requested to be supplied.", 0, java.lang.Integer.MAX_VALUE, orderedItem));
+        childrenList.add(new Property("orderedItem[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, java.lang.Integer.MAX_VALUE, orderedItem));
         childrenList.add(new Property("supplier", "Reference(Organization)", "Who is intended to fulfill the request.", 0, java.lang.Integer.MAX_VALUE, supplier));
         childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("when", "", "When the request should be fulfilled.", 0, java.lang.Integer.MAX_VALUE, when));
@@ -880,7 +881,7 @@ public class SupplyRequest extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SupplyRequestStatus>
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // CodeableConcept
-        case 2129914144: /*orderedItem*/ return this.orderedItem == null ? new Base[0] : new Base[] {this.orderedItem}; // Reference
+        case 2129914144: /*orderedItem*/ return this.orderedItem == null ? new Base[0] : new Base[] {this.orderedItem}; // Type
         case -1663305268: /*supplier*/ return this.supplier == null ? new Base[0] : this.supplier.toArray(new Base[this.supplier.size()]); // Reference
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
         case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // SupplyRequestWhenComponent
@@ -911,7 +912,7 @@ public class SupplyRequest extends DomainResource {
           this.kind = castToCodeableConcept(value); // CodeableConcept
           break;
         case 2129914144: // orderedItem
-          this.orderedItem = castToReference(value); // Reference
+          this.orderedItem = (Type) value; // Type
           break;
         case -1663305268: // supplier
           this.getSupplier().add(castToReference(value)); // Reference
@@ -941,8 +942,8 @@ public class SupplyRequest extends DomainResource {
           this.status = new SupplyRequestStatusEnumFactory().fromType(value); // Enumeration<SupplyRequestStatus>
         else if (name.equals("kind"))
           this.kind = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("orderedItem"))
-          this.orderedItem = castToReference(value); // Reference
+        else if (name.equals("orderedItem[x]"))
+          this.orderedItem = (Type) value; // Type
         else if (name.equals("supplier"))
           this.getSupplier().add(castToReference(value));
         else if (name.equals("reason[x]"))
@@ -962,7 +963,7 @@ public class SupplyRequest extends DomainResource {
         case -1618432855:  return getIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SupplyRequestStatus>
         case 3292052:  return getKind(); // CodeableConcept
-        case 2129914144:  return getOrderedItem(); // Reference
+        case -1574475936:  return getOrderedItem(); // Type
         case -1663305268:  return addSupplier(); // Reference
         case -669418564:  return getReason(); // Type
         case 3648314:  return getWhen(); // SupplyRequestWhenComponent
@@ -995,7 +996,11 @@ public class SupplyRequest extends DomainResource {
           this.kind = new CodeableConcept();
           return this.kind;
         }
-        else if (name.equals("orderedItem")) {
+        else if (name.equals("orderedItemCodeableConcept")) {
+          this.orderedItem = new CodeableConcept();
+          return this.orderedItem;
+        }
+        else if (name.equals("orderedItemReference")) {
           this.orderedItem = new Reference();
           return this.orderedItem;
         }
@@ -1088,7 +1093,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date", target={} )
+  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1108,7 +1113,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1128,7 +1133,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token", target={} )
+  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token" )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -1148,7 +1153,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1174,7 +1179,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference" )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
@@ -1200,7 +1205,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1226,7 +1231,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token", target={} )
+  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,12 +38,13 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
- * Variation and Sequence data.
+ * Variant and Sequence data.
  */
 @ResourceDef(name="Sequence", profile="http://hl7.org/fhir/Profile/Sequence")
 public class Sequence extends DomainResource {
@@ -62,7 +63,7 @@ public class Sequence extends DomainResource {
          */
         RNA, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static SequenceType fromCode(String codeString) throws FHIRException {
@@ -74,7 +75,10 @@ public class Sequence extends DomainResource {
           return DNA;
         if ("RNA".equals(codeString))
           return RNA;
-        throw new FHIRException("Unknown SequenceType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SequenceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -194,20 +198,27 @@ public class Sequence extends DomainResource {
         protected StringType referenceSeqString;
 
         /**
-         * 0-based start position (inclusive) of the window on the reference sequence.
+         * Strand of DNA. Available values are "1" for the plus strand and "-1" for the minus strand.
          */
-        @Child(name = "windowStart", type = {IntegerType.class}, order=6, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based start position (inclusive) of the window on the  reference sequence", formalDefinition="0-based start position (inclusive) of the window on the reference sequence." )
+        @Child(name = "strand", type = {IntegerType.class}, order=6, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Strand of DNA", formalDefinition="Strand of DNA. Available values are \"1\" for the plus strand and \"-1\" for the minus strand." )
+        protected IntegerType strand;
+
+        /**
+         * Start position (inclusive) of the window on the reference sequence.
+         */
+        @Child(name = "windowStart", type = {IntegerType.class}, order=7, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Start position (inclusive) of the window on the  reference sequence", formalDefinition="Start position (inclusive) of the window on the reference sequence." )
         protected IntegerType windowStart;
 
         /**
-         * 0-based end position (exclusive) of the window on the reference sequence.
+         * End position (exclusive) of the window on the reference sequence.
          */
-        @Child(name = "windowEnd", type = {IntegerType.class}, order=7, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based end position (exclusive) of the window on the reference sequence", formalDefinition="0-based end position (exclusive) of the window on the reference sequence." )
+        @Child(name = "windowEnd", type = {IntegerType.class}, order=8, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="End position (exclusive) of the window on the reference sequence", formalDefinition="End position (exclusive) of the window on the reference sequence." )
         protected IntegerType windowEnd;
 
-        private static final long serialVersionUID = -165922935L;
+        private static final long serialVersionUID = -1675617731L;
 
     /**
      * Constructor
@@ -219,9 +230,10 @@ public class Sequence extends DomainResource {
     /**
      * Constructor
      */
-      public SequenceReferenceSeqComponent(CodeableConcept referenceSeqId, IntegerType windowStart, IntegerType windowEnd) {
+      public SequenceReferenceSeqComponent(CodeableConcept referenceSeqId, IntegerType strand, IntegerType windowStart, IntegerType windowEnd) {
         super();
         this.referenceSeqId = referenceSeqId;
+        this.strand = strand;
         this.windowStart = windowStart;
         this.windowEnd = windowEnd;
       }
@@ -417,7 +429,52 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #windowStart} (0-based start position (inclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowStart" gives direct access to the value
+         * @return {@link #strand} (Strand of DNA. Available values are "1" for the plus strand and "-1" for the minus strand.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
+         */
+        public IntegerType getStrandElement() { 
+          if (this.strand == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceReferenceSeqComponent.strand");
+            else if (Configuration.doAutoCreate())
+              this.strand = new IntegerType(); // bb
+          return this.strand;
+        }
+
+        public boolean hasStrandElement() { 
+          return this.strand != null && !this.strand.isEmpty();
+        }
+
+        public boolean hasStrand() { 
+          return this.strand != null && !this.strand.isEmpty();
+        }
+
+        /**
+         * @param value {@link #strand} (Strand of DNA. Available values are "1" for the plus strand and "-1" for the minus strand.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
+         */
+        public SequenceReferenceSeqComponent setStrandElement(IntegerType value) { 
+          this.strand = value;
+          return this;
+        }
+
+        /**
+         * @return Strand of DNA. Available values are "1" for the plus strand and "-1" for the minus strand.
+         */
+        public int getStrand() { 
+          return this.strand == null || this.strand.isEmpty() ? 0 : this.strand.getValue();
+        }
+
+        /**
+         * @param value Strand of DNA. Available values are "1" for the plus strand and "-1" for the minus strand.
+         */
+        public SequenceReferenceSeqComponent setStrand(int value) { 
+            if (this.strand == null)
+              this.strand = new IntegerType();
+            this.strand.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #windowStart} (Start position (inclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowStart" gives direct access to the value
          */
         public IntegerType getWindowStartElement() { 
           if (this.windowStart == null)
@@ -437,7 +494,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #windowStart} (0-based start position (inclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowStart" gives direct access to the value
+         * @param value {@link #windowStart} (Start position (inclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowStart" gives direct access to the value
          */
         public SequenceReferenceSeqComponent setWindowStartElement(IntegerType value) { 
           this.windowStart = value;
@@ -445,14 +502,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return 0-based start position (inclusive) of the window on the reference sequence.
+         * @return Start position (inclusive) of the window on the reference sequence.
          */
         public int getWindowStart() { 
           return this.windowStart == null || this.windowStart.isEmpty() ? 0 : this.windowStart.getValue();
         }
 
         /**
-         * @param value 0-based start position (inclusive) of the window on the reference sequence.
+         * @param value Start position (inclusive) of the window on the reference sequence.
          */
         public SequenceReferenceSeqComponent setWindowStart(int value) { 
             if (this.windowStart == null)
@@ -462,7 +519,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #windowEnd} (0-based end position (exclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowEnd" gives direct access to the value
+         * @return {@link #windowEnd} (End position (exclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowEnd" gives direct access to the value
          */
         public IntegerType getWindowEndElement() { 
           if (this.windowEnd == null)
@@ -482,7 +539,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #windowEnd} (0-based end position (exclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowEnd" gives direct access to the value
+         * @param value {@link #windowEnd} (End position (exclusive) of the window on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getWindowEnd" gives direct access to the value
          */
         public SequenceReferenceSeqComponent setWindowEndElement(IntegerType value) { 
           this.windowEnd = value;
@@ -490,14 +547,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return 0-based end position (exclusive) of the window on the reference sequence.
+         * @return End position (exclusive) of the window on the reference sequence.
          */
         public int getWindowEnd() { 
           return this.windowEnd == null || this.windowEnd.isEmpty() ? 0 : this.windowEnd.getValue();
         }
 
         /**
-         * @param value 0-based end position (exclusive) of the window on the reference sequence.
+         * @param value End position (exclusive) of the window on the reference sequence.
          */
         public SequenceReferenceSeqComponent setWindowEnd(int value) { 
             if (this.windowEnd == null)
@@ -513,8 +570,9 @@ public class Sequence extends DomainResource {
           childrenList.add(new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, java.lang.Integer.MAX_VALUE, referenceSeqId));
           childrenList.add(new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as refence sequence.", 0, java.lang.Integer.MAX_VALUE, referenceSeqPointer));
           childrenList.add(new Property("referenceSeqString", "string", "A Reference Sequence string.", 0, java.lang.Integer.MAX_VALUE, referenceSeqString));
-          childrenList.add(new Property("windowStart", "integer", "0-based start position (inclusive) of the window on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, windowStart));
-          childrenList.add(new Property("windowEnd", "integer", "0-based end position (exclusive) of the window on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, windowEnd));
+          childrenList.add(new Property("strand", "integer", "Strand of DNA. Available values are \"1\" for the plus strand and \"-1\" for the minus strand.", 0, java.lang.Integer.MAX_VALUE, strand));
+          childrenList.add(new Property("windowStart", "integer", "Start position (inclusive) of the window on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, windowStart));
+          childrenList.add(new Property("windowEnd", "integer", "End position (exclusive) of the window on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, windowEnd));
         }
 
       @Override
@@ -525,6 +583,7 @@ public class Sequence extends DomainResource {
         case -1911500465: /*referenceSeqId*/ return this.referenceSeqId == null ? new Base[0] : new Base[] {this.referenceSeqId}; // CodeableConcept
         case 1923414665: /*referenceSeqPointer*/ return this.referenceSeqPointer == null ? new Base[0] : new Base[] {this.referenceSeqPointer}; // Reference
         case -1648301499: /*referenceSeqString*/ return this.referenceSeqString == null ? new Base[0] : new Base[] {this.referenceSeqString}; // StringType
+        case -891993594: /*strand*/ return this.strand == null ? new Base[0] : new Base[] {this.strand}; // IntegerType
         case 1903685202: /*windowStart*/ return this.windowStart == null ? new Base[0] : new Base[] {this.windowStart}; // IntegerType
         case -217026869: /*windowEnd*/ return this.windowEnd == null ? new Base[0] : new Base[] {this.windowEnd}; // IntegerType
         default: return super.getProperty(hash, name, checkValid);
@@ -550,6 +609,9 @@ public class Sequence extends DomainResource {
         case -1648301499: // referenceSeqString
           this.referenceSeqString = castToString(value); // StringType
           break;
+        case -891993594: // strand
+          this.strand = castToInteger(value); // IntegerType
+          break;
         case 1903685202: // windowStart
           this.windowStart = castToInteger(value); // IntegerType
           break;
@@ -573,6 +635,8 @@ public class Sequence extends DomainResource {
           this.referenceSeqPointer = castToReference(value); // Reference
         else if (name.equals("referenceSeqString"))
           this.referenceSeqString = castToString(value); // StringType
+        else if (name.equals("strand"))
+          this.strand = castToInteger(value); // IntegerType
         else if (name.equals("windowStart"))
           this.windowStart = castToInteger(value); // IntegerType
         else if (name.equals("windowEnd"))
@@ -589,6 +653,7 @@ public class Sequence extends DomainResource {
         case -1911500465:  return getReferenceSeqId(); // CodeableConcept
         case 1923414665:  return getReferenceSeqPointer(); // Reference
         case -1648301499: throw new FHIRException("Cannot make property referenceSeqString as it is not a complex type"); // StringType
+        case -891993594: throw new FHIRException("Cannot make property strand as it is not a complex type"); // IntegerType
         case 1903685202: throw new FHIRException("Cannot make property windowStart as it is not a complex type"); // IntegerType
         case -217026869: throw new FHIRException("Cannot make property windowEnd as it is not a complex type"); // IntegerType
         default: return super.makeProperty(hash, name);
@@ -616,6 +681,9 @@ public class Sequence extends DomainResource {
         else if (name.equals("referenceSeqString")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.referenceSeqString");
         }
+        else if (name.equals("strand")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.strand");
+        }
         else if (name.equals("windowStart")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.windowStart");
         }
@@ -634,6 +702,7 @@ public class Sequence extends DomainResource {
         dst.referenceSeqId = referenceSeqId == null ? null : referenceSeqId.copy();
         dst.referenceSeqPointer = referenceSeqPointer == null ? null : referenceSeqPointer.copy();
         dst.referenceSeqString = referenceSeqString == null ? null : referenceSeqString.copy();
+        dst.strand = strand == null ? null : strand.copy();
         dst.windowStart = windowStart == null ? null : windowStart.copy();
         dst.windowEnd = windowEnd == null ? null : windowEnd.copy();
         return dst;
@@ -648,8 +717,8 @@ public class Sequence extends DomainResource {
         SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
         return compareDeep(chromosome, o.chromosome, true) && compareDeep(genomeBuild, o.genomeBuild, true)
            && compareDeep(referenceSeqId, o.referenceSeqId, true) && compareDeep(referenceSeqPointer, o.referenceSeqPointer, true)
-           && compareDeep(referenceSeqString, o.referenceSeqString, true) && compareDeep(windowStart, o.windowStart, true)
-           && compareDeep(windowEnd, o.windowEnd, true);
+           && compareDeep(referenceSeqString, o.referenceSeqString, true) && compareDeep(strand, o.strand, true)
+           && compareDeep(windowStart, o.windowStart, true) && compareDeep(windowEnd, o.windowEnd, true);
       }
 
       @Override
@@ -660,12 +729,13 @@ public class Sequence extends DomainResource {
           return false;
         SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
         return compareValues(genomeBuild, o.genomeBuild, true) && compareValues(referenceSeqString, o.referenceSeqString, true)
-           && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true);
+           && compareValues(strand, o.strand, true) && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(chromosome, genomeBuild, referenceSeqId
-          , referenceSeqPointer, referenceSeqString, windowStart, windowEnd);
+          , referenceSeqPointer, referenceSeqString, strand, windowStart, windowEnd);
       }
 
   public String fhirType() {
@@ -676,33 +746,33 @@ public class Sequence extends DomainResource {
   }
 
     @Block()
-    public static class SequenceVariationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SequenceVariantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * 0-based start position (inclusive) of the variation on the  reference sequence.
+         * Start position (inclusive) of the variant on the  reference sequence.
          */
         @Child(name = "start", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based start position (inclusive) of the variation on the  reference sequence", formalDefinition="0-based start position (inclusive) of the variation on the  reference sequence." )
+        @Description(shortDefinition="Start position (inclusive) of the variant on the  reference sequence", formalDefinition="Start position (inclusive) of the variant on the  reference sequence." )
         protected IntegerType start;
 
         /**
-         * 0-based end position (exclusive) of the variation on the reference sequence.
+         * End position (exclusive) of the variant on the reference sequence.
          */
         @Child(name = "end", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based end position (exclusive) of the variation on the reference sequence", formalDefinition="0-based end position (exclusive) of the variation on the reference sequence." )
+        @Description(shortDefinition="End position (exclusive) of the variant on the reference sequence", formalDefinition="End position (exclusive) of the variant on the reference sequence." )
         protected IntegerType end;
 
         /**
          * Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.
          */
         @Child(name = "observedAllele", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Nucleotide(s)/amino acids from start position to stop position of observed variation", formalDefinition="Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand." )
+        @Description(shortDefinition="Nucleotide(s)/amino acids from start position to stop position of observed variant", formalDefinition="Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand." )
         protected StringType observedAllele;
 
         /**
          * Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.
          */
         @Child(name = "referenceAllele", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Nucleotide(s)/amino acids from start position to stop position of reference variation", formalDefinition="Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand." )
+        @Description(shortDefinition="Nucleotide(s)/amino acids from start position to stop position of reference variant", formalDefinition="Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand." )
         protected StringType referenceAllele;
 
         /**
@@ -717,17 +787,17 @@ public class Sequence extends DomainResource {
     /**
      * Constructor
      */
-      public SequenceVariationComponent() {
+      public SequenceVariantComponent() {
         super();
       }
 
         /**
-         * @return {@link #start} (0-based start position (inclusive) of the variation on the  reference sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         * @return {@link #start} (Start position (inclusive) of the variant on the  reference sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
         public IntegerType getStartElement() { 
           if (this.start == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceVariationComponent.start");
+              throw new Error("Attempt to auto-create SequenceVariantComponent.start");
             else if (Configuration.doAutoCreate())
               this.start = new IntegerType(); // bb
           return this.start;
@@ -742,24 +812,24 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #start} (0-based start position (inclusive) of the variation on the  reference sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         * @param value {@link #start} (Start position (inclusive) of the variant on the  reference sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
-        public SequenceVariationComponent setStartElement(IntegerType value) { 
+        public SequenceVariantComponent setStartElement(IntegerType value) { 
           this.start = value;
           return this;
         }
 
         /**
-         * @return 0-based start position (inclusive) of the variation on the  reference sequence.
+         * @return Start position (inclusive) of the variant on the  reference sequence.
          */
         public int getStart() { 
           return this.start == null || this.start.isEmpty() ? 0 : this.start.getValue();
         }
 
         /**
-         * @param value 0-based start position (inclusive) of the variation on the  reference sequence.
+         * @param value Start position (inclusive) of the variant on the  reference sequence.
          */
-        public SequenceVariationComponent setStart(int value) { 
+        public SequenceVariantComponent setStart(int value) { 
             if (this.start == null)
               this.start = new IntegerType();
             this.start.setValue(value);
@@ -767,12 +837,12 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #end} (0-based end position (exclusive) of the variation on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         * @return {@link #end} (End position (exclusive) of the variant on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
         public IntegerType getEndElement() { 
           if (this.end == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceVariationComponent.end");
+              throw new Error("Attempt to auto-create SequenceVariantComponent.end");
             else if (Configuration.doAutoCreate())
               this.end = new IntegerType(); // bb
           return this.end;
@@ -787,24 +857,24 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #end} (0-based end position (exclusive) of the variation on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         * @param value {@link #end} (End position (exclusive) of the variant on the reference sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
-        public SequenceVariationComponent setEndElement(IntegerType value) { 
+        public SequenceVariantComponent setEndElement(IntegerType value) { 
           this.end = value;
           return this;
         }
 
         /**
-         * @return 0-based end position (exclusive) of the variation on the reference sequence.
+         * @return End position (exclusive) of the variant on the reference sequence.
          */
         public int getEnd() { 
           return this.end == null || this.end.isEmpty() ? 0 : this.end.getValue();
         }
 
         /**
-         * @param value 0-based end position (exclusive) of the variation on the reference sequence.
+         * @param value End position (exclusive) of the variant on the reference sequence.
          */
-        public SequenceVariationComponent setEnd(int value) { 
+        public SequenceVariantComponent setEnd(int value) { 
             if (this.end == null)
               this.end = new IntegerType();
             this.end.setValue(value);
@@ -817,7 +887,7 @@ public class Sequence extends DomainResource {
         public StringType getObservedAlleleElement() { 
           if (this.observedAllele == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceVariationComponent.observedAllele");
+              throw new Error("Attempt to auto-create SequenceVariantComponent.observedAllele");
             else if (Configuration.doAutoCreate())
               this.observedAllele = new StringType(); // bb
           return this.observedAllele;
@@ -834,7 +904,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #observedAllele} (Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.). This is the underlying object with id, value and extensions. The accessor "getObservedAllele" gives direct access to the value
          */
-        public SequenceVariationComponent setObservedAlleleElement(StringType value) { 
+        public SequenceVariantComponent setObservedAlleleElement(StringType value) { 
           this.observedAllele = value;
           return this;
         }
@@ -849,7 +919,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.
          */
-        public SequenceVariationComponent setObservedAllele(String value) { 
+        public SequenceVariantComponent setObservedAllele(String value) { 
           if (Utilities.noString(value))
             this.observedAllele = null;
           else {
@@ -866,7 +936,7 @@ public class Sequence extends DomainResource {
         public StringType getReferenceAlleleElement() { 
           if (this.referenceAllele == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceVariationComponent.referenceAllele");
+              throw new Error("Attempt to auto-create SequenceVariantComponent.referenceAllele");
             else if (Configuration.doAutoCreate())
               this.referenceAllele = new StringType(); // bb
           return this.referenceAllele;
@@ -883,7 +953,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #referenceAllele} (Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.). This is the underlying object with id, value and extensions. The accessor "getReferenceAllele" gives direct access to the value
          */
-        public SequenceVariationComponent setReferenceAlleleElement(StringType value) { 
+        public SequenceVariantComponent setReferenceAlleleElement(StringType value) { 
           this.referenceAllele = value;
           return this;
         }
@@ -898,7 +968,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.
          */
-        public SequenceVariationComponent setReferenceAllele(String value) { 
+        public SequenceVariantComponent setReferenceAllele(String value) { 
           if (Utilities.noString(value))
             this.referenceAllele = null;
           else {
@@ -915,7 +985,7 @@ public class Sequence extends DomainResource {
         public StringType getCigarElement() { 
           if (this.cigar == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceVariationComponent.cigar");
+              throw new Error("Attempt to auto-create SequenceVariantComponent.cigar");
             else if (Configuration.doAutoCreate())
               this.cigar = new StringType(); // bb
           return this.cigar;
@@ -932,7 +1002,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #cigar} (Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).). This is the underlying object with id, value and extensions. The accessor "getCigar" gives direct access to the value
          */
-        public SequenceVariationComponent setCigarElement(StringType value) { 
+        public SequenceVariantComponent setCigarElement(StringType value) { 
           this.cigar = value;
           return this;
         }
@@ -947,7 +1017,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).
          */
-        public SequenceVariationComponent setCigar(String value) { 
+        public SequenceVariantComponent setCigar(String value) { 
           if (Utilities.noString(value))
             this.cigar = null;
           else {
@@ -960,8 +1030,8 @@ public class Sequence extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("start", "integer", "0-based start position (inclusive) of the variation on the  reference sequence.", 0, java.lang.Integer.MAX_VALUE, start));
-          childrenList.add(new Property("end", "integer", "0-based end position (exclusive) of the variation on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, end));
+          childrenList.add(new Property("start", "integer", "Start position (inclusive) of the variant on the  reference sequence.", 0, java.lang.Integer.MAX_VALUE, start));
+          childrenList.add(new Property("end", "integer", "End position (exclusive) of the variant on the reference sequence.", 0, java.lang.Integer.MAX_VALUE, end));
           childrenList.add(new Property("observedAllele", "string", "Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.", 0, java.lang.Integer.MAX_VALUE, observedAllele));
           childrenList.add(new Property("referenceAllele", "string", "Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand.", 0, java.lang.Integer.MAX_VALUE, referenceAllele));
           childrenList.add(new Property("cigar", "string", "Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).", 0, java.lang.Integer.MAX_VALUE, cigar));
@@ -1053,8 +1123,8 @@ public class Sequence extends DomainResource {
           return super.addChild(name);
       }
 
-      public SequenceVariationComponent copy() {
-        SequenceVariationComponent dst = new SequenceVariationComponent();
+      public SequenceVariantComponent copy() {
+        SequenceVariantComponent dst = new SequenceVariantComponent();
         copyValues(dst);
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
@@ -1068,9 +1138,9 @@ public class Sequence extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof SequenceVariationComponent))
+        if (!(other instanceof SequenceVariantComponent))
           return false;
-        SequenceVariationComponent o = (SequenceVariationComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(observedAllele, o.observedAllele, true)
            && compareDeep(referenceAllele, o.referenceAllele, true) && compareDeep(cigar, o.cigar, true);
       }
@@ -1079,20 +1149,20 @@ public class Sequence extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof SequenceVariationComponent))
+        if (!(other instanceof SequenceVariantComponent))
           return false;
-        SequenceVariationComponent o = (SequenceVariationComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(observedAllele, o.observedAllele, true)
            && compareValues(referenceAllele, o.referenceAllele, true) && compareValues(cigar, o.cigar, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end, observedAllele, referenceAllele
-          , cigar);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end, observedAllele
+          , referenceAllele, cigar);
       }
 
   public String fhirType() {
-    return "Sequence.variation";
+    return "Sequence.variant";
 
   }
 
@@ -1101,17 +1171,17 @@ public class Sequence extends DomainResource {
     @Block()
     public static class SequenceQualityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * 0-based start position (inclusive) of the sequence.
+         * Start position (inclusive) of the sequence.
          */
         @Child(name = "start", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based start position (inclusive) of the sequence", formalDefinition="0-based start position (inclusive) of the sequence." )
+        @Description(shortDefinition="Start position (inclusive) of the sequence", formalDefinition="Start position (inclusive) of the sequence." )
         protected IntegerType start;
 
         /**
-         * 0-based end position (exclusive) of the sequence.
+         * End position (exclusive) of the sequence.
          */
         @Child(name = "end", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="0-based end position (exclusive) of the sequence", formalDefinition="0-based end position (exclusive) of the sequence." )
+        @Description(shortDefinition="End position (exclusive) of the sequence", formalDefinition="End position (exclusive) of the sequence." )
         protected IntegerType end;
 
         /**
@@ -1128,7 +1198,49 @@ public class Sequence extends DomainResource {
         @Description(shortDefinition="Method for quality", formalDefinition="Method for quality." )
         protected StringType method;
 
-        private static final long serialVersionUID = -1046665930L;
+        /**
+         * The number of variants found in the benchmark set that match exactly the test set.
+         */
+        @Child(name = "truePositives", type = {DecimalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="True positives", formalDefinition="The number of variants found in the benchmark set that match exactly the test set." )
+        protected DecimalType truePositives;
+
+        /**
+         * The number of variants found in the test set that did not match exactly the benchmark set.
+         */
+        @Child(name = "falsePositives", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="False positives", formalDefinition="The number of variants found in the test set that did not match exactly the benchmark set." )
+        protected DecimalType falsePositives;
+
+        /**
+         * The number of variants found in the benchmark set that did not match exactly the test set.
+         */
+        @Child(name = "falseNegatives", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="False negatives", formalDefinition="The number of variants found in the benchmark set that did not match exactly the test set." )
+        protected DecimalType falseNegatives;
+
+        /**
+         * (true positives) / (true positives + false positives).
+         */
+        @Child(name = "precision", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Precision (PPV)", formalDefinition="(true positives) / (true positives + false positives)." )
+        protected DecimalType precision;
+
+        /**
+         * (true positives) / (true positives + false negatives).
+         */
+        @Child(name = "recall", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Recall (sensitivity)", formalDefinition="(true positives) / (true positives + false negatives)." )
+        protected DecimalType recall;
+
+        /**
+         * 2 * precision * recall / (precision + recall).
+         */
+        @Child(name = "fMeasure", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="F-measure", formalDefinition="2 * precision * recall / (precision + recall)." )
+        protected DecimalType fMeasure;
+
+        private static final long serialVersionUID = 2136977311L;
 
     /**
      * Constructor
@@ -1138,7 +1250,7 @@ public class Sequence extends DomainResource {
       }
 
         /**
-         * @return {@link #start} (0-based start position (inclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         * @return {@link #start} (Start position (inclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
         public IntegerType getStartElement() { 
           if (this.start == null)
@@ -1158,7 +1270,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #start} (0-based start position (inclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+         * @param value {@link #start} (Start position (inclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
         public SequenceQualityComponent setStartElement(IntegerType value) { 
           this.start = value;
@@ -1166,14 +1278,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return 0-based start position (inclusive) of the sequence.
+         * @return Start position (inclusive) of the sequence.
          */
         public int getStart() { 
           return this.start == null || this.start.isEmpty() ? 0 : this.start.getValue();
         }
 
         /**
-         * @param value 0-based start position (inclusive) of the sequence.
+         * @param value Start position (inclusive) of the sequence.
          */
         public SequenceQualityComponent setStart(int value) { 
             if (this.start == null)
@@ -1183,7 +1295,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #end} (0-based end position (exclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         * @return {@link #end} (End position (exclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
         public IntegerType getEndElement() { 
           if (this.end == null)
@@ -1203,7 +1315,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #end} (0-based end position (exclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+         * @param value {@link #end} (End position (exclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
         public SequenceQualityComponent setEndElement(IntegerType value) { 
           this.end = value;
@@ -1211,14 +1323,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return 0-based end position (exclusive) of the sequence.
+         * @return End position (exclusive) of the sequence.
          */
         public int getEnd() { 
           return this.end == null || this.end.isEmpty() ? 0 : this.end.getValue();
         }
 
         /**
-         * @param value 0-based end position (exclusive) of the sequence.
+         * @param value End position (exclusive) of the sequence.
          */
         public SequenceQualityComponent setEnd(int value) { 
             if (this.end == null)
@@ -1300,12 +1412,420 @@ public class Sequence extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #truePositives} (The number of variants found in the benchmark set that match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getTruePositives" gives direct access to the value
+         */
+        public DecimalType getTruePositivesElement() { 
+          if (this.truePositives == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.truePositives");
+            else if (Configuration.doAutoCreate())
+              this.truePositives = new DecimalType(); // bb
+          return this.truePositives;
+        }
+
+        public boolean hasTruePositivesElement() { 
+          return this.truePositives != null && !this.truePositives.isEmpty();
+        }
+
+        public boolean hasTruePositives() { 
+          return this.truePositives != null && !this.truePositives.isEmpty();
+        }
+
+        /**
+         * @param value {@link #truePositives} (The number of variants found in the benchmark set that match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getTruePositives" gives direct access to the value
+         */
+        public SequenceQualityComponent setTruePositivesElement(DecimalType value) { 
+          this.truePositives = value;
+          return this;
+        }
+
+        /**
+         * @return The number of variants found in the benchmark set that match exactly the test set.
+         */
+        public BigDecimal getTruePositives() { 
+          return this.truePositives == null ? null : this.truePositives.getValue();
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         */
+        public SequenceQualityComponent setTruePositives(BigDecimal value) { 
+          if (value == null)
+            this.truePositives = null;
+          else {
+            if (this.truePositives == null)
+              this.truePositives = new DecimalType();
+            this.truePositives.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         */
+        public SequenceQualityComponent setTruePositives(long value) { 
+              this.truePositives = new DecimalType();
+            this.truePositives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         */
+        public SequenceQualityComponent setTruePositives(double value) { 
+              this.truePositives = new DecimalType();
+            this.truePositives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #falsePositives} (The number of variants found in the test set that did not match exactly the benchmark set.). This is the underlying object with id, value and extensions. The accessor "getFalsePositives" gives direct access to the value
+         */
+        public DecimalType getFalsePositivesElement() { 
+          if (this.falsePositives == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.falsePositives");
+            else if (Configuration.doAutoCreate())
+              this.falsePositives = new DecimalType(); // bb
+          return this.falsePositives;
+        }
+
+        public boolean hasFalsePositivesElement() { 
+          return this.falsePositives != null && !this.falsePositives.isEmpty();
+        }
+
+        public boolean hasFalsePositives() { 
+          return this.falsePositives != null && !this.falsePositives.isEmpty();
+        }
+
+        /**
+         * @param value {@link #falsePositives} (The number of variants found in the test set that did not match exactly the benchmark set.). This is the underlying object with id, value and extensions. The accessor "getFalsePositives" gives direct access to the value
+         */
+        public SequenceQualityComponent setFalsePositivesElement(DecimalType value) { 
+          this.falsePositives = value;
+          return this;
+        }
+
+        /**
+         * @return The number of variants found in the test set that did not match exactly the benchmark set.
+         */
+        public BigDecimal getFalsePositives() { 
+          return this.falsePositives == null ? null : this.falsePositives.getValue();
+        }
+
+        /**
+         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         */
+        public SequenceQualityComponent setFalsePositives(BigDecimal value) { 
+          if (value == null)
+            this.falsePositives = null;
+          else {
+            if (this.falsePositives == null)
+              this.falsePositives = new DecimalType();
+            this.falsePositives.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         */
+        public SequenceQualityComponent setFalsePositives(long value) { 
+              this.falsePositives = new DecimalType();
+            this.falsePositives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         */
+        public SequenceQualityComponent setFalsePositives(double value) { 
+              this.falsePositives = new DecimalType();
+            this.falsePositives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #falseNegatives} (The number of variants found in the benchmark set that did not match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getFalseNegatives" gives direct access to the value
+         */
+        public DecimalType getFalseNegativesElement() { 
+          if (this.falseNegatives == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.falseNegatives");
+            else if (Configuration.doAutoCreate())
+              this.falseNegatives = new DecimalType(); // bb
+          return this.falseNegatives;
+        }
+
+        public boolean hasFalseNegativesElement() { 
+          return this.falseNegatives != null && !this.falseNegatives.isEmpty();
+        }
+
+        public boolean hasFalseNegatives() { 
+          return this.falseNegatives != null && !this.falseNegatives.isEmpty();
+        }
+
+        /**
+         * @param value {@link #falseNegatives} (The number of variants found in the benchmark set that did not match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getFalseNegatives" gives direct access to the value
+         */
+        public SequenceQualityComponent setFalseNegativesElement(DecimalType value) { 
+          this.falseNegatives = value;
+          return this;
+        }
+
+        /**
+         * @return The number of variants found in the benchmark set that did not match exactly the test set.
+         */
+        public BigDecimal getFalseNegatives() { 
+          return this.falseNegatives == null ? null : this.falseNegatives.getValue();
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         */
+        public SequenceQualityComponent setFalseNegatives(BigDecimal value) { 
+          if (value == null)
+            this.falseNegatives = null;
+          else {
+            if (this.falseNegatives == null)
+              this.falseNegatives = new DecimalType();
+            this.falseNegatives.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         */
+        public SequenceQualityComponent setFalseNegatives(long value) { 
+              this.falseNegatives = new DecimalType();
+            this.falseNegatives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         */
+        public SequenceQualityComponent setFalseNegatives(double value) { 
+              this.falseNegatives = new DecimalType();
+            this.falseNegatives.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #precision} ((true positives) / (true positives + false positives).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         */
+        public DecimalType getPrecisionElement() { 
+          if (this.precision == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.precision");
+            else if (Configuration.doAutoCreate())
+              this.precision = new DecimalType(); // bb
+          return this.precision;
+        }
+
+        public boolean hasPrecisionElement() { 
+          return this.precision != null && !this.precision.isEmpty();
+        }
+
+        public boolean hasPrecision() { 
+          return this.precision != null && !this.precision.isEmpty();
+        }
+
+        /**
+         * @param value {@link #precision} ((true positives) / (true positives + false positives).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         */
+        public SequenceQualityComponent setPrecisionElement(DecimalType value) { 
+          this.precision = value;
+          return this;
+        }
+
+        /**
+         * @return (true positives) / (true positives + false positives).
+         */
+        public BigDecimal getPrecision() { 
+          return this.precision == null ? null : this.precision.getValue();
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false positives).
+         */
+        public SequenceQualityComponent setPrecision(BigDecimal value) { 
+          if (value == null)
+            this.precision = null;
+          else {
+            if (this.precision == null)
+              this.precision = new DecimalType();
+            this.precision.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false positives).
+         */
+        public SequenceQualityComponent setPrecision(long value) { 
+              this.precision = new DecimalType();
+            this.precision.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false positives).
+         */
+        public SequenceQualityComponent setPrecision(double value) { 
+              this.precision = new DecimalType();
+            this.precision.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #recall} ((true positives) / (true positives + false negatives).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
+         */
+        public DecimalType getRecallElement() { 
+          if (this.recall == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.recall");
+            else if (Configuration.doAutoCreate())
+              this.recall = new DecimalType(); // bb
+          return this.recall;
+        }
+
+        public boolean hasRecallElement() { 
+          return this.recall != null && !this.recall.isEmpty();
+        }
+
+        public boolean hasRecall() { 
+          return this.recall != null && !this.recall.isEmpty();
+        }
+
+        /**
+         * @param value {@link #recall} ((true positives) / (true positives + false negatives).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
+         */
+        public SequenceQualityComponent setRecallElement(DecimalType value) { 
+          this.recall = value;
+          return this;
+        }
+
+        /**
+         * @return (true positives) / (true positives + false negatives).
+         */
+        public BigDecimal getRecall() { 
+          return this.recall == null ? null : this.recall.getValue();
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false negatives).
+         */
+        public SequenceQualityComponent setRecall(BigDecimal value) { 
+          if (value == null)
+            this.recall = null;
+          else {
+            if (this.recall == null)
+              this.recall = new DecimalType();
+            this.recall.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false negatives).
+         */
+        public SequenceQualityComponent setRecall(long value) { 
+              this.recall = new DecimalType();
+            this.recall.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value (true positives) / (true positives + false negatives).
+         */
+        public SequenceQualityComponent setRecall(double value) { 
+              this.recall = new DecimalType();
+            this.recall.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #fMeasure} (2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFMeasure" gives direct access to the value
+         */
+        public DecimalType getFMeasureElement() { 
+          if (this.fMeasure == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.fMeasure");
+            else if (Configuration.doAutoCreate())
+              this.fMeasure = new DecimalType(); // bb
+          return this.fMeasure;
+        }
+
+        public boolean hasFMeasureElement() { 
+          return this.fMeasure != null && !this.fMeasure.isEmpty();
+        }
+
+        public boolean hasFMeasure() { 
+          return this.fMeasure != null && !this.fMeasure.isEmpty();
+        }
+
+        /**
+         * @param value {@link #fMeasure} (2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFMeasure" gives direct access to the value
+         */
+        public SequenceQualityComponent setFMeasureElement(DecimalType value) { 
+          this.fMeasure = value;
+          return this;
+        }
+
+        /**
+         * @return 2 * precision * recall / (precision + recall).
+         */
+        public BigDecimal getFMeasure() { 
+          return this.fMeasure == null ? null : this.fMeasure.getValue();
+        }
+
+        /**
+         * @param value 2 * precision * recall / (precision + recall).
+         */
+        public SequenceQualityComponent setFMeasure(BigDecimal value) { 
+          if (value == null)
+            this.fMeasure = null;
+          else {
+            if (this.fMeasure == null)
+              this.fMeasure = new DecimalType();
+            this.fMeasure.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value 2 * precision * recall / (precision + recall).
+         */
+        public SequenceQualityComponent setFMeasure(long value) { 
+              this.fMeasure = new DecimalType();
+            this.fMeasure.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value 2 * precision * recall / (precision + recall).
+         */
+        public SequenceQualityComponent setFMeasure(double value) { 
+              this.fMeasure = new DecimalType();
+            this.fMeasure.setValue(value);
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("start", "integer", "0-based start position (inclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, start));
-          childrenList.add(new Property("end", "integer", "0-based end position (exclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, end));
+          childrenList.add(new Property("start", "integer", "Start position (inclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, start));
+          childrenList.add(new Property("end", "integer", "End position (exclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, end));
           childrenList.add(new Property("score", "Quantity", "Quality score.", 0, java.lang.Integer.MAX_VALUE, score));
           childrenList.add(new Property("method", "string", "Method for quality.", 0, java.lang.Integer.MAX_VALUE, method));
+          childrenList.add(new Property("truePositives", "decimal", "The number of variants found in the benchmark set that match exactly the test set.", 0, java.lang.Integer.MAX_VALUE, truePositives));
+          childrenList.add(new Property("falsePositives", "decimal", "The number of variants found in the test set that did not match exactly the benchmark set.", 0, java.lang.Integer.MAX_VALUE, falsePositives));
+          childrenList.add(new Property("falseNegatives", "decimal", "The number of variants found in the benchmark set that did not match exactly the test set.", 0, java.lang.Integer.MAX_VALUE, falseNegatives));
+          childrenList.add(new Property("precision", "decimal", "(true positives) / (true positives + false positives).", 0, java.lang.Integer.MAX_VALUE, precision));
+          childrenList.add(new Property("recall", "decimal", "(true positives) / (true positives + false negatives).", 0, java.lang.Integer.MAX_VALUE, recall));
+          childrenList.add(new Property("fMeasure", "decimal", "2 * precision * recall / (precision + recall).", 0, java.lang.Integer.MAX_VALUE, fMeasure));
         }
 
       @Override
@@ -1315,6 +1835,12 @@ public class Sequence extends DomainResource {
         case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // IntegerType
         case 109264530: /*score*/ return this.score == null ? new Base[0] : new Base[] {this.score}; // Quantity
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // StringType
+        case -886263892: /*truePositives*/ return this.truePositives == null ? new Base[0] : new Base[] {this.truePositives}; // DecimalType
+        case -1109507145: /*falsePositives*/ return this.falsePositives == null ? new Base[0] : new Base[] {this.falsePositives}; // DecimalType
+        case -31975173: /*falseNegatives*/ return this.falseNegatives == null ? new Base[0] : new Base[] {this.falseNegatives}; // DecimalType
+        case -1376177026: /*precision*/ return this.precision == null ? new Base[0] : new Base[] {this.precision}; // DecimalType
+        case -934922479: /*recall*/ return this.recall == null ? new Base[0] : new Base[] {this.recall}; // DecimalType
+        case -18997736: /*fMeasure*/ return this.fMeasure == null ? new Base[0] : new Base[] {this.fMeasure}; // DecimalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1335,6 +1861,24 @@ public class Sequence extends DomainResource {
         case -1077554975: // method
           this.method = castToString(value); // StringType
           break;
+        case -886263892: // truePositives
+          this.truePositives = castToDecimal(value); // DecimalType
+          break;
+        case -1109507145: // falsePositives
+          this.falsePositives = castToDecimal(value); // DecimalType
+          break;
+        case -31975173: // falseNegatives
+          this.falseNegatives = castToDecimal(value); // DecimalType
+          break;
+        case -1376177026: // precision
+          this.precision = castToDecimal(value); // DecimalType
+          break;
+        case -934922479: // recall
+          this.recall = castToDecimal(value); // DecimalType
+          break;
+        case -18997736: // fMeasure
+          this.fMeasure = castToDecimal(value); // DecimalType
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1350,6 +1894,18 @@ public class Sequence extends DomainResource {
           this.score = castToQuantity(value); // Quantity
         else if (name.equals("method"))
           this.method = castToString(value); // StringType
+        else if (name.equals("truePositives"))
+          this.truePositives = castToDecimal(value); // DecimalType
+        else if (name.equals("falsePositives"))
+          this.falsePositives = castToDecimal(value); // DecimalType
+        else if (name.equals("falseNegatives"))
+          this.falseNegatives = castToDecimal(value); // DecimalType
+        else if (name.equals("precision"))
+          this.precision = castToDecimal(value); // DecimalType
+        else if (name.equals("recall"))
+          this.recall = castToDecimal(value); // DecimalType
+        else if (name.equals("fMeasure"))
+          this.fMeasure = castToDecimal(value); // DecimalType
         else
           super.setProperty(name, value);
       }
@@ -1361,6 +1917,12 @@ public class Sequence extends DomainResource {
         case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // IntegerType
         case 109264530:  return getScore(); // Quantity
         case -1077554975: throw new FHIRException("Cannot make property method as it is not a complex type"); // StringType
+        case -886263892: throw new FHIRException("Cannot make property truePositives as it is not a complex type"); // DecimalType
+        case -1109507145: throw new FHIRException("Cannot make property falsePositives as it is not a complex type"); // DecimalType
+        case -31975173: throw new FHIRException("Cannot make property falseNegatives as it is not a complex type"); // DecimalType
+        case -1376177026: throw new FHIRException("Cannot make property precision as it is not a complex type"); // DecimalType
+        case -934922479: throw new FHIRException("Cannot make property recall as it is not a complex type"); // DecimalType
+        case -18997736: throw new FHIRException("Cannot make property fMeasure as it is not a complex type"); // DecimalType
         default: return super.makeProperty(hash, name);
         }
 
@@ -1381,6 +1943,24 @@ public class Sequence extends DomainResource {
         else if (name.equals("method")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.method");
         }
+        else if (name.equals("truePositives")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.truePositives");
+        }
+        else if (name.equals("falsePositives")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.falsePositives");
+        }
+        else if (name.equals("falseNegatives")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.falseNegatives");
+        }
+        else if (name.equals("precision")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.precision");
+        }
+        else if (name.equals("recall")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.recall");
+        }
+        else if (name.equals("fMeasure")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.fMeasure");
+        }
         else
           return super.addChild(name);
       }
@@ -1392,6 +1972,12 @@ public class Sequence extends DomainResource {
         dst.end = end == null ? null : end.copy();
         dst.score = score == null ? null : score.copy();
         dst.method = method == null ? null : method.copy();
+        dst.truePositives = truePositives == null ? null : truePositives.copy();
+        dst.falsePositives = falsePositives == null ? null : falsePositives.copy();
+        dst.falseNegatives = falseNegatives == null ? null : falseNegatives.copy();
+        dst.precision = precision == null ? null : precision.copy();
+        dst.recall = recall == null ? null : recall.copy();
+        dst.fMeasure = fMeasure == null ? null : fMeasure.copy();
         return dst;
       }
 
@@ -1403,7 +1989,9 @@ public class Sequence extends DomainResource {
           return false;
         SequenceQualityComponent o = (SequenceQualityComponent) other;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(score, o.score, true)
-           && compareDeep(method, o.method, true);
+           && compareDeep(method, o.method, true) && compareDeep(truePositives, o.truePositives, true) && compareDeep(falsePositives, o.falsePositives, true)
+           && compareDeep(falseNegatives, o.falseNegatives, true) && compareDeep(precision, o.precision, true)
+           && compareDeep(recall, o.recall, true) && compareDeep(fMeasure, o.fMeasure, true);
       }
 
       @Override
@@ -1414,11 +2002,14 @@ public class Sequence extends DomainResource {
           return false;
         SequenceQualityComponent o = (SequenceQualityComponent) other;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(method, o.method, true)
-          ;
+           && compareValues(truePositives, o.truePositives, true) && compareValues(falsePositives, o.falsePositives, true)
+           && compareValues(falseNegatives, o.falseNegatives, true) && compareValues(precision, o.precision, true)
+           && compareValues(recall, o.recall, true) && compareValues(fMeasure, o.fMeasure, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end, score, method);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end, score, method
+          , truePositives, falsePositives, falseNegatives, precision, recall, fMeasure);
       }
 
   public String fhirType() {
@@ -1445,10 +2036,10 @@ public class Sequence extends DomainResource {
         protected StringType name;
 
         /**
-         * Id of the variation in this external repository.
+         * Id of the variant in this external repository.
          */
         @Child(name = "variantId", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Id of the variant", formalDefinition="Id of the variation in this external repository." )
+        @Description(shortDefinition="Id of the variant", formalDefinition="Id of the variant in this external repository." )
         protected StringType variantId;
 
         /**
@@ -1566,7 +2157,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #variantId} (Id of the variation in this external repository.). This is the underlying object with id, value and extensions. The accessor "getVariantId" gives direct access to the value
+         * @return {@link #variantId} (Id of the variant in this external repository.). This is the underlying object with id, value and extensions. The accessor "getVariantId" gives direct access to the value
          */
         public StringType getVariantIdElement() { 
           if (this.variantId == null)
@@ -1586,7 +2177,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #variantId} (Id of the variation in this external repository.). This is the underlying object with id, value and extensions. The accessor "getVariantId" gives direct access to the value
+         * @param value {@link #variantId} (Id of the variant in this external repository.). This is the underlying object with id, value and extensions. The accessor "getVariantId" gives direct access to the value
          */
         public SequenceRepositoryComponent setVariantIdElement(StringType value) { 
           this.variantId = value;
@@ -1594,14 +2185,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return Id of the variation in this external repository.
+         * @return Id of the variant in this external repository.
          */
         public String getVariantId() { 
           return this.variantId == null ? null : this.variantId.getValue();
         }
 
         /**
-         * @param value Id of the variation in this external repository.
+         * @param value Id of the variant in this external repository.
          */
         public SequenceRepositoryComponent setVariantId(String value) { 
           if (Utilities.noString(value))
@@ -1667,7 +2258,7 @@ public class Sequence extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("url", "uri", "URI of an external repository which contains further details about the genetics data.", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("name", "string", "URI of an external repository which contains further details about the genetics data.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("variantId", "string", "Id of the variation in this external repository.", 0, java.lang.Integer.MAX_VALUE, variantId));
+          childrenList.add(new Property("variantId", "string", "Id of the variant in this external repository.", 0, java.lang.Integer.MAX_VALUE, variantId));
           childrenList.add(new Property("readId", "string", "Id of the read in this external repository.", 0, java.lang.Integer.MAX_VALUE, readId));
         }
 
@@ -1780,7 +2371,8 @@ public class Sequence extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, name, variantId, readId);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, name, variantId, readId
+          );
       }
 
   public String fhirType() {
@@ -1791,7 +2383,7 @@ public class Sequence extends DomainResource {
   }
 
     @Block()
-    public static class SequenceStructureVariationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SequenceStructureVariantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Precision of boundaries.
          */
@@ -1818,21 +2410,21 @@ public class Sequence extends DomainResource {
          */
         @Child(name = "outer", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="", formalDefinition="Structural variant outer." )
-        protected SequenceStructureVariationOuterComponent outer;
+        protected SequenceStructureVariantOuterComponent outer;
 
         /**
          * Structural variant inner.
          */
         @Child(name = "inner", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="", formalDefinition="Structural variant inner." )
-        protected SequenceStructureVariationInnerComponent inner;
+        protected SequenceStructureVariantInnerComponent inner;
 
-        private static final long serialVersionUID = -1615654736L;
+        private static final long serialVersionUID = 1705627760L;
 
     /**
      * Constructor
      */
-      public SequenceStructureVariationComponent() {
+      public SequenceStructureVariantComponent() {
         super();
       }
 
@@ -1842,7 +2434,7 @@ public class Sequence extends DomainResource {
         public StringType getPrecisionOfBoundariesElement() { 
           if (this.precisionOfBoundaries == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationComponent.precisionOfBoundaries");
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.precisionOfBoundaries");
             else if (Configuration.doAutoCreate())
               this.precisionOfBoundaries = new StringType(); // bb
           return this.precisionOfBoundaries;
@@ -1859,7 +2451,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #precisionOfBoundaries} (Precision of boundaries.). This is the underlying object with id, value and extensions. The accessor "getPrecisionOfBoundaries" gives direct access to the value
          */
-        public SequenceStructureVariationComponent setPrecisionOfBoundariesElement(StringType value) { 
+        public SequenceStructureVariantComponent setPrecisionOfBoundariesElement(StringType value) { 
           this.precisionOfBoundaries = value;
           return this;
         }
@@ -1874,7 +2466,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Precision of boundaries.
          */
-        public SequenceStructureVariationComponent setPrecisionOfBoundaries(String value) { 
+        public SequenceStructureVariantComponent setPrecisionOfBoundaries(String value) { 
           if (Utilities.noString(value))
             this.precisionOfBoundaries = null;
           else {
@@ -1891,7 +2483,7 @@ public class Sequence extends DomainResource {
         public DecimalType getReportedaCGHRatioElement() { 
           if (this.reportedaCGHRatio == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationComponent.reportedaCGHRatio");
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.reportedaCGHRatio");
             else if (Configuration.doAutoCreate())
               this.reportedaCGHRatio = new DecimalType(); // bb
           return this.reportedaCGHRatio;
@@ -1908,7 +2500,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #reportedaCGHRatio} (Structural Variant reported aCGH ratio.). This is the underlying object with id, value and extensions. The accessor "getReportedaCGHRatio" gives direct access to the value
          */
-        public SequenceStructureVariationComponent setReportedaCGHRatioElement(DecimalType value) { 
+        public SequenceStructureVariantComponent setReportedaCGHRatioElement(DecimalType value) { 
           this.reportedaCGHRatio = value;
           return this;
         }
@@ -1923,7 +2515,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant reported aCGH ratio.
          */
-        public SequenceStructureVariationComponent setReportedaCGHRatio(BigDecimal value) { 
+        public SequenceStructureVariantComponent setReportedaCGHRatio(BigDecimal value) { 
           if (value == null)
             this.reportedaCGHRatio = null;
           else {
@@ -1937,7 +2529,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant reported aCGH ratio.
          */
-        public SequenceStructureVariationComponent setReportedaCGHRatio(long value) { 
+        public SequenceStructureVariantComponent setReportedaCGHRatio(long value) { 
               this.reportedaCGHRatio = new DecimalType();
             this.reportedaCGHRatio.setValue(value);
           return this;
@@ -1946,7 +2538,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant reported aCGH ratio.
          */
-        public SequenceStructureVariationComponent setReportedaCGHRatio(double value) { 
+        public SequenceStructureVariantComponent setReportedaCGHRatio(double value) { 
               this.reportedaCGHRatio = new DecimalType();
             this.reportedaCGHRatio.setValue(value);
           return this;
@@ -1958,7 +2550,7 @@ public class Sequence extends DomainResource {
         public IntegerType getLengthElement() { 
           if (this.length == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationComponent.length");
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.length");
             else if (Configuration.doAutoCreate())
               this.length = new IntegerType(); // bb
           return this.length;
@@ -1975,7 +2567,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #length} (Structural Variant Length.). This is the underlying object with id, value and extensions. The accessor "getLength" gives direct access to the value
          */
-        public SequenceStructureVariationComponent setLengthElement(IntegerType value) { 
+        public SequenceStructureVariantComponent setLengthElement(IntegerType value) { 
           this.length = value;
           return this;
         }
@@ -1990,7 +2582,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant Length.
          */
-        public SequenceStructureVariationComponent setLength(int value) { 
+        public SequenceStructureVariantComponent setLength(int value) { 
             if (this.length == null)
               this.length = new IntegerType();
             this.length.setValue(value);
@@ -2000,12 +2592,12 @@ public class Sequence extends DomainResource {
         /**
          * @return {@link #outer} (Structural variant outer.)
          */
-        public SequenceStructureVariationOuterComponent getOuter() { 
+        public SequenceStructureVariantOuterComponent getOuter() { 
           if (this.outer == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationComponent.outer");
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.outer");
             else if (Configuration.doAutoCreate())
-              this.outer = new SequenceStructureVariationOuterComponent(); // cc
+              this.outer = new SequenceStructureVariantOuterComponent(); // cc
           return this.outer;
         }
 
@@ -2016,7 +2608,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #outer} (Structural variant outer.)
          */
-        public SequenceStructureVariationComponent setOuter(SequenceStructureVariationOuterComponent value) { 
+        public SequenceStructureVariantComponent setOuter(SequenceStructureVariantOuterComponent value) { 
           this.outer = value;
           return this;
         }
@@ -2024,12 +2616,12 @@ public class Sequence extends DomainResource {
         /**
          * @return {@link #inner} (Structural variant inner.)
          */
-        public SequenceStructureVariationInnerComponent getInner() { 
+        public SequenceStructureVariantInnerComponent getInner() { 
           if (this.inner == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationComponent.inner");
+              throw new Error("Attempt to auto-create SequenceStructureVariantComponent.inner");
             else if (Configuration.doAutoCreate())
-              this.inner = new SequenceStructureVariationInnerComponent(); // cc
+              this.inner = new SequenceStructureVariantInnerComponent(); // cc
           return this.inner;
         }
 
@@ -2040,7 +2632,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #inner} (Structural variant inner.)
          */
-        public SequenceStructureVariationComponent setInner(SequenceStructureVariationInnerComponent value) { 
+        public SequenceStructureVariantComponent setInner(SequenceStructureVariantInnerComponent value) { 
           this.inner = value;
           return this;
         }
@@ -2060,8 +2652,8 @@ public class Sequence extends DomainResource {
         case 1591532317: /*precisionOfBoundaries*/ return this.precisionOfBoundaries == null ? new Base[0] : new Base[] {this.precisionOfBoundaries}; // StringType
         case -1872600587: /*reportedaCGHRatio*/ return this.reportedaCGHRatio == null ? new Base[0] : new Base[] {this.reportedaCGHRatio}; // DecimalType
         case -1106363674: /*length*/ return this.length == null ? new Base[0] : new Base[] {this.length}; // IntegerType
-        case 106111099: /*outer*/ return this.outer == null ? new Base[0] : new Base[] {this.outer}; // SequenceStructureVariationOuterComponent
-        case 100355670: /*inner*/ return this.inner == null ? new Base[0] : new Base[] {this.inner}; // SequenceStructureVariationInnerComponent
+        case 106111099: /*outer*/ return this.outer == null ? new Base[0] : new Base[] {this.outer}; // SequenceStructureVariantOuterComponent
+        case 100355670: /*inner*/ return this.inner == null ? new Base[0] : new Base[] {this.inner}; // SequenceStructureVariantInnerComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2080,10 +2672,10 @@ public class Sequence extends DomainResource {
           this.length = castToInteger(value); // IntegerType
           break;
         case 106111099: // outer
-          this.outer = (SequenceStructureVariationOuterComponent) value; // SequenceStructureVariationOuterComponent
+          this.outer = (SequenceStructureVariantOuterComponent) value; // SequenceStructureVariantOuterComponent
           break;
         case 100355670: // inner
-          this.inner = (SequenceStructureVariationInnerComponent) value; // SequenceStructureVariationInnerComponent
+          this.inner = (SequenceStructureVariantInnerComponent) value; // SequenceStructureVariantInnerComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2099,9 +2691,9 @@ public class Sequence extends DomainResource {
         else if (name.equals("length"))
           this.length = castToInteger(value); // IntegerType
         else if (name.equals("outer"))
-          this.outer = (SequenceStructureVariationOuterComponent) value; // SequenceStructureVariationOuterComponent
+          this.outer = (SequenceStructureVariantOuterComponent) value; // SequenceStructureVariantOuterComponent
         else if (name.equals("inner"))
-          this.inner = (SequenceStructureVariationInnerComponent) value; // SequenceStructureVariationInnerComponent
+          this.inner = (SequenceStructureVariantInnerComponent) value; // SequenceStructureVariantInnerComponent
         else
           super.setProperty(name, value);
       }
@@ -2112,8 +2704,8 @@ public class Sequence extends DomainResource {
         case 1591532317: throw new FHIRException("Cannot make property precisionOfBoundaries as it is not a complex type"); // StringType
         case -1872600587: throw new FHIRException("Cannot make property reportedaCGHRatio as it is not a complex type"); // DecimalType
         case -1106363674: throw new FHIRException("Cannot make property length as it is not a complex type"); // IntegerType
-        case 106111099:  return getOuter(); // SequenceStructureVariationOuterComponent
-        case 100355670:  return getInner(); // SequenceStructureVariationInnerComponent
+        case 106111099:  return getOuter(); // SequenceStructureVariantOuterComponent
+        case 100355670:  return getInner(); // SequenceStructureVariantInnerComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -2131,19 +2723,19 @@ public class Sequence extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.length");
         }
         else if (name.equals("outer")) {
-          this.outer = new SequenceStructureVariationOuterComponent();
+          this.outer = new SequenceStructureVariantOuterComponent();
           return this.outer;
         }
         else if (name.equals("inner")) {
-          this.inner = new SequenceStructureVariationInnerComponent();
+          this.inner = new SequenceStructureVariantInnerComponent();
           return this.inner;
         }
         else
           return super.addChild(name);
       }
 
-      public SequenceStructureVariationComponent copy() {
-        SequenceStructureVariationComponent dst = new SequenceStructureVariationComponent();
+      public SequenceStructureVariantComponent copy() {
+        SequenceStructureVariantComponent dst = new SequenceStructureVariantComponent();
         copyValues(dst);
         dst.precisionOfBoundaries = precisionOfBoundaries == null ? null : precisionOfBoundaries.copy();
         dst.reportedaCGHRatio = reportedaCGHRatio == null ? null : reportedaCGHRatio.copy();
@@ -2157,9 +2749,9 @@ public class Sequence extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationComponent))
+        if (!(other instanceof SequenceStructureVariantComponent))
           return false;
-        SequenceStructureVariationComponent o = (SequenceStructureVariationComponent) other;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
         return compareDeep(precisionOfBoundaries, o.precisionOfBoundaries, true) && compareDeep(reportedaCGHRatio, o.reportedaCGHRatio, true)
            && compareDeep(length, o.length, true) && compareDeep(outer, o.outer, true) && compareDeep(inner, o.inner, true)
           ;
@@ -2169,9 +2761,9 @@ public class Sequence extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationComponent))
+        if (!(other instanceof SequenceStructureVariantComponent))
           return false;
-        SequenceStructureVariationComponent o = (SequenceStructureVariationComponent) other;
+        SequenceStructureVariantComponent o = (SequenceStructureVariantComponent) other;
         return compareValues(precisionOfBoundaries, o.precisionOfBoundaries, true) && compareValues(reportedaCGHRatio, o.reportedaCGHRatio, true)
            && compareValues(length, o.length, true);
       }
@@ -2182,14 +2774,14 @@ public class Sequence extends DomainResource {
       }
 
   public String fhirType() {
-    return "Sequence.structureVariation";
+    return "Sequence.structureVariant";
 
   }
 
   }
 
     @Block()
-    public static class SequenceStructureVariationOuterComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SequenceStructureVariantOuterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Structural Variant Outer Start-End.
          */
@@ -2209,7 +2801,7 @@ public class Sequence extends DomainResource {
     /**
      * Constructor
      */
-      public SequenceStructureVariationOuterComponent() {
+      public SequenceStructureVariantOuterComponent() {
         super();
       }
 
@@ -2219,7 +2811,7 @@ public class Sequence extends DomainResource {
         public IntegerType getStartElement() { 
           if (this.start == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationOuterComponent.start");
+              throw new Error("Attempt to auto-create SequenceStructureVariantOuterComponent.start");
             else if (Configuration.doAutoCreate())
               this.start = new IntegerType(); // bb
           return this.start;
@@ -2236,7 +2828,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #start} (Structural Variant Outer Start-End.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
-        public SequenceStructureVariationOuterComponent setStartElement(IntegerType value) { 
+        public SequenceStructureVariantOuterComponent setStartElement(IntegerType value) { 
           this.start = value;
           return this;
         }
@@ -2251,7 +2843,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant Outer Start-End.
          */
-        public SequenceStructureVariationOuterComponent setStart(int value) { 
+        public SequenceStructureVariantOuterComponent setStart(int value) { 
             if (this.start == null)
               this.start = new IntegerType();
             this.start.setValue(value);
@@ -2264,7 +2856,7 @@ public class Sequence extends DomainResource {
         public IntegerType getEndElement() { 
           if (this.end == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationOuterComponent.end");
+              throw new Error("Attempt to auto-create SequenceStructureVariantOuterComponent.end");
             else if (Configuration.doAutoCreate())
               this.end = new IntegerType(); // bb
           return this.end;
@@ -2281,7 +2873,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #end} (Structural Variant Outer Start-End.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
-        public SequenceStructureVariationOuterComponent setEndElement(IntegerType value) { 
+        public SequenceStructureVariantOuterComponent setEndElement(IntegerType value) { 
           this.end = value;
           return this;
         }
@@ -2296,7 +2888,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant Outer Start-End.
          */
-        public SequenceStructureVariationOuterComponent setEnd(int value) { 
+        public SequenceStructureVariantOuterComponent setEnd(int value) { 
             if (this.end == null)
               this.end = new IntegerType();
             this.end.setValue(value);
@@ -2365,8 +2957,8 @@ public class Sequence extends DomainResource {
           return super.addChild(name);
       }
 
-      public SequenceStructureVariationOuterComponent copy() {
-        SequenceStructureVariationOuterComponent dst = new SequenceStructureVariationOuterComponent();
+      public SequenceStructureVariantOuterComponent copy() {
+        SequenceStructureVariantOuterComponent dst = new SequenceStructureVariantOuterComponent();
         copyValues(dst);
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
@@ -2377,9 +2969,9 @@ public class Sequence extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationOuterComponent))
+        if (!(other instanceof SequenceStructureVariantOuterComponent))
           return false;
-        SequenceStructureVariationOuterComponent o = (SequenceStructureVariationOuterComponent) other;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
       }
 
@@ -2387,9 +2979,9 @@ public class Sequence extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationOuterComponent))
+        if (!(other instanceof SequenceStructureVariantOuterComponent))
           return false;
-        SequenceStructureVariationOuterComponent o = (SequenceStructureVariationOuterComponent) other;
+        SequenceStructureVariantOuterComponent o = (SequenceStructureVariantOuterComponent) other;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true);
       }
 
@@ -2398,14 +2990,14 @@ public class Sequence extends DomainResource {
       }
 
   public String fhirType() {
-    return "Sequence.structureVariation.outer";
+    return "Sequence.structureVariant.outer";
 
   }
 
   }
 
     @Block()
-    public static class SequenceStructureVariationInnerComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SequenceStructureVariantInnerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Structural Variant Inner Start-End.
          */
@@ -2425,7 +3017,7 @@ public class Sequence extends DomainResource {
     /**
      * Constructor
      */
-      public SequenceStructureVariationInnerComponent() {
+      public SequenceStructureVariantInnerComponent() {
         super();
       }
 
@@ -2435,7 +3027,7 @@ public class Sequence extends DomainResource {
         public IntegerType getStartElement() { 
           if (this.start == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationInnerComponent.start");
+              throw new Error("Attempt to auto-create SequenceStructureVariantInnerComponent.start");
             else if (Configuration.doAutoCreate())
               this.start = new IntegerType(); // bb
           return this.start;
@@ -2452,7 +3044,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #start} (Structural Variant Inner Start-End.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
          */
-        public SequenceStructureVariationInnerComponent setStartElement(IntegerType value) { 
+        public SequenceStructureVariantInnerComponent setStartElement(IntegerType value) { 
           this.start = value;
           return this;
         }
@@ -2467,7 +3059,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant Inner Start-End.
          */
-        public SequenceStructureVariationInnerComponent setStart(int value) { 
+        public SequenceStructureVariantInnerComponent setStart(int value) { 
             if (this.start == null)
               this.start = new IntegerType();
             this.start.setValue(value);
@@ -2480,7 +3072,7 @@ public class Sequence extends DomainResource {
         public IntegerType getEndElement() { 
           if (this.end == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceStructureVariationInnerComponent.end");
+              throw new Error("Attempt to auto-create SequenceStructureVariantInnerComponent.end");
             else if (Configuration.doAutoCreate())
               this.end = new IntegerType(); // bb
           return this.end;
@@ -2497,7 +3089,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #end} (Structural Variant Inner Start-End.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
          */
-        public SequenceStructureVariationInnerComponent setEndElement(IntegerType value) { 
+        public SequenceStructureVariantInnerComponent setEndElement(IntegerType value) { 
           this.end = value;
           return this;
         }
@@ -2512,7 +3104,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value Structural Variant Inner Start-End.
          */
-        public SequenceStructureVariationInnerComponent setEnd(int value) { 
+        public SequenceStructureVariantInnerComponent setEnd(int value) { 
             if (this.end == null)
               this.end = new IntegerType();
             this.end.setValue(value);
@@ -2581,8 +3173,8 @@ public class Sequence extends DomainResource {
           return super.addChild(name);
       }
 
-      public SequenceStructureVariationInnerComponent copy() {
-        SequenceStructureVariationInnerComponent dst = new SequenceStructureVariationInnerComponent();
+      public SequenceStructureVariantInnerComponent copy() {
+        SequenceStructureVariantInnerComponent dst = new SequenceStructureVariantInnerComponent();
         copyValues(dst);
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
@@ -2593,9 +3185,9 @@ public class Sequence extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationInnerComponent))
+        if (!(other instanceof SequenceStructureVariantInnerComponent))
           return false;
-        SequenceStructureVariationInnerComponent o = (SequenceStructureVariationInnerComponent) other;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
       }
 
@@ -2603,9 +3195,9 @@ public class Sequence extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof SequenceStructureVariationInnerComponent))
+        if (!(other instanceof SequenceStructureVariantInnerComponent))
           return false;
-        SequenceStructureVariationInnerComponent o = (SequenceStructureVariationInnerComponent) other;
+        SequenceStructureVariantInnerComponent o = (SequenceStructureVariantInnerComponent) other;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true);
       }
 
@@ -2614,35 +3206,49 @@ public class Sequence extends DomainResource {
       }
 
   public String fhirType() {
-    return "Sequence.structureVariation.inner";
+    return "Sequence.structureVariant.inner";
 
   }
 
   }
 
     /**
-     * Amino acid / cDNA transcript / RNA variation.
+     * A unique identifier for this particular sequence instance.
      */
-    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AA | DNA | RNA", formalDefinition="Amino acid / cDNA transcript / RNA variation." )
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Unique ID for this particular sequence", formalDefinition="A unique identifier for this particular sequence instance." )
+    protected List<Identifier> identifier;
+
+    /**
+     * Amino acid / cDNA transcript / RNA variant.
+     */
+    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="AA | DNA | RNA", formalDefinition="Amino acid / cDNA transcript / RNA variant." )
     protected Enumeration<SequenceType> type;
 
     /**
-     * The patient, or group of patients whose sequencing results are described by this resource.
+     * Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are "0" for 0-based numbering and "1" for one-based.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient, or group of patients whose sequencing results are described by this resource." )
+    @Child(name = "coordinateSystem", type = {IntegerType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Numbering used for sequence (0-based or 1-based)", formalDefinition="Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are \"0\" for 0-based numbering and \"1\" for one-based." )
+    protected IntegerType coordinateSystem;
+
+    /**
+     * The patient whose sequencing results are described by this resource.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient whose sequencing results are described by this resource." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient, or group of patients whose sequencing results are described by this resource.)
+     * The actual object that is the target of the reference (The patient whose sequencing results are described by this resource.)
      */
     protected Patient patientTarget;
 
     /**
      * Specimen used for sequencing.
      */
-    @Child(name = "specimen", type = {Specimen.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "specimen", type = {Specimen.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Specimen used for sequencing", formalDefinition="Specimen used for sequencing." )
     protected Reference specimen;
 
@@ -2654,7 +3260,7 @@ public class Sequence extends DomainResource {
     /**
      * The method for sequencing, for example, chip information.
      */
-    @Child(name = "device", type = {Device.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "device", type = {Device.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The method for sequencing", formalDefinition="The method for sequencing, for example, chip information." )
     protected Reference device;
 
@@ -2666,112 +3272,72 @@ public class Sequence extends DomainResource {
     /**
      * Quantity of the sequence.
      */
-    @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "quantity", type = {Quantity.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Quantity of the sequence", formalDefinition="Quantity of the sequence." )
     protected Quantity quantity;
 
     /**
-     * The organism from which sample of the sequence was extracted. Supporting tests of human, viruses, and bacteria.
-     */
-    @Child(name = "species", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Supporting tests of human, viruses, and bacteria", formalDefinition="The organism from which sample of the sequence was extracted. Supporting tests of human, viruses, and bacteria." )
-    protected CodeableConcept species;
-
-    /**
      * Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .
      */
-    @Child(name = "referenceSeq", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "referenceSeq", type = {}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reference sequence", formalDefinition="Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) ." )
-    protected List<SequenceReferenceSeqComponent> referenceSeq;
+    protected SequenceReferenceSeqComponent referenceSeq;
 
     /**
-     * Variation info in this sequence.
+     * Variant info in this sequence.
      */
-    @Child(name = "variation", type = {}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Variation info in this sequence", formalDefinition="Variation info in this sequence." )
-    protected SequenceVariationComponent variation;
+    @Child(name = "variant", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Variant info in this sequence", formalDefinition="Variant info in this sequence." )
+    protected List<SequenceVariantComponent> variant;
+
+    /**
+     * Observed sequence.
+     */
+    @Child(name = "observedSeq", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Observed sequence", formalDefinition="Observed sequence." )
+    protected StringType observedSeq;
 
     /**
      * Quality for sequence quality vary by platform reflecting differences in sequencing chemistry and digital processing.
      */
-    @Child(name = "quality", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "quality", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Sequence Quality", formalDefinition="Quality for sequence quality vary by platform reflecting differences in sequencing chemistry and digital processing." )
     protected List<SequenceQualityComponent> quality;
 
     /**
-     * The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA.
-     */
-    @Child(name = "allelicState", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The level of occurrence of a single DNA Sequence Variation within a set of chromosomes: Heteroplasmic / Homoplasmic / Homozygous / Heterozygous / Hemizygous", formalDefinition="The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA." )
-    protected CodeableConcept allelicState;
-
-    /**
-     * Allele frequencies.
-     */
-    @Child(name = "allelicFrequency", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Allele frequencies", formalDefinition="Allele frequencies." )
-    protected DecimalType allelicFrequency;
-
-    /**
-     * Values: amplificaiton / deletion / LOH.
-     */
-    @Child(name = "copyNumberEvent", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Copy Number Event: Values: amplificaiton / deletion / LOH", formalDefinition="Values: amplificaiton / deletion / LOH." )
-    protected CodeableConcept copyNumberEvent;
-
-    /**
      * Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.
      */
-    @Child(name = "readCoverage", type = {IntegerType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "readCoverage", type = {IntegerType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Average number of reads representing a given nucleotide in the reconstructed sequence", formalDefinition="Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence." )
     protected IntegerType readCoverage;
 
     /**
      * Configurations of the external repository.
      */
-    @Child(name = "repository", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "repository", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External repository", formalDefinition="Configurations of the external repository." )
     protected List<SequenceRepositoryComponent> repository;
 
     /**
-     * Pointer to next atomic sequence which at most contains one variation.
+     * Pointer to next atomic sequence which at most contains one variant.
      */
-    @Child(name = "pointer", type = {Sequence.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Pointer to next atomic sequence", formalDefinition="Pointer to next atomic sequence which at most contains one variation." )
+    @Child(name = "pointer", type = {Sequence.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Pointer to next atomic sequence", formalDefinition="Pointer to next atomic sequence which at most contains one variant." )
     protected List<Reference> pointer;
     /**
-     * The actual objects that are the target of the reference (Pointer to next atomic sequence which at most contains one variation.)
+     * The actual objects that are the target of the reference (Pointer to next atomic sequence which at most contains one variant.)
      */
     protected List<Sequence> pointerTarget;
 
 
     /**
-     * Observed Sequence.
-     */
-    @Child(name = "observedSeq", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Observed Sequence", formalDefinition="Observed Sequence." )
-    protected StringType observedSeq;
-
-    /**
-     * Analysis of the sequence.
-     */
-    @Child(name = "observation", type = {Observation.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Observation-genetics", formalDefinition="Analysis of the sequence." )
-    protected Reference observation;
-
-    /**
-     * The actual object that is the target of the reference (Analysis of the sequence.)
-     */
-    protected Observation observationTarget;
-
-    /**
      * Structural variant.
      */
-    @Child(name = "structureVariation", type = {}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "structureVariant", type = {}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="Structural variant." )
-    protected SequenceStructureVariationComponent structureVariation;
+    protected SequenceStructureVariantComponent structureVariant;
 
-    private static final long serialVersionUID = -1153660995L;
+    private static final long serialVersionUID = 1674606659L;
 
   /**
    * Constructor
@@ -2783,13 +3349,67 @@ public class Sequence extends DomainResource {
   /**
    * Constructor
    */
-    public Sequence(Enumeration<SequenceType> type) {
+    public Sequence(Enumeration<SequenceType> type, IntegerType coordinateSystem) {
       super();
       this.type = type;
+      this.coordinateSystem = coordinateSystem;
     }
 
     /**
-     * @return {@link #type} (Amino acid / cDNA transcript / RNA variation.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #identifier} (A unique identifier for this particular sequence instance.)
+     */
+    public List<Identifier> getIdentifier() { 
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      return this.identifier;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Sequence setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public Sequence addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #type} (Amino acid / cDNA transcript / RNA variant.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<SequenceType> getTypeElement() { 
       if (this.type == null)
@@ -2809,7 +3429,7 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Amino acid / cDNA transcript / RNA variation.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (Amino acid / cDNA transcript / RNA variant.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Sequence setTypeElement(Enumeration<SequenceType> value) { 
       this.type = value;
@@ -2817,14 +3437,14 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return Amino acid / cDNA transcript / RNA variation.
+     * @return Amino acid / cDNA transcript / RNA variant.
      */
     public SequenceType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value Amino acid / cDNA transcript / RNA variation.
+     * @param value Amino acid / cDNA transcript / RNA variant.
      */
     public Sequence setType(SequenceType value) { 
         if (this.type == null)
@@ -2834,7 +3454,52 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (The patient, or group of patients whose sequencing results are described by this resource.)
+     * @return {@link #coordinateSystem} (Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are "0" for 0-based numbering and "1" for one-based.). This is the underlying object with id, value and extensions. The accessor "getCoordinateSystem" gives direct access to the value
+     */
+    public IntegerType getCoordinateSystemElement() { 
+      if (this.coordinateSystem == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Sequence.coordinateSystem");
+        else if (Configuration.doAutoCreate())
+          this.coordinateSystem = new IntegerType(); // bb
+      return this.coordinateSystem;
+    }
+
+    public boolean hasCoordinateSystemElement() { 
+      return this.coordinateSystem != null && !this.coordinateSystem.isEmpty();
+    }
+
+    public boolean hasCoordinateSystem() { 
+      return this.coordinateSystem != null && !this.coordinateSystem.isEmpty();
+    }
+
+    /**
+     * @param value {@link #coordinateSystem} (Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are "0" for 0-based numbering and "1" for one-based.). This is the underlying object with id, value and extensions. The accessor "getCoordinateSystem" gives direct access to the value
+     */
+    public Sequence setCoordinateSystemElement(IntegerType value) { 
+      this.coordinateSystem = value;
+      return this;
+    }
+
+    /**
+     * @return Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are "0" for 0-based numbering and "1" for one-based.
+     */
+    public int getCoordinateSystem() { 
+      return this.coordinateSystem == null || this.coordinateSystem.isEmpty() ? 0 : this.coordinateSystem.getValue();
+    }
+
+    /**
+     * @param value Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are "0" for 0-based numbering and "1" for one-based.
+     */
+    public Sequence setCoordinateSystem(int value) { 
+        if (this.coordinateSystem == null)
+          this.coordinateSystem = new IntegerType();
+        this.coordinateSystem.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} (The patient whose sequencing results are described by this resource.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -2850,7 +3515,7 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient, or group of patients whose sequencing results are described by this resource.)
+     * @param value {@link #patient} (The patient whose sequencing results are described by this resource.)
      */
     public Sequence setPatient(Reference value) { 
       this.patient = value;
@@ -2858,7 +3523,7 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, or group of patients whose sequencing results are described by this resource.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient whose sequencing results are described by this resource.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -2870,7 +3535,7 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, or group of patients whose sequencing results are described by this resource.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient whose sequencing results are described by this resource.)
      */
     public Sequence setPatientTarget(Patient value) { 
       this.patientTarget = value;
@@ -2990,108 +3655,128 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #species} (The organism from which sample of the sequence was extracted. Supporting tests of human, viruses, and bacteria.)
+     * @return {@link #referenceSeq} (Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .)
      */
-    public CodeableConcept getSpecies() { 
-      if (this.species == null)
+    public SequenceReferenceSeqComponent getReferenceSeq() { 
+      if (this.referenceSeq == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.species");
+          throw new Error("Attempt to auto-create Sequence.referenceSeq");
         else if (Configuration.doAutoCreate())
-          this.species = new CodeableConcept(); // cc
-      return this.species;
+          this.referenceSeq = new SequenceReferenceSeqComponent(); // cc
+      return this.referenceSeq;
     }
 
-    public boolean hasSpecies() { 
-      return this.species != null && !this.species.isEmpty();
+    public boolean hasReferenceSeq() { 
+      return this.referenceSeq != null && !this.referenceSeq.isEmpty();
     }
 
     /**
-     * @param value {@link #species} (The organism from which sample of the sequence was extracted. Supporting tests of human, viruses, and bacteria.)
+     * @param value {@link #referenceSeq} (Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .)
      */
-    public Sequence setSpecies(CodeableConcept value) { 
-      this.species = value;
+    public Sequence setReferenceSeq(SequenceReferenceSeqComponent value) { 
+      this.referenceSeq = value;
       return this;
     }
 
     /**
-     * @return {@link #referenceSeq} (Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .)
+     * @return {@link #variant} (Variant info in this sequence.)
      */
-    public List<SequenceReferenceSeqComponent> getReferenceSeq() { 
-      if (this.referenceSeq == null)
-        this.referenceSeq = new ArrayList<SequenceReferenceSeqComponent>();
-      return this.referenceSeq;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #referenceSeq}, creating it if it does not already exist
-     */
-    public SequenceReferenceSeqComponent getReferenceSeqFirstRep() { 
-      if (getReferenceSeq().isEmpty()) {
-        addReferenceSeq();
-      }
-      return getReferenceSeq().get(0);
+    public List<SequenceVariantComponent> getVariant() { 
+      if (this.variant == null)
+        this.variant = new ArrayList<SequenceVariantComponent>();
+      return this.variant;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Sequence setReferenceSeq(List<SequenceReferenceSeqComponent> theReferenceSeq) { 
-      this.referenceSeq = theReferenceSeq;
+    public Sequence setVariant(List<SequenceVariantComponent> theVariant) { 
+      this.variant = theVariant;
       return this;
     }
 
-    public boolean hasReferenceSeq() { 
-      if (this.referenceSeq == null)
+    public boolean hasVariant() { 
+      if (this.variant == null)
         return false;
-      for (SequenceReferenceSeqComponent item : this.referenceSeq)
+      for (SequenceVariantComponent item : this.variant)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #referenceSeq} (Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .)
-     */
-    // syntactic sugar
-    public SequenceReferenceSeqComponent addReferenceSeq() { //3
-      SequenceReferenceSeqComponent t = new SequenceReferenceSeqComponent();
-      if (this.referenceSeq == null)
-        this.referenceSeq = new ArrayList<SequenceReferenceSeqComponent>();
-      this.referenceSeq.add(t);
+    public SequenceVariantComponent addVariant() { //3
+      SequenceVariantComponent t = new SequenceVariantComponent();
+      if (this.variant == null)
+        this.variant = new ArrayList<SequenceVariantComponent>();
+      this.variant.add(t);
       return t;
     }
 
-    // syntactic sugar
-    public Sequence addReferenceSeq(SequenceReferenceSeqComponent t) { //3
+    public Sequence addVariant(SequenceVariantComponent t) { //3
       if (t == null)
         return this;
-      if (this.referenceSeq == null)
-        this.referenceSeq = new ArrayList<SequenceReferenceSeqComponent>();
-      this.referenceSeq.add(t);
+      if (this.variant == null)
+        this.variant = new ArrayList<SequenceVariantComponent>();
+      this.variant.add(t);
       return this;
     }
 
     /**
-     * @return {@link #variation} (Variation info in this sequence.)
+     * @return The first repetition of repeating field {@link #variant}, creating it if it does not already exist
      */
-    public SequenceVariationComponent getVariation() { 
-      if (this.variation == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.variation");
-        else if (Configuration.doAutoCreate())
-          this.variation = new SequenceVariationComponent(); // cc
-      return this.variation;
-    }
-
-    public boolean hasVariation() { 
-      return this.variation != null && !this.variation.isEmpty();
+    public SequenceVariantComponent getVariantFirstRep() { 
+      if (getVariant().isEmpty()) {
+        addVariant();
+      }
+      return getVariant().get(0);
     }
 
     /**
-     * @param value {@link #variation} (Variation info in this sequence.)
+     * @return {@link #observedSeq} (Observed sequence.). This is the underlying object with id, value and extensions. The accessor "getObservedSeq" gives direct access to the value
      */
-    public Sequence setVariation(SequenceVariationComponent value) { 
-      this.variation = value;
+    public StringType getObservedSeqElement() { 
+      if (this.observedSeq == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Sequence.observedSeq");
+        else if (Configuration.doAutoCreate())
+          this.observedSeq = new StringType(); // bb
+      return this.observedSeq;
+    }
+
+    public boolean hasObservedSeqElement() { 
+      return this.observedSeq != null && !this.observedSeq.isEmpty();
+    }
+
+    public boolean hasObservedSeq() { 
+      return this.observedSeq != null && !this.observedSeq.isEmpty();
+    }
+
+    /**
+     * @param value {@link #observedSeq} (Observed sequence.). This is the underlying object with id, value and extensions. The accessor "getObservedSeq" gives direct access to the value
+     */
+    public Sequence setObservedSeqElement(StringType value) { 
+      this.observedSeq = value;
+      return this;
+    }
+
+    /**
+     * @return Observed sequence.
+     */
+    public String getObservedSeq() { 
+      return this.observedSeq == null ? null : this.observedSeq.getValue();
+    }
+
+    /**
+     * @param value Observed sequence.
+     */
+    public Sequence setObservedSeq(String value) { 
+      if (Utilities.noString(value))
+        this.observedSeq = null;
+      else {
+        if (this.observedSeq == null)
+          this.observedSeq = new StringType();
+        this.observedSeq.setValue(value);
+      }
       return this;
     }
 
@@ -3102,16 +3787,6 @@ public class Sequence extends DomainResource {
       if (this.quality == null)
         this.quality = new ArrayList<SequenceQualityComponent>();
       return this.quality;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #quality}, creating it if it does not already exist
-     */
-    public SequenceQualityComponent getQualityFirstRep() { 
-      if (getQuality().isEmpty()) {
-        addQuality();
-      }
-      return getQuality().get(0);
     }
 
     /**
@@ -3131,10 +3806,6 @@ public class Sequence extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #quality} (Quality for sequence quality vary by platform reflecting differences in sequencing chemistry and digital processing.)
-     */
-    // syntactic sugar
     public SequenceQualityComponent addQuality() { //3
       SequenceQualityComponent t = new SequenceQualityComponent();
       if (this.quality == null)
@@ -3143,7 +3814,6 @@ public class Sequence extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Sequence addQuality(SequenceQualityComponent t) { //3
       if (t == null)
         return this;
@@ -3154,118 +3824,13 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #allelicState} (The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA.)
+     * @return The first repetition of repeating field {@link #quality}, creating it if it does not already exist
      */
-    public CodeableConcept getAllelicState() { 
-      if (this.allelicState == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.allelicState");
-        else if (Configuration.doAutoCreate())
-          this.allelicState = new CodeableConcept(); // cc
-      return this.allelicState;
-    }
-
-    public boolean hasAllelicState() { 
-      return this.allelicState != null && !this.allelicState.isEmpty();
-    }
-
-    /**
-     * @param value {@link #allelicState} (The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA.)
-     */
-    public Sequence setAllelicState(CodeableConcept value) { 
-      this.allelicState = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #allelicFrequency} (Allele frequencies.). This is the underlying object with id, value and extensions. The accessor "getAllelicFrequency" gives direct access to the value
-     */
-    public DecimalType getAllelicFrequencyElement() { 
-      if (this.allelicFrequency == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.allelicFrequency");
-        else if (Configuration.doAutoCreate())
-          this.allelicFrequency = new DecimalType(); // bb
-      return this.allelicFrequency;
-    }
-
-    public boolean hasAllelicFrequencyElement() { 
-      return this.allelicFrequency != null && !this.allelicFrequency.isEmpty();
-    }
-
-    public boolean hasAllelicFrequency() { 
-      return this.allelicFrequency != null && !this.allelicFrequency.isEmpty();
-    }
-
-    /**
-     * @param value {@link #allelicFrequency} (Allele frequencies.). This is the underlying object with id, value and extensions. The accessor "getAllelicFrequency" gives direct access to the value
-     */
-    public Sequence setAllelicFrequencyElement(DecimalType value) { 
-      this.allelicFrequency = value;
-      return this;
-    }
-
-    /**
-     * @return Allele frequencies.
-     */
-    public BigDecimal getAllelicFrequency() { 
-      return this.allelicFrequency == null ? null : this.allelicFrequency.getValue();
-    }
-
-    /**
-     * @param value Allele frequencies.
-     */
-    public Sequence setAllelicFrequency(BigDecimal value) { 
-      if (value == null)
-        this.allelicFrequency = null;
-      else {
-        if (this.allelicFrequency == null)
-          this.allelicFrequency = new DecimalType();
-        this.allelicFrequency.setValue(value);
+    public SequenceQualityComponent getQualityFirstRep() { 
+      if (getQuality().isEmpty()) {
+        addQuality();
       }
-      return this;
-    }
-
-    /**
-     * @param value Allele frequencies.
-     */
-    public Sequence setAllelicFrequency(long value) { 
-          this.allelicFrequency = new DecimalType();
-        this.allelicFrequency.setValue(value);
-      return this;
-    }
-
-    /**
-     * @param value Allele frequencies.
-     */
-    public Sequence setAllelicFrequency(double value) { 
-          this.allelicFrequency = new DecimalType();
-        this.allelicFrequency.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #copyNumberEvent} (Values: amplificaiton / deletion / LOH.)
-     */
-    public CodeableConcept getCopyNumberEvent() { 
-      if (this.copyNumberEvent == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.copyNumberEvent");
-        else if (Configuration.doAutoCreate())
-          this.copyNumberEvent = new CodeableConcept(); // cc
-      return this.copyNumberEvent;
-    }
-
-    public boolean hasCopyNumberEvent() { 
-      return this.copyNumberEvent != null && !this.copyNumberEvent.isEmpty();
-    }
-
-    /**
-     * @param value {@link #copyNumberEvent} (Values: amplificaiton / deletion / LOH.)
-     */
-    public Sequence setCopyNumberEvent(CodeableConcept value) { 
-      this.copyNumberEvent = value;
-      return this;
+      return getQuality().get(0);
     }
 
     /**
@@ -3323,16 +3888,6 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #repository}, creating it if it does not already exist
-     */
-    public SequenceRepositoryComponent getRepositoryFirstRep() { 
-      if (getRepository().isEmpty()) {
-        addRepository();
-      }
-      return getRepository().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Sequence setRepository(List<SequenceRepositoryComponent> theRepository) { 
@@ -3349,10 +3904,6 @@ public class Sequence extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #repository} (Configurations of the external repository.)
-     */
-    // syntactic sugar
     public SequenceRepositoryComponent addRepository() { //3
       SequenceRepositoryComponent t = new SequenceRepositoryComponent();
       if (this.repository == null)
@@ -3361,7 +3912,6 @@ public class Sequence extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Sequence addRepository(SequenceRepositoryComponent t) { //3
       if (t == null)
         return this;
@@ -3372,22 +3922,22 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #pointer} (Pointer to next atomic sequence which at most contains one variation.)
+     * @return The first repetition of repeating field {@link #repository}, creating it if it does not already exist
+     */
+    public SequenceRepositoryComponent getRepositoryFirstRep() { 
+      if (getRepository().isEmpty()) {
+        addRepository();
+      }
+      return getRepository().get(0);
+    }
+
+    /**
+     * @return {@link #pointer} (Pointer to next atomic sequence which at most contains one variant.)
      */
     public List<Reference> getPointer() { 
       if (this.pointer == null)
         this.pointer = new ArrayList<Reference>();
       return this.pointer;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #pointer}, creating it if it does not already exist
-     */
-    public Reference getPointerFirstRep() { 
-      if (getPointer().isEmpty()) {
-        addPointer();
-      }
-      return getPointer().get(0);
     }
 
     /**
@@ -3407,10 +3957,6 @@ public class Sequence extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #pointer} (Pointer to next atomic sequence which at most contains one variation.)
-     */
-    // syntactic sugar
     public Reference addPointer() { //3
       Reference t = new Reference();
       if (this.pointer == null)
@@ -3419,7 +3965,6 @@ public class Sequence extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Sequence addPointer(Reference t) { //3
       if (t == null)
         return this;
@@ -3430,18 +3975,29 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #pointer} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Pointer to next atomic sequence which at most contains one variation.)
+     * @return The first repetition of repeating field {@link #pointer}, creating it if it does not already exist
      */
+    public Reference getPointerFirstRep() { 
+      if (getPointer().isEmpty()) {
+        addPointer();
+      }
+      return getPointer().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Sequence> getPointerTarget() { 
       if (this.pointerTarget == null)
         this.pointerTarget = new ArrayList<Sequence>();
       return this.pointerTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #pointer} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Pointer to next atomic sequence which at most contains one variation.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public Sequence addPointerTarget() { 
       Sequence r = new Sequence();
       if (this.pointerTarget == null)
@@ -3451,165 +4007,66 @@ public class Sequence extends DomainResource {
     }
 
     /**
-     * @return {@link #observedSeq} (Observed Sequence.). This is the underlying object with id, value and extensions. The accessor "getObservedSeq" gives direct access to the value
+     * @return {@link #structureVariant} (Structural variant.)
      */
-    public StringType getObservedSeqElement() { 
-      if (this.observedSeq == null)
+    public SequenceStructureVariantComponent getStructureVariant() { 
+      if (this.structureVariant == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.observedSeq");
+          throw new Error("Attempt to auto-create Sequence.structureVariant");
         else if (Configuration.doAutoCreate())
-          this.observedSeq = new StringType(); // bb
-      return this.observedSeq;
+          this.structureVariant = new SequenceStructureVariantComponent(); // cc
+      return this.structureVariant;
     }
 
-    public boolean hasObservedSeqElement() { 
-      return this.observedSeq != null && !this.observedSeq.isEmpty();
-    }
-
-    public boolean hasObservedSeq() { 
-      return this.observedSeq != null && !this.observedSeq.isEmpty();
+    public boolean hasStructureVariant() { 
+      return this.structureVariant != null && !this.structureVariant.isEmpty();
     }
 
     /**
-     * @param value {@link #observedSeq} (Observed Sequence.). This is the underlying object with id, value and extensions. The accessor "getObservedSeq" gives direct access to the value
+     * @param value {@link #structureVariant} (Structural variant.)
      */
-    public Sequence setObservedSeqElement(StringType value) { 
-      this.observedSeq = value;
-      return this;
-    }
-
-    /**
-     * @return Observed Sequence.
-     */
-    public String getObservedSeq() { 
-      return this.observedSeq == null ? null : this.observedSeq.getValue();
-    }
-
-    /**
-     * @param value Observed Sequence.
-     */
-    public Sequence setObservedSeq(String value) { 
-      if (Utilities.noString(value))
-        this.observedSeq = null;
-      else {
-        if (this.observedSeq == null)
-          this.observedSeq = new StringType();
-        this.observedSeq.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #observation} (Analysis of the sequence.)
-     */
-    public Reference getObservation() { 
-      if (this.observation == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.observation");
-        else if (Configuration.doAutoCreate())
-          this.observation = new Reference(); // cc
-      return this.observation;
-    }
-
-    public boolean hasObservation() { 
-      return this.observation != null && !this.observation.isEmpty();
-    }
-
-    /**
-     * @param value {@link #observation} (Analysis of the sequence.)
-     */
-    public Sequence setObservation(Reference value) { 
-      this.observation = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #observation} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Analysis of the sequence.)
-     */
-    public Observation getObservationTarget() { 
-      if (this.observationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.observation");
-        else if (Configuration.doAutoCreate())
-          this.observationTarget = new Observation(); // aa
-      return this.observationTarget;
-    }
-
-    /**
-     * @param value {@link #observation} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Analysis of the sequence.)
-     */
-    public Sequence setObservationTarget(Observation value) { 
-      this.observationTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #structureVariation} (Structural variant.)
-     */
-    public SequenceStructureVariationComponent getStructureVariation() { 
-      if (this.structureVariation == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.structureVariation");
-        else if (Configuration.doAutoCreate())
-          this.structureVariation = new SequenceStructureVariationComponent(); // cc
-      return this.structureVariation;
-    }
-
-    public boolean hasStructureVariation() { 
-      return this.structureVariation != null && !this.structureVariation.isEmpty();
-    }
-
-    /**
-     * @param value {@link #structureVariation} (Structural variant.)
-     */
-    public Sequence setStructureVariation(SequenceStructureVariationComponent value) { 
-      this.structureVariation = value;
+    public Sequence setStructureVariant(SequenceStructureVariantComponent value) { 
+      this.structureVariant = value;
       return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("type", "code", "Amino acid / cDNA transcript / RNA variation.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient, or group of patients whose sequencing results are described by this resource.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("identifier", "Identifier", "A unique identifier for this particular sequence instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("type", "code", "Amino acid / cDNA transcript / RNA variant.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("coordinateSystem", "integer", "Whether the sequence is numbered starting at 0 (0-based numbering or coordinates) or starting at 1 (1-based numbering). Values are \"0\" for 0-based numbering and \"1\" for one-based.", 0, java.lang.Integer.MAX_VALUE, coordinateSystem));
+        childrenList.add(new Property("patient", "Reference(Patient)", "The patient whose sequencing results are described by this resource.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "Specimen used for sequencing.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("device", "Reference(Device)", "The method for sequencing, for example, chip information.", 0, java.lang.Integer.MAX_VALUE, device));
         childrenList.add(new Property("quantity", "Quantity", "Quantity of the sequence.", 0, java.lang.Integer.MAX_VALUE, quantity));
-        childrenList.add(new Property("species", "CodeableConcept", "The organism from which sample of the sequence was extracted. Supporting tests of human, viruses, and bacteria.", 0, java.lang.Integer.MAX_VALUE, species));
         childrenList.add(new Property("referenceSeq", "", "Reference Sequence. It can be described in two ways. One is provide the unique identifier of reference sequence submitted to NCBI. The start and end position of window on reference sequence should be defined.  The other way is using  genome build, chromosome number,and also the start, end position of window (this method is specifically for DNA reference sequence) .", 0, java.lang.Integer.MAX_VALUE, referenceSeq));
-        childrenList.add(new Property("variation", "", "Variation info in this sequence.", 0, java.lang.Integer.MAX_VALUE, variation));
+        childrenList.add(new Property("variant", "", "Variant info in this sequence.", 0, java.lang.Integer.MAX_VALUE, variant));
+        childrenList.add(new Property("observedSeq", "string", "Observed sequence.", 0, java.lang.Integer.MAX_VALUE, observedSeq));
         childrenList.add(new Property("quality", "", "Quality for sequence quality vary by platform reflecting differences in sequencing chemistry and digital processing.", 0, java.lang.Integer.MAX_VALUE, quality));
-        childrenList.add(new Property("allelicState", "CodeableConcept", "The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA.", 0, java.lang.Integer.MAX_VALUE, allelicState));
-        childrenList.add(new Property("allelicFrequency", "decimal", "Allele frequencies.", 0, java.lang.Integer.MAX_VALUE, allelicFrequency));
-        childrenList.add(new Property("copyNumberEvent", "CodeableConcept", "Values: amplificaiton / deletion / LOH.", 0, java.lang.Integer.MAX_VALUE, copyNumberEvent));
         childrenList.add(new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, java.lang.Integer.MAX_VALUE, readCoverage));
         childrenList.add(new Property("repository", "", "Configurations of the external repository.", 0, java.lang.Integer.MAX_VALUE, repository));
-        childrenList.add(new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variation.", 0, java.lang.Integer.MAX_VALUE, pointer));
-        childrenList.add(new Property("observedSeq", "string", "Observed Sequence.", 0, java.lang.Integer.MAX_VALUE, observedSeq));
-        childrenList.add(new Property("observation", "Reference(Observation)", "Analysis of the sequence.", 0, java.lang.Integer.MAX_VALUE, observation));
-        childrenList.add(new Property("structureVariation", "", "Structural variant.", 0, java.lang.Integer.MAX_VALUE, structureVariation));
+        childrenList.add(new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer));
+        childrenList.add(new Property("structureVariant", "", "Structural variant.", 0, java.lang.Integer.MAX_VALUE, structureVariant));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SequenceType>
+        case 354212295: /*coordinateSystem*/ return this.coordinateSystem == null ? new Base[0] : new Base[] {this.coordinateSystem}; // IntegerType
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : new Base[] {this.specimen}; // Reference
         case -1335157162: /*device*/ return this.device == null ? new Base[0] : new Base[] {this.device}; // Reference
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
-        case -2008465092: /*species*/ return this.species == null ? new Base[0] : new Base[] {this.species}; // CodeableConcept
-        case -502547180: /*referenceSeq*/ return this.referenceSeq == null ? new Base[0] : this.referenceSeq.toArray(new Base[this.referenceSeq.size()]); // SequenceReferenceSeqComponent
-        case -81944045: /*variation*/ return this.variation == null ? new Base[0] : new Base[] {this.variation}; // SequenceVariationComponent
+        case -502547180: /*referenceSeq*/ return this.referenceSeq == null ? new Base[0] : new Base[] {this.referenceSeq}; // SequenceReferenceSeqComponent
+        case 236785797: /*variant*/ return this.variant == null ? new Base[0] : this.variant.toArray(new Base[this.variant.size()]); // SequenceVariantComponent
+        case 125541495: /*observedSeq*/ return this.observedSeq == null ? new Base[0] : new Base[] {this.observedSeq}; // StringType
         case 651215103: /*quality*/ return this.quality == null ? new Base[0] : this.quality.toArray(new Base[this.quality.size()]); // SequenceQualityComponent
-        case 2079026319: /*allelicState*/ return this.allelicState == null ? new Base[0] : new Base[] {this.allelicState}; // CodeableConcept
-        case 8650330: /*allelicFrequency*/ return this.allelicFrequency == null ? new Base[0] : new Base[] {this.allelicFrequency}; // DecimalType
-        case 960854556: /*copyNumberEvent*/ return this.copyNumberEvent == null ? new Base[0] : new Base[] {this.copyNumberEvent}; // CodeableConcept
         case -1798816354: /*readCoverage*/ return this.readCoverage == null ? new Base[0] : new Base[] {this.readCoverage}; // IntegerType
         case 1950800714: /*repository*/ return this.repository == null ? new Base[0] : this.repository.toArray(new Base[this.repository.size()]); // SequenceRepositoryComponent
         case -400605635: /*pointer*/ return this.pointer == null ? new Base[0] : this.pointer.toArray(new Base[this.pointer.size()]); // Reference
-        case 125541495: /*observedSeq*/ return this.observedSeq == null ? new Base[0] : new Base[] {this.observedSeq}; // StringType
-        case 122345516: /*observation*/ return this.observation == null ? new Base[0] : new Base[] {this.observation}; // Reference
-        case 1886586336: /*structureVariation*/ return this.structureVariation == null ? new Base[0] : new Base[] {this.structureVariation}; // SequenceStructureVariationComponent
+        case 757269394: /*structureVariant*/ return this.structureVariant == null ? new Base[0] : new Base[] {this.structureVariant}; // SequenceStructureVariantComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3618,8 +4075,14 @@ public class Sequence extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
         case 3575610: // type
           this.type = new SequenceTypeEnumFactory().fromType(value); // Enumeration<SequenceType>
+          break;
+        case 354212295: // coordinateSystem
+          this.coordinateSystem = castToInteger(value); // IntegerType
           break;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
@@ -3633,26 +4096,17 @@ public class Sequence extends DomainResource {
         case -1285004149: // quantity
           this.quantity = castToQuantity(value); // Quantity
           break;
-        case -2008465092: // species
-          this.species = castToCodeableConcept(value); // CodeableConcept
-          break;
         case -502547180: // referenceSeq
-          this.getReferenceSeq().add((SequenceReferenceSeqComponent) value); // SequenceReferenceSeqComponent
+          this.referenceSeq = (SequenceReferenceSeqComponent) value; // SequenceReferenceSeqComponent
           break;
-        case -81944045: // variation
-          this.variation = (SequenceVariationComponent) value; // SequenceVariationComponent
+        case 236785797: // variant
+          this.getVariant().add((SequenceVariantComponent) value); // SequenceVariantComponent
+          break;
+        case 125541495: // observedSeq
+          this.observedSeq = castToString(value); // StringType
           break;
         case 651215103: // quality
           this.getQuality().add((SequenceQualityComponent) value); // SequenceQualityComponent
-          break;
-        case 2079026319: // allelicState
-          this.allelicState = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case 8650330: // allelicFrequency
-          this.allelicFrequency = castToDecimal(value); // DecimalType
-          break;
-        case 960854556: // copyNumberEvent
-          this.copyNumberEvent = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1798816354: // readCoverage
           this.readCoverage = castToInteger(value); // IntegerType
@@ -3663,14 +4117,8 @@ public class Sequence extends DomainResource {
         case -400605635: // pointer
           this.getPointer().add(castToReference(value)); // Reference
           break;
-        case 125541495: // observedSeq
-          this.observedSeq = castToString(value); // StringType
-          break;
-        case 122345516: // observation
-          this.observation = castToReference(value); // Reference
-          break;
-        case 1886586336: // structureVariation
-          this.structureVariation = (SequenceStructureVariationComponent) value; // SequenceStructureVariationComponent
+        case 757269394: // structureVariant
+          this.structureVariant = (SequenceStructureVariantComponent) value; // SequenceStructureVariantComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -3679,8 +4127,12 @@ public class Sequence extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("type"))
           this.type = new SequenceTypeEnumFactory().fromType(value); // Enumeration<SequenceType>
+        else if (name.equals("coordinateSystem"))
+          this.coordinateSystem = castToInteger(value); // IntegerType
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
         else if (name.equals("specimen"))
@@ -3689,32 +4141,22 @@ public class Sequence extends DomainResource {
           this.device = castToReference(value); // Reference
         else if (name.equals("quantity"))
           this.quantity = castToQuantity(value); // Quantity
-        else if (name.equals("species"))
-          this.species = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("referenceSeq"))
-          this.getReferenceSeq().add((SequenceReferenceSeqComponent) value);
-        else if (name.equals("variation"))
-          this.variation = (SequenceVariationComponent) value; // SequenceVariationComponent
+          this.referenceSeq = (SequenceReferenceSeqComponent) value; // SequenceReferenceSeqComponent
+        else if (name.equals("variant"))
+          this.getVariant().add((SequenceVariantComponent) value);
+        else if (name.equals("observedSeq"))
+          this.observedSeq = castToString(value); // StringType
         else if (name.equals("quality"))
           this.getQuality().add((SequenceQualityComponent) value);
-        else if (name.equals("allelicState"))
-          this.allelicState = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("allelicFrequency"))
-          this.allelicFrequency = castToDecimal(value); // DecimalType
-        else if (name.equals("copyNumberEvent"))
-          this.copyNumberEvent = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("readCoverage"))
           this.readCoverage = castToInteger(value); // IntegerType
         else if (name.equals("repository"))
           this.getRepository().add((SequenceRepositoryComponent) value);
         else if (name.equals("pointer"))
           this.getPointer().add(castToReference(value));
-        else if (name.equals("observedSeq"))
-          this.observedSeq = castToString(value); // StringType
-        else if (name.equals("observation"))
-          this.observation = castToReference(value); // Reference
-        else if (name.equals("structureVariation"))
-          this.structureVariation = (SequenceStructureVariationComponent) value; // SequenceStructureVariationComponent
+        else if (name.equals("structureVariant"))
+          this.structureVariant = (SequenceStructureVariantComponent) value; // SequenceStructureVariantComponent
         else
           super.setProperty(name, value);
       }
@@ -3722,24 +4164,21 @@ public class Sequence extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1618432855:  return addIdentifier(); // Identifier
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SequenceType>
+        case 354212295: throw new FHIRException("Cannot make property coordinateSystem as it is not a complex type"); // IntegerType
         case -791418107:  return getPatient(); // Reference
         case -2132868344:  return getSpecimen(); // Reference
         case -1335157162:  return getDevice(); // Reference
         case -1285004149:  return getQuantity(); // Quantity
-        case -2008465092:  return getSpecies(); // CodeableConcept
-        case -502547180:  return addReferenceSeq(); // SequenceReferenceSeqComponent
-        case -81944045:  return getVariation(); // SequenceVariationComponent
+        case -502547180:  return getReferenceSeq(); // SequenceReferenceSeqComponent
+        case 236785797:  return addVariant(); // SequenceVariantComponent
+        case 125541495: throw new FHIRException("Cannot make property observedSeq as it is not a complex type"); // StringType
         case 651215103:  return addQuality(); // SequenceQualityComponent
-        case 2079026319:  return getAllelicState(); // CodeableConcept
-        case 8650330: throw new FHIRException("Cannot make property allelicFrequency as it is not a complex type"); // DecimalType
-        case 960854556:  return getCopyNumberEvent(); // CodeableConcept
         case -1798816354: throw new FHIRException("Cannot make property readCoverage as it is not a complex type"); // IntegerType
         case 1950800714:  return addRepository(); // SequenceRepositoryComponent
         case -400605635:  return addPointer(); // Reference
-        case 125541495: throw new FHIRException("Cannot make property observedSeq as it is not a complex type"); // StringType
-        case 122345516:  return getObservation(); // Reference
-        case 1886586336:  return getStructureVariation(); // SequenceStructureVariationComponent
+        case 757269394:  return getStructureVariant(); // SequenceStructureVariantComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -3747,8 +4186,14 @@ public class Sequence extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.type");
+        }
+        else if (name.equals("coordinateSystem")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.coordinateSystem");
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
@@ -3766,30 +4211,18 @@ public class Sequence extends DomainResource {
           this.quantity = new Quantity();
           return this.quantity;
         }
-        else if (name.equals("species")) {
-          this.species = new CodeableConcept();
-          return this.species;
-        }
         else if (name.equals("referenceSeq")) {
-          return addReferenceSeq();
+          this.referenceSeq = new SequenceReferenceSeqComponent();
+          return this.referenceSeq;
         }
-        else if (name.equals("variation")) {
-          this.variation = new SequenceVariationComponent();
-          return this.variation;
+        else if (name.equals("variant")) {
+          return addVariant();
+        }
+        else if (name.equals("observedSeq")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.observedSeq");
         }
         else if (name.equals("quality")) {
           return addQuality();
-        }
-        else if (name.equals("allelicState")) {
-          this.allelicState = new CodeableConcept();
-          return this.allelicState;
-        }
-        else if (name.equals("allelicFrequency")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.allelicFrequency");
-        }
-        else if (name.equals("copyNumberEvent")) {
-          this.copyNumberEvent = new CodeableConcept();
-          return this.copyNumberEvent;
         }
         else if (name.equals("readCoverage")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.readCoverage");
@@ -3800,16 +4233,9 @@ public class Sequence extends DomainResource {
         else if (name.equals("pointer")) {
           return addPointer();
         }
-        else if (name.equals("observedSeq")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.observedSeq");
-        }
-        else if (name.equals("observation")) {
-          this.observation = new Reference();
-          return this.observation;
-        }
-        else if (name.equals("structureVariation")) {
-          this.structureVariation = new SequenceStructureVariationComponent();
-          return this.structureVariation;
+        else if (name.equals("structureVariant")) {
+          this.structureVariant = new SequenceStructureVariantComponent();
+          return this.structureVariant;
         }
         else
           return super.addChild(name);
@@ -3823,26 +4249,29 @@ public class Sequence extends DomainResource {
       public Sequence copy() {
         Sequence dst = new Sequence();
         copyValues(dst);
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.type = type == null ? null : type.copy();
+        dst.coordinateSystem = coordinateSystem == null ? null : coordinateSystem.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.specimen = specimen == null ? null : specimen.copy();
         dst.device = device == null ? null : device.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
-        dst.species = species == null ? null : species.copy();
-        if (referenceSeq != null) {
-          dst.referenceSeq = new ArrayList<SequenceReferenceSeqComponent>();
-          for (SequenceReferenceSeqComponent i : referenceSeq)
-            dst.referenceSeq.add(i.copy());
+        dst.referenceSeq = referenceSeq == null ? null : referenceSeq.copy();
+        if (variant != null) {
+          dst.variant = new ArrayList<SequenceVariantComponent>();
+          for (SequenceVariantComponent i : variant)
+            dst.variant.add(i.copy());
         };
-        dst.variation = variation == null ? null : variation.copy();
+        dst.observedSeq = observedSeq == null ? null : observedSeq.copy();
         if (quality != null) {
           dst.quality = new ArrayList<SequenceQualityComponent>();
           for (SequenceQualityComponent i : quality)
             dst.quality.add(i.copy());
         };
-        dst.allelicState = allelicState == null ? null : allelicState.copy();
-        dst.allelicFrequency = allelicFrequency == null ? null : allelicFrequency.copy();
-        dst.copyNumberEvent = copyNumberEvent == null ? null : copyNumberEvent.copy();
         dst.readCoverage = readCoverage == null ? null : readCoverage.copy();
         if (repository != null) {
           dst.repository = new ArrayList<SequenceRepositoryComponent>();
@@ -3854,9 +4283,7 @@ public class Sequence extends DomainResource {
           for (Reference i : pointer)
             dst.pointer.add(i.copy());
         };
-        dst.observedSeq = observedSeq == null ? null : observedSeq.copy();
-        dst.observation = observation == null ? null : observation.copy();
-        dst.structureVariation = structureVariation == null ? null : structureVariation.copy();
+        dst.structureVariant = structureVariant == null ? null : structureVariant.copy();
         return dst;
       }
 
@@ -3871,13 +4298,11 @@ public class Sequence extends DomainResource {
         if (!(other instanceof Sequence))
           return false;
         Sequence o = (Sequence) other;
-        return compareDeep(type, o.type, true) && compareDeep(patient, o.patient, true) && compareDeep(specimen, o.specimen, true)
-           && compareDeep(device, o.device, true) && compareDeep(quantity, o.quantity, true) && compareDeep(species, o.species, true)
-           && compareDeep(referenceSeq, o.referenceSeq, true) && compareDeep(variation, o.variation, true)
-           && compareDeep(quality, o.quality, true) && compareDeep(allelicState, o.allelicState, true) && compareDeep(allelicFrequency, o.allelicFrequency, true)
-           && compareDeep(copyNumberEvent, o.copyNumberEvent, true) && compareDeep(readCoverage, o.readCoverage, true)
-           && compareDeep(repository, o.repository, true) && compareDeep(pointer, o.pointer, true) && compareDeep(observedSeq, o.observedSeq, true)
-           && compareDeep(observation, o.observation, true) && compareDeep(structureVariation, o.structureVariation, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(coordinateSystem, o.coordinateSystem, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(specimen, o.specimen, true) && compareDeep(device, o.device, true)
+           && compareDeep(quantity, o.quantity, true) && compareDeep(referenceSeq, o.referenceSeq, true) && compareDeep(variant, o.variant, true)
+           && compareDeep(observedSeq, o.observedSeq, true) && compareDeep(quality, o.quality, true) && compareDeep(readCoverage, o.readCoverage, true)
+           && compareDeep(repository, o.repository, true) && compareDeep(pointer, o.pointer, true) && compareDeep(structureVariant, o.structureVariant, true)
           ;
       }
 
@@ -3888,15 +4313,15 @@ public class Sequence extends DomainResource {
         if (!(other instanceof Sequence))
           return false;
         Sequence o = (Sequence) other;
-        return compareValues(type, o.type, true) && compareValues(allelicFrequency, o.allelicFrequency, true)
-           && compareValues(readCoverage, o.readCoverage, true) && compareValues(observedSeq, o.observedSeq, true)
+        return compareValues(type, o.type, true) && compareValues(coordinateSystem, o.coordinateSystem, true)
+           && compareValues(observedSeq, o.observedSeq, true) && compareValues(readCoverage, o.readCoverage, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, patient, specimen, device
-          , quantity, species, referenceSeq, variation, quality, allelicState, allelicFrequency, copyNumberEvent
-          , readCoverage, repository, pointer, observedSeq, observation, structureVariation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, coordinateSystem
+          , patient, specimen, device, quantity, referenceSeq, variant, observedSeq, quality
+          , readCoverage, repository, pointer, structureVariant);
       }
 
   @Override
@@ -3912,7 +4337,7 @@ public class Sequence extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite", compositeOf={"chromosome", "start"}, target={} )
+  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite", compositeOf={"chromosome", "start"} )
   public static final String SP_COORDINATE = "coordinate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
@@ -3925,26 +4350,6 @@ public class Sequence extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.NumberClientParam> COORDINATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.NumberClientParam>(SP_COORDINATE);
 
  /**
-   * Search parameter: <b>species</b>
-   * <p>
-   * Description: <b>The organism from which sample of the sequence was extracted.</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Sequence.species</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="species", path="Sequence.species", description="The organism from which sample of the sequence was extracted.", type="token", target={} )
-  public static final String SP_SPECIES = "species";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>species</b>
-   * <p>
-   * Description: <b>The organism from which sample of the sequence was extracted.</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Sequence.species</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIES = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIES);
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The subject that the observation is about</b><br>
@@ -3952,7 +4357,7 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Sequence.patient", description="The subject that the observation is about", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Sequence.patient", description="The subject that the observation is about", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3978,7 +4383,7 @@ public class Sequence extends DomainResource {
    * Path: <b>Sequence.referenceSeq.chromosome</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="chromosome", path="Sequence.referenceSeq.chromosome", description="Chromosome of the sequence", type="token", target={} )
+  @SearchParamDefinition(name="chromosome", path="Sequence.referenceSeq.chromosome", description="Chromosome of the sequence", type="token" )
   public static final String SP_CHROMOSOME = "chromosome";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>chromosome</b>
@@ -3995,17 +4400,17 @@ public class Sequence extends DomainResource {
    * <p>
    * Description: <b>Start position (0-based inclusive) of the sequence</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>Sequence.variation.start</b><br>
+   * Path: <b>Sequence.variant.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Sequence.variation.start", description="Start position (0-based inclusive) of the sequence", type="number", target={} )
+  @SearchParamDefinition(name="start", path="Sequence.variant.start", description="Start position (0-based inclusive) of the sequence", type="number" )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
    * <p>
    * Description: <b>Start position (0-based inclusive) of the sequence</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>Sequence.variation.start</b><br>
+   * Path: <b>Sequence.variant.start</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.NumberClientParam START = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_START);
@@ -4015,17 +4420,17 @@ public class Sequence extends DomainResource {
    * <p>
    * Description: <b>End position (0-based exclusive) of the sequence</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>Sequence.variation.end</b><br>
+   * Path: <b>Sequence.variant.end</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="end", path="Sequence.variation.end", description="End position (0-based exclusive) of the sequence", type="number", target={} )
+  @SearchParamDefinition(name="end", path="Sequence.variant.end", description="End position (0-based exclusive) of the sequence", type="number" )
   public static final String SP_END = "end";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>end</b>
    * <p>
    * Description: <b>End position (0-based exclusive) of the sequence</b><br>
    * Type: <b>number</b><br>
-   * Path: <b>Sequence.variation.end</b><br>
+   * Path: <b>Sequence.variant.end</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.NumberClientParam END = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_END);
@@ -4033,17 +4438,17 @@ public class Sequence extends DomainResource {
  /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variation.</b><br>
+   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variant.</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Sequence.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Sequence.type", description="The type of the variant: Amino acid / cDNA transcript / RNA variation.", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Sequence.type", description="The type of the variant: Amino acid / cDNA transcript / RNA variant.", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variation.</b><br>
+   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variant.</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Sequence.type</b><br>
    * </p>

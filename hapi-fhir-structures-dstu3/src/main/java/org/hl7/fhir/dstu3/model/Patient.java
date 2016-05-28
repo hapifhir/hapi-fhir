@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -62,7 +63,7 @@ public class Patient extends DomainResource {
          */
         SEEALSO, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static LinkType fromCode(String codeString) throws FHIRException {
@@ -74,7 +75,10 @@ public class Patient extends DomainResource {
           return REFER;
         if ("seealso".equals(codeString))
           return SEEALSO;
-        throw new FHIRException("Unknown LinkType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown LinkType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -226,16 +230,6 @@ public class Patient extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #relationship}, creating it if it does not already exist
-         */
-        public CodeableConcept getRelationshipFirstRep() { 
-          if (getRelationship().isEmpty()) {
-            addRelationship();
-          }
-          return getRelationship().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ContactComponent setRelationship(List<CodeableConcept> theRelationship) { 
@@ -252,10 +246,6 @@ public class Patient extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #relationship} (The nature of the relationship between the patient and the contact person.)
-         */
-    // syntactic sugar
         public CodeableConcept addRelationship() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.relationship == null)
@@ -264,7 +254,6 @@ public class Patient extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ContactComponent addRelationship(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -272,6 +261,16 @@ public class Patient extends DomainResource {
             this.relationship = new ArrayList<CodeableConcept>();
           this.relationship.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #relationship}, creating it if it does not already exist
+         */
+        public CodeableConcept getRelationshipFirstRep() { 
+          if (getRelationship().isEmpty()) {
+            addRelationship();
+          }
+          return getRelationship().get(0);
         }
 
         /**
@@ -308,16 +307,6 @@ public class Patient extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -334,10 +323,6 @@ public class Patient extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (A contact detail for the person, e.g. a telephone number or an email address.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -346,7 +331,6 @@ public class Patient extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -354,6 +338,16 @@ public class Patient extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         /**
@@ -662,8 +656,8 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(relationship, name, telecom, address
-          , gender, organization, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(relationship, name, telecom
+          , address, gender, organization, period);
       }
 
   public String fhirType() {
@@ -892,7 +886,8 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(species, breed, genderStatus);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(species, breed, genderStatus
+          );
       }
 
   public String fhirType() {
@@ -1484,16 +1479,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setIdentifier(List<Identifier> theIdentifier) { 
@@ -1510,10 +1495,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (An identifier for this patient.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1522,7 +1503,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1530,6 +1510,16 @@ public class Patient extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1587,16 +1577,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
-     */
-    public HumanName getNameFirstRep() { 
-      if (getName().isEmpty()) {
-        addName();
-      }
-      return getName().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setName(List<HumanName> theName) { 
@@ -1613,10 +1593,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #name} (A name associated with the individual.)
-     */
-    // syntactic sugar
     public HumanName addName() { //3
       HumanName t = new HumanName();
       if (this.name == null)
@@ -1625,7 +1601,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addName(HumanName t) { //3
       if (t == null)
         return this;
@@ -1636,22 +1611,22 @@ public class Patient extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
+     */
+    public HumanName getNameFirstRep() { 
+      if (getName().isEmpty()) {
+        addName();
+      }
+      return getName().get(0);
+    }
+
+    /**
      * @return {@link #telecom} (A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.)
      */
     public List<ContactPoint> getTelecom() { 
       if (this.telecom == null)
         this.telecom = new ArrayList<ContactPoint>();
       return this.telecom;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
     }
 
     /**
@@ -1671,10 +1646,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -1683,7 +1654,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -1691,6 +1661,16 @@ public class Patient extends DomainResource {
         this.telecom = new ArrayList<ContactPoint>();
       this.telecom.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
     }
 
     /**
@@ -1846,16 +1826,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
-     */
-    public Address getAddressFirstRep() { 
-      if (getAddress().isEmpty()) {
-        addAddress();
-      }
-      return getAddress().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setAddress(List<Address> theAddress) { 
@@ -1872,10 +1842,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #address} (Addresses for the individual.)
-     */
-    // syntactic sugar
     public Address addAddress() { //3
       Address t = new Address();
       if (this.address == null)
@@ -1884,7 +1850,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addAddress(Address t) { //3
       if (t == null)
         return this;
@@ -1892,6 +1857,16 @@ public class Patient extends DomainResource {
         this.address = new ArrayList<Address>();
       this.address.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
     }
 
     /**
@@ -1973,16 +1948,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
-     */
-    public Attachment getPhotoFirstRep() { 
-      if (getPhoto().isEmpty()) {
-        addPhoto();
-      }
-      return getPhoto().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setPhoto(List<Attachment> thePhoto) { 
@@ -1999,10 +1964,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #photo} (Image of the patient.)
-     */
-    // syntactic sugar
     public Attachment addPhoto() { //3
       Attachment t = new Attachment();
       if (this.photo == null)
@@ -2011,7 +1972,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addPhoto(Attachment t) { //3
       if (t == null)
         return this;
@@ -2022,22 +1982,22 @@ public class Patient extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #photo}, creating it if it does not already exist
+     */
+    public Attachment getPhotoFirstRep() { 
+      if (getPhoto().isEmpty()) {
+        addPhoto();
+      }
+      return getPhoto().get(0);
+    }
+
+    /**
      * @return {@link #contact} (A contact party (e.g. guardian, partner, friend) for the patient.)
      */
     public List<ContactComponent> getContact() { 
       if (this.contact == null)
         this.contact = new ArrayList<ContactComponent>();
       return this.contact;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
     }
 
     /**
@@ -2057,10 +2017,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (A contact party (e.g. guardian, partner, friend) for the patient.)
-     */
-    // syntactic sugar
     public ContactComponent addContact() { //3
       ContactComponent t = new ContactComponent();
       if (this.contact == null)
@@ -2069,7 +2025,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addContact(ContactComponent t) { //3
       if (t == null)
         return this;
@@ -2077,6 +2032,16 @@ public class Patient extends DomainResource {
         this.contact = new ArrayList<ContactComponent>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -2113,16 +2078,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
-     */
-    public PatientCommunicationComponent getCommunicationFirstRep() { 
-      if (getCommunication().isEmpty()) {
-        addCommunication();
-      }
-      return getCommunication().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setCommunication(List<PatientCommunicationComponent> theCommunication) { 
@@ -2139,10 +2094,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #communication} (Languages which may be used to communicate with the patient about his or her health.)
-     */
-    // syntactic sugar
     public PatientCommunicationComponent addCommunication() { //3
       PatientCommunicationComponent t = new PatientCommunicationComponent();
       if (this.communication == null)
@@ -2151,7 +2102,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addCommunication(PatientCommunicationComponent t) { //3
       if (t == null)
         return this;
@@ -2162,22 +2112,22 @@ public class Patient extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
+     */
+    public PatientCommunicationComponent getCommunicationFirstRep() { 
+      if (getCommunication().isEmpty()) {
+        addCommunication();
+      }
+      return getCommunication().get(0);
+    }
+
+    /**
      * @return {@link #careProvider} (Patient's nominated care provider.)
      */
     public List<Reference> getCareProvider() { 
       if (this.careProvider == null)
         this.careProvider = new ArrayList<Reference>();
       return this.careProvider;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #careProvider}, creating it if it does not already exist
-     */
-    public Reference getCareProviderFirstRep() { 
-      if (getCareProvider().isEmpty()) {
-        addCareProvider();
-      }
-      return getCareProvider().get(0);
     }
 
     /**
@@ -2197,10 +2147,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #careProvider} (Patient's nominated care provider.)
-     */
-    // syntactic sugar
     public Reference addCareProvider() { //3
       Reference t = new Reference();
       if (this.careProvider == null)
@@ -2209,7 +2155,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addCareProvider(Reference t) { //3
       if (t == null)
         return this;
@@ -2220,8 +2165,19 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #careProvider} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Patient's nominated care provider.)
+     * @return The first repetition of repeating field {@link #careProvider}, creating it if it does not already exist
      */
+    public Reference getCareProviderFirstRep() { 
+      if (getCareProvider().isEmpty()) {
+        addCareProvider();
+      }
+      return getCareProvider().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getCareProviderTarget() { 
       if (this.careProviderTarget == null)
         this.careProviderTarget = new ArrayList<Resource>();
@@ -2282,16 +2238,6 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
-     */
-    public PatientLinkComponent getLinkFirstRep() { 
-      if (getLink().isEmpty()) {
-        addLink();
-      }
-      return getLink().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Patient setLink(List<PatientLinkComponent> theLink) { 
@@ -2308,10 +2254,6 @@ public class Patient extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #link} (Link to another patient resource that concerns the same actual patient.)
-     */
-    // syntactic sugar
     public PatientLinkComponent addLink() { //3
       PatientLinkComponent t = new PatientLinkComponent();
       if (this.link == null)
@@ -2320,7 +2262,6 @@ public class Patient extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Patient addLink(PatientLinkComponent t) { //3
       if (t == null)
         return this;
@@ -2328,6 +2269,16 @@ public class Patient extends DomainResource {
         this.link = new ArrayList<PatientLinkComponent>();
       this.link.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
+     */
+    public PatientLinkComponent getLinkFirstRep() { 
+      if (getLink().isEmpty()) {
+        addLink();
+      }
+      return getLink().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2666,9 +2617,10 @@ public class Patient extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name, telecom
-          , gender, birthDate, deceased, address, maritalStatus, multipleBirth, photo, contact, animal
-          , communication, careProvider, managingOrganization, link);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name
+          , telecom, gender, birthDate, deceased, address, maritalStatus, multipleBirth
+          , photo, contact, animal, communication, careProvider, managingOrganization, link
+          );
       }
 
   @Override
@@ -2684,7 +2636,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.birthDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date", target={} )
+  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
@@ -2704,7 +2656,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceased[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token", target={} )
+  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token" )
   public static final String SP_DECEASED = "deceased";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>deceased</b>
@@ -2724,7 +2676,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -2744,7 +2696,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -2764,7 +2716,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.species</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token", target={} )
+  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
   public static final String SP_ANIMAL_SPECIES = "animal-species";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-species</b>
@@ -2784,7 +2736,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.link.other</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_LINK = "link";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>link</b>
@@ -2810,7 +2762,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.communication.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token", target={} )
+  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token" )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -2830,7 +2782,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.breed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token", target={} )
+  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
   public static final String SP_ANIMAL_BREED = "animal-breed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-breed</b>
@@ -2850,7 +2802,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -2870,7 +2822,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceasedDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date", target={} )
+  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATH_DATE = "death-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
@@ -2890,7 +2842,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
+  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -2910,7 +2862,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -2930,7 +2882,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -2950,7 +2902,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
+  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>
@@ -2970,7 +2922,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2990,7 +2942,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.given</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string" )
   public static final String SP_GIVEN = "given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>given</b>
@@ -3010,7 +2962,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string", target={} )
+  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -3030,7 +2982,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token", target={} )
+  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
@@ -3050,7 +3002,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -3070,7 +3022,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.careProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", target={Practitioner.class, Organization.class} )
+  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_CAREPROVIDER = "careprovider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careprovider</b>
@@ -3096,7 +3048,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
+  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -3116,7 +3068,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -3142,7 +3094,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3162,7 +3114,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -3182,7 +3134,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.family</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string" )
   public static final String SP_FAMILY = "family";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>family</b>

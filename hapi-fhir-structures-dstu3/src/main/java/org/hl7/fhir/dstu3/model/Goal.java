@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -85,7 +86,7 @@ public class Goal extends DomainResource {
          */
         CANCELLED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static GoalStatus fromCode(String codeString) throws FHIRException {
@@ -109,7 +110,10 @@ public class Goal extends DomainResource {
           return ONHOLD;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new FHIRException("Unknown GoalStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown GoalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -544,16 +548,6 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Goal setIdentifier(List<Identifier> theIdentifier) { 
@@ -570,10 +564,6 @@ public class Goal extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -582,7 +572,6 @@ public class Goal extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Goal addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -590,6 +579,16 @@ public class Goal extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -731,16 +730,6 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
-     */
-    public CodeableConcept getCategoryFirstRep() { 
-      if (getCategory().isEmpty()) {
-        addCategory();
-      }
-      return getCategory().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Goal setCategory(List<CodeableConcept> theCategory) { 
@@ -757,10 +746,6 @@ public class Goal extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #category} (Indicates a category the goal falls within.)
-     */
-    // syntactic sugar
     public CodeableConcept addCategory() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.category == null)
@@ -769,7 +754,6 @@ public class Goal extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Goal addCategory(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -777,6 +761,16 @@ public class Goal extends DomainResource {
         this.category = new ArrayList<CodeableConcept>();
       this.category.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
+     */
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
     }
 
     /**
@@ -1015,16 +1009,6 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #addresses}, creating it if it does not already exist
-     */
-    public Reference getAddressesFirstRep() { 
-      if (getAddresses().isEmpty()) {
-        addAddresses();
-      }
-      return getAddresses().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Goal setAddresses(List<Reference> theAddresses) { 
@@ -1041,10 +1025,6 @@ public class Goal extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #addresses} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
-     */
-    // syntactic sugar
     public Reference addAddresses() { //3
       Reference t = new Reference();
       if (this.addresses == null)
@@ -1053,7 +1033,6 @@ public class Goal extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Goal addAddresses(Reference t) { //3
       if (t == null)
         return this;
@@ -1064,8 +1043,19 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #addresses} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     * @return The first repetition of repeating field {@link #addresses}, creating it if it does not already exist
      */
+    public Reference getAddressesFirstRep() { 
+      if (getAddresses().isEmpty()) {
+        addAddresses();
+      }
+      return getAddresses().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getAddressesTarget() { 
       if (this.addressesTarget == null)
         this.addressesTarget = new ArrayList<Resource>();
@@ -1079,16 +1069,6 @@ public class Goal extends DomainResource {
       if (this.note == null)
         this.note = new ArrayList<Annotation>();
       return this.note;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
     }
 
     /**
@@ -1108,10 +1088,6 @@ public class Goal extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Any comments related to the goal.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -1120,7 +1096,6 @@ public class Goal extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Goal addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -1131,22 +1106,22 @@ public class Goal extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
      * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.)
      */
     public List<GoalOutcomeComponent> getOutcome() { 
       if (this.outcome == null)
         this.outcome = new ArrayList<GoalOutcomeComponent>();
       return this.outcome;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #outcome}, creating it if it does not already exist
-     */
-    public GoalOutcomeComponent getOutcomeFirstRep() { 
-      if (getOutcome().isEmpty()) {
-        addOutcome();
-      }
-      return getOutcome().get(0);
     }
 
     /**
@@ -1166,10 +1141,6 @@ public class Goal extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.)
-     */
-    // syntactic sugar
     public GoalOutcomeComponent addOutcome() { //3
       GoalOutcomeComponent t = new GoalOutcomeComponent();
       if (this.outcome == null)
@@ -1178,7 +1149,6 @@ public class Goal extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Goal addOutcome(GoalOutcomeComponent t) { //3
       if (t == null)
         return this;
@@ -1186,6 +1156,16 @@ public class Goal extends DomainResource {
         this.outcome = new ArrayList<GoalOutcomeComponent>();
       this.outcome.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #outcome}, creating it if it does not already exist
+     */
+    public GoalOutcomeComponent getOutcomeFirstRep() { 
+      if (getOutcome().isEmpty()) {
+        addOutcome();
+      }
+      return getOutcome().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1471,9 +1451,9 @@ public class Goal extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, start, target
-          , category, description, status, statusDate, statusReason, expressedBy, priority, addresses
-          , note, outcome);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, start
+          , target, category, description, status, statusDate, statusReason, expressedBy
+          , priority, addresses, note, outcome);
       }
 
   @Override
@@ -1489,7 +1469,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1509,7 +1489,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1535,7 +1515,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Group.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1561,7 +1541,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.targetDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date", target={} )
+  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date" )
   public static final String SP_TARGETDATE = "targetdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetdate</b>
@@ -1581,7 +1561,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1601,7 +1581,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

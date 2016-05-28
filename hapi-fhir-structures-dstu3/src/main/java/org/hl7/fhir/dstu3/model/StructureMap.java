@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -46,7 +47,8 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
  * A Map of relationships between 2 structures that can be used to transform data.
  */
 @ResourceDef(name="StructureMap", profile="http://hl7.org/fhir/Profile/StructureMap")
-public class StructureMap extends DomainResource {
+@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "requirements", "copyright", "structure", "import", "group"})
+public class StructureMap extends BaseConformance {
 
     public enum StructureMapModelMode {
         /**
@@ -66,7 +68,7 @@ public class StructureMap extends DomainResource {
          */
         PRODUCED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static StructureMapModelMode fromCode(String codeString) throws FHIRException {
@@ -80,7 +82,10 @@ public class StructureMap extends DomainResource {
           return TARGET;
         if ("produced".equals(codeString))
           return PRODUCED;
-        throw new FHIRException("Unknown StructureMapModelMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StructureMapModelMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -177,7 +182,7 @@ public class StructureMap extends DomainResource {
          */
         TARGET, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static StructureMapInputMode fromCode(String codeString) throws FHIRException {
@@ -187,7 +192,10 @@ public class StructureMap extends DomainResource {
           return SOURCE;
         if ("target".equals(codeString))
           return TARGET;
-        throw new FHIRException("Unknown StructureMapInputMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StructureMapInputMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -264,7 +272,7 @@ public class StructureMap extends DomainResource {
          */
         VARIABLE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static StructureMapContextType fromCode(String codeString) throws FHIRException {
@@ -274,7 +282,10 @@ public class StructureMap extends DomainResource {
           return TYPE;
         if ("variable".equals(codeString))
           return VARIABLE;
-        throw new FHIRException("Unknown StructureMapContextType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StructureMapContextType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -355,7 +366,7 @@ public class StructureMap extends DomainResource {
          */
         LAST, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static StructureMapListMode fromCode(String codeString) throws FHIRException {
@@ -367,7 +378,10 @@ public class StructureMap extends DomainResource {
           return SHARE;
         if ("last".equals(codeString))
           return LAST;
-        throw new FHIRException("Unknown StructureMapListMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StructureMapListMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -494,7 +508,7 @@ public class StructureMap extends DomainResource {
          */
         EVALUATE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static StructureMapTransform fromCode(String codeString) throws FHIRException {
@@ -524,7 +538,10 @@ public class StructureMap extends DomainResource {
           return POINTER;
         if ("evaluate".equals(codeString))
           return EVALUATE;
-        throw new FHIRException("Unknown StructureMapTransform code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StructureMapTransform code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -775,16 +792,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -801,10 +808,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -813,7 +816,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -821,6 +823,16 @@ public class StructureMap extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1213,7 +1225,8 @@ public class StructureMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, mode, documentation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, mode, documentation
+          );
       }
 
   public String fhirType() {
@@ -1430,16 +1443,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
-         */
-        public StructureMapGroupInputComponent getInputFirstRep() { 
-          if (getInput().isEmpty()) {
-            addInput();
-          }
-          return getInput().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapGroupComponent setInput(List<StructureMapGroupInputComponent> theInput) { 
@@ -1456,10 +1459,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #input} (A name assigned to an instance of data. The instance must be provided when the mapping is invoked.)
-         */
-    // syntactic sugar
         public StructureMapGroupInputComponent addInput() { //3
           StructureMapGroupInputComponent t = new StructureMapGroupInputComponent();
           if (this.input == null)
@@ -1468,7 +1467,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupComponent addInput(StructureMapGroupInputComponent t) { //3
           if (t == null)
             return this;
@@ -1479,22 +1477,22 @@ public class StructureMap extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
+         */
+        public StructureMapGroupInputComponent getInputFirstRep() { 
+          if (getInput().isEmpty()) {
+            addInput();
+          }
+          return getInput().get(0);
+        }
+
+        /**
          * @return {@link #rule} (Transform Rule from source to target.)
          */
         public List<StructureMapGroupRuleComponent> getRule() { 
           if (this.rule == null)
             this.rule = new ArrayList<StructureMapGroupRuleComponent>();
           return this.rule;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
         }
 
         /**
@@ -1514,10 +1512,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #rule} (Transform Rule from source to target.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleComponent addRule() { //3
           StructureMapGroupRuleComponent t = new StructureMapGroupRuleComponent();
           if (this.rule == null)
@@ -1526,7 +1520,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupComponent addRule(StructureMapGroupRuleComponent t) { //3
           if (t == null)
             return this;
@@ -1534,6 +1527,16 @@ public class StructureMap extends DomainResource {
             this.rule = new ArrayList<StructureMapGroupRuleComponent>();
           this.rule.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1673,8 +1676,8 @@ public class StructureMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, extends_, documentation, input
-          , rule);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, extends_, documentation
+          , input, rule);
       }
 
   public String fhirType() {
@@ -2164,16 +2167,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleSourceComponent getSourceFirstRep() { 
-          if (getSource().isEmpty()) {
-            addSource();
-          }
-          return getSource().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapGroupRuleComponent setSource(List<StructureMapGroupRuleSourceComponent> theSource) { 
@@ -2190,10 +2183,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #source} (Source inputs to the mapping.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleSourceComponent addSource() { //3
           StructureMapGroupRuleSourceComponent t = new StructureMapGroupRuleSourceComponent();
           if (this.source == null)
@@ -2202,7 +2191,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupRuleComponent addSource(StructureMapGroupRuleSourceComponent t) { //3
           if (t == null)
             return this;
@@ -2213,22 +2201,22 @@ public class StructureMap extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleSourceComponent getSourceFirstRep() { 
+          if (getSource().isEmpty()) {
+            addSource();
+          }
+          return getSource().get(0);
+        }
+
+        /**
          * @return {@link #target} (Content to create because of this mapping rule.)
          */
         public List<StructureMapGroupRuleTargetComponent> getTarget() { 
           if (this.target == null)
             this.target = new ArrayList<StructureMapGroupRuleTargetComponent>();
           return this.target;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #target}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleTargetComponent getTargetFirstRep() { 
-          if (getTarget().isEmpty()) {
-            addTarget();
-          }
-          return getTarget().get(0);
         }
 
         /**
@@ -2248,10 +2236,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #target} (Content to create because of this mapping rule.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleTargetComponent addTarget() { //3
           StructureMapGroupRuleTargetComponent t = new StructureMapGroupRuleTargetComponent();
           if (this.target == null)
@@ -2260,7 +2244,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupRuleComponent addTarget(StructureMapGroupRuleTargetComponent t) { //3
           if (t == null)
             return this;
@@ -2271,22 +2254,22 @@ public class StructureMap extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #target}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleTargetComponent getTargetFirstRep() { 
+          if (getTarget().isEmpty()) {
+            addTarget();
+          }
+          return getTarget().get(0);
+        }
+
+        /**
          * @return {@link #rule} (Rules contained in this rule.)
          */
         public List<StructureMapGroupRuleComponent> getRule() { 
           if (this.rule == null)
             this.rule = new ArrayList<StructureMapGroupRuleComponent>();
           return this.rule;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
         }
 
         /**
@@ -2306,10 +2289,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #rule} (Rules contained in this rule.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleComponent addRule() { //3
           StructureMapGroupRuleComponent t = new StructureMapGroupRuleComponent();
           if (this.rule == null)
@@ -2318,7 +2297,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupRuleComponent addRule(StructureMapGroupRuleComponent t) { //3
           if (t == null)
             return this;
@@ -2329,22 +2307,22 @@ public class StructureMap extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
+        }
+
+        /**
          * @return {@link #dependent} (Which other rules to apply in the context of this rule.)
          */
         public List<StructureMapGroupRuleDependentComponent> getDependent() { 
           if (this.dependent == null)
             this.dependent = new ArrayList<StructureMapGroupRuleDependentComponent>();
           return this.dependent;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #dependent}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleDependentComponent getDependentFirstRep() { 
-          if (getDependent().isEmpty()) {
-            addDependent();
-          }
-          return getDependent().get(0);
         }
 
         /**
@@ -2364,10 +2342,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dependent} (Which other rules to apply in the context of this rule.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleDependentComponent addDependent() { //3
           StructureMapGroupRuleDependentComponent t = new StructureMapGroupRuleDependentComponent();
           if (this.dependent == null)
@@ -2376,7 +2350,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupRuleComponent addDependent(StructureMapGroupRuleDependentComponent t) { //3
           if (t == null)
             return this;
@@ -2384,6 +2357,16 @@ public class StructureMap extends DomainResource {
             this.dependent = new ArrayList<StructureMapGroupRuleDependentComponent>();
           this.dependent.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #dependent}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleDependentComponent getDependentFirstRep() { 
+          if (getDependent().isEmpty()) {
+            addDependent();
+          }
+          return getDependent().get(0);
         }
 
         /**
@@ -2592,8 +2575,8 @@ public class StructureMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, source, target, rule, dependent
-          , documentation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, source, target, rule
+          , dependent, documentation);
       }
 
   public String fhirType() {
@@ -3512,16 +3495,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #listMode}, creating it if it does not already exist
-         */
-        public Enumeration<StructureMapListMode> getListModeFirstRep() { 
-          if (getListMode().isEmpty()) {
-            addListModeElement();
-          }
-          return getListMode().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapGroupRuleTargetComponent setListMode(List<Enumeration<StructureMapListMode>> theListMode) { 
@@ -3541,7 +3514,6 @@ public class StructureMap extends DomainResource {
         /**
          * @return {@link #listMode} (If field is a list, how to manage the list.)
          */
-    // syntactic sugar
         public Enumeration<StructureMapListMode> addListModeElement() {//2 
           Enumeration<StructureMapListMode> t = new Enumeration<StructureMapListMode>(new StructureMapListModeEnumFactory());
           if (this.listMode == null)
@@ -3682,16 +3654,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-         */
-        public StructureMapGroupRuleTargetParameterComponent getParameterFirstRep() { 
-          if (getParameter().isEmpty()) {
-            addParameter();
-          }
-          return getParameter().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapGroupRuleTargetComponent setParameter(List<StructureMapGroupRuleTargetParameterComponent> theParameter) { 
@@ -3708,10 +3670,6 @@ public class StructureMap extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #parameter} (Parameters to the transform.)
-         */
-    // syntactic sugar
         public StructureMapGroupRuleTargetParameterComponent addParameter() { //3
           StructureMapGroupRuleTargetParameterComponent t = new StructureMapGroupRuleTargetParameterComponent();
           if (this.parameter == null)
@@ -3720,7 +3678,6 @@ public class StructureMap extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StructureMapGroupRuleTargetComponent addParameter(StructureMapGroupRuleTargetParameterComponent t) { //3
           if (t == null)
             return this;
@@ -3728,6 +3685,16 @@ public class StructureMap extends DomainResource {
             this.parameter = new ArrayList<StructureMapGroupRuleTargetParameterComponent>();
           this.parameter.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+         */
+        public StructureMapGroupRuleTargetParameterComponent getParameterFirstRep() { 
+          if (getParameter().isEmpty()) {
+            addParameter();
+          }
+          return getParameter().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -3905,8 +3872,8 @@ public class StructureMap extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(context, contextType, element, variable
-          , listMode, listRuleId, transform, parameter);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(context, contextType, element
+          , variable, listMode, listRuleId, transform, parameter);
       }
 
   public String fhirType() {
@@ -4220,16 +4187,6 @@ public class StructureMap extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #variable}, creating it if it does not already exist
-         */
-        public StringType getVariableFirstRep() { 
-          if (getVariable().isEmpty()) {
-            addVariableElement();
-          }
-          return getVariable().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StructureMapGroupRuleDependentComponent setVariable(List<StringType> theVariable) { 
@@ -4249,7 +4206,6 @@ public class StructureMap extends DomainResource {
         /**
          * @return {@link #variable} (Names of variables to pass to the rule or group.)
          */
-    // syntactic sugar
         public StringType addVariableElement() {//2 
           StringType t = new StringType();
           if (this.variable == null)
@@ -4388,118 +4344,76 @@ public class StructureMap extends DomainResource {
   }
 
     /**
-     * An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.
-     */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Absolute URL used to reference this StructureMap", formalDefinition="An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published." )
-    protected UriType url;
-
-    /**
      * Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Other identifiers for the StructureMap", formalDefinition="Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
     protected List<Identifier> identifier;
 
     /**
-     * The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.
-     */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical id for this version of the StructureMap", formalDefinition="The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually." )
-    protected StringType version;
-
-    /**
-     * A free text natural language name identifying the StructureMap.
-     */
-    @Child(name = "name", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Informal name for this StructureMap", formalDefinition="A free text natural language name identifying the StructureMap." )
-    protected StringType name;
-
-    /**
-     * The status of the StructureMap.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the StructureMap." )
-    protected Enumeration<ConformanceResourceStatus> status;
-
-    /**
      * This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the structure map.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the structure map." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<StructureMapContactComponent> contact;
 
     /**
-     * The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date for this version of the StructureMap", formalDefinition="The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes." )
-    protected DateTimeType date;
-
-    /**
      * A free text natural language description of the StructureMap and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the StructureMap", formalDefinition="A free text natural language description of the StructureMap and its use." )
     protected StringType description;
 
     /**
-     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure maps.
-     */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure maps." )
-    protected List<CodeableConcept> useContext;
-
-    /**
      * Explains why this structure map is needed and why it's been designed as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Scope and Usage this structure map is for", formalDefinition="Explains why this structure map is needed and why it's been designed as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
      * A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.
      */
-    @Child(name = "structure", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "structure", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Structure Definition used by this map", formalDefinition="A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced." )
     protected List<StructureMapStructureComponent> structure;
 
     /**
      * Other maps used by this map (canonical URLs).
      */
-    @Child(name = "import", type = {UriType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "import", type = {UriType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Other maps used by this map (canonical URLs)", formalDefinition="Other maps used by this map (canonical URLs)." )
     protected List<UriType> import_;
 
     /**
      * Named sections for reader convenience.
      */
-    @Child(name = "group", type = {}, order=15, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "group", type = {}, order=9, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Named sections for reader convenience", formalDefinition="Named sections for reader convenience." )
     protected List<StructureMapGroupComponent> group;
 
-    private static final long serialVersionUID = 710892955L;
+    private static final long serialVersionUID = 1891400819L;
 
   /**
    * Constructor
@@ -4516,41 +4430,6 @@ public class StructureMap extends DomainResource {
       this.url = url;
       this.name = name;
       this.status = status;
-    }
-
-    /**
-     * @return {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public UriType getUrlElement() { 
-      if (this.url == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.url");
-        else if (Configuration.doAutoCreate())
-          this.url = new UriType(); // bb
-      return this.url;
-    }
-
-    public boolean hasUrlElement() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    public boolean hasUrl() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    /**
-     * @param value {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public StructureMap setUrlElement(UriType value) { 
-      this.url = value;
-      return this;
-    }
-
-    /**
-     * @return An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.
-     */
-    public String getUrl() { 
-      return this.url == null ? null : this.url.getValue();
     }
 
     /**
@@ -4573,16 +4452,6 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public StructureMap setIdentifier(List<Identifier> theIdentifier) { 
@@ -4599,10 +4468,6 @@ public class StructureMap extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -4611,7 +4476,6 @@ public class StructureMap extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public StructureMap addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -4622,38 +4486,13 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public StringType getVersionElement() { 
-      if (this.version == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.version");
-        else if (Configuration.doAutoCreate())
-          this.version = new StringType(); // bb
-      return this.version;
-    }
-
-    public boolean hasVersionElement() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    public boolean hasVersion() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-     */
-    public StructureMap setVersionElement(StringType value) { 
-      this.version = value;
-      return this;
-    }
-
-    /**
-     * @return The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.
-     */
-    public String getVersion() { 
-      return this.version == null ? null : this.version.getValue();
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -4671,41 +4510,6 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A free text natural language name identifying the StructureMap.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public StringType getNameElement() { 
-      if (this.name == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.name");
-        else if (Configuration.doAutoCreate())
-          this.name = new StringType(); // bb
-      return this.name;
-    }
-
-    public boolean hasNameElement() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    public boolean hasName() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    /**
-     * @param value {@link #name} (A free text natural language name identifying the StructureMap.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public StructureMap setNameElement(StringType value) { 
-      this.name = value;
-      return this;
-    }
-
-    /**
-     * @return A free text natural language name identifying the StructureMap.
-     */
-    public String getName() { 
-      return this.name == null ? null : this.name.getValue();
-    }
-
-    /**
      * @param value A free text natural language name identifying the StructureMap.
      */
     public StructureMap setName(String value) { 
@@ -4713,41 +4517,6 @@ public class StructureMap extends DomainResource {
           this.name = new StringType();
         this.name.setValue(value);
       return this;
-    }
-
-    /**
-     * @return {@link #status} (The status of the StructureMap.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
-      if (this.status == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.status");
-        else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
-      return this.status;
-    }
-
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    /**
-     * @param value {@link #status} (The status of the StructureMap.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public StructureMap setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
-      this.status = value;
-      return this;
-    }
-
-    /**
-     * @return The status of the StructureMap.
-     */
-    public ConformanceResourceStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
     }
 
     /**
@@ -4864,16 +4633,6 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public StructureMapContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public StructureMap setContact(List<StructureMapContactComponent> theContact) { 
@@ -4890,10 +4649,6 @@ public class StructureMap extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
-     */
-    // syntactic sugar
     public StructureMapContactComponent addContact() { //3
       StructureMapContactComponent t = new StructureMapContactComponent();
       if (this.contact == null)
@@ -4902,7 +4657,6 @@ public class StructureMap extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public StructureMap addContact(StructureMapContactComponent t) { //3
       if (t == null)
         return this;
@@ -4913,38 +4667,13 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public StructureMap setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public StructureMapContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -5007,64 +4736,6 @@ public class StructureMap extends DomainResource {
           this.description = new StringType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure maps.)
-     */
-    public List<CodeableConcept> getUseContext() { 
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      return this.useContext;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
-     */
-    public CodeableConcept getUseContextFirstRep() { 
-      if (getUseContext().isEmpty()) {
-        addUseContext();
-      }
-      return getUseContext().get(0);
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public StructureMap setUseContext(List<CodeableConcept> theUseContext) { 
-      this.useContext = theUseContext;
-      return this;
-    }
-
-    public boolean hasUseContext() { 
-      if (this.useContext == null)
-        return false;
-      for (CodeableConcept item : this.useContext)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure maps.)
-     */
-    // syntactic sugar
-    public CodeableConcept addUseContext() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public StructureMap addUseContext(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
       return this;
     }
 
@@ -5176,16 +4847,6 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #structure}, creating it if it does not already exist
-     */
-    public StructureMapStructureComponent getStructureFirstRep() { 
-      if (getStructure().isEmpty()) {
-        addStructure();
-      }
-      return getStructure().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public StructureMap setStructure(List<StructureMapStructureComponent> theStructure) { 
@@ -5202,10 +4863,6 @@ public class StructureMap extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #structure} (A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.)
-     */
-    // syntactic sugar
     public StructureMapStructureComponent addStructure() { //3
       StructureMapStructureComponent t = new StructureMapStructureComponent();
       if (this.structure == null)
@@ -5214,7 +4871,6 @@ public class StructureMap extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public StructureMap addStructure(StructureMapStructureComponent t) { //3
       if (t == null)
         return this;
@@ -5225,22 +4881,22 @@ public class StructureMap extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #structure}, creating it if it does not already exist
+     */
+    public StructureMapStructureComponent getStructureFirstRep() { 
+      if (getStructure().isEmpty()) {
+        addStructure();
+      }
+      return getStructure().get(0);
+    }
+
+    /**
      * @return {@link #import_} (Other maps used by this map (canonical URLs).)
      */
     public List<UriType> getImport() { 
       if (this.import_ == null)
         this.import_ = new ArrayList<UriType>();
       return this.import_;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #import_}, creating it if it does not already exist
-     */
-    public UriType getImportFirstRep() { 
-      if (getImport().isEmpty()) {
-        addImportElement();
-      }
-      return getImport().get(0);
     }
 
     /**
@@ -5263,7 +4919,6 @@ public class StructureMap extends DomainResource {
     /**
      * @return {@link #import_} (Other maps used by this map (canonical URLs).)
      */
-    // syntactic sugar
     public UriType addImportElement() {//2 
       UriType t = new UriType();
       if (this.import_ == null)
@@ -5306,16 +4961,6 @@ public class StructureMap extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
-     */
-    public StructureMapGroupComponent getGroupFirstRep() { 
-      if (getGroup().isEmpty()) {
-        addGroup();
-      }
-      return getGroup().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public StructureMap setGroup(List<StructureMapGroupComponent> theGroup) { 
@@ -5332,10 +4977,6 @@ public class StructureMap extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #group} (Named sections for reader convenience.)
-     */
-    // syntactic sugar
     public StructureMapGroupComponent addGroup() { //3
       StructureMapGroupComponent t = new StructureMapGroupComponent();
       if (this.group == null)
@@ -5344,7 +4985,6 @@ public class StructureMap extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public StructureMap addGroup(StructureMapGroupComponent t) { //3
       if (t == null)
         return this;
@@ -5354,19 +4994,23 @@ public class StructureMap extends DomainResource {
       return this;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #group}, creating it if it does not already exist
+     */
+    public StructureMapGroupComponent getGroupFirstRep() { 
+      if (getGroup().isEmpty()) {
+        addGroup();
+      }
+      return getGroup().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A free text natural language name identifying the StructureMap.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The status of the StructureMap.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the structure map.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the StructureMap and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure maps.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("requirements", "string", "Explains why this structure map is needed and why it's been designed as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("structure", "", "A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.", 0, java.lang.Integer.MAX_VALUE, structure));
@@ -5632,10 +5276,8 @@ public class StructureMap extends DomainResource {
         if (!(other instanceof StructureMap))
           return false;
         StructureMap o = (StructureMap) other;
-        return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
-           && compareDeep(name, o.name, true) && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
-           && compareDeep(description, o.description, true) && compareDeep(useContext, o.useContext, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(structure, o.structure, true) && compareDeep(import_, o.import_, true) && compareDeep(group, o.group, true)
           ;
@@ -5648,16 +5290,14 @@ public class StructureMap extends DomainResource {
         if (!(other instanceof StructureMap))
           return false;
         StructureMap o = (StructureMap) other;
-        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
+        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
+           && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
            && compareValues(copyright, o.copyright, true) && compareValues(import_, o.import_, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
-          , status, experimental, publisher, contact, date, description, useContext, requirements, copyright
-          , structure, import_, group);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, experimental, publisher
+          , contact, description, requirements, copyright, structure, import_, group);
       }
 
   @Override
@@ -5673,7 +5313,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -5693,7 +5333,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -5713,7 +5353,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string", target={} )
+  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -5733,7 +5373,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token", target={} )
+  @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -5753,7 +5393,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -5773,7 +5413,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string", target={} )
+  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -5793,7 +5433,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.experimental</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token", target={} )
+  @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token" )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
@@ -5813,7 +5453,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token", target={} )
+  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -5833,7 +5473,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -5853,7 +5493,7 @@ public class StructureMap extends DomainResource {
    * Path: <b>StructureMap.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token", target={} )
+  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class QuestionnaireResponse extends DomainResource {
          */
         AMENDED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static QuestionnaireResponseStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class QuestionnaireResponse extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
-        throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -348,16 +352,6 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #answer}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemAnswerComponent getAnswerFirstRep() { 
-          if (getAnswer().isEmpty()) {
-            addAnswer();
-          }
-          return getAnswer().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireResponseItemComponent setAnswer(List<QuestionnaireResponseItemAnswerComponent> theAnswer) { 
@@ -374,10 +368,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #answer} (The respondent's answer(s) to the question.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemAnswerComponent addAnswer() { //3
           QuestionnaireResponseItemAnswerComponent t = new QuestionnaireResponseItemAnswerComponent();
           if (this.answer == null)
@@ -386,7 +376,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addAnswer(QuestionnaireResponseItemAnswerComponent t) { //3
           if (t == null)
             return this;
@@ -397,22 +386,22 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #answer}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemAnswerComponent getAnswerFirstRep() { 
+          if (getAnswer().isEmpty()) {
+            addAnswer();
+          }
+          return getAnswer().get(0);
+        }
+
+        /**
          * @return {@link #item} (Questions or sub-groups nested beneath a question or group.)
          */
         public List<QuestionnaireResponseItemComponent> getItem() { 
           if (this.item == null)
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           return this.item;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
         }
 
         /**
@@ -432,10 +421,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (Questions or sub-groups nested beneath a question or group.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem() { //3
           QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
           if (this.item == null)
@@ -444,7 +429,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem(QuestionnaireResponseItemComponent t) { //3
           if (t == null)
             return this;
@@ -452,6 +436,16 @@ public class QuestionnaireResponse extends DomainResource {
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           this.item.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -591,8 +585,8 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, text, subject, answer, item
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, text, subject, answer
+          , item);
       }
 
   public String fhirType() {
@@ -825,16 +819,6 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireResponseItemAnswerComponent setItem(List<QuestionnaireResponseItemComponent> theItem) { 
@@ -851,10 +835,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (Nested groups and/or questions found within this particular answer.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem() { //3
           QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
           if (this.item == null)
@@ -863,7 +843,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemAnswerComponent addItem(QuestionnaireResponseItemComponent t) { //3
           if (t == null)
             return this;
@@ -871,6 +850,16 @@ public class QuestionnaireResponse extends DomainResource {
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           this.item.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1465,16 +1454,6 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-     */
-    public QuestionnaireResponseItemComponent getItemFirstRep() { 
-      if (getItem().isEmpty()) {
-        addItem();
-      }
-      return getItem().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public QuestionnaireResponse setItem(List<QuestionnaireResponseItemComponent> theItem) { 
@@ -1491,10 +1470,6 @@ public class QuestionnaireResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #item} (Corresponds to a group or question item from the original questionnaire.)
-     */
-    // syntactic sugar
     public QuestionnaireResponseItemComponent addItem() { //3
       QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
       if (this.item == null)
@@ -1503,7 +1478,6 @@ public class QuestionnaireResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public QuestionnaireResponse addItem(QuestionnaireResponseItemComponent t) { //3
       if (t == null)
         return this;
@@ -1511,6 +1485,16 @@ public class QuestionnaireResponse extends DomainResource {
         this.item = new ArrayList<QuestionnaireResponseItemComponent>();
       this.item.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public QuestionnaireResponseItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1710,8 +1694,8 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, questionnaire, status
-          , subject, author, authored, source, encounter, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, questionnaire
+          , status, subject, author, authored, source, encounter, item);
       }
 
   @Override
@@ -1727,7 +1711,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date", target={} )
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authored</b>
@@ -1747,7 +1731,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.questionnaire</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference", target={Questionnaire.class} )
+  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>questionnaire</b>
@@ -1773,7 +1757,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference" )
+  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1799,7 +1783,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1825,7 +1809,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1851,7 +1835,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1877,7 +1861,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1903,7 +1887,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token", target={} )
+  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

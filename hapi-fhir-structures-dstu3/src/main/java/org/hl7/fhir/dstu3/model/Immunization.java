@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -82,16 +83,6 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
-         */
-        public CodeableConcept getReasonFirstRep() { 
-          if (getReason().isEmpty()) {
-            addReason();
-          }
-          return getReason().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ImmunizationExplanationComponent setReason(List<CodeableConcept> theReason) { 
@@ -108,10 +99,6 @@ public class Immunization extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #reason} (Reasons why a vaccine was administered.)
-         */
-    // syntactic sugar
         public CodeableConcept addReason() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.reason == null)
@@ -120,7 +107,6 @@ public class Immunization extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationExplanationComponent addReason(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -131,22 +117,22 @@ public class Immunization extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+         */
+        public CodeableConcept getReasonFirstRep() { 
+          if (getReason().isEmpty()) {
+            addReason();
+          }
+          return getReason().get(0);
+        }
+
+        /**
          * @return {@link #reasonNotGiven} (Reason why a vaccine was not administered.)
          */
         public List<CodeableConcept> getReasonNotGiven() { 
           if (this.reasonNotGiven == null)
             this.reasonNotGiven = new ArrayList<CodeableConcept>();
           return this.reasonNotGiven;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #reasonNotGiven}, creating it if it does not already exist
-         */
-        public CodeableConcept getReasonNotGivenFirstRep() { 
-          if (getReasonNotGiven().isEmpty()) {
-            addReasonNotGiven();
-          }
-          return getReasonNotGiven().get(0);
         }
 
         /**
@@ -166,10 +152,6 @@ public class Immunization extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #reasonNotGiven} (Reason why a vaccine was not administered.)
-         */
-    // syntactic sugar
         public CodeableConcept addReasonNotGiven() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.reasonNotGiven == null)
@@ -178,7 +160,6 @@ public class Immunization extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationExplanationComponent addReasonNotGiven(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -186,6 +167,16 @@ public class Immunization extends DomainResource {
             this.reasonNotGiven = new ArrayList<CodeableConcept>();
           this.reasonNotGiven.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #reasonNotGiven}, creating it if it does not already exist
+         */
+        public CodeableConcept getReasonNotGivenFirstRep() { 
+          if (getReasonNotGiven().isEmpty()) {
+            addReasonNotGiven();
+          }
+          return getReasonNotGiven().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -911,16 +902,6 @@ public class Immunization extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #targetDisease}, creating it if it does not already exist
-         */
-        public CodeableConcept getTargetDiseaseFirstRep() { 
-          if (getTargetDisease().isEmpty()) {
-            addTargetDisease();
-          }
-          return getTargetDisease().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ImmunizationVaccinationProtocolComponent setTargetDisease(List<CodeableConcept> theTargetDisease) { 
@@ -937,10 +918,6 @@ public class Immunization extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #targetDisease} (The targeted disease.)
-         */
-    // syntactic sugar
         public CodeableConcept addTargetDisease() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.targetDisease == null)
@@ -949,7 +926,6 @@ public class Immunization extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationVaccinationProtocolComponent addTargetDisease(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -957,6 +933,16 @@ public class Immunization extends DomainResource {
             this.targetDisease = new ArrayList<CodeableConcept>();
           this.targetDisease.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #targetDisease}, creating it if it does not already exist
+         */
+        public CodeableConcept getTargetDiseaseFirstRep() { 
+          if (getTargetDisease().isEmpty()) {
+            addTargetDisease();
+          }
+          return getTargetDisease().get(0);
         }
 
         /**
@@ -1181,8 +1167,8 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description, authority
-          , series, seriesDoses, targetDisease, doseStatus, doseStatusReason);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description
+          , authority, series, seriesDoses, targetDisease, doseStatus, doseStatusReason);
       }
 
   public String fhirType() {
@@ -1400,16 +1386,6 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Immunization setIdentifier(List<Identifier> theIdentifier) { 
@@ -1426,10 +1402,6 @@ public class Immunization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (A unique identifier assigned to this immunization record.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1438,7 +1410,6 @@ public class Immunization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Immunization addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1446,6 +1417,16 @@ public class Immunization extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2100,16 +2081,6 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Immunization setNote(List<Annotation> theNote) { 
@@ -2126,10 +2097,6 @@ public class Immunization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Extra information about the immunization that is not conveyed by the other attributes.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -2138,7 +2105,6 @@ public class Immunization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Immunization addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -2146,6 +2112,16 @@ public class Immunization extends DomainResource {
         this.note = new ArrayList<Annotation>();
       this.note.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
     }
 
     /**
@@ -2182,16 +2158,6 @@ public class Immunization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #reaction}, creating it if it does not already exist
-     */
-    public ImmunizationReactionComponent getReactionFirstRep() { 
-      if (getReaction().isEmpty()) {
-        addReaction();
-      }
-      return getReaction().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Immunization setReaction(List<ImmunizationReactionComponent> theReaction) { 
@@ -2208,10 +2174,6 @@ public class Immunization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #reaction} (Categorical data indicating that an adverse event is associated in time to an immunization.)
-     */
-    // syntactic sugar
     public ImmunizationReactionComponent addReaction() { //3
       ImmunizationReactionComponent t = new ImmunizationReactionComponent();
       if (this.reaction == null)
@@ -2220,7 +2182,6 @@ public class Immunization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Immunization addReaction(ImmunizationReactionComponent t) { //3
       if (t == null)
         return this;
@@ -2231,22 +2192,22 @@ public class Immunization extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #reaction}, creating it if it does not already exist
+     */
+    public ImmunizationReactionComponent getReactionFirstRep() { 
+      if (getReaction().isEmpty()) {
+        addReaction();
+      }
+      return getReaction().get(0);
+    }
+
+    /**
      * @return {@link #vaccinationProtocol} (Contains information about the protocol(s) under which the vaccine was administered.)
      */
     public List<ImmunizationVaccinationProtocolComponent> getVaccinationProtocol() { 
       if (this.vaccinationProtocol == null)
         this.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
       return this.vaccinationProtocol;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #vaccinationProtocol}, creating it if it does not already exist
-     */
-    public ImmunizationVaccinationProtocolComponent getVaccinationProtocolFirstRep() { 
-      if (getVaccinationProtocol().isEmpty()) {
-        addVaccinationProtocol();
-      }
-      return getVaccinationProtocol().get(0);
     }
 
     /**
@@ -2266,10 +2227,6 @@ public class Immunization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #vaccinationProtocol} (Contains information about the protocol(s) under which the vaccine was administered.)
-     */
-    // syntactic sugar
     public ImmunizationVaccinationProtocolComponent addVaccinationProtocol() { //3
       ImmunizationVaccinationProtocolComponent t = new ImmunizationVaccinationProtocolComponent();
       if (this.vaccinationProtocol == null)
@@ -2278,7 +2235,6 @@ public class Immunization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Immunization addVaccinationProtocol(ImmunizationVaccinationProtocolComponent t) { //3
       if (t == null)
         return this;
@@ -2286,6 +2242,16 @@ public class Immunization extends DomainResource {
         this.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
       this.vaccinationProtocol.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #vaccinationProtocol}, creating it if it does not already exist
+     */
+    public ImmunizationVaccinationProtocolComponent getVaccinationProtocolFirstRep() { 
+      if (getVaccinationProtocol().isEmpty()) {
+        addVaccinationProtocol();
+      }
+      return getVaccinationProtocol().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2652,10 +2618,10 @@ public class Immunization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, date, vaccineCode
-          , patient, wasNotGiven, reported, performer, requester, encounter, manufacturer, location, lotNumber
-          , expirationDate, site, route, doseQuantity, note, explanation, reaction, vaccinationProtocol
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, date
+          , vaccineCode, patient, wasNotGiven, reported, performer, requester, encounter
+          , manufacturer, location, lotNumber, expirationDate, site, route, doseQuantity
+          , note, explanation, reaction, vaccinationProtocol);
       }
 
   @Override
@@ -2671,7 +2637,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  (non)-Administration Date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  (non)-Administration Date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2691,7 +2657,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -2717,7 +2683,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2737,7 +2703,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.explanation.reason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token", target={} )
+  @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token" )
   public static final String SP_REASON = "reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason</b>
@@ -2757,7 +2723,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2783,7 +2749,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.reaction.detail</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference", target={Observation.class} )
+  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference" )
   public static final String SP_REACTION = "reaction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reaction</b>
@@ -2809,7 +2775,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.lotNumber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string", target={} )
+  @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string" )
   public static final String SP_LOT_NUMBER = "lot-number";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>lot-number</b>
@@ -2829,7 +2795,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.wasNotGiven</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token", target={} )
+  @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token" )
   public static final String SP_NOTGIVEN = "notgiven";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>notgiven</b>
@@ -2849,7 +2815,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
@@ -2875,7 +2841,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number", target={} )
+  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number" )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
@@ -2895,7 +2861,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2921,7 +2887,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.vaccineCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="vaccine-code", path="Immunization.vaccineCode", description="Vaccine Product Administered", type="token", target={} )
+  @SearchParamDefinition(name="vaccine-code", path="Immunization.vaccineCode", description="Vaccine Product Administered", type="token" )
   public static final String SP_VACCINE_CODE = "vaccine-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>vaccine-code</b>
@@ -2941,7 +2907,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.explanation.reasonNotGiven</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token", target={} )
+  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token" )
   public static final String SP_REASON_NOT_GIVEN = "reason-not-given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason-not-given</b>
@@ -2961,7 +2927,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2987,7 +2953,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.reaction.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date", target={} )
+  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date" )
   public static final String SP_REACTION_DATE = "reaction-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reaction-date</b>
@@ -3007,7 +2973,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

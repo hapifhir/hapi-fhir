@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -73,7 +74,7 @@ public class Condition extends DomainResource {
          */
         UNKNOWN, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ConditionVerificationStatus fromCode(String codeString) throws FHIRException {
@@ -91,7 +92,10 @@ public class Condition extends DomainResource {
           return ENTEREDINERROR;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new FHIRException("Unknown ConditionVerificationStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ConditionVerificationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -262,16 +266,6 @@ public class Condition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #assessment}, creating it if it does not already exist
-         */
-        public Reference getAssessmentFirstRep() { 
-          if (getAssessment().isEmpty()) {
-            addAssessment();
-          }
-          return getAssessment().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ConditionStageComponent setAssessment(List<Reference> theAssessment) { 
@@ -288,10 +282,6 @@ public class Condition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #assessment} (Reference to a formal record of the evidence on which the staging assessment is based.)
-         */
-    // syntactic sugar
         public Reference addAssessment() { //3
           Reference t = new Reference();
           if (this.assessment == null)
@@ -300,7 +290,6 @@ public class Condition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ConditionStageComponent addAssessment(Reference t) { //3
           if (t == null)
             return this;
@@ -311,8 +300,19 @@ public class Condition extends DomainResource {
         }
 
         /**
-         * @return {@link #assessment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to a formal record of the evidence on which the staging assessment is based.)
+         * @return The first repetition of repeating field {@link #assessment}, creating it if it does not already exist
          */
+        public Reference getAssessmentFirstRep() { 
+          if (getAssessment().isEmpty()) {
+            addAssessment();
+          }
+          return getAssessment().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getAssessmentTarget() { 
           if (this.assessmentTarget == null)
             this.assessmentTarget = new ArrayList<Resource>();
@@ -489,16 +489,6 @@ public class Condition extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
-         */
-        public Reference getDetailFirstRep() { 
-          if (getDetail().isEmpty()) {
-            addDetail();
-          }
-          return getDetail().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ConditionEvidenceComponent setDetail(List<Reference> theDetail) { 
@@ -515,10 +505,6 @@ public class Condition extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #detail} (Links to other relevant information, including pathology reports.)
-         */
-    // syntactic sugar
         public Reference addDetail() { //3
           Reference t = new Reference();
           if (this.detail == null)
@@ -527,7 +513,6 @@ public class Condition extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ConditionEvidenceComponent addDetail(Reference t) { //3
           if (t == null)
             return this;
@@ -538,8 +523,19 @@ public class Condition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to other relevant information, including pathology reports.)
+         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
          */
+        public Reference getDetailFirstRep() { 
+          if (getDetail().isEmpty()) {
+            addDetail();
+          }
+          return getDetail().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getDetailTarget() { 
           if (this.detailTarget == null)
             this.detailTarget = new ArrayList<Resource>();
@@ -808,16 +804,6 @@ public class Condition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Condition setIdentifier(List<Identifier> theIdentifier) { 
@@ -834,10 +820,6 @@ public class Condition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this condition that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -846,7 +828,6 @@ public class Condition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Condition addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -854,6 +835,16 @@ public class Condition extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1413,16 +1404,6 @@ public class Condition extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #evidence}, creating it if it does not already exist
-     */
-    public ConditionEvidenceComponent getEvidenceFirstRep() { 
-      if (getEvidence().isEmpty()) {
-        addEvidence();
-      }
-      return getEvidence().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Condition setEvidence(List<ConditionEvidenceComponent> theEvidence) { 
@@ -1439,10 +1420,6 @@ public class Condition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #evidence} (Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.)
-     */
-    // syntactic sugar
     public ConditionEvidenceComponent addEvidence() { //3
       ConditionEvidenceComponent t = new ConditionEvidenceComponent();
       if (this.evidence == null)
@@ -1451,7 +1428,6 @@ public class Condition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Condition addEvidence(ConditionEvidenceComponent t) { //3
       if (t == null)
         return this;
@@ -1462,22 +1438,22 @@ public class Condition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #evidence}, creating it if it does not already exist
+     */
+    public ConditionEvidenceComponent getEvidenceFirstRep() { 
+      if (getEvidence().isEmpty()) {
+        addEvidence();
+      }
+      return getEvidence().get(0);
+    }
+
+    /**
      * @return {@link #bodySite} (The anatomical location where this condition manifests itself.)
      */
     public List<CodeableConcept> getBodySite() { 
       if (this.bodySite == null)
         this.bodySite = new ArrayList<CodeableConcept>();
       return this.bodySite;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
-     */
-    public CodeableConcept getBodySiteFirstRep() { 
-      if (getBodySite().isEmpty()) {
-        addBodySite();
-      }
-      return getBodySite().get(0);
     }
 
     /**
@@ -1497,10 +1473,6 @@ public class Condition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #bodySite} (The anatomical location where this condition manifests itself.)
-     */
-    // syntactic sugar
     public CodeableConcept addBodySite() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.bodySite == null)
@@ -1509,7 +1481,6 @@ public class Condition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Condition addBodySite(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1520,22 +1491,22 @@ public class Condition extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
+     */
+    public CodeableConcept getBodySiteFirstRep() { 
+      if (getBodySite().isEmpty()) {
+        addBodySite();
+      }
+      return getBodySite().get(0);
+    }
+
+    /**
      * @return {@link #note} (Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.)
      */
     public List<Annotation> getNote() { 
       if (this.note == null)
         this.note = new ArrayList<Annotation>();
       return this.note;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
     }
 
     /**
@@ -1555,10 +1526,6 @@ public class Condition extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -1567,7 +1534,6 @@ public class Condition extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Condition addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -1575,6 +1541,16 @@ public class Condition extends DomainResource {
         this.note = new ArrayList<Annotation>();
       this.note.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1914,8 +1890,8 @@ public class Condition extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, encounter
-          , asserter, dateRecorded, code, category, clinicalStatus, verificationStatus, severity, onset
-          , abatement, stage, evidence, bodySite, note);
+          , asserter, dateRecorded, code, category, clinicalStatus, verificationStatus, severity
+          , onset, abatement, stage, evidence, bodySite, note);
       }
 
   @Override
@@ -1931,7 +1907,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.severity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token", target={} )
+  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
   public static final String SP_SEVERITY = "severity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>severity</b>
@@ -1951,7 +1927,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1971,7 +1947,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.clinicalStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token", target={} )
+  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>clinicalstatus</b>
@@ -1991,7 +1967,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string", target={} )
+  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string" )
   public static final String SP_ONSET_INFO = "onset-info";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset-info</b>
@@ -2011,7 +1987,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2031,7 +2007,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.evidence.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token", target={} )
+  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
   public static final String SP_EVIDENCE = "evidence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>evidence</b>
@@ -2051,7 +2027,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2077,7 +2053,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date", target={} )
+  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date" )
   public static final String SP_ONSET = "onset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset</b>
@@ -2097,7 +2073,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.asserter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", target={Practitioner.class, Patient.class} )
+  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ASSERTER = "asserter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>asserter</b>
@@ -2123,7 +2099,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.dateRecorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date", target={} )
+  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date" )
   public static final String SP_DATE_RECORDED = "date-recorded";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date-recorded</b>
@@ -2143,7 +2119,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.stage.summary</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token", target={} )
+  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
   public static final String SP_STAGE = "stage";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>stage</b>
@@ -2163,7 +2139,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2189,7 +2165,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2209,7 +2185,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token", target={} )
+  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token" )
   public static final String SP_BODY_SITE = "body-site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>body-site</b>

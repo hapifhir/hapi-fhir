@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -57,7 +58,7 @@ public class Account extends DomainResource {
          */
         INACTIVE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AccountStatus fromCode(String codeString) throws FHIRException {
@@ -67,7 +68,10 @@ public class Account extends DomainResource {
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -240,16 +244,6 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Account setIdentifier(List<Identifier> theIdentifier) { 
@@ -266,10 +260,6 @@ public class Account extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -278,7 +268,6 @@ public class Account extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Account addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -286,6 +275,16 @@ public class Account extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -863,7 +862,8 @@ public class Account extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
-          , activePeriod, currency, balance, coveragePeriod, subject, owner, description);
+          , activePeriod, currency, balance, coveragePeriod, subject, owner, description
+          );
       }
 
   @Override
@@ -879,7 +879,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference" )
   public static final String SP_OWNER = "owner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>owner</b>
@@ -905,7 +905,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -925,7 +925,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.coveragePeriod</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date", target={} )
+  @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -945,7 +945,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.balance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity", target={} )
+  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity" )
   public static final String SP_BALANCE = "balance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>balance</b>
@@ -965,7 +965,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, HealthcareService.class, Location.class} )
+  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -991,7 +991,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1017,7 +1017,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1037,7 +1037,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1057,7 +1057,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

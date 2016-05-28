@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class ClinicalImpression extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ClinicalImpressionStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class ClinicalImpression extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -222,16 +226,6 @@ public class ClinicalImpression extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public Reference getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ClinicalImpressionInvestigationsComponent setItem(List<Reference> theItem) { 
@@ -248,10 +242,6 @@ public class ClinicalImpression extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (A record of a specific investigation that was undertaken.)
-         */
-    // syntactic sugar
         public Reference addItem() { //3
           Reference t = new Reference();
           if (this.item == null)
@@ -260,7 +250,6 @@ public class ClinicalImpression extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ClinicalImpressionInvestigationsComponent addItem(Reference t) { //3
           if (t == null)
             return this;
@@ -271,8 +260,19 @@ public class ClinicalImpression extends DomainResource {
         }
 
         /**
-         * @return {@link #item} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A record of a specific investigation that was undertaken.)
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
          */
+        public Reference getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getItemTarget() { 
           if (this.itemTarget == null)
             this.itemTarget = new ArrayList<Resource>();
@@ -1253,16 +1253,6 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #problem}, creating it if it does not already exist
-     */
-    public Reference getProblemFirstRep() { 
-      if (getProblem().isEmpty()) {
-        addProblem();
-      }
-      return getProblem().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ClinicalImpression setProblem(List<Reference> theProblem) { 
@@ -1279,10 +1269,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #problem} (This a list of the general problems/conditions for a patient.)
-     */
-    // syntactic sugar
     public Reference addProblem() { //3
       Reference t = new Reference();
       if (this.problem == null)
@@ -1291,7 +1277,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addProblem(Reference t) { //3
       if (t == null)
         return this;
@@ -1302,8 +1287,19 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #problem} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. This a list of the general problems/conditions for a patient.)
+     * @return The first repetition of repeating field {@link #problem}, creating it if it does not already exist
      */
+    public Reference getProblemFirstRep() { 
+      if (getProblem().isEmpty()) {
+        addProblem();
+      }
+      return getProblem().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getProblemTarget() { 
       if (this.problemTarget == null)
         this.problemTarget = new ArrayList<Resource>();
@@ -1365,16 +1361,6 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #investigations}, creating it if it does not already exist
-     */
-    public ClinicalImpressionInvestigationsComponent getInvestigationsFirstRep() { 
-      if (getInvestigations().isEmpty()) {
-        addInvestigations();
-      }
-      return getInvestigations().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ClinicalImpression setInvestigations(List<ClinicalImpressionInvestigationsComponent> theInvestigations) { 
@@ -1391,10 +1377,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #investigations} (One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.)
-     */
-    // syntactic sugar
     public ClinicalImpressionInvestigationsComponent addInvestigations() { //3
       ClinicalImpressionInvestigationsComponent t = new ClinicalImpressionInvestigationsComponent();
       if (this.investigations == null)
@@ -1403,7 +1385,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addInvestigations(ClinicalImpressionInvestigationsComponent t) { //3
       if (t == null)
         return this;
@@ -1411,6 +1392,16 @@ public class ClinicalImpression extends DomainResource {
         this.investigations = new ArrayList<ClinicalImpressionInvestigationsComponent>();
       this.investigations.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #investigations}, creating it if it does not already exist
+     */
+    public ClinicalImpressionInvestigationsComponent getInvestigationsFirstRep() { 
+      if (getInvestigations().isEmpty()) {
+        addInvestigations();
+      }
+      return getInvestigations().get(0);
     }
 
     /**
@@ -1521,16 +1512,6 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #finding}, creating it if it does not already exist
-     */
-    public ClinicalImpressionFindingComponent getFindingFirstRep() { 
-      if (getFinding().isEmpty()) {
-        addFinding();
-      }
-      return getFinding().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ClinicalImpression setFinding(List<ClinicalImpressionFindingComponent> theFinding) { 
@@ -1547,10 +1528,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #finding} (Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.)
-     */
-    // syntactic sugar
     public ClinicalImpressionFindingComponent addFinding() { //3
       ClinicalImpressionFindingComponent t = new ClinicalImpressionFindingComponent();
       if (this.finding == null)
@@ -1559,7 +1536,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addFinding(ClinicalImpressionFindingComponent t) { //3
       if (t == null)
         return this;
@@ -1570,22 +1546,22 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #finding}, creating it if it does not already exist
+     */
+    public ClinicalImpressionFindingComponent getFindingFirstRep() { 
+      if (getFinding().isEmpty()) {
+        addFinding();
+      }
+      return getFinding().get(0);
+    }
+
+    /**
      * @return {@link #resolved} (Diagnoses/conditions resolved since the last assessment.)
      */
     public List<CodeableConcept> getResolved() { 
       if (this.resolved == null)
         this.resolved = new ArrayList<CodeableConcept>();
       return this.resolved;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #resolved}, creating it if it does not already exist
-     */
-    public CodeableConcept getResolvedFirstRep() { 
-      if (getResolved().isEmpty()) {
-        addResolved();
-      }
-      return getResolved().get(0);
     }
 
     /**
@@ -1605,10 +1581,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #resolved} (Diagnoses/conditions resolved since the last assessment.)
-     */
-    // syntactic sugar
     public CodeableConcept addResolved() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.resolved == null)
@@ -1617,7 +1589,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addResolved(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1628,22 +1599,22 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #resolved}, creating it if it does not already exist
+     */
+    public CodeableConcept getResolvedFirstRep() { 
+      if (getResolved().isEmpty()) {
+        addResolved();
+      }
+      return getResolved().get(0);
+    }
+
+    /**
      * @return {@link #ruledOut} (Diagnosis considered not possible.)
      */
     public List<ClinicalImpressionRuledOutComponent> getRuledOut() { 
       if (this.ruledOut == null)
         this.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
       return this.ruledOut;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #ruledOut}, creating it if it does not already exist
-     */
-    public ClinicalImpressionRuledOutComponent getRuledOutFirstRep() { 
-      if (getRuledOut().isEmpty()) {
-        addRuledOut();
-      }
-      return getRuledOut().get(0);
     }
 
     /**
@@ -1663,10 +1634,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #ruledOut} (Diagnosis considered not possible.)
-     */
-    // syntactic sugar
     public ClinicalImpressionRuledOutComponent addRuledOut() { //3
       ClinicalImpressionRuledOutComponent t = new ClinicalImpressionRuledOutComponent();
       if (this.ruledOut == null)
@@ -1675,7 +1642,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addRuledOut(ClinicalImpressionRuledOutComponent t) { //3
       if (t == null)
         return this;
@@ -1683,6 +1649,16 @@ public class ClinicalImpression extends DomainResource {
         this.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
       this.ruledOut.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #ruledOut}, creating it if it does not already exist
+     */
+    public ClinicalImpressionRuledOutComponent getRuledOutFirstRep() { 
+      if (getRuledOut().isEmpty()) {
+        addRuledOut();
+      }
+      return getRuledOut().get(0);
     }
 
     /**
@@ -1744,16 +1720,6 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #plan}, creating it if it does not already exist
-     */
-    public Reference getPlanFirstRep() { 
-      if (getPlan().isEmpty()) {
-        addPlan();
-      }
-      return getPlan().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ClinicalImpression setPlan(List<Reference> thePlan) { 
@@ -1770,10 +1736,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #plan} (Plan of action after assessment.)
-     */
-    // syntactic sugar
     public Reference addPlan() { //3
       Reference t = new Reference();
       if (this.plan == null)
@@ -1782,7 +1744,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addPlan(Reference t) { //3
       if (t == null)
         return this;
@@ -1793,8 +1754,19 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #plan} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Plan of action after assessment.)
+     * @return The first repetition of repeating field {@link #plan}, creating it if it does not already exist
      */
+    public Reference getPlanFirstRep() { 
+      if (getPlan().isEmpty()) {
+        addPlan();
+      }
+      return getPlan().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getPlanTarget() { 
       if (this.planTarget == null)
         this.planTarget = new ArrayList<Resource>();
@@ -1808,16 +1780,6 @@ public class ClinicalImpression extends DomainResource {
       if (this.action == null)
         this.action = new ArrayList<Reference>();
       return this.action;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
-     */
-    public Reference getActionFirstRep() { 
-      if (getAction().isEmpty()) {
-        addAction();
-      }
-      return getAction().get(0);
     }
 
     /**
@@ -1837,10 +1799,6 @@ public class ClinicalImpression extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #action} (Actions taken during assessment.)
-     */
-    // syntactic sugar
     public Reference addAction() { //3
       Reference t = new Reference();
       if (this.action == null)
@@ -1849,7 +1807,6 @@ public class ClinicalImpression extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ClinicalImpression addAction(Reference t) { //3
       if (t == null)
         return this;
@@ -1860,8 +1817,19 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #action} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Actions taken during assessment.)
+     * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
      */
+    public Reference getActionFirstRep() { 
+      if (getAction().isEmpty()) {
+        addAction();
+      }
+      return getAction().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getActionTarget() { 
       if (this.actionTarget == null)
         this.actionTarget = new ArrayList<Resource>();
@@ -2191,9 +2159,9 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, assessor, status, date
-          , description, previous, problem, trigger, investigations, protocol, summary, finding, resolved
-          , ruledOut, prognosis, plan, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, assessor, status
+          , date, description, previous, problem, trigger, investigations, protocol, summary
+          , finding, resolved, ruledOut, prognosis, plan, action);
       }
 
   @Override
@@ -2209,7 +2177,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2229,7 +2197,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.previous</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference", target={ClinicalImpression.class} )
+  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
   public static final String SP_PREVIOUS = "previous";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>previous</b>
@@ -2255,7 +2223,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.assessor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ASSESSOR = "assessor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>assessor</b>
@@ -2307,7 +2275,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.finding.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token", target={} )
+  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
   public static final String SP_FINDING = "finding";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>finding</b>
@@ -2327,7 +2295,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.ruledOut.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token", target={} )
+  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
   public static final String SP_RULEDOUT = "ruledout";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ruledout</b>
@@ -2347,7 +2315,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.problem</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference", target={Condition.class, AllergyIntolerance.class} )
+  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
   public static final String SP_PROBLEM = "problem";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>problem</b>
@@ -2373,7 +2341,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2399,7 +2367,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.investigations.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference", target={FamilyMemberHistory.class, Observation.class, DiagnosticReport.class, QuestionnaireResponse.class} )
+  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>investigation</b>
@@ -2425,7 +2393,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference", target={Appointment.class, ReferralRequest.class, NutritionOrder.class, ProcedureRequest.class, Procedure.class, DiagnosticOrder.class, MedicationOrder.class, SupplyRequest.class} )
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -2451,7 +2419,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.trigger.as(CodeableConcept)", description="Request or event that necessitated this assessment", type="token", target={} )
+  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.trigger.as(CodeableConcept)", description="Request or event that necessitated this assessment", type="token" )
   public static final String SP_TRIGGER_CODE = "trigger-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>trigger-code</b>
@@ -2471,7 +2439,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference", target={Appointment.class, Order.class, ReferralRequest.class, ProcessRequest.class, VisionPrescription.class, DiagnosticOrder.class, ProcedureRequest.class, DeviceUseRequest.class, SupplyRequest.class, CarePlan.class, NutritionOrder.class, MedicationOrder.class, CommunicationRequest.class} )
+  @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference" )
   public static final String SP_PLAN = "plan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>plan</b>
@@ -2497,7 +2465,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.resolved</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token", target={} )
+  @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token" )
   public static final String SP_RESOLVED = "resolved";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>resolved</b>
@@ -2517,7 +2485,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

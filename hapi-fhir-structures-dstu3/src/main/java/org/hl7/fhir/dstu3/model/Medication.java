@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -113,16 +114,6 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #ingredient}, creating it if it does not already exist
-         */
-        public MedicationProductIngredientComponent getIngredientFirstRep() { 
-          if (getIngredient().isEmpty()) {
-            addIngredient();
-          }
-          return getIngredient().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MedicationProductComponent setIngredient(List<MedicationProductIngredientComponent> theIngredient) { 
@@ -139,10 +130,6 @@ public class Medication extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #ingredient} (Identifies a particular constituent of interest in the product.)
-         */
-    // syntactic sugar
         public MedicationProductIngredientComponent addIngredient() { //3
           MedicationProductIngredientComponent t = new MedicationProductIngredientComponent();
           if (this.ingredient == null)
@@ -151,7 +138,6 @@ public class Medication extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MedicationProductComponent addIngredient(MedicationProductIngredientComponent t) { //3
           if (t == null)
             return this;
@@ -162,22 +148,22 @@ public class Medication extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #ingredient}, creating it if it does not already exist
+         */
+        public MedicationProductIngredientComponent getIngredientFirstRep() { 
+          if (getIngredient().isEmpty()) {
+            addIngredient();
+          }
+          return getIngredient().get(0);
+        }
+
+        /**
          * @return {@link #batch} (Information about a group of medication produced or packaged from one production run.)
          */
         public List<MedicationProductBatchComponent> getBatch() { 
           if (this.batch == null)
             this.batch = new ArrayList<MedicationProductBatchComponent>();
           return this.batch;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #batch}, creating it if it does not already exist
-         */
-        public MedicationProductBatchComponent getBatchFirstRep() { 
-          if (getBatch().isEmpty()) {
-            addBatch();
-          }
-          return getBatch().get(0);
         }
 
         /**
@@ -197,10 +183,6 @@ public class Medication extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #batch} (Information about a group of medication produced or packaged from one production run.)
-         */
-    // syntactic sugar
         public MedicationProductBatchComponent addBatch() { //3
           MedicationProductBatchComponent t = new MedicationProductBatchComponent();
           if (this.batch == null)
@@ -209,7 +191,6 @@ public class Medication extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MedicationProductComponent addBatch(MedicationProductBatchComponent t) { //3
           if (t == null)
             return this;
@@ -217,6 +198,16 @@ public class Medication extends DomainResource {
             this.batch = new ArrayList<MedicationProductBatchComponent>();
           this.batch.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #batch}, creating it if it does not already exist
+         */
+        public MedicationProductBatchComponent getBatchFirstRep() { 
+          if (getBatch().isEmpty()) {
+            addBatch();
+          }
+          return getBatch().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -332,7 +323,8 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(form, ingredient, batch);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(form, ingredient, batch
+          );
       }
 
   public String fhirType() {
@@ -767,7 +759,8 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lotNumber, expirationDate);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lotNumber, expirationDate
+          );
       }
 
   public String fhirType() {
@@ -836,16 +829,6 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
-         */
-        public MedicationPackageContentComponent getContentFirstRep() { 
-          if (getContent().isEmpty()) {
-            addContent();
-          }
-          return getContent().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public MedicationPackageComponent setContent(List<MedicationPackageContentComponent> theContent) { 
@@ -862,10 +845,6 @@ public class Medication extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #content} (A set of components that go to make up the described item.)
-         */
-    // syntactic sugar
         public MedicationPackageContentComponent addContent() { //3
           MedicationPackageContentComponent t = new MedicationPackageContentComponent();
           if (this.content == null)
@@ -874,7 +853,6 @@ public class Medication extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public MedicationPackageComponent addContent(MedicationPackageContentComponent t) { //3
           if (t == null)
             return this;
@@ -882,6 +860,16 @@ public class Medication extends DomainResource {
             this.content = new ArrayList<MedicationPackageContentComponent>();
           this.content.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+         */
+        public MedicationPackageContentComponent getContentFirstRep() { 
+          if (getContent().isEmpty()) {
+            addContent();
+          }
+          return getContent().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1550,8 +1538,8 @@ public class Medication extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, isBrand, manufacturer, product
-          , package_);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, isBrand, manufacturer
+          , product, package_);
       }
 
   @Override
@@ -1567,7 +1555,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.item.as(CodeableConcept)", description="The product contained", type="token", target={} )
+  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.item.as(CodeableConcept)", description="The product contained", type="token" )
   public static final String SP_INGREDIENT_CODE = "ingredient-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient-code</b>
@@ -1587,7 +1575,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.container</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token", target={} )
+  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token" )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
@@ -1607,7 +1595,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item", path="Medication.package.content.item.as(Reference)", description="The item in the package", type="reference", target={Medication.class} )
+  @SearchParamDefinition(name="package-item", path="Medication.package.content.item.as(Reference)", description="The item in the package", type="reference" )
   public static final String SP_PACKAGE_ITEM = "package-item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item</b>
@@ -1633,7 +1621,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1653,7 +1641,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item.as(Reference)", description="The product contained", type="reference", target={Medication.class, Substance.class} )
+  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item.as(Reference)", description="The product contained", type="reference" )
   public static final String SP_INGREDIENT = "ingredient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
@@ -1679,7 +1667,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.form</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token", target={} )
+  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token" )
   public static final String SP_FORM = "form";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>form</b>
@@ -1699,7 +1687,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.item.as(CodeableConcept)", description="The item in the package", type="token", target={} )
+  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.item.as(CodeableConcept)", description="The item in the package", type="token" )
   public static final String SP_PACKAGE_ITEM_CODE = "package-item-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item-code</b>
@@ -1719,7 +1707,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

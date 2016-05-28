@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -261,16 +262,6 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DeviceUseStatement setIdentifier(List<Identifier> theIdentifier) { 
@@ -287,10 +278,6 @@ public class DeviceUseStatement extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (An external identifier for this statement such as an IRI.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -299,7 +286,6 @@ public class DeviceUseStatement extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DeviceUseStatement addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -310,22 +296,22 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
      * @return {@link #indication} (Reason or justification for the use of the device.)
      */
     public List<CodeableConcept> getIndication() { 
       if (this.indication == null)
         this.indication = new ArrayList<CodeableConcept>();
       return this.indication;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
-     */
-    public CodeableConcept getIndicationFirstRep() { 
-      if (getIndication().isEmpty()) {
-        addIndication();
-      }
-      return getIndication().get(0);
     }
 
     /**
@@ -345,10 +331,6 @@ public class DeviceUseStatement extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #indication} (Reason or justification for the use of the device.)
-     */
-    // syntactic sugar
     public CodeableConcept addIndication() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.indication == null)
@@ -357,7 +339,6 @@ public class DeviceUseStatement extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DeviceUseStatement addIndication(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -368,22 +349,22 @@ public class DeviceUseStatement extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
+     */
+    public CodeableConcept getIndicationFirstRep() { 
+      if (getIndication().isEmpty()) {
+        addIndication();
+      }
+      return getIndication().get(0);
+    }
+
+    /**
      * @return {@link #notes} (Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.)
      */
     public List<StringType> getNotes() { 
       if (this.notes == null)
         this.notes = new ArrayList<StringType>();
       return this.notes;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
-     */
-    public StringType getNotesFirstRep() { 
-      if (getNotes().isEmpty()) {
-        addNotesElement();
-      }
-      return getNotes().get(0);
     }
 
     /**
@@ -406,7 +387,6 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return {@link #notes} (Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.)
      */
-    // syntactic sugar
     public StringType addNotesElement() {//2 
       StringType t = new StringType();
       if (this.notes == null)
@@ -806,8 +786,8 @@ public class DeviceUseStatement extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(bodySite, whenUsed, device, identifier
-          , indication, notes, recordedOn, subject, timing);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(bodySite, whenUsed, device
+          , identifier, indication, notes, recordedOn, subject, timing);
       }
 
   @Override
@@ -823,7 +803,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DeviceUseStatement.subject", description="Search by subject", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="subject", path="DeviceUseStatement.subject", description="Search by subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -849,7 +829,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DeviceUseStatement.subject", description="Search by subject - a patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DeviceUseStatement.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -875,7 +855,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="DeviceUseStatement.device", description="Search by device", type="reference", target={Device.class} )
+  @SearchParamDefinition(name="device", path="DeviceUseStatement.device", description="Search by device", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

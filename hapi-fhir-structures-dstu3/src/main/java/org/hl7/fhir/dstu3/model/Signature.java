@@ -29,13 +29,14 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -110,16 +111,6 @@ public class Signature extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-     */
-    public Coding getTypeFirstRep() { 
-      if (getType().isEmpty()) {
-        addType();
-      }
-      return getType().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Signature setType(List<Coding> theType) { 
@@ -136,10 +127,6 @@ public class Signature extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #type} (An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.)
-     */
-    // syntactic sugar
     public Coding addType() { //3
       Coding t = new Coding();
       if (this.type == null)
@@ -148,7 +135,6 @@ public class Signature extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public Signature addType(Coding t) { //3
       if (t == null)
         return this;
@@ -156,6 +142,16 @@ public class Signature extends Type implements ICompositeType {
         this.type = new ArrayList<Coding>();
       this.type.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public Coding getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -493,8 +489,8 @@ public class Signature extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, when, who, contentType, blob
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, when, who, contentType
+          , blob);
       }
 
 

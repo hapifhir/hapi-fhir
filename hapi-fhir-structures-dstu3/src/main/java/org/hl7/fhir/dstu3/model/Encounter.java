@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -73,7 +74,7 @@ public class Encounter extends DomainResource {
          */
         CANCELLED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EncounterState fromCode(String codeString) throws FHIRException {
@@ -91,7 +92,10 @@ public class Encounter extends DomainResource {
           return FINISHED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new FHIRException("Unknown EncounterState code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EncounterState code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -236,7 +240,7 @@ public class Encounter extends DomainResource {
          */
         OTHER, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EncounterClass fromCode(String codeString) throws FHIRException {
@@ -260,7 +264,10 @@ public class Encounter extends DomainResource {
           return VIRTUAL;
         if ("other".equals(codeString))
           return OTHER;
-        throw new FHIRException("Unknown EncounterClass code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EncounterClass code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -419,7 +426,7 @@ Not to be used when the patient is currently at the location
          */
         COMPLETED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EncounterLocationStatus fromCode(String codeString) throws FHIRException {
@@ -433,7 +440,10 @@ Not to be used when the patient is currently at the location
           return RESERVED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new FHIRException("Unknown EncounterLocationStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EncounterLocationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -772,16 +782,6 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-         */
-        public CodeableConcept getTypeFirstRep() { 
-          if (getType().isEmpty()) {
-            addType();
-          }
-          return getType().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public EncounterParticipantComponent setType(List<CodeableConcept> theType) { 
@@ -798,10 +798,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #type} (Role of participant in encounter.)
-         */
-    // syntactic sugar
         public CodeableConcept addType() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.type == null)
@@ -810,7 +806,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterParticipantComponent addType(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -818,6 +813,16 @@ Not to be used when the patient is currently at the location
             this.type = new ArrayList<CodeableConcept>();
           this.type.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+         */
+        public CodeableConcept getTypeFirstRep() { 
+          if (getType().isEmpty()) {
+            addType();
+          }
+          return getType().get(0);
         }
 
         /**
@@ -993,7 +998,8 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, period, individual);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, period, individual
+          );
       }
 
   public String fhirType() {
@@ -1213,16 +1219,6 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return The first repetition of repeating field {@link #admittingDiagnosis}, creating it if it does not already exist
-         */
-        public Reference getAdmittingDiagnosisFirstRep() { 
-          if (getAdmittingDiagnosis().isEmpty()) {
-            addAdmittingDiagnosis();
-          }
-          return getAdmittingDiagnosis().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public EncounterHospitalizationComponent setAdmittingDiagnosis(List<Reference> theAdmittingDiagnosis) { 
@@ -1239,10 +1235,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #admittingDiagnosis} (The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
-         */
-    // syntactic sugar
         public Reference addAdmittingDiagnosis() { //3
           Reference t = new Reference();
           if (this.admittingDiagnosis == null)
@@ -1251,7 +1243,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterHospitalizationComponent addAdmittingDiagnosis(Reference t) { //3
           if (t == null)
             return this;
@@ -1262,18 +1253,29 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #admittingDiagnosis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @return The first repetition of repeating field {@link #admittingDiagnosis}, creating it if it does not already exist
          */
+        public Reference getAdmittingDiagnosisFirstRep() { 
+          if (getAdmittingDiagnosis().isEmpty()) {
+            addAdmittingDiagnosis();
+          }
+          return getAdmittingDiagnosis().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Condition> getAdmittingDiagnosisTarget() { 
           if (this.admittingDiagnosisTarget == null)
             this.admittingDiagnosisTarget = new ArrayList<Condition>();
           return this.admittingDiagnosisTarget;
         }
 
-    // syntactic sugar
         /**
-         * @return {@link #admittingDiagnosis} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The admitting diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter.)
+         * @deprecated Use Reference#setResource(IBaseResource) instead
          */
+        @Deprecated
         public Condition addAdmittingDiagnosisTarget() { 
           Condition r = new Condition();
           if (this.admittingDiagnosisTarget == null)
@@ -1316,16 +1318,6 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dietPreference}, creating it if it does not already exist
-         */
-        public CodeableConcept getDietPreferenceFirstRep() { 
-          if (getDietPreference().isEmpty()) {
-            addDietPreference();
-          }
-          return getDietPreference().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public EncounterHospitalizationComponent setDietPreference(List<CodeableConcept> theDietPreference) { 
@@ -1342,10 +1334,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #dietPreference} (Diet preferences reported by the patient.)
-         */
-    // syntactic sugar
         public CodeableConcept addDietPreference() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.dietPreference == null)
@@ -1354,7 +1342,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterHospitalizationComponent addDietPreference(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -1365,22 +1352,22 @@ Not to be used when the patient is currently at the location
         }
 
         /**
+         * @return The first repetition of repeating field {@link #dietPreference}, creating it if it does not already exist
+         */
+        public CodeableConcept getDietPreferenceFirstRep() { 
+          if (getDietPreference().isEmpty()) {
+            addDietPreference();
+          }
+          return getDietPreference().get(0);
+        }
+
+        /**
          * @return {@link #specialCourtesy} (Special courtesies (VIP, board member).)
          */
         public List<CodeableConcept> getSpecialCourtesy() { 
           if (this.specialCourtesy == null)
             this.specialCourtesy = new ArrayList<CodeableConcept>();
           return this.specialCourtesy;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #specialCourtesy}, creating it if it does not already exist
-         */
-        public CodeableConcept getSpecialCourtesyFirstRep() { 
-          if (getSpecialCourtesy().isEmpty()) {
-            addSpecialCourtesy();
-          }
-          return getSpecialCourtesy().get(0);
         }
 
         /**
@@ -1400,10 +1387,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #specialCourtesy} (Special courtesies (VIP, board member).)
-         */
-    // syntactic sugar
         public CodeableConcept addSpecialCourtesy() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.specialCourtesy == null)
@@ -1412,7 +1395,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterHospitalizationComponent addSpecialCourtesy(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -1423,22 +1405,22 @@ Not to be used when the patient is currently at the location
         }
 
         /**
+         * @return The first repetition of repeating field {@link #specialCourtesy}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialCourtesyFirstRep() { 
+          if (getSpecialCourtesy().isEmpty()) {
+            addSpecialCourtesy();
+          }
+          return getSpecialCourtesy().get(0);
+        }
+
+        /**
          * @return {@link #specialArrangement} (Wheelchair, translator, stretcher, etc.)
          */
         public List<CodeableConcept> getSpecialArrangement() { 
           if (this.specialArrangement == null)
             this.specialArrangement = new ArrayList<CodeableConcept>();
           return this.specialArrangement;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #specialArrangement}, creating it if it does not already exist
-         */
-        public CodeableConcept getSpecialArrangementFirstRep() { 
-          if (getSpecialArrangement().isEmpty()) {
-            addSpecialArrangement();
-          }
-          return getSpecialArrangement().get(0);
         }
 
         /**
@@ -1458,10 +1440,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #specialArrangement} (Wheelchair, translator, stretcher, etc.)
-         */
-    // syntactic sugar
         public CodeableConcept addSpecialArrangement() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.specialArrangement == null)
@@ -1470,7 +1448,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterHospitalizationComponent addSpecialArrangement(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -1478,6 +1455,16 @@ Not to be used when the patient is currently at the location
             this.specialArrangement = new ArrayList<CodeableConcept>();
           this.specialArrangement.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #specialArrangement}, creating it if it does not already exist
+         */
+        public CodeableConcept getSpecialArrangementFirstRep() { 
+          if (getSpecialArrangement().isEmpty()) {
+            addSpecialArrangement();
+          }
+          return getSpecialArrangement().get(0);
         }
 
         /**
@@ -1558,16 +1545,6 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dischargeDiagnosis}, creating it if it does not already exist
-         */
-        public Reference getDischargeDiagnosisFirstRep() { 
-          if (getDischargeDiagnosis().isEmpty()) {
-            addDischargeDiagnosis();
-          }
-          return getDischargeDiagnosis().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public EncounterHospitalizationComponent setDischargeDiagnosis(List<Reference> theDischargeDiagnosis) { 
@@ -1584,10 +1561,6 @@ Not to be used when the patient is currently at the location
           return false;
         }
 
-        /**
-         * @return {@link #dischargeDiagnosis} (The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete.)
-         */
-    // syntactic sugar
         public Reference addDischargeDiagnosis() { //3
           Reference t = new Reference();
           if (this.dischargeDiagnosis == null)
@@ -1596,7 +1569,6 @@ Not to be used when the patient is currently at the location
           return t;
         }
 
-    // syntactic sugar
         public EncounterHospitalizationComponent addDischargeDiagnosis(Reference t) { //3
           if (t == null)
             return this;
@@ -1607,18 +1579,29 @@ Not to be used when the patient is currently at the location
         }
 
         /**
-         * @return {@link #dischargeDiagnosis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete.)
+         * @return The first repetition of repeating field {@link #dischargeDiagnosis}, creating it if it does not already exist
          */
+        public Reference getDischargeDiagnosisFirstRep() { 
+          if (getDischargeDiagnosis().isEmpty()) {
+            addDischargeDiagnosis();
+          }
+          return getDischargeDiagnosis().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Condition> getDischargeDiagnosisTarget() { 
           if (this.dischargeDiagnosisTarget == null)
             this.dischargeDiagnosisTarget = new ArrayList<Condition>();
           return this.dischargeDiagnosisTarget;
         }
 
-    // syntactic sugar
         /**
-         * @return {@link #dischargeDiagnosis} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete.)
+         * @deprecated Use Reference#setResource(IBaseResource) instead
          */
+        @Deprecated
         public Condition addDischargeDiagnosisTarget() { 
           Condition r = new Condition();
           if (this.dischargeDiagnosisTarget == null)
@@ -2137,7 +2120,8 @@ Not to be used when the patient is currently at the location
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(location, status, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(location, status, period
+          );
       }
 
   public String fhirType() {
@@ -2342,16 +2326,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setIdentifier(List<Identifier> theIdentifier) { 
@@ -2368,10 +2342,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier(s) by which this encounter is known.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -2380,7 +2350,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -2388,6 +2357,16 @@ Not to be used when the patient is currently at the location
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2445,16 +2424,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #statusHistory}, creating it if it does not already exist
-     */
-    public EncounterStatusHistoryComponent getStatusHistoryFirstRep() { 
-      if (getStatusHistory().isEmpty()) {
-        addStatusHistory();
-      }
-      return getStatusHistory().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setStatusHistory(List<EncounterStatusHistoryComponent> theStatusHistory) { 
@@ -2471,10 +2440,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #statusHistory} (The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.)
-     */
-    // syntactic sugar
     public EncounterStatusHistoryComponent addStatusHistory() { //3
       EncounterStatusHistoryComponent t = new EncounterStatusHistoryComponent();
       if (this.statusHistory == null)
@@ -2483,7 +2448,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addStatusHistory(EncounterStatusHistoryComponent t) { //3
       if (t == null)
         return this;
@@ -2491,6 +2455,16 @@ Not to be used when the patient is currently at the location
         this.statusHistory = new ArrayList<EncounterStatusHistoryComponent>();
       this.statusHistory.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #statusHistory}, creating it if it does not already exist
+     */
+    public EncounterStatusHistoryComponent getStatusHistoryFirstRep() { 
+      if (getStatusHistory().isEmpty()) {
+        addStatusHistory();
+      }
+      return getStatusHistory().get(0);
     }
 
     /**
@@ -2552,16 +2526,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-     */
-    public CodeableConcept getTypeFirstRep() { 
-      if (getType().isEmpty()) {
-        addType();
-      }
-      return getType().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setType(List<CodeableConcept> theType) { 
@@ -2578,10 +2542,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #type} (Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).)
-     */
-    // syntactic sugar
     public CodeableConcept addType() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.type == null)
@@ -2590,7 +2550,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addType(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -2598,6 +2557,16 @@ Not to be used when the patient is currently at the location
         this.type = new ArrayList<CodeableConcept>();
       this.type.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -2678,16 +2647,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #episodeOfCare}, creating it if it does not already exist
-     */
-    public Reference getEpisodeOfCareFirstRep() { 
-      if (getEpisodeOfCare().isEmpty()) {
-        addEpisodeOfCare();
-      }
-      return getEpisodeOfCare().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setEpisodeOfCare(List<Reference> theEpisodeOfCare) { 
@@ -2704,10 +2663,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
-     */
-    // syntactic sugar
     public Reference addEpisodeOfCare() { //3
       Reference t = new Reference();
       if (this.episodeOfCare == null)
@@ -2716,7 +2671,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addEpisodeOfCare(Reference t) { //3
       if (t == null)
         return this;
@@ -2727,18 +2681,29 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #episodeOfCare} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return The first repetition of repeating field {@link #episodeOfCare}, creating it if it does not already exist
      */
+    public Reference getEpisodeOfCareFirstRep() { 
+      if (getEpisodeOfCare().isEmpty()) {
+        addEpisodeOfCare();
+      }
+      return getEpisodeOfCare().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<EpisodeOfCare> getEpisodeOfCareTarget() { 
       if (this.episodeOfCareTarget == null)
         this.episodeOfCareTarget = new ArrayList<EpisodeOfCare>();
       return this.episodeOfCareTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #episodeOfCare} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public EpisodeOfCare addEpisodeOfCareTarget() { 
       EpisodeOfCare r = new EpisodeOfCare();
       if (this.episodeOfCareTarget == null)
@@ -2754,16 +2719,6 @@ Not to be used when the patient is currently at the location
       if (this.incomingReferral == null)
         this.incomingReferral = new ArrayList<Reference>();
       return this.incomingReferral;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #incomingReferral}, creating it if it does not already exist
-     */
-    public Reference getIncomingReferralFirstRep() { 
-      if (getIncomingReferral().isEmpty()) {
-        addIncomingReferral();
-      }
-      return getIncomingReferral().get(0);
     }
 
     /**
@@ -2783,10 +2738,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #incomingReferral} (The referral request this encounter satisfies (incoming referral).)
-     */
-    // syntactic sugar
     public Reference addIncomingReferral() { //3
       Reference t = new Reference();
       if (this.incomingReferral == null)
@@ -2795,7 +2746,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addIncomingReferral(Reference t) { //3
       if (t == null)
         return this;
@@ -2806,18 +2756,29 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #incomingReferral} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The referral request this encounter satisfies (incoming referral).)
+     * @return The first repetition of repeating field {@link #incomingReferral}, creating it if it does not already exist
      */
+    public Reference getIncomingReferralFirstRep() { 
+      if (getIncomingReferral().isEmpty()) {
+        addIncomingReferral();
+      }
+      return getIncomingReferral().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<ReferralRequest> getIncomingReferralTarget() { 
       if (this.incomingReferralTarget == null)
         this.incomingReferralTarget = new ArrayList<ReferralRequest>();
       return this.incomingReferralTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #incomingReferral} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The referral request this encounter satisfies (incoming referral).)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public ReferralRequest addIncomingReferralTarget() { 
       ReferralRequest r = new ReferralRequest();
       if (this.incomingReferralTarget == null)
@@ -2833,16 +2794,6 @@ Not to be used when the patient is currently at the location
       if (this.participant == null)
         this.participant = new ArrayList<EncounterParticipantComponent>();
       return this.participant;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
-     */
-    public EncounterParticipantComponent getParticipantFirstRep() { 
-      if (getParticipant().isEmpty()) {
-        addParticipant();
-      }
-      return getParticipant().get(0);
     }
 
     /**
@@ -2862,10 +2813,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #participant} (The list of people responsible for providing the service.)
-     */
-    // syntactic sugar
     public EncounterParticipantComponent addParticipant() { //3
       EncounterParticipantComponent t = new EncounterParticipantComponent();
       if (this.participant == null)
@@ -2874,7 +2821,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addParticipant(EncounterParticipantComponent t) { //3
       if (t == null)
         return this;
@@ -2882,6 +2828,16 @@ Not to be used when the patient is currently at the location
         this.participant = new ArrayList<EncounterParticipantComponent>();
       this.participant.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     */
+    public EncounterParticipantComponent getParticipantFirstRep() { 
+      if (getParticipant().isEmpty()) {
+        addParticipant();
+      }
+      return getParticipant().get(0);
     }
 
     /**
@@ -2986,16 +2942,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
-     */
-    public CodeableConcept getReasonFirstRep() { 
-      if (getReason().isEmpty()) {
-        addReason();
-      }
-      return getReason().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setReason(List<CodeableConcept> theReason) { 
@@ -3012,10 +2958,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #reason} (Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.)
-     */
-    // syntactic sugar
     public CodeableConcept addReason() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.reason == null)
@@ -3024,7 +2966,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addReason(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -3035,22 +2976,22 @@ Not to be used when the patient is currently at the location
     }
 
     /**
+     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonFirstRep() { 
+      if (getReason().isEmpty()) {
+        addReason();
+      }
+      return getReason().get(0);
+    }
+
+    /**
      * @return {@link #indication} (Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.)
      */
     public List<Reference> getIndication() { 
       if (this.indication == null)
         this.indication = new ArrayList<Reference>();
       return this.indication;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
-     */
-    public Reference getIndicationFirstRep() { 
-      if (getIndication().isEmpty()) {
-        addIndication();
-      }
-      return getIndication().get(0);
     }
 
     /**
@@ -3070,10 +3011,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #indication} (Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.)
-     */
-    // syntactic sugar
     public Reference addIndication() { //3
       Reference t = new Reference();
       if (this.indication == null)
@@ -3082,7 +3019,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addIndication(Reference t) { //3
       if (t == null)
         return this;
@@ -3093,8 +3029,19 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return {@link #indication} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.)
+     * @return The first repetition of repeating field {@link #indication}, creating it if it does not already exist
      */
+    public Reference getIndicationFirstRep() { 
+      if (getIndication().isEmpty()) {
+        addIndication();
+      }
+      return getIndication().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getIndicationTarget() { 
       if (this.indicationTarget == null)
         this.indicationTarget = new ArrayList<Resource>();
@@ -3135,16 +3082,6 @@ Not to be used when the patient is currently at the location
     }
 
     /**
-     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
-     */
-    public EncounterLocationComponent getLocationFirstRep() { 
-      if (getLocation().isEmpty()) {
-        addLocation();
-      }
-      return getLocation().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Encounter setLocation(List<EncounterLocationComponent> theLocation) { 
@@ -3161,10 +3098,6 @@ Not to be used when the patient is currently at the location
       return false;
     }
 
-    /**
-     * @return {@link #location} (List of locations where  the patient has been during this encounter.)
-     */
-    // syntactic sugar
     public EncounterLocationComponent addLocation() { //3
       EncounterLocationComponent t = new EncounterLocationComponent();
       if (this.location == null)
@@ -3173,7 +3106,6 @@ Not to be used when the patient is currently at the location
       return t;
     }
 
-    // syntactic sugar
     public Encounter addLocation(EncounterLocationComponent t) { //3
       if (t == null)
         return this;
@@ -3181,6 +3113,16 @@ Not to be used when the patient is currently at the location
         this.location = new ArrayList<EncounterLocationComponent>();
       this.location.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
+     */
+    public EncounterLocationComponent getLocationFirstRep() { 
+      if (getLocation().isEmpty()) {
+        addLocation();
+      }
+      return getLocation().get(0);
     }
 
     /**
@@ -3627,8 +3569,9 @@ Not to be used when the patient is currently at the location
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
-          , class_, type, priority, patient, episodeOfCare, incomingReferral, participant, appointment
-          , period, length, reason, indication, hospitalization, location, serviceProvider, partOf);
+          , class_, type, priority, patient, episodeOfCare, incomingReferral, participant
+          , appointment, period, length, reason, indication, hospitalization, location, serviceProvider
+          , partOf);
       }
 
   @Override
@@ -3644,7 +3587,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3664,7 +3607,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3684,7 +3627,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.reason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token", target={} )
+  @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token" )
   public static final String SP_REASON = "reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason</b>
@@ -3704,7 +3647,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.episodeOfCare</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class} )
+  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference" )
   public static final String SP_EPISODEOFCARE = "episodeofcare";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>episodeofcare</b>
@@ -3730,7 +3673,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token", target={} )
+  @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
   public static final String SP_PARTICIPANT_TYPE = "participant-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant-type</b>
@@ -3750,7 +3693,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.incomingReferral</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ReferralRequest that initiated this encounter", type="reference", target={ReferralRequest.class} )
+  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ReferralRequest that initiated this encounter", type="reference" )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
@@ -3776,7 +3719,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -3802,7 +3745,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.length</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number", target={} )
+  @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number" )
   public static final String SP_LENGTH = "length";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>length</b>
@@ -3822,7 +3765,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.appointment</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class} )
+  @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference" )
   public static final String SP_APPOINTMENT = "appointment";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment</b>
@@ -3848,7 +3791,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference" )
   public static final String SP_PART_OF = "part-of";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-of</b>
@@ -3874,7 +3817,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="procedure", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Procedure.class} )
+  @SearchParamDefinition(name="procedure", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_PROCEDURE = "procedure";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>procedure</b>
@@ -3900,7 +3843,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -3920,7 +3863,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", target={Practitioner.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -3946,7 +3889,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class} )
+  @SearchParamDefinition(name="condition", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -3972,7 +3915,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3998,7 +3941,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.location.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date", target={} )
+  @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date" )
   public static final String SP_LOCATION_PERIOD = "location-period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location-period</b>
@@ -4018,7 +3961,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.location.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -4044,7 +3987,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.indication</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class, Procedure.class} )
+  @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_INDICATION = "indication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>indication</b>
@@ -4070,7 +4013,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.hospitalization.specialArrangement</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc.", type="token", target={} )
+  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc.", type="token" )
   public static final String SP_SPECIAL_ARRANGEMENT = "special-arrangement";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>special-arrangement</b>
@@ -4090,7 +4033,7 @@ Not to be used when the patient is currently at the location
    * Path: <b>Encounter.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

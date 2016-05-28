@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -65,7 +66,7 @@ public class Subscription extends DomainResource {
          */
         OFF, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static SubscriptionStatus fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Subscription extends DomainResource {
           return ERROR;
         if ("off".equals(codeString))
           return OFF;
-        throw new FHIRException("Unknown SubscriptionStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -188,7 +192,7 @@ public class Subscription extends DomainResource {
          */
         MESSAGE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static SubscriptionChannelType fromCode(String codeString) throws FHIRException {
@@ -204,7 +208,10 @@ public class Subscription extends DomainResource {
           return SMS;
         if ("message".equals(codeString))
           return MESSAGE;
-        throw new FHIRException("Unknown SubscriptionChannelType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -654,8 +661,8 @@ public class Subscription extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, endpoint, payload, header
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, endpoint, payload
+          , header);
       }
 
   public String fhirType() {
@@ -796,16 +803,6 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactPoint getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Subscription setContact(List<ContactPoint> theContact) { 
@@ -822,10 +819,6 @@ public class Subscription extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.)
-     */
-    // syntactic sugar
     public ContactPoint addContact() { //3
       ContactPoint t = new ContactPoint();
       if (this.contact == null)
@@ -834,7 +827,6 @@ public class Subscription extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Subscription addContact(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -842,6 +834,16 @@ public class Subscription extends DomainResource {
         this.contact = new ArrayList<ContactPoint>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactPoint getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -1066,16 +1068,6 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #tag}, creating it if it does not already exist
-     */
-    public Coding getTagFirstRep() { 
-      if (getTag().isEmpty()) {
-        addTag();
-      }
-      return getTag().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Subscription setTag(List<Coding> theTag) { 
@@ -1092,10 +1084,6 @@ public class Subscription extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #tag} (A tag to add to any resource that matches the criteria, after the subscription is processed.)
-     */
-    // syntactic sugar
     public Coding addTag() { //3
       Coding t = new Coding();
       if (this.tag == null)
@@ -1104,7 +1092,6 @@ public class Subscription extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Subscription addTag(Coding t) { //3
       if (t == null)
         return this;
@@ -1112,6 +1099,16 @@ public class Subscription extends DomainResource {
         this.tag = new ArrayList<Coding>();
       this.tag.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #tag}, creating it if it does not already exist
+     */
+    public Coding getTagFirstRep() { 
+      if (getTag().isEmpty()) {
+        addTag();
+      }
+      return getTag().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1298,8 +1295,8 @@ public class Subscription extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(criteria, contact, reason, status
-          , error, channel, end, tag);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(criteria, contact, reason
+          , status, error, channel, end, tag);
       }
 
   @Override
@@ -1315,7 +1312,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string", target={} )
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
@@ -1335,7 +1332,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.criteria</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string", target={} )
+  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
   public static final String SP_CRITERIA = "criteria";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criteria</b>
@@ -1355,7 +1352,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.contact</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token", target={} )
+  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
@@ -1375,7 +1372,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.tag</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token", target={} )
+  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token" )
   public static final String SP_TAG = "tag";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>tag</b>
@@ -1395,7 +1392,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1415,7 +1412,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1435,7 +1432,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -103,4 +103,9 @@ public class Configuration {
 	  return status == 0;
   }
 
+
+	public static boolean isAcceptInvalidEnums() {
+		return true;
+	}
+
 }

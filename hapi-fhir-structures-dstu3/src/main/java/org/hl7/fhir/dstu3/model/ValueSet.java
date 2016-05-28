@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -46,7 +47,8 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
  * A value set specifies a set of codes drawn from one or more code systems.
  */
 @ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/Profile/ValueSet")
-public class ValueSet extends DomainResource {
+@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "lockedDate", "description", "useContext", "immutable", "requirements", "copyright", "extensible", "compose", "expansion"})
+public class ValueSet extends BaseConformance {
 
     public enum FilterOperator {
         /**
@@ -74,7 +76,7 @@ public class ValueSet extends DomainResource {
          */
         NOTIN, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static FilterOperator fromCode(String codeString) throws FHIRException {
@@ -92,7 +94,10 @@ public class ValueSet extends DomainResource {
           return IN;
         if ("not-in".equals(codeString))
           return NOTIN;
-        throw new FHIRException("Unknown FilterOperator code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown FilterOperator code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -283,16 +288,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ValueSetContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -309,10 +304,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -321,7 +312,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -329,6 +319,16 @@ public class ValueSet extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -478,16 +478,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #import_}, creating it if it does not already exist
-         */
-        public UriType getImportFirstRep() { 
-          if (getImport().isEmpty()) {
-            addImportElement();
-          }
-          return getImport().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ValueSetComposeComponent setImport(List<UriType> theImport) { 
@@ -507,7 +497,6 @@ public class ValueSet extends DomainResource {
         /**
          * @return {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.)
          */
-    // syntactic sugar
         public UriType addImportElement() {//2 
           UriType t = new UriType();
           if (this.import_ == null)
@@ -550,16 +539,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #include}, creating it if it does not already exist
-         */
-        public ConceptSetComponent getIncludeFirstRep() { 
-          if (getInclude().isEmpty()) {
-            addInclude();
-          }
-          return getInclude().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ValueSetComposeComponent setInclude(List<ConceptSetComponent> theInclude) { 
@@ -576,10 +555,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #include} (Include one or more codes from a code system.)
-         */
-    // syntactic sugar
         public ConceptSetComponent addInclude() { //3
           ConceptSetComponent t = new ConceptSetComponent();
           if (this.include == null)
@@ -588,7 +563,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetComposeComponent addInclude(ConceptSetComponent t) { //3
           if (t == null)
             return this;
@@ -599,22 +573,22 @@ public class ValueSet extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #include}, creating it if it does not already exist
+         */
+        public ConceptSetComponent getIncludeFirstRep() { 
+          if (getInclude().isEmpty()) {
+            addInclude();
+          }
+          return getInclude().get(0);
+        }
+
+        /**
          * @return {@link #exclude} (Exclude one or more codes from the value set.)
          */
         public List<ConceptSetComponent> getExclude() { 
           if (this.exclude == null)
             this.exclude = new ArrayList<ConceptSetComponent>();
           return this.exclude;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #exclude}, creating it if it does not already exist
-         */
-        public ConceptSetComponent getExcludeFirstRep() { 
-          if (getExclude().isEmpty()) {
-            addExclude();
-          }
-          return getExclude().get(0);
         }
 
         /**
@@ -634,10 +608,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #exclude} (Exclude one or more codes from the value set.)
-         */
-    // syntactic sugar
         public ConceptSetComponent addExclude() { //3
           ConceptSetComponent t = new ConceptSetComponent();
           if (this.exclude == null)
@@ -646,7 +616,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetComposeComponent addExclude(ConceptSetComponent t) { //3
           if (t == null)
             return this;
@@ -654,6 +623,16 @@ public class ValueSet extends DomainResource {
             this.exclude = new ArrayList<ConceptSetComponent>();
           this.exclude.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #exclude}, creating it if it does not already exist
+         */
+        public ConceptSetComponent getExcludeFirstRep() { 
+          if (getExclude().isEmpty()) {
+            addExclude();
+          }
+          return getExclude().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -772,7 +751,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(import_, include, exclude);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(import_, include, exclude
+          );
       }
 
   public String fhirType() {
@@ -933,16 +913,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
-         */
-        public ConceptReferenceComponent getConceptFirstRep() { 
-          if (getConcept().isEmpty()) {
-            addConcept();
-          }
-          return getConcept().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ConceptSetComponent setConcept(List<ConceptReferenceComponent> theConcept) { 
@@ -959,10 +929,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #concept} (Specifies a concept to be included or excluded.)
-         */
-    // syntactic sugar
         public ConceptReferenceComponent addConcept() { //3
           ConceptReferenceComponent t = new ConceptReferenceComponent();
           if (this.concept == null)
@@ -971,7 +937,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ConceptSetComponent addConcept(ConceptReferenceComponent t) { //3
           if (t == null)
             return this;
@@ -982,22 +947,22 @@ public class ValueSet extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+         */
+        public ConceptReferenceComponent getConceptFirstRep() { 
+          if (getConcept().isEmpty()) {
+            addConcept();
+          }
+          return getConcept().get(0);
+        }
+
+        /**
          * @return {@link #filter} (Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.)
          */
         public List<ConceptSetFilterComponent> getFilter() { 
           if (this.filter == null)
             this.filter = new ArrayList<ConceptSetFilterComponent>();
           return this.filter;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #filter}, creating it if it does not already exist
-         */
-        public ConceptSetFilterComponent getFilterFirstRep() { 
-          if (getFilter().isEmpty()) {
-            addFilter();
-          }
-          return getFilter().get(0);
         }
 
         /**
@@ -1017,10 +982,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #filter} (Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.)
-         */
-    // syntactic sugar
         public ConceptSetFilterComponent addFilter() { //3
           ConceptSetFilterComponent t = new ConceptSetFilterComponent();
           if (this.filter == null)
@@ -1029,7 +990,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ConceptSetComponent addFilter(ConceptSetFilterComponent t) { //3
           if (t == null)
             return this;
@@ -1037,6 +997,16 @@ public class ValueSet extends DomainResource {
             this.filter = new ArrayList<ConceptSetFilterComponent>();
           this.filter.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #filter}, creating it if it does not already exist
+         */
+        public ConceptSetFilterComponent getFilterFirstRep() { 
+          if (getFilter().isEmpty()) {
+            addFilter();
+          }
+          return getFilter().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1163,8 +1133,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, concept, filter
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, concept
+          , filter);
       }
 
   public String fhirType() {
@@ -1318,16 +1288,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #designation}, creating it if it does not already exist
-         */
-        public ConceptReferenceDesignationComponent getDesignationFirstRep() { 
-          if (getDesignation().isEmpty()) {
-            addDesignation();
-          }
-          return getDesignation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ConceptReferenceComponent setDesignation(List<ConceptReferenceDesignationComponent> theDesignation) { 
@@ -1344,10 +1304,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.)
-         */
-    // syntactic sugar
         public ConceptReferenceDesignationComponent addDesignation() { //3
           ConceptReferenceDesignationComponent t = new ConceptReferenceDesignationComponent();
           if (this.designation == null)
@@ -1356,7 +1312,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ConceptReferenceComponent addDesignation(ConceptReferenceDesignationComponent t) { //3
           if (t == null)
             return this;
@@ -1364,6 +1319,16 @@ public class ValueSet extends DomainResource {
             this.designation = new ArrayList<ConceptReferenceDesignationComponent>();
           this.designation.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #designation}, creating it if it does not already exist
+         */
+        public ConceptReferenceDesignationComponent getDesignationFirstRep() { 
+          if (getDesignation().isEmpty()) {
+            addDesignation();
+          }
+          return getDesignation().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1474,7 +1439,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, display, designation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, display, designation
+          );
       }
 
   public String fhirType() {
@@ -2301,16 +2267,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-         */
-        public ValueSetExpansionParameterComponent getParameterFirstRep() { 
-          if (getParameter().isEmpty()) {
-            addParameter();
-          }
-          return getParameter().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ValueSetExpansionComponent setParameter(List<ValueSetExpansionParameterComponent> theParameter) { 
@@ -2327,10 +2283,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #parameter} (A parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
-         */
-    // syntactic sugar
         public ValueSetExpansionParameterComponent addParameter() { //3
           ValueSetExpansionParameterComponent t = new ValueSetExpansionParameterComponent();
           if (this.parameter == null)
@@ -2339,7 +2291,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetExpansionComponent addParameter(ValueSetExpansionParameterComponent t) { //3
           if (t == null)
             return this;
@@ -2350,22 +2301,22 @@ public class ValueSet extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+         */
+        public ValueSetExpansionParameterComponent getParameterFirstRep() { 
+          if (getParameter().isEmpty()) {
+            addParameter();
+          }
+          return getParameter().get(0);
+        }
+
+        /**
          * @return {@link #contains} (The codes that are contained in the value set expansion.)
          */
         public List<ValueSetExpansionContainsComponent> getContains() { 
           if (this.contains == null)
             this.contains = new ArrayList<ValueSetExpansionContainsComponent>();
           return this.contains;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #contains}, creating it if it does not already exist
-         */
-        public ValueSetExpansionContainsComponent getContainsFirstRep() { 
-          if (getContains().isEmpty()) {
-            addContains();
-          }
-          return getContains().get(0);
         }
 
         /**
@@ -2385,10 +2336,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #contains} (The codes that are contained in the value set expansion.)
-         */
-    // syntactic sugar
         public ValueSetExpansionContainsComponent addContains() { //3
           ValueSetExpansionContainsComponent t = new ValueSetExpansionContainsComponent();
           if (this.contains == null)
@@ -2397,7 +2344,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetExpansionComponent addContains(ValueSetExpansionContainsComponent t) { //3
           if (t == null)
             return this;
@@ -2405,6 +2351,16 @@ public class ValueSet extends DomainResource {
             this.contains = new ArrayList<ValueSetExpansionContainsComponent>();
           this.contains.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #contains}, creating it if it does not already exist
+         */
+        public ValueSetExpansionContainsComponent getContainsFirstRep() { 
+          if (getContains().isEmpty()) {
+            addContains();
+          }
+          return getContains().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2557,8 +2513,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, timestamp, total, offset
-          , parameter, contains);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, timestamp, total
+          , offset, parameter, contains);
       }
 
   public String fhirType() {
@@ -3169,16 +3125,6 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #contains}, creating it if it does not already exist
-         */
-        public ValueSetExpansionContainsComponent getContainsFirstRep() { 
-          if (getContains().isEmpty()) {
-            addContains();
-          }
-          return getContains().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ValueSetExpansionContainsComponent setContains(List<ValueSetExpansionContainsComponent> theContains) { 
@@ -3195,10 +3141,6 @@ public class ValueSet extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #contains} (Other codes and entries contained under this entry in the hierarchy.)
-         */
-    // syntactic sugar
         public ValueSetExpansionContainsComponent addContains() { //3
           ValueSetExpansionContainsComponent t = new ValueSetExpansionContainsComponent();
           if (this.contains == null)
@@ -3207,7 +3149,6 @@ public class ValueSet extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ValueSetExpansionContainsComponent addContains(ValueSetExpansionContainsComponent t) { //3
           if (t == null)
             return this;
@@ -3215,6 +3156,16 @@ public class ValueSet extends DomainResource {
             this.contains = new ArrayList<ValueSetExpansionContainsComponent>();
           this.contains.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #contains}, creating it if it does not already exist
+         */
+        public ValueSetExpansionContainsComponent getContainsFirstRep() { 
+          if (getContains().isEmpty()) {
+            addContains();
+          }
+          return getContains().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -3363,8 +3314,8 @@ public class ValueSet extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, abstract_, version, code
-          , display, contains);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, abstract_, version
+          , code, display, contains);
       }
 
   public String fhirType() {
@@ -3375,132 +3326,90 @@ public class ValueSet extends DomainResource {
   }
 
     /**
-     * An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.
-     */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Globally unique logical identifier for  value set", formalDefinition="An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published." )
-    protected UriType url;
-
-    /**
      * Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional identifier for the value set (e.g. HL7 v2 / CDA)", formalDefinition="Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected Identifier identifier;
 
     /**
-     * Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
-     */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical identifier for this version of the value set", formalDefinition="Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
-    protected StringType version;
-
-    /**
-     * A free text natural language name describing the value set.
-     */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Informal name for this value set", formalDefinition="A free text natural language name describing the value set." )
-    protected StringType name;
-
-    /**
-     * The status of the value set.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the value set." )
-    protected Enumeration<ConformanceResourceStatus> status;
-
-    /**
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the value set.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (organization or individual)", formalDefinition="The name of the individual or organization that published the value set." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ValueSetContactComponent> contact;
 
     /**
-     * The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date for given status", formalDefinition="The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition')." )
-    protected DateTimeType date;
-
-    /**
      * If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.
      */
-    @Child(name = "lockedDate", type = {DateType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "lockedDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Fixed date for all referenced code systems and value sets", formalDefinition="If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date." )
     protected DateType lockedDate;
 
     /**
      * A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.
      */
-    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the value set", formalDefinition="A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set." )
     protected StringType description;
 
     /**
-     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.
-     */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions." )
-    protected List<CodeableConcept> useContext;
-
-    /**
      * If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.
      */
-    @Child(name = "immutable", type = {BooleanType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "immutable", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Indicates whether or not any change to the content logical definition may occur", formalDefinition="If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change." )
     protected BooleanType immutable;
 
     /**
      * Explains why this value set is needed and why it has been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why needed", formalDefinition="Explains why this value set is needed and why it has been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set." )
     protected StringType copyright;
 
     /**
      * Whether this is intended to be used with an extensible binding or not.
      */
-    @Child(name = "extensible", type = {BooleanType.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "extensible", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Whether this is intended to be used with an extensible binding", formalDefinition="Whether this is intended to be used with an extensible binding or not." )
     protected BooleanType extensible;
 
     /**
      * A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.
      */
-    @Child(name = "compose", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "compose", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When value set includes codes from elsewhere", formalDefinition="A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set." )
     protected ValueSetComposeComponent compose;
 
     /**
      * A value set can also be "expanded", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.
      */
-    @Child(name = "expansion", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expansion", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Used when the value set is \"expanded\"", formalDefinition="A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
-    private static final long serialVersionUID = 1847545818L;
+    private static final long serialVersionUID = 182109950L;
 
   /**
    * Constructor
@@ -3515,41 +3424,6 @@ public class ValueSet extends DomainResource {
     public ValueSet(Enumeration<ConformanceResourceStatus> status) {
       super();
       this.status = status;
-    }
-
-    /**
-     * @return {@link #url} (An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public UriType getUrlElement() { 
-      if (this.url == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.url");
-        else if (Configuration.doAutoCreate())
-          this.url = new UriType(); // bb
-      return this.url;
-    }
-
-    public boolean hasUrlElement() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    public boolean hasUrl() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    /**
-     * @param value {@link #url} (An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public ValueSet setUrlElement(UriType value) { 
-      this.url = value;
-      return this;
-    }
-
-    /**
-     * @return An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.
-     */
-    public String getUrl() { 
-      return this.url == null ? null : this.url.getValue();
     }
 
     /**
@@ -3591,41 +3465,6 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #version} (Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-     */
-    public StringType getVersionElement() { 
-      if (this.version == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.version");
-        else if (Configuration.doAutoCreate())
-          this.version = new StringType(); // bb
-      return this.version;
-    }
-
-    public boolean hasVersionElement() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    public boolean hasVersion() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    /**
-     * @param value {@link #version} (Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-     */
-    public ValueSet setVersionElement(StringType value) { 
-      this.version = value;
-      return this;
-    }
-
-    /**
-     * @return Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
-     */
-    public String getVersion() { 
-      return this.version == null ? null : this.version.getValue();
-    }
-
-    /**
      * @param value Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
     public ValueSet setVersion(String value) { 
@@ -3640,41 +3479,6 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A free text natural language name describing the value set.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public StringType getNameElement() { 
-      if (this.name == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.name");
-        else if (Configuration.doAutoCreate())
-          this.name = new StringType(); // bb
-      return this.name;
-    }
-
-    public boolean hasNameElement() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    public boolean hasName() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    /**
-     * @param value {@link #name} (A free text natural language name describing the value set.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public ValueSet setNameElement(StringType value) { 
-      this.name = value;
-      return this;
-    }
-
-    /**
-     * @return A free text natural language name describing the value set.
-     */
-    public String getName() { 
-      return this.name == null ? null : this.name.getValue();
-    }
-
-    /**
      * @param value A free text natural language name describing the value set.
      */
     public ValueSet setName(String value) { 
@@ -3686,41 +3490,6 @@ public class ValueSet extends DomainResource {
         this.name.setValue(value);
       }
       return this;
-    }
-
-    /**
-     * @return {@link #status} (The status of the value set.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
-      if (this.status == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.status");
-        else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
-      return this.status;
-    }
-
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    /**
-     * @param value {@link #status} (The status of the value set.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public ValueSet setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
-      this.status = value;
-      return this;
-    }
-
-    /**
-     * @return The status of the value set.
-     */
-    public ConformanceResourceStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
     }
 
     /**
@@ -3837,16 +3606,6 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ValueSetContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ValueSet setContact(List<ValueSetContactComponent> theContact) { 
@@ -3863,10 +3622,6 @@ public class ValueSet extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
-     */
-    // syntactic sugar
     public ValueSetContactComponent addContact() { //3
       ValueSetContactComponent t = new ValueSetContactComponent();
       if (this.contact == null)
@@ -3875,7 +3630,6 @@ public class ValueSet extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ValueSet addContact(ValueSetContactComponent t) { //3
       if (t == null)
         return this;
@@ -3886,38 +3640,13 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public ValueSet setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public ValueSetContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -4029,64 +3758,6 @@ public class ValueSet extends DomainResource {
           this.description = new StringType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.)
-     */
-    public List<CodeableConcept> getUseContext() { 
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      return this.useContext;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
-     */
-    public CodeableConcept getUseContextFirstRep() { 
-      if (getUseContext().isEmpty()) {
-        addUseContext();
-      }
-      return getUseContext().get(0);
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ValueSet setUseContext(List<CodeableConcept> theUseContext) { 
-      this.useContext = theUseContext;
-      return this;
-    }
-
-    public boolean hasUseContext() { 
-      if (this.useContext == null)
-        return false;
-      for (CodeableConcept item : this.useContext)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.)
-     */
-    // syntactic sugar
-    public CodeableConcept addUseContext() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public ValueSet addUseContext(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
       return this;
     }
 
@@ -4328,18 +3999,12 @@ public class ValueSet extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A free text natural language name describing the value set.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The status of the value set.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the value set.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("lockedDate", "date", "If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
         childrenList.add(new Property("description", "string", "A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("immutable", "boolean", "If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.", 0, java.lang.Integer.MAX_VALUE, immutable));
         childrenList.add(new Property("requirements", "string", "Explains why this value set is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.", 0, java.lang.Integer.MAX_VALUE, copyright));
@@ -4615,11 +4280,9 @@ public class ValueSet extends DomainResource {
         if (!(other instanceof ValueSet))
           return false;
         ValueSet o = (ValueSet) other;
-        return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
-           && compareDeep(name, o.name, true) && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
-           && compareDeep(lockedDate, o.lockedDate, true) && compareDeep(description, o.description, true)
-           && compareDeep(useContext, o.useContext, true) && compareDeep(immutable, o.immutable, true) && compareDeep(requirements, o.requirements, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(lockedDate, o.lockedDate, true)
+           && compareDeep(description, o.description, true) && compareDeep(immutable, o.immutable, true) && compareDeep(requirements, o.requirements, true)
            && compareDeep(copyright, o.copyright, true) && compareDeep(extensible, o.extensible, true) && compareDeep(compose, o.compose, true)
            && compareDeep(expansion, o.expansion, true);
       }
@@ -4631,17 +4294,16 @@ public class ValueSet extends DomainResource {
         if (!(other instanceof ValueSet))
           return false;
         ValueSet o = (ValueSet) other;
-        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(date, o.date, true) && compareValues(lockedDate, o.lockedDate, true) && compareValues(description, o.description, true)
+        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
+           && compareValues(lockedDate, o.lockedDate, true) && compareValues(description, o.description, true)
            && compareValues(immutable, o.immutable, true) && compareValues(requirements, o.requirements, true)
            && compareValues(copyright, o.copyright, true) && compareValues(extensible, o.extensible, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, name
-          , status, experimental, publisher, contact, date, lockedDate, description, useContext, immutable
-          , requirements, copyright, extensible, compose, expansion);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, experimental, publisher
+          , contact, lockedDate, description, immutable, requirements, copyright, extensible
+          , compose, expansion);
       }
 
   @Override
@@ -4657,7 +4319,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -4677,7 +4339,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.compose.include.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri", target={} )
+  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
   public static final String SP_REFERENCE = "reference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reference</b>
@@ -4697,7 +4359,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4717,7 +4379,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string", target={} )
+  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -4737,7 +4399,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token", target={} )
+  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -4757,7 +4419,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -4777,7 +4439,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string", target={} )
+  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -4797,7 +4459,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token", target={} )
+  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -4817,7 +4479,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -4837,7 +4499,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -4857,7 +4519,7 @@ public class ValueSet extends DomainResource {
    * Path: <b>ValueSet.expansion.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri", target={} )
+  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
   public static final String SP_EXPANSION = "expansion";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>expansion</b>

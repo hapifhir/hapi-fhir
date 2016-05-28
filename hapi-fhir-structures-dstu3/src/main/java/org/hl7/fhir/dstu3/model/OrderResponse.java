@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -85,7 +86,7 @@ public class OrderResponse extends DomainResource {
          */
         COMPLETED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static OrderStatus fromCode(String codeString) throws FHIRException {
@@ -109,7 +110,10 @@ public class OrderResponse extends DomainResource {
           return ABORTED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new FHIRException("Unknown OrderStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown OrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -338,16 +342,6 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public OrderResponse setIdentifier(List<Identifier> theIdentifier) { 
@@ -364,10 +358,6 @@ public class OrderResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifiers assigned to this order. The identifiers are usually assigned by the system responding to the order, but they may be provided or added to by other systems.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -376,7 +366,6 @@ public class OrderResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public OrderResponse addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -384,6 +373,16 @@ public class OrderResponse extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -622,16 +621,6 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #fulfillment}, creating it if it does not already exist
-     */
-    public Reference getFulfillmentFirstRep() { 
-      if (getFulfillment().isEmpty()) {
-        addFulfillment();
-      }
-      return getFulfillment().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public OrderResponse setFulfillment(List<Reference> theFulfillment) { 
@@ -648,10 +637,6 @@ public class OrderResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #fulfillment} (Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
-     */
-    // syntactic sugar
     public Reference addFulfillment() { //3
       Reference t = new Reference();
       if (this.fulfillment == null)
@@ -660,7 +645,6 @@ public class OrderResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public OrderResponse addFulfillment(Reference t) { //3
       if (t == null)
         return this;
@@ -671,8 +655,19 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #fulfillment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
+     * @return The first repetition of repeating field {@link #fulfillment}, creating it if it does not already exist
      */
+    public Reference getFulfillmentFirstRep() { 
+      if (getFulfillment().isEmpty()) {
+        addFulfillment();
+      }
+      return getFulfillment().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getFulfillmentTarget() { 
       if (this.fulfillmentTarget == null)
         this.fulfillmentTarget = new ArrayList<Resource>();
@@ -852,8 +847,8 @@ public class OrderResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, date, who
-          , orderStatus, description, fulfillment);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, request, date
+          , who, orderStatus, description, fulfillment);
       }
 
   @Override
@@ -869,7 +864,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date", target={} )
+  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -889,7 +884,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference", target={Order.class} )
+  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -915,7 +910,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -935,7 +930,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.orderStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token", target={} )
+  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -981,7 +976,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.who</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference", target={Practitioner.class, Organization.class, Device.class} )
+  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_WHO = "who";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>who</b>

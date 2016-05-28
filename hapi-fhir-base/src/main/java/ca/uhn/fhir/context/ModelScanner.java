@@ -70,6 +70,7 @@ import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Compartment;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -335,7 +336,17 @@ class ModelScanner {
 		 * We scan classes for annotated fields in the class but also all of its superclasses
 		 */
 		Class<? extends IBase> current = theClass;
+		Map<String, Integer> forcedOrder = null;
 		do {
+			if (forcedOrder == null) {
+				ChildOrder childOrder = current.getAnnotation(ChildOrder.class);
+				if (childOrder != null) {
+					forcedOrder = new HashMap<String, Integer>();
+					for (int i = 0; i < childOrder.names().length; i++) {
+						forcedOrder.put(childOrder.names()[i], i);
+					}
+				}
+			}
 			classes.push(current);
 			if (IBase.class.isAssignableFrom(current.getSuperclass())) {
 				current = (Class<? extends IBase>) current.getSuperclass();
@@ -345,7 +356,7 @@ class ModelScanner {
 		} while (current != null);
 
 		for (Class<? extends IBase> next : classes) {
-			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef);
+			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef, forcedOrder);
 		}
 
 		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
@@ -379,7 +390,7 @@ class ModelScanner {
 
 	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef, Map<String, Integer> theForcedOrder) {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 
 		for (Field next : theClass.getDeclaredFields()) {
@@ -454,11 +465,16 @@ class ModelScanner {
 				}
 
 			}
-			if (order < 0 && order != Child.ORDER_UNKNOWN) {
-				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
-			}
-			if (order != Child.ORDER_UNKNOWN) {
-				order = order + baseElementOrder;
+			
+			if (theForcedOrder != null) {
+				order = theForcedOrder.get(elementName);
+			} else {
+				if (order < 0 && order != Child.ORDER_UNKNOWN) {
+					throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
+				}
+				if (order != Child.ORDER_UNKNOWN) {
+					order = order + baseElementOrder;
+				}
 			}
 			// int min = childAnnotation.min();
 			// int max = childAnnotation.max();

@@ -29,13 +29,14 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -317,16 +318,6 @@ public class Order extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Order setIdentifier(List<Identifier> theIdentifier) { 
@@ -343,10 +334,6 @@ public class Order extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifiers assigned to this order by the orderer or by the receiver.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -355,7 +342,6 @@ public class Order extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Order addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -363,6 +349,16 @@ public class Order extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -610,16 +606,6 @@ public class Order extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
-     */
-    public Reference getDetailFirstRep() { 
-      if (getDetail().isEmpty()) {
-        addDetail();
-      }
-      return getDetail().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Order setDetail(List<Reference> theDetail) { 
@@ -636,10 +622,6 @@ public class Order extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #detail} (What action is being ordered.)
-     */
-    // syntactic sugar
     public Reference addDetail() { //3
       Reference t = new Reference();
       if (this.detail == null)
@@ -648,7 +630,6 @@ public class Order extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Order addDetail(Reference t) { //3
       if (t == null)
         return this;
@@ -659,8 +640,19 @@ public class Order extends DomainResource {
     }
 
     /**
-     * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. What action is being ordered.)
+     * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
      */
+    public Reference getDetailFirstRep() { 
+      if (getDetail().isEmpty()) {
+        addDetail();
+      }
+      return getDetail().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getDetailTarget() { 
       if (this.detailTarget == null)
         this.detailTarget = new ArrayList<Resource>();
@@ -858,8 +850,8 @@ public class Order extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, date, subject, source
-          , target, reason, when, detail);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, date, subject
+          , source, target, reason, when, detail);
       }
 
   @Override
@@ -875,7 +867,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -895,7 +887,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -915,7 +907,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class} )
+  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -941,7 +933,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -967,7 +959,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", target={Practitioner.class, Organization.class} )
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1019,7 +1011,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date", target={} )
+  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
   public static final String SP_WHEN = "when";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when</b>
@@ -1039,7 +1031,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", target={Practitioner.class, Organization.class, Device.class} )
+  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -1065,7 +1057,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token", target={} )
+  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
   public static final String SP_WHENCODE = "when_code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when_code</b>

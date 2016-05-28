@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -335,7 +336,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          );
       }
 
   public String fhirType() {
@@ -702,8 +704,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version, document
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          , document);
       }
 
   public String fhirType() {
@@ -1001,7 +1003,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          );
       }
 
   public String fhirType() {
@@ -1211,16 +1214,6 @@ public class Library extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-         */
-        public StringType getCodeSystemFirstRep() { 
-          if (getCodeSystem().isEmpty()) {
-            addCodeSystemElement();
-          }
-          return getCodeSystem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public LibraryValueSetComponent setCodeSystem(List<StringType> theCodeSystem) { 
@@ -1240,7 +1233,6 @@ public class Library extends DomainResource {
         /**
          * @return {@link #codeSystem} (The codeSystem element determines which code system binding to use to compute the expansion of the value set definition. The codeSystem element specified here will correspond to a code system element, which is used to determine the code system version.)
          */
-    // syntactic sugar
         public StringType addCodeSystemElement() {//2 
           StringType t = new StringType();
           if (this.codeSystem == null)
@@ -1394,8 +1386,8 @@ public class Library extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version, codeSystem
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, identifier, version
+          , codeSystem);
       }
 
   public String fhirType() {
@@ -1512,16 +1504,6 @@ public class Library extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #model}, creating it if it does not already exist
-     */
-    public LibraryModelComponent getModelFirstRep() { 
-      if (getModel().isEmpty()) {
-        addModel();
-      }
-      return getModel().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Library setModel(List<LibraryModelComponent> theModel) { 
@@ -1538,10 +1520,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #model} (A model element describes the model and version used by the library.)
-     */
-    // syntactic sugar
     public LibraryModelComponent addModel() { //3
       LibraryModelComponent t = new LibraryModelComponent();
       if (this.model == null)
@@ -1550,7 +1528,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addModel(LibraryModelComponent t) { //3
       if (t == null)
         return this;
@@ -1561,22 +1538,22 @@ public class Library extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #model}, creating it if it does not already exist
+     */
+    public LibraryModelComponent getModelFirstRep() { 
+      if (getModel().isEmpty()) {
+        addModel();
+      }
+      return getModel().get(0);
+    }
+
+    /**
      * @return {@link #library} (A library element describes a library referenced by this library.)
      */
     public List<LibraryLibraryComponent> getLibrary() { 
       if (this.library == null)
         this.library = new ArrayList<LibraryLibraryComponent>();
       return this.library;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
-     */
-    public LibraryLibraryComponent getLibraryFirstRep() { 
-      if (getLibrary().isEmpty()) {
-        addLibrary();
-      }
-      return getLibrary().get(0);
     }
 
     /**
@@ -1596,10 +1573,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #library} (A library element describes a library referenced by this library.)
-     */
-    // syntactic sugar
     public LibraryLibraryComponent addLibrary() { //3
       LibraryLibraryComponent t = new LibraryLibraryComponent();
       if (this.library == null)
@@ -1608,7 +1581,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addLibrary(LibraryLibraryComponent t) { //3
       if (t == null)
         return this;
@@ -1619,22 +1591,22 @@ public class Library extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
+     */
+    public LibraryLibraryComponent getLibraryFirstRep() { 
+      if (getLibrary().isEmpty()) {
+        addLibrary();
+      }
+      return getLibrary().get(0);
+    }
+
+    /**
      * @return {@link #codeSystem} (A code system definition used within the library.)
      */
     public List<LibraryCodeSystemComponent> getCodeSystem() { 
       if (this.codeSystem == null)
         this.codeSystem = new ArrayList<LibraryCodeSystemComponent>();
       return this.codeSystem;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-     */
-    public LibraryCodeSystemComponent getCodeSystemFirstRep() { 
-      if (getCodeSystem().isEmpty()) {
-        addCodeSystem();
-      }
-      return getCodeSystem().get(0);
     }
 
     /**
@@ -1654,10 +1626,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #codeSystem} (A code system definition used within the library.)
-     */
-    // syntactic sugar
     public LibraryCodeSystemComponent addCodeSystem() { //3
       LibraryCodeSystemComponent t = new LibraryCodeSystemComponent();
       if (this.codeSystem == null)
@@ -1666,7 +1634,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addCodeSystem(LibraryCodeSystemComponent t) { //3
       if (t == null)
         return this;
@@ -1677,22 +1644,22 @@ public class Library extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
+     */
+    public LibraryCodeSystemComponent getCodeSystemFirstRep() { 
+      if (getCodeSystem().isEmpty()) {
+        addCodeSystem();
+      }
+      return getCodeSystem().get(0);
+    }
+
+    /**
      * @return {@link #valueSet} (A value set definition referenced by the library.)
      */
     public List<LibraryValueSetComponent> getValueSet() { 
       if (this.valueSet == null)
         this.valueSet = new ArrayList<LibraryValueSetComponent>();
       return this.valueSet;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #valueSet}, creating it if it does not already exist
-     */
-    public LibraryValueSetComponent getValueSetFirstRep() { 
-      if (getValueSet().isEmpty()) {
-        addValueSet();
-      }
-      return getValueSet().get(0);
     }
 
     /**
@@ -1712,10 +1679,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #valueSet} (A value set definition referenced by the library.)
-     */
-    // syntactic sugar
     public LibraryValueSetComponent addValueSet() { //3
       LibraryValueSetComponent t = new LibraryValueSetComponent();
       if (this.valueSet == null)
@@ -1724,7 +1687,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addValueSet(LibraryValueSetComponent t) { //3
       if (t == null)
         return this;
@@ -1735,22 +1697,22 @@ public class Library extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #valueSet}, creating it if it does not already exist
+     */
+    public LibraryValueSetComponent getValueSetFirstRep() { 
+      if (getValueSet().isEmpty()) {
+        addValueSet();
+      }
+      return getValueSet().get(0);
+    }
+
+    /**
      * @return {@link #parameter} (The parameter element defines parameters used by the library.)
      */
     public List<ParameterDefinition> getParameter() { 
       if (this.parameter == null)
         this.parameter = new ArrayList<ParameterDefinition>();
       return this.parameter;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
-     */
-    public ParameterDefinition getParameterFirstRep() { 
-      if (getParameter().isEmpty()) {
-        addParameter();
-      }
-      return getParameter().get(0);
     }
 
     /**
@@ -1770,10 +1732,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #parameter} (The parameter element defines parameters used by the library.)
-     */
-    // syntactic sugar
     public ParameterDefinition addParameter() { //3
       ParameterDefinition t = new ParameterDefinition();
       if (this.parameter == null)
@@ -1782,7 +1740,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addParameter(ParameterDefinition t) { //3
       if (t == null)
         return this;
@@ -1793,22 +1750,22 @@ public class Library extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
+     */
+    public ParameterDefinition getParameterFirstRep() { 
+      if (getParameter().isEmpty()) {
+        addParameter();
+      }
+      return getParameter().get(0);
+    }
+
+    /**
      * @return {@link #dataRequirement} (The dataRequirement element specifies a data requirement used by some expression within the library.)
      */
     public List<DataRequirement> getDataRequirement() { 
       if (this.dataRequirement == null)
         this.dataRequirement = new ArrayList<DataRequirement>();
       return this.dataRequirement;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
-     */
-    public DataRequirement getDataRequirementFirstRep() { 
-      if (getDataRequirement().isEmpty()) {
-        addDataRequirement();
-      }
-      return getDataRequirement().get(0);
     }
 
     /**
@@ -1828,10 +1785,6 @@ public class Library extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #dataRequirement} (The dataRequirement element specifies a data requirement used by some expression within the library.)
-     */
-    // syntactic sugar
     public DataRequirement addDataRequirement() { //3
       DataRequirement t = new DataRequirement();
       if (this.dataRequirement == null)
@@ -1840,7 +1793,6 @@ public class Library extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Library addDataRequirement(DataRequirement t) { //3
       if (t == null)
         return this;
@@ -1848,6 +1800,16 @@ public class Library extends DomainResource {
         this.dataRequirement = new ArrayList<DataRequirement>();
       this.dataRequirement.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
+     */
+    public DataRequirement getDataRequirementFirstRep() { 
+      if (getDataRequirement().isEmpty()) {
+        addDataRequirement();
+      }
+      return getDataRequirement().get(0);
     }
 
     /**
@@ -2092,7 +2054,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Library.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Library.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2112,7 +2074,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="Library.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
+  @SearchParamDefinition(name="topic", path="Library.moduleMetadata.topic", description="Topics associated with the module", type="token" )
   public static final String SP_TOPIC = "topic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>topic</b>
@@ -2132,7 +2094,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="Library.moduleMetadata.description", description="Text search against the description", type="string", target={} )
+  @SearchParamDefinition(name="description", path="Library.moduleMetadata.description", description="Text search against the description", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2152,7 +2114,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Library.moduleMetadata.title", description="Text search against the title", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Library.moduleMetadata.title", description="Text search against the title", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -2172,7 +2134,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Library.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
+  @SearchParamDefinition(name="version", path="Library.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2192,7 +2154,7 @@ public class Library extends DomainResource {
    * Path: <b>Library.moduleMetadata.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Library.moduleMetadata.status", description="Status of the module", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Library.moduleMetadata.status", description="Status of the module", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

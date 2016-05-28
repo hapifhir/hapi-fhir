@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -46,7 +47,8 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
-public class TestScript extends DomainResource {
+@ChildOrder(names={"url", "version", "name", "status", "identifier", "experimental", "publisher", "contact", "date", "description", "useContext", "requirements", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "rule", "ruleset", "setup", "test", "teardown"})
+public class TestScript extends BaseConformance {
 
     public enum ContentType {
         /**
@@ -58,7 +60,7 @@ public class TestScript extends DomainResource {
          */
         JSON, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ContentType fromCode(String codeString) throws FHIRException {
@@ -68,7 +70,10 @@ public class TestScript extends DomainResource {
           return XML;
         if ("json".equals(codeString))
           return JSON;
-        throw new FHIRException("Unknown ContentType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ContentType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -145,7 +150,7 @@ public class TestScript extends DomainResource {
          */
         REQUEST, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AssertionDirectionType fromCode(String codeString) throws FHIRException {
@@ -155,7 +160,10 @@ public class TestScript extends DomainResource {
           return RESPONSE;
         if ("request".equals(codeString))
           return REQUEST;
-        throw new FHIRException("Unknown AssertionDirectionType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AssertionDirectionType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -264,7 +272,7 @@ public class TestScript extends DomainResource {
          */
         NOTCONTAINS, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AssertionOperatorType fromCode(String codeString) throws FHIRException {
@@ -290,7 +298,10 @@ public class TestScript extends DomainResource {
           return CONTAINS;
         if ("notContains".equals(codeString))
           return NOTCONTAINS;
-        throw new FHIRException("Unknown AssertionOperatorType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AssertionOperatorType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -487,7 +498,7 @@ public class TestScript extends DomainResource {
          */
         UNPROCESSABLE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AssertionResponseTypes fromCode(String codeString) throws FHIRException {
@@ -517,7 +528,10 @@ public class TestScript extends DomainResource {
           return PRECONDITIONFAILED;
         if ("unprocessable".equals(codeString))
           return UNPROCESSABLE;
-        throw new FHIRException("Unknown AssertionResponseTypes code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AssertionResponseTypes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -768,16 +782,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -794,10 +798,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -806,7 +806,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -814,6 +813,16 @@ public class TestScript extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1366,16 +1375,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
-         */
-        public TestScriptMetadataLinkComponent getLinkFirstRep() { 
-          if (getLink().isEmpty()) {
-            addLink();
-          }
-          return getLink().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptMetadataComponent setLink(List<TestScriptMetadataLinkComponent> theLink) { 
@@ -1392,10 +1391,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #link} (A link to the FHIR specification that this test is covering.)
-         */
-    // syntactic sugar
         public TestScriptMetadataLinkComponent addLink() { //3
           TestScriptMetadataLinkComponent t = new TestScriptMetadataLinkComponent();
           if (this.link == null)
@@ -1404,7 +1399,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptMetadataComponent addLink(TestScriptMetadataLinkComponent t) { //3
           if (t == null)
             return this;
@@ -1415,22 +1409,22 @@ public class TestScript extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
+         */
+        public TestScriptMetadataLinkComponent getLinkFirstRep() { 
+          if (getLink().isEmpty()) {
+            addLink();
+          }
+          return getLink().get(0);
+        }
+
+        /**
          * @return {@link #capability} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
          */
         public List<TestScriptMetadataCapabilityComponent> getCapability() { 
           if (this.capability == null)
             this.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
           return this.capability;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #capability}, creating it if it does not already exist
-         */
-        public TestScriptMetadataCapabilityComponent getCapabilityFirstRep() { 
-          if (getCapability().isEmpty()) {
-            addCapability();
-          }
-          return getCapability().get(0);
         }
 
         /**
@@ -1450,10 +1444,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #capability} (Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.)
-         */
-    // syntactic sugar
         public TestScriptMetadataCapabilityComponent addCapability() { //3
           TestScriptMetadataCapabilityComponent t = new TestScriptMetadataCapabilityComponent();
           if (this.capability == null)
@@ -1462,7 +1452,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptMetadataComponent addCapability(TestScriptMetadataCapabilityComponent t) { //3
           if (t == null)
             return this;
@@ -1470,6 +1459,16 @@ public class TestScript extends DomainResource {
             this.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
           this.capability.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #capability}, creating it if it does not already exist
+         */
+        public TestScriptMetadataCapabilityComponent getCapabilityFirstRep() { 
+          if (getCapability().isEmpty()) {
+            addCapability();
+          }
+          return getCapability().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2031,16 +2030,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #origin}, creating it if it does not already exist
-         */
-        public IntegerType getOriginFirstRep() { 
-          if (getOrigin().isEmpty()) {
-            addOriginElement();
-          }
-          return getOrigin().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptMetadataCapabilityComponent setOrigin(List<IntegerType> theOrigin) { 
@@ -2060,7 +2049,6 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #origin} (Which origin server these requirements apply to.)
          */
-    // syntactic sugar
         public IntegerType addOriginElement() {//2 
           IntegerType t = new IntegerType();
           if (this.origin == null)
@@ -2148,16 +2136,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #link}, creating it if it does not already exist
-         */
-        public UriType getLinkFirstRep() { 
-          if (getLink().isEmpty()) {
-            addLinkElement();
-          }
-          return getLink().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptMetadataCapabilityComponent setLink(List<UriType> theLink) { 
@@ -2177,7 +2155,6 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #link} (Links to the FHIR specification that describes this interaction and the resources involved in more detail.)
          */
-    // syntactic sugar
         public UriType addLinkElement() {//2 
           UriType t = new UriType();
           if (this.link == null)
@@ -3234,16 +3211,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public TestScriptRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptRuleComponent setParam(List<TestScriptRuleParamComponent> theParam) { 
@@ -3260,10 +3227,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-    // syntactic sugar
         public TestScriptRuleParamComponent addParam() { //3
           TestScriptRuleParamComponent t = new TestScriptRuleParamComponent();
           if (this.param == null)
@@ -3272,7 +3235,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptRuleComponent addParam(TestScriptRuleParamComponent t) { //3
           if (t == null)
             return this;
@@ -3280,6 +3242,16 @@ public class TestScript extends DomainResource {
             this.param = new ArrayList<TestScriptRuleParamComponent>();
           this.param.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public TestScriptRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -3703,16 +3675,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public TestScriptRulesetRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptRulesetComponent setRule(List<TestScriptRulesetRuleComponent> theRule) { 
@@ -3729,10 +3691,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #rule} (The referenced rule within the external ruleset template.)
-         */
-    // syntactic sugar
         public TestScriptRulesetRuleComponent addRule() { //3
           TestScriptRulesetRuleComponent t = new TestScriptRulesetRuleComponent();
           if (this.rule == null)
@@ -3741,7 +3699,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptRulesetComponent addRule(TestScriptRulesetRuleComponent t) { //3
           if (t == null)
             return this;
@@ -3749,6 +3706,16 @@ public class TestScript extends DomainResource {
             this.rule = new ArrayList<TestScriptRulesetRuleComponent>();
           this.rule.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public TestScriptRulesetRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -3945,16 +3912,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public TestScriptRulesetRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptRulesetRuleComponent setParam(List<TestScriptRulesetRuleParamComponent> theParam) { 
@@ -3971,10 +3928,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-    // syntactic sugar
         public TestScriptRulesetRuleParamComponent addParam() { //3
           TestScriptRulesetRuleParamComponent t = new TestScriptRulesetRuleParamComponent();
           if (this.param == null)
@@ -3983,7 +3936,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptRulesetRuleComponent addParam(TestScriptRulesetRuleParamComponent t) { //3
           if (t == null)
             return this;
@@ -3991,6 +3943,16 @@ public class TestScript extends DomainResource {
             this.param = new ArrayList<TestScriptRulesetRuleParamComponent>();
           this.param.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public TestScriptRulesetRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -4385,16 +4347,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
-         */
-        public SetupActionComponent getActionFirstRep() { 
-          if (getAction().isEmpty()) {
-            addAction();
-          }
-          return getAction().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptSetupComponent setAction(List<SetupActionComponent> theAction) { 
@@ -4411,10 +4363,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #action} (Action would contain either an operation or an assertion.)
-         */
-    // syntactic sugar
         public SetupActionComponent addAction() { //3
           SetupActionComponent t = new SetupActionComponent();
           if (this.action == null)
@@ -4423,7 +4371,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptSetupComponent addAction(SetupActionComponent t) { //3
           if (t == null)
             return this;
@@ -4431,6 +4378,16 @@ public class TestScript extends DomainResource {
             this.action = new ArrayList<SetupActionComponent>();
           this.action.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public SetupActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -5294,16 +5251,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #requestHeader}, creating it if it does not already exist
-         */
-        public SetupActionOperationRequestHeaderComponent getRequestHeaderFirstRep() { 
-          if (getRequestHeader().isEmpty()) {
-            addRequestHeader();
-          }
-          return getRequestHeader().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SetupActionOperationComponent setRequestHeader(List<SetupActionOperationRequestHeaderComponent> theRequestHeader) { 
@@ -5320,10 +5267,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #requestHeader} (Header elements would be used to set HTTP headers.)
-         */
-    // syntactic sugar
         public SetupActionOperationRequestHeaderComponent addRequestHeader() { //3
           SetupActionOperationRequestHeaderComponent t = new SetupActionOperationRequestHeaderComponent();
           if (this.requestHeader == null)
@@ -5332,7 +5275,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SetupActionOperationComponent addRequestHeader(SetupActionOperationRequestHeaderComponent t) { //3
           if (t == null)
             return this;
@@ -5340,6 +5282,16 @@ public class TestScript extends DomainResource {
             this.requestHeader = new ArrayList<SetupActionOperationRequestHeaderComponent>();
           this.requestHeader.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #requestHeader}, creating it if it does not already exist
+         */
+        public SetupActionOperationRequestHeaderComponent getRequestHeaderFirstRep() { 
+          if (getRequestHeader().isEmpty()) {
+            addRequestHeader();
+          }
+          return getRequestHeader().get(0);
         }
 
         /**
@@ -5800,8 +5752,8 @@ public class TestScript extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, resource, label, description
-          , accept, contentType, destination, encodeRequestUrl, origin, params, requestHeader, responseId
-          , sourceId, targetId, url);
+          , accept, contentType, destination, encodeRequestUrl, origin, params, requestHeader
+          , responseId, sourceId, targetId, url);
       }
 
   public String fhirType() {
@@ -7432,10 +7384,10 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, description, direction, compareToSourceId
-          , compareToSourcePath, contentType, headerField, minimumId, navigationLinks, operator, path
-          , resource, response, responseCode, rule, ruleset, sourceId, validateProfileId, value, warningOnly
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, description, direction
+          , compareToSourceId, compareToSourcePath, contentType, headerField, minimumId, navigationLinks
+          , operator, path, resource, response, responseCode, rule, ruleset, sourceId
+          , validateProfileId, value, warningOnly);
       }
 
   public String fhirType() {
@@ -7533,16 +7485,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public SetupActionAssertRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SetupActionAssertRuleComponent setParam(List<SetupActionAssertRuleParamComponent> theParam) { 
@@ -7559,10 +7501,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-    // syntactic sugar
         public SetupActionAssertRuleParamComponent addParam() { //3
           SetupActionAssertRuleParamComponent t = new SetupActionAssertRuleParamComponent();
           if (this.param == null)
@@ -7571,7 +7509,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SetupActionAssertRuleComponent addParam(SetupActionAssertRuleParamComponent t) { //3
           if (t == null)
             return this;
@@ -7579,6 +7516,16 @@ public class TestScript extends DomainResource {
             this.param = new ArrayList<SetupActionAssertRuleParamComponent>();
           this.param.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public SetupActionAssertRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -7999,16 +7946,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public SetupActionAssertRulesetRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SetupActionAssertRulesetComponent setRule(List<SetupActionAssertRulesetRuleComponent> theRule) { 
@@ -8025,10 +7962,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #rule} (The referenced rule within the external ruleset template.)
-         */
-    // syntactic sugar
         public SetupActionAssertRulesetRuleComponent addRule() { //3
           SetupActionAssertRulesetRuleComponent t = new SetupActionAssertRulesetRuleComponent();
           if (this.rule == null)
@@ -8037,7 +7970,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SetupActionAssertRulesetComponent addRule(SetupActionAssertRulesetRuleComponent t) { //3
           if (t == null)
             return this;
@@ -8045,6 +7977,16 @@ public class TestScript extends DomainResource {
             this.rule = new ArrayList<SetupActionAssertRulesetRuleComponent>();
           this.rule.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+         */
+        public SetupActionAssertRulesetRuleComponent getRuleFirstRep() { 
+          if (getRule().isEmpty()) {
+            addRule();
+          }
+          return getRule().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -8240,16 +8182,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public SetupActionAssertRulesetRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SetupActionAssertRulesetRuleComponent setParam(List<SetupActionAssertRulesetRuleParamComponent> theParam) { 
@@ -8266,10 +8198,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-    // syntactic sugar
         public SetupActionAssertRulesetRuleParamComponent addParam() { //3
           SetupActionAssertRulesetRuleParamComponent t = new SetupActionAssertRulesetRuleParamComponent();
           if (this.param == null)
@@ -8278,7 +8206,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SetupActionAssertRulesetRuleComponent addParam(SetupActionAssertRulesetRuleParamComponent t) { //3
           if (t == null)
             return this;
@@ -8286,6 +8213,16 @@ public class TestScript extends DomainResource {
             this.param = new ArrayList<SetupActionAssertRulesetRuleParamComponent>();
           this.param.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
+         */
+        public SetupActionAssertRulesetRuleParamComponent getParamFirstRep() { 
+          if (getParam().isEmpty()) {
+            addParam();
+          }
+          return getParam().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -8789,16 +8726,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
-         */
-        public TestActionComponent getActionFirstRep() { 
-          if (getAction().isEmpty()) {
-            addAction();
-          }
-          return getAction().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptTestComponent setAction(List<TestActionComponent> theAction) { 
@@ -8815,10 +8742,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #action} (Action would contain either an operation or an assertion.)
-         */
-    // syntactic sugar
         public TestActionComponent addAction() { //3
           TestActionComponent t = new TestActionComponent();
           if (this.action == null)
@@ -8827,7 +8750,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptTestComponent addAction(TestActionComponent t) { //3
           if (t == null)
             return this;
@@ -8835,6 +8757,16 @@ public class TestScript extends DomainResource {
             this.action = new ArrayList<TestActionComponent>();
           this.action.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public TestActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -8958,8 +8890,8 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, description, metadata, action
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, description, metadata
+          , action);
       }
 
   public String fhirType() {
@@ -9173,16 +9105,6 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
-         */
-        public TeardownActionComponent getActionFirstRep() { 
-          if (getAction().isEmpty()) {
-            addAction();
-          }
-          return getAction().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public TestScriptTeardownComponent setAction(List<TeardownActionComponent> theAction) { 
@@ -9199,10 +9121,6 @@ public class TestScript extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #action} (The teardown action will only contain an operation.)
-         */
-    // syntactic sugar
         public TeardownActionComponent addAction() { //3
           TeardownActionComponent t = new TeardownActionComponent();
           if (this.action == null)
@@ -9211,7 +9129,6 @@ public class TestScript extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public TestScriptTeardownComponent addAction(TeardownActionComponent t) { //3
           if (t == null)
             return this;
@@ -9219,6 +9136,16 @@ public class TestScript extends DomainResource {
             this.action = new ArrayList<TeardownActionComponent>();
           this.action.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+         */
+        public TeardownActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
+          }
+          return getAction().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -9447,128 +9374,86 @@ public class TestScript extends DomainResource {
   }
 
     /**
-     * An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
-     */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Absolute URL used to reference this TestScript", formalDefinition="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published." )
-    protected UriType url;
-
-    /**
-     * The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
-     */
-    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical id for this version of the TestScript", formalDefinition="The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually." )
-    protected StringType version;
-
-    /**
-     * A free text natural language name identifying the TestScript.
-     */
-    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Informal name for this TestScript", formalDefinition="A free text natural language name identifying the TestScript." )
-    protected StringType name;
-
-    /**
-     * The status of the TestScript.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the TestScript." )
-    protected Enumeration<ConformanceResourceStatus> status;
-
-    /**
      * Identifier for the TestScript assigned for external purposes outside the context of FHIR.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="External identifier", formalDefinition="Identifier for the TestScript assigned for external purposes outside the context of FHIR." )
     protected Identifier identifier;
 
     /**
      * This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the Test Script.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the Test Script." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<TestScriptContactComponent> contact;
 
     /**
-     * The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change." )
-    protected DateTimeType date;
-
-    /**
      * A free text natural language description of the TestScript and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the TestScript", formalDefinition="A free text natural language description of the TestScript and its use." )
     protected StringType description;
 
     /**
-     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.
-     */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts." )
-    protected List<CodeableConcept> useContext;
-
-    /**
      * Explains why this Test Script is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Scope and Usage this Test Script is for", formalDefinition="Explains why this Test Script is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
      * An abstract server used in operations within this test script in the origin element.
      */
-    @Child(name = "origin", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "origin", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An abstract server representing a client or sender in a message exchange", formalDefinition="An abstract server used in operations within this test script in the origin element." )
     protected List<TestScriptOriginComponent> origin;
 
     /**
      * An abstract server used in operations within this test script in the destination element.
      */
-    @Child(name = "destination", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "destination", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An abstract server representing a destination or receiver in a message exchange", formalDefinition="An abstract server used in operations within this test script in the destination element." )
     protected List<TestScriptDestinationComponent> destination;
 
     /**
      * The required capability must exist and are assumed to function correctly on the FHIR server being tested.
      */
-    @Child(name = "metadata", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "metadata", type = {}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and are assumed to function correctly on the FHIR server being tested." )
     protected TestScriptMetadataComponent metadata;
 
     /**
      * Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.
      */
-    @Child(name = "fixture", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "fixture", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Fixture in the test script - by reference (uri)", formalDefinition="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute." )
     protected List<TestScriptFixtureComponent> fixture;
 
     /**
      * Reference to the profile to be used for validation.
      */
-    @Child(name = "profile", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "profile", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reference of the validation profile", formalDefinition="Reference to the profile to be used for validation." )
     protected List<Reference> profile;
     /**
@@ -9580,46 +9465,46 @@ public class TestScript extends DomainResource {
     /**
      * Variable is set based either on element value in response body or on header field value in the response headers.
      */
-    @Child(name = "variable", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "variable", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Placeholder for evaluated elements", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
     protected List<TestScriptVariableComponent> variable;
 
     /**
      * Assert rule to be used in one or more asserts within the test script.
      */
-    @Child(name = "rule", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "rule", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Assert rule used within the test script", formalDefinition="Assert rule to be used in one or more asserts within the test script." )
     protected List<TestScriptRuleComponent> rule;
 
     /**
      * Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.
      */
-    @Child(name = "ruleset", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "ruleset", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Assert ruleset used within the test script", formalDefinition="Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied." )
     protected List<TestScriptRulesetComponent> ruleset;
 
     /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "setup", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "test", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=23, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "teardown", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = -468958725L;
+    private static final long serialVersionUID = 766187407L;
 
   /**
    * Constructor
@@ -9639,41 +9524,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public UriType getUrlElement() { 
-      if (this.url == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.url");
-        else if (Configuration.doAutoCreate())
-          this.url = new UriType(); // bb
-      return this.url;
-    }
-
-    public boolean hasUrlElement() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    public boolean hasUrl() { 
-      return this.url != null && !this.url.isEmpty();
-    }
-
-    /**
-     * @param value {@link #url} (An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-     */
-    public TestScript setUrlElement(UriType value) { 
-      this.url = value;
-      return this;
-    }
-
-    /**
-     * @return An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
-     */
-    public String getUrl() { 
-      return this.url == null ? null : this.url.getValue();
-    }
-
-    /**
      * @param value An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
      */
     public TestScript setUrl(String value) { 
@@ -9681,41 +9531,6 @@ public class TestScript extends DomainResource {
           this.url = new UriType();
         this.url.setValue(value);
       return this;
-    }
-
-    /**
-     * @return {@link #version} (The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-     */
-    public StringType getVersionElement() { 
-      if (this.version == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.version");
-        else if (Configuration.doAutoCreate())
-          this.version = new StringType(); // bb
-      return this.version;
-    }
-
-    public boolean hasVersionElement() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    public boolean hasVersion() { 
-      return this.version != null && !this.version.isEmpty();
-    }
-
-    /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
-     */
-    public TestScript setVersionElement(StringType value) { 
-      this.version = value;
-      return this;
-    }
-
-    /**
-     * @return The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
-     */
-    public String getVersion() { 
-      return this.version == null ? null : this.version.getValue();
     }
 
     /**
@@ -9733,41 +9548,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A free text natural language name identifying the TestScript.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public StringType getNameElement() { 
-      if (this.name == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.name");
-        else if (Configuration.doAutoCreate())
-          this.name = new StringType(); // bb
-      return this.name;
-    }
-
-    public boolean hasNameElement() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    public boolean hasName() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    /**
-     * @param value {@link #name} (A free text natural language name identifying the TestScript.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public TestScript setNameElement(StringType value) { 
-      this.name = value;
-      return this;
-    }
-
-    /**
-     * @return A free text natural language name identifying the TestScript.
-     */
-    public String getName() { 
-      return this.name == null ? null : this.name.getValue();
-    }
-
-    /**
      * @param value A free text natural language name identifying the TestScript.
      */
     public TestScript setName(String value) { 
@@ -9775,41 +9555,6 @@ public class TestScript extends DomainResource {
           this.name = new StringType();
         this.name.setValue(value);
       return this;
-    }
-
-    /**
-     * @return {@link #status} (The status of the TestScript.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
-      if (this.status == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.status");
-        else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
-      return this.status;
-    }
-
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    /**
-     * @param value {@link #status} (The status of the TestScript.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public TestScript setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
-      this.status = value;
-      return this;
-    }
-
-    /**
-     * @return The status of the TestScript.
-     */
-    public ConformanceResourceStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
     }
 
     /**
@@ -9950,16 +9695,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public TestScriptContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public TestScript setContact(List<TestScriptContactComponent> theContact) { 
@@ -9976,10 +9711,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
-     */
-    // syntactic sugar
     public TestScriptContactComponent addContact() { //3
       TestScriptContactComponent t = new TestScriptContactComponent();
       if (this.contact == null)
@@ -9988,7 +9719,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addContact(TestScriptContactComponent t) { //3
       if (t == null)
         return this;
@@ -9999,38 +9729,13 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TestScript.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public TestScript setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public TestScriptContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -10093,64 +9798,6 @@ public class TestScript extends DomainResource {
           this.description = new StringType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.)
-     */
-    public List<CodeableConcept> getUseContext() { 
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      return this.useContext;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
-     */
-    public CodeableConcept getUseContextFirstRep() { 
-      if (getUseContext().isEmpty()) {
-        addUseContext();
-      }
-      return getUseContext().get(0);
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public TestScript setUseContext(List<CodeableConcept> theUseContext) { 
-      this.useContext = theUseContext;
-      return this;
-    }
-
-    public boolean hasUseContext() { 
-      if (this.useContext == null)
-        return false;
-      for (CodeableConcept item : this.useContext)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.)
-     */
-    // syntactic sugar
-    public CodeableConcept addUseContext() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public TestScript addUseContext(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.useContext == null)
-        this.useContext = new ArrayList<CodeableConcept>();
-      this.useContext.add(t);
       return this;
     }
 
@@ -10262,16 +9909,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #origin}, creating it if it does not already exist
-     */
-    public TestScriptOriginComponent getOriginFirstRep() { 
-      if (getOrigin().isEmpty()) {
-        addOrigin();
-      }
-      return getOrigin().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public TestScript setOrigin(List<TestScriptOriginComponent> theOrigin) { 
@@ -10288,10 +9925,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #origin} (An abstract server used in operations within this test script in the origin element.)
-     */
-    // syntactic sugar
     public TestScriptOriginComponent addOrigin() { //3
       TestScriptOriginComponent t = new TestScriptOriginComponent();
       if (this.origin == null)
@@ -10300,7 +9933,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addOrigin(TestScriptOriginComponent t) { //3
       if (t == null)
         return this;
@@ -10311,22 +9943,22 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #origin}, creating it if it does not already exist
+     */
+    public TestScriptOriginComponent getOriginFirstRep() { 
+      if (getOrigin().isEmpty()) {
+        addOrigin();
+      }
+      return getOrigin().get(0);
+    }
+
+    /**
      * @return {@link #destination} (An abstract server used in operations within this test script in the destination element.)
      */
     public List<TestScriptDestinationComponent> getDestination() { 
       if (this.destination == null)
         this.destination = new ArrayList<TestScriptDestinationComponent>();
       return this.destination;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #destination}, creating it if it does not already exist
-     */
-    public TestScriptDestinationComponent getDestinationFirstRep() { 
-      if (getDestination().isEmpty()) {
-        addDestination();
-      }
-      return getDestination().get(0);
     }
 
     /**
@@ -10346,10 +9978,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #destination} (An abstract server used in operations within this test script in the destination element.)
-     */
-    // syntactic sugar
     public TestScriptDestinationComponent addDestination() { //3
       TestScriptDestinationComponent t = new TestScriptDestinationComponent();
       if (this.destination == null)
@@ -10358,7 +9986,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addDestination(TestScriptDestinationComponent t) { //3
       if (t == null)
         return this;
@@ -10366,6 +9993,16 @@ public class TestScript extends DomainResource {
         this.destination = new ArrayList<TestScriptDestinationComponent>();
       this.destination.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #destination}, creating it if it does not already exist
+     */
+    public TestScriptDestinationComponent getDestinationFirstRep() { 
+      if (getDestination().isEmpty()) {
+        addDestination();
+      }
+      return getDestination().get(0);
     }
 
     /**
@@ -10402,16 +10039,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #fixture}, creating it if it does not already exist
-     */
-    public TestScriptFixtureComponent getFixtureFirstRep() { 
-      if (getFixture().isEmpty()) {
-        addFixture();
-      }
-      return getFixture().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public TestScript setFixture(List<TestScriptFixtureComponent> theFixture) { 
@@ -10428,10 +10055,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #fixture} (Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.)
-     */
-    // syntactic sugar
     public TestScriptFixtureComponent addFixture() { //3
       TestScriptFixtureComponent t = new TestScriptFixtureComponent();
       if (this.fixture == null)
@@ -10440,7 +10063,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addFixture(TestScriptFixtureComponent t) { //3
       if (t == null)
         return this;
@@ -10451,22 +10073,22 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #fixture}, creating it if it does not already exist
+     */
+    public TestScriptFixtureComponent getFixtureFirstRep() { 
+      if (getFixture().isEmpty()) {
+        addFixture();
+      }
+      return getFixture().get(0);
+    }
+
+    /**
      * @return {@link #profile} (Reference to the profile to be used for validation.)
      */
     public List<Reference> getProfile() { 
       if (this.profile == null)
         this.profile = new ArrayList<Reference>();
       return this.profile;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #profile}, creating it if it does not already exist
-     */
-    public Reference getProfileFirstRep() { 
-      if (getProfile().isEmpty()) {
-        addProfile();
-      }
-      return getProfile().get(0);
     }
 
     /**
@@ -10486,10 +10108,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #profile} (Reference to the profile to be used for validation.)
-     */
-    // syntactic sugar
     public Reference addProfile() { //3
       Reference t = new Reference();
       if (this.profile == null)
@@ -10498,7 +10116,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addProfile(Reference t) { //3
       if (t == null)
         return this;
@@ -10509,8 +10126,19 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return {@link #profile} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to the profile to be used for validation.)
+     * @return The first repetition of repeating field {@link #profile}, creating it if it does not already exist
      */
+    public Reference getProfileFirstRep() { 
+      if (getProfile().isEmpty()) {
+        addProfile();
+      }
+      return getProfile().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getProfileTarget() { 
       if (this.profileTarget == null)
         this.profileTarget = new ArrayList<Resource>();
@@ -10524,16 +10152,6 @@ public class TestScript extends DomainResource {
       if (this.variable == null)
         this.variable = new ArrayList<TestScriptVariableComponent>();
       return this.variable;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #variable}, creating it if it does not already exist
-     */
-    public TestScriptVariableComponent getVariableFirstRep() { 
-      if (getVariable().isEmpty()) {
-        addVariable();
-      }
-      return getVariable().get(0);
     }
 
     /**
@@ -10553,10 +10171,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #variable} (Variable is set based either on element value in response body or on header field value in the response headers.)
-     */
-    // syntactic sugar
     public TestScriptVariableComponent addVariable() { //3
       TestScriptVariableComponent t = new TestScriptVariableComponent();
       if (this.variable == null)
@@ -10565,7 +10179,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addVariable(TestScriptVariableComponent t) { //3
       if (t == null)
         return this;
@@ -10576,22 +10189,22 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #variable}, creating it if it does not already exist
+     */
+    public TestScriptVariableComponent getVariableFirstRep() { 
+      if (getVariable().isEmpty()) {
+        addVariable();
+      }
+      return getVariable().get(0);
+    }
+
+    /**
      * @return {@link #rule} (Assert rule to be used in one or more asserts within the test script.)
      */
     public List<TestScriptRuleComponent> getRule() { 
       if (this.rule == null)
         this.rule = new ArrayList<TestScriptRuleComponent>();
       return this.rule;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-     */
-    public TestScriptRuleComponent getRuleFirstRep() { 
-      if (getRule().isEmpty()) {
-        addRule();
-      }
-      return getRule().get(0);
     }
 
     /**
@@ -10611,10 +10224,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #rule} (Assert rule to be used in one or more asserts within the test script.)
-     */
-    // syntactic sugar
     public TestScriptRuleComponent addRule() { //3
       TestScriptRuleComponent t = new TestScriptRuleComponent();
       if (this.rule == null)
@@ -10623,7 +10232,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addRule(TestScriptRuleComponent t) { //3
       if (t == null)
         return this;
@@ -10634,22 +10242,22 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
+     */
+    public TestScriptRuleComponent getRuleFirstRep() { 
+      if (getRule().isEmpty()) {
+        addRule();
+      }
+      return getRule().get(0);
+    }
+
+    /**
      * @return {@link #ruleset} (Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.)
      */
     public List<TestScriptRulesetComponent> getRuleset() { 
       if (this.ruleset == null)
         this.ruleset = new ArrayList<TestScriptRulesetComponent>();
       return this.ruleset;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #ruleset}, creating it if it does not already exist
-     */
-    public TestScriptRulesetComponent getRulesetFirstRep() { 
-      if (getRuleset().isEmpty()) {
-        addRuleset();
-      }
-      return getRuleset().get(0);
     }
 
     /**
@@ -10669,10 +10277,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #ruleset} (Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.)
-     */
-    // syntactic sugar
     public TestScriptRulesetComponent addRuleset() { //3
       TestScriptRulesetComponent t = new TestScriptRulesetComponent();
       if (this.ruleset == null)
@@ -10681,7 +10285,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addRuleset(TestScriptRulesetComponent t) { //3
       if (t == null)
         return this;
@@ -10689,6 +10292,16 @@ public class TestScript extends DomainResource {
         this.ruleset = new ArrayList<TestScriptRulesetComponent>();
       this.ruleset.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #ruleset}, creating it if it does not already exist
+     */
+    public TestScriptRulesetComponent getRulesetFirstRep() { 
+      if (getRuleset().isEmpty()) {
+        addRuleset();
+      }
+      return getRuleset().get(0);
     }
 
     /**
@@ -10725,16 +10338,6 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #test}, creating it if it does not already exist
-     */
-    public TestScriptTestComponent getTestFirstRep() { 
-      if (getTest().isEmpty()) {
-        addTest();
-      }
-      return getTest().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public TestScript setTest(List<TestScriptTestComponent> theTest) { 
@@ -10751,10 +10354,6 @@ public class TestScript extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #test} (A test in this script.)
-     */
-    // syntactic sugar
     public TestScriptTestComponent addTest() { //3
       TestScriptTestComponent t = new TestScriptTestComponent();
       if (this.test == null)
@@ -10763,7 +10362,6 @@ public class TestScript extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public TestScript addTest(TestScriptTestComponent t) { //3
       if (t == null)
         return this;
@@ -10771,6 +10369,16 @@ public class TestScript extends DomainResource {
         this.test = new ArrayList<TestScriptTestComponent>();
       this.test.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #test}, creating it if it does not already exist
+     */
+    public TestScriptTestComponent getTestFirstRep() { 
+      if (getTest().isEmpty()) {
+        addTest();
+      }
+      return getTest().get(0);
     }
 
     /**
@@ -10799,17 +10407,11 @@ public class TestScript extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A free text natural language name identifying the TestScript.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The status of the TestScript.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("identifier", "Identifier", "Identifier for the TestScript assigned for external purposes outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("experimental", "boolean", "This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the Test Script.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date this version of the test tcript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test cases change.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the TestScript and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("requirements", "string", "Explains why this Test Script is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
@@ -11191,10 +10793,8 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScript))
           return false;
         TestScript o = (TestScript) other;
-        return compareDeep(url, o.url, true) && compareDeep(version, o.version, true) && compareDeep(name, o.name, true)
-           && compareDeep(status, o.status, true) && compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
-           && compareDeep(description, o.description, true) && compareDeep(useContext, o.useContext, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(metadata, o.metadata, true)
            && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
@@ -11209,16 +10809,15 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScript))
           return false;
         TestScript o = (TestScript) other;
-        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
+        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
+           && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
            && compareValues(copyright, o.copyright, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, version, name, status, identifier
-          , experimental, publisher, contact, date, description, useContext, requirements, copyright, origin
-          , destination, metadata, fixture, profile, variable, rule, ruleset, setup, test, teardown);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, experimental, publisher
+          , contact, description, requirements, copyright, origin, destination, metadata
+          , fixture, profile, variable, rule, ruleset, setup, test, teardown);
       }
 
   @Override
@@ -11234,7 +10833,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -11254,7 +10853,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.test.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string", target={} )
+  @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string" )
   public static final String SP_TESTSCRIPT_TEST_CAPABILITY = "testscript-test-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-test-capability</b>
@@ -11274,7 +10873,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.setup.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string", target={} )
+  @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string" )
   public static final String SP_TESTSCRIPT_SETUP_CAPABILITY = "testscript-setup-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-setup-capability</b>
@@ -11294,7 +10893,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string", target={} )
+  @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -11314,7 +10913,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string", target={} )
+  @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -11334,7 +10933,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.metadata.capability.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string", target={} )
+  @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string" )
   public static final String SP_TESTSCRIPT_CAPABILITY = "testscript-capability";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>testscript-capability</b>
@@ -11354,7 +10953,7 @@ public class TestScript extends DomainResource {
    * Path: <b>TestScript.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>

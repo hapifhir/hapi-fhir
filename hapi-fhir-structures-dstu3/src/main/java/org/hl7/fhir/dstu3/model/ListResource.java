@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class ListResource extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ListStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class ListResource extends DomainResource {
           return RETIRED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown ListStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ListStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -164,7 +168,7 @@ public class ListResource extends DomainResource {
          */
         CHANGES, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ListMode fromCode(String codeString) throws FHIRException {
@@ -176,7 +180,10 @@ public class ListResource extends DomainResource {
           return SNAPSHOT;
         if ("changes".equals(codeString))
           return CHANGES;
-        throw new FHIRException("Unknown ListMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ListMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -580,7 +587,8 @@ public class ListResource extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(flag, deleted, date, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(flag, deleted, date, item
+          );
       }
 
   public String fhirType() {
@@ -724,16 +732,6 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ListResource setIdentifier(List<Identifier> theIdentifier) { 
@@ -750,10 +748,6 @@ public class ListResource extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier for the List assigned for business purposes outside the context of FHIR.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -762,7 +756,6 @@ public class ListResource extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ListResource addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -770,6 +763,16 @@ public class ListResource extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1140,16 +1143,6 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ListResource setNote(List<Annotation> theNote) { 
@@ -1166,10 +1159,6 @@ public class ListResource extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Comments that apply to the overall list.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -1178,7 +1167,6 @@ public class ListResource extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ListResource addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -1189,22 +1177,22 @@ public class ListResource extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
      * @return {@link #entry} (Entries in this list.)
      */
     public List<ListEntryComponent> getEntry() { 
       if (this.entry == null)
         this.entry = new ArrayList<ListEntryComponent>();
       return this.entry;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #entry}, creating it if it does not already exist
-     */
-    public ListEntryComponent getEntryFirstRep() { 
-      if (getEntry().isEmpty()) {
-        addEntry();
-      }
-      return getEntry().get(0);
     }
 
     /**
@@ -1224,10 +1212,6 @@ public class ListResource extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #entry} (Entries in this list.)
-     */
-    // syntactic sugar
     public ListEntryComponent addEntry() { //3
       ListEntryComponent t = new ListEntryComponent();
       if (this.entry == null)
@@ -1236,7 +1220,6 @@ public class ListResource extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ListResource addEntry(ListEntryComponent t) { //3
       if (t == null)
         return this;
@@ -1244,6 +1227,16 @@ public class ListResource extends DomainResource {
         this.entry = new ArrayList<ListEntryComponent>();
       this.entry.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #entry}, creating it if it does not already exist
+     */
+    public ListEntryComponent getEntryFirstRep() { 
+      if (getEntry().isEmpty()) {
+        addEntry();
+      }
+      return getEntry().get(0);
     }
 
     /**
@@ -1525,8 +1518,9 @@ public class ListResource extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, mode, title
-          , code, subject, encounter, date, source, orderedBy, note, entry, emptyReason);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, mode
+          , title, code, subject, encounter, date, source, orderedBy, note, entry, emptyReason
+          );
       }
 
   @Override
@@ -1542,7 +1536,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date", target={} )
+  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1562,7 +1556,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1608,7 +1602,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.emptyReason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token", target={} )
+  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
   public static final String SP_EMPTY_REASON = "empty-reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>empty-reason</b>
@@ -1628,7 +1622,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token", target={} )
+  @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1648,7 +1642,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.note.text</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="notes", path="List.note.text", description="The annotation  - text content", type="string", target={} )
+  @SearchParamDefinition(name="notes", path="List.note.text", description="The annotation  - text content", type="string" )
   public static final String SP_NOTES = "notes";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>notes</b>
@@ -1668,7 +1662,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
+  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1694,7 +1688,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1720,7 +1714,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference", target={Practitioner.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1746,7 +1740,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1772,7 +1766,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string", target={} )
+  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -1792,7 +1786,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

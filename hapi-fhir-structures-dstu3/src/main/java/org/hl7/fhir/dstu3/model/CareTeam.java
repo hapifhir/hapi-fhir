@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -373,16 +374,6 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public CareTeam setIdentifier(List<Identifier> theIdentifier) { 
@@ -399,10 +390,6 @@ public class CareTeam extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this care team that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -411,7 +398,6 @@ public class CareTeam extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public CareTeam addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -419,6 +405,16 @@ public class CareTeam extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -455,16 +451,6 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
-     */
-    public CodeableConcept getTypeFirstRep() { 
-      if (getType().isEmpty()) {
-        addType();
-      }
-      return getType().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public CareTeam setType(List<CodeableConcept> theType) { 
@@ -481,10 +467,6 @@ public class CareTeam extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #type} (Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.)
-     */
-    // syntactic sugar
     public CodeableConcept addType() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.type == null)
@@ -493,7 +475,6 @@ public class CareTeam extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public CareTeam addType(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -501,6 +482,16 @@ public class CareTeam extends DomainResource {
         this.type = new ArrayList<CodeableConcept>();
       this.type.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     */
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -625,16 +616,6 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
-     */
-    public CareTeamParticipantComponent getParticipantFirstRep() { 
-      if (getParticipant().isEmpty()) {
-        addParticipant();
-      }
-      return getParticipant().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public CareTeam setParticipant(List<CareTeamParticipantComponent> theParticipant) { 
@@ -651,10 +632,6 @@ public class CareTeam extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #participant} (Identifies all people and organizations who are expected to be involved in the care team.)
-     */
-    // syntactic sugar
     public CareTeamParticipantComponent addParticipant() { //3
       CareTeamParticipantComponent t = new CareTeamParticipantComponent();
       if (this.participant == null)
@@ -663,7 +640,6 @@ public class CareTeam extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public CareTeam addParticipant(CareTeamParticipantComponent t) { //3
       if (t == null)
         return this;
@@ -671,6 +647,16 @@ public class CareTeam extends DomainResource {
         this.participant = new ArrayList<CareTeamParticipantComponent>();
       this.participant.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     */
+    public CareTeamParticipantComponent getParticipantFirstRep() { 
+      if (getParticipant().isEmpty()) {
+        addParticipant();
+      }
+      return getParticipant().get(0);
     }
 
     /**
@@ -908,8 +894,8 @@ public class CareTeam extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type, name
-          , subject, period, participant, managingOrganization);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
+          , name, subject, period, participant, managingOrganization);
       }
 
   @Override
@@ -925,7 +911,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CareTeam.period", description="Time period team covers", type="date", target={} )
+  @SearchParamDefinition(name="date", path="CareTeam.period", description="Time period team covers", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -945,7 +931,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="CareTeam.identifier", description="External Ids for this team", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="CareTeam.identifier", description="External Ids for this team", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -965,7 +951,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -991,7 +977,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="CareTeam.subject", description="Who care team is for", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="CareTeam.subject", description="Who care team is for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1017,7 +1003,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="CareTeam.type", description="Type of team", type="token", target={} )
+  @SearchParamDefinition(name="type", path="CareTeam.type", description="Type of team", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1037,7 +1023,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.participant.member</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -1063,7 +1049,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="CareTeam.status", description="active | suspended | inactive | entered in error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="CareTeam.status", description="active | suspended | inactive | entered in error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

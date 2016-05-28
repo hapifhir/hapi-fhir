@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -77,7 +78,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceStatus fromCode(String codeString) throws FHIRException {
@@ -97,7 +98,10 @@ public class AllergyIntolerance extends DomainResource {
           return REFUTED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -224,7 +228,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         INTOLERANCE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceType fromCode(String codeString) throws FHIRException {
@@ -234,7 +238,10 @@ public class AllergyIntolerance extends DomainResource {
           return ALLERGY;
         if ("intolerance".equals(codeString))
           return INTOLERANCE;
-        throw new FHIRException("Unknown AllergyIntoleranceType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -319,7 +326,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         OTHER, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceCategory fromCode(String codeString) throws FHIRException {
@@ -333,7 +340,10 @@ public class AllergyIntolerance extends DomainResource {
           return ENVIRONMENT;
         if ("other".equals(codeString))
           return OTHER;
-        throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -434,7 +444,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         UNABLETOASSESS, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceCriticality fromCode(String codeString) throws FHIRException {
@@ -446,7 +456,10 @@ public class AllergyIntolerance extends DomainResource {
           return HIGH;
         if ("unable-to-assess".equals(codeString))
           return UNABLETOASSESS;
-        throw new FHIRException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -537,7 +550,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         CONFIRMED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceCertainty fromCode(String codeString) throws FHIRException {
@@ -549,7 +562,10 @@ public class AllergyIntolerance extends DomainResource {
           return LIKELY;
         if ("confirmed".equals(codeString))
           return CONFIRMED;
-        throw new FHIRException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -640,7 +656,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         SEVERE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AllergyIntoleranceSeverity fromCode(String codeString) throws FHIRException {
@@ -652,7 +668,10 @@ public class AllergyIntolerance extends DomainResource {
           return MODERATE;
         if ("severe".equals(codeString))
           return SEVERE;
-        throw new FHIRException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -879,16 +898,6 @@ public class AllergyIntolerance extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #manifestation}, creating it if it does not already exist
-         */
-        public CodeableConcept getManifestationFirstRep() { 
-          if (getManifestation().isEmpty()) {
-            addManifestation();
-          }
-          return getManifestation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AllergyIntoleranceReactionComponent setManifestation(List<CodeableConcept> theManifestation) { 
@@ -905,10 +914,6 @@ public class AllergyIntolerance extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #manifestation} (Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.)
-         */
-    // syntactic sugar
         public CodeableConcept addManifestation() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.manifestation == null)
@@ -917,7 +922,6 @@ public class AllergyIntolerance extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AllergyIntoleranceReactionComponent addManifestation(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -925,6 +929,16 @@ public class AllergyIntolerance extends DomainResource {
             this.manifestation = new ArrayList<CodeableConcept>();
           this.manifestation.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #manifestation}, creating it if it does not already exist
+         */
+        public CodeableConcept getManifestationFirstRep() { 
+          if (getManifestation().isEmpty()) {
+            addManifestation();
+          }
+          return getManifestation().get(0);
         }
 
         /**
@@ -1108,16 +1122,6 @@ public class AllergyIntolerance extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-         */
-        public Annotation getNoteFirstRep() { 
-          if (getNote().isEmpty()) {
-            addNote();
-          }
-          return getNote().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public AllergyIntoleranceReactionComponent setNote(List<Annotation> theNote) { 
@@ -1134,10 +1138,6 @@ public class AllergyIntolerance extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #note} (Additional text about the adverse reaction event not captured in other fields.)
-         */
-    // syntactic sugar
         public Annotation addNote() { //3
           Annotation t = new Annotation();
           if (this.note == null)
@@ -1146,7 +1146,6 @@ public class AllergyIntolerance extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public AllergyIntoleranceReactionComponent addNote(Annotation t) { //3
           if (t == null)
             return this;
@@ -1154,6 +1153,16 @@ public class AllergyIntolerance extends DomainResource {
             this.note = new ArrayList<Annotation>();
           this.note.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+         */
+        public Annotation getNoteFirstRep() { 
+          if (getNote().isEmpty()) {
+            addNote();
+          }
+          return getNote().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1484,16 +1493,6 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public AllergyIntolerance setIdentifier(List<Identifier> theIdentifier) { 
@@ -1510,10 +1509,6 @@ public class AllergyIntolerance extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1522,7 +1517,6 @@ public class AllergyIntolerance extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AllergyIntolerance addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1530,6 +1524,16 @@ public class AllergyIntolerance extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2031,16 +2035,6 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
-     */
-    public Annotation getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
-      }
-      return getNote().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public AllergyIntolerance setNote(List<Annotation> theNote) { 
@@ -2057,10 +2051,6 @@ public class AllergyIntolerance extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #note} (Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.)
-     */
-    // syntactic sugar
     public Annotation addNote() { //3
       Annotation t = new Annotation();
       if (this.note == null)
@@ -2069,7 +2059,6 @@ public class AllergyIntolerance extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AllergyIntolerance addNote(Annotation t) { //3
       if (t == null)
         return this;
@@ -2080,22 +2069,22 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
+    /**
      * @return {@link #reaction} (Details about each adverse reaction event linked to exposure to the identified Substance.)
      */
     public List<AllergyIntoleranceReactionComponent> getReaction() { 
       if (this.reaction == null)
         this.reaction = new ArrayList<AllergyIntoleranceReactionComponent>();
       return this.reaction;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #reaction}, creating it if it does not already exist
-     */
-    public AllergyIntoleranceReactionComponent getReactionFirstRep() { 
-      if (getReaction().isEmpty()) {
-        addReaction();
-      }
-      return getReaction().get(0);
     }
 
     /**
@@ -2115,10 +2104,6 @@ public class AllergyIntolerance extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #reaction} (Details about each adverse reaction event linked to exposure to the identified Substance.)
-     */
-    // syntactic sugar
     public AllergyIntoleranceReactionComponent addReaction() { //3
       AllergyIntoleranceReactionComponent t = new AllergyIntoleranceReactionComponent();
       if (this.reaction == null)
@@ -2127,7 +2112,6 @@ public class AllergyIntolerance extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public AllergyIntolerance addReaction(AllergyIntoleranceReactionComponent t) { //3
       if (t == null)
         return this;
@@ -2135,6 +2119,16 @@ public class AllergyIntolerance extends DomainResource {
         this.reaction = new ArrayList<AllergyIntoleranceReactionComponent>();
       this.reaction.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reaction}, creating it if it does not already exist
+     */
+    public AllergyIntoleranceReactionComponent getReactionFirstRep() { 
+      if (getReaction().isEmpty()) {
+        addReaction();
+      }
+      return getReaction().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -2403,9 +2397,9 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type, category
-          , criticality, substance, patient, recordedDate, recorder, reporter, onset, lastOccurence, note
-          , reaction);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
+          , category, criticality, substance, patient, recordedDate, recorder, reporter
+          , onset, lastOccurence, note, reaction);
       }
 
   @Override
@@ -2421,7 +2415,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.severity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="severity", path="AllergyIntolerance.reaction.severity", description="mild | moderate | severe (of event as a whole)", type="token", target={} )
+  @SearchParamDefinition(name="severity", path="AllergyIntolerance.reaction.severity", description="mild | moderate | severe (of event as a whole)", type="token" )
   public static final String SP_SEVERITY = "severity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>severity</b>
@@ -2441,7 +2435,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recordedDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date", target={} )
+  @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2461,7 +2455,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External ids for this item", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External ids for this item", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2481,7 +2475,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.manifestation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.reaction.manifestation", description="Clinical symptoms/signs associated with the Event", type="token", target={} )
+  @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.reaction.manifestation", description="Clinical symptoms/signs associated with the Event", type="token" )
   public static final String SP_MANIFESTATION = "manifestation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manifestation</b>
@@ -2501,7 +2495,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recorder</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference", target={Practitioner.class, Patient.class} )
+  @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECORDER = "recorder";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recorder</b>
@@ -2527,7 +2521,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.substance, AllergyIntolerance.reaction.substance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token", target={} )
+  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
   public static final String SP_SUBSTANCE = "substance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>substance</b>
@@ -2547,7 +2541,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.criticality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unable-to-assess", type="token", target={} )
+  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unable-to-assess", type="token" )
   public static final String SP_CRITICALITY = "criticality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criticality</b>
@@ -2567,7 +2561,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reporter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_REPORTER = "reporter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reporter</b>
@@ -2593,7 +2587,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2613,7 +2607,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.onset</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date", target={} )
+  @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date" )
   public static final String SP_ONSET = "onset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset</b>
@@ -2633,7 +2627,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.exposureRoute</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="route", path="AllergyIntolerance.reaction.exposureRoute", description="How the subject was exposed to the substance", type="token", target={} )
+  @SearchParamDefinition(name="route", path="AllergyIntolerance.reaction.exposureRoute", description="How the subject was exposed to the substance", type="token" )
   public static final String SP_ROUTE = "route";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>route</b>
@@ -2653,7 +2647,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2679,7 +2673,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token", target={} )
+  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2699,7 +2693,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.lastOccurence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date", target={} )
+  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date" )
   public static final String SP_LAST_DATE = "last-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>last-date</b>
@@ -2719,7 +2713,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

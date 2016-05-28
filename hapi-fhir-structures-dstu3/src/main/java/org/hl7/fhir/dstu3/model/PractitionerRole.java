@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -96,16 +97,6 @@ public class PractitionerRole extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #daysOfWeek}, creating it if it does not already exist
-         */
-        public CodeType getDaysOfWeekFirstRep() { 
-          if (getDaysOfWeek().isEmpty()) {
-            addDaysOfWeekElement();
-          }
-          return getDaysOfWeek().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public PractitionerRoleAvailableTimeComponent setDaysOfWeek(List<CodeType> theDaysOfWeek) { 
@@ -125,7 +116,6 @@ public class PractitionerRole extends DomainResource {
         /**
          * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
-    // syntactic sugar
         public CodeType addDaysOfWeekElement() {//2 
           CodeType t = new CodeType();
           if (this.daysOfWeek == null)
@@ -767,16 +757,6 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public PractitionerRole setIdentifier(List<Identifier> theIdentifier) { 
@@ -793,10 +773,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Business Identifiers that are specific to a role/location.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -805,7 +781,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -813,6 +788,16 @@ public class PractitionerRole extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -958,16 +943,6 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
-     */
-    public CodeableConcept getRoleFirstRep() { 
-      if (getRole().isEmpty()) {
-        addRole();
-      }
-      return getRole().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public PractitionerRole setRole(List<CodeableConcept> theRole) { 
@@ -984,10 +959,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
-     */
-    // syntactic sugar
     public CodeableConcept addRole() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.role == null)
@@ -996,7 +967,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addRole(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1007,22 +977,22 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
+     */
+    public CodeableConcept getRoleFirstRep() { 
+      if (getRole().isEmpty()) {
+        addRole();
+      }
+      return getRole().get(0);
+    }
+
+    /**
      * @return {@link #specialty} (Specific specialty of the practitioner.)
      */
     public List<CodeableConcept> getSpecialty() { 
       if (this.specialty == null)
         this.specialty = new ArrayList<CodeableConcept>();
       return this.specialty;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
-     */
-    public CodeableConcept getSpecialtyFirstRep() { 
-      if (getSpecialty().isEmpty()) {
-        addSpecialty();
-      }
-      return getSpecialty().get(0);
     }
 
     /**
@@ -1042,10 +1012,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #specialty} (Specific specialty of the practitioner.)
-     */
-    // syntactic sugar
     public CodeableConcept addSpecialty() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.specialty == null)
@@ -1054,7 +1020,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addSpecialty(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -1065,22 +1030,22 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #specialty}, creating it if it does not already exist
+     */
+    public CodeableConcept getSpecialtyFirstRep() { 
+      if (getSpecialty().isEmpty()) {
+        addSpecialty();
+      }
+      return getSpecialty().get(0);
+    }
+
+    /**
      * @return {@link #location} (The location(s) at which this practitioner provides care.)
      */
     public List<Reference> getLocation() { 
       if (this.location == null)
         this.location = new ArrayList<Reference>();
       return this.location;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
-     */
-    public Reference getLocationFirstRep() { 
-      if (getLocation().isEmpty()) {
-        addLocation();
-      }
-      return getLocation().get(0);
     }
 
     /**
@@ -1100,10 +1065,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #location} (The location(s) at which this practitioner provides care.)
-     */
-    // syntactic sugar
     public Reference addLocation() { //3
       Reference t = new Reference();
       if (this.location == null)
@@ -1112,7 +1073,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addLocation(Reference t) { //3
       if (t == null)
         return this;
@@ -1123,18 +1083,29 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+     * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
      */
+    public Reference getLocationFirstRep() { 
+      if (getLocation().isEmpty()) {
+        addLocation();
+      }
+      return getLocation().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Location> getLocationTarget() { 
       if (this.locationTarget == null)
         this.locationTarget = new ArrayList<Location>();
       return this.locationTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public Location addLocationTarget() { 
       Location r = new Location();
       if (this.locationTarget == null)
@@ -1150,16 +1121,6 @@ public class PractitionerRole extends DomainResource {
       if (this.healthcareService == null)
         this.healthcareService = new ArrayList<Reference>();
       return this.healthcareService;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #healthcareService}, creating it if it does not already exist
-     */
-    public Reference getHealthcareServiceFirstRep() { 
-      if (getHealthcareService().isEmpty()) {
-        addHealthcareService();
-      }
-      return getHealthcareService().get(0);
     }
 
     /**
@@ -1179,10 +1140,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #healthcareService} (The list of healthcare services that this worker provides for this role's Organization/Location(s).)
-     */
-    // syntactic sugar
     public Reference addHealthcareService() { //3
       Reference t = new Reference();
       if (this.healthcareService == null)
@@ -1191,7 +1148,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addHealthcareService(Reference t) { //3
       if (t == null)
         return this;
@@ -1202,18 +1158,29 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #healthcareService} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker provides for this role's Organization/Location(s).)
+     * @return The first repetition of repeating field {@link #healthcareService}, creating it if it does not already exist
      */
+    public Reference getHealthcareServiceFirstRep() { 
+      if (getHealthcareService().isEmpty()) {
+        addHealthcareService();
+      }
+      return getHealthcareService().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<HealthcareService> getHealthcareServiceTarget() { 
       if (this.healthcareServiceTarget == null)
         this.healthcareServiceTarget = new ArrayList<HealthcareService>();
       return this.healthcareServiceTarget;
     }
 
-    // syntactic sugar
     /**
-     * @return {@link #healthcareService} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker provides for this role's Organization/Location(s).)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
+    @Deprecated
     public HealthcareService addHealthcareServiceTarget() { 
       HealthcareService r = new HealthcareService();
       if (this.healthcareServiceTarget == null)
@@ -1229,16 +1196,6 @@ public class PractitionerRole extends DomainResource {
       if (this.telecom == null)
         this.telecom = new ArrayList<ContactPoint>();
       return this.telecom;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
     }
 
     /**
@@ -1258,10 +1215,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (Contact details that are specific to the role/location/service.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -1270,7 +1223,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -1278,6 +1230,16 @@ public class PractitionerRole extends DomainResource {
         this.telecom = new ArrayList<ContactPoint>();
       this.telecom.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
     }
 
     /**
@@ -1314,16 +1276,6 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #availableTime}, creating it if it does not already exist
-     */
-    public PractitionerRoleAvailableTimeComponent getAvailableTimeFirstRep() { 
-      if (getAvailableTime().isEmpty()) {
-        addAvailableTime();
-      }
-      return getAvailableTime().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public PractitionerRole setAvailableTime(List<PractitionerRoleAvailableTimeComponent> theAvailableTime) { 
@@ -1340,10 +1292,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #availableTime} (A collection of times that the Service Site is available.)
-     */
-    // syntactic sugar
     public PractitionerRoleAvailableTimeComponent addAvailableTime() { //3
       PractitionerRoleAvailableTimeComponent t = new PractitionerRoleAvailableTimeComponent();
       if (this.availableTime == null)
@@ -1352,7 +1300,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addAvailableTime(PractitionerRoleAvailableTimeComponent t) { //3
       if (t == null)
         return this;
@@ -1363,22 +1310,22 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #availableTime}, creating it if it does not already exist
+     */
+    public PractitionerRoleAvailableTimeComponent getAvailableTimeFirstRep() { 
+      if (getAvailableTime().isEmpty()) {
+        addAvailableTime();
+      }
+      return getAvailableTime().get(0);
+    }
+
+    /**
      * @return {@link #notAvailable} (The HealthcareService is not available during this period of time due to the provided reason.)
      */
     public List<PractitionerRoleNotAvailableComponent> getNotAvailable() { 
       if (this.notAvailable == null)
         this.notAvailable = new ArrayList<PractitionerRoleNotAvailableComponent>();
       return this.notAvailable;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #notAvailable}, creating it if it does not already exist
-     */
-    public PractitionerRoleNotAvailableComponent getNotAvailableFirstRep() { 
-      if (getNotAvailable().isEmpty()) {
-        addNotAvailable();
-      }
-      return getNotAvailable().get(0);
     }
 
     /**
@@ -1398,10 +1345,6 @@ public class PractitionerRole extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #notAvailable} (The HealthcareService is not available during this period of time due to the provided reason.)
-     */
-    // syntactic sugar
     public PractitionerRoleNotAvailableComponent addNotAvailable() { //3
       PractitionerRoleNotAvailableComponent t = new PractitionerRoleNotAvailableComponent();
       if (this.notAvailable == null)
@@ -1410,7 +1353,6 @@ public class PractitionerRole extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public PractitionerRole addNotAvailable(PractitionerRoleNotAvailableComponent t) { //3
       if (t == null)
         return this;
@@ -1418,6 +1360,16 @@ public class PractitionerRole extends DomainResource {
         this.notAvailable = new ArrayList<PractitionerRoleNotAvailableComponent>();
       this.notAvailable.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #notAvailable}, creating it if it does not already exist
+     */
+    public PractitionerRoleNotAvailableComponent getNotAvailableFirstRep() { 
+      if (getNotAvailable().isEmpty()) {
+        addNotAvailable();
+      }
+      return getNotAvailable().get(0);
     }
 
     /**
@@ -1743,8 +1695,8 @@ public class PractitionerRole extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, practitioner
-          , organization, role, specialty, location, healthcareService, telecom, period, availableTime
-          , notAvailable, availabilityExceptions);
+          , organization, role, specialty, location, healthcareService, telecom, period
+          , availableTime, notAvailable, availabilityExceptions);
       }
 
   @Override
@@ -1760,7 +1712,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PractitionerRole.identifier", description="A practitioner's Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="PractitionerRole.identifier", description="A practitioner's Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1780,7 +1732,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="PractitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token", target={} )
+  @SearchParamDefinition(name="specialty", path="PractitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1800,7 +1752,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.role</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="PractitionerRole.role", description="The practitioner can perform this role at for the organization", type="token", target={} )
+  @SearchParamDefinition(name="role", path="PractitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
@@ -1820,7 +1772,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.practitioner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organation", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="practitioner", path="PractitionerRole.practitioner", description="Practitioner that is able to provide the defined services for the organation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -1846,7 +1798,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="PractitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
+  @SearchParamDefinition(name="phone", path="PractitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -1866,7 +1818,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="PractitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="PractitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1892,7 +1844,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="PractitionerRole.telecom", description="The value in any kind of contact", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="PractitionerRole.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1912,7 +1864,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="PractitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="PractitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1938,7 +1890,7 @@ public class PractitionerRole extends DomainResource {
    * Path: <b>PractitionerRole.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="PractitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
+  @SearchParamDefinition(name="email", path="PractitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>

@@ -29,13 +29,14 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -132,10 +133,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return false;
     }
 
-    /**
-     * @return {@link #contained} (These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.)
-     */
-    // syntactic sugar
     public DomainResource addContained(Resource t) { //3
       if (t == null)
         return this;
@@ -145,6 +142,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return this;
     }
 
+
     /**
      * @return {@link #extension} (May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.)
      */
@@ -152,16 +150,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       if (this.extension == null)
         this.extension = new ArrayList<Extension>();
       return this.extension;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #extension}, creating it if it does not already exist
-     */
-    public Extension getExtensionFirstRep() { 
-      if (getExtension().isEmpty()) {
-        addExtension();
-      }
-      return getExtension().get(0);
     }
 
     /**
@@ -181,10 +169,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return false;
     }
 
-    /**
-     * @return {@link #extension} (May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.)
-     */
-    // syntactic sugar
     public Extension addExtension() { //3
       Extension t = new Extension();
       if (this.extension == null)
@@ -193,7 +177,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return t;
     }
 
-    // syntactic sugar
     public DomainResource addExtension(Extension t) { //3
       if (t == null)
         return this;
@@ -203,6 +186,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return this;
     }
 
+
     /**
      * @return {@link #modifierExtension} (May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.)
      */
@@ -210,16 +194,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       if (this.modifierExtension == null)
         this.modifierExtension = new ArrayList<Extension>();
       return this.modifierExtension;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #modifierExtension}, creating it if it does not already exist
-     */
-    public Extension getModifierExtensionFirstRep() { 
-      if (getModifierExtension().isEmpty()) {
-        addModifierExtension();
-      }
-      return getModifierExtension().get(0);
     }
 
     /**
@@ -239,10 +213,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return false;
     }
 
-    /**
-     * @return {@link #modifierExtension} (May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.)
-     */
-    // syntactic sugar
     public Extension addModifierExtension() { //3
       Extension t = new Extension();
       if (this.modifierExtension == null)
@@ -251,7 +221,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return t;
     }
 
-    // syntactic sugar
     public DomainResource addModifierExtension(Extension t) { //3
       if (t == null)
         return this;
@@ -260,6 +229,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       this.modifierExtension.add(t);
       return this;
     }
+
 
     /**
      * Returns a list of extensions from this element which have the given URL. Note that
@@ -423,8 +393,8 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, contained, extension, modifierExtension
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, contained, extension
+          , modifierExtension);
       }
 
 

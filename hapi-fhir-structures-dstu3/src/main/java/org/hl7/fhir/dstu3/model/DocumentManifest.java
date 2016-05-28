@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -559,16 +560,6 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentManifest setIdentifier(List<Identifier> theIdentifier) { 
@@ -585,10 +576,6 @@ public class DocumentManifest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Other identifiers associated with the document manifest, including version independent  identifiers.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -597,7 +584,6 @@ public class DocumentManifest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentManifest addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -605,6 +591,16 @@ public class DocumentManifest extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -656,16 +652,6 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
-     */
-    public Reference getRecipientFirstRep() { 
-      if (getRecipient().isEmpty()) {
-        addRecipient();
-      }
-      return getRecipient().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentManifest setRecipient(List<Reference> theRecipient) { 
@@ -682,10 +668,6 @@ public class DocumentManifest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #recipient} (A patient, practitioner, or organization for which this set of documents is intended.)
-     */
-    // syntactic sugar
     public Reference addRecipient() { //3
       Reference t = new Reference();
       if (this.recipient == null)
@@ -694,7 +676,6 @@ public class DocumentManifest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentManifest addRecipient(Reference t) { //3
       if (t == null)
         return this;
@@ -705,8 +686,19 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #recipient} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A patient, practitioner, or organization for which this set of documents is intended.)
+     * @return The first repetition of repeating field {@link #recipient}, creating it if it does not already exist
      */
+    public Reference getRecipientFirstRep() { 
+      if (getRecipient().isEmpty()) {
+        addRecipient();
+      }
+      return getRecipient().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getRecipientTarget() { 
       if (this.recipientTarget == null)
         this.recipientTarget = new ArrayList<Resource>();
@@ -747,16 +739,6 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
-     */
-    public Reference getAuthorFirstRep() { 
-      if (getAuthor().isEmpty()) {
-        addAuthor();
-      }
-      return getAuthor().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentManifest setAuthor(List<Reference> theAuthor) { 
@@ -773,10 +755,6 @@ public class DocumentManifest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #author} (Identifies who is responsible for creating the manifest, and adding  documents to it.)
-     */
-    // syntactic sugar
     public Reference addAuthor() { //3
       Reference t = new Reference();
       if (this.author == null)
@@ -785,7 +763,6 @@ public class DocumentManifest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentManifest addAuthor(Reference t) { //3
       if (t == null)
         return this;
@@ -796,8 +773,19 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies who is responsible for creating the manifest, and adding  documents to it.)
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
      */
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
+      }
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getAuthorTarget() { 
       if (this.authorTarget == null)
         this.authorTarget = new ArrayList<Resource>();
@@ -1006,16 +994,6 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
-     */
-    public DocumentManifestContentComponent getContentFirstRep() { 
-      if (getContent().isEmpty()) {
-        addContent();
-      }
-      return getContent().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentManifest setContent(List<DocumentManifestContentComponent> theContent) { 
@@ -1032,10 +1010,6 @@ public class DocumentManifest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #content} (The list of Documents included in the manifest.)
-     */
-    // syntactic sugar
     public DocumentManifestContentComponent addContent() { //3
       DocumentManifestContentComponent t = new DocumentManifestContentComponent();
       if (this.content == null)
@@ -1044,7 +1018,6 @@ public class DocumentManifest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentManifest addContent(DocumentManifestContentComponent t) { //3
       if (t == null)
         return this;
@@ -1055,22 +1028,22 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+     */
+    public DocumentManifestContentComponent getContentFirstRep() { 
+      if (getContent().isEmpty()) {
+        addContent();
+      }
+      return getContent().get(0);
+    }
+
+    /**
      * @return {@link #related} (Related identifiers or resources associated with the DocumentManifest.)
      */
     public List<DocumentManifestRelatedComponent> getRelated() { 
       if (this.related == null)
         this.related = new ArrayList<DocumentManifestRelatedComponent>();
       return this.related;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
-     */
-    public DocumentManifestRelatedComponent getRelatedFirstRep() { 
-      if (getRelated().isEmpty()) {
-        addRelated();
-      }
-      return getRelated().get(0);
     }
 
     /**
@@ -1090,10 +1063,6 @@ public class DocumentManifest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #related} (Related identifiers or resources associated with the DocumentManifest.)
-     */
-    // syntactic sugar
     public DocumentManifestRelatedComponent addRelated() { //3
       DocumentManifestRelatedComponent t = new DocumentManifestRelatedComponent();
       if (this.related == null)
@@ -1102,7 +1071,6 @@ public class DocumentManifest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentManifest addRelated(DocumentManifestRelatedComponent t) { //3
       if (t == null)
         return this;
@@ -1110,6 +1078,16 @@ public class DocumentManifest extends DomainResource {
         this.related = new ArrayList<DocumentManifestRelatedComponent>();
       this.related.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
+     */
+    public DocumentManifestRelatedComponent getRelatedFirstRep() { 
+      if (getRelated().isEmpty()) {
+        addRelated();
+      }
+      return getRelated().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1360,8 +1338,9 @@ public class DocumentManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier, subject
-          , recipient, type, author, created, source, status, description, content, related);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier
+          , subject, recipient, type, author, created, source, status, description, content
+          , related);
       }
 
   @Override
@@ -1377,7 +1356,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1397,7 +1376,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token", target={} )
+  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
   public static final String SP_RELATED_ID = "related-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
@@ -1443,7 +1422,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1469,7 +1448,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1495,7 +1474,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date", target={} )
+  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1515,7 +1494,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string", target={} )
+  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1535,7 +1514,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri", target={} )
+  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1555,7 +1534,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token", target={} )
+  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1601,7 +1580,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1627,7 +1606,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1653,7 +1632,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -66,7 +67,7 @@ public class DocumentReference extends DomainResource {
          */
         APPENDS, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DocumentRelationshipType fromCode(String codeString) throws FHIRException {
@@ -80,7 +81,10 @@ public class DocumentReference extends DomainResource {
           return SIGNS;
         if ("appends".equals(codeString))
           return APPENDS;
-        throw new FHIRException("Unknown DocumentRelationshipType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DocumentRelationshipType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -464,16 +468,6 @@ public class DocumentReference extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #format}, creating it if it does not already exist
-         */
-        public Coding getFormatFirstRep() { 
-          if (getFormat().isEmpty()) {
-            addFormat();
-          }
-          return getFormat().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public DocumentReferenceContentComponent setFormat(List<Coding> theFormat) { 
@@ -490,10 +484,6 @@ public class DocumentReference extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
-         */
-    // syntactic sugar
         public Coding addFormat() { //3
           Coding t = new Coding();
           if (this.format == null)
@@ -502,7 +492,6 @@ public class DocumentReference extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public DocumentReferenceContentComponent addFormat(Coding t) { //3
           if (t == null)
             return this;
@@ -510,6 +499,16 @@ public class DocumentReference extends DomainResource {
             this.format = new ArrayList<Coding>();
           this.format.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #format}, creating it if it does not already exist
+         */
+        public Coding getFormatFirstRep() { 
+          if (getFormat().isEmpty()) {
+            addFormat();
+          }
+          return getFormat().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -742,16 +741,6 @@ public class DocumentReference extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
-         */
-        public CodeableConcept getEventFirstRep() { 
-          if (getEvent().isEmpty()) {
-            addEvent();
-          }
-          return getEvent().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public DocumentReferenceContextComponent setEvent(List<CodeableConcept> theEvent) { 
@@ -768,10 +757,6 @@ public class DocumentReference extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #event} (This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.)
-         */
-    // syntactic sugar
         public CodeableConcept addEvent() { //3
           CodeableConcept t = new CodeableConcept();
           if (this.event == null)
@@ -780,7 +765,6 @@ public class DocumentReference extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public DocumentReferenceContextComponent addEvent(CodeableConcept t) { //3
           if (t == null)
             return this;
@@ -788,6 +772,16 @@ public class DocumentReference extends DomainResource {
             this.event = new ArrayList<CodeableConcept>();
           this.event.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
+         */
+        public CodeableConcept getEventFirstRep() { 
+          if (getEvent().isEmpty()) {
+            addEvent();
+          }
+          return getEvent().get(0);
         }
 
         /**
@@ -916,16 +910,6 @@ public class DocumentReference extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
-         */
-        public DocumentReferenceContextRelatedComponent getRelatedFirstRep() { 
-          if (getRelated().isEmpty()) {
-            addRelated();
-          }
-          return getRelated().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public DocumentReferenceContextComponent setRelated(List<DocumentReferenceContextRelatedComponent> theRelated) { 
@@ -942,10 +926,6 @@ public class DocumentReference extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #related} (Related identifiers or resources associated with the DocumentReference.)
-         */
-    // syntactic sugar
         public DocumentReferenceContextRelatedComponent addRelated() { //3
           DocumentReferenceContextRelatedComponent t = new DocumentReferenceContextRelatedComponent();
           if (this.related == null)
@@ -954,7 +934,6 @@ public class DocumentReference extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public DocumentReferenceContextComponent addRelated(DocumentReferenceContextRelatedComponent t) { //3
           if (t == null)
             return this;
@@ -962,6 +941,16 @@ public class DocumentReference extends DomainResource {
             this.related = new ArrayList<DocumentReferenceContextRelatedComponent>();
           this.related.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #related}, creating it if it does not already exist
+         */
+        public DocumentReferenceContextRelatedComponent getRelatedFirstRep() { 
+          if (getRelated().isEmpty()) {
+            addRelated();
+          }
+          return getRelated().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1131,8 +1120,8 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(encounter, event, period, facilityType
-          , practiceSetting, sourcePatientInfo, related);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(encounter, event, period
+          , facilityType, practiceSetting, sourcePatientInfo, related);
       }
 
   public String fhirType() {
@@ -1530,16 +1519,6 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentReference setIdentifier(List<Identifier> theIdentifier) { 
@@ -1556,10 +1535,6 @@ public class DocumentReference extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Other identifiers associated with the document, including version independent identifiers.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1568,7 +1543,6 @@ public class DocumentReference extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentReference addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1576,6 +1550,16 @@ public class DocumentReference extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1675,16 +1659,6 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
-     */
-    public Reference getAuthorFirstRep() { 
-      if (getAuthor().isEmpty()) {
-        addAuthor();
-      }
-      return getAuthor().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentReference setAuthor(List<Reference> theAuthor) { 
@@ -1701,10 +1675,6 @@ public class DocumentReference extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #author} (Identifies who is responsible for adding the information to the document.)
-     */
-    // syntactic sugar
     public Reference addAuthor() { //3
       Reference t = new Reference();
       if (this.author == null)
@@ -1713,7 +1683,6 @@ public class DocumentReference extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentReference addAuthor(Reference t) { //3
       if (t == null)
         return this;
@@ -1724,8 +1693,19 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies who is responsible for adding the information to the document.)
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
      */
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
+      }
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getAuthorTarget() { 
       if (this.authorTarget == null)
         this.authorTarget = new ArrayList<Resource>();
@@ -1988,16 +1968,6 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #relatesTo}, creating it if it does not already exist
-     */
-    public DocumentReferenceRelatesToComponent getRelatesToFirstRep() { 
-      if (getRelatesTo().isEmpty()) {
-        addRelatesTo();
-      }
-      return getRelatesTo().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentReference setRelatesTo(List<DocumentReferenceRelatesToComponent> theRelatesTo) { 
@@ -2014,10 +1984,6 @@ public class DocumentReference extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #relatesTo} (Relationships that this document has with other document references that already exist.)
-     */
-    // syntactic sugar
     public DocumentReferenceRelatesToComponent addRelatesTo() { //3
       DocumentReferenceRelatesToComponent t = new DocumentReferenceRelatesToComponent();
       if (this.relatesTo == null)
@@ -2026,7 +1992,6 @@ public class DocumentReference extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentReference addRelatesTo(DocumentReferenceRelatesToComponent t) { //3
       if (t == null)
         return this;
@@ -2034,6 +1999,16 @@ public class DocumentReference extends DomainResource {
         this.relatesTo = new ArrayList<DocumentReferenceRelatesToComponent>();
       this.relatesTo.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #relatesTo}, creating it if it does not already exist
+     */
+    public DocumentReferenceRelatesToComponent getRelatesToFirstRep() { 
+      if (getRelatesTo().isEmpty()) {
+        addRelatesTo();
+      }
+      return getRelatesTo().get(0);
     }
 
     /**
@@ -2095,16 +2070,6 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
-     */
-    public CodeableConcept getSecurityLabelFirstRep() { 
-      if (getSecurityLabel().isEmpty()) {
-        addSecurityLabel();
-      }
-      return getSecurityLabel().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DocumentReference setSecurityLabel(List<CodeableConcept> theSecurityLabel) { 
@@ -2121,10 +2086,6 @@ public class DocumentReference extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #securityLabel} (A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security contains the security labels of the "reference" to the document, while DocumentReference.securityLabel contains a snapshot of the security labels on the document the reference refers to.)
-     */
-    // syntactic sugar
     public CodeableConcept addSecurityLabel() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.securityLabel == null)
@@ -2133,7 +2094,6 @@ public class DocumentReference extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentReference addSecurityLabel(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -2144,22 +2104,22 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
+     */
+    public CodeableConcept getSecurityLabelFirstRep() { 
+      if (getSecurityLabel().isEmpty()) {
+        addSecurityLabel();
+      }
+      return getSecurityLabel().get(0);
+    }
+
+    /**
      * @return {@link #content} (The document and format referenced. There may be multiple content element repetitions, each with a different format.)
      */
     public List<DocumentReferenceContentComponent> getContent() { 
       if (this.content == null)
         this.content = new ArrayList<DocumentReferenceContentComponent>();
       return this.content;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
-     */
-    public DocumentReferenceContentComponent getContentFirstRep() { 
-      if (getContent().isEmpty()) {
-        addContent();
-      }
-      return getContent().get(0);
     }
 
     /**
@@ -2179,10 +2139,6 @@ public class DocumentReference extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #content} (The document and format referenced. There may be multiple content element repetitions, each with a different format.)
-     */
-    // syntactic sugar
     public DocumentReferenceContentComponent addContent() { //3
       DocumentReferenceContentComponent t = new DocumentReferenceContentComponent();
       if (this.content == null)
@@ -2191,7 +2147,6 @@ public class DocumentReference extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DocumentReference addContent(DocumentReferenceContentComponent t) { //3
       if (t == null)
         return this;
@@ -2199,6 +2154,16 @@ public class DocumentReference extends DomainResource {
         this.content = new ArrayList<DocumentReferenceContentComponent>();
       this.content.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
+     */
+    public DocumentReferenceContentComponent getContentFirstRep() { 
+      if (getContent().isEmpty()) {
+        addContent();
+      }
+      return getContent().get(0);
     }
 
     /**
@@ -2540,9 +2505,9 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier, subject
-          , type, class_, author, custodian, authenticator, created, indexed, status, docStatus, relatesTo
-          , description, securityLabel, content, context);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier
+          , subject, type, class_, author, custodian, authenticator, created, indexed
+          , status, docStatus, relatesTo, description, securityLabel, content, context);
       }
 
   @Override
@@ -2558,7 +2523,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.securityLabel</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token", target={} )
+  @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token" )
   public static final String SP_SECURITYLABEL = "securitylabel";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>securitylabel</b>
@@ -2578,7 +2543,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2604,7 +2569,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string", target={} )
+  @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -2624,7 +2589,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token", target={} )
+  @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token" )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -2644,7 +2609,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2664,7 +2629,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token", target={} )
+  @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token" )
   public static final String SP_RELATION = "relation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relation</b>
@@ -2684,7 +2649,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.practiceSetting</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token", target={} )
+  @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token" )
   public static final String SP_SETTING = "setting";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>setting</b>
@@ -2704,7 +2669,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2730,7 +2695,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"}, target={} )
+  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"} )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>
@@ -2750,7 +2715,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.event</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token", target={} )
+  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
@@ -2770,7 +2735,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="DocumentReference.class", description="Categorization of document", type="token", target={} )
+  @SearchParamDefinition(name="class", path="DocumentReference.class", description="Categorization of document", type="token" )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
@@ -2790,7 +2755,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.authenticator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", target={Practitioner.class, Organization.class} )
+  @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHENTICATOR = "authenticator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authenticator</b>
@@ -2816,7 +2781,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.masterIdentifier, DocumentReference.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2836,7 +2801,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date", target={} )
+  @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -2856,7 +2821,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.related.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token", target={} )
+  @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token" )
   public static final String SP_RELATED_ID = "related-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
@@ -2876,7 +2841,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.custodian</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference" )
   public static final String SP_CUSTODIAN = "custodian";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>custodian</b>
@@ -2902,7 +2867,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.indexed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date", target={} )
+  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date" )
   public static final String SP_INDEXED = "indexed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
@@ -2922,7 +2887,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2948,7 +2913,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date", target={} )
+  @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -2968,7 +2933,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.format</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token", target={} )
+  @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token" )
   public static final String SP_FORMAT = "format";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>format</b>
@@ -2988,7 +2953,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -3040,7 +3005,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.content.attachment.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri", target={} )
+  @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -3060,7 +3025,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.relatesTo.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference", target={DocumentReference.class} )
+  @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference" )
   public static final String SP_RELATESTO = "relatesto";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatesto</b>
@@ -3086,7 +3051,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.context.facilityType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token", target={} )
+  @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token" )
   public static final String SP_FACILITY = "facility";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facility</b>
@@ -3106,7 +3071,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b>DocumentReference.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

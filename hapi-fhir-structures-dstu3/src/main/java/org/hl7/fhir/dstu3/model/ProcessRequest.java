@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -66,7 +67,7 @@ public class ProcessRequest extends DomainResource {
          */
         STATUS, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ActionList fromCode(String codeString) throws FHIRException {
@@ -80,7 +81,10 @@ public class ProcessRequest extends DomainResource {
           return REPROCESS;
         if ("status".equals(codeString))
           return STATUS;
-        throw new FHIRException("Unknown ActionList code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ActionList code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -511,16 +515,6 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcessRequest setIdentifier(List<Identifier> theIdentifier) { 
@@ -537,10 +531,6 @@ public class ProcessRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (The ProcessRequest business identifier.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -549,7 +539,6 @@ public class ProcessRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcessRequest addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -557,6 +546,16 @@ public class ProcessRequest extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -985,16 +984,6 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-     */
-    public ItemsComponent getItemFirstRep() { 
-      if (getItem().isEmpty()) {
-        addItem();
-      }
-      return getItem().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcessRequest setItem(List<ItemsComponent> theItem) { 
@@ -1011,10 +1000,6 @@ public class ProcessRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #item} (List of top level items to be re-adjudicated, if none specified then the entire submission is re-adjudicated.)
-     */
-    // syntactic sugar
     public ItemsComponent addItem() { //3
       ItemsComponent t = new ItemsComponent();
       if (this.item == null)
@@ -1023,7 +1008,6 @@ public class ProcessRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcessRequest addItem(ItemsComponent t) { //3
       if (t == null)
         return this;
@@ -1034,22 +1018,22 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public ItemsComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
+    /**
      * @return {@link #include} (Names of resource types to include.)
      */
     public List<StringType> getInclude() { 
       if (this.include == null)
         this.include = new ArrayList<StringType>();
       return this.include;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #include}, creating it if it does not already exist
-     */
-    public StringType getIncludeFirstRep() { 
-      if (getInclude().isEmpty()) {
-        addIncludeElement();
-      }
-      return getInclude().get(0);
     }
 
     /**
@@ -1072,7 +1056,6 @@ public class ProcessRequest extends DomainResource {
     /**
      * @return {@link #include} (Names of resource types to include.)
      */
-    // syntactic sugar
     public StringType addIncludeElement() {//2 
       StringType t = new StringType();
       if (this.include == null)
@@ -1115,16 +1098,6 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #exclude}, creating it if it does not already exist
-     */
-    public StringType getExcludeFirstRep() { 
-      if (getExclude().isEmpty()) {
-        addExcludeElement();
-      }
-      return getExclude().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcessRequest setExclude(List<StringType> theExclude) { 
@@ -1144,7 +1117,6 @@ public class ProcessRequest extends DomainResource {
     /**
      * @return {@link #exclude} (Names of resource types to exclude.)
      */
-    // syntactic sugar
     public StringType addExcludeElement() {//2 
       StringType t = new StringType();
       if (this.exclude == null)
@@ -1520,9 +1492,9 @@ public class ProcessRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(action, identifier, ruleset, originalRuleset
-          , created, target, provider, organization, request, response, nullify, reference, item, include
-          , exclude, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(action, identifier, ruleset
+          , originalRuleset, created, target, provider, organization, request, response
+          , nullify, reference, item, include, exclude, period);
       }
 
   @Override
@@ -1538,7 +1510,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcessRequest.identifier", description="The business identifier of the ProcessRequest", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ProcessRequest.identifier", description="The business identifier of the ProcessRequest", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1558,7 +1530,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="ProcessRequest.organization.as(Identifier)", description="The organization who generated this request", type="token", target={} )
+  @SearchParamDefinition(name="organizationidentifier", path="ProcessRequest.organization.as(Identifier)", description="The organization who generated this request", type="token" )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1578,7 +1550,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ProcessRequest.action", description="The action requested by this resource", type="token", target={} )
+  @SearchParamDefinition(name="action", path="ProcessRequest.action", description="The action requested by this resource", type="token" )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -1598,7 +1570,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="ProcessRequest.organization.as(Reference)", description="The organization who generated this request", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organizationreference", path="ProcessRequest.organization.as(Reference)", description="The organization who generated this request", type="reference" )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1624,7 +1596,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="ProcessRequest.provider.as(Reference)", description="The provider who regenerated this request", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="providerreference", path="ProcessRequest.provider.as(Reference)", description="The provider who regenerated this request", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -1650,7 +1622,7 @@ public class ProcessRequest extends DomainResource {
    * Path: <b>ProcessRequest.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="ProcessRequest.provider.as(Identifier)", description="The provider who regenerated this request", type="token", target={} )
+  @SearchParamDefinition(name="provideridentifier", path="ProcessRequest.provider.as(Identifier)", description="The provider who regenerated this request", type="token" )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>

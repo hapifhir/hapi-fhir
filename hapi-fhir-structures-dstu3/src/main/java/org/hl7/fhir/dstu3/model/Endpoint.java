@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -65,7 +66,7 @@ public class Endpoint extends DomainResource {
          */
         OFF, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EndpointStatus fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Endpoint extends DomainResource {
           return ERROR;
         if ("off".equals(codeString))
           return OFF;
-        throw new FHIRException("Unknown EndpointStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EndpointStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -366,16 +370,6 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactPoint getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Endpoint setContact(List<ContactPoint> theContact) { 
@@ -392,10 +386,6 @@ public class Endpoint extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.)
-     */
-    // syntactic sugar
     public ContactPoint addContact() { //3
       ContactPoint t = new ContactPoint();
       if (this.contact == null)
@@ -404,7 +394,6 @@ public class Endpoint extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Endpoint addContact(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -412,6 +401,16 @@ public class Endpoint extends DomainResource {
         this.contact = new ArrayList<ContactPoint>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactPoint getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -469,16 +468,6 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #method}, creating it if it does not already exist
-     */
-    public Coding getMethodFirstRep() { 
-      if (getMethod().isEmpty()) {
-        addMethod();
-      }
-      return getMethod().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Endpoint setMethod(List<Coding> theMethod) { 
@@ -495,10 +484,6 @@ public class Endpoint extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #method} (The http verb to be used when calling this endpoint.)
-     */
-    // syntactic sugar
     public Coding addMethod() { //3
       Coding t = new Coding();
       if (this.method == null)
@@ -507,7 +492,6 @@ public class Endpoint extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Endpoint addMethod(Coding t) { //3
       if (t == null)
         return this;
@@ -515,6 +499,16 @@ public class Endpoint extends DomainResource {
         this.method = new ArrayList<Coding>();
       this.method.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #method}, creating it if it does not already exist
+     */
+    public Coding getMethodFirstRep() { 
+      if (getMethod().isEmpty()) {
+        addMethod();
+      }
+      return getMethod().get(0);
     }
 
     /**
@@ -641,16 +635,6 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #payloadType}, creating it if it does not already exist
-     */
-    public CodeableConcept getPayloadTypeFirstRep() { 
-      if (getPayloadType().isEmpty()) {
-        addPayloadType();
-      }
-      return getPayloadType().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Endpoint setPayloadType(List<CodeableConcept> thePayloadType) { 
@@ -667,10 +651,6 @@ public class Endpoint extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #payloadType} (The payload type describes the acceptable content that can be communicated on the endpoint.)
-     */
-    // syntactic sugar
     public CodeableConcept addPayloadType() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.payloadType == null)
@@ -679,7 +659,6 @@ public class Endpoint extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Endpoint addPayloadType(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -690,22 +669,22 @@ public class Endpoint extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #payloadType}, creating it if it does not already exist
+     */
+    public CodeableConcept getPayloadTypeFirstRep() { 
+      if (getPayloadType().isEmpty()) {
+        addPayloadType();
+      }
+      return getPayloadType().get(0);
+    }
+
+    /**
      * @return {@link #header} (Additional headers / information to send as part of the notification.)
      */
     public List<StringType> getHeader() { 
       if (this.header == null)
         this.header = new ArrayList<StringType>();
       return this.header;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #header}, creating it if it does not already exist
-     */
-    public StringType getHeaderFirstRep() { 
-      if (getHeader().isEmpty()) {
-        addHeaderElement();
-      }
-      return getHeader().get(0);
     }
 
     /**
@@ -728,7 +707,6 @@ public class Endpoint extends DomainResource {
     /**
      * @return {@link #header} (Additional headers / information to send as part of the notification.)
      */
-    // syntactic sugar
     public StringType addHeaderElement() {//2 
       StringType t = new StringType();
       if (this.header == null)
@@ -1047,8 +1025,9 @@ public class Endpoint extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, managingOrganization, contact
-          , connectionType, method, period, address, payloadFormat, payloadType, header, publicKey);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, managingOrganization
+          , contact, connectionType, method, period, address, payloadFormat, payloadType
+          , header, publicKey);
       }
 
   @Override
@@ -1064,7 +1043,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.payloadType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload-type", path="Endpoint.payloadType", description="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", type="token", target={} )
+  @SearchParamDefinition(name="payload-type", path="Endpoint.payloadType", description="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", type="token" )
   public static final String SP_PAYLOAD_TYPE = "payload-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload-type</b>
@@ -1084,7 +1063,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is exposing the endpoint", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is exposing the endpoint", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1110,7 +1089,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Endpoint.status", description="The current status of the Endpoint (usually expected to be active)", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Endpoint.status", description="The current status of the Endpoint (usually expected to be active)", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

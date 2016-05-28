@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -66,7 +67,7 @@ public class ImagingExcerpt extends DomainResource {
          */
         WADOWS, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DWebType fromCode(String codeString) throws FHIRException {
@@ -80,7 +81,10 @@ public class ImagingExcerpt extends DomainResource {
           return IID;
         if ("WADO-WS".equals(codeString))
           return WADOWS;
-        throw new FHIRException("Unknown DWebType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DWebType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -325,16 +329,6 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
-         */
-        public StudyDicomComponent getDicomFirstRep() { 
-          if (getDicom().isEmpty()) {
-            addDicom();
-          }
-          return getDicom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StudyComponent setDicom(List<StudyDicomComponent> theDicom) { 
@@ -351,10 +345,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dicom} (Methods of accessing using DICOM web technologies.)
-         */
-    // syntactic sugar
         public StudyDicomComponent addDicom() { //3
           StudyDicomComponent t = new StudyDicomComponent();
           if (this.dicom == null)
@@ -363,7 +353,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StudyComponent addDicom(StudyDicomComponent t) { //3
           if (t == null)
             return this;
@@ -374,22 +363,22 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
+         */
+        public StudyDicomComponent getDicomFirstRep() { 
+          if (getDicom().isEmpty()) {
+            addDicom();
+          }
+          return getDicom().get(0);
+        }
+
+        /**
          * @return {@link #viewable} (A set of viewable reference images of various  types.)
          */
         public List<StudyViewableComponent> getViewable() { 
           if (this.viewable == null)
             this.viewable = new ArrayList<StudyViewableComponent>();
           return this.viewable;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #viewable}, creating it if it does not already exist
-         */
-        public StudyViewableComponent getViewableFirstRep() { 
-          if (getViewable().isEmpty()) {
-            addViewable();
-          }
-          return getViewable().get(0);
         }
 
         /**
@@ -409,10 +398,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #viewable} (A set of viewable reference images of various  types.)
-         */
-    // syntactic sugar
         public StudyViewableComponent addViewable() { //3
           StudyViewableComponent t = new StudyViewableComponent();
           if (this.viewable == null)
@@ -421,7 +406,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StudyComponent addViewable(StudyViewableComponent t) { //3
           if (t == null)
             return this;
@@ -432,22 +416,22 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #viewable}, creating it if it does not already exist
+         */
+        public StudyViewableComponent getViewableFirstRep() { 
+          if (getViewable().isEmpty()) {
+            addViewable();
+          }
+          return getViewable().get(0);
+        }
+
+        /**
          * @return {@link #series} (Series identity and locating information of the DICOM SOP instances in the selection.)
          */
         public List<SeriesComponent> getSeries() { 
           if (this.series == null)
             this.series = new ArrayList<SeriesComponent>();
           return this.series;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #series}, creating it if it does not already exist
-         */
-        public SeriesComponent getSeriesFirstRep() { 
-          if (getSeries().isEmpty()) {
-            addSeries();
-          }
-          return getSeries().get(0);
         }
 
         /**
@@ -467,10 +451,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #series} (Series identity and locating information of the DICOM SOP instances in the selection.)
-         */
-    // syntactic sugar
         public SeriesComponent addSeries() { //3
           SeriesComponent t = new SeriesComponent();
           if (this.series == null)
@@ -479,7 +459,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StudyComponent addSeries(SeriesComponent t) { //3
           if (t == null)
             return this;
@@ -487,6 +466,16 @@ public class ImagingExcerpt extends DomainResource {
             this.series = new ArrayList<SeriesComponent>();
           this.series.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #series}, creating it if it does not already exist
+         */
+        public SeriesComponent getSeriesFirstRep() { 
+          if (getSeries().isEmpty()) {
+            addSeries();
+          }
+          return getSeries().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -630,8 +619,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, dicom, viewable
-          , series);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, dicom
+          , viewable, series);
       }
 
   public String fhirType() {
@@ -1473,8 +1462,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(contentType, height, width, frames
-          , duration, size, title, url);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(contentType, height, width
+          , frames, duration, size, title, url);
       }
 
   public String fhirType() {
@@ -1579,16 +1568,6 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
-         */
-        public SeriesDicomComponent getDicomFirstRep() { 
-          if (getDicom().isEmpty()) {
-            addDicom();
-          }
-          return getDicom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SeriesComponent setDicom(List<SeriesDicomComponent> theDicom) { 
@@ -1605,10 +1584,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dicom} (Methods of accessing using DICOM web technologies.)
-         */
-    // syntactic sugar
         public SeriesDicomComponent addDicom() { //3
           SeriesDicomComponent t = new SeriesDicomComponent();
           if (this.dicom == null)
@@ -1617,7 +1592,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SeriesComponent addDicom(SeriesDicomComponent t) { //3
           if (t == null)
             return this;
@@ -1628,22 +1602,22 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
+         */
+        public SeriesDicomComponent getDicomFirstRep() { 
+          if (getDicom().isEmpty()) {
+            addDicom();
+          }
+          return getDicom().get(0);
+        }
+
+        /**
          * @return {@link #instance} (Identity and locating information of the selected DICOM SOP instances.)
          */
         public List<InstanceComponent> getInstance() { 
           if (this.instance == null)
             this.instance = new ArrayList<InstanceComponent>();
           return this.instance;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #instance}, creating it if it does not already exist
-         */
-        public InstanceComponent getInstanceFirstRep() { 
-          if (getInstance().isEmpty()) {
-            addInstance();
-          }
-          return getInstance().get(0);
         }
 
         /**
@@ -1663,10 +1637,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #instance} (Identity and locating information of the selected DICOM SOP instances.)
-         */
-    // syntactic sugar
         public InstanceComponent addInstance() { //3
           InstanceComponent t = new InstanceComponent();
           if (this.instance == null)
@@ -1675,7 +1645,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SeriesComponent addInstance(InstanceComponent t) { //3
           if (t == null)
             return this;
@@ -1683,6 +1652,16 @@ public class ImagingExcerpt extends DomainResource {
             this.instance = new ArrayList<InstanceComponent>();
           this.instance.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #instance}, creating it if it does not already exist
+         */
+        public InstanceComponent getInstanceFirstRep() { 
+          if (getInstance().isEmpty()) {
+            addInstance();
+          }
+          return getInstance().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -2180,16 +2159,6 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
-         */
-        public InstanceDicomComponent getDicomFirstRep() { 
-          if (getDicom().isEmpty()) {
-            addDicom();
-          }
-          return getDicom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public InstanceComponent setDicom(List<InstanceDicomComponent> theDicom) { 
@@ -2206,10 +2175,6 @@ public class ImagingExcerpt extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dicom} (Methods of accessing using DICOM web technologies.)
-         */
-    // syntactic sugar
         public InstanceDicomComponent addDicom() { //3
           InstanceDicomComponent t = new InstanceDicomComponent();
           if (this.dicom == null)
@@ -2218,7 +2183,6 @@ public class ImagingExcerpt extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public InstanceComponent addDicom(InstanceDicomComponent t) { //3
           if (t == null)
             return this;
@@ -2229,22 +2193,22 @@ public class ImagingExcerpt extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #dicom}, creating it if it does not already exist
+         */
+        public InstanceDicomComponent getDicomFirstRep() { 
+          if (getDicom().isEmpty()) {
+            addDicom();
+          }
+          return getDicom().get(0);
+        }
+
+        /**
          * @return {@link #frameNumbers} (The specific frame reference within a multi-frame object.)
          */
         public List<UnsignedIntType> getFrameNumbers() { 
           if (this.frameNumbers == null)
             this.frameNumbers = new ArrayList<UnsignedIntType>();
           return this.frameNumbers;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #frameNumbers}, creating it if it does not already exist
-         */
-        public UnsignedIntType getFrameNumbersFirstRep() { 
-          if (getFrameNumbers().isEmpty()) {
-            addFrameNumbersElement();
-          }
-          return getFrameNumbers().get(0);
         }
 
         /**
@@ -2267,7 +2231,6 @@ public class ImagingExcerpt extends DomainResource {
         /**
          * @return {@link #frameNumbers} (The specific frame reference within a multi-frame object.)
          */
-    // syntactic sugar
         public UnsignedIntType addFrameNumbersElement() {//2 
           UnsignedIntType t = new UnsignedIntType();
           if (this.frameNumbers == null)
@@ -2999,16 +2962,6 @@ public class ImagingExcerpt extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #study}, creating it if it does not already exist
-     */
-    public StudyComponent getStudyFirstRep() { 
-      if (getStudy().isEmpty()) {
-        addStudy();
-      }
-      return getStudy().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ImagingExcerpt setStudy(List<StudyComponent> theStudy) { 
@@ -3025,10 +2978,6 @@ public class ImagingExcerpt extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #study} (Study identity and locating information of the DICOM SOP instances in the selection.)
-     */
-    // syntactic sugar
     public StudyComponent addStudy() { //3
       StudyComponent t = new StudyComponent();
       if (this.study == null)
@@ -3037,7 +2986,6 @@ public class ImagingExcerpt extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ImagingExcerpt addStudy(StudyComponent t) { //3
       if (t == null)
         return this;
@@ -3045,6 +2993,16 @@ public class ImagingExcerpt extends DomainResource {
         this.study = new ArrayList<StudyComponent>();
       this.study.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #study}, creating it if it does not already exist
+     */
+    public StudyComponent getStudyFirstRep() { 
+      if (getStudy().isEmpty()) {
+        addStudy();
+      }
+      return getStudy().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -3217,8 +3175,8 @@ public class ImagingExcerpt extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime, author
-          , title, description, study);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime
+          , author, title, description, study);
       }
 
   @Override
@@ -3234,7 +3192,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingExcerpt.uid", description="UID of key DICOM object selection", type="uri", target={} )
+  @SearchParamDefinition(name="identifier", path="ImagingExcerpt.uid", description="UID of key DICOM object selection", type="uri" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3254,7 +3212,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.authoringTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authoring-time", path="ImagingExcerpt.authoringTime", description="Time of key DICOM object selection authoring", type="date", target={} )
+  @SearchParamDefinition(name="authoring-time", path="ImagingExcerpt.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
   public static final String SP_AUTHORING_TIME = "authoring-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
@@ -3274,7 +3232,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.study.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="selected-study", path="ImagingExcerpt.study.uid", description="Study selected in key DICOM object selection", type="uri", target={} )
+  @SearchParamDefinition(name="selected-study", path="ImagingExcerpt.study.uid", description="Study selected in key DICOM object selection", type="uri" )
   public static final String SP_SELECTED_STUDY = "selected-study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
@@ -3294,7 +3252,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="ImagingExcerpt.author", description="Author of key DICOM object selection", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="ImagingExcerpt.author", description="Author of key DICOM object selection", type="reference" )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -3320,7 +3278,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingExcerpt.patient", description="Subject of key DICOM object selection", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ImagingExcerpt.patient", description="Subject of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3346,7 +3304,7 @@ public class ImagingExcerpt extends DomainResource {
    * Path: <b>ImagingExcerpt.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ImagingExcerpt.title", description="Title of key DICOM object selection", type="token", target={} )
+  @SearchParamDefinition(name="title", path="ImagingExcerpt.title", description="Title of key DICOM object selection", type="token" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>

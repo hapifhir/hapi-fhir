@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,7 +62,7 @@ public class DetectedIssue extends DomainResource {
          */
         LOW, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DetectedIssueSeverity fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class DetectedIssue extends DomainResource {
           return MODERATE;
         if ("low".equals(codeString))
           return LOW;
-        throw new FHIRException("Unknown DetectedIssueSeverity code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DetectedIssueSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -649,16 +653,6 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #implicated}, creating it if it does not already exist
-     */
-    public Reference getImplicatedFirstRep() { 
-      if (getImplicated().isEmpty()) {
-        addImplicated();
-      }
-      return getImplicated().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DetectedIssue setImplicated(List<Reference> theImplicated) { 
@@ -675,10 +669,6 @@ public class DetectedIssue extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #implicated} (Indicates the resource representing the current activity or proposed activity that is potentially problematic.)
-     */
-    // syntactic sugar
     public Reference addImplicated() { //3
       Reference t = new Reference();
       if (this.implicated == null)
@@ -687,7 +677,6 @@ public class DetectedIssue extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DetectedIssue addImplicated(Reference t) { //3
       if (t == null)
         return this;
@@ -698,8 +687,19 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @return {@link #implicated} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Indicates the resource representing the current activity or proposed activity that is potentially problematic.)
+     * @return The first repetition of repeating field {@link #implicated}, creating it if it does not already exist
      */
+    public Reference getImplicatedFirstRep() { 
+      if (getImplicated().isEmpty()) {
+        addImplicated();
+      }
+      return getImplicated().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
     public List<Resource> getImplicatedTarget() { 
       if (this.implicatedTarget == null)
         this.implicatedTarget = new ArrayList<Resource>();
@@ -926,16 +926,6 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #mitigation}, creating it if it does not already exist
-     */
-    public DetectedIssueMitigationComponent getMitigationFirstRep() { 
-      if (getMitigation().isEmpty()) {
-        addMitigation();
-      }
-      return getMitigation().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DetectedIssue setMitigation(List<DetectedIssueMitigationComponent> theMitigation) { 
@@ -952,10 +942,6 @@ public class DetectedIssue extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #mitigation} (Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.)
-     */
-    // syntactic sugar
     public DetectedIssueMitigationComponent addMitigation() { //3
       DetectedIssueMitigationComponent t = new DetectedIssueMitigationComponent();
       if (this.mitigation == null)
@@ -964,7 +950,6 @@ public class DetectedIssue extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DetectedIssue addMitigation(DetectedIssueMitigationComponent t) { //3
       if (t == null)
         return this;
@@ -972,6 +957,16 @@ public class DetectedIssue extends DomainResource {
         this.mitigation = new ArrayList<DetectedIssueMitigationComponent>();
       this.mitigation.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #mitigation}, creating it if it does not already exist
+     */
+    public DetectedIssueMitigationComponent getMitigationFirstRep() { 
+      if (getMitigation().isEmpty()) {
+        addMitigation();
+      }
+      return getMitigation().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1186,8 +1181,8 @@ public class DetectedIssue extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, category, severity, implicated
-          , detail, date, author, identifier, reference, mitigation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, category, severity
+          , implicated, detail, date, author, identifier, reference, mitigation);
       }
 
   @Override
@@ -1203,7 +1198,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date", target={} )
+  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1223,7 +1218,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1243,7 +1238,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1269,7 +1264,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", target={Practitioner.class, Device.class} )
+  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1321,7 +1316,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token", target={} )
+  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

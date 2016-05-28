@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -144,16 +145,6 @@ public class Organization extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public OrganizationContactComponent setTelecom(List<ContactPoint> theTelecom) { 
@@ -170,10 +161,6 @@ public class Organization extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #telecom} (A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.)
-         */
-    // syntactic sugar
         public ContactPoint addTelecom() { //3
           ContactPoint t = new ContactPoint();
           if (this.telecom == null)
@@ -182,7 +169,6 @@ public class Organization extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public OrganizationContactComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
@@ -190,6 +176,16 @@ public class Organization extends DomainResource {
             this.telecom = new ArrayList<ContactPoint>();
           this.telecom.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+         */
+        public ContactPoint getTelecomFirstRep() { 
+          if (getTelecom().isEmpty()) {
+            addTelecom();
+          }
+          return getTelecom().get(0);
         }
 
         /**
@@ -430,16 +426,6 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Organization setIdentifier(List<Identifier> theIdentifier) { 
@@ -456,10 +442,6 @@ public class Organization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier for the organization that is used to identify the organization across multiple disparate systems.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -468,7 +450,6 @@ public class Organization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Organization addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -476,6 +457,16 @@ public class Organization extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -606,16 +597,6 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Organization setTelecom(List<ContactPoint> theTelecom) { 
@@ -632,10 +613,6 @@ public class Organization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (A contact detail for the organization.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -644,7 +621,6 @@ public class Organization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Organization addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -655,22 +631,22 @@ public class Organization extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
      * @return {@link #address} (An address for the organization.)
      */
     public List<Address> getAddress() { 
       if (this.address == null)
         this.address = new ArrayList<Address>();
       return this.address;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
-     */
-    public Address getAddressFirstRep() { 
-      if (getAddress().isEmpty()) {
-        addAddress();
-      }
-      return getAddress().get(0);
     }
 
     /**
@@ -690,10 +666,6 @@ public class Organization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #address} (An address for the organization.)
-     */
-    // syntactic sugar
     public Address addAddress() { //3
       Address t = new Address();
       if (this.address == null)
@@ -702,7 +674,6 @@ public class Organization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Organization addAddress(Address t) { //3
       if (t == null)
         return this;
@@ -710,6 +681,16 @@ public class Organization extends DomainResource {
         this.address = new ArrayList<Address>();
       this.address.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
+     */
+    public Address getAddressFirstRep() { 
+      if (getAddress().isEmpty()) {
+        addAddress();
+      }
+      return getAddress().get(0);
     }
 
     /**
@@ -766,16 +747,6 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public OrganizationContactComponent getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Organization setContact(List<OrganizationContactComponent> theContact) { 
@@ -792,10 +763,6 @@ public class Organization extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #contact} (Contact for the organization for a certain purpose.)
-     */
-    // syntactic sugar
     public OrganizationContactComponent addContact() { //3
       OrganizationContactComponent t = new OrganizationContactComponent();
       if (this.contact == null)
@@ -804,7 +771,6 @@ public class Organization extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Organization addContact(OrganizationContactComponent t) { //3
       if (t == null)
         return this;
@@ -812,6 +778,16 @@ public class Organization extends DomainResource {
         this.contact = new ArrayList<OrganizationContactComponent>();
       this.contact.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public OrganizationContactComponent getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1006,8 +982,8 @@ public class Organization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, type, name
-          , telecom, address, partOf, contact);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, type
+          , name, telecom, address, partOf, contact);
       }
 
   @Override
@@ -1023,7 +999,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1043,7 +1019,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>partof</b>
@@ -1069,7 +1045,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string", target={} )
+  @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -1089,7 +1065,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string", target={} )
+  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1109,7 +1085,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1129,7 +1105,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1149,7 +1125,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1169,7 +1145,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token", target={} )
+  @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
@@ -1189,7 +1165,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1209,7 +1185,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1229,7 +1205,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1249,7 +1225,7 @@ public class Organization extends DomainResource {
    * Path: <b>Organization.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>

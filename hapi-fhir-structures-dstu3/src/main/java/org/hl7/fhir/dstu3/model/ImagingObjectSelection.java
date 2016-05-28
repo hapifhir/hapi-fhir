@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
@@ -247,16 +248,6 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #series}, creating it if it does not already exist
-         */
-        public SeriesComponent getSeriesFirstRep() { 
-          if (getSeries().isEmpty()) {
-            addSeries();
-          }
-          return getSeries().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public StudyComponent setSeries(List<SeriesComponent> theSeries) { 
@@ -273,10 +264,6 @@ public class ImagingObjectSelection extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #series} (Series identity and locating information of the DICOM SOP instances in the selection.)
-         */
-    // syntactic sugar
         public SeriesComponent addSeries() { //3
           SeriesComponent t = new SeriesComponent();
           if (this.series == null)
@@ -285,7 +272,6 @@ public class ImagingObjectSelection extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public StudyComponent addSeries(SeriesComponent t) { //3
           if (t == null)
             return this;
@@ -293,6 +279,16 @@ public class ImagingObjectSelection extends DomainResource {
             this.series = new ArrayList<SeriesComponent>();
           this.series.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #series}, creating it if it does not already exist
+         */
+        public SeriesComponent getSeriesFirstRep() { 
+          if (getSeries().isEmpty()) {
+            addSeries();
+          }
+          return getSeries().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -571,16 +567,6 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #instance}, creating it if it does not already exist
-         */
-        public InstanceComponent getInstanceFirstRep() { 
-          if (getInstance().isEmpty()) {
-            addInstance();
-          }
-          return getInstance().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public SeriesComponent setInstance(List<InstanceComponent> theInstance) { 
@@ -597,10 +583,6 @@ public class ImagingObjectSelection extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #instance} (Identity and locating information of the selected DICOM SOP instances.)
-         */
-    // syntactic sugar
         public InstanceComponent addInstance() { //3
           InstanceComponent t = new InstanceComponent();
           if (this.instance == null)
@@ -609,7 +591,6 @@ public class ImagingObjectSelection extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public SeriesComponent addInstance(InstanceComponent t) { //3
           if (t == null)
             return this;
@@ -617,6 +598,16 @@ public class ImagingObjectSelection extends DomainResource {
             this.instance = new ArrayList<InstanceComponent>();
           this.instance.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #instance}, creating it if it does not already exist
+         */
+        public InstanceComponent getInstanceFirstRep() { 
+          if (getInstance().isEmpty()) {
+            addInstance();
+          }
+          return getInstance().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -931,16 +922,6 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #frame}, creating it if it does not already exist
-         */
-        public FramesComponent getFrameFirstRep() { 
-          if (getFrame().isEmpty()) {
-            addFrame();
-          }
-          return getFrame().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public InstanceComponent setFrame(List<FramesComponent> theFrame) { 
@@ -957,10 +938,6 @@ public class ImagingObjectSelection extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #frame} (Identity and location information of the frames in the selected instance.)
-         */
-    // syntactic sugar
         public FramesComponent addFrame() { //3
           FramesComponent t = new FramesComponent();
           if (this.frame == null)
@@ -969,7 +946,6 @@ public class ImagingObjectSelection extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public InstanceComponent addFrame(FramesComponent t) { //3
           if (t == null)
             return this;
@@ -977,6 +953,16 @@ public class ImagingObjectSelection extends DomainResource {
             this.frame = new ArrayList<FramesComponent>();
           this.frame.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #frame}, creating it if it does not already exist
+         */
+        public FramesComponent getFrameFirstRep() { 
+          if (getFrame().isEmpty()) {
+            addFrame();
+          }
+          return getFrame().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1100,7 +1086,8 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid, url, frame);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid, url, frame
+          );
       }
 
   public String fhirType() {
@@ -1153,16 +1140,6 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #number}, creating it if it does not already exist
-         */
-        public UnsignedIntType getNumberFirstRep() { 
-          if (getNumber().isEmpty()) {
-            addNumberElement();
-          }
-          return getNumber().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public FramesComponent setNumber(List<UnsignedIntType> theNumber) { 
@@ -1182,7 +1159,6 @@ public class ImagingObjectSelection extends DomainResource {
         /**
          * @return {@link #number} (The specific frame reference within a multi-frame object.)
          */
-    // syntactic sugar
         public UnsignedIntType addNumberElement() {//2 
           UnsignedIntType t = new UnsignedIntType();
           if (this.number == null)
@@ -1703,16 +1679,6 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #study}, creating it if it does not already exist
-     */
-    public StudyComponent getStudyFirstRep() { 
-      if (getStudy().isEmpty()) {
-        addStudy();
-      }
-      return getStudy().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ImagingObjectSelection setStudy(List<StudyComponent> theStudy) { 
@@ -1729,10 +1695,6 @@ public class ImagingObjectSelection extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #study} (Study identity and locating information of the DICOM SOP instances in the selection.)
-     */
-    // syntactic sugar
     public StudyComponent addStudy() { //3
       StudyComponent t = new StudyComponent();
       if (this.study == null)
@@ -1741,7 +1703,6 @@ public class ImagingObjectSelection extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ImagingObjectSelection addStudy(StudyComponent t) { //3
       if (t == null)
         return this;
@@ -1749,6 +1710,16 @@ public class ImagingObjectSelection extends DomainResource {
         this.study = new ArrayList<StudyComponent>();
       this.study.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #study}, creating it if it does not already exist
+     */
+    public StudyComponent getStudyFirstRep() { 
+      if (getStudy().isEmpty()) {
+        addStudy();
+      }
+      return getStudy().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1921,8 +1892,8 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime, author
-          , title, description, study);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime
+          , author, title, description, study);
       }
 
   @Override
@@ -1938,7 +1909,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="uri", target={} )
+  @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="uri" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1958,7 +1929,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.authoringTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date", target={} )
+  @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
   public static final String SP_AUTHORING_TIME = "authoring-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
@@ -1978,7 +1949,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.study.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="uri", target={} )
+  @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="uri" )
   public static final String SP_SELECTED_STUDY = "selected-study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
@@ -1998,7 +1969,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2024,7 +1995,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2050,7 +2021,7 @@ public class ImagingObjectSelection extends DomainResource {
    * Path: <b>ImagingObjectSelection.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token", target={} )
+  @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
