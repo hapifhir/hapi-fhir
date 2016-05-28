@@ -20,7 +20,7 @@
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>2</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -4439,7 +4439,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4482,7 +4481,7 @@
    <Column ss:StyleID="s104" ss:Width="55.5"/>
    <Column ss:StyleID="s104" ss:Width="165"/>
    <Column ss:StyleID="s104" ss:AutoFitWidth="0" ss:Width="233.25"/>
-   <Column ss:StyleID="s104" ss:AutoFitWidth="0" ss:Width="108.75"/>
+   <Column ss:StyleID="s104" ss:AutoFitWidth="0" ss:Width="192"/>
    <Column ss:StyleID="s104" ss:AutoFitWidth="0" ss:Width="246.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s71">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
@@ -4536,7 +4535,7 @@
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.entity</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Either an identifier or a reference, (or both)</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">identifier or reference</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">identifier.exists() or reference.exists()</Data></Cell>
     <Cell ss:StyleID="s111"><Data ss:Type="String">exists(f:identifier) or exists(f:reference)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4546,7 +4545,7 @@
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.agent</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Either a userId or a reference, (or both)</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">userId or reference</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">userId.exists() or reference.exists()</Data></Cell>
     <Cell ss:StyleID="s111"><Data ss:Type="String">exists(f:userId) or exists(f:reference)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4977,6 +4976,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4996,8 +4996,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>1</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

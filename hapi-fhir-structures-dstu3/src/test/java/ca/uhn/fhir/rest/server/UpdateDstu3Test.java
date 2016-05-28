@@ -58,7 +58,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("OODETAILS", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("OODETAILS", oo.getIssue().get(0).getDiagnostics());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
@@ -133,7 +133,7 @@ public class UpdateDstu3Test {
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals(
 				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"3\" does not match URL ID of \"001\"",
-				oo.getIssueFirstRep().getDiagnostics());
+				oo.getIssue().get(0).getDiagnostics());
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));

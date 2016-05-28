@@ -50,8 +50,8 @@
     <sch:rule context="//f:RiskAssessment/f:basis">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
-    <sch:rule context="//f:RiskAssessment/f:prediction/f:probabilityDecimal">
-      <sch:assert test="@value &lt;= 100">ras-2: Must be &lt;= 100</sch:assert>
+    <sch:rule context="//f:RiskAssessment/f:prediction">
+      <sch:assert test="not(f:probabilityDecimal) or f:probabilityDecimal/@value &lt;= 100">ras-2: Must be &lt;= 100</sch:assert>
     </sch:rule>
     <sch:rule context="//f:RiskAssessment/f:prediction/f:probabilityRange">
       <sch:assert test="(not(f:low) or f:low[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org']) and (not(f:high) or f:high[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org'])">ras-1: low and high must be percentages, if present</sch:assert>

@@ -222,6 +222,11 @@ public class JsonCreatorCanonical implements JsonCreator {
     }
     gson.endArray();    
   }
+
+  @Override
+  public void link(String href) {
+    // not used
+  }
        
     
 }

@@ -61,7 +61,7 @@ public class BaseDateTimeTypeDstu3Test {
 			dt.setValueAsString("1974-12-25+10:00");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertEquals("Invalid date/time string: 1974-12-25+10:00", e.getMessage());
+			assertEquals("Invalid date/time string (invalid length): 1974-12-25+10:00", e.getMessage());
 		}
 		try {
 			DateTimeType dt = new DateTimeType();

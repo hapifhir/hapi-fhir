@@ -1,11 +1,17 @@
 package org.hl7.fhir.dstu3.metamodel;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.exceptions.DefinitionException;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.ElementDefinition.PropertyRepresentation;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.dstu3.utils.ProfileUtilities;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
 
 public class Property {
@@ -58,7 +64,7 @@ public class Property {
 			String tail = definition.getPath().substring(definition.getPath().lastIndexOf(".")+1);
       if (tail.endsWith("[x]") && elementName != null && elementName.startsWith(tail.substring(0, tail.length()-3))) {
 				String name = elementName.substring(tail.length()-3);
-				return ParserBase.isPrimitive(lowFirst(name)) ? lowFirst(name) : name;				
+        return isPrimitive(lowFirst(name)) ? lowFirst(name) : name;        
 			} else
         throw new Error("logic error, gettype when types > 1, name mismatch for "+elementName+" on at "+definition.getPath());
     } else if (definition.getType().get(0).getCode() == null) {
@@ -94,7 +100,9 @@ public class Property {
 	}
 
 	public boolean isPrimitive(String name) {
-    return ParserBase.isPrimitive(getType(name));
+	  String code = name;
+    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
+    return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
 	}
 
 	private String lowFirst(String t) {
@@ -134,7 +142,7 @@ public class Property {
   	if (sd == null || sd.getKind() != StructureDefinitionKind.LOGICAL)
   		return false;
   	for (ElementDefinition ed : sd.getSnapshot().getElement()) {
-  		if (ed.getPath().equals(sd.getId()+".value") && ed.getType().size() == 1 && ParserBase.isPrimitive(ed.getType().get(0).getCode())) {
+  		if (ed.getPath().equals(sd.getId()+".value") && ed.getType().size() == 1 && isPrimitive(ed.getType().get(0).getCode())) {
   			canBePrimitive = true;
   			return true;
   		}
@@ -152,6 +160,74 @@ public class Property {
     return false;
   }
 
+
+  protected List<Property> getChildProperties(String elementName, String statedType) throws DefinitionException {
+    ElementDefinition ed = definition;
+    StructureDefinition sd = structure;
+    List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);
+    if (children.isEmpty()) {
+      // ok, find the right definitions
+      String t = null;
+      if (ed.getType().size() == 1)
+        t = ed.getType().get(0).getCode();
+      else if (ed.getType().size() == 0)
+        throw new Error("types == 0, and no children found");
+      else {
+        t = ed.getType().get(0).getCode();
+        boolean all = true;
+        for (TypeRefComponent tr : ed.getType()) {
+          if (!tr.getCode().equals(t)) {
+            all = false;
+            break;
+          }
+        }
+        if (!all) {
+          // ok, it's polymorphic
+          if (ed.hasRepresentation(PropertyRepresentation.TYPEATTR)) {
+            t = statedType;
+            if (t == null && ToolingExtensions.hasExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaulttype"))
+              t = ToolingExtensions.readStringExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaulttype");
+            boolean ok = false;
+            for (TypeRefComponent tr : ed.getType()) 
+              if (tr.getCode().equals(t)) 
+                ok = true;
+             if (!ok)
+               throw new DefinitionException("Type '"+t+"' is not an acceptable type for '"+elementName+"' on property "+definition.getPath());
+            
+          } else {
+            t = elementName.substring(tail(ed.getPath()).length() - 3);
+            if (isPrimitive(lowFirst(t)))
+              t = lowFirst(t);
+          }
+        }
+      }
+      if (!"xhtml".equals(t)) {
+        sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t);
+        if (sd == null)
+          throw new DefinitionException("Unable to find class '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
+        children = ProfileUtilities.getChildMap(sd, sd.getSnapshot().getElement().get(0));
+      }
+    }
+    List<Property> properties = new ArrayList<Property>();
+    for (ElementDefinition child : children) {
+      properties.add(new Property(context, child, sd));
+    }
+    return properties;
+  }
+
+  private String tail(String path) {
+    return path.contains(".") ? path.substring(path.lastIndexOf(".")+1) : path;
+  }
+
+  public Property getChild(String elementName, String childName) throws DefinitionException {
+    List<Property> children = getChildProperties(elementName, null);
+    for (Property p : children) {
+      if (p.getName().equals(childName)) {
+        return p;
+      }
+    }
+    return null;
+  }
 
 
 }

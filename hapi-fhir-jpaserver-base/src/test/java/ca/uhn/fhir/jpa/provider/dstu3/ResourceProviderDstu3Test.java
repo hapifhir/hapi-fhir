@@ -245,8 +245,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			
 			assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
 			
-			Patient p = (Patient) b.getEntryFirstRep().getResource();
-			assertEquals("Jernelöv", p.getNameFirstRep().getFamilyFirstRep().getValue());
+			Patient p = (Patient) b.getEntry().get(0).getResource();
+			assertEquals("Jernelöv", p.getName().get(0).getFamily().get(0).getValue());
 			
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());

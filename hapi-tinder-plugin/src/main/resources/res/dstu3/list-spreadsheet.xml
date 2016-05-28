@@ -4493,7 +4493,7 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">notes</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">List.note</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">List.note.text</Data></Cell>
     <Cell ss:StyleID="s120"/>
    </Row>
    <Row ss:AutoFitHeight="0">

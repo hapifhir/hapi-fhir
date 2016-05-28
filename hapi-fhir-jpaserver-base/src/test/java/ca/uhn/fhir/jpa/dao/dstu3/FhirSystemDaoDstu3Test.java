@@ -87,8 +87,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle response = mySystemDao.transaction(mySrd, bundle);
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals("201 Created", response.getEntryFirstRep().getResponse().getStatus());
-		assertThat(response.getEntryFirstRep().getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
+		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
+		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
 		/*
 		 * Now a second time
@@ -98,8 +98,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		response = mySystemDao.transaction(mySrd, bundle);
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
-		assertThat(response.getEntryFirstRep().getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
+		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
+		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
 	}
 	

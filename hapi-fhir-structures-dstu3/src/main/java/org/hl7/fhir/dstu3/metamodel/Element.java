@@ -16,7 +16,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 /**
- * This class represents the reference model of FHIR
+ * This class represents the underlying reference model of FHIR
  * 
  * A resource is nothing but a set of elements, where every element has a 
  * name, maybe a stated type, maybe an id, and either a value or child elements 
@@ -229,9 +229,10 @@ public class Element extends Base {
 
 	@Override
 	public boolean isPrimitive() {
-		return type != null ? ParserBase.isPrimitive(type) : property.isPrimitive(name);
+		return type != null ? property.isPrimitive(type) : property.isPrimitive(property.getType(name));
 	}
 	
+
 	@Override
 	public boolean hasPrimitiveValue() {
 		return property.isPrimitive(name) || property.IsLogicalAndHasPrimitiveValue(name);

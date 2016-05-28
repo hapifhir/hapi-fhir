@@ -673,32 +673,35 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 		//@formatter:on
 
+		// Was Observation.SP_COMPONENT_CODE_VALUE_QUANTITY
+		String param = Observation.SP_CODE_VALUE_QUANTITY;
+		
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
-			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+			IBundleProvider result = myObservationDao.search(param, val);
 			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
-			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+			IBundleProvider result = myObservationDao.search(param, val);
 			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue(), id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code4");
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
-			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+			IBundleProvider result = myObservationDao.search(param, val);
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code4");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<TokenParam, QuantityParam>(v0, v1);
-			IBundleProvider result = myObservationDao.search(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+			IBundleProvider result = myObservationDao.search(param, val);
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
 		}
 	}

@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadFactory;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -356,9 +357,31 @@ class ModelScanner {
 		} while (current != null);
 
 		for (Class<? extends IBase> next : classes) {
-			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef, forcedOrder);
+			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef);
 		}
 
+		if (forcedOrder != null) {
+			/* 
+			 * Find out how many elements don't match any entry in the list
+			 * for forced order. Those elements come first.
+			 */
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> newOrderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
+			int unknownCount = 0;
+			for (BaseRuntimeDeclaredChildDefinition nextEntry : orderToElementDef.values()) {
+				if (!forcedOrder.containsKey(nextEntry.getElementName())) {
+					newOrderToExtensionDef.put(unknownCount, nextEntry);
+					unknownCount++;
+				}
+			}
+			for (BaseRuntimeDeclaredChildDefinition nextEntry : orderToElementDef.values()) {
+				if (forcedOrder.containsKey(nextEntry.getElementName())) {
+					Integer newOrder = forcedOrder.get(nextEntry.getElementName());
+					newOrderToExtensionDef.put(newOrder + unknownCount, nextEntry);
+				}
+			}
+			orderToElementDef = newOrderToExtensionDef;
+		}
+		
 		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
 		// 0) {
 		// BaseRuntimeDeclaredChildDefinition elementDef =
@@ -390,7 +413,7 @@ class ModelScanner {
 
 	@SuppressWarnings("unchecked")
 	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef, Map<String, Integer> theForcedOrder) {
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
 		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 
 		for (Field next : theClass.getDeclaredFields()) {
@@ -466,15 +489,11 @@ class ModelScanner {
 
 			}
 			
-			if (theForcedOrder != null) {
-				order = theForcedOrder.get(elementName);
-			} else {
-				if (order < 0 && order != Child.ORDER_UNKNOWN) {
-					throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
-				}
-				if (order != Child.ORDER_UNKNOWN) {
-					order = order + baseElementOrder;
-				}
+			if (order < 0 && order != Child.ORDER_UNKNOWN) {
+				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
+			}
+			if (order != Child.ORDER_UNKNOWN) {
+				order = order + baseElementOrder;
 			}
 			// int min = childAnnotation.min();
 			// int max = childAnnotation.max();
@@ -495,7 +514,7 @@ class ModelScanner {
 			}
 
 			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
+				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "' - Already had: " + orderMap.get(order).getElementName());
 			}
 
 			if (elementNames.contains(elementName)) {

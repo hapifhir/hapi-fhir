@@ -118,7 +118,7 @@ public class JsonParser extends ParserBase {
 
 	private void parseChildren(String path, JsonObject object, Element context, boolean hasResourceType) throws DefinitionException, FHIRFormatError {
 		reapComments(object, context);
-		List<Property> properties = getChildProperties(context.getProperty(), context.getName(), null);
+		List<Property> properties = context.getProperty().getChildProperties(context.getName(), null);
 		Set<String> processed = new HashSet<String>();
 		if (hasResourceType)
 			processed.add("resourceType");
@@ -130,15 +130,15 @@ public class JsonParser extends ParserBase {
 			if (property.isChoice()) {
 				for (TypeRefComponent type : property.getDefinition().getType()) {
 					String eName = property.getName().substring(0, property.getName().length()-3) + Utilities.capitalize(type.getCode());
-					if (!ParserBase.isPrimitive(type.getCode()) && object.has(eName)) {
+					if (!isPrimitive(type.getCode()) && object.has(eName)) {
 						parseChildComplex(path, object, context, processed, property, eName);
 						break;
-					} else if (ParserBase.isPrimitive(type.getCode()) && (object.has(eName) || object.has("_"+eName))) {
+					} else if (isPrimitive(type.getCode()) && (object.has(eName) || object.has("_"+eName))) {
 						parseChildPrimitive(object, context, processed, property, path, eName);
 						break;
 					}
 				}
-			} else if (property.isPrimitive(null)) {
+			} else if (property.isPrimitive(property.getType(null))) {
 				parseChildPrimitive(object, context, processed, property, path, property.getName());
 			} else if (object.has(property.getName())) {
 				parseChildComplex(path, object, context, processed, property, property.getName());
@@ -290,13 +290,15 @@ public class JsonParser extends ParserBase {
 	}
 
 
-	protected void prop(String name, String value) throws IOException {
+	protected void prop(String name, String value, String link) throws IOException {
+    json.link(link);
 		if (name != null)
 			json.name(name);
 		json.value(value);
 	}
 
-	protected void open(String name) throws IOException {
+	protected void open(String name, String link) throws IOException {
+	  json.link(link);
 		if (name != null) 
 			json.name(name);
 		json.beginObject();
@@ -306,7 +308,8 @@ public class JsonParser extends ParserBase {
 		json.endObject();
 	}
 
-	protected void openArray(String name) throws IOException {
+	protected void openArray(String name, String link) throws IOException {
+    json.link(link);
 		if (name != null) 
 			json.name(name);
 		json.beginArray();
@@ -326,7 +329,7 @@ public class JsonParser extends ParserBase {
 			json = new JsonCreatorGson(osw);
 		json.setIndent(style == OutputStyle.PRETTY ? "  " : "");
 		json.beginObject();
-		prop("resourceType", e.getType());
+		prop("resourceType", e.getType(), null);
 		Set<String> done = new HashSet<String>();
 		for (Element child : e.getChildren()) {
 			compose(e.getName(), e, done, child);
@@ -335,6 +338,19 @@ public class JsonParser extends ParserBase {
 		json.finish();
 		osw.flush();
 	}
+
+  public void compose(Element e, JsonCreator json) throws Exception {
+    this.json = json;
+    json.beginObject();
+    
+    prop("resourceType", e.getType(), linkResolver == null ? null : linkResolver.resolveType(e.getType()));
+    Set<String> done = new HashSet<String>();
+    for (Element child : e.getChildren()) {
+      compose(e.getName(), e, done, child);
+    }
+    json.endObject();
+    json.finish();
+  }
 
 	private void compose(String path, Element e, Set<String> done, Element child) throws IOException {
 		if (child.getSpecial() == SpecialElement.BUNDLE_ENTRY || !child.getProperty().isList()) {// for specials, ignore the cardinality of the stated type
@@ -360,7 +376,7 @@ public class JsonParser extends ParserBase {
 					complex = true;
 			}
 			if (prim) {
-				openArray(name);
+				openArray(name, linkResolver == null ? null : linkResolver.resolveProperty(list.get(0).getProperty()));
 				for (Element item : list) { 
 					if (item.hasValue())
 						primitiveValue(null, item);
@@ -372,12 +388,12 @@ public class JsonParser extends ParserBase {
 			name = "_"+name;
 		}
 		if (complex) {
-			openArray(name);
+			openArray(name, linkResolver == null ? null : linkResolver.resolveProperty(list.get(0).getProperty()));
 			for (Element item : list) { 
 				if (item.hasChildren()) {
-					open(null);
+					open(null,null);
 					if (item.getProperty().isResource()) {
-						prop("resourceType", item.getType());
+						prop("resourceType", item.getType(), linkResolver == null ? null : linkResolver.resolveType(item.getType()));
 					}
 					Set<String> done = new HashSet<String>();
 					for (Element child : item.getChildren()) {
@@ -392,11 +408,14 @@ public class JsonParser extends ParserBase {
 	}
 
 	private void primitiveValue(String name, Element item) throws IOException {
-		if (name != null)
+		if (name != null) {
+		  if (linkResolver != null)
+		    json.link(linkResolver.resolveProperty(item.getProperty()));
 			json.name(name);
+		}
 		String type = item.getType();
 		if (Utilities.existsInList(type, "boolean"))
-			json.value(item.getValue().equals("true") ? new Boolean(true) : new Boolean(false));
+	  	json.value(item.getValue().trim().equals("true") ? new Boolean(true) : new Boolean(false));
 		else if (Utilities.existsInList(type, "integer", "unsignedInt", "positiveInt"))
 			json.value(new Integer(item.getValue()));
 		else if (Utilities.existsInList(type, "decimal"))
@@ -407,15 +426,15 @@ public class JsonParser extends ParserBase {
 
 	private void compose(String path, Element element) throws IOException {
 		String name = element.getName();
-		if (element.isPrimitive() || ParserBase.isPrimitive(element.getType())) {
+		if (element.isPrimitive() || isPrimitive(element.getType())) {
 			if (element.hasValue())
 				primitiveValue(name, element);
 			name = "_"+name;
 		}
 		if (element.hasChildren()) {
-			open(name);
+			open(name, linkResolver == null ? null : linkResolver.resolveProperty(element.getProperty()));
 			if (element.getProperty().isResource()) {
-				prop("resourceType", element.getType());
+				prop("resourceType", element.getType(), linkResolver == null ? null : linkResolver.resolveType(element.getType()));
 			}
 			Set<String> done = new HashSet<String>();
 			for (Element child : element.getChildren()) {

@@ -10,13 +10,13 @@
   <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-06-11T11:38:00Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
+  <WindowHeight>14010</WindowHeight>
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
@@ -3939,7 +3939,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><Data ss:Type="String">The organization SHALL at least have a name or an id, and possibly more than one</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">identifier or name</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(identifier.count() + name.count()) &gt; 0</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">count(f:identifier | f:name) &gt; 0</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3951,7 +3951,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Organization.address</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">An address of an organization can never be of use 'home'</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">address.where(use = 'home').empty()</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">select(use = 'home').empty()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">count(f:use[@value='home']) = 0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -3961,7 +3961,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Organization.telecom</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">The telecom of an organization can never be of use 'home'</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">telecom.where(use = 'home').empty()</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">select(use = 'home').empty()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">count(f:use[@value='home']) = 0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4412,8 +4412,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

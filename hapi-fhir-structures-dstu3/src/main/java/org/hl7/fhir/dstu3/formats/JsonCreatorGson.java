@@ -75,4 +75,9 @@ public class JsonCreatorGson implements JsonCreator {
     
   }
 
+  @Override
+  public void link(String href) {
+    // not used
+  }
+
 }

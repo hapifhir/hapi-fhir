@@ -44,7 +44,7 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
  * Base definition for all elements in a resource.
  */
-public abstract class Element extends Base implements IBaseHasExtensions {
+public abstract class Element extends Base implements IBaseHasExtensions, IBaseElement {
 
     /**
      * unique id for the element within a resource (for internal references).

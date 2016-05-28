@@ -69,6 +69,7 @@ public interface IXMLWriter {
 	public abstract void element(String namespace, String name, String content)	throws IOException;
 	public abstract void element(String name, String content,	boolean onlyIfNotEmpty) throws IOException;
 	public abstract void element(String name, String content)	throws IOException;
+	public abstract void element(String name) throws IOException;
 
 	public abstract void text(String content) throws IOException;
 	public abstract void text(String content, boolean dontEscape) throws IOException;
@@ -89,5 +90,9 @@ public interface IXMLWriter {
 	 */
 	public abstract void startCommentBlock() throws IOException;
 	public abstract void endCommentBlock() throws IOException;
-
+	public abstract void escapedText(String content) throws IOException;
+	
+	// this is only implemented by an implementation that is producing an xhtml representation, and is able to render elements as hyperlinks 
+  public abstract void link(String href);
+  
 }

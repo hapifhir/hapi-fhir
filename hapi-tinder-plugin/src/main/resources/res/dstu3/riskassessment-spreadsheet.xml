@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>14010</WindowHeight>
-  <WindowWidth>24000</WindowWidth>
+  <WindowHeight>0</WindowHeight>
+  <WindowWidth>0</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>2</ActiveSheet>
@@ -3823,7 +3823,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>5</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3836,10 +3836,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
+     <ActiveRow>12</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -3913,10 +3914,10 @@
       ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Probability percentage</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">RiskAssessment.prediction.probabilityDecimal</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">RiskAssessment.prediction</Data></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Must be &lt;= 100</Data></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">probabilityDecimal &lt;= 100</Data></Cell>
-    <Cell ss:StyleID="s108"><Data ss:Type="String">@value &lt;= 100</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">probability is decimal implies probability.as(decimal) &lt;= 100</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">not(f:probabilityDecimal) or f:probabilityDecimal/@value &lt;= 100</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s107"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4375,8 +4376,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>6</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

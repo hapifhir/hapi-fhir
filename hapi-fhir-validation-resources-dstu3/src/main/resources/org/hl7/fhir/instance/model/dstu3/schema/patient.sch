@@ -51,7 +51,7 @@
       <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: It the Attachment has data, it SHALL have a contentType</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Patient/f:contact">
-      <sch:assert test="f:name or f:telecom or f:address or f:organization">pat-1: SHALL at least contain a contact's details or a reference to an organization</sch:assert>
+      <sch:assert test="exists(f:name) or exists(f:telecom) or exists(f:address) or exists(f:organization)">pat-1: SHALL at least contain a contact's details or a reference to an organization</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Patient/f:contact/f:name/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>

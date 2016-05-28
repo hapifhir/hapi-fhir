@@ -1,0 +1,2 @@
+cp /Users/t3903uhn/workspace/fhirbuild/trunk//build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/validation/InstanceValidator.java /Users/t3903uhn/git/hapi-fhir//hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/validation/InstanceValidator.java
+cp /Users/t3903uhn/workspace/fhirbuild/trunk//build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/validation/IResourceValidator.java  /Users/t3903uhn/git/hapi-fhir//hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/validation/IResourceValidator.java

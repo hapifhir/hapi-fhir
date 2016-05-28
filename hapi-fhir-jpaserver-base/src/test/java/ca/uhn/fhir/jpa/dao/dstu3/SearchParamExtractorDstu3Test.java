@@ -35,7 +35,7 @@ public class SearchParamExtractorDstu3Test {
 	@Test
 	public void testParamWithOrInPath() {
 		Observation obs = new Observation();
-		obs.getCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
+		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 		
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(ourCtx, ourValidationSupport);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);

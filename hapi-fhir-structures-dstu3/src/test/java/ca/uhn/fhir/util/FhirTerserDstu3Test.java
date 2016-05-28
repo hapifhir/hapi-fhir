@@ -199,8 +199,8 @@ public class FhirTerserDstu3Test {
 
 		assertEquals(3, element.getAllValues().size());
 		assertSame(p, element.getAllValues().get(0));
-		assertSame(p.getLinkFirstRep(), element.getAllValues().get(1));
-		assertSame(p.getLinkFirstRep().getTypeElement(), element.getAllValues().get(2));
+		assertSame(p.getLink().get(0), element.getAllValues().get(1));
+		assertSame(p.getLink().get(0).getTypeElement(), element.getAllValues().get(2));
 
 		assertEquals(3, containingElementPath.getAllValues().size());
 		// assertEquals(0, containingElementPath.getAllValues().get(0).size());

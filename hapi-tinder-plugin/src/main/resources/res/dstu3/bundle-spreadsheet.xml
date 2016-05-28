@@ -10,14 +10,14 @@
   <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-09-14T23:59:23Z</LastSaved>
-  <Version>16.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>6900</WindowHeight>
-  <WindowWidth>2910</WindowWidth>
+  <WindowHeight>4980</WindowHeight>
+  <WindowWidth>7470</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>2</ActiveSheet>
@@ -3942,8 +3942,8 @@
    <Column ss:StyleID="s101" ss:Width="55.5"/>
    <Column ss:StyleID="s101" ss:Width="165"/>
    <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="204.75"/>
-   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="198.75"/>
-   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="188.25"/>
+   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="297"/>
+   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="266.25"/>
    <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="260.25"/>
    <Column ss:Index="11" ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="216.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
@@ -4023,8 +4023,8 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle.entry</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">must be a resource unless there's a request or response</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">resource or request or response</Data></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">f:resource or f:request or f:response</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">resource.exists() or request.exists() or response.exists()</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">exists(f:resource) or exists(f:request) or exists(f:response)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s105"><Data ss:Type="Number">6</Data><NamedCell
@@ -4033,7 +4033,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle.entry</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">The fullUrl element must be present when a resource is present, and not present otherwise</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">fullUrl.empty() xor resource</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">fullUrl.empty() xor resource.exists()</Data></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">(not(exists(f:fullUrl)) and not(exists(f:resource))) or (exists(f:fullUrl) and exists(f:resource))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="180">
@@ -4043,7 +4043,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.where(fullUrl).select(fullUrl+resource.meta.versionId).distinct()</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.where(fullUrl).select(fullUrl&amp;resource.meta.versionId).isDistinct()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">count(for $entry in f:entry[f:resource] return $entry[count(parent::f:Bundle/f:entry[f:fullUrl/@value=$entry/f:fullUrl/@value and ((not(f:resource/*/f:meta/f:versionId/@value) and not($entry/f:resource/*/f:meta/f:versionId/@value)) or f:resource/*/f:meta/f:versionId/@value=$entry/f:resource/*/f:meta/f:versionId/@value)])!=1])=0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4395,8 +4395,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>7</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

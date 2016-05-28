@@ -100,10 +100,11 @@ public class FhirInstanceValidatorDstu3Test {
 			ids.add(next.getId());
 
 			ourLog.info("Validating {}", next.getId());
+			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-			assertThat("Failed to validate " + i.getFullUrl(), errors, empty());
+			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
 		}
 
 		ourLog.info("Validated the following:\n{}", ids);
@@ -353,6 +354,7 @@ public class FhirInstanceValidatorDstu3Test {
 		
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals("This cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 	
@@ -503,9 +505,20 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+//	@Ignore 
+	// TODO: reenable
 	public void testValidateResourceWithDefaultValuesetBadCode() {
-		String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
+		//@formatter:off
+		String input = 
+			"<Observation xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <status value=\"notvalidcode\"/>\n" + 
+			"   <code>\n" +
+			"      <text value=\"No code here!\"/>\n" + 
+			"   </code>\n" + 
+			"</Observation>";
+		//@formatter:on
 		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnAll(output);
 		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set", output.getMessages().get(0).getMessage());
 	}
 

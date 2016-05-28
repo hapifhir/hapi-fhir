@@ -3691,7 +3691,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><Data ss:Type="String">A parameter must have only one of (value, resource, part)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">value xor resource</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(part.exists() and value.empty() and resource.empty()) or (part.empty() and (value.exists() xor resource.exists()))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">exists(f:value) or exists(f:resource) and not(exists(f:value) and exists(f:resource))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
