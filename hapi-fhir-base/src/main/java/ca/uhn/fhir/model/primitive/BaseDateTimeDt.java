@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -202,7 +203,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Returns the TimeZone associated with this dateTime's value. May return <code>null</code> if no timezone was supplied.
+	 * Returns the TimeZone associated with this dateTime's value. May return <code>null</code> if no timezone was
+	 * supplied.
 	 */
 	public TimeZone getTimeZone() {
 		return myTimeZone;
@@ -304,18 +306,30 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 				Date retVal;
 				if (hasMillis) {
+					String value = theValue;
+					
+					/*
+					 * If we have more than 3 digits of precision after the decimal point, we
+					 * only parse the first 3 since Java Dates don't support more than that and
+					 * FastDateFormat gets confused
+					 */
+					int offsetIndex = getOffsetIndex(theValue);
+					if (offsetIndex >= 24) {
+						value = theValue.substring(0, 23) + theValue.substring(offsetIndex);
+					}
+					
 					try {
-						if (hasOffset(theValue)) {
-							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
-						} else if (theValue.endsWith("Z")) {
-							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
+						if (hasOffset(value)) {
+							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(value);
+						} else if (value.endsWith("Z")) {
+							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(value);
 						} else {
-							retVal = ourYearMonthDayTimeMilliFormat.parse(theValue);
+							retVal = ourYearMonthDayTimeMilliFormat.parse(value);
 						}
 					} catch (ParseException p2) {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
-					setTimeZone(theValue, hasMillis);
+					setTimeZone(theValue);
 					setPrecision(TemporalPrecisionEnum.MILLI);
 				} else {
 					try {
@@ -330,7 +344,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
 
-					setTimeZone(theValue, hasMillis);
+					setTimeZone(theValue);
 					setPrecision(TemporalPrecisionEnum.SECOND);
 				}
 
@@ -356,18 +370,34 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		updateStringValue();
 	}
 
-	private BaseDateTimeDt setTimeZone(String theValueString, boolean hasMillis) {
-		clearTimeZone();
-		int timeZoneStart = 19;
-		if (hasMillis)
-			timeZoneStart += 4;
-		if (theValueString.endsWith("Z")) {
-			setTimeZoneZulu(true);
-		} else if (theValueString.indexOf("GMT", timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone(theValueString.substring(timeZoneStart)));
-		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone("GMT" + theValueString.substring(timeZoneStart)));
+	private int getOffsetIndex(String theValueString) {
+		int plusIndex = theValueString.indexOf('+', 19);
+		int minusIndex = theValueString.indexOf('-', 19);
+		int zIndex = theValueString.indexOf('Z', 19);
+		int retVal = Math.max(Math.max(plusIndex, minusIndex), zIndex);
+		if (retVal == -1) {
+			return -1;
 		}
+		if ((retVal - 2) != (plusIndex + minusIndex + zIndex)) {
+			// This means we have more than one separator
+			throw new DataFormatException("Invalid FHIR date/time string: " + theValueString);
+		}
+		return retVal;
+	}
+
+	private BaseDateTimeDt setTimeZone(String theValueString) {
+		clearTimeZone();
+		
+		int sepIndex = getOffsetIndex(theValueString);
+		if (sepIndex != -1) {
+			if (theValueString.charAt(sepIndex) == 'Z') {
+				setTimeZoneZulu(true);
+			} else {
+				String offsetString = theValueString.substring(sepIndex);
+				setTimeZone(TimeZone.getTimeZone("GMT" + offsetString));
+			}
+		}
+
 		return this;
 	}
 
@@ -384,7 +414,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the value for this type using the given Java Date object as the time, and using the default precision for this datatype, as well as the local timezone as determined by the local operating
+	 * Sets the value for this type using the given Java Date object as the time, and using the default precision for
+	 * this datatype, as well as the local timezone as determined by the local operating
 	 * system. Both of these properties may be modified in subsequent calls if neccesary.
 	 */
 	@Override
@@ -394,7 +425,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as well as the local timezone as determined by the local operating system. Both of
+	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as
+	 * well as the local timezone as determined by the local operating system. Both of
 	 * these properties may be modified in subsequent calls if neccesary.
 	 * 
 	 * @param theValue
@@ -418,8 +450,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	/**
 	 * Returns a human readable version of this date/time using the system local format.
 	 * <p>
-	 * <b>Note on time zones:</b> This method renders the value using the time zone that is contained within the value. For example, if this date object contains the value "2012-01-05T12:00:00-08:00",
-	 * the human display will be rendered as "12:00:00" even if the application is being executed on a system in a different time zone. If this behaviour is not what you want, use
+	 * <b>Note on time zones:</b> This method renders the value using the time zone that is contained within the value.
+	 * For example, if this date object contains the value "2012-01-05T12:00:00-08:00",
+	 * the human display will be rendered as "12:00:00" even if the application is being executed on a system in a
+	 * different time zone. If this behaviour is not what you want, use
 	 * {@link #toHumanDisplayLocalTimezone()} instead.
 	 * </p>
 	 */
@@ -441,7 +475,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Returns a human readable version of this date/time using the system local format, converted to the local timezone if neccesary.
+	 * Returns a human readable version of this date/time using the system local format, converted to the local timezone
+	 * if neccesary.
 	 * 
 	 * @see #toHumanDisplay() for a method which does not convert the time to the local timezone before rendering it.
 	 */

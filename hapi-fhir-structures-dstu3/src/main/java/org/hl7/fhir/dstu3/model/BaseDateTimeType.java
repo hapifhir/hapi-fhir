@@ -19,6 +19,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
+import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseDateTimeType extends PrimitiveType<Date> {
@@ -332,12 +333,12 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 			} else if (theValue.length() >= 16) { // date and time with possible time zone
 				char timeSeparator = theValue.charAt(10);
 				if (timeSeparator != 'T') {
-					throw new DataFormatException("Invalid date/time string: " + theValue);
+					throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
 				}
 				
 				int firstColonIndex = theValue.indexOf(':');
 				if (firstColonIndex == -1) {
-					throw new DataFormatException("Invalid date/time string: " + theValue);
+					throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
 				}
 				
 				boolean hasSeconds = theValue.length() > firstColonIndex+3 ? theValue.charAt(firstColonIndex+3) == ':' : false; 
@@ -355,18 +356,30 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 
 				Date retVal;
 				if (hasMillis) {
+					
+					/*
+					 * If we have more than 3 digits of precision after the decimal point, we
+					 * only parse the first 3 since Java Dates don't support more than that and
+					 * FastDateFormat gets confused
+					 */
+					String value = theValue;
+					int offsetIndex = getOffsetIndex(theValue);
+					if (offsetIndex >= 24) {
+						value = theValue.substring(0, 23) + theValue.substring(offsetIndex);
+					}
+					
 					try {
-						if (hasOffset(theValue)) {
-							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
-						} else if (theValue.endsWith("Z")) {
-							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
+						if (hasOffset(value)) {
+							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(value);
+						} else if (value.endsWith("Z")) {
+							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(value);
 						} else {
-							retVal = ourYearMonthDayTimeMilliFormat.parse(theValue);
+							retVal = ourYearMonthDayTimeMilliFormat.parse(value);
 						}
 					} catch (ParseException p2) {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
-					setTimeZone(theValue, hasMillis);
+					setTimeZone(theValue);
 					setPrecision(TemporalPrecisionEnum.MILLI);
 				} else if (hasSeconds) {
 					try {
@@ -381,7 +394,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
 
-					setTimeZone(theValue, hasMillis);
+					setTimeZone(theValue);
 					setPrecision(TemporalPrecisionEnum.SECOND);
 				} else {
 					try {
@@ -396,7 +409,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue, p2);
 					}
 
-					setTimeZone(theValue, hasMillis);
+					setTimeZone(theValue);
 					setPrecision(TemporalPrecisionEnum.MINUTE);
 				}
 
@@ -444,18 +457,35 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 		updateStringValue();
 	}
 
-	private void setTimeZone(String theValueString, boolean hasMillis) {
-		clearTimeZone();
-		int timeZoneStart = 19;
-		if (hasMillis)
-			timeZoneStart += 4;
-		if (theValueString.endsWith("Z")) {
-			setTimeZoneZulu(true);
-		} else if (theValueString.indexOf("GMT", timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone(theValueString.substring(timeZoneStart)));
-		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone("GMT" + theValueString.substring(timeZoneStart)));
+	private int getOffsetIndex(String theValueString) {
+		int plusIndex = theValueString.indexOf('+', 19);
+		int minusIndex = theValueString.indexOf('-', 19);
+		int zIndex = theValueString.indexOf('Z');
+		int retVal = Math.max(Math.max(plusIndex, minusIndex), zIndex);
+		if (retVal == -1) {
+			return -1;
 		}
+		if ((retVal - 2) != (plusIndex + minusIndex + zIndex)) {
+			// This means we have more than one separator
+			throw new DataFormatException("Invalid FHIR date/time string: " + theValueString);
+		}
+		return retVal;
+	}
+
+	private BaseDateTimeType setTimeZone(String theValueString) {
+		clearTimeZone();
+		
+		int sepIndex = getOffsetIndex(theValueString);
+		if (sepIndex != -1) {
+			if (theValueString.charAt(sepIndex) == 'Z') {
+				setTimeZoneZulu(true);
+			} else {
+				String offsetString = theValueString.substring(sepIndex);
+				setTimeZone(TimeZone.getTimeZone("GMT" + offsetString));
+			}
+		}
+
+		return this;
 	}
 
 	public void setTimeZone(TimeZone theTimeZone) {

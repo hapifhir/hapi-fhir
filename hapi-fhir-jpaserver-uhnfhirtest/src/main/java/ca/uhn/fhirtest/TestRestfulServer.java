@@ -124,7 +124,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
+			if ("TDL3".equals(fhirVersionParam.trim().toUpperCase())) {
 				myAppCtx.register(TdlDstu3Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL3;
 			} else {

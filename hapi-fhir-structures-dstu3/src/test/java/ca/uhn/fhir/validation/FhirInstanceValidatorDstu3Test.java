@@ -333,6 +333,30 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+	public void testValidateRawXmlWithMissingRootNamespace() {
+		//@formatter:off
+		String input = ""
+				+ "<Patient>"
+				+ "    <text>"
+				+ "        <status value=\"generated\"/>"
+				+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
+				+ "    </text>"
+				+ "    <name>"
+				+ "        <use value=\"official\"/>"
+				+ "        <family value=\"Doe\"/>"
+				+ "        <given value=\"John\"/>"
+				+ "    </name>"
+				+ "    <gender value=\"male\"/>"
+				+ "    <birthDate value=\"1974-12-25\"/>"
+				+ "</Patient>";
+		//@formatter:on
+		
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+	}
+	
+	@Test
 	public void testValidateRawJsonResourceBadAttributes() {
 		//@formatter:off
 		String input = 
