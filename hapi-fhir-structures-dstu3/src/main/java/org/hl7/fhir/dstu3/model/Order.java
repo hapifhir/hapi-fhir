@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -867,7 +867,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
+  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -887,7 +887,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token" )
+  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -907,7 +907,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference", target={Group.class, Device.class, Patient.class, Substance.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -933,7 +933,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
+  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -959,7 +959,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1011,7 +1011,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
+  @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date", target={} )
   public static final String SP_WHEN = "when";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when</b>
@@ -1031,7 +1031,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference", target={Practitioner.class, Organization.class, Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -1057,7 +1057,7 @@ public class Order extends DomainResource {
    * Path: <b>Order.when.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
+  @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token", target={} )
   public static final String SP_WHENCODE = "when_code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>when_code</b>

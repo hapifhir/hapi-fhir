@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -951,7 +951,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="SupplyDelivery.identifier", description="External identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="SupplyDelivery.identifier", description="External identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -971,7 +971,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -997,7 +997,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1023,7 +1023,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
@@ -1049,7 +1049,7 @@ public class SupplyDelivery extends DomainResource {
    * Path: <b>SupplyDelivery.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token" )
+  @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

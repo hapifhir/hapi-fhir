@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -66,6 +66,14 @@ public class MedicationStatement extends DomainResource {
          */
         INTENDED, 
         /**
+         * Actions implied by the statement have been permanently halted, before all of them occurred.
+         */
+        STOPPED, 
+        /**
+         * Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         */
+        ONHOLD, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -80,6 +88,10 @@ public class MedicationStatement extends DomainResource {
           return ENTEREDINERROR;
         if ("intended".equals(codeString))
           return INTENDED;
+        if ("stopped".equals(codeString))
+          return STOPPED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -91,6 +103,8 @@ public class MedicationStatement extends DomainResource {
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case INTENDED: return "intended";
+            case STOPPED: return "stopped";
+            case ONHOLD: return "on-hold";
             default: return "?";
           }
         }
@@ -100,6 +114,8 @@ public class MedicationStatement extends DomainResource {
             case COMPLETED: return "http://hl7.org/fhir/medication-statement-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/medication-statement-status";
             case INTENDED: return "http://hl7.org/fhir/medication-statement-status";
+            case STOPPED: return "http://hl7.org/fhir/medication-statement-status";
+            case ONHOLD: return "http://hl7.org/fhir/medication-statement-status";
             default: return "?";
           }
         }
@@ -109,6 +125,8 @@ public class MedicationStatement extends DomainResource {
             case COMPLETED: return "The medication is no longer being taken.";
             case ENTEREDINERROR: return "The statement was entered in error.";
             case INTENDED: return "The medication may be taken at some time in the future.";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred.";
+            case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             default: return "?";
           }
         }
@@ -118,6 +136,8 @@ public class MedicationStatement extends DomainResource {
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case INTENDED: return "Intended";
+            case STOPPED: return "Stopped";
+            case ONHOLD: return "On Hold";
             default: return "?";
           }
         }
@@ -136,6 +156,10 @@ public class MedicationStatement extends DomainResource {
           return MedicationStatementStatus.ENTEREDINERROR;
         if ("intended".equals(codeString))
           return MedicationStatementStatus.INTENDED;
+        if ("stopped".equals(codeString))
+          return MedicationStatementStatus.STOPPED;
+        if ("on-hold".equals(codeString))
+          return MedicationStatementStatus.ONHOLD;
         throw new IllegalArgumentException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
         public Enumeration<MedicationStatementStatus> fromType(Base code) throws FHIRException {
@@ -152,6 +176,10 @@ public class MedicationStatement extends DomainResource {
           return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.ENTEREDINERROR);
         if ("intended".equals(codeString))
           return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.INTENDED);
+        if ("stopped".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.STOPPED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.ONHOLD);
         throw new FHIRException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
     public String toCode(MedicationStatementStatus code) {
@@ -163,6 +191,10 @@ public class MedicationStatement extends DomainResource {
         return "entered-in-error";
       if (code == MedicationStatementStatus.INTENDED)
         return "intended";
+      if (code == MedicationStatementStatus.STOPPED)
+        return "stopped";
+      if (code == MedicationStatementStatus.ONHOLD)
+        return "on-hold";
       return "?";
       }
     public String toSystem(MedicationStatementStatus code) {
@@ -896,7 +928,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
      * A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | completed | entered-in-error | intended", formalDefinition="A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed." )
+    @Description(shortDefinition="active | completed | entered-in-error | intended | stopped | on-hold", formalDefinition="A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed." )
     protected Enumeration<MedicationStatementStatus> status;
 
     /**
@@ -2045,7 +2077,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2065,7 +2097,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date" )
+  @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date", target={} )
   public static final String SP_EFFECTIVE = "effective";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>effective</b>
@@ -2085,7 +2117,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2105,7 +2137,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2131,7 +2163,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference" )
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2157,7 +2189,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2183,7 +2215,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token" )
+  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

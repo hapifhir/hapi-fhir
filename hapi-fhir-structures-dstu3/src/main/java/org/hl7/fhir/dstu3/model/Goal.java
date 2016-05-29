@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1469,7 +1469,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token" )
+  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1489,7 +1489,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1515,7 +1515,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
+  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Group.class, Organization.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1541,7 +1541,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.targetDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date" )
+  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date", target={} )
   public static final String SP_TARGETDATE = "targetdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetdate</b>
@@ -1561,7 +1561,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )
+  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1581,7 +1581,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token" )
+  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

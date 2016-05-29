@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -5313,7 +5313,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date" )
+  @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -5333,7 +5333,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token" )
+  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -5353,7 +5353,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string" )
+  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -5373,7 +5373,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token" )
+  @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -5393,7 +5393,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string" )
+  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -5413,7 +5413,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string" )
+  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -5433,7 +5433,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.experimental</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token" )
+  @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
@@ -5453,7 +5453,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token" )
+  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -5473,7 +5473,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri" )
+  @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -5493,7 +5493,7 @@ public class StructureMap extends BaseConformance {
    * Path: <b>StructureMap.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token" )
+  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

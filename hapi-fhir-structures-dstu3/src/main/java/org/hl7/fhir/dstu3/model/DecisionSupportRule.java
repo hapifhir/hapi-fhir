@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -519,7 +519,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DecisionSupportRule.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
+  @SearchParamDefinition(name="identifier", path="DecisionSupportRule.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -539,7 +539,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="DecisionSupportRule.moduleMetadata.topic", description="Topics associated with the module", type="token" )
+  @SearchParamDefinition(name="topic", path="DecisionSupportRule.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
   public static final String SP_TOPIC = "topic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>topic</b>
@@ -559,7 +559,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DecisionSupportRule.moduleMetadata.description", description="Text search against the description", type="string" )
+  @SearchParamDefinition(name="description", path="DecisionSupportRule.moduleMetadata.description", description="Text search against the description", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -579,7 +579,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="DecisionSupportRule.moduleMetadata.title", description="Text search against the title", type="string" )
+  @SearchParamDefinition(name="title", path="DecisionSupportRule.moduleMetadata.title", description="Text search against the title", type="string", target={} )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -599,7 +599,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="DecisionSupportRule.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
+  @SearchParamDefinition(name="version", path="DecisionSupportRule.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -619,7 +619,7 @@ public class DecisionSupportRule extends DomainResource {
    * Path: <b>DecisionSupportRule.moduleMetadata.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DecisionSupportRule.moduleMetadata.status", description="Status of the module", type="token" )
+  @SearchParamDefinition(name="status", path="DecisionSupportRule.moduleMetadata.status", description="Status of the module", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

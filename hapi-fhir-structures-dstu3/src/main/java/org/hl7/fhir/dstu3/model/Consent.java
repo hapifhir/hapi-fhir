@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2696,7 +2696,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Consent.identifier", description="The identity of the consent", type="token" )
+  @SearchParamDefinition(name="identifier", path="Consent.identifier", description="The identity of the consent", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2716,7 +2716,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.agent.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Consent.agent.actor", description="Agent to the consent", type="reference" )
+  @SearchParamDefinition(name="agent", path="Consent.agent.actor", description="Agent to the consent", type="reference", target={Practitioner.class, Group.class, Organization.class, Device.class, Patient.class, RelatedPerson.class} )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -2742,7 +2742,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.applies</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="applies", path="Consent.applies", description="The effective date/time range of the consent", type="date" )
+  @SearchParamDefinition(name="applies", path="Consent.applies", description="The effective date/time range of the consent", type="date", target={} )
   public static final String SP_APPLIES = "applies";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>applies</b>
@@ -2762,7 +2762,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Consent.patient", description="The identity of the patient of the consent", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Consent.patient", description="The identity of the patient of the consent", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2788,7 +2788,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.authority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authority", path="Consent.authority", description="The authority of the consent", type="reference" )
+  @SearchParamDefinition(name="authority", path="Consent.authority", description="The authority of the consent", type="reference", target={Organization.class} )
   public static final String SP_AUTHORITY = "authority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authority</b>
@@ -2814,7 +2814,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.domain</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="domain", path="Consent.domain", description="The domain of the consent", type="reference" )
+  @SearchParamDefinition(name="domain", path="Consent.domain", description="The domain of the consent", type="reference", target={Location.class} )
   public static final String SP_DOMAIN = "domain";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>domain</b>
@@ -2866,7 +2866,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.issued</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issued", path="Consent.issued", description="The date/time the consent was issued", type="date" )
+  @SearchParamDefinition(name="issued", path="Consent.issued", description="The date/time the consent was issued", type="date", target={} )
   public static final String SP_ISSUED = "issued";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issued</b>
@@ -2886,7 +2886,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Consent.type", description="The type of the consent", type="token" )
+  @SearchParamDefinition(name="type", path="Consent.type", description="The type of the consent", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2906,7 +2906,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Consent.status", description="The status of the consent", type="token" )
+  @SearchParamDefinition(name="status", path="Consent.status", description="The status of the consent", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

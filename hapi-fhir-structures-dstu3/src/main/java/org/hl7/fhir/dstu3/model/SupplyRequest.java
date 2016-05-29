@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1093,7 +1093,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date" )
+  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1113,7 +1113,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1133,7 +1133,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token" )
+  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token", target={} )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -1153,7 +1153,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1179,7 +1179,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference" )
+  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference", target={Organization.class} )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
@@ -1205,7 +1205,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference" )
+  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1231,7 +1231,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token" )
+  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

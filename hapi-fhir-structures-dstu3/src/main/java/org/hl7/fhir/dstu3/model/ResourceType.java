@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 public enum ResourceType {
     Account,
@@ -58,8 +58,7 @@ public enum ResourceType {
     Group,
     GuidanceResponse,
     HealthcareService,
-    ImagingExcerpt,
-    ImagingObjectSelection,
+    ImagingManifest,
     ImagingStudy,
     Immunization,
     ImmunizationRecommendation,
@@ -230,10 +229,8 @@ public enum ResourceType {
       return "guidanceresponse";
     case HealthcareService:
       return "healthcareservice";
-    case ImagingExcerpt:
-      return "imagingexcerpt";
-    case ImagingObjectSelection:
-      return "imagingobjectselection";
+    case ImagingManifest:
+      return "imagingmanifest";
     case ImagingStudy:
       return "imagingstudy";
     case Immunization:
@@ -466,10 +463,8 @@ public enum ResourceType {
       return GuidanceResponse;
     if ("HealthcareService".equals(code))
       return HealthcareService;
-    if ("ImagingExcerpt".equals(code))
-      return ImagingExcerpt;
-    if ("ImagingObjectSelection".equals(code))
-      return ImagingObjectSelection;
+    if ("ImagingManifest".equals(code))
+      return ImagingManifest;
     if ("ImagingStudy".equals(code))
       return ImagingStudy;
     if ("Immunization".equals(code))

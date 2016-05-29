@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2041,7 +2041,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.item.event.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token", target={} )
   public static final String SP_ITEM_PAST_STATUS = "item-past-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-past-status</b>
@@ -2061,7 +2061,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="Identifiers assigned to this order", type="token" )
+  @SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="Identifiers assigned to this order", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2081,7 +2081,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.item.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="Location of requested test (if applicable)", type="token" )
+  @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="Location of requested test (if applicable)", type="token", target={} )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -2101,7 +2101,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.item.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token" )
+  @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2121,7 +2121,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.dateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
+  @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date", target={} )
   public static final String SP_EVENT_DATE = "event-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-date</b>
@@ -2141,7 +2141,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite", compositeOf={"event-status", "event-date"} )
+  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite", compositeOf={"event-status", "event-date"}, target={} )
   public static final String SP_EVENT_STATUS_DATE = "event-status-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-status-date</b>
@@ -2161,7 +2161,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference", target={Group.class, Device.class, Patient.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2187,7 +2187,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2213,7 +2213,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference", target={Practitioner.class, Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2239,7 +2239,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.item.event.dateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
+  @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date", target={} )
   public static final String SP_ITEM_DATE = "item-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-date</b>
@@ -2259,7 +2259,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite", compositeOf={"item-past-status", "item-date"} )
+  @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite", compositeOf={"item-past-status", "item-date"}, target={} )
   public static final String SP_ITEM_STATUS_DATE = "item-status-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-status-date</b>
@@ -2279,7 +2279,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token", target={} )
   public static final String SP_EVENT_STATUS = "event-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-status</b>
@@ -2299,7 +2299,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.item.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token", target={} )
   public static final String SP_ITEM_STATUS = "item-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-status</b>
@@ -2319,7 +2319,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
+  @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2345,7 +2345,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ORDERER = "orderer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
@@ -2371,7 +2371,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

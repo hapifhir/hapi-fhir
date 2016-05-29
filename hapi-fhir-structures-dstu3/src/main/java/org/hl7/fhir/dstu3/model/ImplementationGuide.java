@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3726,7 +3726,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ImplementationGuide.date", description="The implementation guide publication date", type="date" )
+  @SearchParamDefinition(name="date", path="ImplementationGuide.date", description="The implementation guide publication date", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3746,7 +3746,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.dependency.uri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependency", path="ImplementationGuide.dependency.uri", description="Where to find dependency", type="uri" )
+  @SearchParamDefinition(name="dependency", path="ImplementationGuide.dependency.uri", description="Where to find dependency", type="uri", target={} )
   public static final String SP_DEPENDENCY = "dependency";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependency</b>
@@ -3792,7 +3792,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ImplementationGuide.name", description="Name of the implementation guide", type="string" )
+  @SearchParamDefinition(name="name", path="ImplementationGuide.name", description="Name of the implementation guide", type="string", target={} )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3812,7 +3812,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ImplementationGuide.useContext", description="A use context assigned to the structure", type="token" )
+  @SearchParamDefinition(name="context", path="ImplementationGuide.useContext", description="A use context assigned to the structure", type="token", target={} )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3832,7 +3832,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ImplementationGuide.publisher", description="Name of the publisher of the implementation guide", type="string" )
+  @SearchParamDefinition(name="publisher", path="ImplementationGuide.publisher", description="Name of the publisher of the implementation guide", type="string", target={} )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3852,7 +3852,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ImplementationGuide.description", description="Text search in the description of the implementation guide", type="string" )
+  @SearchParamDefinition(name="description", path="ImplementationGuide.description", description="Text search in the description of the implementation guide", type="string", target={} )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -3872,7 +3872,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.experimental</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="ImplementationGuide.experimental", description="If for testing purposes, not real usage", type="token" )
+  @SearchParamDefinition(name="experimental", path="ImplementationGuide.experimental", description="If for testing purposes, not real usage", type="token", target={} )
   public static final String SP_EXPERIMENTAL = "experimental";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
@@ -3892,7 +3892,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ImplementationGuide.version", description="The version identifier of the implementation guide", type="token" )
+  @SearchParamDefinition(name="version", path="ImplementationGuide.version", description="The version identifier of the implementation guide", type="token", target={} )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3912,7 +3912,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ImplementationGuide.url", description="Absolute URL used to reference this Implementation Guide", type="uri" )
+  @SearchParamDefinition(name="url", path="ImplementationGuide.url", description="Absolute URL used to reference this Implementation Guide", type="uri", target={} )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -3932,7 +3932,7 @@ public class ImplementationGuide extends DomainResource {
    * Path: <b>ImplementationGuide.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ImplementationGuide.status", description="The current status of the implementation guide", type="token" )
+  @SearchParamDefinition(name="status", path="ImplementationGuide.status", description="The current status of the implementation guide", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

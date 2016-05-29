@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -7734,7 +7734,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Claim.identifier", description="The primary identifier of the financial resource", type="token" )
+  @SearchParamDefinition(name="identifier", path="Claim.identifier", description="The primary identifier of the financial resource", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -7754,7 +7754,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientidentifier", path="Claim.patient.as(Identifier)", description="Patient receiving the services", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patientidentifier", path="Claim.patient.as(Identifier)", description="Patient receiving the services", type="token", target={}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientidentifier</b>
@@ -7774,7 +7774,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="Claim.organization.as(Identifier)", description="The reference to the providing organization", type="token" )
+  @SearchParamDefinition(name="organizationidentifier", path="Claim.organization.as(Identifier)", description="The reference to the providing organization", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -7794,7 +7794,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="use", path="Claim.use", description="The kind of financial resource", type="token" )
+  @SearchParamDefinition(name="use", path="Claim.use", description="The kind of financial resource", type="token", target={} )
   public static final String SP_USE = "use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>use</b>
@@ -7814,7 +7814,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Claim.created", description="The creation date for the Claim", type="date" )
+  @SearchParamDefinition(name="created", path="Claim.created", description="The creation date for the Claim", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -7834,7 +7834,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.patientReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientreference", path="Claim.patient.as(Reference)", description="Patient receiving the services", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patientreference", path="Claim.patient.as(Reference)", description="Patient receiving the services", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientreference</b>
@@ -7860,7 +7860,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="Claim.provider.as(Reference)", description="Provider responsible for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="providerreference", path="Claim.provider.as(Reference)", description="Provider responsible for the Claim", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -7886,7 +7886,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="Claim.organization.as(Reference)", description="The reference to the providing organization", type="reference" )
+  @SearchParamDefinition(name="organizationreference", path="Claim.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -7912,7 +7912,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="Claim.priority", description="Processing priority requested", type="token" )
+  @SearchParamDefinition(name="priority", path="Claim.priority", description="Processing priority requested", type="token", target={} )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -7932,7 +7932,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="Claim.provider.as(Identifier)", description="Provider responsible for the Claim", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="provideridentifier", path="Claim.provider.as(Identifier)", description="Provider responsible for the Claim", type="token", target={}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>
@@ -7952,7 +7952,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetidentifier", path="Claim.target.as(Identifier)", description="The target payor/insurer for the Claim", type="token" )
+  @SearchParamDefinition(name="targetidentifier", path="Claim.target.as(Identifier)", description="The target payor/insurer for the Claim", type="token", target={} )
   public static final String SP_TARGETIDENTIFIER = "targetidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetidentifier</b>
@@ -7972,7 +7972,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityreference", path="Claim.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference" )
+  @SearchParamDefinition(name="facilityreference", path="Claim.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class} )
   public static final String SP_FACILITYREFERENCE = "facilityreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityreference</b>
@@ -7998,7 +7998,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.targetReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetreference", path="Claim.target.as(Reference)", description="The target payor/insurer for the Claim", type="reference" )
+  @SearchParamDefinition(name="targetreference", path="Claim.target.as(Reference)", description="The target payor/insurer for the Claim", type="reference", target={Organization.class} )
   public static final String SP_TARGETREFERENCE = "targetreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetreference</b>
@@ -8024,7 +8024,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.facilityIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityidentifier", path="Claim.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token" )
+  @SearchParamDefinition(name="facilityidentifier", path="Claim.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token", target={} )
   public static final String SP_FACILITYIDENTIFIER = "facilityidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityidentifier</b>

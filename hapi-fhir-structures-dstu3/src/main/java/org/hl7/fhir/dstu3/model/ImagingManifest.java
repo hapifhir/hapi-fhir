@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -43,10 +43,10 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
- * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
+ * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
  */
-@ResourceDef(name="ImagingObjectSelection", profile="http://hl7.org/fhir/Profile/ImagingObjectSelection")
-public class ImagingObjectSelection extends DomainResource {
+@ResourceDef(name="ImagingManifest", profile="http://hl7.org/fhir/Profile/ImagingManifest")
+public class ImagingManifest extends DomainResource {
 
     @Block()
     public static class StudyComponent extends BackboneElement implements IBaseBackboneElement {
@@ -58,16 +58,9 @@ public class ImagingObjectSelection extends DomainResource {
         protected OidType uid;
 
         /**
-         * WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.
-         */
-        @Child(name = "url", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Retrieve study URL", formalDefinition="WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection." )
-        protected UriType url;
-
-        /**
          * Reference to the Imaging Study in FHIR form.
          */
-        @Child(name = "imagingStudy", type = {ImagingStudy.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "imagingStudy", type = {ImagingStudy.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Reference to ImagingStudy", formalDefinition="Reference to the Imaging Study in FHIR form." )
         protected Reference imagingStudy;
 
@@ -77,13 +70,20 @@ public class ImagingObjectSelection extends DomainResource {
         protected ImagingStudy imagingStudyTarget;
 
         /**
+         * Methods of accessing using DICOM web technologies.
+         */
+        @Child(name = "baseLocation", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Dicom web access", formalDefinition="Methods of accessing using DICOM web technologies." )
+        protected List<StudyBaseLocationComponent> baseLocation;
+
+        /**
          * Series identity and locating information of the DICOM SOP instances in the selection.
          */
         @Child(name = "series", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Series identity of the selected instances", formalDefinition="Series identity and locating information of the DICOM SOP instances in the selection." )
         protected List<SeriesComponent> series;
 
-        private static final long serialVersionUID = 341246743L;
+        private static final long serialVersionUID = 1076481516L;
 
     /**
      * Constructor
@@ -146,55 +146,6 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return {@link #url} (WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StudyComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        /**
-         * @param value {@link #url} (WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public StudyComponent setUrlElement(UriType value) { 
-          this.url = value;
-          return this;
-        }
-
-        /**
-         * @return WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.
-         */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.
-         */
-        public StudyComponent setUrl(String value) { 
-          if (Utilities.noString(value))
-            this.url = null;
-          else {
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
-          }
-          return this;
-        }
-
-        /**
          * @return {@link #imagingStudy} (Reference to the Imaging Study in FHIR form.)
          */
         public Reference getImagingStudy() { 
@@ -236,6 +187,59 @@ public class ImagingObjectSelection extends DomainResource {
         public StudyComponent setImagingStudyTarget(ImagingStudy value) { 
           this.imagingStudyTarget = value;
           return this;
+        }
+
+        /**
+         * @return {@link #baseLocation} (Methods of accessing using DICOM web technologies.)
+         */
+        public List<StudyBaseLocationComponent> getBaseLocation() { 
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
+          return this.baseLocation;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public StudyComponent setBaseLocation(List<StudyBaseLocationComponent> theBaseLocation) { 
+          this.baseLocation = theBaseLocation;
+          return this;
+        }
+
+        public boolean hasBaseLocation() { 
+          if (this.baseLocation == null)
+            return false;
+          for (StudyBaseLocationComponent item : this.baseLocation)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public StudyBaseLocationComponent addBaseLocation() { //3
+          StudyBaseLocationComponent t = new StudyBaseLocationComponent();
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
+          this.baseLocation.add(t);
+          return t;
+        }
+
+        public StudyComponent addBaseLocation(StudyBaseLocationComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
+          this.baseLocation.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #baseLocation}, creating it if it does not already exist
+         */
+        public StudyBaseLocationComponent getBaseLocationFirstRep() { 
+          if (getBaseLocation().isEmpty()) {
+            addBaseLocation();
+          }
+          return getBaseLocation().get(0);
         }
 
         /**
@@ -294,8 +298,8 @@ public class ImagingObjectSelection extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("uid", "oid", "Study instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("url", "uri", "WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy)", "Reference to the Imaging Study in FHIR form.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
+          childrenList.add(new Property("baseLocation", "", "Methods of accessing using DICOM web technologies.", 0, java.lang.Integer.MAX_VALUE, baseLocation));
           childrenList.add(new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series));
         }
 
@@ -303,8 +307,8 @@ public class ImagingObjectSelection extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case -814900911: /*imagingStudy*/ return this.imagingStudy == null ? new Base[0] : new Base[] {this.imagingStudy}; // Reference
+        case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // StudyBaseLocationComponent
         case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // SeriesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -317,11 +321,11 @@ public class ImagingObjectSelection extends DomainResource {
         case 115792: // uid
           this.uid = castToOid(value); // OidType
           break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
-          break;
         case -814900911: // imagingStudy
           this.imagingStudy = castToReference(value); // Reference
+          break;
+        case 231778726: // baseLocation
+          this.getBaseLocation().add((StudyBaseLocationComponent) value); // StudyBaseLocationComponent
           break;
         case -905838985: // series
           this.getSeries().add((SeriesComponent) value); // SeriesComponent
@@ -335,10 +339,10 @@ public class ImagingObjectSelection extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
         else if (name.equals("imagingStudy"))
           this.imagingStudy = castToReference(value); // Reference
+        else if (name.equals("baseLocation"))
+          this.getBaseLocation().add((StudyBaseLocationComponent) value);
         else if (name.equals("series"))
           this.getSeries().add((SeriesComponent) value);
         else
@@ -349,8 +353,8 @@ public class ImagingObjectSelection extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
         case -814900911:  return getImagingStudy(); // Reference
+        case 231778726:  return addBaseLocation(); // StudyBaseLocationComponent
         case -905838985:  return addSeries(); // SeriesComponent
         default: return super.makeProperty(hash, name);
         }
@@ -360,14 +364,14 @@ public class ImagingObjectSelection extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
-        }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
         }
         else if (name.equals("imagingStudy")) {
           this.imagingStudy = new Reference();
           return this.imagingStudy;
+        }
+        else if (name.equals("baseLocation")) {
+          return addBaseLocation();
         }
         else if (name.equals("series")) {
           return addSeries();
@@ -380,8 +384,12 @@ public class ImagingObjectSelection extends DomainResource {
         StudyComponent dst = new StudyComponent();
         copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
-        dst.url = url == null ? null : url.copy();
         dst.imagingStudy = imagingStudy == null ? null : imagingStudy.copy();
+        if (baseLocation != null) {
+          dst.baseLocation = new ArrayList<StudyBaseLocationComponent>();
+          for (StudyBaseLocationComponent i : baseLocation)
+            dst.baseLocation.add(i.copy());
+        };
         if (series != null) {
           dst.series = new ArrayList<SeriesComponent>();
           for (SeriesComponent i : series)
@@ -397,7 +405,7 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof StudyComponent))
           return false;
         StudyComponent o = (StudyComponent) other;
-        return compareDeep(uid, o.uid, true) && compareDeep(url, o.url, true) && compareDeep(imagingStudy, o.imagingStudy, true)
+        return compareDeep(uid, o.uid, true) && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(baseLocation, o.baseLocation, true)
            && compareDeep(series, o.series, true);
       }
 
@@ -408,16 +416,221 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof StudyComponent))
           return false;
         StudyComponent o = (StudyComponent) other;
-        return compareValues(uid, o.uid, true) && compareValues(url, o.url, true);
+        return compareValues(uid, o.uid, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, url, imagingStudy, series
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, baseLocation
+          , series);
       }
 
   public String fhirType() {
-    return "ImagingObjectSelection.study";
+    return "ImagingManifest.study";
+
+  }
+
+  }
+
+    @Block()
+    public static class StudyBaseLocationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Access type for DICOM web.
+         */
+        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="WADO-RS | WADO-URI | IID | WADO-WS", formalDefinition="Access type for DICOM web." )
+        protected Coding type;
+
+        /**
+         * The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Retrieve study URL", formalDefinition="The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol." )
+        protected UriType url;
+
+        private static final long serialVersionUID = 1242620527L;
+
+    /**
+     * Constructor
+     */
+      public StudyBaseLocationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public StudyBaseLocationComponent(Coding type, UriType url) {
+        super();
+        this.type = type;
+        this.url = url;
+      }
+
+        /**
+         * @return {@link #type} (Access type for DICOM web.)
+         */
+        public Coding getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StudyBaseLocationComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Coding(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Access type for DICOM web.)
+         */
+        public StudyBaseLocationComponent setType(Coding value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #url} (The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public UriType getUrlElement() { 
+          if (this.url == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StudyBaseLocationComponent.url");
+            else if (Configuration.doAutoCreate())
+              this.url = new UriType(); // bb
+          return this.url;
+        }
+
+        public boolean hasUrlElement() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        public boolean hasUrl() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        /**
+         * @param value {@link #url} (The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public StudyBaseLocationComponent setUrlElement(UriType value) { 
+          this.url = value;
+          return this;
+        }
+
+        /**
+         * @return The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        public String getUrl() { 
+          return this.url == null ? null : this.url.getValue();
+        }
+
+        /**
+         * @param value The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        public StudyBaseLocationComponent setUrl(String value) { 
+            if (this.url == null)
+              this.url = new UriType();
+            this.url.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("type", "Coding", "Access type for DICOM web.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("url", "uri", "The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.", 0, java.lang.Integer.MAX_VALUE, url));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public StudyBaseLocationComponent copy() {
+        StudyBaseLocationComponent dst = new StudyBaseLocationComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.url = url == null ? null : url.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof StudyBaseLocationComponent))
+          return false;
+        StudyBaseLocationComponent o = (StudyBaseLocationComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(url, o.url, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof StudyBaseLocationComponent))
+          return false;
+        StudyBaseLocationComponent o = (StudyBaseLocationComponent) other;
+        return compareValues(url, o.url, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
+      }
+
+  public String fhirType() {
+    return "ImagingManifest.study.baseLocation";
 
   }
 
@@ -433,11 +646,11 @@ public class ImagingObjectSelection extends DomainResource {
         protected OidType uid;
 
         /**
-         * WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.
+         * Methods of accessing using DICOM web technologies.
          */
-        @Child(name = "url", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Retrieve series URL", formalDefinition="WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection." )
-        protected UriType url;
+        @Child(name = "baseLocation", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Dicom web access", formalDefinition="Methods of accessing using DICOM web technologies." )
+        protected List<SeriesBaseLocationComponent> baseLocation;
 
         /**
          * Identity and locating information of the selected DICOM SOP instances.
@@ -446,7 +659,7 @@ public class ImagingObjectSelection extends DomainResource {
         @Description(shortDefinition="The selected instance", formalDefinition="Identity and locating information of the selected DICOM SOP instances." )
         protected List<InstanceComponent> instance;
 
-        private static final long serialVersionUID = 229247770L;
+        private static final long serialVersionUID = -1085739489L;
 
     /**
      * Constructor
@@ -509,52 +722,56 @@ public class ImagingObjectSelection extends DomainResource {
         }
 
         /**
-         * @return {@link #url} (WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return {@link #baseLocation} (Methods of accessing using DICOM web technologies.)
          */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SeriesComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
+        public List<SeriesBaseLocationComponent> getBaseLocation() { 
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
+          return this.baseLocation;
         }
 
         /**
-         * @param value {@link #url} (WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SeriesComponent setUrlElement(UriType value) { 
-          this.url = value;
+        public SeriesComponent setBaseLocation(List<SeriesBaseLocationComponent> theBaseLocation) { 
+          this.baseLocation = theBaseLocation;
+          return this;
+        }
+
+        public boolean hasBaseLocation() { 
+          if (this.baseLocation == null)
+            return false;
+          for (SeriesBaseLocationComponent item : this.baseLocation)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public SeriesBaseLocationComponent addBaseLocation() { //3
+          SeriesBaseLocationComponent t = new SeriesBaseLocationComponent();
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
+          this.baseLocation.add(t);
+          return t;
+        }
+
+        public SeriesComponent addBaseLocation(SeriesBaseLocationComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.baseLocation == null)
+            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
+          this.baseLocation.add(t);
           return this;
         }
 
         /**
-         * @return WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.
+         * @return The first repetition of repeating field {@link #baseLocation}, creating it if it does not already exist
          */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.
-         */
-        public SeriesComponent setUrl(String value) { 
-          if (Utilities.noString(value))
-            this.url = null;
-          else {
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
+        public SeriesBaseLocationComponent getBaseLocationFirstRep() { 
+          if (getBaseLocation().isEmpty()) {
+            addBaseLocation();
           }
-          return this;
+          return getBaseLocation().get(0);
         }
 
         /**
@@ -613,7 +830,7 @@ public class ImagingObjectSelection extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("uid", "oid", "Series instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("url", "uri", "WADO-RS URL to retrieve the series. Note that this URL retrieves all SOP instances of the series not only those in the selection.", 0, java.lang.Integer.MAX_VALUE, url));
+          childrenList.add(new Property("baseLocation", "", "Methods of accessing using DICOM web technologies.", 0, java.lang.Integer.MAX_VALUE, baseLocation));
           childrenList.add(new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
@@ -621,7 +838,7 @@ public class ImagingObjectSelection extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // SeriesBaseLocationComponent
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // InstanceComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -634,8 +851,8 @@ public class ImagingObjectSelection extends DomainResource {
         case 115792: // uid
           this.uid = castToOid(value); // OidType
           break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
+        case 231778726: // baseLocation
+          this.getBaseLocation().add((SeriesBaseLocationComponent) value); // SeriesBaseLocationComponent
           break;
         case 555127957: // instance
           this.getInstance().add((InstanceComponent) value); // InstanceComponent
@@ -649,8 +866,8 @@ public class ImagingObjectSelection extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
+        else if (name.equals("baseLocation"))
+          this.getBaseLocation().add((SeriesBaseLocationComponent) value);
         else if (name.equals("instance"))
           this.getInstance().add((InstanceComponent) value);
         else
@@ -661,7 +878,7 @@ public class ImagingObjectSelection extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 231778726:  return addBaseLocation(); // SeriesBaseLocationComponent
         case 555127957:  return addInstance(); // InstanceComponent
         default: return super.makeProperty(hash, name);
         }
@@ -671,10 +888,10 @@ public class ImagingObjectSelection extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
         }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+        else if (name.equals("baseLocation")) {
+          return addBaseLocation();
         }
         else if (name.equals("instance")) {
           return addInstance();
@@ -687,7 +904,11 @@ public class ImagingObjectSelection extends DomainResource {
         SeriesComponent dst = new SeriesComponent();
         copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
-        dst.url = url == null ? null : url.copy();
+        if (baseLocation != null) {
+          dst.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
+          for (SeriesBaseLocationComponent i : baseLocation)
+            dst.baseLocation.add(i.copy());
+        };
         if (instance != null) {
           dst.instance = new ArrayList<InstanceComponent>();
           for (InstanceComponent i : instance)
@@ -703,7 +924,7 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof SeriesComponent))
           return false;
         SeriesComponent o = (SeriesComponent) other;
-        return compareDeep(uid, o.uid, true) && compareDeep(url, o.url, true) && compareDeep(instance, o.instance, true)
+        return compareDeep(uid, o.uid, true) && compareDeep(baseLocation, o.baseLocation, true) && compareDeep(instance, o.instance, true)
           ;
       }
 
@@ -714,15 +935,221 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof SeriesComponent))
           return false;
         SeriesComponent o = (SeriesComponent) other;
-        return compareValues(uid, o.uid, true) && compareValues(url, o.url, true);
+        return compareValues(uid, o.uid, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, url, instance);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, baseLocation, instance
+          );
       }
 
   public String fhirType() {
-    return "ImagingObjectSelection.study.series";
+    return "ImagingManifest.study.series";
+
+  }
+
+  }
+
+    @Block()
+    public static class SeriesBaseLocationComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Access type for DICOM web.
+         */
+        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="WADO-RS | WADO-URI | IID | WADO-WS", formalDefinition="Access type for DICOM web." )
+        protected Coding type;
+
+        /**
+         * The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Retrieve study URL", formalDefinition="The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol." )
+        protected UriType url;
+
+        private static final long serialVersionUID = 1242620527L;
+
+    /**
+     * Constructor
+     */
+      public SeriesBaseLocationComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SeriesBaseLocationComponent(Coding type, UriType url) {
+        super();
+        this.type = type;
+        this.url = url;
+      }
+
+        /**
+         * @return {@link #type} (Access type for DICOM web.)
+         */
+        public Coding getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SeriesBaseLocationComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Coding(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Access type for DICOM web.)
+         */
+        public SeriesBaseLocationComponent setType(Coding value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #url} (The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public UriType getUrlElement() { 
+          if (this.url == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SeriesBaseLocationComponent.url");
+            else if (Configuration.doAutoCreate())
+              this.url = new UriType(); // bb
+          return this.url;
+        }
+
+        public boolean hasUrlElement() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        public boolean hasUrl() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        /**
+         * @param value {@link #url} (The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public SeriesBaseLocationComponent setUrlElement(UriType value) { 
+          this.url = value;
+          return this;
+        }
+
+        /**
+         * @return The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        public String getUrl() { 
+          return this.url == null ? null : this.url.getValue();
+        }
+
+        /**
+         * @param value The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.
+         */
+        public SeriesBaseLocationComponent setUrl(String value) { 
+            if (this.url == null)
+              this.url = new UriType();
+            this.url.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("type", "Coding", "Access type for DICOM web.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("url", "uri", "The source system root URL / base URL, from which all content can be retrieved using the specified DICOM protocol.", 0, java.lang.Integer.MAX_VALUE, url));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCoding(value); // Coding
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); // Coding
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SeriesBaseLocationComponent copy() {
+        SeriesBaseLocationComponent dst = new SeriesBaseLocationComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.url = url == null ? null : url.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SeriesBaseLocationComponent))
+          return false;
+        SeriesBaseLocationComponent o = (SeriesBaseLocationComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(url, o.url, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SeriesBaseLocationComponent))
+          return false;
+        SeriesBaseLocationComponent o = (SeriesBaseLocationComponent) other;
+        return compareValues(url, o.url, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
+      }
+
+  public String fhirType() {
+    return "ImagingManifest.study.series.baseLocation";
 
   }
 
@@ -744,21 +1171,7 @@ public class ImagingObjectSelection extends DomainResource {
         @Description(shortDefinition="Selected instance UID", formalDefinition="SOP Instance UID of the selected instance." )
         protected OidType uid;
 
-        /**
-         * WADO-RS URL to retrieve the DICOM SOP Instance.
-         */
-        @Child(name = "url", type = {UriType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Retrieve instance URL", formalDefinition="WADO-RS URL to retrieve the DICOM SOP Instance." )
-        protected UriType url;
-
-        /**
-         * Identity and location information of the frames in the selected instance.
-         */
-        @Child(name = "frame", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="The frame set", formalDefinition="Identity and location information of the frames in the selected instance." )
-        protected List<FramesComponent> frame;
-
-        private static final long serialVersionUID = -1609681911L;
+        private static final long serialVersionUID = -885780004L;
 
     /**
      * Constructor
@@ -770,11 +1183,10 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * Constructor
      */
-      public InstanceComponent(OidType sopClass, OidType uid, UriType url) {
+      public InstanceComponent(OidType sopClass, OidType uid) {
         super();
         this.sopClass = sopClass;
         this.uid = uid;
-        this.url = url;
       }
 
         /**
@@ -867,110 +1279,10 @@ public class ImagingObjectSelection extends DomainResource {
           return this;
         }
 
-        /**
-         * @return {@link #url} (WADO-RS URL to retrieve the DICOM SOP Instance.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create InstanceComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        /**
-         * @param value {@link #url} (WADO-RS URL to retrieve the DICOM SOP Instance.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public InstanceComponent setUrlElement(UriType value) { 
-          this.url = value;
-          return this;
-        }
-
-        /**
-         * @return WADO-RS URL to retrieve the DICOM SOP Instance.
-         */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value WADO-RS URL to retrieve the DICOM SOP Instance.
-         */
-        public InstanceComponent setUrl(String value) { 
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #frame} (Identity and location information of the frames in the selected instance.)
-         */
-        public List<FramesComponent> getFrame() { 
-          if (this.frame == null)
-            this.frame = new ArrayList<FramesComponent>();
-          return this.frame;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public InstanceComponent setFrame(List<FramesComponent> theFrame) { 
-          this.frame = theFrame;
-          return this;
-        }
-
-        public boolean hasFrame() { 
-          if (this.frame == null)
-            return false;
-          for (FramesComponent item : this.frame)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public FramesComponent addFrame() { //3
-          FramesComponent t = new FramesComponent();
-          if (this.frame == null)
-            this.frame = new ArrayList<FramesComponent>();
-          this.frame.add(t);
-          return t;
-        }
-
-        public InstanceComponent addFrame(FramesComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.frame == null)
-            this.frame = new ArrayList<FramesComponent>();
-          this.frame.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #frame}, creating it if it does not already exist
-         */
-        public FramesComponent getFrameFirstRep() { 
-          if (getFrame().isEmpty()) {
-            addFrame();
-          }
-          return getFrame().get(0);
-        }
-
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("sopClass", "oid", "SOP class UID of the selected instance.", 0, java.lang.Integer.MAX_VALUE, sopClass));
           childrenList.add(new Property("uid", "oid", "SOP Instance UID of the selected instance.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("url", "uri", "WADO-RS URL to retrieve the DICOM SOP Instance.", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("frame", "", "Identity and location information of the frames in the selected instance.", 0, java.lang.Integer.MAX_VALUE, frame));
         }
 
       @Override
@@ -978,8 +1290,6 @@ public class ImagingObjectSelection extends DomainResource {
         switch (hash) {
         case 1560041540: /*sopClass*/ return this.sopClass == null ? new Base[0] : new Base[] {this.sopClass}; // OidType
         case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        case 97692013: /*frame*/ return this.frame == null ? new Base[0] : this.frame.toArray(new Base[this.frame.size()]); // FramesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -994,12 +1304,6 @@ public class ImagingObjectSelection extends DomainResource {
         case 115792: // uid
           this.uid = castToOid(value); // OidType
           break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
-          break;
-        case 97692013: // frame
-          this.getFrame().add((FramesComponent) value); // FramesComponent
-          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1011,10 +1315,6 @@ public class ImagingObjectSelection extends DomainResource {
           this.sopClass = castToOid(value); // OidType
         else if (name.equals("uid"))
           this.uid = castToOid(value); // OidType
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
-        else if (name.equals("frame"))
-          this.getFrame().add((FramesComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -1024,8 +1324,6 @@ public class ImagingObjectSelection extends DomainResource {
         switch (hash) {
         case 1560041540: throw new FHIRException("Cannot make property sopClass as it is not a complex type"); // OidType
         case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 97692013:  return addFrame(); // FramesComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -1034,16 +1332,10 @@ public class ImagingObjectSelection extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("sopClass")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.sopClass");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.sopClass");
         }
         else if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
-        }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
-        }
-        else if (name.equals("frame")) {
-          return addFrame();
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
         }
         else
           return super.addChild(name);
@@ -1054,12 +1346,6 @@ public class ImagingObjectSelection extends DomainResource {
         copyValues(dst);
         dst.sopClass = sopClass == null ? null : sopClass.copy();
         dst.uid = uid == null ? null : uid.copy();
-        dst.url = url == null ? null : url.copy();
-        if (frame != null) {
-          dst.frame = new ArrayList<FramesComponent>();
-          for (FramesComponent i : frame)
-            dst.frame.add(i.copy());
-        };
         return dst;
       }
 
@@ -1070,8 +1356,7 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof InstanceComponent))
           return false;
         InstanceComponent o = (InstanceComponent) other;
-        return compareDeep(sopClass, o.sopClass, true) && compareDeep(uid, o.uid, true) && compareDeep(url, o.url, true)
-           && compareDeep(frame, o.frame, true);
+        return compareDeep(sopClass, o.sopClass, true) && compareDeep(uid, o.uid, true);
       }
 
       @Override
@@ -1081,282 +1366,36 @@ public class ImagingObjectSelection extends DomainResource {
         if (!(other instanceof InstanceComponent))
           return false;
         InstanceComponent o = (InstanceComponent) other;
-        return compareValues(sopClass, o.sopClass, true) && compareValues(uid, o.uid, true) && compareValues(url, o.url, true)
-          ;
+        return compareValues(sopClass, o.sopClass, true) && compareValues(uid, o.uid, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid, url, frame
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sopClass, uid);
       }
 
   public String fhirType() {
-    return "ImagingObjectSelection.study.series.instance";
-
-  }
-
-  }
-
-    @Block()
-    public static class FramesComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The specific frame reference within a multi-frame object.
-         */
-        @Child(name = "number", type = {UnsignedIntType.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Frame reference number", formalDefinition="The specific frame reference within a multi-frame object." )
-        protected List<UnsignedIntType> number;
-
-        /**
-         * WADO-RS URL to retrieve the DICOM frames.
-         */
-        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Retrieve frame URL", formalDefinition="WADO-RS URL to retrieve the DICOM frames." )
-        protected UriType url;
-
-        private static final long serialVersionUID = 236505178L;
-
-    /**
-     * Constructor
-     */
-      public FramesComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public FramesComponent(UriType url) {
-        super();
-        this.url = url;
-      }
-
-        /**
-         * @return {@link #number} (The specific frame reference within a multi-frame object.)
-         */
-        public List<UnsignedIntType> getNumber() { 
-          if (this.number == null)
-            this.number = new ArrayList<UnsignedIntType>();
-          return this.number;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public FramesComponent setNumber(List<UnsignedIntType> theNumber) { 
-          this.number = theNumber;
-          return this;
-        }
-
-        public boolean hasNumber() { 
-          if (this.number == null)
-            return false;
-          for (UnsignedIntType item : this.number)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #number} (The specific frame reference within a multi-frame object.)
-         */
-        public UnsignedIntType addNumberElement() {//2 
-          UnsignedIntType t = new UnsignedIntType();
-          if (this.number == null)
-            this.number = new ArrayList<UnsignedIntType>();
-          this.number.add(t);
-          return t;
-        }
-
-        /**
-         * @param value {@link #number} (The specific frame reference within a multi-frame object.)
-         */
-        public FramesComponent addNumber(int value) { //1
-          UnsignedIntType t = new UnsignedIntType();
-          t.setValue(value);
-          if (this.number == null)
-            this.number = new ArrayList<UnsignedIntType>();
-          this.number.add(t);
-          return this;
-        }
-
-        /**
-         * @param value {@link #number} (The specific frame reference within a multi-frame object.)
-         */
-        public boolean hasNumber(int value) { 
-          if (this.number == null)
-            return false;
-          for (UnsignedIntType v : this.number)
-            if (v.equals(value)) // unsignedInt
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #url} (WADO-RS URL to retrieve the DICOM frames.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create FramesComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        /**
-         * @param value {@link #url} (WADO-RS URL to retrieve the DICOM frames.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public FramesComponent setUrlElement(UriType value) { 
-          this.url = value;
-          return this;
-        }
-
-        /**
-         * @return WADO-RS URL to retrieve the DICOM frames.
-         */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value WADO-RS URL to retrieve the DICOM frames.
-         */
-        public FramesComponent setUrl(String value) { 
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("number", "unsignedInt", "The specific frame reference within a multi-frame object.", 0, java.lang.Integer.MAX_VALUE, number));
-          childrenList.add(new Property("url", "uri", "WADO-RS URL to retrieve the DICOM frames.", 0, java.lang.Integer.MAX_VALUE, url));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -1034364087: /*number*/ return this.number == null ? new Base[0] : this.number.toArray(new Base[this.number.size()]); // UnsignedIntType
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -1034364087: // number
-          this.getNumber().add(castToUnsignedInt(value)); // UnsignedIntType
-          break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("number"))
-          this.getNumber().add(castToUnsignedInt(value));
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -1034364087: throw new FHIRException("Cannot make property number as it is not a complex type"); // UnsignedIntType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("number")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.number");
-        }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public FramesComponent copy() {
-        FramesComponent dst = new FramesComponent();
-        copyValues(dst);
-        if (number != null) {
-          dst.number = new ArrayList<UnsignedIntType>();
-          for (UnsignedIntType i : number)
-            dst.number.add(i.copy());
-        };
-        dst.url = url == null ? null : url.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof FramesComponent))
-          return false;
-        FramesComponent o = (FramesComponent) other;
-        return compareDeep(number, o.number, true) && compareDeep(url, o.url, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof FramesComponent))
-          return false;
-        FramesComponent o = (FramesComponent) other;
-        return compareValues(number, o.number, true) && compareValues(url, o.url, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(number, url);
-      }
-
-  public String fhirType() {
-    return "ImagingObjectSelection.study.series.instance.frame";
+    return "ImagingManifest.study.series.instance";
 
   }
 
   }
 
     /**
-     * Instance UID of the DICOM KOS SOP Instances represented in this resource.
+     * Unique identifier of the DICOM Key Object Selection (KOS) representation.
      */
     @Child(name = "uid", type = {OidType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Instance UID", formalDefinition="Instance UID of the DICOM KOS SOP Instances represented in this resource." )
+    @Description(shortDefinition="Instance UID", formalDefinition="Unique identifier of the DICOM Key Object Selection (KOS) representation." )
     protected OidType uid;
 
     /**
-     * A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.
+     * A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.
      */
     @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Patient of the selected objects", formalDefinition="A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection." )
+    @Description(shortDefinition="Patient of the selected objects", formalDefinition="A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.)
+     * The actual object that is the target of the reference (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
     protected Patient patientTarget;
 
@@ -1368,14 +1407,14 @@ public class ImagingObjectSelection extends DomainResource {
     protected DateTimeType authoringTime;
 
     /**
-     * Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.
+     * Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.
      */
     @Child(name = "author", type = {Practitioner.class, Device.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Author (human or machine)", formalDefinition="Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion." )
+    @Description(shortDefinition="Author (human or machine)", formalDefinition="Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion." )
     protected Reference author;
 
     /**
-     * The actual object that is the target of the reference (Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
+     * The actual object that is the target of the reference (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
     protected Resource authorTarget;
 
@@ -1387,10 +1426,10 @@ public class ImagingObjectSelection extends DomainResource {
     protected CodeableConcept title;
 
     /**
-     * Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
+     * Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
      */
     @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Description text", formalDefinition="Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection." )
+    @Description(shortDefinition="Description text", formalDefinition="Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection." )
     protected StringType description;
 
     /**
@@ -1405,14 +1444,14 @@ public class ImagingObjectSelection extends DomainResource {
   /**
    * Constructor
    */
-    public ImagingObjectSelection() {
+    public ImagingManifest() {
       super();
     }
 
   /**
    * Constructor
    */
-    public ImagingObjectSelection(OidType uid, Reference patient, CodeableConcept title) {
+    public ImagingManifest(OidType uid, Reference patient, CodeableConcept title) {
       super();
       this.uid = uid;
       this.patient = patient;
@@ -1420,12 +1459,12 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @return {@link #uid} (Instance UID of the DICOM KOS SOP Instances represented in this resource.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+     * @return {@link #uid} (Unique identifier of the DICOM Key Object Selection (KOS) representation.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
      */
     public OidType getUidElement() { 
       if (this.uid == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.uid");
+          throw new Error("Attempt to auto-create ImagingManifest.uid");
         else if (Configuration.doAutoCreate())
           this.uid = new OidType(); // bb
       return this.uid;
@@ -1440,24 +1479,24 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @param value {@link #uid} (Instance UID of the DICOM KOS SOP Instances represented in this resource.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+     * @param value {@link #uid} (Unique identifier of the DICOM Key Object Selection (KOS) representation.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
      */
-    public ImagingObjectSelection setUidElement(OidType value) { 
+    public ImagingManifest setUidElement(OidType value) { 
       this.uid = value;
       return this;
     }
 
     /**
-     * @return Instance UID of the DICOM KOS SOP Instances represented in this resource.
+     * @return Unique identifier of the DICOM Key Object Selection (KOS) representation.
      */
     public String getUid() { 
       return this.uid == null ? null : this.uid.getValue();
     }
 
     /**
-     * @param value Instance UID of the DICOM KOS SOP Instances represented in this resource.
+     * @param value Unique identifier of the DICOM Key Object Selection (KOS) representation.
      */
-    public ImagingObjectSelection setUid(String value) { 
+    public ImagingManifest setUid(String value) { 
         if (this.uid == null)
           this.uid = new OidType();
         this.uid.setValue(value);
@@ -1465,12 +1504,12 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.)
+     * @return {@link #patient} (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.patient");
+          throw new Error("Attempt to auto-create ImagingManifest.patient");
         else if (Configuration.doAutoCreate())
           this.patient = new Reference(); // cc
       return this.patient;
@@ -1481,29 +1520,29 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.)
+     * @param value {@link #patient} (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
-    public ImagingObjectSelection setPatient(Reference value) { 
+    public ImagingManifest setPatient(Reference value) { 
       this.patient = value;
       return this;
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.patient");
+          throw new Error("Attempt to auto-create ImagingManifest.patient");
         else if (Configuration.doAutoCreate())
           this.patientTarget = new Patient(); // aa
       return this.patientTarget;
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
-    public ImagingObjectSelection setPatientTarget(Patient value) { 
+    public ImagingManifest setPatientTarget(Patient value) { 
       this.patientTarget = value;
       return this;
     }
@@ -1514,7 +1553,7 @@ public class ImagingObjectSelection extends DomainResource {
     public DateTimeType getAuthoringTimeElement() { 
       if (this.authoringTime == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.authoringTime");
+          throw new Error("Attempt to auto-create ImagingManifest.authoringTime");
         else if (Configuration.doAutoCreate())
           this.authoringTime = new DateTimeType(); // bb
       return this.authoringTime;
@@ -1531,7 +1570,7 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * @param value {@link #authoringTime} (Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).). This is the underlying object with id, value and extensions. The accessor "getAuthoringTime" gives direct access to the value
      */
-    public ImagingObjectSelection setAuthoringTimeElement(DateTimeType value) { 
+    public ImagingManifest setAuthoringTimeElement(DateTimeType value) { 
       this.authoringTime = value;
       return this;
     }
@@ -1546,7 +1585,7 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * @param value Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).
      */
-    public ImagingObjectSelection setAuthoringTime(Date value) { 
+    public ImagingManifest setAuthoringTime(Date value) { 
       if (value == null)
         this.authoringTime = null;
       else {
@@ -1558,12 +1597,12 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
+     * @return {@link #author} (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
     public Reference getAuthor() { 
       if (this.author == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.author");
+          throw new Error("Attempt to auto-create ImagingManifest.author");
         else if (Configuration.doAutoCreate())
           this.author = new Reference(); // cc
       return this.author;
@@ -1574,24 +1613,24 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} (Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
+     * @param value {@link #author} (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
-    public ImagingObjectSelection setAuthor(Reference value) { 
+    public ImagingManifest setAuthor(Reference value) { 
       this.author = value;
       return this;
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
     public Resource getAuthorTarget() { 
       return this.authorTarget;
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
-    public ImagingObjectSelection setAuthorTarget(Resource value) { 
+    public ImagingManifest setAuthorTarget(Resource value) { 
       this.authorTarget = value;
       return this;
     }
@@ -1602,7 +1641,7 @@ public class ImagingObjectSelection extends DomainResource {
     public CodeableConcept getTitle() { 
       if (this.title == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.title");
+          throw new Error("Attempt to auto-create ImagingManifest.title");
         else if (Configuration.doAutoCreate())
           this.title = new CodeableConcept(); // cc
       return this.title;
@@ -1615,18 +1654,18 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * @param value {@link #title} (The reason for, or significance of, the selection of objects referenced in the resource.)
      */
-    public ImagingObjectSelection setTitle(CodeableConcept value) { 
+    public ImagingManifest setTitle(CodeableConcept value) { 
       this.title = value;
       return this;
     }
 
     /**
-     * @return {@link #description} (Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingObjectSelection.description");
+          throw new Error("Attempt to auto-create ImagingManifest.description");
         else if (Configuration.doAutoCreate())
           this.description = new StringType(); // bb
       return this.description;
@@ -1641,24 +1680,24 @@ public class ImagingObjectSelection extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public ImagingObjectSelection setDescriptionElement(StringType value) { 
+    public ImagingManifest setDescriptionElement(StringType value) { 
       this.description = value;
       return this;
     }
 
     /**
-     * @return Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
+     * @return Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
+     * @param value Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
      */
-    public ImagingObjectSelection setDescription(String value) { 
+    public ImagingManifest setDescription(String value) { 
       if (Utilities.noString(value))
         this.description = null;
       else {
@@ -1681,7 +1720,7 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ImagingObjectSelection setStudy(List<StudyComponent> theStudy) { 
+    public ImagingManifest setStudy(List<StudyComponent> theStudy) { 
       this.study = theStudy;
       return this;
     }
@@ -1703,7 +1742,7 @@ public class ImagingObjectSelection extends DomainResource {
       return t;
     }
 
-    public ImagingObjectSelection addStudy(StudyComponent t) { //3
+    public ImagingManifest addStudy(StudyComponent t) { //3
       if (t == null)
         return this;
       if (this.study == null)
@@ -1724,12 +1763,12 @@ public class ImagingObjectSelection extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("uid", "oid", "Instance UID of the DICOM KOS SOP Instances represented in this resource.", 0, java.lang.Integer.MAX_VALUE, uid));
-        childrenList.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingObjectSelection.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("uid", "oid", "Unique identifier of the DICOM Key Object Selection (KOS) representation.", 0, java.lang.Integer.MAX_VALUE, uid));
+        childrenList.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, java.lang.Integer.MAX_VALUE, authoringTime));
-        childrenList.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingObjectSelection. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("title", "CodeableConcept", "The reason for, or significance of, the selection of objects referenced in the resource.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("description", "string", "Text description of the DICOM SOP instances selected in the ImagingObjectSelection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study));
       }
 
@@ -1815,14 +1854,14 @@ public class ImagingObjectSelection extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
           return this.patient;
         }
         else if (name.equals("authoringTime")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.authoringTime");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.authoringTime");
         }
         else if (name.equals("author")) {
           this.author = new Reference();
@@ -1833,7 +1872,7 @@ public class ImagingObjectSelection extends DomainResource {
           return this.title;
         }
         else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.description");
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.description");
         }
         else if (name.equals("study")) {
           return addStudy();
@@ -1843,12 +1882,12 @@ public class ImagingObjectSelection extends DomainResource {
       }
 
   public String fhirType() {
-    return "ImagingObjectSelection";
+    return "ImagingManifest";
 
   }
 
-      public ImagingObjectSelection copy() {
-        ImagingObjectSelection dst = new ImagingObjectSelection();
+      public ImagingManifest copy() {
+        ImagingManifest dst = new ImagingManifest();
         copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
         dst.patient = patient == null ? null : patient.copy();
@@ -1864,7 +1903,7 @@ public class ImagingObjectSelection extends DomainResource {
         return dst;
       }
 
-      protected ImagingObjectSelection typedCopy() {
+      protected ImagingManifest typedCopy() {
         return copy();
       }
 
@@ -1872,9 +1911,9 @@ public class ImagingObjectSelection extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ImagingObjectSelection))
+        if (!(other instanceof ImagingManifest))
           return false;
-        ImagingObjectSelection o = (ImagingObjectSelection) other;
+        ImagingManifest o = (ImagingManifest) other;
         return compareDeep(uid, o.uid, true) && compareDeep(patient, o.patient, true) && compareDeep(authoringTime, o.authoringTime, true)
            && compareDeep(author, o.author, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(study, o.study, true);
@@ -1884,9 +1923,9 @@ public class ImagingObjectSelection extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ImagingObjectSelection))
+        if (!(other instanceof ImagingManifest))
           return false;
-        ImagingObjectSelection o = (ImagingObjectSelection) other;
+        ImagingManifest o = (ImagingManifest) other;
         return compareValues(uid, o.uid, true) && compareValues(authoringTime, o.authoringTime, true) && compareValues(description, o.description, true)
           ;
       }
@@ -1898,7 +1937,7 @@ public class ImagingObjectSelection extends DomainResource {
 
   @Override
   public ResourceType getResourceType() {
-    return ResourceType.ImagingObjectSelection;
+    return ResourceType.ImagingManifest;
    }
 
  /**
@@ -1906,17 +1945,17 @@ public class ImagingObjectSelection extends DomainResource {
    * <p>
    * Description: <b>UID of key DICOM object selection</b><br>
    * Type: <b>uri</b><br>
-   * Path: <b>ImagingObjectSelection.uid</b><br>
+   * Path: <b>ImagingManifest.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="uri" )
+  @SearchParamDefinition(name="identifier", path="ImagingManifest.uid", description="UID of key DICOM object selection", type="uri", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
    * Description: <b>UID of key DICOM object selection</b><br>
    * Type: <b>uri</b><br>
-   * Path: <b>ImagingObjectSelection.uid</b><br>
+   * Path: <b>ImagingManifest.uid</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_IDENTIFIER);
@@ -1926,17 +1965,17 @@ public class ImagingObjectSelection extends DomainResource {
    * <p>
    * Description: <b>Time of key DICOM object selection authoring</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>ImagingObjectSelection.authoringTime</b><br>
+   * Path: <b>ImagingManifest.authoringTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
+  @SearchParamDefinition(name="authoring-time", path="ImagingManifest.authoringTime", description="Time of key DICOM object selection authoring", type="date", target={} )
   public static final String SP_AUTHORING_TIME = "authoring-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
    * <p>
    * Description: <b>Time of key DICOM object selection authoring</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>ImagingObjectSelection.authoringTime</b><br>
+   * Path: <b>ImagingManifest.authoringTime</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORING_TIME = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORING_TIME);
@@ -1946,17 +1985,17 @@ public class ImagingObjectSelection extends DomainResource {
    * <p>
    * Description: <b>Study selected in key DICOM object selection</b><br>
    * Type: <b>uri</b><br>
-   * Path: <b>ImagingObjectSelection.study.uid</b><br>
+   * Path: <b>ImagingManifest.study.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="uri" )
+  @SearchParamDefinition(name="selected-study", path="ImagingManifest.study.uid", description="Study selected in key DICOM object selection", type="uri", target={} )
   public static final String SP_SELECTED_STUDY = "selected-study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
    * <p>
    * Description: <b>Study selected in key DICOM object selection</b><br>
    * Type: <b>uri</b><br>
-   * Path: <b>ImagingObjectSelection.study.uid</b><br>
+   * Path: <b>ImagingManifest.study.uid</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam SELECTED_STUDY = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SELECTED_STUDY);
@@ -1966,69 +2005,69 @@ public class ImagingObjectSelection extends DomainResource {
    * <p>
    * Description: <b>Author of key DICOM object selection</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingObjectSelection.author</b><br>
+   * Path: <b>ImagingManifest.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="author", path="ImagingManifest.author", description="Author of key DICOM object selection", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
    * <p>
    * Description: <b>Author of key DICOM object selection</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingObjectSelection.author</b><br>
+   * Path: <b>ImagingManifest.author</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ImagingObjectSelection:author</b>".
+   * the path value of "<b>ImagingManifest:author</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:author").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("ImagingManifest:author").toLocked();
 
  /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Subject of key DICOM object selection</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingObjectSelection.patient</b><br>
+   * Path: <b>ImagingManifest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="ImagingManifest.patient", description="Subject of key DICOM object selection", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
    * Description: <b>Subject of key DICOM object selection</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingObjectSelection.patient</b><br>
+   * Path: <b>ImagingManifest.patient</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ImagingObjectSelection:patient</b>".
+   * the path value of "<b>ImagingManifest:patient</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:patient").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingManifest:patient").toLocked();
 
  /**
    * Search parameter: <b>title</b>
    * <p>
    * Description: <b>Title of key DICOM object selection</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingObjectSelection.title</b><br>
+   * Path: <b>ImagingManifest.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token" )
+  @SearchParamDefinition(name="title", path="ImagingManifest.title", description="Title of key DICOM object selection", type="token", target={} )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
    * Description: <b>Title of key DICOM object selection</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingObjectSelection.title</b><br>
+   * Path: <b>ImagingManifest.title</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TITLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TITLE);

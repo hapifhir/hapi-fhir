@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1078,7 +1078,7 @@ public class MedicationAdministration extends DomainResource {
     /**
      * Set this to true if the record is saying that the medication was NOT administered.
      */
-    @Child(name = "wasNotGiven", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=false)
+    @Child(name = "wasNotGiven", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="True if medication not administered", formalDefinition="Set this to true if the record is saying that the medication was NOT administered." )
     protected BooleanType wasNotGiven;
 
@@ -2182,7 +2182,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationAdministration.identifier", description="Return administrations with this external identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="MedicationAdministration.identifier", description="Return administrations with this external identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2202,7 +2202,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationAdministration.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="MedicationAdministration.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2222,7 +2222,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="MedicationAdministration.performer", description="Who administered substance", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="MedicationAdministration.performer", description="Who administered substance", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2248,7 +2248,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.prescription</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from", type="reference" )
+  @SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from", type="reference", target={MedicationOrder.class} )
   public static final String SP_PRESCRIPTION = "prescription";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
@@ -2274,7 +2274,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.effectiveTime[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effectivetime", path="MedicationAdministration.effectiveTime", description="Date administration happened (or did not happen)", type="date" )
+  @SearchParamDefinition(name="effectivetime", path="MedicationAdministration.effectiveTime", description="Date administration happened (or did not happen)", type="date", target={} )
   public static final String SP_EFFECTIVETIME = "effectivetime";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>effectivetime</b>
@@ -2294,7 +2294,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2320,7 +2320,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.wasNotGiven</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="wasnotgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made", type="token" )
+  @SearchParamDefinition(name="wasnotgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made", type="token", target={} )
   public static final String SP_WASNOTGIVEN = "wasnotgiven";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>wasnotgiven</b>
@@ -2340,7 +2340,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationAdministration.medication.as(Reference)", description="Return administrations of this medication resource", type="reference" )
+  @SearchParamDefinition(name="medication", path="MedicationAdministration.medication.as(Reference)", description="Return administrations of this medication resource", type="reference", target={Medication.class} )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2366,7 +2366,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2392,7 +2392,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity", type="reference", target={Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>
@@ -2418,7 +2418,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)", type="token" )
+  @SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

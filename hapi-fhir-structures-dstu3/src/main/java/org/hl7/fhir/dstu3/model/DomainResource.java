@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -142,7 +142,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return this;
     }
 
-
     /**
      * @return {@link #extension} (May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.)
      */
@@ -186,7 +185,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return this;
     }
 
-
     /**
      * @return {@link #modifierExtension} (May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.)
      */
@@ -229,7 +227,6 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       this.modifierExtension.add(t);
       return this;
     }
-
 
     /**
      * Returns a list of extensions from this element which have the given URL. Note that

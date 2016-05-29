@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1031,7 +1031,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token" )
+  @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1051,7 +1051,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
+  @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token", target={} )
   public static final String SP_CONTAINER_IDENTIFIER = "container-identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container-identifier</b>
@@ -1071,7 +1071,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.code, Substance.ingredient.substanceCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Substance.code | Substance.ingredient.substance.as(CodeableConcept)", description="The code of the substance or ingredient", type="token" )
+  @SearchParamDefinition(name="code", path="Substance.code | Substance.ingredient.substance.as(CodeableConcept)", description="The code of the substance or ingredient", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1091,7 +1091,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.quantity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="quantity" )
+  @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="quantity", target={} )
   public static final String SP_QUANTITY = "quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>quantity</b>
@@ -1111,7 +1111,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.ingredient.substanceReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="substance-reference", path="Substance.ingredient.substance.as(Reference)", description="A component of the substance", type="reference" )
+  @SearchParamDefinition(name="substance-reference", path="Substance.ingredient.substance.as(Reference)", description="A component of the substance", type="reference", target={Substance.class} )
   public static final String SP_SUBSTANCE_REFERENCE = "substance-reference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>substance-reference</b>
@@ -1137,7 +1137,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.instance.expiry</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date" )
+  @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date", target={} )
   public static final String SP_EXPIRY = "expiry";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>expiry</b>
@@ -1157,7 +1157,7 @@ public class Substance extends DomainResource {
    * Path: <b>Substance.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token" )
+  @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

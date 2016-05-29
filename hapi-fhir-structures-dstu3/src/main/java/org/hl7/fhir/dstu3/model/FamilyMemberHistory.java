@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1491,7 +1491,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date" )
+  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1511,7 +1511,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1531,7 +1531,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token" )
+  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1551,7 +1551,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token" )
+  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token", target={} )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -1571,7 +1571,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1597,7 +1597,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.relationship</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token" )
+  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token", target={} )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>

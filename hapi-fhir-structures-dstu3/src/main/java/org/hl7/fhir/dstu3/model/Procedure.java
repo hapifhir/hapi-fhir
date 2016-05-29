@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2162,7 +2162,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performed[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date" )
+  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2182,7 +2182,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token" )
+  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2202,7 +2202,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token" )
+  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2222,7 +2222,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2248,7 +2248,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference" )
+  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2274,7 +2274,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2300,7 +2300,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
+  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2326,7 +2326,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2352,7 +2352,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token" )
+  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

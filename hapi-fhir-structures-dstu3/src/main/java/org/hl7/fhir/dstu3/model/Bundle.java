@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2759,7 +2759,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
+  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class} )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
@@ -2785,7 +2785,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token" )
+  @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2805,7 +2805,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
+  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class} )
   public static final String SP_MESSAGE = "message";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>message</b>

@@ -322,6 +322,7 @@ public abstract class BaseStructureParser {
 			ourLog.debug("Element Name: {}", next.getName());
 			if (next instanceof SimpleChild) {
 				for (String nextType : next.getType()) {
+					ourLog.debug("* Element Type: {}", nextType);
 					if (((SimpleChild) next).isBoundCode()) {
 						scanForImportsNames(((SimpleChild) next).getBoundDatatype());
 					}

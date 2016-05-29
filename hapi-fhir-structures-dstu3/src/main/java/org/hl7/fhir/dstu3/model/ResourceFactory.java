@@ -208,8 +208,6 @@ public class ResourceFactory extends Factory {
             return new MedicationDispense();
         if ("DiagnosticReport".equals(name))
             return new DiagnosticReport();
-        if ("ImagingObjectSelection".equals(name))
-            return new ImagingObjectSelection();
         if ("HealthcareService".equals(name))
             return new HealthcareService();
         if ("DataElement".equals(name))
@@ -218,8 +216,6 @@ public class ResourceFactory extends Factory {
             return new NutritionOrder();
         if ("AuditEvent".equals(name))
             return new AuditEvent();
-        if ("ImagingExcerpt".equals(name))
-            return new ImagingExcerpt();
         if ("MedicationOrder".equals(name))
             return new MedicationOrder();
         if ("DecisionSupportRule".equals(name))

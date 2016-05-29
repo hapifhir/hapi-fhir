@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -474,7 +474,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Basic.identifier", description="Business identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="Basic.identifier", description="Business identifier", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -494,7 +494,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token" )
+  @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -540,7 +540,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date" )
+  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -560,7 +560,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -586,7 +586,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

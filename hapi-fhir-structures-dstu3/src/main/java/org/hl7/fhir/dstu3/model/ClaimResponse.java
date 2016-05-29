@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -4856,7 +4856,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the insurer", type="token" )
+  @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the insurer", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4876,7 +4876,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.disposition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="disposition", path="ClaimResponse.disposition", description="The contents of the disposition message", type="string" )
+  @SearchParamDefinition(name="disposition", path="ClaimResponse.disposition", description="The contents of the disposition message", type="string", target={} )
   public static final String SP_DISPOSITION = "disposition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>disposition</b>
@@ -4896,7 +4896,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.paymentDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="paymentdate", path="ClaimResponse.paymentDate", description="The expected paymentDate", type="date" )
+  @SearchParamDefinition(name="paymentdate", path="ClaimResponse.paymentDate", description="The expected paymentDate", type="date", target={} )
   public static final String SP_PAYMENTDATE = "paymentdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>paymentdate</b>
@@ -4916,7 +4916,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="ClaimResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
+  @SearchParamDefinition(name="organizationidentifier", path="ClaimResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token", target={} )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -4936,7 +4936,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="ClaimResponse.created", description="The creation date", type="date" )
+  @SearchParamDefinition(name="created", path="ClaimResponse.created", description="The creation date", type="date", target={} )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -4956,7 +4956,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="ClaimResponse.request.as(Identifier)", description="The claim reference", type="token" )
+  @SearchParamDefinition(name="requestidentifier", path="ClaimResponse.request.as(Identifier)", description="The claim reference", type="token", target={} )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -4976,7 +4976,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="ClaimResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference" )
+  @SearchParamDefinition(name="organizationreference", path="ClaimResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -5002,7 +5002,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.requestReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestreference", path="ClaimResponse.request.as(Reference)", description="The claim reference", type="reference" )
+  @SearchParamDefinition(name="requestreference", path="ClaimResponse.request.as(Reference)", description="The claim reference", type="reference", target={Claim.class} )
   public static final String SP_REQUESTREFERENCE = "requestreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
@@ -5028,7 +5028,7 @@ public class ClaimResponse extends DomainResource {
    * Path: <b>ClaimResponse.outcome</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="outcome", path="ClaimResponse.outcome", description="The processing outcome", type="token" )
+  @SearchParamDefinition(name="outcome", path="ClaimResponse.outcome", description="The processing outcome", type="token", target={} )
   public static final String SP_OUTCOME = "outcome";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>outcome</b>

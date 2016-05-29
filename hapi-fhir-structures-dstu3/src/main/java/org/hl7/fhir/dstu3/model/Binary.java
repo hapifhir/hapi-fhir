@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -287,7 +287,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
    * Path: <b>Binary.contentType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token" )
+  @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token", target={} )
   public static final String SP_CONTENTTYPE = "contenttype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contenttype</b>

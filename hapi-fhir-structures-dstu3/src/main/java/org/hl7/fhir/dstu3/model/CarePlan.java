@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3459,7 +3459,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date" )
+  @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3479,7 +3479,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token" )
+  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token", target={} )
   public static final String SP_ACTIVITYCODE = "activitycode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activitycode</b>
@@ -3499,7 +3499,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.scheduled[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
+  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date", target={} )
   public static final String SP_ACTIVITYDATE = "activitydate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activitydate</b>
@@ -3519,7 +3519,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference" )
+  @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference", target={Appointment.class, Order.class, ReferralRequest.class, ProcessRequest.class, NutritionOrder.class, VisionPrescription.class, DiagnosticOrder.class, ProcedureRequest.class, DeviceUseRequest.class, MedicationOrder.class, CommunicationRequest.class, SupplyRequest.class} )
   public static final String SP_ACTIVITYREFERENCE = "activityreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activityreference</b>
@@ -3545,7 +3545,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -3571,7 +3571,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.goal</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference" )
+  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference", target={Goal.class} )
   public static final String SP_GOAL = "goal";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>goal</b>
@@ -3597,7 +3597,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference" )
+  @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Group.class, Patient.class} )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -3623,7 +3623,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token" )
+  @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token", target={} )
   public static final String SP_RELATEDCODE = "relatedcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedcode</b>
@@ -3643,7 +3643,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.careTeam</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careteam", path="CarePlan.careTeam", description="Who's involved in plan?", type="reference" )
+  @SearchParamDefinition(name="careteam", path="CarePlan.careTeam", description="Who's involved in plan?", type="reference", target={CareTeam.class} )
   public static final String SP_CARETEAM = "careteam";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careteam</b>
@@ -3669,7 +3669,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference" )
+  @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference", target={CarePlan.class} )
   public static final String SP_RELATEDPLAN = "relatedplan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedplan</b>
@@ -3695,7 +3695,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.addresses</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference" )
+  @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference", target={Condition.class} )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -3721,7 +3721,7 @@ public class CarePlan extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"} )
+  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"}, target={} )
   public static final String SP_RELATED = "related";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related</b>
@@ -3741,7 +3741,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3767,7 +3767,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="CarePlan.category", description="Type of plan", type="token" )
+  @SearchParamDefinition(name="category", path="CarePlan.category", description="Type of plan", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1043,7 +1043,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.payloadType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload-type", path="Endpoint.payloadType", description="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", type="token" )
+  @SearchParamDefinition(name="payload-type", path="Endpoint.payloadType", description="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", type="token", target={} )
   public static final String SP_PAYLOAD_TYPE = "payload-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload-type</b>
@@ -1063,7 +1063,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is exposing the endpoint", type="reference" )
+  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is exposing the endpoint", type="reference", target={Organization.class} )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1089,7 +1089,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Endpoint.status", description="The current status of the Endpoint (usually expected to be active)", type="token" )
+  @SearchParamDefinition(name="status", path="Endpoint.status", description="The current status of the Endpoint (usually expected to be active)", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

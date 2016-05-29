@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -2415,7 +2415,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.severity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="severity", path="AllergyIntolerance.reaction.severity", description="mild | moderate | severe (of event as a whole)", type="token" )
+  @SearchParamDefinition(name="severity", path="AllergyIntolerance.reaction.severity", description="mild | moderate | severe (of event as a whole)", type="token", target={} )
   public static final String SP_SEVERITY = "severity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>severity</b>
@@ -2435,7 +2435,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recordedDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date" )
+  @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2455,7 +2455,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External ids for this item", type="token" )
+  @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External ids for this item", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2475,7 +2475,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.manifestation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.reaction.manifestation", description="Clinical symptoms/signs associated with the Event", type="token" )
+  @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.reaction.manifestation", description="Clinical symptoms/signs associated with the Event", type="token", target={} )
   public static final String SP_MANIFESTATION = "manifestation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manifestation</b>
@@ -2495,7 +2495,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.recorder</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference", target={Practitioner.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECORDER = "recorder";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recorder</b>
@@ -2521,7 +2521,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.substance, AllergyIntolerance.reaction.substance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
+  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token", target={} )
   public static final String SP_SUBSTANCE = "substance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>substance</b>
@@ -2541,7 +2541,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.criticality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unable-to-assess", type="token" )
+  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unable-to-assess", type="token", target={} )
   public static final String SP_CRITICALITY = "criticality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criticality</b>
@@ -2561,7 +2561,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reporter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_REPORTER = "reporter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reporter</b>
@@ -2587,7 +2587,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token" )
+  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2607,7 +2607,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.onset</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date" )
+  @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date", target={} )
   public static final String SP_ONSET = "onset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset</b>
@@ -2627,7 +2627,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.reaction.exposureRoute</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="route", path="AllergyIntolerance.reaction.exposureRoute", description="How the subject was exposed to the substance", type="token" )
+  @SearchParamDefinition(name="route", path="AllergyIntolerance.reaction.exposureRoute", description="How the subject was exposed to the substance", type="token", target={} )
   public static final String SP_ROUTE = "route";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>route</b>
@@ -2647,7 +2647,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2673,7 +2673,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token" )
+  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2693,7 +2693,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.lastOccurence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date" )
+  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date", target={} )
   public static final String SP_LAST_DATE = "last-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>last-date</b>
@@ -2713,7 +2713,7 @@ public class AllergyIntolerance extends DomainResource {
    * Path: <b>AllergyIntolerance.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

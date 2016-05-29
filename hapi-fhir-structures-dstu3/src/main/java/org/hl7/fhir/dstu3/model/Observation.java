@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -3030,7 +3030,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Observation.effective", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date" )
+  @SearchParamDefinition(name="date", path="Observation.effective", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3050,7 +3050,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique id for a particular observation", type="token" )
+  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique id for a particular observation", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3070,7 +3070,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.code, Observation.component.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Observation.code | Observation.component.code", description="The code of the observation type or component type", type="token" )
+  @SearchParamDefinition(name="code", path="Observation.code | Observation.component.code", description="The code of the observation type or component type", type="token", target={} )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3090,7 +3090,7 @@ public class Observation extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code-value-quantity", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-quantity"} )
+  @SearchParamDefinition(name="code-value-quantity", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-quantity"}, target={} )
   public static final String SP_CODE_VALUE_QUANTITY = "code-value-quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code-value-quantity</b>
@@ -3110,7 +3110,7 @@ public class Observation extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code-value-concept", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-concept"} )
+  @SearchParamDefinition(name="code-value-concept", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-concept"}, target={} )
   public static final String SP_CODE_VALUE_CONCEPT = "code-value-concept";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code-value-concept</b>
@@ -3130,7 +3130,7 @@ public class Observation extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code-value-date", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-date"} )
+  @SearchParamDefinition(name="code-value-date", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-date"}, target={} )
   public static final String SP_CODE_VALUE_DATE = "code-value-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code-value-date</b>
@@ -3150,7 +3150,7 @@ public class Observation extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code-value-string", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-string"} )
+  @SearchParamDefinition(name="code-value-string", path="", description="Code and value parameter pair", type="composite", compositeOf={"code", "value-string"}, target={} )
   public static final String SP_CODE_VALUE_STRING = "code-value-string";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code-value-string</b>
@@ -3170,7 +3170,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -3196,7 +3196,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.method</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="method", path="Observation.method", description="The method used for the observation", type="token" )
+  @SearchParamDefinition(name="method", path="Observation.method", description="The method used for the observation", type="token", target={} )
   public static final String SP_METHOD = "method";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>method</b>
@@ -3216,7 +3216,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.valueQuantity, Observation.component.valueQuantity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-quantity", path="Observation.value.as(Quantity) | Observation.component.value.as(Quantity)", description="The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
+  @SearchParamDefinition(name="value-quantity", path="Observation.value.as(Quantity) | Observation.component.value.as(Quantity)", description="The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity", target={} )
   public static final String SP_VALUE_QUANTITY = "value-quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-quantity</b>
@@ -3236,7 +3236,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference", target={Group.class, Device.class, Patient.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -3262,7 +3262,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.valueCodeableConcept, Observation.component.valueCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-concept", path="Observation.value.as(CodeableConcept) | Observation.component.value.as(CodeableConcept)", description="The value or component value of the observation, if the value is a CodeableConcept", type="token" )
+  @SearchParamDefinition(name="value-concept", path="Observation.value.as(CodeableConcept) | Observation.component.value.as(CodeableConcept)", description="The value or component value of the observation, if the value is a CodeableConcept", type="token", target={} )
   public static final String SP_VALUE_CONCEPT = "value-concept";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-concept</b>
@@ -3282,7 +3282,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.valueDateTime, Observation.valuePeriod</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-date", path="Observation.value.as(DateTime) | Observation.value.as(Period)", description="The value of the observation, if the value is a date or period of time", type="date" )
+  @SearchParamDefinition(name="value-date", path="Observation.value.as(DateTime) | Observation.value.as(Period)", description="The value of the observation, if the value is a date or period of time", type="date", target={} )
   public static final String SP_VALUE_DATE = "value-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-date</b>
@@ -3302,7 +3302,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.dataAbsentReason, Observation.component.dataAbsentReason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="data-absent-reason", path="Observation.dataAbsentReason | Observation.component.dataAbsentReason", description="The reason why the expected value in the element Observation.value[x] is missing.", type="token" )
+  @SearchParamDefinition(name="data-absent-reason", path="Observation.dataAbsentReason | Observation.component.dataAbsentReason", description="The reason why the expected value in the element Observation.value[x] is missing.", type="token", target={} )
   public static final String SP_DATA_ABSENT_REASON = "data-absent-reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>data-absent-reason</b>
@@ -3322,7 +3322,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -3348,7 +3348,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.related.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-type", path="Observation.related.type", description="has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type="token" )
+  @SearchParamDefinition(name="related-type", path="Observation.related.type", description="has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type="token", target={} )
   public static final String SP_RELATED_TYPE = "related-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-type</b>
@@ -3368,7 +3368,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.related.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-target", path="Observation.related.target", description="Resource that is related to this one", type="reference" )
+  @SearchParamDefinition(name="related-target", path="Observation.related.target", description="Resource that is related to this one", type="reference", target={Observation.class, QuestionnaireResponse.class} )
   public static final String SP_RELATED_TARGET = "related-target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-target</b>
@@ -3394,7 +3394,7 @@ public class Observation extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite", compositeOf={"related-target", "related-type"} )
+  @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite", compositeOf={"related-target", "related-type"}, target={} )
   public static final String SP_RELATED = "related";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related</b>
@@ -3414,7 +3414,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference" )
+  @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference", target={Patient.class} )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3440,7 +3440,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.specimen</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specimen", path="Observation.specimen", description="Specimen used for this observation", type="reference" )
+  @SearchParamDefinition(name="specimen", path="Observation.specimen", description="Specimen used for this observation", type="reference", target={Specimen.class} )
   public static final String SP_SPECIMEN = "specimen";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
@@ -3466,7 +3466,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Observation.category", description="The classification of the type of observation", type="token" )
+  @SearchParamDefinition(name="category", path="Observation.category", description="The classification of the type of observation", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -3486,7 +3486,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.valueString, Observation.component.valueString</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-string", path="Observation.value.as(String) | Observation.component.value.as(String)", description="The value or component value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
+  @SearchParamDefinition(name="value-string", path="Observation.value.as(String) | Observation.component.value.as(String)", description="The value or component value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string", target={} )
   public static final String SP_VALUE_STRING = "value-string";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-string</b>
@@ -3506,7 +3506,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference", target={Device.class, DeviceMetric.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>
@@ -3532,7 +3532,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token" )
+  @SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token", target={} )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

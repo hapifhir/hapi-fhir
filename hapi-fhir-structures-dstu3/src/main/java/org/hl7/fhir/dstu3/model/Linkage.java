@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -600,7 +600,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference" )
+  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference", target={} )
   public static final String SP_ITEM = "item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item</b>
@@ -626,7 +626,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -652,7 +652,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference" )
+  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference", target={} )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

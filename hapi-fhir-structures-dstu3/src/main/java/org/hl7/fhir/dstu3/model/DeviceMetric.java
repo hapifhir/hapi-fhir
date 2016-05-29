@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1706,7 +1706,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference" )
+  @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference", target={DeviceComponent.class} )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1732,7 +1732,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
+  @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1752,7 +1752,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", target={Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1778,7 +1778,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
+  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token", target={} )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1798,7 +1798,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )
+  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

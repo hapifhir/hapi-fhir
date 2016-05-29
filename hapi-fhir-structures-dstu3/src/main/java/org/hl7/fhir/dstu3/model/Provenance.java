@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1915,7 +1915,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.signature.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sig", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token" )
+  @SearchParamDefinition(name="sig", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token", target={} )
   public static final String SP_SIG = "sig";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sig</b>
@@ -1935,7 +1935,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.entity.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity-type", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
+  @SearchParamDefinition(name="entity-type", path="Provenance.entity.type", description="The type of resource in this entity", type="token", target={} )
   public static final String SP_ENTITY_TYPE = "entity-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity-type</b>
@@ -1955,7 +1955,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.agent.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
@@ -1981,7 +1981,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2007,7 +2007,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.period.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date" )
+  @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date", target={} )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
@@ -2027,7 +2027,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.period.end</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="end", path="Provenance.period.end", description="End time with inclusive boundary, if not ongoing", type="date" )
+  @SearchParamDefinition(name="end", path="Provenance.period.end", description="End time with inclusive boundary, if not ongoing", type="date", target={} )
   public static final String SP_END = "end";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>end</b>
@@ -2047,7 +2047,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Provenance.location", description="Where the activity occurred, if relevant", type="reference" )
+  @SearchParamDefinition(name="location", path="Provenance.location", description="Where the activity occurred, if relevant", type="reference", target={Location.class} )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2073,7 +2073,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.agent.userId</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token" )
+  @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token", target={} )
   public static final String SP_USERID = "userid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>userid</b>
@@ -2093,7 +2093,7 @@ public class Provenance extends DomainResource {
    * Path: <b>Provenance.entity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
+  @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri", target={} )
   public static final String SP_ENTITY = "entity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity</b>

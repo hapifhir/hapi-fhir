@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1198,7 +1198,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date" )
+  @SearchParamDefinition(name="date", path="DetectedIssue.date", description="When identified", type="date", target={} )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1218,7 +1218,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token" )
+  @SearchParamDefinition(name="identifier", path="DetectedIssue.identifier", description="Unique id for the detected issue", type="token", target={} )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1238,7 +1238,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1264,7 +1264,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference", target={Practitioner.class, Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1316,7 +1316,7 @@ public class DetectedIssue extends DomainResource {
    * Path: <b>DetectedIssue.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token" )
+  @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token", target={} )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

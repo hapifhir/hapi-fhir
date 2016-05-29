@@ -48,7 +48,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
