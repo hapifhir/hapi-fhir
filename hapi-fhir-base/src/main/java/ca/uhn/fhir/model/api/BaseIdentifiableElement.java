@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public abstract class BaseIdentifiableElement extends BaseElement implements IIdentifiableElement {
 
@@ -36,6 +37,7 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@CoverageIgnore
 	@Deprecated
 	@Override
 	public IdDt getId() {
@@ -55,6 +57,7 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@CoverageIgnore
 	@Deprecated
 	@Override
 	public void setId(IdDt theId) {
@@ -69,27 +72,33 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@CoverageIgnore
 	@Override
 	@Deprecated
 	public void setId(String theId) {
 		myElementSpecificId = theId;
 	}
 
+	@CoverageIgnore
 	private static class LockedId extends IdDt {
 
+		@CoverageIgnore
 		public LockedId() {
 		}
 
+		@CoverageIgnore
 		public LockedId(String theElementSpecificId) {
 			super(theElementSpecificId);
 		}
 
 		@Override
+		@CoverageIgnore
 		public IdDt setValue(String theValue) throws DataFormatException {
 			throw new UnsupportedOperationException("Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
 
 		@Override
+		@CoverageIgnore
 		public void setValueAsString(String theValue) throws DataFormatException {
 			throw new UnsupportedOperationException("Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}

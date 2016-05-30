@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -179,7 +181,7 @@ public class OperationParameter implements IParameter {
 		 */
 		isSearchParam &= typeIsConcrete && !IBase.class.isAssignableFrom(myParameterType);
 
-		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType) || isSearchParam;
+		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType) || isSearchParam || ValidationModeEnum.class.equals(myParameterType);
 
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
@@ -291,7 +293,17 @@ public class OperationParameter implements IParameter {
 							for (String next : paramValues) {
 								matchingParamValues.add(next);
 							}
-
+						} else if (ValidationModeEnum.class.equals(myParameterType)) {
+							
+							if (isNotBlank(paramValues[0])) {
+								ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
+								if (validationMode != null) {
+									matchingParamValues.add(validationMode);
+								} else {
+									throwInvalidMode(paramValues[0]);
+								}
+							}
+							
 						} else {
 							for (String nextValue : paramValues) {
 								FhirContext ctx = theRequest.getServer().getFhirContext();
@@ -374,6 +386,10 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
+	public static void throwInvalidMode(String paramValues) {
+		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
+	}
+
 	@SuppressWarnings("unchecked")
 	private void tryToAddValues(List<IBase> theParamValues, List<Object> theMatchingParamValues) {
 		for (Object nextValue : theParamValues) {
@@ -435,5 +451,6 @@ public class OperationParameter implements IParameter {
 		}
 
 	}
+
 
 }

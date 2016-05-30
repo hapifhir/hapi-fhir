@@ -217,12 +217,13 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			}
 		}
 
-		ourLog.info("Validating code system");
+		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 		
 		// Validate the code system
 		IdentityHashMap<TermConcept, Object> conceptsStack = new IdentityHashMap<TermConcept, Object>();
+		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystem.getConcepts()) {
-			validateConceptForStorage(next, theCodeSystem, conceptsStack);
+			totalCodeCount += validateConceptForStorage(next, theCodeSystem, conceptsStack);
 		}
 
 		ourLog.info("Saving version");
@@ -234,7 +235,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		codeSystem.setCurrentVersion(theCodeSystem);
 		myCodeSystemDao.save(codeSystem);
 
-		ourLog.info("Saving concepts...");
+		ourLog.info("Saving {} concepts...", totalCodeCount);
 
 		conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystem.getConcepts()) {
@@ -275,20 +276,24 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return retVal;
 	}
 
-	private void validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
+	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
 		ValidateUtil.isNotNullOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "Codesystem contains a code which does not reference the codesystem");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code which does not reference the codesystem");
 
+		
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
 
+		int retVal = 1;
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			next.setCodeSystem(theCodeSystem);
-			validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack);
+			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack);
 		}
 
 		theConceptsStack.remove(theConcept);
+		
+		return retVal;
 	}
 
 	public TermConcept findCode(String theCodeSystem, String theCode) {

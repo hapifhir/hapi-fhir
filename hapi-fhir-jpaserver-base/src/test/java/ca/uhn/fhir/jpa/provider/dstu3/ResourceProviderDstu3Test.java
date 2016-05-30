@@ -51,6 +51,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -2687,6 +2688,46 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testValidateBadInputViaPost() throws IOException {
+
+		Parameters input = new Parameters();
+		input.addParameter().setName("mode").setValue(new CodeType("create"));
+
+		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
+		ourLog.info(inputStr);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertThat(resp, containsString("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testValidateBadInputViaGet() throws IOException {
+
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/$validate?mode=create");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertThat(resp, containsString("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();

@@ -498,12 +498,20 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
-								return ValidationModeEnum.valueOf(theObject.toString().toUpperCase());
+								if (isNotBlank(theObject.toString())) {
+									ValidationModeEnum retVal = ValidationModeEnum.forCode(theObject.toString());
+									if (retVal == null) {
+										OperationParameter.throwInvalidMode(theObject.toString());
+									}
+									return retVal;
+								} else {
+									return null;
+								}
 							}
 							
 							@Override
 							public Object outgoingClient(Object theObject) {
-								return new StringDt(((ValidationModeEnum)theObject).name().toLowerCase());
+								return new StringDt(((ValidationModeEnum)theObject).getCode());
 							}
 						});
 					} else if (nextAnnotation instanceof Validate.Profile) {

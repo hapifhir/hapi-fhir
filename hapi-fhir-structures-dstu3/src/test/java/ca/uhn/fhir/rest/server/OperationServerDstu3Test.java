@@ -1,6 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -22,6 +26,18 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestOperationComponent;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,18 +46,6 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestOperation;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -50,18 +54,18 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class OperationServerDstu2Test {
+public class OperationServerDstu3Test {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 
-	private static IdDt ourLastId;
+	private static IdType ourLastId;
 	private static String ourLastMethod;
-	private static StringDt ourLastParam1;
+	private static StringType ourLastParam1;
 	private static Patient ourLastParam2;
-	private static List<StringDt> ourLastParam3;
-	private static MoneyDt ourLastParamMoney1;
-	private static UnsignedIntDt ourLastParamUnsignedInt1;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu2Test.class);
+	private static List<StringType> ourLastParam3;
+	private static Money ourLastParamMoney1;
+	private static UnsignedIntType ourLastParamUnsignedInt1;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -81,13 +85,9 @@ public class OperationServerDstu2Test {
 	public void testConformance() throws Exception {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		Conformance p = client.fetchConformance().ofType(Conformance.class).execute();
-		List<RestOperation> ops = p.getRest().get(0).getOperation();
+		List<ConformanceRestOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
-		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
-		assertThat(ops.get(0).getDefinition().getReference().getValue(), startsWith("OperationDefinition/"));
-		
-		OperationDefinition def = client.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
-		assertThat(def.getCode(), not(blankOrNullString()));
+		assertThat(ops.get(0).getDefinition().getReferenceElement().getValue(), startsWith("#"));
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class OperationServerDstu2Test {
 	
 	@Test
 	public void testInstanceEverythingHapiClient() throws Exception {
-		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdDt("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
+		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 		Bundle b = (Bundle) p.getParameterFirstRep().getResource();
 
 		assertEquals("instance $everything", ourLastMethod);
@@ -153,7 +153,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationWrongParameterType() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new IntegerDt(123));
+		p.addParameter().setName("PARAM1").setValue(new IntegerType(123));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
@@ -161,7 +161,7 @@ public class OperationServerDstu2Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent());
-			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
+			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerType but method expects type StringType"));
 			ourLog.info(response);
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -171,7 +171,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnInstance() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -184,7 +184,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE", ourLastMethod);
 
@@ -209,7 +209,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnInstanceAndType_Instance() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -222,7 +222,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
@@ -234,7 +234,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnInstanceAndType_Type() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 		
@@ -247,7 +247,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals(null, ourLastId);
 		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
@@ -258,7 +258,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnServer() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -271,7 +271,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("$OP_SERVER", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -281,7 +281,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnType() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -294,7 +294,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("$OP_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -304,7 +304,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationOnTypeReturnBundle() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -317,7 +317,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("$OP_TYPE_RET_BUNDLE", ourLastMethod);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -372,8 +372,8 @@ public class OperationServerDstu2Test {
 	public void testOperationWithListParam() throws Exception {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
-		p.addParameter().setName("PARAM3").setValue(new StringDt("PARAM3val1"));
-		p.addParameter().setName("PARAM3").setValue(new StringDt("PARAM3val2"));
+		p.addParameter().setName("PARAM3").setValue(new StringType("PARAM3val1"));
+		p.addParameter().setName("PARAM3").setValue(new StringType("PARAM3val2"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER_LIST_PARAM");
@@ -385,7 +385,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("$OP_SERVER_LIST_PARAM", ourLastMethod);
-		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(true, ourLastParam2.getActive());
 		assertEquals(null, ourLastParam1);
 		assertEquals(2, ourLastParam3.size());
 		assertEquals("PARAM3val1", ourLastParam3.get(0).getValue());
@@ -398,7 +398,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationWithProfileDatatypeParams() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new IntegerDt("123"));
+		p.addParameter().setName("PARAM1").setValue(new IntegerType("123"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_PROFILE_DT");
@@ -415,7 +415,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationWithProfileDatatypeParams2() throws Exception {
 		Parameters p = new Parameters();
-		MoneyDt money = new MoneyDt();
+		Money money = new Money();
 		money.setCode("CODE");
 		money.setSystem("SYSTEM");
 		money.setValue(123L);
@@ -450,7 +450,7 @@ public class OperationServerDstu2Test {
 	@Test
 	public void testOperationWrongParamType() throws Exception {
 		Parameters p = new Parameters();
-		p.addParameter().setName("PARAM1").setValue(new IntegerDt("123"));
+		p.addParameter().setName("PARAM1").setValue(new IntegerType("123"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
@@ -465,7 +465,7 @@ public class OperationServerDstu2Test {
 		ourLog.info(status.getStatusLine().toString());
 		ourLog.info(response);
 
-		assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
+		assertThat(response, containsString("Request has parameter PARAM1 of type IntegerType but method expects type StringType"));
 	}
 
 	@Test
@@ -488,7 +488,7 @@ public class OperationServerDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forDstu2();
+		ourCtx = FhirContext.forDstu3();
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
@@ -514,8 +514,8 @@ public class OperationServerDstu2Test {
 
 	public static void main(String[] theValue) {
 		Parameters p = new Parameters();
-		p.addParameter().setName("start").setValue(new DateTimeDt("2001-01-02"));
-		p.addParameter().setName("end").setValue(new DateTimeDt("2015-07-10"));
+		p.addParameter().setName("start").setValue(new DateTimeType("2001-01-02"));
+		p.addParameter().setName("end").setValue(new DateTimeType("2015-07-10"));
 		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
 		ourLog.info(inParamsStr.replace("\"", "\\\""));
 	}
@@ -523,15 +523,15 @@ public class OperationServerDstu2Test {
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
 		//@formatter:off
 		@Operation(name="$OP_INSTANCE")
 		public Parameters opInstance(
-				@IdParam IdDt theId,
-				@OperationParam(name="PARAM1") StringDt theParam1,
+				@IdParam IdType theId,
+				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {
 			//@formatter:on
@@ -542,15 +542,15 @@ public class OperationServerDstu2Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
 		//@formatter:off
 		@Operation(name="$OP_INSTANCE_OR_TYPE")
 		public Parameters opInstanceOrType(
-				@IdParam(optional=true) IdDt theId,
-				@OperationParam(name="PARAM1") StringDt theParam1,
+				@IdParam(optional=true) IdType theId,
+				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {
 			//@formatter:on
@@ -561,14 +561,14 @@ public class OperationServerDstu2Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
 		//@formatter:off
 		@Operation(name="$OP_PROFILE_DT2", idempotent=true)
-		public Bundle opProfileDt(
-				@OperationParam(name="PARAM1") MoneyDt theParam1
+		public Bundle opProfileType(
+				@OperationParam(name="PARAM1") Money theParam1
 				) {
 			//@formatter:on
 
@@ -582,8 +582,8 @@ public class OperationServerDstu2Test {
 
 		//@formatter:off
 		@Operation(name="$OP_PROFILE_DT", idempotent=true)
-		public Bundle opProfileDt(
-				@OperationParam(name="PARAM1") UnsignedIntDt theParam1
+		public Bundle opProfileType(
+				@OperationParam(name="PARAM1") UnsignedIntType theParam1
 				) {
 			//@formatter:on
 
@@ -598,7 +598,7 @@ public class OperationServerDstu2Test {
 		//@formatter:off
 		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
-				@OperationParam(name="PARAM1") StringDt theParam1,
+				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {
 			//@formatter:on
@@ -608,14 +608,14 @@ public class OperationServerDstu2Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
 		//@formatter:off
 		@Operation(name="$OP_TYPE_ONLY_STRING", idempotent=true)
 		public Parameters opTypeOnlyString(
-				@OperationParam(name="PARAM1") StringDt theParam1
+				@OperationParam(name="PARAM1") StringType theParam1
 				) {
 			//@formatter:on
 
@@ -623,14 +623,14 @@ public class OperationServerDstu2Test {
 			ourLastParam1 = theParam1;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
 		//@formatter:off
 		@Operation(name="$OP_TYPE_RET_BUNDLE")
 		public Bundle opTypeRetBundle(
-				@OperationParam(name="PARAM1") StringDt theParam1,
+				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {
 			//@formatter:on
@@ -645,7 +645,7 @@ public class OperationServerDstu2Test {
 		}
 
 		@Operation(name = "$everything", idempotent=true)
-		public Bundle patientEverything(@IdParam IdDt thePatientId) {
+		public Bundle patientEverything(@IdParam IdType thePatientId) {
 			ourLastMethod = "instance $everything";
 			ourLastId = thePatientId;
 			return new Bundle();
@@ -655,7 +655,7 @@ public class OperationServerDstu2Test {
 		 * Just to make sure this method doesn't "steal" calls
 		 */
 		@Read
-		public Patient read(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdType theId) {
 			ourLastMethod = "read";
 			Patient retVal = new Patient();
 			retVal.setId(theId);
@@ -685,7 +685,7 @@ public class OperationServerDstu2Test {
 		//@formatter:off
 		@Operation(name="$OP_SERVER")
 		public Parameters opServer(
-				@OperationParam(name="PARAM1") StringDt theParam1,
+				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {
 			//@formatter:on
@@ -695,7 +695,7 @@ public class OperationServerDstu2Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
@@ -703,7 +703,7 @@ public class OperationServerDstu2Test {
 		@Operation(name="$OP_SERVER_LIST_PARAM")
 		public Parameters opServerListParam(
 				@OperationParam(name="PARAM2") Patient theParam2,
-				@OperationParam(name="PARAM3") List<StringDt> theParam3
+				@OperationParam(name="PARAM3") List<StringType> theParam3
 				) {
 			//@formatter:on
 
@@ -712,7 +712,7 @@ public class OperationServerDstu2Test {
 			ourLastParam3 = theParam3;
 
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 

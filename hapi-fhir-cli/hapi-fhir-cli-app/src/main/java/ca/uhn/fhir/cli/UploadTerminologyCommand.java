@@ -45,6 +45,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -138,7 +139,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		IBaseParameters inputParameters;
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 			Parameters p = new Parameters();
-			p.addParameter().setName("url").setValue(new StringType(termUrl));
+			p.addParameter().setName("url").setValue(new UriType(termUrl));
 			p.addParameter().setName("localfile").setValue(new StringType(datafile));
 			inputParameters = p;
 		} else {
@@ -154,6 +155,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 			.execute();
 
 		ourLog.info("Upload complete!");
+		ourLog.info("Response:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 }

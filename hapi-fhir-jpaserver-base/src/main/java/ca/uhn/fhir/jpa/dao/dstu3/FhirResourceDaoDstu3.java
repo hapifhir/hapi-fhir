@@ -131,7 +131,9 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 		validator.registerValidatorModule(new IdChecker(theMode));
 
 		ValidationResult result;
-		if (isNotBlank(theRawResource)) {
+		if (theResource == null) {
+			throw new InvalidRequestException("No resource supplied for $validate operation (resource is required unless mode is \"delete\")");
+		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource);
 		} else {
 			result = validator.validateWithResult(theResource);

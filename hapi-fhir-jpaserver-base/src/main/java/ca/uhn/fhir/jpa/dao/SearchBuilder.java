@@ -1428,16 +1428,6 @@ public class SearchBuilder {
 		return singleCode;
 	}
 
-	private Set<String> toCodes(Set<TermConcept> theCodeConcepts) {
-		HashSet<String> retVal = Sets.newHashSet();
-		for (TermConcept next : theCodeConcepts) {
-			if (isNotBlank(next.getCode())) {
-				retVal.add(next.getCode());
-			}
-		}
-		return retVal;
-	}
-
 	private Predicate createResourceLinkPathPredicate(String theParamName, Root<? extends ResourceLink> from) {
 		return createResourceLinkPathPredicate(myContext, theParamName, from, myResourceType);
 	}

@@ -244,6 +244,10 @@
 				DateTime parser incorrectly parsed times where more than 3 digits of
 				precision were provided on the seconds after the decimal point
 			</action>
+			<action type="add">
+				Improve error messages when the $validate operation is called but no resource
+				is actually supplied to validate
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

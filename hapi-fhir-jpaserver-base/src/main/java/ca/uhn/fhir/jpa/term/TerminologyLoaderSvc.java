@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,6 +47,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -68,20 +70,35 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
 
-	private void dropCircularRefs(TermConcept theConcept, HashSet<String> theChain) {
+	private void dropCircularRefs(TermConcept theConcept, LinkedHashSet<String> theChain, Map<String, TermConcept> theCode2concept) {
 
+		theChain.add(theConcept.getCode());
 		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext();) {
 			TermConceptParentChildLink next = childIter.next();
 			TermConcept nextChild = next.getChild();
 			if (theChain.contains(nextChild.getCode())) {
-				ourLog.info("Removing circular reference code {} from parent {}", nextChild.getCode(), theConcept.getCode());
+				
+				StringBuilder b = new StringBuilder();
+				b.append("Removing circular reference code ");
+				b.append(nextChild.getCode());
+				b.append(" from parent ");
+				b.append(nextChild.getCode());
+				b.append(". Chain was: ");
+				for (String nextInChain : theChain) {
+					TermConcept nextCode = theCode2concept.get(nextInChain);
+					b.append(nextCode.getCode());
+					b.append('[');
+					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20).replace("[", "").replace("]", "").trim());
+					b.append("] ");
+				}
+				ourLog.info(b.toString(), theConcept.getCode());
 				childIter.remove();
 			} else {
-				theChain.add(theConcept.getCode());
-				dropCircularRefs(nextChild, theChain);
-				theChain.remove(theConcept.getCode());
+				dropCircularRefs(nextChild, theChain, theCode2concept);
 			}
 		}
+		theChain.remove(theConcept.getCode());
+		
 	}
 
 	private TermConcept getOrCreateConcept(TermCodeSystemVersion codeSystemVersion, Map<String, TermConcept> id2concept, String id) {
@@ -152,7 +169,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 					continue;
 				}
 
-				ourLog.debug("Streaming ZIP entry {} into temporary file", nextEntry.getName());
+				ourLog.info("Streaming ZIP entry {} into temporary file", nextEntry.getName());
 
 				File nextOutFile = File.createTempFile("hapi_fhir", ".csv");
 				nextOutFile.deleteOnExit();
@@ -206,7 +223,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
 		for (TermConcept next : rootConcepts.values()) {
-			dropCircularRefs(next, new HashSet<String>());
+			dropCircularRefs(next, new LinkedHashSet<String>(), code2concept);
 		}
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
