@@ -112,7 +112,7 @@ public class ValidateDstu2Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("profile").setValue(new StringDt("http://foo"));
-		params.addParameter().setName("mode").setValue(new StringDt(ValidationModeEnum.CREATE.name()));
+		params.addParameter().setName("mode").setValue(new StringDt(ValidationModeEnum.CREATE.getCode()));
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));

@@ -33,11 +33,11 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
-public class FhirResourceDaoTerminologyDstu3Test extends BaseJpaDstu3Test {
+public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	private static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoTerminologyDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3TerminologyTest.class);
 
 	@AfterClass
 	public static void afterClassClearContext() {

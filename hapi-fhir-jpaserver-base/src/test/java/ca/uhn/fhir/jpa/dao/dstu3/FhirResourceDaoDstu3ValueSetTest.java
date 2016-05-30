@@ -29,9 +29,9 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
-public class FhirResourceDaoValueSetDstu3Test extends BaseJpaDstu3Test {
+public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoValueSetDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ValueSetTest.class);
 
 	private IIdType myExtensionalVsId;
 
