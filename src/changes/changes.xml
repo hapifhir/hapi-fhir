@@ -248,6 +248,17 @@
 				Improve error messages when the $validate operation is called but no resource
 				is actually supplied to validate
 			</action>
+			<action type="remove">
+				DSTU2+ servers no longer return the Category header, as this has been
+				removed from the FHIR specification (and tags are now available in the
+				resource body so the header was duplication/wasted bandwidth)
+			</action>
+			<action type="fix" issue="374">
+				Create and Update operations in server did not
+				include ETag or Last-Modified headers even though
+				the spec says they should. Thanks to Jim Steel for
+				reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
