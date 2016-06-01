@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.blankOrNullString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -27,8 +29,10 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -40,19 +44,17 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
-public class UpdateConditionalTest {
+public class UpdateDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static String ourLastConditionalUrl;
 	private static IdDt ourLastId;
 	private static IdDt ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private static InstantDt ourSetLastUpdated;
 	
 
 	@Before
@@ -110,6 +112,34 @@ public class UpdateConditionalTest {
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+
+	}
+
+	@Test
+	public void testUpdateReturnsETagAndUpdate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.setId("123");
+		patient.addIdentifier().setValue("002");
+		ourSetLastUpdated = new InstantDt("2002-04-22T11:22:33.022Z");
+		
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/123");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+		ourLog.info("Response was:\n{}", status);
+		
+		assertThat(responseContent, blankOrNullString());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
+		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
 
 	}
 
@@ -188,7 +218,12 @@ public class UpdateConditionalTest {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;
-			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			MethodOutcome retVal = new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			
+			ResourceMetadataKeyEnum.UPDATED.put(thePatient, ourSetLastUpdated);
+			
+			retVal.setResource(thePatient);
+			return retVal;
 		}
 
 	}

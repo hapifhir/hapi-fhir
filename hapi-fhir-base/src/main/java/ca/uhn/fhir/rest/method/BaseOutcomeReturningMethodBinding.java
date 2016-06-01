@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +46,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -57,6 +60,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
+
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE);
 
 	private boolean myReturnVoid;
 
@@ -88,6 +93,43 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * operation in the URL if this method returns null.
 	 */
 	protected abstract String getMatchingOperation();
+
+	private int getOperationStatus(MethodOutcome response) {
+		switch (getRestOperationType()) {
+		case CREATE:
+			if (response == null) {
+				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
+			}
+			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
+				return Constants.STATUS_HTTP_201_CREATED;
+			} else {
+				return Constants.STATUS_HTTP_200_OK;
+			}
+
+		case UPDATE:
+			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
+				return Constants.STATUS_HTTP_200_OK;
+			} else {
+				return Constants.STATUS_HTTP_201_CREATED;
+			}
+
+		case VALIDATE:
+		case DELETE:
+		default:
+			if (response == null) {
+				if (isReturnVoid() == false) {
+					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+				}
+				return Constants.STATUS_HTTP_204_NO_CONTENT;
+			} else {
+				if (response.getOperationOutcome() == null) {
+					return Constants.STATUS_HTTP_204_NO_CONTENT;
+				} else {
+					return Constants.STATUS_HTTP_200_OK;
+				}
+			}
+		}
+	}
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
@@ -156,50 +198,18 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		return returnResponse(theServer, theRequest, response, outcome, resource);
 	}
-
-	private int getOperationStatus(MethodOutcome response) {
-		switch (getRestOperationType()) {
-		case CREATE:
-			if (response == null) {
-				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
-			}
-			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
-				return Constants.STATUS_HTTP_201_CREATED;
-			} else {
-				return Constants.STATUS_HTTP_200_OK;
-			}
-
-		case UPDATE:
-			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
-				return Constants.STATUS_HTTP_200_OK;
-			} else {
-				return Constants.STATUS_HTTP_201_CREATED;
-			}
-
-		case VALIDATE:
-		case DELETE:
-		default:
-			if (response == null) {
-				if (isReturnVoid() == false) {
-					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
-				}
-				return Constants.STATUS_HTTP_204_NO_CONTENT;
-			} else {
-				if (response.getOperationOutcome() == null) {
-					return Constants.STATUS_HTTP_204_NO_CONTENT;
-				} else {
-					return Constants.STATUS_HTTP_200_OK;
-				}
-			}
-		}
+	public boolean isReturnVoid() {
+		return myReturnVoid;
 	}
+
+	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
 	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
 		boolean allowPrefer = false;
 		int operationStatus = getOperationStatus(response);
 		IBaseResource outcome = originalOutcome;
 
-		if (EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE).contains(getRestOperationType())) {
+		if (ourOperationsWhichAllowPreferHeader.contains(getRestOperationType())) {
 			allowPrefer = true;
 		}
 
@@ -220,15 +230,32 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				return null;
 			}
 		}
+		
+		IRestfulResponse restfulResponse = theRequest.getResponse();
+		
+		if (response != null) {
+			if (response.getResource() != null) {
+				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(response.getResource()));
+			}
+			
+			IIdType responseId = response.getId();
+			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
+				responseId = responseId.withResourceType(getResourceName());
+			}
+			
+			if (responseId != null) {
+				String serverBase = theRequest.getFhirServerBase();
+				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, resource, serverBase, responseId);
+				restfulResponse.setOperationResourceId(responseId);
+			}
+		}
 
-		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+		Set<SummaryEnum> summaryMode = Collections.emptySet();
+
+		return restfulResponse.streamResponseAsResource(outcome, prettyPrint, summaryMode, operationStatus, theRequest.isRespondGzip(), true);
+//		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
 	}
-
-	public boolean isReturnVoid() {
-		return myReturnVoid;
-	}
-
-	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
 	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());

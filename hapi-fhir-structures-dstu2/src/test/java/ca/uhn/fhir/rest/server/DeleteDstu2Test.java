@@ -49,7 +49,7 @@ public class DeleteDstu2Test {
 
 	
 	@Test
-	public void testUpdateWithConditionalUrl() throws Exception {
+	public void testDeleteWithConditionalUrl() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
@@ -64,7 +64,7 @@ public class DeleteDstu2Test {
 	}
 
 	@Test
-	public void testUpdateWithoutConditionalUrl() throws Exception {
+	public void testDeleteWithoutConditionalUrl() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
@@ -73,6 +73,7 @@ public class DeleteDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
