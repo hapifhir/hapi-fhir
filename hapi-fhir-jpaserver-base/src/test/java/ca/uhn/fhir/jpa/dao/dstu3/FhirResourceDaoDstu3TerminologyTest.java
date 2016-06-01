@@ -6,7 +6,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -15,6 +18,9 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -263,6 +269,74 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testExpandWithSystemAndCodesInLocalValueSet() {
+		createLocalCsAndVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		include.addConcept().setCode("AAA");
+		include.addConcept().setCode("AB");
+		
+		ValueSet result = myValueSetDao.expand(vs, null);
+		
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("A", "AA", "AAA", "AB"));
+		
+		int idx = codes.indexOf("AAA");
+		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
+		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
+		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
+//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+//		
+	}
+
+	@Test
+	public void testExpandWithSystemAndCodesAndFilterInLocalValueSet() {
+		createLocalCsAndVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		include.addConcept().setCode("AAA");
+		include.addConcept().setCode("AB");
+
+		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Code AAA");
+		
+		ValueSet result = myValueSetDao.expand(vs, null);
+		
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("AAA"));
+		
+		assertEquals("AAA", result.getExpansion().getContains().get(0).getCode());
+		assertEquals("Code AAA", result.getExpansion().getContains().get(0).getDisplay());
+		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(0).getSystem());
+//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+//		
+	}
+
+	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
+		}
+		return retVal;
+	}
+
 
 	@Test
 	public void testSearchCodeAboveLocalCodesystem() {

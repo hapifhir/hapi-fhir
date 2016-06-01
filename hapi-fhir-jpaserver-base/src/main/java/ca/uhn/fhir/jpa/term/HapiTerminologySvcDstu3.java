@@ -24,8 +24,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.search.Filter;
+import org.apache.lucene.search.Query;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.query.dsl.BooleanJunction;
+import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -38,6 +48,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
@@ -54,12 +65,13 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements IValidationSupport, IHapiTerminologySvcDstu3 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcDstu3.class);
-	
+
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
 
@@ -96,7 +108,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		Long codeSystemResourcePid = resource.getId();
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
-		
+
 		theCodeSystemVersion.setResource(resource);
 		theCodeSystemVersion.setResourceVersionId(resource.getVersion());
 		super.storeNewCodeSystemVersion(codeSystemResourcePid, theSystem, theCodeSystemVersion);
@@ -108,25 +120,51 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		String system = theInclude.getSystem();
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		
-		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
-		
-		boolean haveSpecificWantedCode = false;
+
+		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
+		BooleanJunction<?> bool = qb.bool();
+
+		bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
+
+		Set<String> wantCodes = new HashSet<String>();
 		for (ConceptReferenceComponent next : theInclude.getConcept()) {
 			String nextCode = next.getCode();
 			if (isNotBlank(nextCode)) {
-				haveSpecificWantedCode = true;
-				TermConcept termCode = myConceptDao.findByCodeSystemAndCode(csv, nextCode);
-				if (termCode != null) {
-					addCodeIfFilterMatches(retVal, termCode, theInclude.getFilter(), nextCode);
+				wantCodes.add(nextCode);
+				bool.should(qb.keyword().onField("myCode").matching(nextCode).createQuery());
+			}
+		}
+
+		for (ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
+			if (nextFilter.getProperty().equals("display") && nextFilter.getOp() == FilterOperator.EQUAL) {
+				if (isNotBlank(nextFilter.getValue())) {
+					bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
 				}
+			} else if (nextFilter.getOp() == FilterOperator.ISA) {
+				if (isNotBlank(nextFilter.getValue())) {
+					TermConcept code = super.findCode(system, nextFilter.getValue());
+					bool.must(qb.keyword().onField("myParentPids").matching(code.getId()).createQuery());
+				}
+			} else {
+				throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
 			}
 		}
 		
-		if (!haveSpecificWantedCode) {
-			for(TermConcept next : myConceptDao.findByCodeSystemVersion(csv)) { 
-				addCodeIfFilterMatches(retVal, next, theInclude.getFilter(), system);
+		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
+		
+		Query luceneQuery = bool.createQuery();
+		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+		@SuppressWarnings("unchecked")
+		List<TermConcept> result = jpaQuery.getResultList();
+		for (TermConcept nextConcept : result) {
+			if (!wantCodes.isEmpty() && !wantCodes.contains(nextConcept.getCode())) {
+				continue;
 			}
+			ValueSetExpansionContainsComponent contains = retVal.addContains();
+			contains.setCode(nextConcept.getCode());
+			contains.setSystem(system);
+			contains.setDisplay(nextConcept.getDisplay());
 		}
 		
 		return retVal;
@@ -176,8 +214,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 			def.setDisplay(code.getDisplay());
 			return new CodeValidationResult(def);
 		}
-		
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unkonwn code {" + theCodeSystem +"}" + theCode);
+
+		return new CodeValidationResult(IssueSeverity.ERROR, "Unkonwn code {" + theCodeSystem + "}" + theCode);
 	}
 
 }

@@ -119,7 +119,11 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
 		filters = {
 			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-		}) // Def
+		}),
+	@AnalyzerDef(name = "exactAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+		})
 	}
 )
 //@formatter:on

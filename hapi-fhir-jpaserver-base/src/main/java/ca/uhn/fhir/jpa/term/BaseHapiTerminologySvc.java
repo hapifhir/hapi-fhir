@@ -28,6 +28,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +56,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvc.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
-	
+
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
 
@@ -64,12 +68,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 	@Autowired
 	private DaoConfig myDaoConfig;
-	
+
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
 	protected FhirContext myContext;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 
 	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
 		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
@@ -86,7 +93,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
 				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
 				throw new InvalidRequestException(msg);
-			}			
+			}
 		}
 		return retVal;
 	}
@@ -132,7 +139,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			return Collections.emptyList();
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		
+
 		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
@@ -164,96 +171,103 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			return Collections.emptyList();
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		
+
 		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
 	}
 
-	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
+	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, HashSet<Long> thePidsInHierarchy) {
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			return;
 		}
 
 		if (theConceptsStack.size() % 10000 == 0) {
-			ourLog.info("Have saved {} concepts",theConceptsStack.size());
+			ourLog.info("Have saved {} concepts", theConceptsStack.size());
 		}
+
+		theConcept.setParentPids(thePidsInHierarchy);
+		theConcept.setCodeSystem(theCodeSystem);
 		
-		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			persistChildren(next.getChild(), theCodeSystem, theConceptsStack);
-		}
+		TermConcept flushedConcept = myConceptDao.saveAndFlush(theConcept);
+		thePidsInHierarchy.add(flushedConcept.getId());
+		try {
+			for (TermConceptParentChildLink next : theConcept.getChildren()) {
+				persistChildren(next.getChild(), theCodeSystem, theConceptsStack, thePidsInHierarchy);
+			}
 
-		myConceptDao.save(theConcept);
-
-		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			myConceptParentChildLinkDao.save(next);
+			for (TermConceptParentChildLink next : theConcept.getChildren()) {
+				myConceptParentChildLinkDao.save(next);
+			}
+		} finally {
+			thePidsInHierarchy.remove(flushedConcept.getId());
 		}
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSystem) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSystemVersion) {
 		ourLog.info("Storing code system");
 
-		ValidateUtil.isNotNullOrThrowInvalidRequest(theCodeSystem.getResource() != null, "No resource supplied");
+		ValidateUtil.isNotNullOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
-		
+
 		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}
-			codeSystem.setResource(theCodeSystem.getResource());
+			codeSystem.setResource(theCodeSystemVersion.getResource());
 			codeSystem.setCodeSystemUri(theSystemUri);
 			myCodeSystemDao.save(codeSystem);
 		} else {
-			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystem.getResource().getId())) {
+			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
 				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
 		}
 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
-		
+
 		// Validate the code system
 		IdentityHashMap<TermConcept, Object> conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		int totalCodeCount = 0;
-		for (TermConcept next : theCodeSystem.getConcepts()) {
-			totalCodeCount += validateConceptForStorage(next, theCodeSystem, conceptsStack);
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack);
 		}
 
 		ourLog.info("Saving version");
 
-		myCodeSystemVersionDao.save(theCodeSystem);
+		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
 
 		ourLog.info("Saving code system");
 
-		codeSystem.setCurrentVersion(theCodeSystem);
-		myCodeSystemDao.save(codeSystem);
+		codeSystem.setCurrentVersion(theCodeSystemVersion);
+		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 
 		ourLog.info("Saving {} concepts...", totalCodeCount);
 
 		conceptsStack = new IdentityHashMap<TermConcept, Object>();
-		for (TermConcept next : theCodeSystem.getConcepts()) {
-			persistChildren(next, theCodeSystem, conceptsStack);
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+			persistChildren(next, codeSystemVersion, conceptsStack, new HashSet<Long>());
 		}
-		
+
 		/*
 		 * For now we always delete old versions.. At some point it would be
 		 * nice to allow configuration to keep old versions
 		 */
-		
+
 		ourLog.info("Deleting old sode system versions");
 		for (TermCodeSystemVersion next : existing) {
 			ourLog.info(" * Deleting code system version {}", next.getPid());
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			myConceptDao.deleteByCodeSystemVersion(next.getPid());
 		}
-		
+
 		ourLog.info("Done saving code system");
 	}
 
@@ -280,7 +294,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		ValidateUtil.isNotNullOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "Codesystem contains a code which does not reference the codesystem");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code which does not reference the codesystem");
 
-		
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
@@ -292,7 +305,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 
 		theConceptsStack.remove(theConcept);
-		
+
 		return retVal;
 	}
 
@@ -302,9 +315,8 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			return null;
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		
+
 		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 	}
-
 
 }
