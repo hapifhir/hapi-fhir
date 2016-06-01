@@ -52,13 +52,4 @@ public abstract class ParseAction<T> {
         };
     }
     
-    public static ParseAction<IBaseResource> create(IBaseResource outcome) {
-        return outcome == null ? null : new ParseAction<IBaseResource>(outcome) {
-            @Override
-            public void execute(IParser theParser, Writer theWriter) throws IOException {
-                theParser.encodeResourceToWriter(this.theOutcome, theWriter);
-            }
-        };
-    }
-
 }

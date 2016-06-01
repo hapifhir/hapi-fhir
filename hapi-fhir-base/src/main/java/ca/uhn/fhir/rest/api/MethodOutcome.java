@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public class MethodOutcome {
 
@@ -51,6 +52,7 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
+	@CoverageIgnore
 	public MethodOutcome(IIdType theId, Boolean theCreated) {
 		myId = theId;
 		myCreated = theCreated;
@@ -93,6 +95,7 @@ public class MethodOutcome {
 	 * @deprecated Use the constructor which accepts a single IIdType parameter, and include the logical ID and version ID in that IIdType instance
 	 */
 	@Deprecated
+	@CoverageIgnore
 	public MethodOutcome(IIdType theId, IdDt theVersionId) {
 		myId = theId;
 		myVersionId = theVersionId;
@@ -102,6 +105,7 @@ public class MethodOutcome {
 	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
 	 */
 	@Deprecated
+	@CoverageIgnore
 	public MethodOutcome(IIdType theId, IdDt theVersionId, IBaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;
@@ -152,6 +156,7 @@ public class MethodOutcome {
 	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
 	 */
 	@Deprecated
+	@CoverageIgnore
 	public IdDt getVersionId() {
 		return myVersionId;
 	}
@@ -204,6 +209,7 @@ public class MethodOutcome {
 	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IIdType)}
 	 */
 	@Deprecated
+	@CoverageIgnore
 	public void setVersionId(IdDt theVersionId) {
 		myVersionId = theVersionId;
 	}

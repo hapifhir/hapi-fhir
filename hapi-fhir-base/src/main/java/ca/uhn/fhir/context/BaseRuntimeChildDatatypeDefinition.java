@@ -28,13 +28,11 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
-import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDeclaredChildDefinition {
 
-	private Class<? extends ICodeEnum> myCodeType;
 	private Class<? extends IBase> myDatatype;
 
 	private BaseRuntimeElementDefinition<?> myElementDefinition;
@@ -87,10 +85,6 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		return null;
 	}
 
-	public Class<? extends ICodeEnum> getCodeType() {
-		return myCodeType;
-	}
-
 	public Class<? extends IBase> getDatatype() {
 		return myDatatype;
 	}
@@ -104,13 +98,6 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElementDefinition = theClassToElementDefinitions.get(getDatatype());
 		assert myElementDefinition != null : "Unknown type: " + getDatatype();
-	}
-
-	public void setCodeType(Class<? extends ICodeEnum> theType) {
-		if (myElementDefinition != null) {
-			throw new IllegalStateException("Can not set code type at runtime");
-		}
-		myCodeType = theType;
 	}
 
 	@Override

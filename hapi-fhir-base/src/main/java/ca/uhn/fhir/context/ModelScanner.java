@@ -39,7 +39,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ThreadFactory;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -60,10 +59,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
-import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -82,7 +79,6 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -98,7 +94,6 @@ class ModelScanner {
 	private Map<String, Class<? extends IBaseResource>> myNameToResourceType = new HashMap<String, Class<? extends IBaseResource>>();
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
-	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 	private FhirVersionEnum myVersion;
 
 	private Set<Class<? extends IBase>> myVersionTypes;
@@ -648,18 +643,6 @@ class ModelScanner {
 							def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 						} else {
 							def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
-						}
-					}
-
-					CodeableConceptElement concept = pullAnnotation(next, CodeableConceptElement.class);
-					if (concept != null) {
-						if (!ICodedDatatype.class.isAssignableFrom(nextDatatype)) {
-							throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is marked as @" + CodeableConceptElement.class.getCanonicalName()
-									+ " but type is not a subtype of " + ICodedDatatype.class.getName());
-						} else {
-							Class<? extends ICodeEnum> type = concept.type();
-							myScanAlsoCodeTable.add(type);
-							def.setCodeType(type);
 						}
 					}
 
