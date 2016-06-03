@@ -121,60 +121,82 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-		BooleanJunction<?> bool = qb.bool();
+		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
+		Set<String> addedCodes = new HashSet<String>();
+		boolean haveIncludeCriteria = false;
 
-		bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
-
-		Set<String> wantCodes = new HashSet<String>();
+		/*
+		 * Include Concepts
+		 */
 		for (ConceptReferenceComponent next : theInclude.getConcept()) {
 			String nextCode = next.getCode();
-			if (isNotBlank(nextCode)) {
-				wantCodes.add(nextCode);
-				bool.should(qb.keyword().onField("myCode").matching(nextCode).createQuery());
+			if (isNotBlank(nextCode) && !addedCodes.contains(nextCode)) {
+				haveIncludeCriteria = true;
+				TermConcept code = super.findCode(system, nextCode);
+				if (code != null) {
+					addedCodes.add(nextCode);
+					ValueSetExpansionContainsComponent contains = retVal.addContains();
+					contains.setCode(nextCode);
+					contains.setSystem(system);
+					contains.setDisplay(code.getDisplay());
+				}
 			}
 		}
 
-		for (ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
-			if (nextFilter.getProperty().equals("display") && nextFilter.getOp() == FilterOperator.EQUAL) {
-				if (isNotBlank(nextFilter.getValue())) {
-					bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
+		/*
+		 * Filters
+		 */
+
+		if (theInclude.getFilter().size() > 0) {
+			haveIncludeCriteria = true;
+
+			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+			QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
+			BooleanJunction<?> bool = qb.bool();
+
+			bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
+
+			for (ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
+				if (nextFilter.getProperty().equals("display") && nextFilter.getOp() == FilterOperator.EQUAL) {
+					if (isNotBlank(nextFilter.getValue())) {
+						bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
+					}
+				} else if (nextFilter.getOp() == FilterOperator.ISA) {
+					if (isNotBlank(nextFilter.getValue())) {
+						TermConcept code = super.findCode(system, nextFilter.getValue());
+						bool.must(qb.keyword().onField("myParentPids").matching(code.getId()).createQuery());
+					}
+				} else {
+					throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
 				}
-			} else if (nextFilter.getOp() == FilterOperator.ISA) {
-				if (isNotBlank(nextFilter.getValue())) {
-					TermConcept code = super.findCode(system, nextFilter.getValue());
-					bool.must(qb.keyword().onField("myParentPids").matching(code.getId()).createQuery());
-				}
-			} else {
-				throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
+			}
+
+			Query luceneQuery = bool.createQuery();
+			FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+			@SuppressWarnings("unchecked")
+			List<TermConcept> result = jpaQuery.getResultList();
+			for (TermConcept nextConcept : result) {
+				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
 		}
-		
-		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
-		
-		Query luceneQuery = bool.createQuery();
-		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
-		@SuppressWarnings("unchecked")
-		List<TermConcept> result = jpaQuery.getResultList();
-		for (TermConcept nextConcept : result) {
-			if (!wantCodes.isEmpty() && !wantCodes.contains(nextConcept.getCode())) {
-				continue;
+
+		if (!haveIncludeCriteria) {
+			List<TermConcept> allCodes = super.findCodes(system);
+			for (TermConcept nextConcept : allCodes) {
+				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
-			ValueSetExpansionContainsComponent contains = retVal.addContains();
-			contains.setCode(nextConcept.getCode());
-			contains.setSystem(system);
-			contains.setDisplay(nextConcept.getDisplay());
 		}
 		
 		return retVal;
 	}
 
-	private void addCodeIfFilterMatches(ValueSetExpansionComponent retVal, TermConcept termCode, List<ConceptSetFilterComponent> theFilters, String theSystem) {
-		ValueSetExpansionContainsComponent contains = retVal.addContains();
-		contains.setSystem(theSystem);
-		contains.setCode(termCode.getCode());
-		contains.setDisplay(termCode.getDisplay());
+	private void addCodeIfNotAlreadyAdded(String system, ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
+		if (addedCodes.add(nextConcept.getCode())) {
+			ValueSetExpansionContainsComponent contains = retVal.addContains();
+			contains.setCode(nextConcept.getCode());
+			contains.setSystem(system);
+			contains.setDisplay(nextConcept.getDisplay());
+		}
 	}
 
 	@Override
@@ -185,7 +207,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	@CoverageIgnore
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override

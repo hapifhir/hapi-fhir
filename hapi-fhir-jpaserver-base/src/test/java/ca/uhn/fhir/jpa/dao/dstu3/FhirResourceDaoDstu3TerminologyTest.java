@@ -132,38 +132,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSearchCodeInExternalCodesystem() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
-
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
-
-		TermConcept parentA = new TermConcept(cs, "ParentA");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB");
-		cs.getConcepts().add(parentB);
-
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
-
-		createLocalVs(codeSystem);
+		createExternalCsAndLocalVs();
 		
 		Observation obsPA = new Observation();
 		obsPA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("ParentA");
@@ -193,6 +162,48 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue(), idAAA.getValue(), idAAB.getValue()));
 		
+	}
+
+
+	private void createExternalCsAndLocalVs() {
+		CodeSystem codeSystem = createExternalCs();
+
+		createLocalVs(codeSystem);
+	}
+
+
+	private CodeSystem createExternalCs() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+
+		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		return codeSystem;
 	}
 
 	@Test
@@ -299,19 +310,48 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 //		
 	}
 
+
+
 	@Test
-	public void testExpandWithSystemAndCodesAndFilterInLocalValueSet() {
+	public void testExpandWithSystemAndCodesAndFilterInExternalValueSet() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("ParentA");
+		include.addConcept().setCode("childAA");
+		include.addConcept().setCode("childAAA");
+
+		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Parent B");
+		
+		ValueSet result = myValueSetDao.expand(vs, null);
+		
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "ParentB"));
+		
+		int idx = codes.indexOf("childAA");
+		assertEquals("childAA", result.getExpansion().getContains().get(idx).getCode());
+		assertEquals("Child AA", result.getExpansion().getContains().get(idx).getDisplay());
+		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
+	}
+
+	@Test
+	public void testExpandWithSystemAndCodesAndFilterKeywordInLocalValueSet() {
 		createLocalCsAndVs();
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addConcept().setCode("A");
-		include.addConcept().setCode("AA");
-		include.addConcept().setCode("AAA");
-		include.addConcept().setCode("AB");
+//		include.addConcept().setCode("A");
+//		include.addConcept().setCode("AA");
+//		include.addConcept().setCode("AAA");
+//		include.addConcept().setCode("AB");
 
-		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Code AAA");
+		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("AAA");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
 		
@@ -324,9 +364,42 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		assertEquals("AAA", result.getExpansion().getContains().get(0).getCode());
 		assertEquals("Code AAA", result.getExpansion().getContains().get(0).getDisplay());
 		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(0).getSystem());
-//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
-//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
 //		
+	}
+
+	@Test
+	public void testExpandWithNoResultsInLocalValueSet1() {
+		createLocalCsAndVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("ZZZZ");
+
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to find code 'ZZZZ' in code system http://example.com/my_code_system", e.getMessage());
+		}
+		
+	}
+
+	@Test
+	public void testExpandWithNoResultsInLocalValueSet2() {
+		createLocalCsAndVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM + "AA");
+		include.addConcept().setCode("A");
+
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("unable to find code system http://example.com/my_code_systemAA", e.getMessage());
+		}
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {

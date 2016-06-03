@@ -67,25 +67,16 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	protected ITermConceptDao myConceptDao;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
-
-	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
 	protected FhirContext myContext;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
-	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
-		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
-			TermConcept nextChild = nextChildLink.getChild();
-			if (addToSet(theSetToPopulate, nextChild)) {
-				fetchChildren(nextChild, theSetToPopulate);
-			}
-		}
-	}
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
@@ -96,6 +87,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			}
 		}
 		return retVal;
+	}
+
+	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			TermConcept nextChild = nextChildLink.getChild();
+			if (addToSet(theSetToPopulate, nextChild)) {
+				fetchChildren(nextChild, theSetToPopulate);
+			}
+		}
 	}
 
 	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -111,6 +111,17 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 				fetchParents(nextChild, theSetToPopulate);
 			}
 		}
+	}
+
+	public TermConcept findCode(String theCodeSystem, String theCode) {
+		TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
+
+		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
+	}
+
+	@Override
+	public List<TermConcept> findCodes(String theSystem) {
+		return myConceptDao.findByCodeSystemVersion(findCurrentCodeSystemVersionForSystem(theSystem));
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -175,6 +186,20 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
+	}
+
+	private TermCodeSystemVersion findCurrentCodeSystemVersionForSystem(String theCodeSystem) {
+		TermCodeSystem cs = getCodeSystem(theCodeSystem);
+		if (cs == null || cs.getCurrentVersion() == null) {
+			return null;
+		}
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		return csv;
+	}
+
+	private TermCodeSystem getCodeSystem(String theSystem) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		return cs;
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, HashSet<Long> thePidsInHierarchy) {
@@ -277,11 +302,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return cs != null;
 	}
 
-	private TermCodeSystem getCodeSystem(String theSystem) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
-		return cs;
-	}
-
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>(codes.size());
 		for (TermConcept next : codes) {
@@ -307,16 +327,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		theConceptsStack.remove(theConcept);
 
 		return retVal;
-	}
-
-	public TermConcept findCode(String theCodeSystem, String theCode) {
-		TermCodeSystem cs = getCodeSystem(theCodeSystem);
-		if (cs == null || cs.getCurrentVersion() == null) {
-			return null;
-		}
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
-
-		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 	}
 
 }

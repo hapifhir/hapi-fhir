@@ -158,23 +158,19 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		// @formatter:off
-		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-				"<expansion>", 
-					"<contains>", 
-						"<system value=\"http://acme.org\"/>",
-						"<code value=\"8450-9\"/>", 
-						"<display value=\"Systolic blood pressure--expiration\"/>", 
-					"</contains>",
-					"<contains>", 
-						"<system value=\"http://acme.org\"/>",
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>", 
-					"</contains>",
-				"</expansion>" 
-					));
-		//@formatter:on
+		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">")); 
+		assertThat(resp, containsString("<expansion>"));
+		assertThat(resp, containsString("<contains>"));
+		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
+		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>")); 
+		assertThat(resp, containsString("</contains>"));
+		assertThat(resp, containsString("<contains>"));
+		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
+		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>")); 
+		assertThat(resp, containsString("</contains>"));
+		assertThat(resp, containsString("</expansion>"));
 
 		/*
 		 * Filter with display name

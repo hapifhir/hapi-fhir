@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -75,7 +76,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		String filterLc = theFilter != null ? theFilter.toLowerCase() : null;
 
 		ValueSetExpansionOutcome outcome = workerContext.expand(source);
-		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
+			ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
 		if (isNotBlank(theFilter)) {
 			for (Iterator<ValueSetExpansionContainsComponent> containsIter = expansion.getContains().iterator(); containsIter.hasNext();) {
 				ValueSetExpansionContainsComponent nextContains = containsIter.next();

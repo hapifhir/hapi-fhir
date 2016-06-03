@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.terminologies;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -46,6 +48,7 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
@@ -144,20 +147,16 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
   }
 
   private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params) throws TerminologyServiceException, ETooCostly {
-	  if (context.supportsSystem(inc.getSystem())) {
-      try {
-        int i = codes.size();
+    CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
+	  if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(inc.getSystem())) {
         addCodes(context.expandVS(inc), params);
-        if (codes.size() > i)
-      return;
-      } catch (Exception e) {
-        // ok, we'll try locally
-      }
+        return;
 	  }
 	    
-	  CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
-	  if (cs == null)
-	  	throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+    if (cs == null)
+      throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+    if (cs.getContent() != CodeSystemContentMode.COMPLETE)
+      throw new TerminologyServiceException("Code system "+inc.getSystem().toString()+" is incomplete");
 	  if (cs.hasVersion())
       if (!existsInParams(params, "version", new UriType(cs.getUrl()+"?version="+cs.getVersion())))
         params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl()+"?version="+cs.getVersion())));
@@ -181,8 +180,17 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	  		if (def == null)
 	  			throw new TerminologyServiceException("Code '"+fc.getValue()+"' not found in system '"+inc.getSystem()+"'");
 	  		addCodeAndDescendents(cs, inc.getSystem(), def);
+	  	} else if ("display".equals(fc.getProperty()) && fc.getOp() == FilterOperator.EQUAL) {
+	  		ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
+	  		if (def != null) {
+		  		if (isNotBlank(def.getDisplay()) && isNotBlank(fc.getValue())) {
+		  			if (def.getDisplay().contains(fc.getValue())) {
+		  				addCode(inc.getSystem(), def.getCode(), def.getDisplay());
+		  			}
+		  		}
+	  		}
 	  	} else
-	  		throw new NotImplementedException("not done yet");
+	  		throw new NotImplementedException("Search by property[" + fc.getProperty() + "] and op[" + fc.getOp() + "] is not supported yet");
 	  }
   }
 

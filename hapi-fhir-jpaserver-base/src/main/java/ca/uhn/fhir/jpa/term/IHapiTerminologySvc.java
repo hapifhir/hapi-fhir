@@ -46,4 +46,6 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails);
 
+	List<TermConcept> findCodes(String theSystem);
+
 }

@@ -207,11 +207,12 @@ public class TermConcept implements Serializable {
 		}
 	}
 
-	public void setDisplay(String theDisplay) {
+	public TermConcept setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
 		if (isNotBlank(theDisplay) && theDisplay.length() > MAX_DESC_LENGTH) {
 			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
 		}
+		return this;
 	}
 
 	public void setParentPids(Set<Long> theParentPids) {

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
