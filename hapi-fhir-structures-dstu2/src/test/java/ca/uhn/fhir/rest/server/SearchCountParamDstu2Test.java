@@ -17,8 +17,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -33,11 +33,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchCountParamDstu3Test {
+public class SearchCountParamDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu3Test.class);
+	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourLastMethod;
@@ -158,7 +158,7 @@ public class SearchCountParamDstu3Test {
 			ourLastParam = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanNameDt().addFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}
@@ -172,7 +172,7 @@ public class SearchCountParamDstu3Test {
 			ourLastParam = null;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanNameDt().addFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}
