@@ -483,7 +483,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
 					} else if (nextAnnotation instanceof Sort) {
-						param = new SortParameter();
+						param = new SortParameter(theContext);
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {

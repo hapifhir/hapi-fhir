@@ -34,6 +34,7 @@ public class SortSpec {
 	 * Constructor
 	 */
 	public SortSpec() {
+		super();
 	}
 
 	/**

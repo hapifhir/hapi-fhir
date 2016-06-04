@@ -259,6 +259,10 @@
 				the spec says they should. Thanks to Jim Steel for
 				reporting!
 			</action>
+			<action type="fix" issue="371">
+				Update STU3 client and server to use the new sort parameter style (param1,-param2,param). Thanks to GitHub user @euz1e4r for
+				reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

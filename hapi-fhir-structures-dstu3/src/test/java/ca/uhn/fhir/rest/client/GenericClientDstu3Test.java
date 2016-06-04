@@ -24,6 +24,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -605,6 +606,60 @@ public class GenericClientDstu3Test {
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, extractBodyAsByteArray(capt));
 
+	}
+
+	/**
+	 * See #371
+	 */
+	@Test
+	public void testSortDstu3Test() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Bundle b = new Bundle();
+		b.setType(BundleType.SEARCHSET);
+
+		final String respString = p.encodeResourceToString(b);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		//@formatter:off
+		client
+			.search()
+			.forResource(Patient.class)
+			.sort().ascending("address")
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?_sort=address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+
+			client
+			.search()
+			.forResource(Patient.class)
+			.sort().descending("address")
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?_sort=-address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		
+			client
+			.search()
+			.forResource(Patient.class)
+			.sort().descending("address")
+			.sort().ascending("name")
+			.sort().descending(Patient.BIRTHDATE)
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate", capt.getAllValues().get(idx++).getURI().toASCIIString());
+	//@formatter:on
 	}
 
 	@Test
