@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -45,9 +47,11 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -58,17 +62,26 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
+	public static final String LOINC_FILE = "loinc.csv";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvc.class);
-	static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full";
-	static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
-
-	static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
+	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
+	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	
-
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
+	
+	private void cleanUpTemporaryFiles(Map<String, File> filenameToFile) {
+		ourLog.info("Finished terminology file import, cleaning up temporary files");
+		for (File nextFile : filenameToFile.values()) {
+			nextFile.delete();
+		}
+	}
 
 	private void dropCircularRefs(TermConcept theConcept, LinkedHashSet<String> theChain, Map<String, TermConcept> theCode2concept) {
 
@@ -101,56 +114,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		
 	}
 
-	private TermConcept getOrCreateConcept(TermCodeSystemVersion codeSystemVersion, Map<String, TermConcept> id2concept, String id) {
-		TermConcept concept = id2concept.get(id);
-		if (concept == null) {
-			concept = new TermConcept();
-			id2concept.put(id, concept);
-			concept.setCodeSystem(codeSystemVersion);
-		}
-		return concept;
-	}
-
-	private void iterateOverZipFile(Map<String, File> theFilenameToFile, String fileNamePart, IRecordHandler handler) {
-		for (Entry<String, File> nextEntry : theFilenameToFile.entrySet()) {
-
-			if (nextEntry.getKey().contains(fileNamePart)) {
-				ourLog.info("Processing file {}", nextEntry.getKey());
-
-				Reader reader = null;
-				CSVParser parsed = null;
-				try {
-					reader = new BufferedReader(new FileReader(nextEntry.getValue()));
-					parsed = new CSVParser(reader, CSVFormat.newFormat('\t').withFirstRecordAsHeader());
-					Iterator<CSVRecord> iter = parsed.iterator();
-					ourLog.debug("Header map: {}", parsed.getHeaderMap());
-
-					int count = 0;
-					int logIncrement = 100000;
-					int nextLoggedCount = logIncrement;
-					while (iter.hasNext()) {
-						CSVRecord nextRecord = iter.next();
-						handler.accept(nextRecord);
-						count++;
-						if (count >= nextLoggedCount) {
-							ourLog.info(" * Processed {} records in {}", count, fileNamePart);
-							nextLoggedCount += logIncrement;
-						}
-					}
-				} catch (IOException e) {
-					throw new InternalErrorException(e);
-				} finally {
-					IOUtils.closeQuietly(parsed);
-					IOUtils.closeQuietly(reader);
-				}
-			}
-		}
-	}
-
-	@Override
-	public UploadStatistics loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
-		List<String> allFilenames = Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
-
+	private Map<String, File> extractFiles(byte[] theZipBytes, List<String> theExpectedFilenameFragments) {
 		Map<String, File> filenameToFile = new HashMap<String, File>();
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(theZipBytes)));
 		try {
@@ -158,7 +122,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 				ZippedFileInputStream inputStream = new ZippedFileInputStream(zis);
 
 				boolean want = false;
-				for (String next : allFilenames) {
+				for (String next : theExpectedFilenameFragments) {
 					if (nextEntry.getName().contains(next)) {
 						want = true;
 					}
@@ -188,16 +152,110 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			IOUtils.closeQuietly(zis);
 		}
 
+		if (filenameToFile.size() != theExpectedFilenameFragments.size()) {
+			throw new InvalidRequestException("Invalid input zip file, expected zip to contain the following name fragments: " + theExpectedFilenameFragments + " but found: " + filenameToFile.keySet());
+		}
+		return filenameToFile;
+	}
+
+	private TermConcept getOrCreateConcept(TermCodeSystemVersion codeSystemVersion, Map<String, TermConcept> id2concept, String id) {
+		TermConcept concept = id2concept.get(id);
+		if (concept == null) {
+			concept = new TermConcept();
+			id2concept.put(id, concept);
+			concept.setCodeSystem(codeSystemVersion);
+		}
+		return concept;
+	}
+
+	private void iterateOverZipFile(Map<String, File> theFilenameToFile, String fileNamePart, IRecordHandler handler, char theDelimiter, QuoteMode theQuoteMode) {
+		boolean found = false;
+		for (Entry<String, File> nextEntry : theFilenameToFile.entrySet()) {
+
+			if (nextEntry.getKey().contains(fileNamePart)) {
+				ourLog.info("Processing file {}", nextEntry.getKey());
+				found = true;
+
+				Reader reader = null;
+				CSVParser parsed = null;
+				try {
+					reader = new BufferedReader(new FileReader(nextEntry.getValue()));
+					CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
+					if (theQuoteMode != null) {
+						format = format.withQuote('"').withQuoteMode(theQuoteMode);
+					}
+					parsed = new CSVParser(reader, format);
+					Iterator<CSVRecord> iter = parsed.iterator();
+					ourLog.debug("Header map: {}", parsed.getHeaderMap());
+
+					int count = 0;
+					int logIncrement = 100000;
+					int nextLoggedCount = logIncrement;
+					while (iter.hasNext()) {
+						CSVRecord nextRecord = iter.next();
+						handler.accept(nextRecord);
+						count++;
+						if (count >= nextLoggedCount) {
+							ourLog.info(" * Processed {} records in {}", count, fileNamePart);
+							nextLoggedCount += logIncrement;
+						}
+					}
+				} catch (IOException e) {
+					throw new InternalErrorException(e);
+				} finally {
+					IOUtils.closeQuietly(parsed);
+					IOUtils.closeQuietly(reader);
+				}
+			}
+		}
+		
+		// This should always be true, but just in case we've introduced a bug...
+		Validate.isTrue(found);
+	}
+
+	@Override
+	public UploadStatistics loadLoinc(byte[] theZipBytes, RequestDetails theRequestDetails) {
+		List<String> expectedFilenameFragments = Arrays.asList(LOINC_FILE);
+
+		Map<String, File> filenameToFile = extractFiles(theZipBytes, expectedFilenameFragments);
+		
+		ourLog.info("Beginning LOINC processing");
+
+		try {
+			return processLoincFiles(filenameToFile, theRequestDetails);
+		} finally {
+			cleanUpTemporaryFiles(filenameToFile);
+		}
+	}
+
+	@Override
+	public UploadStatistics loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
+		List<String> expectedFilenameFragments = Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
+
+		Map<String, File> filenameToFile = extractFiles(theZipBytes, expectedFilenameFragments);
+		
 		ourLog.info("Beginning SNOMED CT processing");
 
 		try {
 			return processSnomedCtFiles(filenameToFile, theRequestDetails);
 		} finally {
-			ourLog.info("Finished SNOMED CT file import, cleaning up temporary files");
-			for (File nextFile : filenameToFile.values()) {
-				nextFile.delete();
-			}
+			cleanUpTemporaryFiles(filenameToFile);
 		}
+	}
+
+	UploadStatistics processLoincFiles(Map<String, File> filenameToFile, RequestDetails theRequestDetails) {
+		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		final Map<String, TermConcept> code2concept = new HashMap<String, TermConcept>();
+
+		IRecordHandler handler = new LoincHandler(codeSystemVersion, code2concept);
+		iterateOverZipFile(filenameToFile, LOINC_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		ourLog.info("Have {} concepts", code2concept.size());
+		
+		codeSystemVersion.getConcepts().addAll(code2concept.values());
+		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
+		
+		return new UploadStatistics(code2concept.size());
 	}
 
 	UploadStatistics processSnomedCtFiles(Map<String, File> filenameToFile, RequestDetails theRequestDetails) {
@@ -207,18 +265,18 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		final Set<String> validConceptIds = new HashSet<String>();
 
 		IRecordHandler handler = new SctHandlerConcept(validConceptIds);
-		iterateOverZipFile(filenameToFile, SCT_FILE_CONCEPT, handler);
+		iterateOverZipFile(filenameToFile, SCT_FILE_CONCEPT, handler,'\t', null);
 
 		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
 
 		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
-		iterateOverZipFile(filenameToFile, SCT_FILE_DESCRIPTION, handler);
+		iterateOverZipFile(filenameToFile, SCT_FILE_DESCRIPTION, handler,'\t', null);
 
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
 		final HashMap<String, TermConcept> rootConcepts = new HashMap<String, TermConcept>(code2concept);
 
 		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
-		iterateOverZipFile(filenameToFile, SCT_FILE_RELATIONSHIP, handler);
+		iterateOverZipFile(filenameToFile, SCT_FILE_RELATIONSHIP, handler,'\t', null);
 
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
@@ -229,14 +287,15 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
 		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
 		
-		return new UploadStatistics().setConceptCount(code2concept.size());
+		return new UploadStatistics(code2concept.size());
 	}
-
+	
 	@VisibleForTesting
 	void setTermSvcForUnitTests(IHapiTerminologySvc theTermSvc) {
 		myTermSvc = theTermSvc;
 	}
 
+	@CoverageIgnore
 	public static void main(String[] args) throws Exception {
 		TerminologyLoaderSvc svc = new TerminologyLoaderSvc();
 
@@ -252,6 +311,33 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 	private interface IRecordHandler {
 		void accept(CSVRecord theRecord);
+	}
+
+	public class LoincHandler implements IRecordHandler {
+
+		private final Map<String, TermConcept> myCode2Concept;
+		private final TermCodeSystemVersion myCodeSystemVersion;
+
+		public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept) {
+			myCodeSystemVersion = theCodeSystemVersion;
+			myCode2Concept = theCode2concept;
+		}
+
+		@Override
+		public void accept(CSVRecord theRecord) {
+			String code = theRecord.get("LOINC_NUM");
+			String longCommonName = theRecord.get("LONG_COMMON_NAME");
+			String shortName = theRecord.get("SHORTNAME");
+			String consumerName = theRecord.get("CONSUMER_NAME");
+			String display = firstNonBlank(longCommonName, shortName, consumerName);
+			
+			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
+			concept.setDisplay(display);
+			
+			Validate.isTrue(!myCode2Concept.containsKey(code));
+			myCode2Concept.put(code, concept);
+		}
+
 	}
 
 	private final class SctHandlerConcept implements IRecordHandler {
@@ -434,6 +520,17 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		public int read() throws IOException {
 			return is.read();
 		}
+	}
+
+	public String firstNonBlank(String... theStrings) {
+		String retVal = "";
+		for (String nextString : theStrings) {
+			if (isNotBlank(nextString)) {
+				retVal = nextString;
+				break;
+			}
+		}
+		return retVal;
 	}
 
 }

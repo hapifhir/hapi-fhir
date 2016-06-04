@@ -27,9 +27,9 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 
-public class TerminologyProviderDstu3Test extends BaseResourceProviderDstu3Test {
+public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyProviderDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderDstu3Test.class);
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -48,6 +48,26 @@ public class TerminologyProviderDstu3Test extends BaseResourceProviderDstu3Test 
 			.onServer()
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URL))
+			.andParameter("package", new Attachment().setData(packageBytes))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+	}
+
+	@Test
+	public void testUploadLoinc() throws Exception {
+		byte[] packageBytes = createLoincZip();
+		
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onServer()
+			.named("upload-external-code-system")
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URL))
 			.andParameter("package", new Attachment().setData(packageBytes))
 			.execute();
 		//@formatter:on
@@ -154,4 +174,16 @@ public class TerminologyProviderDstu3Test extends BaseResourceProviderDstu3Test 
 		return packageBytes;
 	}
 	
+	private byte[] createLoincZip() throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(bos);
+		
+		zos.putNextEntry(new ZipEntry("loinc.csv"));
+		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/loinc.csv")));
+		zos.close();
+		
+		byte[] packageBytes = bos.toByteArray();
+		return packageBytes;
+	}
+
 }

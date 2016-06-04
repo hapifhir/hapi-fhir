@@ -340,6 +340,51 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testExpandWithExcludeInExternalValueSet() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+
+		ConceptSetComponent exclude = vs.getCompose().addExclude();
+		exclude.setSystem(URL_MY_CODE_SYSTEM);
+		exclude.addConcept().setCode("childAA");
+		exclude.addConcept().setCode("childAAA");
+		
+		ValueSet result = myValueSetDao.expand(vs, null);
+		
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB"));
+		
+	}
+
+	@Test
+	public void testExpandWithInvalidExclude() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+
+		/*
+		 * No system set on exclude
+		 */
+		ConceptSetComponent exclude = vs.getCompose().addExclude();
+		exclude.addConcept().setCode("childAA");
+		exclude.addConcept().setCode("childAAA");
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("ValueSet contains exclude criteria with no system defined", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testExpandWithSystemAndCodesAndFilterKeywordInLocalValueSet() {
 		createLocalCsAndVs();
 

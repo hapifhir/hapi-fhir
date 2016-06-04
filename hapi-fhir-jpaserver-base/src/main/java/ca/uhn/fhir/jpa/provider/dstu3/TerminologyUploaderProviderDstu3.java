@@ -68,6 +68,8 @@ public class TerminologyUploaderProviderDstu3 extends BaseJpaProvider {
 			UploadStatistics stats;
 			if (IHapiTerminologyLoaderSvc.SCT_URL.equals(url)) {
 				stats = myTerminologyLoaderSvc.loadSnomedCt(data, theRequestDetails);
+			} else if (IHapiTerminologyLoaderSvc.LOINC_URL.equals(url)) {
+					stats = myTerminologyLoaderSvc.loadLoinc(data, theRequestDetails);
 			} else {
 				throw new InvalidRequestException("Unknown URL: " + url);
 			}

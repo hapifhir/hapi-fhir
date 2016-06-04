@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ElementUtil;
 
 public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
@@ -70,12 +72,15 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		return retVal;
 	}
 
-	private ValueSet doExpand(ValueSet source, String theFilter) {
+	private ValueSet doExpand(ValueSet theSource, String theFilter) {
+		
+		validateIncludes("include", theSource.getCompose().getInclude());
+		validateIncludes("exclude", theSource.getCompose().getExclude());
 		
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
 		String filterLc = theFilter != null ? theFilter.toLowerCase() : null;
 
-		ValueSetExpansionOutcome outcome = workerContext.expand(source);
+		ValueSetExpansionOutcome outcome = workerContext.expand(theSource);
 			ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
 		if (isNotBlank(theFilter)) {
 			for (Iterator<ValueSetExpansionContainsComponent> containsIter = expansion.getContains().iterator(); containsIter.hasNext();) {
@@ -89,6 +94,14 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		ValueSet retVal = new ValueSet();
 		retVal.setExpansion(expansion);
 		return retVal;
+	}
+
+	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
+		for (ConceptSetComponent nextExclude : listToValidate) {
+			if (isBlank(nextExclude.getSystem()) && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
+				throw new InvalidRequestException("ValueSet contains " + name + " criteria with no system defined");
+			}
+		}
 	}
 
 	@Override
@@ -120,55 +133,6 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		ValueSet retVal = doExpand(source, theFilter);
 		return retVal;
 		
-//		ValueSet retVal = new ValueSet();
-//		retVal.setDate(new Date());
-//
-//		/*
-//		 * Add composed concepts
-//		 */
-//
-//		for (ConceptSetComponent nextInclude : source.getCompose().getInclude()) {
-//			if (nextInclude.getConcept().isEmpty()) {
-//				
-//			} else {
-//				for (ConceptReferenceComponent next : nextInclude.getConcept()) {
-//					if (isBlank(theFilter)) {
-//						addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
-//					} else {
-//						String filter = theFilter.toLowerCase();
-//						if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
-//							addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		return retVal;
-	}
-
-	private void addCompose(String theFilter, ValueSet theValueSetToPopulate, ValueSet theSourceValueSet, ConceptDefinitionComponent theConcept, String theSystem) {
-		if (isBlank(theFilter)) {
-			addCompose(theValueSetToPopulate, theSystem, theConcept.getCode(), theConcept.getDisplay());
-		} else {
-			String filter = theFilter.toLowerCase();
-			if (theConcept.getDisplay().toLowerCase().contains(filter) || theConcept.getCode().toLowerCase().contains(filter)) {
-				addCompose(theValueSetToPopulate, theSystem, theConcept.getCode(), theConcept.getDisplay());
-			}
-		}
-		for (ConceptDefinitionComponent nextChild : theConcept.getConcept()) {
-			addCompose(theFilter, theValueSetToPopulate, theSourceValueSet, nextChild, theSystem);
-		}
-	}
-
-	private void addCompose(ValueSet retVal, String theSystem, String theCode, String theDisplay) {
-		if (isBlank(theCode)) {
-			return;
-		}
-		ValueSetExpansionContainsComponent contains = retVal.getExpansion().addContains();
-		contains.setSystem(theSystem);
-		contains.setCode(theCode);
-		contains.setDisplay(theDisplay);
 	}
 
 	@Override
