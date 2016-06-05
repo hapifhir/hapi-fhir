@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the 
-		site. I don't know why this works... Need to investigate this. -->
+	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the site. I don't know why this works... 
+		Need to investigate this. -->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
@@ -74,7 +74,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j_target_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -120,9 +119,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>xmlunit</groupId>
+			<artifactId>xmlunit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
-			<version>2.4</version>
 			<classifier>jdk15</classifier>
 			<scope>test</scope>
 			<exclusions>
@@ -135,14 +139,12 @@
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
-			<version>2.4</version>
 			<classifier>jdk15-sources</classifier>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
-			<version>0.8</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -298,9 +300,9 @@
 					<runOrder>alphabetical</runOrder>
 					<argLine>-Xmx1624m</argLine>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					<!--<reportFormat>plain</reportFormat>-->
-					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>-->
-					<!--<reuseForks>false</reuseForks>-->
+					<!--<reportFormat>plain</reportFormat> -->
+					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine> -->
+					<!--<reuseForks>false</reuseForks> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -335,21 +337,22 @@
 					</execution>
 				</executions>
 			</plugin>
-
-<plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <version>0.7.6.201602180812</version>
-    <executions>
-        <execution>
-            <id>prepare-agent</id>
-            <goals>
-                <goal>prepare-agent</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
-
+			<!--
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.6.201602180812</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			-->
+			
 		</plugins>
 		<resources>
 		</resources>

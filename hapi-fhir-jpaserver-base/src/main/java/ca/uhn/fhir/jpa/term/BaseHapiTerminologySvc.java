@@ -202,30 +202,25 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return cs;
 	}
 
-	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, HashSet<Long> thePidsInHierarchy) {
+	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			return;
 		}
 
-		if (theConceptsStack.size() % 10000 == 0) {
-			ourLog.info("Have saved {} concepts", theConceptsStack.size());
+		if (theConceptsStack.size() % 1000 == 0) {
+			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
+			ourLog.info("Have saved {}/{} concepts - {}%", theConceptsStack.size(), theTotalConcepts, (int)( pct*100.0f));
 		}
 
-		theConcept.setParentPids(thePidsInHierarchy);
 		theConcept.setCodeSystem(theCodeSystem);
-		
-		TermConcept flushedConcept = myConceptDao.saveAndFlush(theConcept);
-		thePidsInHierarchy.add(flushedConcept.getId());
-		try {
-			for (TermConceptParentChildLink next : theConcept.getChildren()) {
-				persistChildren(next.getChild(), theCodeSystem, theConceptsStack, thePidsInHierarchy);
-			}
 
-			for (TermConceptParentChildLink next : theConcept.getChildren()) {
-				myConceptParentChildLinkDao.save(next);
-			}
-		} finally {
-			thePidsInHierarchy.remove(flushedConcept.getId());
+		myConceptDao.save(theConcept);
+		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			persistChildren(next.getChild(), theCodeSystem, theConceptsStack, theTotalConcepts);
+		}
+
+		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			myConceptParentChildLinkDao.save(next);
 		}
 	}
 
@@ -234,11 +229,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSystemVersion) {
 		ourLog.info("Storing code system");
 
-		ValidateUtil.isNotNullOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+
+		/*
+		 * Do the upload
+		 */
 
 		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
 		if (codeSystem == null) {
@@ -251,7 +250,8 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri, codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvc.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
+						codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
 		}
@@ -260,9 +260,10 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 		// Validate the code system
 		IdentityHashMap<TermConcept, Object> conceptsStack = new IdentityHashMap<TermConcept, Object>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack);
+			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
 		}
 
 		ourLog.info("Saving version");
@@ -278,22 +279,56 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 		conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-			persistChildren(next, codeSystemVersion, conceptsStack, new HashSet<Long>());
+			persistChildren(next, codeSystemVersion, conceptsStack, totalCodeCount);
 		}
 
+		ourLog.info("Done saving concepts, flushing to database");
+
+		myConceptDao.flush();
+		myConceptParentChildLinkDao.flush();
+
+		ourLog.info("Building multi-axial hierarchy...");
+		
+		int index = 0;
+		int totalParents = 0;
+		for (TermConcept nextConcept : conceptsStack.keySet()) {
+			
+			if (index++ % 1000 == 0) {
+				float pct = (float) index / (float) totalCodeCount;
+				ourLog.info("Have built hierarchy for {}/{} concepts - {}%", index, totalCodeCount, (int)( pct*100.0f));
+			}
+			
+			Set<Long> parentPids = new HashSet<Long>();
+			parentPids(nextConcept, parentPids);
+			nextConcept.setParentPids(parentPids);
+			totalParents += parentPids.size();
+			
+			myConceptDao.save(nextConcept);
+		}
+		
+		ourLog.info("Done building hierarchy, found {} parents", totalParents);
+
 		/*
-		 * For now we always delete old versions.. At some point it would be
-		 * nice to allow configuration to keep old versions
+		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
 		 */
 
-		ourLog.info("Deleting old sode system versions");
+		ourLog.info("Deleting old code system versions");
 		for (TermCodeSystemVersion next : existing) {
 			ourLog.info(" * Deleting code system version {}", next.getPid());
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			myConceptDao.deleteByCodeSystemVersion(next.getPid());
 		}
 
-		ourLog.info("Done saving code system");
+		ourLog.info("Done deleting old code system versions");
+	}
+
+	private void parentPids(TermConcept theNextConcept, Set<Long> theParentPids) {
+		for (TermConceptParentChildLink nextParentLink : theNextConcept.getParents()){
+			TermConcept parent = nextParentLink.getParent();
+			if (parent != null && theParentPids.add(parent.getId())) {
+				parentPids(parent, theParentPids);
+			}
+		}
 	}
 
 	@Override
@@ -310,18 +345,27 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return retVal;
 	}
 
-	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack) {
-		ValidateUtil.isNotNullOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "Codesystem contains a code which does not reference the codesystem");
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code which does not reference the codesystem");
+	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack,
+			IdentityHashMap<TermConcept, Object> theAllConcepts) {
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() != null, "CodesystemValue is null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "CodeSystems are not equal");
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
 
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
 
-		int retVal = 1;
+		int retVal = 0;
+		if (theAllConcepts.put(theConcept, theAllConcepts) == null) {
+			if (theAllConcepts.size() % 1000 == 0) {
+				ourLog.info("Have validated {} concepts", theAllConcepts.size());
+			}
+			retVal = 1;
+		}
+
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			next.setCodeSystem(theCodeSystem);
-			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack);
+			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack, theAllConcepts);
 		}
 
 		theConceptsStack.remove(theConcept);

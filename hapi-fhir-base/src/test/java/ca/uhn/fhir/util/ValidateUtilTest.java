@@ -11,10 +11,10 @@ public class ValidateUtilTest {
 
 	@Test
 	public void testValidate() {
-		ValidateUtil.isNotNullOrThrowInvalidRequest(true, "");
+		ValidateUtil.isTrueOrThrowInvalidRequest(true, "");
 		
 		try {
-			ValidateUtil.isNotNullOrThrowInvalidRequest(false, "The message");
+			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("The message", e.getMessage());

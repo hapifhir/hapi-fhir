@@ -202,7 +202,11 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
+	/**
+	 * This type of expansion doesn't really make sense..
+	 */
 	@Test
+	@Ignore
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");

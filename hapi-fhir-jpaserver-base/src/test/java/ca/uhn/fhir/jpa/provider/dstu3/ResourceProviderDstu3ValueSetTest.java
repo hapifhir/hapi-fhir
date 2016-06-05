@@ -109,7 +109,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "identifier", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-			.andParameter("filter", new StringType("11378"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
@@ -122,7 +121,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
 	@Test
@@ -135,7 +133,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "valueSet", toExpand)
-			.andParameter("filter", new StringType("11378"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
@@ -148,7 +145,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
 	@Test

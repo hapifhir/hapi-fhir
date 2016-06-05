@@ -321,6 +321,18 @@
 				<version>2.4</version>
 			</dependency>
 			<dependency>
+				<groupId>directory-naming</groupId>
+				<artifactId>naming-java</artifactId>
+				<version>0.8</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>javax.ejb</groupId>
 				<artifactId>ejb-api</artifactId>
 				<version>3.0</version>
@@ -364,6 +376,24 @@
 				<groupId>lt.velykis.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.json-lib</groupId>
+				<artifactId>json-lib</artifactId>
+				<version>2.4</version>
+				<classifier>jdk15</classifier>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.json-lib</groupId>
+				<artifactId>json-lib</artifactId>
+				<version>2.4</version>
+				<classifier>jdk15-sources</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>

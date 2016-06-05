@@ -38,6 +38,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import ca.uhn.fhir.util.CoverageIgnore;
+
 //@formatter:off
 @Table(name="TRM_CODESYSTEM_VER", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_CSV_RESOURCEPID_AND_VER", columnNames= {"RES_ID", "RES_VERSION_ID"})
@@ -72,6 +74,44 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public Long getPid() {
 		return myId;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
+		result = prime * result + ((myResourceVersionId == null) ? 0 : myResourceVersionId.hashCode());
+		return result;
+	}
+
+	@CoverageIgnore
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof TermCodeSystemVersion)) {
+			return false;
+		}
+		TermCodeSystemVersion other = (TermCodeSystemVersion) obj;
+		if ((myResource.getId() == null) != (other.myResource.getId() == null)) {
+			return false;
+		} else if (!myResource.getId().equals(other.myResource.getId())) {
+			return false;
+		}
+		
+		if (myResourceVersionId == null) {
+			if (other.myResourceVersionId != null) {
+				return false;
+			}
+		} else if (!myResourceVersionId.equals(other.myResourceVersionId)) {
+			return false;
+		}
+		return true;
 	}
 
 	public ResourceTable getResource() {

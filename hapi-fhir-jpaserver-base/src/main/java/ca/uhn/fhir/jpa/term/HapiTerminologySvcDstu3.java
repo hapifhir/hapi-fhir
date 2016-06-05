@@ -28,9 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
@@ -56,8 +53,11 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcom
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -99,11 +99,21 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRED)
 	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails) {
 		CodeSystem cs = new org.hl7.fhir.dstu3.model.CodeSystem();
 		cs.setUrl(theSystem);
 		cs.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType csId = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escape(theSystem), theRequestDetails).getId().toUnqualifiedVersionless();
+		
+		DaoMethodOutcome createOutcome = myCodeSystemResourceDao.create(cs, "CodeSystem?url=" + UrlUtil.escape(theSystem), theRequestDetails);
+		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
+		if (createOutcome.getCreated() != Boolean.TRUE) {
+			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
+			csId = myCodeSystemResourceDao.update(existing, theRequestDetails).getId();
+			
+			ourLog.info("Created new version of CodeSystem, got ID: {}", csId.toUnqualified().getValue());
+		}
+		
 		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
 		Long codeSystemResourcePid = resource.getId();
 
@@ -186,6 +196,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
 		}
+		
+		retVal.setTotal(retVal.getContains().size());
 		
 		return retVal;
 	}

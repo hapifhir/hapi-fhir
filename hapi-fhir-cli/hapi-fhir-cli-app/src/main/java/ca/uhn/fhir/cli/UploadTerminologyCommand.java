@@ -130,8 +130,8 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException("No URL provided");
 		}
 		
-		String datafile = theCommandLine.getOptionValue("d");
-		if (isBlank(datafile)) {
+		String[] datafile = theCommandLine.getOptionValues("d");
+		if (datafile == null || datafile.length == 0) {
 			throw new ParseException("No data file provided");
 		}
 
@@ -140,7 +140,9 @@ public class UploadTerminologyCommand extends BaseCommand {
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 			Parameters p = new Parameters();
 			p.addParameter().setName("url").setValue(new UriType(termUrl));
-			p.addParameter().setName("localfile").setValue(new StringType(datafile));
+			for (String next : datafile) {
+				p.addParameter().setName("localfile").setValue(new StringType(next));
+			}
 			inputParameters = p;
 		} else {
 			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());

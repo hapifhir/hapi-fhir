@@ -50,7 +50,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@JoinColumn(name="CODESYSTEM_PID", nullable=false, foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@ManyToOne()
+	@ManyToOne(cascade= {})
 	@JoinColumn(name="PARENT_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 

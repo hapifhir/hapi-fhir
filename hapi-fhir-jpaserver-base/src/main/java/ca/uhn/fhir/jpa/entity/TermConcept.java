@@ -106,7 +106,7 @@ public class TermConcept implements Serializable {
 	})
 	private String myParentPids;
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="myChild")
+	@OneToMany(cascade= {}, fetch=FetchType.LAZY, mappedBy="myChild")
 	private Collection<TermConceptParentChildLink> myParents;
 
 	@Column(name="CODESYSTEM_PID", insertable=false, updatable=false)
@@ -131,6 +131,8 @@ public class TermConcept implements Serializable {
 		link.setChild(theChild);
 		link.setRelationshipType(theRelationshipType);
 		getChildren().add(link);
+		
+		theChild.getParents().add(link);
 		return this;
 	}
 
@@ -150,12 +152,10 @@ public class TermConcept implements Serializable {
 		}
 		
 		TermConcept obj = (TermConcept)theObj;
-		if (obj.myId == null) {
-			return false;
-		}
-		
+
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myId, obj.myId);
+		b.append(myCodeSystem, obj.myCodeSystem);
+		b.append(myCode, obj.myCode);
 		return b.isEquals();
 	}
 
@@ -192,7 +192,8 @@ public class TermConcept implements Serializable {
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(myId);
+		b.append(myCodeSystem);
+		b.append(myCode);
 		return b.toHashCode();
 	}
 	

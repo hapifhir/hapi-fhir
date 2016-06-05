@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -60,6 +61,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc.LoincHierarchyHandler;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -68,14 +70,15 @@ import ca.uhn.fhir.util.CoverageIgnore;
 public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_FILE = "loinc.csv";
 
+	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvc.class);
+
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-	
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
-	
+
 	private void cleanUpTemporaryFiles(Map<String, File> filenameToFile) {
 		ourLog.info("Finished terminology file import, cleaning up temporary files");
 		for (File nextFile : filenameToFile.values()) {
@@ -90,7 +93,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			TermConceptParentChildLink next = childIter.next();
 			TermConcept nextChild = next.getChild();
 			if (theChain.contains(nextChild.getCode())) {
-				
+
 				StringBuilder b = new StringBuilder();
 				b.append("Removing circular reference code ");
 				b.append(nextChild.getCode());
@@ -111,51 +114,65 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			}
 		}
 		theChain.remove(theConcept.getCode());
-		
+
 	}
 
-	private Map<String, File> extractFiles(byte[] theZipBytes, List<String> theExpectedFilenameFragments) {
+	private Map<String, File> extractFiles(List<byte[]> theZipBytes, List<String> theExpectedFilenameFragments) {
 		Map<String, File> filenameToFile = new HashMap<String, File>();
-		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(theZipBytes)));
-		try {
-			for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null;) {
-				ZippedFileInputStream inputStream = new ZippedFileInputStream(zis);
 
-				boolean want = false;
-				for (String next : theExpectedFilenameFragments) {
-					if (nextEntry.getName().contains(next)) {
-						want = true;
+		for (byte[] nextZipBytes : theZipBytes) {
+			ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(nextZipBytes)));
+			try {
+				for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null;) {
+					ZippedFileInputStream inputStream = new ZippedFileInputStream(zis);
+
+					boolean want = false;
+					for (String next : theExpectedFilenameFragments) {
+						if (nextEntry.getName().contains(next)) {
+							want = true;
+						}
 					}
+
+					if (!want) {
+						ourLog.info("Ignoring zip entry: {}", nextEntry.getName());
+						continue;
+					}
+
+					ourLog.info("Streaming ZIP entry {} into temporary file", nextEntry.getName());
+
+					File nextOutFile = File.createTempFile("hapi_fhir", ".csv");
+					nextOutFile.deleteOnExit();
+					OutputStream outputStream = new SinkOutputStream(new FileOutputStream(nextOutFile, false), nextEntry.getName());
+					try {
+						IOUtils.copyLarge(inputStream, outputStream);
+					} finally {
+						IOUtils.closeQuietly(outputStream);
+					}
+
+					filenameToFile.put(nextEntry.getName(), nextOutFile);
 				}
-
-				if (!want) {
-					ourLog.info("Ignoring zip entry: {}", nextEntry.getName());
-					continue;
-				}
-
-				ourLog.info("Streaming ZIP entry {} into temporary file", nextEntry.getName());
-
-				File nextOutFile = File.createTempFile("hapi_fhir", ".csv");
-				nextOutFile.deleteOnExit();
-				OutputStream outputStream = new SinkOutputStream(new FileOutputStream(nextOutFile, false), nextEntry.getName());
-				try {
-					IOUtils.copyLarge(inputStream, outputStream);
-				} finally {
-					IOUtils.closeQuietly(outputStream);
-				}
-
-				filenameToFile.put(nextEntry.getName(), nextOutFile);
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			} finally {
+				IOUtils.closeQuietly(zis);
 			}
-		} catch (IOException e) {
-			throw new InternalErrorException(e);
-		} finally {
-			IOUtils.closeQuietly(zis);
 		}
 
 		if (filenameToFile.size() != theExpectedFilenameFragments.size()) {
 			throw new InvalidRequestException("Invalid input zip file, expected zip to contain the following name fragments: " + theExpectedFilenameFragments + " but found: " + filenameToFile.keySet());
 		}
 		return filenameToFile;
+	}
+
+	public String firstNonBlank(String... theStrings) {
+		String retVal = "";
+		for (String nextString : theStrings) {
+			if (isNotBlank(nextString)) {
+				retVal = nextString;
+				break;
+			}
+		}
+		return retVal;
 	}
 
 	private TermConcept getOrCreateConcept(TermCodeSystemVersion codeSystemVersion, Map<String, TermConcept> id2concept, String id) {
@@ -208,17 +225,17 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 				}
 			}
 		}
-		
+
 		// This should always be true, but just in case we've introduced a bug...
 		Validate.isTrue(found);
 	}
 
 	@Override
-	public UploadStatistics loadLoinc(byte[] theZipBytes, RequestDetails theRequestDetails) {
-		List<String> expectedFilenameFragments = Arrays.asList(LOINC_FILE);
+	public UploadStatistics loadLoinc(List<byte[]> theZipBytes, RequestDetails theRequestDetails) {
+		List<String> expectedFilenameFragments = Arrays.asList(LOINC_FILE, LOINC_HIERARCHY_FILE);
 
 		Map<String, File> filenameToFile = extractFiles(theZipBytes, expectedFilenameFragments);
-		
+
 		ourLog.info("Beginning LOINC processing");
 
 		try {
@@ -229,11 +246,11 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	}
 
 	@Override
-	public UploadStatistics loadSnomedCt(byte[] theZipBytes, RequestDetails theRequestDetails) {
+	public UploadStatistics loadSnomedCt(List<byte[]> theZipBytes, RequestDetails theRequestDetails) {
 		List<String> expectedFilenameFragments = Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
 
 		Map<String, File> filenameToFile = extractFiles(theZipBytes, expectedFilenameFragments);
-		
+
 		ourLog.info("Beginning SNOMED CT processing");
 
 		try {
@@ -250,11 +267,26 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		IRecordHandler handler = new LoincHandler(codeSystemVersion, code2concept);
 		iterateOverZipFile(filenameToFile, LOINC_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
-		ourLog.info("Have {} concepts", code2concept.size());
-		
-		codeSystemVersion.getConcepts().addAll(code2concept.values());
-		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
-		
+		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
+		iterateOverZipFile(filenameToFile, LOINC_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		for (Iterator<Entry<String, TermConcept>> iter = code2concept.entrySet().iterator(); iter.hasNext();) {
+			Entry<String, TermConcept> next = iter.next();
+			// if (isBlank(next.getKey())) {
+			// ourLog.info("Removing concept with blankc code[{}] and display [{}", next.getValue().getCode(), next.getValue().getDisplay());
+			// iter.remove();
+			// continue;
+			// }
+			TermConcept nextConcept = next.getValue();
+			if (nextConcept.getParents().isEmpty()) {
+				codeSystemVersion.getConcepts().add(nextConcept);
+			}
+		}
+
+		ourLog.info("Have {} total concepts, {} root concepts", code2concept.size(), codeSystemVersion.getConcepts().size());
+
+		myTermSvc.storeNewCodeSystemVersion(LOINC_URL, codeSystemVersion, theRequestDetails);
+
 		return new UploadStatistics(code2concept.size());
 	}
 
@@ -265,18 +297,18 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		final Set<String> validConceptIds = new HashSet<String>();
 
 		IRecordHandler handler = new SctHandlerConcept(validConceptIds);
-		iterateOverZipFile(filenameToFile, SCT_FILE_CONCEPT, handler,'\t', null);
+		iterateOverZipFile(filenameToFile, SCT_FILE_CONCEPT, handler, '\t', null);
 
 		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
 
 		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
-		iterateOverZipFile(filenameToFile, SCT_FILE_DESCRIPTION, handler,'\t', null);
+		iterateOverZipFile(filenameToFile, SCT_FILE_DESCRIPTION, handler, '\t', null);
 
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
 		final HashMap<String, TermConcept> rootConcepts = new HashMap<String, TermConcept>(code2concept);
 
 		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
-		iterateOverZipFile(filenameToFile, SCT_FILE_RELATIONSHIP, handler,'\t', null);
+		iterateOverZipFile(filenameToFile, SCT_FILE_RELATIONSHIP, handler, '\t', null);
 
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
@@ -286,10 +318,10 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
 		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
-		
+
 		return new UploadStatistics(code2concept.size());
 	}
-	
+
 	@VisibleForTesting
 	void setTermSvcForUnitTests(IHapiTerminologySvc theTermSvc) {
 		myTermSvc = theTermSvc;
@@ -299,8 +331,8 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	public static void main(String[] args) throws Exception {
 		TerminologyLoaderSvc svc = new TerminologyLoaderSvc();
 
-		//		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
-		//		svc.loadSnomedCt(bytes);
+		// byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
+		// svc.loadSnomedCt(bytes);
 
 		Map<String, File> files = new HashMap<String, File>();
 		files.put(SCT_FILE_CONCEPT, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Concept_Full_INT_20160131.txt"));
@@ -326,16 +358,56 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		@Override
 		public void accept(CSVRecord theRecord) {
 			String code = theRecord.get("LOINC_NUM");
-			String longCommonName = theRecord.get("LONG_COMMON_NAME");
-			String shortName = theRecord.get("SHORTNAME");
-			String consumerName = theRecord.get("CONSUMER_NAME");
-			String display = firstNonBlank(longCommonName, shortName, consumerName);
-			
-			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
-			concept.setDisplay(display);
-			
-			Validate.isTrue(!myCode2Concept.containsKey(code));
-			myCode2Concept.put(code, concept);
+			if (isNotBlank(code)) {
+				String longCommonName = theRecord.get("LONG_COMMON_NAME");
+				String shortName = theRecord.get("SHORTNAME");
+				String consumerName = theRecord.get("CONSUMER_NAME");
+				String display = firstNonBlank(longCommonName, shortName, consumerName);
+
+				TermConcept concept = new TermConcept(myCodeSystemVersion, code);
+				concept.setDisplay(display);
+
+				Validate.isTrue(!myCode2Concept.containsKey(code));
+				myCode2Concept.put(code, concept);
+			}
+		}
+
+	}
+
+	public class LoincHierarchyHandler implements IRecordHandler {
+
+		private Map<String, TermConcept> myCode2Concept;
+		private TermCodeSystemVersion myCodeSystemVersion;
+
+		public LoincHierarchyHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept) {
+			myCodeSystemVersion = theCodeSystemVersion;
+			myCode2Concept = theCode2concept;
+		}
+
+		@Override
+		public void accept(CSVRecord theRecord) {
+			String parentCode = theRecord.get("IMMEDIATE_PARENT");
+			String childCode = theRecord.get("CODE");
+			String childCodeText = theRecord.get("CODE_TEXT");
+
+			if (isNotBlank(parentCode) && isNotBlank(childCode)) {
+				TermConcept parent = getOrCreate(parentCode, "(unknown)");
+				TermConcept child = getOrCreate(childCode, childCodeText);
+
+				parent.addChild(child, RelationshipTypeEnum.ISA);
+			}
+		}
+
+		private TermConcept getOrCreate(String theCode, String theDisplay) {
+			TermConcept retVal = myCode2Concept.get(theCode);
+			if (retVal == null) {
+				retVal = new TermConcept();
+				retVal.setCodeSystem(myCodeSystemVersion);
+				retVal.setCode(theCode);
+				retVal.setDisplay(theDisplay);
+				myCode2Concept.put(theCode, retVal);
+			}
+			return retVal;
 		}
 
 	}
@@ -428,18 +500,20 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			TermConcept sourceConcept = findConcept(myCode2concept, sourceId);
 			TermConcept targetConcept = findConcept(myCode2concept, destinationId);
 			if (typeConcept.getDisplay().equals("Is a (attribute)")) {
-				TermConceptParentChildLink link = new TermConceptParentChildLink();
-				link.setChild(sourceConcept);
-				link.setParent(targetConcept);
-				link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-				link.setCodeSystem(myCodeSystemVersion);
-				myRootConcepts.remove(link.getChild().getCode());
+				if (!sourceId.equals(destinationId)) {
+					TermConceptParentChildLink link = new TermConceptParentChildLink();
+					link.setChild(sourceConcept);
+					link.setParent(targetConcept);
+					link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+					link.setCodeSystem(myCodeSystemVersion);
+					myRootConcepts.remove(link.getChild().getCode());
 
-				targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+					targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+				}
 			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
 				// ignore
 			} else {
-				//				ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
+				// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 			}
 		}
 
@@ -520,17 +594,6 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		public int read() throws IOException {
 			return is.read();
 		}
-	}
-
-	public String firstNonBlank(String... theStrings) {
-		String retVal = "";
-		for (String nextString : theStrings) {
-			if (isNotBlank(nextString)) {
-				retVal = nextString;
-				break;
-			}
-		}
-		return retVal;
 	}
 
 }

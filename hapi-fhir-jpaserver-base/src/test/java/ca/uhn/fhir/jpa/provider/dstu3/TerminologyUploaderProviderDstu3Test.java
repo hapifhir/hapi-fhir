@@ -76,6 +76,24 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		ourLog.info(resp);
 		
 		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		
+		/*
+		 * Try uploading a second time
+		 */
+		
+		//@formatter:off
+		respParam = ourClient
+			.operation()
+			.onServer()
+			.named("upload-external-code-system")
+			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URL))
+			.andParameter("package", new Attachment().setData(packageBytes))
+			.execute();
+		//@formatter:on
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
 	}
 
 	@Test
@@ -180,6 +198,8 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		
 		zos.putNextEntry(new ZipEntry("loinc.csv"));
 		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/loinc.csv")));
+		zos.putNextEntry(new ZipEntry("LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV"));
+		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV")));
 		zos.close();
 		
 		byte[] packageBytes = bos.toByteArray();

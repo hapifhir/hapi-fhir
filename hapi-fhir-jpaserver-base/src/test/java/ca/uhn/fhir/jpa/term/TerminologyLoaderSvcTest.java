@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,15 +41,20 @@ public class TerminologyLoaderSvcTest {
 
 	@Test
 	public void testLoadLoinc() throws Exception {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
-		addEntry(zos,"/loinc/",  "loinc.csv");
-		zos.close();
+		ByteArrayOutputStream bos1 = new ByteArrayOutputStream();
+		ZipOutputStream zos1 = new ZipOutputStream(bos1);
+		addEntry(zos1,"/loinc/",  "loinc.csv");
+		zos1.close();
+		ourLog.info("ZIP file has {} bytes", bos1.toByteArray().length);
 		
-		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
+		ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+		ZipOutputStream zos2 = new ZipOutputStream(bos2);
+		addEntry(zos2,"/loinc/",  "LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV");
+		zos2.close();
+		ourLog.info("ZIP file has {} bytes", bos2.toByteArray().length);
 		
 		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadLoinc(bos.toByteArray(), details);
+		mySvc.loadLoinc(Arrays.asList(bos1.toByteArray(), bos2.toByteArray()), details);
 	}
 
 	@Test
@@ -66,7 +73,7 @@ public class TerminologyLoaderSvcTest {
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 		
 		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadSnomedCt(bos.toByteArray(), details);
+		mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
 	}
 
 	@Test
@@ -80,7 +87,7 @@ public class TerminologyLoaderSvcTest {
 		
 		RequestDetails details = mock(RequestDetails.class);
 		try {
-			mySvc.loadSnomedCt(bos.toByteArray(), details);
+			mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid input zip file, expected zip to contain the following name fragments: [Terminology/sct2_Description_Full-en, Terminology/sct2_Relationship_Full, Terminology/sct2_Concept_Full_] but found: []", e.getMessage());
