@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util.jar;
 
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ReflectionUtil;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,16 +24,16 @@ package ca.uhn.fhir.util.jar;
  */
 
 public class DependencyLogFactory {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DependencyLogFactory.class);
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * Non instantiable
+	 */
+	@CoverageIgnore
+	private DependencyLogFactory() {
+		// nothing
+	}
+	
 	public static IDependencyLog createJarLogger() {
-		try {
-			Class<IDependencyLog> clas = (Class<IDependencyLog>) Class.forName("ca.uhn.fhir.util.jar.DependencyLogImpl");
-			return clas.newInstance();
-		} catch (Exception e) {
-			ourLog.info("Could not log dependency.");
-			return null;
-		}
+		return ReflectionUtil.newInstanceOrReturnNull("ca.uhn.fhir.util.jar.DependencyLogImpl", IDependencyLog.class);
 	}
 }

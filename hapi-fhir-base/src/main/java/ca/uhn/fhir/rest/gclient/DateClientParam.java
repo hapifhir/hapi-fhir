@@ -25,6 +25,7 @@ import java.util.Date;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
  * Date parameter type for use in fluent client interfaces
@@ -43,30 +44,32 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 	}
 
 	public IDateSpecifier after() {
-		return new DateWithPrefix(">");
+		return new DateWithPrefix(ParamPrefixEnum.GREATERTHAN);
 	}
 
 	public IDateSpecifier afterOrEquals() {
-		return new DateWithPrefix(">=");
+		return new DateWithPrefix(ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
 	}
 
 	public IDateSpecifier before() {
-		return new DateWithPrefix("<");
+		return new DateWithPrefix(ParamPrefixEnum.LESSTHAN);
 	}
 
 	public IDateSpecifier beforeOrEquals() {
-		return new DateWithPrefix("<=");
+		return new DateWithPrefix(ParamPrefixEnum.LESSTHAN_OR_EQUALS);
 	}
 
 	public IDateSpecifier exactly() {
-		return new DateWithPrefix("");
+		return new DateWithPrefix(ParamPrefixEnum.EQUAL);
 	}
 
 	private class Criterion implements ICriterion<DateClientParam>, ICriterionInternal {
 
 		private String myValue;
+		private ParamPrefixEnum myPrefix;
 
-		public Criterion(String theValue) {
+		public Criterion(ParamPrefixEnum thePrefix, String theValue) {
+			myPrefix = thePrefix;
 			myValue = theValue;
 		}
 
@@ -77,15 +80,20 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 
 		@Override
 		public String getParameterValue(FhirContext theContext) {
-			return myValue;
+			StringBuilder b = new StringBuilder();
+			if (myPrefix != null && myPrefix != ParamPrefixEnum.EQUAL) {
+				b.append(myPrefix.getValueForContext(theContext));
+			}
+			b.append(myValue);
+			return b.toString();
 		}
 
 	}
 
 	private class DateWithPrefix implements IDateSpecifier {
-		private String myPrefix;
+		private ParamPrefixEnum myPrefix;
 
-		public DateWithPrefix(String thePrefix) {
+		public DateWithPrefix(ParamPrefixEnum thePrefix) {
 			myPrefix = thePrefix;
 		}
 
@@ -93,35 +101,35 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		public ICriterion<DateClientParam> day(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
-			return new Criterion(myPrefix + dt.getValueAsString());
+			return new Criterion(myPrefix, dt.getValueAsString());
 		}
 
 		@Override
 		public ICriterion<DateClientParam> day(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
-			return new Criterion(myPrefix + dt.getValueAsString());
+			return new Criterion(myPrefix , dt.getValueAsString());
 		}
 
 		@Override
 		public ICriterion<DateClientParam> now() {
-			DateTimeDt dt = new DateTimeDt();
-			dt.setPrecision(TemporalPrecisionEnum.DAY);
-			return new Criterion(myPrefix + dt.getValueAsString());
+			DateTimeDt dt = DateTimeDt.withCurrentTime();
+			dt.setPrecision(TemporalPrecisionEnum.SECOND);
+			return new Criterion(myPrefix , dt.getValueAsString());
 		}
 
 		@Override
 		public ICriterion<DateClientParam> second(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
-			return new Criterion(myPrefix + dt.getValueAsString());
+			return new Criterion(myPrefix , dt.getValueAsString());
 		}
 
 		@Override
 		public ICriterion<DateClientParam> second(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
-			return new Criterion(myPrefix + dt.getValueAsString());
+			return new Criterion(myPrefix , dt.getValueAsString());
 		}
 
 	}

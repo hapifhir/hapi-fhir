@@ -57,6 +57,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -1801,6 +1802,75 @@ public class GenericClientDstu2Test {
 
 		assertEquals("http://example.com/fhir/Patient?name=james", capt.getValue().getURI().toString());
 		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+
+	}
+
+	@Test
+	public void testSearchByNumber() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.greaterThan().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=gt123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.lessThan().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=lt123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.greaterThanOrEqual().number("123"))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=ge123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.lessThanOrEqual().number("123"))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=le123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.exactly().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
 
 	}
 

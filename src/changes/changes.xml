@@ -263,6 +263,14 @@
 				Update STU3 client and server to use the new sort parameter style (param1,-param2,param). Thanks to GitHub user @euz1e4r for
 				reporting!
 			</action>
+			<action type="fix">
+				QuantityClientParam#withUnit(String) put the unit into the system part of the
+				parameter value
+			</action>
+			<action type="fix">
+				Fluent client searches with date parameters were not correctly using
+				new prefix style (e.g. gt) instead of old one (e.g. &gt;) 
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

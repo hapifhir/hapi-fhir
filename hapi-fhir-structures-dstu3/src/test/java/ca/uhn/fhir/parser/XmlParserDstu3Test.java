@@ -120,6 +120,26 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeDivWithPre() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<div>\n\n<p>A P TAG</p><p><pre>line1\nline2\nline3  <b>BOLD</b></pre></p></div>");
+		
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"   <text>",
+			"      <div",
+			"         <pre>line1\nline2\nline3  <b>BOLD</b></pre>"
+		));
+		//@formatter:on
+		
+	}
+
+	
+	@Test
 	public void testEncodeContainedWithNonLocalId() throws Exception {
 
 		Patient p = new Patient();

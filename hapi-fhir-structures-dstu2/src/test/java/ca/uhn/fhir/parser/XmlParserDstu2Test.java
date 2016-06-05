@@ -45,12 +45,10 @@ import com.google.common.collect.Sets;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -139,7 +137,7 @@ public class XmlParserDstu2Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
 	}
-
+	
 	@Test
 	public void testChoiceTypeWithProfiledType() {
 		//@formatter:off
@@ -1040,6 +1038,25 @@ public class XmlParserDstu2Test {
 		assertThat(encoded, not(containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
+	}
+
+	@Test
+	public void testEncodeDivWithPre() {
+		
+		Patient p = new Patient();
+		p.getText().setDiv("<div>\n\n<p>A P TAG</p><p><pre>line1\nline2\nline3  <b>BOLD</b></pre></p></div>");
+		
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"   <text>",
+			"      <div",
+			"         <pre>line1\nline2\nline3  <b>BOLD</b></pre>"
+		));
+		//@formatter:on
+		
 	}
 
 	@Test
@@ -2253,16 +2270,6 @@ public class XmlParserDstu2Test {
 
 	}
 
-	@Test
-	public void testParseInvalidTextualNumber() {
-		Observation obs = new Observation();
-		obs.setValue(new QuantityDt().setValue(1234));
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
-		encoded = encoded.replace("1234", "\"1234\"");
-		ourLog.info(encoded);
-		ourCtx.newJsonParser().parseResource(encoded);
-	}
-
 	/**
 	 * See #366
 	 */
@@ -2275,6 +2282,16 @@ public class XmlParserDstu2Test {
 		//@formatter:on
 		
 		ourCtx.newXmlParser().parseResource(resource);
+	}
+
+	@Test
+	public void testParseInvalidTextualNumber() {
+		Observation obs = new Observation();
+		obs.setValue(new QuantityDt().setValue(1234));
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		encoded = encoded.replace("1234", "\"1234\"");
+		ourLog.info(encoded);
+		ourCtx.newJsonParser().parseResource(encoded);
 	}
 
 	/**

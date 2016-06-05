@@ -1,19 +1,28 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.lang3.time.FastDateParser;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -26,6 +35,8 @@ import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -41,13 +52,19 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class GenericClientDstu3Test {
@@ -708,4 +725,402 @@ public class GenericClientDstu3Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu3();
 	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testSearchByQuantity() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.approximately().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.approximately().number("123").andUnits("CODE"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123||CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.approximately().number("123").andUnits("SYSTEM", "CODE"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123|SYSTEM|CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.exactly().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.exactly().number("123").andUnits("CODE"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=123||CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.exactly().number("123").andUnits("SYSTEM", "CODE"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=123|SYSTEM|CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.greaterThan().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.lessThan().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=lt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.greaterThanOrEquals().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=ge123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.lessThanOrEquals().number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=le123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.withComparator(QuantityCompararatorEnum.GREATERTHAN).number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Observation")
+			.where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.GREATERTHAN).number(123).andNoUnits())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+	}
+
+	@Test
+	public void testSearchByUrl() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		//@formatter:off
+		client.search()
+			.forResource("Device")
+			.where(Device.URL.matches().value("http://foo.com"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("http://example.com/fhir/Device?url=http%3A%2F%2Ffoo.com", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Device")
+			.where(Device.URL.matches().value(new StringDt("http://foo.com")))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+	}
+
+	
+	@Test
+	public void testSearchByString() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("AAA"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name=AAA", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value(new StringDt("AAA")))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name=AAA", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().values("AAA", "BBB"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().values(Arrays.asList("AAA", "BBB")))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+		
+		
+		
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matchesExactly().value("AAA"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name%3Aexact=AAA", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matchesExactly().value(new StringDt("AAA")))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name%3Aexact=AAA", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matchesExactly().values("AAA", "BBB"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name:exact=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matchesExactly().values(Arrays.asList("AAA", "BBB")))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?name:exact=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+	}
+
+	@Test
+	public void testSearchByDate() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+		
+		Date date = new DateTimeDt("2011-01-02T22:33:01Z").getValue();
+		
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().day("2011-01-02"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().day(date))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.afterOrEquals().day("2011-01-02"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=ge2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.before().day("2011-01-02"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=lt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-02"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=le2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.exactly().day("2011-01-02"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().second("2011-01-02T22:33:01Z"))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02T22:33:01Z", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		String expDate = new DateTimeDt(date).getValueAsString();
+		
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().second(date))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + expDate, UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().now())
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertThat(capt.getAllValues().get(idx).getURI().toString(), startsWith("http://example.com/fhir/Patient?birthdate=gt2"));
+		String dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()).substring(44);
+		ourLog.info(dateString);
+		assertEquals(TemporalPrecisionEnum.SECOND, new DateTimeDt(dateString).getPrecision());
+		idx++;
+	}
+
 }

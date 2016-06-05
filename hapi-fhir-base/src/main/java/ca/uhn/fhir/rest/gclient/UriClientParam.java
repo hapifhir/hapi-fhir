@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  *
@@ -45,11 +46,22 @@ public class UriClientParam extends BaseClientParam  implements IParam {
 
 	/**
 	 * The string matches the given value (servers will often, but are not required to) implement this as a left match, meaning that a value of "smi" would match "smi" and "smith".
+	 * @param theValue THIS PARAMETER DOES NOT DO ANYTHING - This method was added by accident
+	 * 
+	 * @deprecated theValue does not do anything, use {@link #matches()} instead
 	 */
+	@CoverageIgnore
+	@Deprecated
 	public IUriMatch matches(String theValue) {
 		return new UriMatches();
 	}
 
+	/**
+	 * The string matches the given value (servers will often, but are not required to) implement this as a left match, meaning that a value of "smi" would match "smi" and "smith".
+	 */
+	public IUriMatch matches() {
+		return new UriMatches();
+	}
 
 	public interface IUriMatch {
 
