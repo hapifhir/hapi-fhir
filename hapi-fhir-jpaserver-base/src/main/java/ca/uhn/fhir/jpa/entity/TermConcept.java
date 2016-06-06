@@ -36,6 +36,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -63,6 +64,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 @Indexed()	
 @Table(name="TRM_CONCEPT", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
+}, indexes= {
+	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList="INDEX_STATUS") 
 })
 //@formatter:on
 public class TermConcept implements Serializable {
@@ -78,10 +81,16 @@ public class TermConcept implements Serializable {
 		@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),
 	})
 	private String myCode;
-	
+
 	@ManyToOne()
 	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
+	
+	@Column(name="CODESYSTEM_PID", insertable=false, updatable=false)
+	@Fields({
+		@Field(name="myCodeSystemVersionPid")
+	})
+	private long myCodeSystemVersionPid;
 	
 	//@formatter:off
 	@Column(name="DISPLAY", length=MAX_DESC_LENGTH, nullable=true)
@@ -100,6 +109,9 @@ public class TermConcept implements Serializable {
 	@Column(name="PID")
 	private Long myId;
 
+	@Column(name = "INDEX_STATUS", nullable = true)
+	private Long myIndexStatus;
+
 	@Transient
 	@Fields({
 		@Field(name = "myParentPids", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
@@ -108,12 +120,6 @@ public class TermConcept implements Serializable {
 
 	@OneToMany(cascade= {}, fetch=FetchType.LAZY, mappedBy="myChild")
 	private Collection<TermConceptParentChildLink> myParents;
-
-	@Column(name="CODESYSTEM_PID", insertable=false, updatable=false)
-	@Fields({
-		@Field(name="myCodeSystemVersionPid")
-	})
-	private long myCodeSystemVersionPid;
 
 	public TermConcept() {
 		super();
@@ -214,6 +220,10 @@ public class TermConcept implements Serializable {
 			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
 		}
 		return this;
+	}
+
+	public void setIndexStatus(Long theIndexStatus) {
+		myIndexStatus = theIndexStatus;
 	}
 
 	public void setParentPids(Set<Long> theParentPids) {

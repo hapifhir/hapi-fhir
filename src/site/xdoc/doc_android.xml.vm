@@ -59,6 +59,16 @@
 			</subsection>
 		</section>
 		
+		<section name="Performance">
+			<p>
+				On mobile devices, performance problems are particularly noticeable. This
+				is made worse by the fact that some Android devices have much slower performance
+				than modern desktop computers. See the
+				<a href="./doc_rest_client_http_config.html#performance">Client Configuration Performance</a>
+				page for some tips on how to improve client performance.
+			</p>
+		</section>
+		
 	</body>
 
 </document>

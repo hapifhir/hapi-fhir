@@ -7,6 +7,29 @@
 	</properties>
 	<body>
 		<release version="1.6" date="TBD">
+			<action type="fix">
+				Performance has been improved for the initial FhirContext
+				object creation by avoiding a lot of unnecessary reflection. HAPI FHIR
+				1.5 had a regression compared to previous releases
+				and this has been corrected, but other improvements have been
+				made so that this release is faster than previous releases too.
+				<![CDATA[<br/><br/>]]>
+				In addition, a new "deferred scan" mode has been implemented for
+				even faster initialization on slower environments (e.g. Android).
+				See the <![CDATA[<a href="./doc_rest_client_http_config.html#performance">performance documentation</a>]]>
+				for more information.
+				<![CDATA[<br/><br/>]]>
+				The following shows our benchmarks for context initialization across several
+				versions of HAPI:
+				<![CDATA[
+					<ul>
+						<li>Version 1.4: <b>560ms</b></li>
+						<li>Version 1.5: <b>800ms</b></li>
+						<li>Version 1.6: <b>340ms</b></li>
+						<li>Version 1.6 (deferred mode): <b>240ms</b></li>
+					</ul>
+				]]>
+			</action>
 			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):

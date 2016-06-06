@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
@@ -71,8 +72,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter) {
 		ValueSet source = myValidationSupport.fetchResource(getContext(), ValueSet.class, theId.getValue());
-		ValueSet retVal = doExpand(source);
-		return retVal;
+		return expand(source, theFilter);
 	}
 
 	private ValueSet doExpand(ValueSet theSource) {
@@ -134,10 +134,34 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(ValueSet source, String theFilter) {
-		ValueSet retVal = doExpand(source);
+	public ValueSet expand(ValueSet source, String theFilter) {		
+		ValueSet toExpand = new ValueSet();
+		for (UriType next : source.getCompose().getImport()) {
+			ConceptSetComponent include = toExpand.getCompose().addInclude();
+			include.setSystem(next.getValue());
+			addFilterIfPresent(theFilter, include);
+		}
+		
+		for (ConceptSetComponent next : source.getCompose().getInclude()) {
+			toExpand.getCompose().addInclude(next);
+			addFilterIfPresent(theFilter, next);
+		}
+		
+		if (toExpand.getCompose().isEmpty()) {
+			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
+		}
+
+		toExpand.getCompose().getExclude().addAll(source.getCompose().getExclude());
+		
+		ValueSet retVal = doExpand(toExpand);
 		return retVal;
 
+	}
+
+	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
+		if (isNotBlank(theFilter)) {
+			include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
+		}
 	}
 
 	@Override

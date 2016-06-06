@@ -22,11 +22,14 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -86,16 +89,20 @@ public class FhirContext {
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
+	private boolean myInitialized;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
 	private volatile Map<String, Class<? extends IBaseResource>> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
+	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<PerformanceOptionsEnum>();
+	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private final IFhirVersion myVersion;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
+	private boolean myInitializing;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -165,8 +172,8 @@ public class FhirContext {
 		} else {
 			ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
 		}
-
-		scanResourceTypes(toElementList(theResourceTypes));
+		
+		myResourceTypesToScan = theResourceTypes;
 	}
 
 	private String createUnknownResourceNameError(String theResourceName, FhirVersionEnum theVersion) {
@@ -191,12 +198,18 @@ public class FhirContext {
 		return myAddProfileTagWhenEncoding;
 	}
 
+	Collection<RuntimeResourceDefinition> getAllResourceDefinitions() {
+		validateInitialized();
+		return myNameToResourceDefinition.values();
+	}
+	
 	/**
 	 * Returns the default resource type for the given profile
 	 * 
 	 * @see #setDefaultTypeForProfile(String, Class)
 	 */
 	public Class<? extends IBaseResource> getDefaultTypeForProfile(String theProfile) {
+		validateInitialized();
 		return myDefaultTypeForProfile.get(theProfile);
 	}
 
@@ -206,6 +219,7 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IBase> theElementType) {
+		validateInitialized();
 		BaseRuntimeElementDefinition<?> retVal = myClassToElementDefinition.get(theElementType);
 		if (retVal == null) {
 			retVal = scanDatatype((Class<? extends IElement>) theElementType);
@@ -221,11 +235,13 @@ public class FhirContext {
 	 * </p>
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
+		validateInitialized();
 		return myNameToElementDefinition.get(theElementName.toLowerCase());
 	}
 
 	/** For unit tests only */
 	int getElementDefinitionCount() {
+		validateInitialized();
 		return myClassToElementDefinition.size();
 	}
 
@@ -233,6 +249,7 @@ public class FhirContext {
 	 * Returns all element definitions (resources, datatypes, etc.)
 	 */
 	public Collection<BaseRuntimeElementDefinition<?>> getElementDefinitions() {
+		validateInitialized();
 		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
 
@@ -252,11 +269,19 @@ public class FhirContext {
 	}
 
 	/**
+	 * Get the configured performance options
+	 */
+	public Set<PerformanceOptionsEnum> getPerformanceOptions() {
+		return myPerformanceOptions;
+	}
+
+	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IBaseResource> theResourceType) {
+		validateInitialized();
 		if (theResourceType == null) {
 			throw new NullPointerException("theResourceType can not be null");
 		}
@@ -273,6 +298,7 @@ public class FhirContext {
 
 	public RuntimeResourceDefinition getResourceDefinition(FhirVersionEnum theVersion, String theResourceName) {
 		Validate.notNull(theVersion, "theVersion can not be null");
+		validateInitialized();
 
 		if (theVersion.equals(myVersion.getVersion())) {
 			return getResourceDefinition(theResourceName);
@@ -302,6 +328,7 @@ public class FhirContext {
 	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IBaseResource theResource) {
+		validateInitialized();
 		Validate.notNull(theResource, "theResource must not be null");
 		return getResourceDefinition(theResource.getClass());
 	}
@@ -315,6 +342,7 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
+		validateInitialized();
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
 
 		String resourceName = theResourceName.toLowerCase();
@@ -338,6 +366,7 @@ public class FhirContext {
 	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
+		validateInitialized();
 		return myIdToResourceDefinition.get(theId);
 	}
 
@@ -345,7 +374,8 @@ public class FhirContext {
 	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
 	 * core library.
 	 */
-	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
+	public Collection<RuntimeResourceDefinition> getResourceDefinitionsWithExplicitId() {
+		validateInitialized();
 		return myIdToResourceDefinition.values();
 	}
 
@@ -363,6 +393,7 @@ public class FhirContext {
 	}
 
 	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
+		validateInitialized();
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
@@ -378,6 +409,7 @@ public class FhirContext {
 	 * @see #getDefaultTypeForProfile(String)
 	 */
 	public boolean hasDefaultTypeForProfile() {
+		validateInitialized();
 		return !myDefaultTypeForProfile.isEmpty();
 	}
 
@@ -538,8 +570,9 @@ public class FhirContext {
 		return (RuntimeResourceDefinition) defs.get(theResourceType);
 	}
 
-	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IElement>> theResourceTypes) {
-
+	private synchronized Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IElement>> theResourceTypes) {
+		myInitializing = true;
+		
 		List<Class<? extends IBase>> typesToScan = new ArrayList<Class<? extends IBase>>();
 		if (theResourceTypes != null) {
 			typesToScan.addAll(theResourceTypes);
@@ -586,6 +619,7 @@ public class FhirContext {
 
 		myNameToResourceType = scanner.getNameToResourceType();
 
+		myInitialized = true;
 		return classToElementDefinition;
 	}
 
@@ -660,6 +694,31 @@ public class FhirContext {
 	}
 
 	/**
+	 * Sets the configured performance options
+	 * 
+	 * @see PerformanceOptionsEnum for a list of available options
+	 */
+	public void setPerformanceOptions(Collection<PerformanceOptionsEnum> theOptions) {
+		myPerformanceOptions.clear();
+		if (theOptions != null) {
+			myPerformanceOptions.addAll(theOptions);
+		}
+	}
+
+	/**
+	 * Sets the configured performance options
+	 * 
+	 * @see PerformanceOptionsEnum for a list of available options
+	 */
+	public void setPerformanceOptions(PerformanceOptionsEnum... thePerformanceOptions) {
+		Collection<PerformanceOptionsEnum> asList = null;
+		if (thePerformanceOptions != null) {
+			asList = Arrays.asList(thePerformanceOptions);
+		}
+		setPerformanceOptions(asList);
+	}
+
+	/**
 	 * Set the restful client factory
 	 * 
 	 * @param theRestfulClientFactory
@@ -679,6 +738,12 @@ public class FhirContext {
 			resTypes.add((Class<? extends IElement>) next);
 		}
 		return resTypes;
+	}
+
+	private void validateInitialized() {
+		if (!myInitialized && !myInitializing) {
+			scanResourceTypes(toElementList(myResourceTypesToScan));
+		}
 	}
 
 	/**

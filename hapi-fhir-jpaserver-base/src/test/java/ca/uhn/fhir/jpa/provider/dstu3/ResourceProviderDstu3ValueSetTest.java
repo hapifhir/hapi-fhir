@@ -76,29 +76,26 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
 
-		/*
-		 * Filter with display name
-		 */
+	}
+
+	@Test
+	public void testExpandByIdWithFilter() throws IOException {
 
 		//@formatter:off
-		respParam = ourClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.withParameter(Parameters.class, "filter", new StringType("first"))
 			.execute();
-		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
 
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"));
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		
 	}
 
 	@Test

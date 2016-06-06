@@ -216,6 +216,10 @@ public interface IRestfulClientFactory {
 	 * validation involves the client requesting the server's conformance statement
 	 * to determine whether the server is appropriate for the given client. 
 	 * <p>
+	 * This check is primarily to validate that the server supports an appropriate
+	 * version of FHIR
+	 * </p> 
+	 * <p>
 	 * The default value for this setting is defined by {@link #DEFAULT_SERVER_VALIDATION_MODE}
 	 * </p>
 	 * 

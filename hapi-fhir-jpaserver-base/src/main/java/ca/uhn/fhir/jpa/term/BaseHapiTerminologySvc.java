@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Stopwatch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -209,10 +210,13 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 		if (theConceptsStack.size() % 1000 == 0) {
 			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
-			ourLog.info("Have saved {}/{} concepts - {}%", theConceptsStack.size(), theTotalConcepts, (int)( pct*100.0f));
+			ourLog.info("Have saved {}/{} concepts ({}%), flushing", theConceptsStack.size(), theTotalConcepts, (int)( pct*100.0f));
+			myConceptDao.flush();
+			myConceptParentChildLinkDao.flush();
 		}
 
 		theConcept.setCodeSystem(theCodeSystem);
+		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
 		myConceptDao.save(theConcept);
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {

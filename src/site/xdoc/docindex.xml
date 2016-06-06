@@ -35,7 +35,7 @@
 				<li><a href="./doc_rest_client.html">Fluent/Generic Client</a></li>
 				<li><a href="./doc_rest_client_annotation.html">Annotation Client</a></li>
 				<li><a href="./doc_rest_client_interceptor.html">Interceptors (client)</a></li>
-				<li><a href="./doc_rest_client_http_config.html">Client HTTP Configuration</a></li>
+				<li><a href="./doc_rest_client_http_config.html">Client Configuration</a></li>
 				<li><a href="./doc_rest_client_examples.html">Client Examples</a></li>
 				<li><a href="./doc_rest_client_alternate_provider.html">JAX-RS Client &amp; Alternate HTTP Providers</a></li>
 			</ul>

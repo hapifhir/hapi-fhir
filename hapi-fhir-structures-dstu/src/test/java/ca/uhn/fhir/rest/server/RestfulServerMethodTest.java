@@ -953,9 +953,15 @@ public class RestfulServerMethodTest {
 	@Test
 	public void testServerProfileProviderFindsProfiles() {
 		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
+
 		IdDt id = new IdDt("Profile", "observation");
 		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
+		assertNull(profile);
+		
+		id = new IdDt("Profile", "patient");
+		profile = profileProvider.getProfileById(createHttpServletRequest(), id);
 		assertNotNull(profile);
+
 	}
 
 	@Test

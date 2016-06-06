@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -41,5 +44,12 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("DELETE FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	@Modifying
 	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
+	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
+	@Modifying
+	int markAllForReindexing();
+
+	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
+	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
 
 }

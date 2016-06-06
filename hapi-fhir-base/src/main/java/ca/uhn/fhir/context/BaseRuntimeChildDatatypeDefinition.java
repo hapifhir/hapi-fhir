@@ -97,6 +97,9 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElementDefinition = theClassToElementDefinitions.get(getDatatype());
+		if (myElementDefinition == null) {
+			myElementDefinition = theContext.getElementDefinition(getDatatype());
+		}
 		assert myElementDefinition != null : "Unknown type: " + getDatatype();
 	}
 

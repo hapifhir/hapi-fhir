@@ -90,7 +90,7 @@
 				<item name="Fluent/Generic Client" href="./doc_rest_client.html" />
 				<item name="Annotation Client" href="./doc_rest_client_annotation.html" />
 				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
-				<item name="Client HTTP Configuration" href="./doc_rest_client_http_config.html"/>
+				<item name="Client Configuration" href="./doc_rest_client_http_config.html"/>
 				<item name="Client Examples" href="./doc_rest_client_examples.html"/>
 				<item name="JAX-RS Client &amp; Alternate HTTP Providers" href="./doc_rest_client_alternate_provider.html"/>
 			</item>

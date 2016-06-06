@@ -857,7 +857,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testDocumentManifestResources() throws Exception {
 		myFhirCtx.getResourceDefinition(Practitioner.class);
-		myFhirCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
+		myFhirCtx.getResourceDefinition(DocumentManifest.class);
 
 		IGenericClient client = ourClient;
 

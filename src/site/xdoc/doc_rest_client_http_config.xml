@@ -3,11 +3,75 @@
 	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>Client HTTP Configuration</title>
+		<title>Client Configuration</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
 	<body>
+		<section name="Configuring Client Behaviour">
+			
+			<p>
+				This page outlines ways that the client can be configured
+				for specific behaviour. 
+			</p>
+			
+		</section>
+
+
+		<a name="performance"/>
+		<section name="Performance">
+		
+			<subsection name="Server Conformance Check">
+				<p>
+					By default, the client will query the server before the very first
+					operation to download the server's conformance/metadata statement
+					and verify that the server is appropriate for the given client.
+					This check is only done once per server endpoint for a given
+					FhirContext.
+				</p>
+				<p>
+					This check is useful to prevent bugs or unexpected behaviour
+					when talking to servers. It may introduce unneccesary overhead
+					however in circumstances where the client and server are known
+					to be compatible. The following example shows how to disable this
+					check.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="dontValidate" />
+					<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>
+			
+			<subsection name="Deferred Model Scanning">
+				
+				<p>
+					By default, HAPI will scan each model type it encounters
+					as soon as it encounters it. This scan includes a check for
+					all fields within the type, and makes use of reflection to do this.
+				</p>
+				<p>
+					While this process is not particularly significant on reasonably 
+					performant machines (current benchmarks show that this takes 
+					roughly 6 seconds on one developer workstation), on some devices
+					(e.g. Android phones where every millisecond counts)
+					it may be desirable to defer this scan. 
+				</p>
+				<p>
+					When the scan is deferred, objects will only be scanned when they
+					are actually accessed, meaning that only types that are
+					actually used in an application get scanned. 
+				</p>
+				<p>
+					The following example shows how to defer model scanning:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="deferModelScanning" />
+					<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+			</subsection>
+			
+		</section>
 
 		<section name="Configuring the HTTP Client">
 

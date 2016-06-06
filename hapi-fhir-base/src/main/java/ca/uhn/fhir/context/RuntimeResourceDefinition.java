@@ -36,7 +36,7 @@ import ca.uhn.fhir.util.UrlUtil;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
-	private RuntimeResourceDefinition myBaseDefinition;
+	private Class<? extends IBaseResource> myBaseType;
 	private Map<String, List<RuntimeSearchParam>> myCompartmentNameToSearchParams;
 	private FhirContext myContext;
 	private String myId;
@@ -45,9 +45,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
 	private final FhirVersionEnum myStructureVersion;
+	private volatile RuntimeResourceDefinition myBaseDefinition;
 	
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType) {
-		super(theResourceName, theClass, theStandardType);
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super(theResourceName, theClass, theStandardType, theContext, theClassToElementDefinitions);
 		myContext = theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
@@ -76,6 +77,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	 * </p>
 	 */
 	public RuntimeResourceDefinition getBaseDefinition() {
+		validateSealed();
+		if (myBaseDefinition == null) {
+			myBaseDefinition = myContext.getResourceDefinition(myBaseType);
+		}
 		return myBaseDefinition;
 	}
 
@@ -105,6 +110,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	public String getResourceProfile(String theServerBase) {
+		validateSealed();
 		String profile;
 		if (!myResourceProfile.isEmpty()) {
 			profile = myResourceProfile;
@@ -128,10 +134,12 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	public RuntimeSearchParam getSearchParam(String theName) {
+		validateSealed();
 		return myNameToSearchParam.get(theName);
 	}
 
 	public List<RuntimeSearchParam> getSearchParams() {
+		validateSealed();
 		return mySearchParams;
 	}
 
@@ -139,6 +147,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	 * Will not return null
 	 */
 	public List<RuntimeSearchParam> getSearchParamsForCompartmentName(String theCompartmentName) {
+		validateSealed();
 		List<RuntimeSearchParam> retVal = myCompartmentNameToSearchParams.get(theCompartmentName);
 		if (retVal == null) {
 			return Collections.emptyList();
@@ -154,6 +163,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return "Bundle".equals(getName());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
@@ -183,17 +193,18 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		myCompartmentNameToSearchParams = Collections.unmodifiableMap(compartmentNameToSearchParams);
 
 		Class<?> target = getImplementingClass();
-		myBaseDefinition = this;
+		myBaseType = (Class<? extends IBaseResource>) target;
 		do {
 			target = target.getSuperclass();
 			if (IBaseResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class) != null) {
-				myBaseDefinition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(target);
+				myBaseType = (Class<? extends IBaseResource>) target;
 			}
 		} while (target.equals(Object.class) == false);
 	}
 
 	@Deprecated
 	public synchronized IBaseResource toProfile() {
+		validateSealed();
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
@@ -205,6 +216,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	public synchronized IBaseResource toProfile(String theServerBase) {
+		validateSealed();
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}

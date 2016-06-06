@@ -1,12 +1,20 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -14,22 +22,33 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TerminologyLoaderSvcTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcTest.class);
 	private TerminologyLoaderSvc mySvc;
+	
+	@Mock
 	private IHapiTerminologySvc myTermSvc;
+
+	@Captor
+	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	
 	@Before
 	public void before() {
-		myTermSvc = mock(IHapiTerminologySvc.class);
-		
 		mySvc = new TerminologyLoaderSvc();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
 	}
@@ -74,6 +93,30 @@ public class TerminologyLoaderSvcTest {
 		
 		RequestDetails details = mock(RequestDetails.class);
 		mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
+		
+		verify(myTermSvc).storeNewCodeSystemVersion(any(String.class), myCsvCaptor.capture(), any(RequestDetails.class));
+		
+		TermCodeSystemVersion csv = myCsvCaptor.getValue();
+		TreeSet<String> allCodes = toCodes(csv);
+		ourLog.info(allCodes.toString());
+		
+		assertThat(allCodes, containsInRelativeOrder("116680003"));
+		assertThat(allCodes, not(containsInRelativeOrder("207527008")));
+	}
+
+	private TreeSet<String> toCodes(TermCodeSystemVersion theCsv) {
+		TreeSet<String> retVal = new TreeSet<String>();
+		for (TermConcept next : theCsv.getConcepts()) {
+			toCodes(retVal, next);
+		}
+		return retVal;
+	}
+
+	private void toCodes(TreeSet<String> theCodes, TermConcept theConcept) {
+		theCodes.add(theConcept.getCode());
+		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			toCodes(theCodes, next.getChild());
+		}
 	}
 
 	@Test

@@ -38,6 +38,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.model.BaseElement;
@@ -564,6 +566,14 @@ public abstract class BaseStructureParser {
 			myNameToResourceClass.put("Binary", thePackageBase + ".resource.Binary");
 			myNameToDatatypeClass.put("Extension", ExtensionDt.class.getName());
 
+			if (determineVersionEnum() == FhirVersionEnum.DSTU1) {
+				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
+				myNameToDatatypeClass.put("boundCodeableConcept", BoundCodeableConceptDt.class.getName());
+			} else if (determineVersionEnum() == FhirVersionEnum.DSTU2) {
+				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
+				myNameToDatatypeClass.put("boundCodeableConcept", ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
+			}
+			
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(versionFile, false), "UTF-8");

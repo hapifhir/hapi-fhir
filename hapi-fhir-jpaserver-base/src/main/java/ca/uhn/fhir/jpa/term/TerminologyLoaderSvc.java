@@ -98,7 +98,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 				b.append("Removing circular reference code ");
 				b.append(nextChild.getCode());
 				b.append(" from parent ");
-				b.append(nextChild.getCode());
+				b.append(next.getParent().getCode());
 				b.append(". Chain was: ");
 				for (String nextInChain : theChain) {
 					TermConcept nextCode = theCode2concept.get(nextInChain);
@@ -187,7 +187,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 	private void iterateOverZipFile(Map<String, File> theFilenameToFile, String fileNamePart, IRecordHandler handler, char theDelimiter, QuoteMode theQuoteMode) {
 		boolean found = false;
-		for (Entry<String, File> nextEntry : theFilenameToFile.entrySet()) {
+		for (Entry<String, File> nextEntry : new HashMap<String, File>(theFilenameToFile).entrySet()) {
 
 			if (nextEntry.getKey().contains(fileNamePart)) {
 				ourLog.info("Processing file {}", nextEntry.getKey());
@@ -217,6 +217,11 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 							nextLoggedCount += logIncrement;
 						}
 					}
+
+					ourLog.info("Deleting temporary file: {}", nextEntry.getValue());
+					nextEntry.getValue().delete();
+					theFilenameToFile.remove(nextEntry.getKey());
+
 				} catch (IOException e) {
 					throw new InternalErrorException(e);
 				} finally {
@@ -415,6 +420,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 	private final class SctHandlerConcept implements IRecordHandler {
 
 		private Set<String> myValidConceptIds;
+		private Map<String, String> myConceptIdToMostRecentDate = new HashMap<String, String>();
 
 		public SctHandlerConcept(Set<String> theValidConceptIds) {
 			myValidConceptIds = theValidConceptIds;
@@ -423,11 +429,18 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		@Override
 		public void accept(CSVRecord theRecord) {
 			String id = theRecord.get("id");
-			boolean active = "1".equals(theRecord.get("active"));
-			if (!active) {
-				return;
+			String date = theRecord.get("effectiveTime");
+
+			if (!myConceptIdToMostRecentDate.containsKey(id) || myConceptIdToMostRecentDate.get(id).compareTo(date) < 0) {
+				boolean active = "1".equals(theRecord.get("active"));
+				if (active) {
+					myValidConceptIds.add(id);
+				} else {
+					myValidConceptIds.remove(id);
+				}
+				myConceptIdToMostRecentDate.put(id, date);
 			}
-			myValidConceptIds.add(id);
+
 		}
 	}
 
@@ -496,34 +509,29 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			if (!active) {
 				return;
 			}
-			TermConcept typeConcept = findConcept(myCode2concept, typeId);
-			TermConcept sourceConcept = findConcept(myCode2concept, sourceId);
-			TermConcept targetConcept = findConcept(myCode2concept, destinationId);
-			if (typeConcept.getDisplay().equals("Is a (attribute)")) {
-				if (!sourceId.equals(destinationId)) {
-					TermConceptParentChildLink link = new TermConceptParentChildLink();
-					link.setChild(sourceConcept);
-					link.setParent(targetConcept);
-					link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-					link.setCodeSystem(myCodeSystemVersion);
-					myRootConcepts.remove(link.getChild().getCode());
+			TermConcept typeConcept = myCode2concept.get(typeId);
+			TermConcept sourceConcept = myCode2concept.get(sourceId);
+			TermConcept targetConcept = myCode2concept.get(destinationId);
+			if (sourceConcept != null && targetConcept != null && typeConcept != null) {
+				if (typeConcept.getDisplay().equals("Is a (attribute)")) {
+					if (!sourceId.equals(destinationId)) {
+						TermConceptParentChildLink link = new TermConceptParentChildLink();
+						link.setChild(sourceConcept);
+						link.setParent(targetConcept);
+						link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+						link.setCodeSystem(myCodeSystemVersion);
+						myRootConcepts.remove(link.getChild().getCode());
 
-					targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+						targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+					}
+				} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
+					// ignore
+				} else {
+					// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 				}
-			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
-				// ignore
-			} else {
-				// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 			}
 		}
 
-		private TermConcept findConcept(final Map<String, TermConcept> code2concept, String typeId) {
-			TermConcept typeConcept = code2concept.get(typeId);
-			if (typeConcept == null) {
-				throw new InternalErrorException("Unknown type ID: " + typeId);
-			}
-			return typeConcept;
-		}
 	}
 
 	private static class SinkOutputStream extends OutputStream {

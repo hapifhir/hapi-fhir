@@ -67,7 +67,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	@Search()
 	public List<StructureDefinition> getAllProfiles(HttpServletRequest theRequest) {
 		final String serverBase = getServerBase(theRequest);
-		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitions());
+		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitionsWithExplicitId());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
 			@Override
 			public int compare(RuntimeResourceDefinition theO1, RuntimeResourceDefinition theO2) {

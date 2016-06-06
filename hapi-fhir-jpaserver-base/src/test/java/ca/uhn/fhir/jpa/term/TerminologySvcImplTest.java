@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -101,6 +102,15 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 
 	}
 
+	
+	@Test
+	public void testReindexTerminology() {
+		IIdType id = createCodeSystem();
+		
+		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
+		
+		assertThat(mySystemDao.performReindexingPass(100, mySrd), greaterThan(0));
+	}
 
 	private IIdType createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();

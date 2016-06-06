@@ -37,6 +37,8 @@ import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,8 +47,10 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
@@ -64,9 +68,12 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	
+
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+
+	@Autowired
+	private ITermConceptDao myTermConceptDao;
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -81,6 +88,12 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	private int doPerformReindexingPass(final Integer theCount, final RequestDetails theRequestDetails) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+		int retVal = doPerformReindexingPassForResources(theCount, theRequestDetails, txTemplate);
+		retVal += doPerformReindexingPassForConcepts(txTemplate);
+		return retVal;
+	}
+
+	private int doPerformReindexingPassForResources(final Integer theCount, final RequestDetails theRequestDetails, TransactionTemplate txTemplate) {
 		return txTemplate.execute(new TransactionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -106,8 +119,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				for (ResourceTable resourceTable : resources) {
 					try {
 						/*
-						 * This part is because from HAPI 1.5 - 1.6 we changed the format of
-						 * forced ID to be "type/id" instead of just "id"
+						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
 						 */
 						ForcedId forcedId = resourceTable.getForcedId();
 						if (forcedId != null) {
@@ -117,7 +129,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 								myForcedIdDao.save(forcedId);
 							}
 						}
-						
+
 						final IBaseResource resource = toResource(resourceTable, false);
 
 						@SuppressWarnings("rawtypes")
@@ -136,6 +148,37 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				ourLog.info("Indexed {} / {} resources in {}ms - Avg {}ms / resource", new Object[] { count, resources.size(), delay, avg });
 
 				return resources.size();
+			}
+		});
+	}
+
+	private int doPerformReindexingPassForConcepts(TransactionTemplate txTemplate) {
+		return txTemplate.execute(new TransactionCallback<Integer>() {
+			@Override
+			public Integer doInTransaction(TransactionStatus theStatus) {
+				
+				int maxResult = 10000;
+				Page<TermConcept> resources = myTermConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
+				if (resources.hasContent() == false) {
+					return 0;
+				}
+
+				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
+
+				int count = 0;
+				long start = System.currentTimeMillis();
+
+				for (TermConcept resourceTable : resources) {
+					resourceTable.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+					myTermConceptDao.save(resourceTable);
+					count++;
+				}
+				
+				long delay = System.currentTimeMillis() - start;
+				long avg = (delay / resources.getContent().size());
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), delay, avg });
+
+				return resources.getContent().size();
 			}
 		});
 	}
@@ -194,7 +237,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Transactional()
 	@Override
 	public int markAllResourcesForReindexing() {
-		return myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " t SET t.myIndexStatus = null").executeUpdate();
+		int retVal = myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " t SET t.myIndexStatus = null").executeUpdate();
+		retVal += myTermConceptDao.markAllForReindexing();
+		return retVal;
 	}
 
 	private void markResourceAsIndexingFailed(final long theId) {
