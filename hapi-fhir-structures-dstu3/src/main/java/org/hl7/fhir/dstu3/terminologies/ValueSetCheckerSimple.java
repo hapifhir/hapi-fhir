@@ -78,7 +78,7 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
   }
 
 
-  private boolean inComponent(ConceptSetComponent vsi, String system, String code) {
+  private boolean inComponent(ConceptSetComponent vsi, String system, String code) throws Exception {
     if (!vsi.getSystem().equals(system))
       return false; 
     // whether we know the system or not, we'll accept the stated codes at face value

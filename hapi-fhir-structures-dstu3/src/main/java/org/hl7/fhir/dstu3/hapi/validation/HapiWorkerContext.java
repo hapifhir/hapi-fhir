@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.dstu3.model.BaseConformance;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -42,6 +43,7 @@ import org.hl7.fhir.dstu3.validation.IResourceValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
@@ -269,17 +271,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 
-	private ValidationResult validateCodeSystem(String theCode, ConceptDefinitionComponent theConcept) {
-		if (StringUtils.equals(theCode, theConcept.getCode())) {
-			return new ValidationResult(theConcept);
-		} else {
-			for (ConceptDefinitionComponent next : theConcept.getConcept()) {
-				ValidationResult retVal = validateCodeSystem(theCode, next);
-				if (retVal != null && retVal.isOk()) {
-					return retVal;
-				}
-			}
-			return null;
-		}
+	@Override
+	@CoverageIgnore
+	public List<BaseConformance> allConformanceResources() {
+		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	@CoverageIgnore
+	public boolean hasCache() {
+		throw new UnsupportedOperationException();
+	}
+	
 }

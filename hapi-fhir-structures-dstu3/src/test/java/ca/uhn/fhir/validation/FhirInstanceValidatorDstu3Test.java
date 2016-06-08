@@ -455,7 +455,6 @@ public class FhirInstanceValidatorDstu3Test {
 
 		assertThat(errors.toString(), containsString("information"));
 		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
-		assertEquals(1, errors.size());
 	}
 
 	@Test
@@ -588,8 +587,8 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
-
+		assertEquals(1, errors.size());
+		assertEquals("The code 1234 is invalid in code system http://loinc.org", errors.get(0).getMessage());
 	}
 
 	@Test

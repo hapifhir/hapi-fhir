@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -61,6 +60,7 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionParameterComponent;
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ValueSetExpanderSimple implements ValueSetExpander {
@@ -234,7 +234,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		}
 	}
 
-	private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params) throws TerminologyServiceException, ETooCostly {
+	private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params) throws ETooCostly, org.hl7.fhir.exceptions.TerminologyServiceException {
 		CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
 		if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(inc.getSystem())) {
 			addCodes(context.expandVS(inc), params);

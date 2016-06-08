@@ -72,6 +72,7 @@ import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.utils.IWorkerContext.ValidationResult;
 import org.hl7.fhir.dstu3.utils.ProfileUtilities;
 import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -341,7 +342,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   // public API
 
-  private boolean checkCode(List<ValidationMessage> errors, Element element, String path, String code, String system, String display) {
+  private boolean checkCode(List<ValidationMessage> errors, Element element, String path, String code, String system, String display) throws TerminologyServiceException {
     long t = System.nanoTime();
     boolean ss = context.supportsSystem(system);
     txTime = txTime + (System.nanoTime() - t);
@@ -415,8 +416,23 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                   }
                 }
                 
-                if (!atLeastOneSystemIsSupported && binding.getStrength() == BindingStrength.EXAMPLE) {
-                  // ignore this since we can't validate but it doesn't matter..
+                if (binding.getStrength() == BindingStrength.EXAMPLE) {
+                  if (!atLeastOneSystemIsSupported) {
+                    // ignore this since we can't validate but it doesn't matter..
+                  } else {
+                     for (Coding nextCoding : cc.getCoding()) {
+                        String nextSystem = nextCoding.getSystem();
+                        // If we do support the system, let's make sure it's a valid code in that VS
+                        if (isNotBlank(nextSystem) && context.supportsSystem(nextSystem)) {
+                          String nextCode = nextCoding.getCode();
+                          String nextDisplay = nextCoding.getDisplay();
+                          ValidationResult vr = context.validateCode(nextSystem, nextCode, nextDisplay);
+                          if (!vr.isOk()) {
+                            rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "The code {0} is invalid in code system {1}", nextCode, nextSystem);
+                          }
+                        }
+                      }
+                  }
                 } else {
                   ValidationResult vr = context.validateCode(cc, valueset);
                   txTime = txTime + (System.nanoTime() - t);
