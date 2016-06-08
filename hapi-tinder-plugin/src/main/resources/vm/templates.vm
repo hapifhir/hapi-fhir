@@ -92,7 +92,7 @@
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * not exist. This method may return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>

@@ -299,6 +299,11 @@
 				certain codes, which caused false failures when validating
 				resources. Thanks to GitHub user @Xoude for reporting!
 			</action>
+			<action type="fix" issue="365">
+				Some methods on DSTU2 model structures have JavaDocs that
+				incorrectly claim that the method will not return null when
+				in fact it can. Thanks to Rick Riemer for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
