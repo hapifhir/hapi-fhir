@@ -187,8 +187,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public Set<String> typeTails() {
-		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code", "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity",
-				"SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint", "Timing", "Reference", "Annotation", "Signature", "Meta"));
+		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
+				"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
+				"Timing", "Reference", "Annotation", "Signature", "Meta"));
 	}
 
 	@Override
@@ -229,40 +230,42 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 		ValueSetExpansionOutcome expandedValueSet = expand(theVs);
 		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-			if (next.getSystem().equals(theSystem) && next.getCode().equals(theCode)) {
-				ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-				definition.setCode(next.getCode());
-				definition.setDisplay(next.getDisplay());
-				ValidationResult retVal = new ValidationResult(definition);
-				return retVal;
+			if (next.getCode().equals(theCode)) {
+				if (theSystem == null || next.getSystem().equals(theSystem)) {
+					ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+					definition.setCode(next.getCode());
+					definition.setDisplay(next.getDisplay());
+					ValidationResult retVal = new ValidationResult(definition);
+					return retVal;
+				}
 			}
 		}
-		
-//		for (UriType nextComposeImport : theVs.getCompose().getImport()) {
-//			if (isNotBlank(nextComposeImport.getValue())) {
-//				aaa
-//			}
-//		}
-//		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
-//			if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
-//				if (nextComposeConceptSet.getConcept().isEmpty()) {
-//					ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
-//					if (retVal != null && retVal.isOk()) {
-//						return retVal;
-//					}
-//				} else {
-//					for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
-//						ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
-//						conceptDef.setCode(nextComposeCode.getCode());
-//						conceptDef.setDisplay(nextComposeCode.getDisplay());
-//						ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
-//						if (retVal != null && retVal.isOk()) {
-//							return retVal;
-//						}
-//					}
-//				}
-//			}
-//		}
+
+		// for (UriType nextComposeImport : theVs.getCompose().getImport()) {
+		// if (isNotBlank(nextComposeImport.getValue())) {
+		// aaa
+		// }
+		// }
+		// for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
+		// if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
+		// if (nextComposeConceptSet.getConcept().isEmpty()) {
+		// ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
+		// if (retVal != null && retVal.isOk()) {
+		// return retVal;
+		// }
+		// } else {
+		// for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
+		// ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
+		// conceptDef.setCode(nextComposeCode.getCode());
+		// conceptDef.setDisplay(nextComposeCode.getDisplay());
+		// ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
+		// if (retVal != null && retVal.isOk()) {
+		// return retVal;
+		// }
+		// }
+		// }
+		// }
+		// }
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 
