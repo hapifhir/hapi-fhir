@@ -195,8 +195,6 @@ public class OperationParameter implements IParameter {
 				myMax = 2;
 				myAllowGet = true;
 			} else if (myParameterType.equals(ValidationModeEnum.class)) {
-				// this is ok
-			} else if (myParameterType.equals(ValidationModeEnum.class)) {
 				myParamType = "code";
 			} else if (IBase.class.isAssignableFrom(myParameterType) && typeIsConcrete) {
 				myParamType = myContext.getElementDefinition((Class<? extends IBase>) myParameterType).getName();
