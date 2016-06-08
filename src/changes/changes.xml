@@ -294,6 +294,11 @@
 				Fluent client searches with date parameters were not correctly using
 				new prefix style (e.g. gt) instead of old one (e.g. &gt;) 
 			</action>
+			<action type="fix" issue="370">
+				Some built-in v3 code systems for STU3 resources were missing
+				certain codes, which caused false failures when validating
+				resources. Thanks to GitHub user @Xoude for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,10 +26,12 @@ import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
@@ -223,26 +227,42 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
-			if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
-				if (nextComposeConceptSet.getConcept().isEmpty()) {
-					ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
-					if (retVal != null && retVal.isOk()) {
-						return retVal;
-					}
-				} else {
-					for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
-						ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
-						conceptDef.setCode(nextComposeCode.getCode());
-						conceptDef.setDisplay(nextComposeCode.getDisplay());
-						ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
-						if (retVal != null && retVal.isOk()) {
-							return retVal;
-						}
-					}
-				}
+		ValueSetExpansionOutcome expandedValueSet = expand(theVs);
+		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
+			if (next.getSystem().equals(theSystem) && next.getCode().equals(theCode)) {
+				ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+				definition.setCode(next.getCode());
+				definition.setDisplay(next.getDisplay());
+				ValidationResult retVal = new ValidationResult(definition);
+				return retVal;
 			}
 		}
+		
+//		for (UriType nextComposeImport : theVs.getCompose().getImport()) {
+//			if (isNotBlank(nextComposeImport.getValue())) {
+//				aaa
+//			}
+//		}
+//		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
+//			if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
+//				if (nextComposeConceptSet.getConcept().isEmpty()) {
+//					ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
+//					if (retVal != null && retVal.isOk()) {
+//						return retVal;
+//					}
+//				} else {
+//					for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
+//						ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
+//						conceptDef.setCode(nextComposeCode.getCode());
+//						conceptDef.setDisplay(nextComposeCode.getDisplay());
+//						ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
+//						if (retVal != null && retVal.isOk()) {
+//							return retVal;
+//						}
+//					}
+//				}
+//			}
+//		}
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 

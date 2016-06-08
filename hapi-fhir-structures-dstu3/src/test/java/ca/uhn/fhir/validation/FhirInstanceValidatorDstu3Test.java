@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -83,6 +84,25 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
+	/**
+	 * See #370
+	 */
+	@Test
+	public void testValidateRelatedPerson() {
+		
+		/*
+		 * Try with a code that is in http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype
+		 * and therefore should validate
+		 */
+		RelatedPerson rp = new RelatedPerson();
+		rp.getPatient().setReference("Patient/1");
+		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/patient-contact-relationship").setCode("emergency");
+		
+		ValidationResult results = myVal.validateWithResult(rp);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+	}
+	
 	@Test
 	// @Ignore
 	public void testValidateBuiltInProfiles() throws Exception {

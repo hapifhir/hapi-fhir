@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.config;
 
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Import;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
+import ca.uhn.fhirtest.mvc.SubscriptionPlaygroundController;
 
 //@formatter:off
 /**
@@ -87,6 +89,11 @@ public class FhirTesterConfig {
 				.withName("Spark - Furore (DSTU2 FHIR)");
 		
 		return retVal;
+	}
+	
+	@Bean(autowire=Autowire.BY_TYPE)
+	public SubscriptionPlaygroundController subscriptionPlaygroundController() {
+		return new SubscriptionPlaygroundController();
 	}
 	
 }
