@@ -1,6 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -33,10 +38,11 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestOperation;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -65,6 +71,7 @@ public class OperationServerDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private IGenericClient myFhirClient;
 
 	@Before
 	public void before() {
@@ -75,22 +82,23 @@ public class OperationServerDstu2Test {
 		ourLastParamMoney1 = null;
 		ourLastId = null;
 		ourLastMethod = "";
+		
+		myFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
 	@Test
 	public void testConformance() throws Exception {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
-		client.registerInterceptor(loggingInterceptor);
+		myFhirClient.registerInterceptor(loggingInterceptor);
 
-		Conformance p = client.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
+		Conformance p = myFhirClient.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<RestOperation> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
 		assertThat(ops.get(0).getDefinition().getReference().getValue(), startsWith("OperationDefinition/"));
 
-		OperationDefinition def = client.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
 		assertThat(def.getCode(), not(blankOrNullString()));
 
 		List<String> opNames = toOpNames(ops);
@@ -99,6 +107,44 @@ public class OperationServerDstu2Test {
 		assertEquals("OperationDefinition/OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
 	}
 
+	/**
+	 * See #380
+	 */
+	@Test
+	public void testOperationDefinition() {
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/OP_TYPE").execute();
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
+		
+//		@OperationParam(name="PARAM1") StringType theParam1,
+//		@OperationParam(name="PARAM2") Patient theParam2,
+//		@OperationParam(name="PARAM3", min=2, max=5) List<StringType> theParam3,
+//		@OperationParam(name="PARAM4", min=1) List<StringType> theParam4,
+
+		assertEquals(4, def.getParameter().size());
+		assertEquals("PARAM1", def.getParameter().get(0).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(0).getUse());
+		assertEquals(0, def.getParameter().get(0).getMin().intValue());
+		assertEquals("1", def.getParameter().get(0).getMax());
+		
+		assertEquals("PARAM2", def.getParameter().get(1).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(1).getUse());
+		assertEquals(0, def.getParameter().get(1).getMin().intValue());
+		assertEquals("1", def.getParameter().get(1).getMax());
+		
+		assertEquals("PARAM3", def.getParameter().get(2).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(2).getUse());
+		assertEquals(2, def.getParameter().get(2).getMin().intValue());
+		assertEquals("5", def.getParameter().get(2).getMax());
+		
+		assertEquals("PARAM4", def.getParameter().get(3).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(3).getUse());
+		assertEquals(1, def.getParameter().get(3).getMin().intValue());
+		assertEquals("*", def.getParameter().get(3).getMax());
+		
+	}
+
+	
 	private List<String> toOpNames(List<RestOperation> theOps) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (RestOperation next : theOps) {
@@ -613,7 +659,9 @@ public class OperationServerDstu2Test {
 		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
 				@OperationParam(name="PARAM1") StringDt theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
+				@OperationParam(name="PARAM2") Patient theParam2,
+				@OperationParam(name="PARAM3", min=2, max=5) List<StringDt> theParam3,
+				@OperationParam(name="PARAM4", min=1) List<StringDt> theParam4
 				) {
 			//@formatter:on
 

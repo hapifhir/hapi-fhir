@@ -87,7 +87,7 @@ public @interface OperationParam {
 	 * repetitions. See {@link #MAX_DEFAULT} for a description of the default
 	 * behaviour.
 	 */
-	int max() default MAX_UNLIMITED;
+	int max() default MAX_DEFAULT;
 
 	
 }

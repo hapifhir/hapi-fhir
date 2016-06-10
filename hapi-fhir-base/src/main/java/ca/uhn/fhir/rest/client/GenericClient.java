@@ -1775,7 +1775,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IReadExecutable withId(String theId) {
 			Validate.notBlank(theId, "The ID can not be blank");
-			myId = new IdDt(myType.getName(), theId);
+			if (theId.indexOf('/') == -1) {
+				myId = new IdDt(myType.getName(), theId);
+			} else {
+				myId = new IdDt(theId);
+			}
 			return this;
 		}
 

@@ -324,6 +324,14 @@
 				server conformance statement should not include the $ prefix in the operation
 				name or code. Thanks to Dion McMurtrie for reporting!
 			</action>
+			<action type="fix" issue="380">
+				OperationDefinition resources generated automatically by the server for operations
+				that are defined within resource/plain providers incorrectly stated that
+				the maximum cardinality was "*" for non-collection types with no explicit
+				maximum stated, which is not the behaviour that the JavaDoc on the
+				<![CDATA[@OperationParam]] annotation describes. Thanks to Michael Lawley
+				for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

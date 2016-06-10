@@ -1,10 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -35,6 +33,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -69,6 +68,7 @@ public class OperationServerDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private IGenericClient myFhirClient;
 
 	@Before
 	public void before() {
@@ -79,25 +79,64 @@ public class OperationServerDstu3Test {
 		ourLastParamMoney1 = null;
 		ourLastId = null;
 		ourLastMethod = "";
+
+		myFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
 
 	@Test
 	public void testConformance() throws Exception {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
-		client.registerInterceptor(loggingInterceptor);
+		myFhirClient.registerInterceptor(loggingInterceptor);
 
-		Conformance p = client.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
+		Conformance p = myFhirClient.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<ConformanceRestOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
 		
-		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
+//		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReferenceElement()).execute();
 		assertEquals("OP_TYPE", def.getCode());
+	}
+	
+	/**
+	 * See #380
+	 */
+	@Test
+	public void testOperationDefinition() {
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/OP_TYPE").execute();
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
+		
+//		@OperationParam(name="PARAM1") StringType theParam1,
+//		@OperationParam(name="PARAM2") Patient theParam2,
+//		@OperationParam(name="PARAM3", min=2, max=5) List<StringType> theParam3,
+//		@OperationParam(name="PARAM4", min=1) List<StringType> theParam4,
+
+		assertEquals(4, def.getParameter().size());
+		assertEquals("PARAM1", def.getParameter().get(0).getName());
+		assertEquals(OperationParameterUse.IN, def.getParameter().get(0).getUse());
+		assertEquals(0, def.getParameter().get(0).getMin());
+		assertEquals("1", def.getParameter().get(0).getMax());
+		
+		assertEquals("PARAM2", def.getParameter().get(1).getName());
+		assertEquals(OperationParameterUse.IN, def.getParameter().get(1).getUse());
+		assertEquals(0, def.getParameter().get(1).getMin());
+		assertEquals("1", def.getParameter().get(1).getMax());
+		
+		assertEquals("PARAM3", def.getParameter().get(2).getName());
+		assertEquals(OperationParameterUse.IN, def.getParameter().get(2).getUse());
+		assertEquals(2, def.getParameter().get(2).getMin());
+		assertEquals("5", def.getParameter().get(2).getMax());
+		
+		assertEquals("PARAM4", def.getParameter().get(3).getName());
+		assertEquals(OperationParameterUse.IN, def.getParameter().get(3).getUse());
+		assertEquals(1, def.getParameter().get(3).getMin());
+		assertEquals("*", def.getParameter().get(3).getMax());
+		
 	}
 
 	private List<String> toOpNames(List<ConformanceRestOperationComponent> theOps) {
@@ -530,6 +569,7 @@ public class OperationServerDstu3Test {
 
 	}
 
+	
 	public static void main(String[] theValue) {
 		Parameters p = new Parameters();
 		p.addParameter().setName("start").setValue(new DateTimeType("2001-01-02"));
@@ -617,7 +657,9 @@ public class OperationServerDstu3Test {
 		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
 				@OperationParam(name="PARAM1") StringType theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
+				@OperationParam(name="PARAM2") Patient theParam2,
+				@OperationParam(name="PARAM3", min=2, max=5) List<StringType> theParam3,
+				@OperationParam(name="PARAM4", min=1) List<StringType> theParam4
 				) {
 			//@formatter:on
 
