@@ -163,7 +163,7 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseIgnoresLeadingAndTrailingSpace() {
 		DateTimeDt dt = new DateTimeDt("  2014-10-11T12:11:00Z      ");
-		assertEquals("", myDateInstantZoneParser.format(dt.getValue()));
+		assertEquals("2014-10-11 10:11:00.000-0200", myDateInstantZoneParser.format(dt.getValue()));
 	}
 
 	@Test

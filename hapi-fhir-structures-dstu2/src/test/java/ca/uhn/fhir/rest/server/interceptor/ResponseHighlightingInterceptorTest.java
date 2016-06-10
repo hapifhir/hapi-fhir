@@ -376,7 +376,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
 		assertThat(output, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
-		assertThat(output, containsString("<a href=\"?_raw=true\">"));
+		assertThat(output, containsString("<a href=\"?_format=json\">"));
 	}
 
 	/**

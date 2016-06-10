@@ -174,18 +174,18 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertThat(conf, stringContainsInOrder(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
-			"<name value=\"$andlist\"/>",
+			"<name value=\"andlist\"/>",
 			"</operation>" 
 		));
 		assertThat(conf, stringContainsInOrder(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
-			"<name value=\"$nonrepeating\"/>"
+			"<name value=\"nonrepeating\"/>"
 		));
 		assertThat(conf, stringContainsInOrder(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
-			"<name value=\"$orlist\"/>"
+			"<name value=\"orlist\"/>"
 		));
 		//@formatter:on
 		

@@ -131,11 +131,10 @@ public class ServerConformanceProviderDstu3Test {
 		ourLog.info(conf);
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("$everything", ((OperationDefinition)conformance.getRest().get(0).getOperation().get(0).getDefinition().getResource()).getCode());
+		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
-		assertEquals("$everything", opDef.getCode());
+		assertEquals("everything", opDef.getCode());
 	}
 
 	@Test
@@ -155,7 +154,7 @@ public class ServerConformanceProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
-		assertEquals("$everything", opDef.getCode());
+		assertEquals("everything", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent());
 	}
 
@@ -269,15 +268,12 @@ public class ServerConformanceProviderDstu3Test {
 
 		rs.init(createServletConfig());
 
-		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
-		assertEquals("$plain", ((OperationDefinition)sconf.getRest().get(0).getOperation().get(0).getDefinition().getResource()).getCode());
-
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/plain"));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
-		assertEquals("$plain", opDef.getCode());
+		assertEquals("plain", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent());
 		assertEquals(3, opDef.getParameter().size());
 		assertEquals("start", opDef.getParameter().get(0).getName());

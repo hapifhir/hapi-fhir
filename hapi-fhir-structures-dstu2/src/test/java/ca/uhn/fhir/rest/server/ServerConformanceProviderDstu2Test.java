@@ -136,7 +136,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 	}
 
