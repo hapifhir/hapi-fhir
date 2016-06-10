@@ -355,13 +355,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		} else if (theValue.charAt(0) == 'Z') {
 			clearTimeZone();
 			setTimeZoneZulu(true);
-		} else if (theValue.length() != 5) {
+		} else if (theValue.length() != 6) {
 			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
 		} else if (theValue.charAt(3) != ':' || !(theValue.charAt(0) == '+' || theValue.charAt(0) == '-')) {
 			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
 		} else {
-			parseInt(theWholeValue, theValue.substring(0, 2), 0, 23);
-			parseInt(theWholeValue, theValue.substring(3, 5), 0, 59);
+			parseInt(theWholeValue, theValue.substring(1, 3), 0, 23);
+			parseInt(theWholeValue, theValue.substring(4, 6), 0, 59);
 			clearTimeZone();
 			setTimeZone(TimeZone.getTimeZone("GMT" + theValue));
 		}

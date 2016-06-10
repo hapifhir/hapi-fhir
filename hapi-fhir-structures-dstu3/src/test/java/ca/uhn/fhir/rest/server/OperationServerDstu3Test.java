@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
@@ -45,12 +46,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -84,10 +85,27 @@ public class OperationServerDstu3Test {
 	@Test
 	public void testConformance() throws Exception {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-		Conformance p = client.fetchConformance().ofType(Conformance.class).execute();
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setLogResponseBody(true);
+		client.registerInterceptor(loggingInterceptor);
+
+		Conformance p = client.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<ConformanceRestOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
-		assertThat(ops.get(0).getDefinition().getReferenceElement().getValue(), startsWith("#"));
+
+		List<String> opNames = toOpNames(ops);
+		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
+		
+		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
+		assertEquals("OP_TYPE", def.getCode());
+	}
+
+	private List<String> toOpNames(List<ConformanceRestOperationComponent> theOps) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (ConformanceRestOperationComponent next : theOps) {
+			retVal.add(next.getName());
+		}
+		return retVal;
 	}
 
 	@Test

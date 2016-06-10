@@ -319,6 +319,11 @@
 				<![CDATA[<code>_raw=true</code>]]> mode has been deprecated and
 				will be removed at some point.
 			</action>
+			<action type="fix" issue="267">
+				Operation definitions (e.g. for $everything operation) in the generated
+				server conformance statement should not include the $ prefix in the operation
+				name or code. Thanks to Dion McMurtrie for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

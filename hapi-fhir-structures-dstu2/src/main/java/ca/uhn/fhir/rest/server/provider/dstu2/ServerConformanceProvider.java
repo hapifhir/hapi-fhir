@@ -265,7 +265,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
-							rest.addOperation().setName(methodBinding.getName()).getDefinition().setReference("OperationDefinition/" + opName);
+							rest.addOperation().setName(opName).getDefinition().setReference("OperationDefinition/" + opName);
 						}
 					}
 
