@@ -1,13 +1,16 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -15,6 +18,7 @@ import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -46,14 +50,18 @@ public class BaseDateTimeDtTest {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(myDateInstantParser.parse("2012-01-02 22:31:02.333"));
 		cal.setTimeZone(TimeZone.getTimeZone("EST"));
-		
+
 		Patient patient = new Patient();
 		patient.setBirthDate(cal.getTime(), TemporalPrecisionEnum.DAY);
 		String out = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(out, containsString("<birthDate value=\"2012-01-02\"/>"));
 	}
 	
-	
+	@Test
+	public void testParseDate() {
+		new DateDt("2012-03-31");
+	}
+
 	@Test
 	public void setTimezoneToZulu() {
 		DateTimeDt dt = new DateTimeDt(new Date(816411488000L));
@@ -126,7 +134,22 @@ public class BaseDateTimeDtTest {
 		}
 	}
 
+	/**
+	 * See #381
+	 */
 	@Test
+	public void testParseFailsForInvalidDate() {
+		try {
+			DateTimeDt dt = new DateTimeDt("9999-13-01");
+			fail(dt.getValue().toString());
+		} catch (DataFormatException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	@Ignore
 	public void testFormats() throws Exception {
 		Date instant = myDateInstantParser.parse("2001-02-03 13:01:02.555");
 		for (FastDateFormat next : BaseDateTimeDt.getFormatters()) {
@@ -156,11 +179,9 @@ public class BaseDateTimeDtTest {
 		assertEquals(TemporalPrecisionEnum.DAY, dt.getPrecision());
 	}
 
-	@Test()
+	@Test(expected=DataFormatException.class)
 	public void testParseMalformatted() throws DataFormatException {
-		DateTimeDt dt = new DateTimeDt("20120102");
-		assertEquals("20120102", dt.getValueAsString());
-		assertEquals("2012-01-02", new SimpleDateFormat("yyyy-MM-dd").format(dt.getValue()));
+		new DateTimeDt("20120102");
 	}
 
 	@Test
@@ -195,7 +216,7 @@ public class BaseDateTimeDtTest {
 		assertEquals("2013-02-03 09:22:33.234-0200", myDateInstantZoneParser.format(dt.getValue()));
 		assertEquals("2013-02-03T11:22:33.234Z", dt.getValueAsString());
 		assertEquals(true, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
+		assertEquals("GMT", dt.getTimeZone().getID());
 		assertEquals(TemporalPrecisionEnum.MILLI, dt.getPrecision());
 	}
 
@@ -204,23 +225,19 @@ public class BaseDateTimeDtTest {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02");
 
-		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
+		ourLog.info("Date: {}", dt.getValue());
 		assertEquals("2013-02", dt.getValueAsString());
 		assertEquals(false, dt.isTimeZoneZulu());
 		assertNull(dt.getTimeZone());
 		assertEquals(TemporalPrecisionEnum.MONTH, dt.getPrecision());
+		
+		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
 	}
 
-	@Test
+	@Test(expected=DataFormatException.class)
 	public void testParseMonthNoDashes() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("201302");
-
-		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
-		assertEquals("201302", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.MONTH, dt.getPrecision());
 	}
 
 	@Test
@@ -242,7 +259,7 @@ public class BaseDateTimeDtTest {
 
 		assertEquals("2013-02-03T11:22:33Z", dt.getValueAsString());
 		assertEquals(true, dt.isTimeZoneZulu());
-		assertEquals(null, dt.getTimeZone());
+		assertEquals("GMT", dt.getTimeZone().getID());
 		assertEquals(TemporalPrecisionEnum.SECOND, dt.getPrecision());
 	}
 
@@ -280,7 +297,6 @@ public class BaseDateTimeDtTest {
 		assertEquals(1403295729000L, i.getValue().getTime());
 		assertEquals("2014-06-20T20:22:09Z", i.getValueAsString());
 	}
-
 
 	@AfterClass
 	public static void afterClassClearContext() {

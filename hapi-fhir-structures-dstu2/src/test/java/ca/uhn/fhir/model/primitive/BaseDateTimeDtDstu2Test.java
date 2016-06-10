@@ -1,10 +1,12 @@
 package ca.uhn.fhir.model.primitive;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,6 +38,24 @@ public class BaseDateTimeDtDstu2Test {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 
+	
+	@Test
+	public void testLargePrecision() {
+		DateTimeDt dt = new DateTimeDt("2014-03-06T22:09:58.9121174+04:30");
+		
+		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("Z"));
+		assertEquals("2014-03-06 17:39:58.912", myDateInstantParser.format(dt.getValue()));
+	}
+	
+	@Test
+	public void testEncodeOffset() throws Exception {
+		myDateInstantParser.parse("2011-01-01 11:11:11.0");
+		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
+		String offset = InstantDt.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
+		assertThat(offset, endsWith("-05:00"));
+	}
+	
+	
 	@Test
 	public void testParseInvalid() {
 		try {
@@ -43,14 +63,14 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString("1974-12-25+10:00");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertEquals("Invalid date/time string (invalid length): 1974-12-25+10:00", e.getMessage());
+			assertEquals("Invalid date/time format: \"1974-12-25+10:00\"", e.getMessage());
 		}
 		try {
 			DateTimeDt dt = new DateTimeDt();
 			dt.setValueAsString("1974-12-25Z");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertEquals("Invalid date/time string (invalid length): 1974-12-25Z", e.getMessage());
+			assertEquals("Invalid date/time format: \"1974-12-25Z\"", e.getMessage());
 		}
 	}
 
@@ -136,7 +156,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
 		
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.123Z", dt.getValueAsString());
+		assertEquals("2010-01-01T09:00:00.1234Z", dt.getValueAsString());
 	}
 
 	@Test
@@ -151,7 +171,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
 		
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.123Z", dt.getValueAsString());
+		assertEquals("2010-01-01T09:00:00.12345Z", dt.getValueAsString());
 	}
 
 	/**

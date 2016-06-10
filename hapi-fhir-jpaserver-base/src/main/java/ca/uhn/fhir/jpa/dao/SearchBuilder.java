@@ -2053,6 +2053,7 @@ public class SearchBuilder {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<Predicate>();
 		if (theLastUpdated != null) {
 			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.info("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
 				Predicate predicateLower = builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
 				lastUpdatedPredicates.add(predicateLower);
 			}

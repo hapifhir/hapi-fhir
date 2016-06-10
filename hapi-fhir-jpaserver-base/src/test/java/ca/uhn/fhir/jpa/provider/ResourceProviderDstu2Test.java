@@ -1590,17 +1590,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			patient.addName().addFamily(methodName).addGiven("John");
 			id2 = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
-
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, hasItems(id1a, id1b, id2));
-		}
+		
+		ourLog.info("Before: {}", beforeAny.getValue());
 		{
 			//@formatter:off
 			Bundle found = ourClient.search()
@@ -1612,6 +1603,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
+
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		
 		{
 			//@formatter:off
 			Bundle found = ourClient.search()

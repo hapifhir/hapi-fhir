@@ -1109,6 +1109,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		if (theEntity.getPublished() == null) {
+			ourLog.info("Entity has published time: {}", new InstantDt(theUpdateTime));
+
 			theEntity.setPublished(theUpdateTime);
 		}
 
@@ -1187,7 +1189,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				coordsParams = extractSearchParamCoords(theEntity, theResource);
 
 				// ourLog.info("Indexing resource: {}", entity.getId());
-				ourLog.trace("Storing string indexes: {}", stringParams);
+				ourLog.info("Storing date indexes: {}", dateParams);
 
 				tokenParams = new HashSet<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {

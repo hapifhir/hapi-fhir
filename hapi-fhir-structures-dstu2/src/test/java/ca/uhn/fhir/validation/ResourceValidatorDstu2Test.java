@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
 import ca.uhn.fhir.util.TestUtil;
@@ -69,7 +71,7 @@ public class ResourceValidatorDstu2Test {
 	/**
 	 * See issue #50
 	 */
-	@Test
+	@Test(expected=DataFormatException.class)
 	public void testOutOfBoundsDate() {
 		Patient p = new Patient();
 		p.setBirthDate(new DateDt("2000-15-31"));

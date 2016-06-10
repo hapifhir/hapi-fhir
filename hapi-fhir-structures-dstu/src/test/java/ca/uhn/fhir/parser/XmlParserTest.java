@@ -151,7 +151,7 @@ public class XmlParserTest {
 		MyPatientWithUnorderedExtensions pat = new MyPatientWithUnorderedExtensions();
 		pat.getExtAtt1().setValue(true);
 		pat.getExtAtt2().setValue("val2");
-		pat.getExtAtt3().setValueAsString("20110102");
+		pat.getExtAtt3().setValueAsString("2011-01-02");
 
 		String string = ourCtx.newXmlParser().encodeResourceToString(pat);
 		ourLog.info(string);
@@ -160,7 +160,7 @@ public class XmlParserTest {
 		assertThat(string, stringContainsInOrder(Arrays.asList(
 			"<extension url=\"urn:ex1\"><valueBoolean value=\"true\"/></extension>",
 			"<extension url=\"urn:ex2\"><valueString value=\"val2\"/></extension>",
-			"<extension url=\"urn:ex3\"><valueDate value=\"20110102\"/></extension>"
+			"<extension url=\"urn:ex3\"><valueDate value=\"2011-01-02\"/></extension>"
 			)));
 		//@formatter:on
 
