@@ -24,9 +24,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,25 +53,19 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
-	public static final String PARAM_RAW_TRUE = "true";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
+	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[] { Constants.FORMAT_JSON };
+	private static final String[] PARAM_FORMAT_VALUE_XML = new String[] { Constants.FORMAT_XML };
+
+	/**
+	 * TODO: As of HAPI 1.6 (2016-06-10) this parameter has been replaced with simply
+	 * requesting _format=json or xml so eventually this parameter should be removed
+	 */
 	public static final String PARAM_RAW = "_raw";
 
-//	private boolean myEncodeHeaders = false;
-//	
-//	/**
-//	 * Should headers be included in the HTML response?
-//	 */
-//	public boolean isEncodeHeaders() {
-//		return myEncodeHeaders;
-//	}
-//
-//	/**
-//	 * Should headers be included in the HTML response?
-//	 */
-//	public void setEncodeHeaders(boolean theEncodeHeaders) {
-//		myEncodeHeaders = theEncodeHeaders;
-//	}
-
+	public static final String PARAM_RAW_TRUE = "true";
+	
+	public static final String PARAM_TRUE = "true";
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
@@ -185,17 +176,67 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 		return b.toString();
 	}
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
+
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
+		/*
+		 * It's not a browser...
+		 */
+		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
+		if (!accept.contains(Constants.CT_HTML)) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+
+		/*
+		 * It's an AJAX request, so no HTML
+		 */
+		String requestedWith = theServletRequest.getHeader("X-Requested-With");
+		if (requestedWith != null) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+
+		/*
+		 * Not a GET
+		 */
+		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+
+		if (theException.getOperationOutcome() == null) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+
+		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome());
+
+		return false;
+	}
+
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 
+		/*
+		 * Request for _raw
+		 */
+		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
+		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
+			ourLog.warn("Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+		
 		boolean force = false;
 		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
-		if (formatParams != null) {
-			for (String next : formatParams) {
-				if (Constants.FORMATS_HTML.contains(next)) {
-					force = true;
-				}
+		if (formatParams != null && formatParams.length > 0) {
+			String formatParam = formatParams[0];
+			if (Constants.FORMATS_HTML.contains(formatParam)) { // this is a set
+				force = true;
+			} else if (Constants.FORMATS_HTML_XML.equals(formatParam)) {
+				force = true;
+				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_XML);
+			} else if (Constants.FORMATS_HTML_JSON.equals(formatParam)) {
+				force = true;
+				theRequestDetails.getParameters().put(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
+			} else {
+				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 			}
 		}
 		
@@ -235,14 +276,6 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
-		/*
-		 * Request for _raw
-		 */
-		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
-		if (!force && rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
-		}
-
 		streamResponse(theRequestDetails, theServletResponse, theResponseObject);
 
 		return false;
@@ -264,32 +297,6 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 
 		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
 
-		StringBuilder rawB = new StringBuilder();
-		for (String next : parameters.keySet()) {
-			if (next.equals(PARAM_RAW)) {
-				continue;
-			}
-			for (String nextValue : parameters.get(next)) {
-				if (isBlank(nextValue)) {
-					continue;
-				}
-				if (rawB.length() == 0) {
-					rawB.append('?');
-				}else {
-					rawB.append('&');
-				}
-				rawB.append(UrlUtil.escape(next));
-				rawB.append('=');
-				rawB.append(UrlUtil.escape(nextValue));
-			}
-		}
-		if (rawB.length() == 0) {
-			rawB.append('?');
-		}else {
-			rawB.append('&');
-		}
-		rawB.append(PARAM_RAW).append('=').append(PARAM_RAW_TRUE);
-		
 		StringBuilder b = new StringBuilder();
 		b.append("<html lang=\"en\">\n");
 		b.append("	<head>\n");
@@ -330,19 +337,41 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		b.append("	</head>\n");
 		b.append("\n");
 		b.append("	<body>");
-		b.append("This result is being rendered in HTML for easy viewing. <a href=\"");
-		b.append(rawB.toString());
-		b.append("\">Click here</a> to disable this.<br/><br/>");
-//		if (isEncodeHeaders()) {
-//			b.append("<h1>Request Headers</h1>");
-//			b.append("<div class=\"headersDiv\">");
-//			for (int next : theRequestDetails.get)
-//			b.append("</div>");
-//			b.append("<h1>Response Headers</h1>");
-//			b.append("<div class=\"headersDiv\">");
-//			b.append("</div>");
-//			b.append("<h1>Response Body</h1>");
-//		}
+		
+		b.append("<p>");
+		b.append("This result is being rendered in HTML for easy viewing. ");
+		b.append("You may view this content as ");
+		
+		b.append("<a href=\"");
+		b.append(createLinkHref(parameters, Constants.FORMAT_JSON));
+		b.append("\">Raw JSON</a>, ");
+
+		b.append("<a href=\"");
+		b.append(createLinkHref(parameters, Constants.FORMAT_XML));
+		b.append("\">Raw XML</a>, ");
+
+		b.append("<a href=\"");
+		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
+		b.append("\">HTML JSON</a>, ");
+
+		b.append("or ");
+		b.append("<a href=\"");
+		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
+		b.append("\">HTML XML</a>.");
+		b.append("</p>");
+		
+		b.append("\n");
+		
+		//		if (isEncodeHeaders()) {
+		//			b.append("<h1>Request Headers</h1>");
+		//			b.append("<div class=\"headersDiv\">");
+		//			for (int next : theRequestDetails.get)
+		//			b.append("</div>");
+		//			b.append("<h1>Response Headers</h1>");
+		//			b.append("<div class=\"headersDiv\">");
+		//			b.append("</div>");
+		//			b.append("<h1>Response Body</h1>");
+		//		}
 		b.append("<pre>");
 		b.append(format(encoded, encoding));
 		b.append("</pre>");
@@ -360,38 +389,35 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		}
 	}
 
-	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
-		/*
-		 * It's not a browser...
-		 */
-		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
-		if (!accept.contains(Constants.CT_HTML)) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+	private String createLinkHref(Map<String, String[]> parameters, String formatValue) {
+		StringBuilder rawB = new StringBuilder();
+		for (String next : parameters.keySet()) {
+			if (Constants.PARAM_FORMAT.equals(next)) {
+				continue;
+			}
+			for (String nextValue : parameters.get(next)) {
+				if (isBlank(nextValue)) {
+					continue;
+				}
+				if (rawB.length() == 0) {
+					rawB.append('?');
+				} else {
+					rawB.append('&');
+				}
+				rawB.append(UrlUtil.escape(next));
+				rawB.append('=');
+				rawB.append(UrlUtil.escape(nextValue));
+			}
 		}
-
-		/*
-		 * It's an AJAX request, so no HTML
-		 */
-		String requestedWith = theServletRequest.getHeader("X-Requested-With");
-		if (requestedWith != null) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		if (rawB.length() == 0) {
+			rawB.append('?');
+		} else {
+			rawB.append('&');
 		}
+		rawB.append(Constants.PARAM_FORMAT).append('=').append(formatValue);
 
-		/*
-		 * Not a GET
-		 */
-		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
-		}
-
-		if (theException.getOperationOutcome() == null) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
-		}
-
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome());
-
-		return false;
+		String link = rawB.toString();
+		return link;
 	}
 
 }

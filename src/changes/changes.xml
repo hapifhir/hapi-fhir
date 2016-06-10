@@ -304,6 +304,21 @@
 				incorrectly claim that the method will not return null when
 				in fact it can. Thanks to Rick Riemer for reporting!
 			</action>
+			<action type="add">
+				ResponseHighlightingInterceptor has been modified based on consensus
+				on Zulip with Grahame that requests that have a parameter of
+				<![CDATA[<code>_format=json</code>]]> or
+				<![CDATA[<code>_format=xml</code>]]> will output raw FHIR content
+				instead of HTML highlighting the content as they previously did. 
+				HTML content can now be forced via the (previously existing)
+				<![CDATA[<code>_format=html</code>]]> or via the two newly added
+				values
+				<![CDATA[<code>_format=html/json</code>]]> and
+				<![CDATA[<code>_format=html/xml</code>]]>. Because of this
+				change, the custom
+				<![CDATA[<code>_raw=true</code>]]> mode has been deprecated and
+				will be removed at some point.
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
