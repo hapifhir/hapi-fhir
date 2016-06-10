@@ -315,7 +315,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent());
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response, containsString("_format=json"));
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			http.close();
@@ -454,7 +454,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testGetOperationDefinition() {
 		OperationDefinition op = ourClient.read(OperationDefinition.class, "get-resource-counts");
-		assertEquals("$get-resource-counts", op.getCode());
+		assertEquals("get-resource-counts", op.getCode());
 	}
 
 	@Test
