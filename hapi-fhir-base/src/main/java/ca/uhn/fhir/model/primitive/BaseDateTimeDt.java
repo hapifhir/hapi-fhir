@@ -108,7 +108,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 								leftPadWithZeros(myFractionalSeconds, 3, b);
 							}
 						}
-						
+
 						if (myTimeZoneZulu) {
 							b.append('Z');
 						} else if (myTimeZone != null) {
@@ -119,7 +119,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 								b.append('-');
 								offset = Math.abs(offset);
 							}
-							
+
 							int hoursOffset = (int) (offset / DateUtils.MILLIS_PER_HOUR);
 							leftPadWithZeros(hoursOffset, 2, b);
 							b.append(':');
@@ -223,20 +223,19 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		theTarget.append(string);
 	}
 
-
 	@Override
 	protected Date parse(String theValue) throws DataFormatException {
 		Calendar cal = new GregorianCalendar(0, 0, 0);
 		cal.setTimeZone(TimeZone.getDefault());
 		int length = theValue.length();
-		
+
 		if (length == 0) {
 			return null;
 		}
 		if (length < 4) {
-			throwBadDateFormat(theValue); 
+			throwBadDateFormat(theValue);
 		}
-		
+
 		TemporalPrecisionEnum precision = null;
 		cal.set(Calendar.YEAR, parseInt(theValue, theValue.substring(0, 4), 0, 9999));
 		precision = TemporalPrecisionEnum.YEAR;
@@ -265,11 +264,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					} else {
 						time = theValue.substring(11, offsetIdx);
 						String offsetString = theValue.substring(offsetIdx);
-						setTimeZone(offsetString);
+						setTimeZone(theValue, offsetString);
 						cal.setTimeZone(getTimeZone());
 					}
 					int timeLength = time.length();
-					
+
 					validateCharAtIndexIs(theValue, 13, ':');
 					cal.set(Calendar.HOUR_OF_DAY, parseInt(theValue, theValue.substring(11, 13), 0, 23));
 					cal.set(Calendar.MINUTE, parseInt(theValue, theValue.substring(14, 16), 0, 59));
@@ -288,7 +287,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 							}
 							int millis;
 							if (endIndex > 23) {
-								myFractionalSeconds = parseInt(theValue, theValue.substring(20,endIndex), 0, Integer.MAX_VALUE);
+								myFractionalSeconds = parseInt(theValue, theValue.substring(20, endIndex), 0, Integer.MAX_VALUE);
 								endIndex = 23;
 								String millisString = theValue.substring(20, endIndex);
 								millis = parseInt(theValue, millisString, 0, 999);
@@ -308,115 +307,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		} else {
 			cal.set(Calendar.DATE, 1);
 		}
-		
+
 		setPrecision(precision);
 		return cal.getTime();
 
-//		try {
-//			if (theValue.length() == 4 && ourYearPattern.matcher(theValue).matches()) {
-//				if (!isPrecisionAllowed(YEAR)) {
-//					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
-//				}
-//				setPrecision(YEAR);
-//				clearTimeZone();
-//				return ((ourYearFormat).parse(theValue));
-//			} else if (theValue.length() == 6 && ourYearMonthPattern.matcher(theValue).matches()) {
-//				// Eg. 198401 (allow this just to be lenient)
-//				if (!isPrecisionAllowed(MONTH)) {
-//					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-//				}
-//				setPrecision(MONTH);
-//				clearTimeZone();
-//				return ((ourYearMonthNoDashesFormat).parse(theValue));
-//			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
-//				// E.g. 1984-01 (this is valid according to the spec)
-//				if (!isPrecisionAllowed(MONTH)) {
-//					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
-//				}
-//				setPrecision(MONTH);
-//				clearTimeZone();
-//				return ((ourYearMonthFormat).parse(theValue));
-//			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
-//				// Eg. 19840101 (allow this just to be lenient)
-//				if (!isPrecisionAllowed(DAY)) {
-//					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-//				}
-//				setPrecision(DAY);
-//				clearTimeZone();
-//				return ((ourYearMonthDayNoDashesFormat).parse(theValue));
-//			} else if (theValue.length() == 10 && ourYearDashMonthDashDayPattern.matcher(theValue).matches()) {
-//				// E.g. 1984-01-01 (this is valid according to the spec)
-//				if (!isPrecisionAllowed(DAY)) {
-//					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-//				}
-//				setPrecision(DAY);
-//				clearTimeZone();
-//				return ((ourYearMonthDayFormat).parse(theValue));
-//			} else if (theValue.length() >= 18) { // date and time with possible time zone
-//				char timeSeparator = theValue.charAt(10);
-//				if (timeSeparator != 'T') {
-//					throw new DataFormatException("Invalid date/time string: " + theValue);
-//				}
-//				int dotIndex = theValue.indexOf('.', 18);
-//				boolean hasMillis = dotIndex > -1;
-//
-//				if (!hasMillis && !isPrecisionAllowed(SECOND)) {
-//					ourLog.debug("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
-//				} else if (hasMillis && !isPrecisionAllowed(MILLI)) {
-//					ourLog.debug("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
-//				}
-//
-//				Date retVal;
-//				if (hasMillis) {
-//					String value = theValue;
-//					
-//					/*
-//					 * If we have more than 3 digits of precision after the decimal point, we
-//					 * only parse the first 3 since Java Dates don't support more than that and
-//					 * FastDateFormat gets confused
-//					 */
-//					int offsetIndex = getOffsetIndex(theValue);
-//					if (offsetIndex >= 24) {
-//						value = theValue.substring(0, 23) + theValue.substring(offsetIndex);
-//					}
-//					
-//					try {
-//						if (hasOffset(value)) {
-//							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(value);
-//						} else if (value.endsWith("Z")) {
-//							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(value);
-//						} else {
-//							retVal = ourYearMonthDayTimeMilliFormat.parse(value);
-//						}
-//					} catch (ParseException p2) {
-//						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
-//					}
-//					setTimeZone(theValue);
-//					setPrecision(TemporalPrecisionEnum.MILLI);
-//				} else {
-//					try {
-//						if (hasOffset(theValue)) {
-//							retVal = ourYearMonthDayTimeZoneFormat.parse(theValue);
-//						} else if (theValue.endsWith("Z")) {
-//							retVal = ourYearMonthDayTimeUTCZFormat.parse(theValue);
-//						} else {
-//							retVal = ourYearMonthDayTimeFormat.parse(theValue);
-//						}
-//					} catch (ParseException p2) {
-//						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
-//					}
-//
-//					setTimeZone(theValue);
-//					setPrecision(TemporalPrecisionEnum.SECOND);
-//				}
-//
-//				return retVal;
-//			} else {
-//				throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
-//			}
-//		} catch (ParseException e) {
-//			throw new DataFormatException("Invalid date string (" + e.getMessage() + "): " + theValue);
-//		}
 	}
 
 	private int parseInt(String theValue, String theSubstring, int theLowerBound, int theUpperBound) {
@@ -426,11 +320,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		} catch (NumberFormatException e) {
 			throwBadDateFormat(theValue);
 		}
-		
+
 		if (retVal < theLowerBound || retVal > theUpperBound) {
 			throwBadDateFormat(theValue);
 		}
-		
+
 		return retVal;
 	}
 
@@ -447,17 +341,23 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		updateStringValue();
 	}
 
-	private BaseDateTimeDt setTimeZone(String theValueString) {
+	private BaseDateTimeDt setTimeZone(String theWholeValue, String theValue) {
 
-		if (isBlank(theValueString)) {
-			throw new DataFormatException("Invalid time zone offset string: \"" + theValueString + "\"");
+		if (isBlank(theValue)) {
+			throwBadDateFormat(theWholeValue);
+		} else if (theValue.charAt(0) == 'Z') {
+			clearTimeZone();
+			setTimeZoneZulu(true);
+		} else if (theValue.length() != 5) {
+			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
+		} else if (theValue.charAt(3) != ':' || !(theValue.charAt(0) == '+' || theValue.charAt(0) == '-')) {
+			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
+		} else {
+			parseInt(theWholeValue, theValue.substring(0, 2), 0, 23);
+			parseInt(theWholeValue, theValue.substring(3, 5), 0, 59);
+			clearTimeZone();
+			setTimeZone(TimeZone.getTimeZone("GMT" + theValue));
 		}
-		clearTimeZone();
-			if (theValueString.charAt(0) == 'Z') {
-				setTimeZoneZulu(true);
-			} else {
-				setTimeZone(TimeZone.getTimeZone("GMT" + theValueString));
-			}
 
 		return this;
 	}
