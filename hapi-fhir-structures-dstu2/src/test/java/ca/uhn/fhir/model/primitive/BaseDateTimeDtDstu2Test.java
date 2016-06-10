@@ -157,6 +157,15 @@ public class BaseDateTimeDtDstu2Test {
 		new DateDt("2012-03-31");
 	}
 
+	/*
+	 * Just to be lenient
+	 */
+	@Test
+	public void testParseIgnoresLeadingAndTrailingSpace() {
+		DateTimeDt dt = new DateTimeDt("  2014-10-11T12:11:00Z      ");
+		assertEquals("", myDateInstantZoneParser.format(dt.getValue()));
+	}
+
 	@Test
 	public void testParseDay() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();

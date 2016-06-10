@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.length;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -227,73 +228,79 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	protected Date parse(String theValue) throws DataFormatException {
 		Calendar cal = new GregorianCalendar(0, 0, 0);
 		cal.setTimeZone(TimeZone.getDefault());
-		int length = theValue.length();
-
+		String value = theValue;
+		
+		if (value.length() > 0 && (value.charAt(0) == ' ' || value.charAt(value.length()-1) == ' ')) {
+			value = value.trim();
+		}
+		
+		int length = value.length();
 		if (length == 0) {
 			return null;
 		}
+		
 		if (length < 4) {
-			throwBadDateFormat(theValue);
+			throwBadDateFormat(value);
 		}
 
 		TemporalPrecisionEnum precision = null;
-		cal.set(Calendar.YEAR, parseInt(theValue, theValue.substring(0, 4), 0, 9999));
+		cal.set(Calendar.YEAR, parseInt(value, value.substring(0, 4), 0, 9999));
 		precision = TemporalPrecisionEnum.YEAR;
 		if (length > 4) {
-			validateCharAtIndexIs(theValue, 4, '-');
-			validateLengthIsAtLeast(theValue, 7);
-			int monthVal = parseInt(theValue, theValue.substring(5, 7), 1, 12) - 1;
+			validateCharAtIndexIs(value, 4, '-');
+			validateLengthIsAtLeast(value, 7);
+			int monthVal = parseInt(value, value.substring(5, 7), 1, 12) - 1;
 			cal.set(Calendar.MONTH, monthVal);
 			precision = TemporalPrecisionEnum.MONTH;
 			if (length > 7) {
-				validateCharAtIndexIs(theValue, 7, '-');
-				validateLengthIsAtLeast(theValue, 10);
+				validateCharAtIndexIs(value, 7, '-');
+				validateLengthIsAtLeast(value, 10);
 				cal.set(Calendar.DATE, 1); // for some reason getActualMaximum works incorrectly if date isn't set
 				int actualMaximum = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-				cal.set(Calendar.DAY_OF_MONTH, parseInt(theValue, theValue.substring(8, 10), 1, actualMaximum));
+				cal.set(Calendar.DAY_OF_MONTH, parseInt(value, value.substring(8, 10), 1, actualMaximum));
 				precision = TemporalPrecisionEnum.DAY;
 				if (length > 10) {
-					validateLengthIsAtLeast(theValue, 17);
-					validateCharAtIndexIs(theValue, 10, 'T'); // yyyy-mm-ddThh:mm:ss
-					int offsetIdx = getOffsetIndex(theValue);
+					validateLengthIsAtLeast(value, 17);
+					validateCharAtIndexIs(value, 10, 'T'); // yyyy-mm-ddThh:mm:ss
+					int offsetIdx = getOffsetIndex(value);
 					String time;
 					if (offsetIdx == -1) {
 						//throwBadDateFormat(theValue);
 						// No offset - should this be an error?
-						time = theValue.substring(11);
+						time = value.substring(11);
 					} else {
-						time = theValue.substring(11, offsetIdx);
-						String offsetString = theValue.substring(offsetIdx);
-						setTimeZone(theValue, offsetString);
+						time = value.substring(11, offsetIdx);
+						String offsetString = value.substring(offsetIdx);
+						setTimeZone(value, offsetString);
 						cal.setTimeZone(getTimeZone());
 					}
 					int timeLength = time.length();
 
-					validateCharAtIndexIs(theValue, 13, ':');
-					cal.set(Calendar.HOUR_OF_DAY, parseInt(theValue, theValue.substring(11, 13), 0, 23));
-					cal.set(Calendar.MINUTE, parseInt(theValue, theValue.substring(14, 16), 0, 59));
+					validateCharAtIndexIs(value, 13, ':');
+					cal.set(Calendar.HOUR_OF_DAY, parseInt(value, value.substring(11, 13), 0, 23));
+					cal.set(Calendar.MINUTE, parseInt(value, value.substring(14, 16), 0, 59));
 					precision = TemporalPrecisionEnum.MINUTE;
 					if (timeLength > 5) {
-						validateLengthIsAtLeast(theValue, 19);
-						validateCharAtIndexIs(theValue, 16, ':'); // yyyy-mm-ddThh:mm:ss
-						cal.set(Calendar.SECOND, parseInt(theValue, theValue.substring(17, 19), 0, 59));
+						validateLengthIsAtLeast(value, 19);
+						validateCharAtIndexIs(value, 16, ':'); // yyyy-mm-ddThh:mm:ss
+						cal.set(Calendar.SECOND, parseInt(value, value.substring(17, 19), 0, 59));
 						precision = TemporalPrecisionEnum.SECOND;
 						if (timeLength > 8) {
-							validateCharAtIndexIs(theValue, 19, '.'); // yyyy-mm-ddThh:mm:ss.SSSS
-							validateLengthIsAtLeast(theValue, 20);
-							int endIndex = getOffsetIndex(theValue);
+							validateCharAtIndexIs(value, 19, '.'); // yyyy-mm-ddThh:mm:ss.SSSS
+							validateLengthIsAtLeast(value, 20);
+							int endIndex = getOffsetIndex(value);
 							if (endIndex == -1) {
-								endIndex = theValue.length();
+								endIndex = value.length();
 							}
 							int millis;
 							if (endIndex > 23) {
-								myFractionalSeconds = parseInt(theValue, theValue.substring(20, endIndex), 0, Integer.MAX_VALUE);
+								myFractionalSeconds = parseInt(value, value.substring(20, endIndex), 0, Integer.MAX_VALUE);
 								endIndex = 23;
-								String millisString = theValue.substring(20, endIndex);
-								millis = parseInt(theValue, millisString, 0, 999);
+								String millisString = value.substring(20, endIndex);
+								millis = parseInt(value, millisString, 0, 999);
 							} else {
-								String millisString = theValue.substring(20, endIndex);
-								millis = parseInt(theValue, millisString, 0, 999);
+								String millisString = value.substring(20, endIndex);
+								millis = parseInt(value, millisString, 0, 999);
 								myFractionalSeconds = millis;
 							}
 							cal.set(Calendar.MILLISECOND, millis);
