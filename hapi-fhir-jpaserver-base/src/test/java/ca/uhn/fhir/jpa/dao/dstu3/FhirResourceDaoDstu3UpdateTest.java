@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -181,6 +182,44 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
 
+	}
+
+	@Test
+	public void testUpdateConditionalByLastUpdatedWithWrongTimezone() throws Exception {
+		TimeZone def = TimeZone.getDefault();
+		try {
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0:00"));
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantDt start = InstantDt.withCurrentTime();
+		Thread.sleep(100);
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
+
+		p = myPatientDao.read(id.toVersionless(), mySrd);
+		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		} finally {
+			TimeZone.setDefault(def);
+		}
 	}
 
 	@Test

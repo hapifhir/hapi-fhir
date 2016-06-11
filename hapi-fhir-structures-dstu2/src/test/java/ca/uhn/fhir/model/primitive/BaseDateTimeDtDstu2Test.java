@@ -49,6 +49,16 @@ public class BaseDateTimeDtDstu2Test {
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
 	
+	@Test
+	public void testEncodeZeroOffset() {
+		DateTimeDt dt = new DateTimeDt();
+		dt.setValueAsString("2011-01-01T12:00:00");
+		dt.setTimeZone(TimeZone.getTimeZone("GMT-0:00"));
+
+		String val = dt.getValueAsString();
+		assertEquals("2011-01-01T18:00:00+00:00", val);
+	}
+	
 	
 	@Test
 	public void setTimezoneToZulu() {

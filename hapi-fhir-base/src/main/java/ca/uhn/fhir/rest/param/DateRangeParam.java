@@ -357,6 +357,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
 			}
 			String param = paramList.get(0);
+			
+			/*
+			 * Since ' ' is escaped as '+' we'll be nice to anyone might have accidentally not
+			 * escaped theirs
+			 */
+			param = param.replace(' ', '+');
+			
 			DateParam parsed = new DateParam();
 			parsed.setValueAsQueryToken(paramList.getQualifier(), param);
 			addParam(parsed);
