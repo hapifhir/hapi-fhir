@@ -36,6 +36,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -157,7 +158,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
 		myPatientDao.create(p, mySrd).getId();
 
-		InstantType start = InstantType.now();
+		InstantDt start = InstantDt.withCurrentTime();
 		Thread.sleep(100);
 		
 		p = new Patient();
