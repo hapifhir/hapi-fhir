@@ -1,7 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.length;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -21,7 +20,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
 	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
 
-	private int myFractionalSeconds;
+	private String myFractionalSeconds;
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
 	private TimeZone myTimeZone;
 
@@ -106,7 +105,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 							leftPadWithZeros(cal.get(Calendar.SECOND), 2, b);
 							if (myPrecision.ordinal() > TemporalPrecisionEnum.SECOND.ordinal()) {
 								b.append('.');
-								leftPadWithZeros(myFractionalSeconds, 3, b);
+								for (int i = myFractionalSeconds.length(); i < 3; i++) {
+									b.append('0');
+								}
+								b.append(myFractionalSeconds);
 							}
 						}
 
@@ -149,8 +151,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			return -1;
 		}
 		if ((retVal - 2) != (plusIndex + minusIndex + zIndex)) {
-			// This means we have more than one separator
-			throw new DataFormatException("Invalid FHIR date/time string: " + theValueString);
+			throwBadDateFormat(theValueString);
 		}
 		return retVal;
 	}
@@ -176,24 +177,6 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			return TimeZone.getTimeZone("Z");
 		}
 		return myTimeZone;
-	}
-
-	private boolean hasOffset(String theValue) {
-		boolean inTime = false;
-		for (int i = 0; i < theValue.length(); i++) {
-			switch (theValue.charAt(i)) {
-			case 'T':
-				inTime = true;
-				break;
-			case '+':
-			case '-':
-				if (inTime) {
-					return true;
-				}
-				break;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -223,7 +206,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 		theTarget.append(string);
 	}
-
+	
 	@Override
 	protected Date parse(String theValue) throws DataFormatException {
 		Calendar cal = new GregorianCalendar(0, 0, 0);
@@ -293,15 +276,21 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 								endIndex = value.length();
 							}
 							int millis;
+							String millisString;
 							if (endIndex > 23) {
-								myFractionalSeconds = parseInt(value, value.substring(20, endIndex), 0, Integer.MAX_VALUE);
+								myFractionalSeconds = value.substring(20, endIndex);
 								endIndex = 23;
-								String millisString = value.substring(20, endIndex);
+								millisString = value.substring(20, endIndex);
 								millis = parseInt(value, millisString, 0, 999);
 							} else {
-								String millisString = value.substring(20, endIndex);
+								millisString = value.substring(20, endIndex);
 								millis = parseInt(value, millisString, 0, 999);
-								myFractionalSeconds = millis;
+								myFractionalSeconds = millisString;
+							}
+							if (millisString.length() == 1) {
+								millis = millis * 100;
+							} else if (millisString.length() == 2) {
+								millis = millis * 10;
 							}
 							cal.set(Calendar.MILLISECOND, millis);
 							precision = TemporalPrecisionEnum.MILLI;
@@ -407,9 +396,9 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		setTimeZone(TimeZone.getDefault());
 		myPrecision = thePrecision;
 		super.setValue(theValue);
-		myFractionalSeconds = 0;
+		myFractionalSeconds = "";
 		if (theValue != null) {
-			myFractionalSeconds = (int) (theValue.getTime() % 1000);
+			myFractionalSeconds = Integer.toString((int) (theValue.getTime() % 1000));
 		}
 	}
 

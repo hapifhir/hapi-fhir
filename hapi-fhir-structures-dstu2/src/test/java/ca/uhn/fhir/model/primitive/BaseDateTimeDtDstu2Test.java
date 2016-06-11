@@ -217,6 +217,37 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testParseHandlesMillisPartial() {
+		// .12 should be 120ms
+		validateMillisPartial("2015-06-22T00:00:00.1Z", 100);
+		validateMillisPartial("2015-06-22T00:00:00.12Z", 120);
+		validateMillisPartial("2015-06-22T00:00:00.123Z", 123);
+		validateMillisPartial("2015-06-22T00:00:00.1234Z", 123);
+		validateMillisPartial("2015-06-22T00:00:00.01Z", 10);
+		validateMillisPartial("2015-06-22T00:00:00.012Z", 12);
+		validateMillisPartial("2015-06-22T00:00:00.0123Z", 12);
+		validateMillisPartial("2015-06-22T00:00:00.001Z", 1);
+		validateMillisPartial("2015-06-22T00:00:00.0012Z", 1);
+		validateMillisPartial("2015-06-22T00:00:00.00123Z", 1);
+	}
+
+	private void validateMillisPartial(String input, int expected) {
+		InstantDt dt = new InstantDt();
+		dt.setValueAsString(input);
+		Date date = dt.getValue();
+
+		assertEquals(expected, date.getTime() % 1000);
+	}
+
+	@Test
+	public void testDateTimeFormatsInvalidMillis() {
+		verifyFails("1974-12-01T00:00:00.AZ");
+		verifyFails("1974-12-01T00:00:00.-Z");
+		verifyFails("1974-12-01T00:00:00.-1Z");
+		verifyFails("1974-12-01T00:00:00..1111Z");
+	}
+	
+	@Test
 	public void testDateTimeFormatsInvalid() {
 		// Bad timezone
 		verifyFails("1974-12-01T00:00:00A");
