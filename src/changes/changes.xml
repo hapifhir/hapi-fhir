@@ -329,8 +329,14 @@
 				that are defined within resource/plain providers incorrectly stated that
 				the maximum cardinality was "*" for non-collection types with no explicit
 				maximum stated, which is not the behaviour that the JavaDoc on the
-				<![CDATA[@OperationParam]] annotation describes. Thanks to Michael Lawley
+				<![CDATA[@OperationParam]]> annotation describes. Thanks to Michael Lawley
 				for reporting!
+			</action>
+			<action type="fix" issue="379">
+				Operations that are defined on multiple resource provider types with
+				the same name (e.g. "$everything") are now automatically exposed by the server
+				as separate OperationDefinition resources per resource type. Thanks to
+				Michael Lawley for reporting!
 			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">

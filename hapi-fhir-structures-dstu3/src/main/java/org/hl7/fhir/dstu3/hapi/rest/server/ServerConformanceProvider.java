@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.method.OperationParameter;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
+import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu3;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
@@ -173,7 +174,24 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private String createOperationName(OperationMethodBinding theMethodBinding) {
-		return theMethodBinding.getName().substring(1);
+		StringBuilder retVal = new StringBuilder();
+		if (theMethodBinding.getResourceName() != null) {
+			retVal.append(theMethodBinding.getResourceName());
+		}
+
+		retVal.append('_');
+		if (theMethodBinding.isCanOperateAtInstanceLevel()) {
+			retVal.append('i');
+		}
+		if (theMethodBinding.isCanOperateAtServerLevel()) {
+			retVal.append('s');
+		}
+		retVal.append('_');
+		
+		// Exclude the leading $
+		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
+		
+		return retVal.toString();
 	}
 
 	/**
@@ -289,7 +307,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
-							rest.addOperation().setName(opName).setDefinition(new Reference("OperationDefinition/" + opName));
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
 						}
 					}
 
@@ -517,7 +535,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			if (!sharedDescription.isIdempotent()) {
 				op.setIdempotent(sharedDescription.isIdempotent());
 			}
-			op.setCode(createOperationName(sharedDescription));
+			op.setCode(sharedDescription.getName().substring(1));
 			if (sharedDescription.isCanOperateAtInstanceLevel()) {
 				op.setInstance(sharedDescription.isCanOperateAtInstanceLevel());
 			}
