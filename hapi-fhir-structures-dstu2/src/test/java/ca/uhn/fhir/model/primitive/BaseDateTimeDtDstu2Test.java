@@ -52,11 +52,11 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testEncodeZeroOffset() {
 		DateTimeDt dt = new DateTimeDt();
-		dt.setValueAsString("2011-01-01T12:00:00");
+		dt.setValueAsString("2011-01-01T12:00:00-04:00");
 		dt.setTimeZone(TimeZone.getTimeZone("GMT-0:00"));
 
 		String val = dt.getValueAsString();
-		assertEquals("2011-01-01T18:00:00+00:00", val);
+		assertEquals("2011-01-01T16:00:00+00:00", val);
 	}
 	
 	
