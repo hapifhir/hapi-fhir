@@ -76,13 +76,32 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu2Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx;
+	private static FhirValidator ourValidator;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
 
+	static {
+		ourCtx = FhirContext.forDstu2();
+		ourValidator = ourCtx.newValidator();
+		ourValidator.setValidateAgainstStandardSchema(true);
+		ourValidator.setValidateAgainstStandardSchematron(true);
+	}
+
+	private void validate(OperationDefinition theOpDef) {
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(theOpDef);
+		ourLog.info("Def: {}", conf);
+
+		ValidationResult result = ourValidator.validateWithResult(theOpDef);
+		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info("Outcome: {}", outcome);
+		
+		assertTrue(outcome, result.isSuccessful());
+	}
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -168,9 +187,7 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_everything"));
-
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
-		ourLog.info(conf);
+		validate(opDef);
 
 		assertEquals("everything", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent().booleanValue());
@@ -277,11 +294,12 @@ public class ServerConformanceProviderDstu2Test {
 		
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_someOp"));
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			validate(opDef);
+			
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
-			assertEquals(null, opDef.getSystem());
+			assertEquals(false, opDef.getSystem());
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
@@ -291,11 +309,12 @@ public class ServerConformanceProviderDstu2Test {
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Encounter_i_someOp"));
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			validate(opDef);
+
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
-			assertEquals(null, opDef.getSystem());
+			assertEquals(false, opDef.getSystem());
 			assertThat(types, containsInAnyOrder("Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
@@ -305,11 +324,12 @@ public class ServerConformanceProviderDstu2Test {
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_validate"));
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			validate(opDef);
+
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
-			assertEquals(null, opDef.getSystem());
+			assertEquals(false, opDef.getSystem());
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(1, opDef.getParameter().size());
 			assertEquals("resource", opDef.getParameter().get(0).getName());
@@ -357,9 +377,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals("OperationDefinition/_is_plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/_is_plain"));
-
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
-		ourLog.info(conf);
+		validate(opDef);
 
 		assertEquals("plain", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent().booleanValue());

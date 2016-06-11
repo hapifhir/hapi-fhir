@@ -324,6 +324,18 @@
 				server conformance statement should not include the $ prefix in the operation
 				name or code. Thanks to Dion McMurtrie for reporting!
 			</action>
+			<action type="fix" issue="378">
+				Server generated OperationDefinition resources did not validate
+				due to some missing elements (kind, status, etc.).
+				Thanks to
+				Michael Lawley for reporting!
+			</action>
+			<action type="fix" issue="379">
+				Operations that are defined on multiple resource provider types with
+				the same name (e.g. "$everything") are now automatically exposed by the server
+				as separate OperationDefinition resources per resource type. Thanks to
+				Michael Lawley for reporting!
+			</action>
 			<action type="fix" issue="380">
 				OperationDefinition resources generated automatically by the server for operations
 				that are defined within resource/plain providers incorrectly stated that
@@ -331,12 +343,6 @@
 				maximum stated, which is not the behaviour that the JavaDoc on the
 				<![CDATA[@OperationParam]]> annotation describes. Thanks to Michael Lawley
 				for reporting!
-			</action>
-			<action type="fix" issue="379">
-				Operations that are defined on multiple resource provider types with
-				the same name (e.g. "$everything") are now automatically exposed by the server
-				as separate OperationDefinition resources per resource type. Thanks to
-				Michael Lawley for reporting!
 			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">

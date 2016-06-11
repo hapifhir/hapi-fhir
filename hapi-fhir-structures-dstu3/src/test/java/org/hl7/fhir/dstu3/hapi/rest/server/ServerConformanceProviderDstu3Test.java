@@ -73,12 +73,21 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu3Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu3Test.class);
+	private static FhirValidator ourValidator;
+
+	static {
+		ourCtx = FhirContext.forDstu3();
+		ourValidator = ourCtx.newValidator();
+		ourValidator.setValidateAgainstStandardSchema(true);
+		ourValidator.setValidateAgainstStandardSchematron(true);
+	}
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -150,7 +159,8 @@ public class ServerConformanceProviderDstu3Test {
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient_i_everything"));
+		validate(opDef);
 		assertEquals("everything", opDef.getCode());
 	}
 
@@ -167,6 +177,7 @@ public class ServerConformanceProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient_i_everything"));
+		validate(opDef);
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
@@ -250,14 +261,6 @@ public class ServerConformanceProviderDstu3Test {
 		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
-	private List<String> toOperationIdParts(List<ConformanceRestOperationComponent> theOperation) {
-		ArrayList<String> retVal = Lists.newArrayList();
-		for (ConformanceRestOperationComponent next : theOperation) {
-			retVal.add(next.getDefinition().getReferenceElement().getIdPart());
-		}
-		return retVal;
-	}
-
 	/** See #379 */
 	@Test
 	public void testOperationAcrossMultipleTypes() throws Exception {
@@ -277,12 +280,13 @@ public class ServerConformanceProviderDstu3Test {
 		assertEquals(4, conformance.getRest().get(0).getOperation().size());
 		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
 		assertThat(operationNames, containsInAnyOrder("someOp", "validate", "someOp", "validate"));
-		
+
 		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("Patient_i_someOp","Encounter_i_someOp","Patient_i_validate","Encounter_i_validate"));
-		
+		assertThat(operationIdParts, containsInAnyOrder("Patient_i_someOp", "Encounter_i_someOp", "Patient_i_validate", "Encounter_i_validate"));
+
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient_i_someOp"));
+			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("someOp", opDef.getCode());
@@ -297,6 +301,7 @@ public class ServerConformanceProviderDstu3Test {
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter_i_someOp"));
+			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("someOp", opDef.getCode());
@@ -311,6 +316,7 @@ public class ServerConformanceProviderDstu3Test {
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient_i_validate"));
+			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getType());
 			assertEquals("validate", opDef.getCode());
@@ -322,7 +328,7 @@ public class ServerConformanceProviderDstu3Test {
 			assertEquals("Patient", opDef.getParameter().get(0).getType());
 		}
 	}
-
+	
 	@Test
 	public void testOperationDocumentation() throws Exception {
 
@@ -359,13 +365,13 @@ public class ServerConformanceProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/_is_plain"));
-
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
-		ourLog.info(conf);
+		validate(opDef);
 
 		assertEquals("plain", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent());
 		assertEquals(3, opDef.getParameter().size());
+
+		assertTrue(opDef.getParameter().get(0).hasName());
 		assertEquals("start", opDef.getParameter().get(0).getName());
 		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
 		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
@@ -613,6 +619,14 @@ public class ServerConformanceProviderDstu3Test {
 		assertTrue(result.getMessages().toString(), result.isSuccessful());
 	}
 
+	private List<String> toOperationIdParts(List<ConformanceRestOperationComponent> theOperation) {
+		ArrayList<String> retVal = Lists.newArrayList();
+		for (ConformanceRestOperationComponent next : theOperation) {
+			retVal.add(next.getDefinition().getReferenceElement().getIdPart());
+		}
+		return retVal;
+	}
+
 	private List<String> toOperationNames(List<ConformanceRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (ConformanceRestOperationComponent next : theOperation) {
@@ -627,6 +641,17 @@ public class ServerConformanceProviderDstu3Test {
 			retVal.add(next.getValueAsString());
 		}
 		return retVal;
+	}
+
+	private void validate(OperationDefinition theOpDef) {
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(theOpDef);
+		ourLog.info("Def: {}", conf);
+
+		ValidationResult result = ourValidator.validateWithResult(theOpDef);
+		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info("Outcome: {}", outcome);
+		
+		assertTrue(outcome, result.isSuccessful());
 	}
 
 	@AfterClass

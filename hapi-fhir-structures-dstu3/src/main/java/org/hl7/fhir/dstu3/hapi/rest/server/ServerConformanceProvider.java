@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -56,6 +57,7 @@ import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -523,6 +525,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		OperationDefinition op = new OperationDefinition();
 		op.setStatus(ConformanceResourceStatus.ACTIVE);
+		op.setKind(OperationKind.OPERATION);
 		op.setIdempotent(true);
 
 		Set<String> inParams = new HashSet<String>();
@@ -531,6 +534,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		for (OperationMethodBinding sharedDescription : sharedDescriptions) {
 			if (isNotBlank(sharedDescription.getDescription())) {
 				op.setDescription(sharedDescription.getDescription());
+			}
+			if (sharedDescription.isCanOperateAtInstanceLevel()) {
+				op.setInstance(true);
+			}
+			if (sharedDescription.isCanOperateAtServerLevel()) {
+				op.setSystem(true);
 			}
 			if (!sharedDescription.isIdempotent()) {
 				op.setIdempotent(sharedDescription.isIdempotent());
@@ -581,6 +590,21 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			}
 		}
 
+		if (isBlank(op.getName())) {
+			if (isNotBlank(op.getDescription())) {
+				op.setName(op.getDescription());
+			} else {
+				op.setName(op.getCode());
+			}
+		}
+		
+		if (op.hasSystem() == false) {
+			op.setSystem(false);
+		}
+		if (op.hasInstance() == false) {
+			op.setInstance(false);
+		}
+		
 		return op;
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -53,6 +54,7 @@ import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
 import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConformanceStatementKindEnum;
+import ca.uhn.fhir.model.dstu2.valueset.OperationKindEnum;
 import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulConformanceModeEnum;
@@ -502,6 +504,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		OperationDefinition op = new OperationDefinition();
 		op.setStatus(ConformanceResourceStatusEnum.ACTIVE);
+		op.setKind(OperationKindEnum.OPERATION);
 		op.setIdempotent(true);
 
 		Set<String> inParams = new HashSet<String>();
@@ -555,6 +558,21 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
 				param.setName(nextParam.getName());
 			}
+		}
+
+		if (isBlank(op.getName())) {
+			if (isNotBlank(op.getDescription())) {
+				op.setName(op.getDescription());
+			} else {
+				op.setName(op.getCode());
+			}
+		}
+		
+		if (op.getSystem() == null) {
+			op.setSystem(false);
+		}
+		if (op.getInstance() == null) {
+			op.setInstance(false);
 		}
 
 		return op;
