@@ -192,7 +192,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/andlist"));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -208,7 +208,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/andlist-withnomax"));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -224,7 +224,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/orlist"));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -240,7 +240,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/orlist-withnomax"));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off

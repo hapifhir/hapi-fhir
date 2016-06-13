@@ -38,7 +38,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -92,11 +91,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails);
 
-	IBundleProvider history(Date theSince, RequestDetails theRequestDetails);
+	IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails);
 
-	IBundleProvider history(IIdType theId, Date theSince, RequestDetails theRequestDetails);
-
-	IBundleProvider history(Long theId, Date theSince, RequestDetails theRequestDetails);
+	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!

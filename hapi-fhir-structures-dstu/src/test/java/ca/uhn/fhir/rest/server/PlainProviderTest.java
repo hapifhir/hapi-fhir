@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,12 +50,17 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class PlainProviderTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderTest.class);
-	private int myPort;
-	private Server myServer;
-	private CloseableHttpClient myClient;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderTest.class);
+	private CloseableHttpClient myClient;
+	private int myPort;
 	private RestfulServer myRestfulServer;
+	private Server myServer;
+
+	@After
+	public void after() throws Exception {
+		myServer.stop();
+	}
 
 	@Before
 	public void before() throws Exception {
@@ -76,9 +82,60 @@ public class PlainProviderTest {
 
 	}
 
-	@After
-	public void after() throws Exception {
-		myServer.stop();
+	@Test
+	public void testGlobalHistory() throws Exception {
+		GlobalHistoryProvider provider = new GlobalHistoryProvider();
+		myRestfulServer.setProviders(provider);
+		myServer.start();
+
+		String baseUri = "http://localhost:" + myPort + "/fhir/context";
+		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(3, bundle.getEntries().size());
+		
+		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
+		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
+
+		status = myClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(3, bundle.getEntries().size());
+		assertNull(provider.myLastSince);
+		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
+		
+		status =myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(3, bundle.getEntries().size());
+		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
+		assertNull(provider.myLastCount);
+	}
+
+	@Test
+	public void testGlobalHistoryNoParams() throws Exception {
+		GlobalHistoryProvider provider = new GlobalHistoryProvider();
+		myRestfulServer.setProviders(provider);
+		myServer.start();
+
+		String baseUri = "http://localhost:" + myPort + "/fhir/context";
+		CloseableHttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history"));
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(3, bundle.getEntries().size());
+		assertNull(provider.myLastSince);
+		assertNull(provider.myLastCount);
+		
 	}
 
 	@Test
@@ -109,110 +166,40 @@ public class PlainProviderTest {
 		httpGet.releaseConnection();
 	}
 	
-	@Test
-	public void testGlobalHistory() throws Exception {
-		GlobalHistoryProvider provider = new GlobalHistoryProvider();
-		myRestfulServer.setProviders(provider);
-		myServer.start();
-
-		String baseUri = "http://localhost:" + myPort + "/fhir/context";
-		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(3, bundle.getEntries().size());
-		
-		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
-		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
-
-		status = myClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(3, bundle.getEntries().size());
-		assertNull(provider.myLastSince.getValueAsString());
-		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
-		
-		status =myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(3, bundle.getEntries().size());
-		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
-		assertNull(provider.myLastCount.getValueAsString());
-
-		status =myClient.execute(new HttpGet(baseUri + "/_history"));
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(3, bundle.getEntries().size());
-		assertNull(provider.myLastSince.getValueAsString());
-		assertNull(provider.myLastCount.getValueAsString());
-		
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-	
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
-	public static class SearchProvider {
 
-		public Map<String, Patient> getIdToPatient() {
-			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
-			{
-				Patient patient = createPatient();
-				idToPatient.put("1", patient);
-			}
-			{
-				Patient patient = new Patient();
-				patient.getIdentifier().add(new IdentifierDt());
-				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-				patient.getIdentifier().get(0).setValue("00002");
-				patient.getName().add(new HumanNameDt());
-				patient.getName().get(0).addFamily("Test");
-				patient.getName().get(0).addGiven("PatientTwo");
-				patient.getGender().setText("F");
-				idToPatient.put("2", patient);
-			}
-			return idToPatient;
-		}
+	private static Organization createOrganization() {
+		Organization retVal = new Organization();
+		retVal.setId("1");
+		retVal.addIdentifier();
+		retVal.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+		retVal.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+		retVal.getIdentifier().get(0).setValue("00001");
+		retVal.getName().setValue("Test Org");
+		return retVal;
+	}
 
-		@Search(type = Patient.class)
-		public Patient findPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
-			for (Patient next : getIdToPatient().values()) {
-				for (IdentifierDt nextId : next.getIdentifier()) {
-					if (nextId.matchesSystemAndValue(theIdentifier)) {
-						return next;
-					}
-				}
-			}
-			return null;
-		}
-
-		/**
-		 * Retrieve the resource by its identifier
-		 * 
-		 * @param theId
-		 *            The resource identity
-		 * @return The resource
-		 */
-		@Read(type = Patient.class)
-		public Patient getPatientById(@IdParam IdDt theId) {
-			return getIdToPatient().get(theId.getValue());
-		}
-
+	private static Patient createPatient() {
+		Patient patient = new Patient();
+		patient.setId("1");
+		patient.addIdentifier();
+		patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+		patient.getIdentifier().get(0).setValue("00001");
+		patient.addName();
+		patient.getName().get(0).addFamily("Test");
+		patient.getName().get(0).addGiven("PatientOne");
+		patient.getGender().setText("M");
+		return patient;
 	}
 
 	public static class GlobalHistoryProvider {
 
-		private InstantDt myLastSince;
 		private IntegerDt myLastCount;
+		private InstantDt myLastSince;
 
 		@History
 		public List<IResource> getGlobalHistory(@Since InstantDt theSince, @Count IntegerDt theCount) {
@@ -246,35 +233,54 @@ public class PlainProviderTest {
 
 	}
 
-	private static Patient createPatient() {
-		Patient patient = new Patient();
-		patient.setId("1");
-		patient.addIdentifier();
-		patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-		patient.getIdentifier().get(0).setValue("00001");
-		patient.addName();
-		patient.getName().get(0).addFamily("Test");
-		patient.getName().get(0).addGiven("PatientOne");
-		patient.getGender().setText("M");
-		return patient;
-	}
 
-	private static Organization createOrganization() {
-		Organization retVal = new Organization();
-		retVal.setId("1");
-		retVal.addIdentifier();
-		retVal.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-		retVal.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
-		retVal.getIdentifier().get(0).setValue("00001");
-		retVal.getName().setValue("Test Org");
-		return retVal;
-	}
+	public static class SearchProvider {
 
+		@Search(type = Patient.class)
+		public Patient findPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+			for (Patient next : getIdToPatient().values()) {
+				for (IdentifierDt nextId : next.getIdentifier()) {
+					if (nextId.matchesSystemAndValue(theIdentifier)) {
+						return next;
+					}
+				}
+			}
+			return null;
+		}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		public Map<String, Patient> getIdToPatient() {
+			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
+			{
+				Patient patient = createPatient();
+				idToPatient.put("1", patient);
+			}
+			{
+				Patient patient = new Patient();
+				patient.getIdentifier().add(new IdentifierDt());
+				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
+				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+				patient.getIdentifier().get(0).setValue("00002");
+				patient.getName().add(new HumanNameDt());
+				patient.getName().get(0).addFamily("Test");
+				patient.getName().get(0).addGiven("PatientTwo");
+				patient.getGender().setText("F");
+				idToPatient.put("2", patient);
+			}
+			return idToPatient;
+		}
+
+		/**
+		 * Retrieve the resource by its identifier
+		 * 
+		 * @param theId
+		 *            The resource identity
+		 * @return The resource
+		 */
+		@Read(type = Patient.class)
+		public Patient getPatientById(@IdParam IdDt theId) {
+			return getIdToPatient().get(theId.getValue());
+		}
+
 	}
 
 }

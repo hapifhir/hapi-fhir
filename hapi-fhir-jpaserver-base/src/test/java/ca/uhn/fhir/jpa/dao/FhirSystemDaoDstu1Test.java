@@ -121,7 +121,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		patient.setId(pid);
 		IIdType newpid3 = ourPatientDao.update(patient, mySrd).getId();
 
-		IBundleProvider values = ourSystemDao.history(start, mySrd);
+		IBundleProvider values = ourSystemDao.history(start, null, mySrd);
 		assertEquals(4, values.size());
 
 		List<IBaseResource> res = values.getResources(0, 4);
@@ -140,10 +140,10 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 		Thread.sleep(2000);
 
-		values = ourLocationDao.history(start, mySrd);
+		values = ourLocationDao.history(start, null, mySrd);
 		assertEquals(2, values.size());
 
-		values = ourLocationDao.history(lid.getIdPartAsLong(), start, mySrd);
+		values = ourLocationDao.history(lid.toUnqualifiedVersionless(), start, null, mySrd);
 		assertEquals(1, values.size());
 
 	}

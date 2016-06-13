@@ -453,7 +453,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testGetOperationDefinition() {
-		OperationDefinition op = ourClient.read(OperationDefinition.class, "get-resource-counts");
+		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
 		assertEquals("get-resource-counts", op.getCode());
 	}
 

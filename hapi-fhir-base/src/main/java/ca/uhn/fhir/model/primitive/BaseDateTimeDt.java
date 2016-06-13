@@ -105,10 +105,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 							leftPadWithZeros(cal.get(Calendar.SECOND), 2, b);
 							if (myPrecision.ordinal() > TemporalPrecisionEnum.SECOND.ordinal()) {
 								b.append('.');
+								b.append(myFractionalSeconds);
 								for (int i = myFractionalSeconds.length(); i < 3; i++) {
 									b.append('0');
 								}
-								b.append(myFractionalSeconds);
 							}
 						}
 
@@ -180,6 +180,21 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
+	 * Returns the value of this object as a {@link GregorianCalendar}
+	 */
+	public GregorianCalendar getValueAsCalendar() {
+		if (getValue() == null) {
+			return null;
+		}
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(getValue());
+		if (getTimeZone() != null) {
+			cal.setTimeZone(getTimeZone());
+		}
+		return cal;
+	}
+
+	/**
 	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
 	 */
 	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
@@ -198,7 +213,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		Validate.notNull(getValue(), getClass().getSimpleName() + " contains null value");
 		return DateUtils.isSameDay(new Date(), getValue());
 	}
-
+	
 	private void leftPadWithZeros(int theInteger, int theLength, StringBuilder theTarget) {
 		String string = Integer.toString(theInteger);
 		for (int i = string.length(); i < theLength; i++) {
@@ -206,12 +221,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 		theTarget.append(string);
 	}
-	
+
 	@Override
 	protected Date parse(String theValue) throws DataFormatException {
 		Calendar cal = new GregorianCalendar(0, 0, 0);
 		cal.setTimeZone(TimeZone.getDefault());
 		String value = theValue;
+		boolean fractionalSecondsSet = false;
 		
 		if (value.length() > 0 && (value.charAt(0) == ' ' || value.charAt(value.length()-1) == ' ')) {
 			value = value.trim();
@@ -279,6 +295,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 							String millisString;
 							if (endIndex > 23) {
 								myFractionalSeconds = value.substring(20, endIndex);
+								fractionalSecondsSet = true;
 								endIndex = 23;
 								millisString = value.substring(20, endIndex);
 								millis = parseInt(value, millisString, 0, 999);
@@ -286,6 +303,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 								millisString = value.substring(20, endIndex);
 								millis = parseInt(value, millisString, 0, 999);
 								myFractionalSeconds = millisString;
+								fractionalSecondsSet = true;
 							}
 							if (millisString.length() == 1) {
 								millis = millis * 100;
@@ -304,6 +322,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			cal.set(Calendar.DATE, 1);
 		}
 
+		if (fractionalSecondsSet == false) {
+			myFractionalSeconds = "";
+		}
+		
 		setPrecision(precision);
 		return cal.getTime();
 
@@ -395,11 +417,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {
 		setTimeZone(TimeZone.getDefault());
 		myPrecision = thePrecision;
-		super.setValue(theValue);
 		myFractionalSeconds = "";
 		if (theValue != null) {
 			myFractionalSeconds = Integer.toString((int) (theValue.getTime() % 1000));
 		}
+		super.setValue(theValue);
 	}
 
 	@Override
@@ -468,6 +490,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
+	
 	private void validateLengthIsAtLeast(String theValue, int theLength) {
 		if (theValue.length() < theLength) {
 			throwBadDateFormat(theValue);

@@ -18,7 +18,6 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -121,6 +120,17 @@ public class BaseJpaTest {
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
+		List<String> retVal = new ArrayList<String>();
+		int size = theFound.size();
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
 		return retVal;
 	}

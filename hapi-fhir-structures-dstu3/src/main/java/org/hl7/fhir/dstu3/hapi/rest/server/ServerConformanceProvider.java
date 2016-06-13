@@ -41,10 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationDefinition;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
@@ -55,11 +51,15 @@ import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
 import org.hl7.fhir.dstu3.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -79,7 +79,6 @@ import ca.uhn.fhir.rest.method.OperationParameter;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
-import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu3;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
@@ -181,14 +180,14 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			retVal.append(theMethodBinding.getResourceName());
 		}
 
-		retVal.append('_');
+		retVal.append('-');
 		if (theMethodBinding.isCanOperateAtInstanceLevel()) {
 			retVal.append('i');
 		}
 		if (theMethodBinding.isCanOperateAtServerLevel()) {
 			retVal.append('s');
 		}
-		retVal.append('_');
+		retVal.append('-');
 		
 		// Exclude the leading $
 		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
@@ -344,7 +343,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							ourLog.info("Found bound operation: {}", opName);
-							rest.addOperation().setName(opName).setDefinition(new Reference("OperationDefinition/" + opName));
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
 						}
 					}
 				}

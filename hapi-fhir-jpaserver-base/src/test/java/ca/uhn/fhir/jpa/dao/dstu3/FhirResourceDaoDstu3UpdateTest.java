@@ -107,7 +107,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		 * Get history
 		 */
 
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, mySrd);
+		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
 
 		assertEquals(2, historyBundle.size());
 		

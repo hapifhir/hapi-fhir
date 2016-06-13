@@ -30,12 +30,14 @@ import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -57,11 +59,20 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return myDao;
 	}
 
+	//@formatter:off
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate, RequestDetails theRequestDetails) {
+	public IBundleProvider getHistoryForResourceInstance(
+			HttpServletRequest theRequest, 
+			@IdParam IIdType theId, 
+			@Since Date theSince, 
+//			@At DateRangeParam theAt, 
+			RequestDetails theRequestDetails) {
+	//@formatter:on
+		
 		startRequest(theRequest);
 		try {
-			return myDao.history(theId, theDate, theRequestDetails);
+//			DateRangeParam sinceOrAt = processSinceOrAt(theSince)
+			return myDao.history(theId, theSince, null, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -71,7 +82,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate, theRequestDetails);
+			return myDao.history(theDate, null, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

@@ -51,7 +51,7 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate, theRequestDetails);
+			return myDao.history(theDate, null, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

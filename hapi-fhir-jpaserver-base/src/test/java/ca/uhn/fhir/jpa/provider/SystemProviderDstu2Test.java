@@ -279,8 +279,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testGetOperationDefinition() {
-		OperationDefinition op = ourClient.read(OperationDefinition.class, "get-resource-counts");
-		assertEquals("$get-resource-counts", op.getCode());
+		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
+		assertEquals("get-resource-counts", op.getCode());
 	}
 
 	@Test

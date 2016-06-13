@@ -171,7 +171,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/Patient_i_everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 	}
 
 	@Test
@@ -186,7 +186,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"));
 		validate(opDef);
 
 		assertEquals("everything", opDef.getCode());
@@ -290,10 +290,10 @@ public class ServerConformanceProviderDstu2Test {
 		assertThat(operationNames, containsInAnyOrder("someOp", "validate", "someOp", "validate"));
 		
 		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("Patient_i_someOp","Encounter_i_someOp","Patient_i_validate","Encounter_i_validate"));
+		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp","Encounter-i-someOp","Patient-i-validate","Encounter-i-validate"));
 		
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-someOp"));
 			validate(opDef);
 			
 			Set<String> types = toStrings(opDef.getType());
@@ -308,7 +308,7 @@ public class ServerConformanceProviderDstu2Test {
 			assertEquals("Patient", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Encounter_i_someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Encounter-i-someOp"));
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
@@ -323,7 +323,7 @@ public class ServerConformanceProviderDstu2Test {
 			assertEquals("Encounter", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient_i_validate"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-validate"));
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
@@ -374,9 +374,9 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
-		assertEquals("OperationDefinition/_is_plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertEquals("OperationDefinition/-is-plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/_is_plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/-is-plain"));
 		validate(opDef);
 
 		assertEquals("plain", opDef.getCode());

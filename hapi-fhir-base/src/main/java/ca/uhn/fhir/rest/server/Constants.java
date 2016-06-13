@@ -58,6 +58,8 @@ public class Constants {
 	 * "text/html" and "html"
 	 */
 	public static final Set<String> FORMATS_HTML;
+	public static final String FORMATS_HTML_JSON = "html/json";
+	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
@@ -103,6 +105,7 @@ public class Constants {
 	public static final String LINK_PREVIOUS = "previous";
 	public static final String LINK_SELF = "self";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
+	public static final String PARAM_AT = "_at";
 	/**
 	 * Used in paging links
 	 */
@@ -155,15 +158,13 @@ public class Constants {
 	public static final int STATUS_HTTP_410_GONE = 410;
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
+	
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
-	
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String FORMATS_HTML_JSON = "html/json";
-	public static final String FORMATS_HTML_XML = "html/xml";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

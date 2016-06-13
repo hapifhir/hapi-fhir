@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -363,7 +364,11 @@ public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam S
 
 //START SNIPPET: history
 @History()
-public List<Patient> getPatientHistory(@IdParam IdDt theId) {
+public List<Patient> getPatientHistory(
+      @IdParam IdDt theId,
+      @Since InstantDt theSince,
+      @At DateRangeParam theAt
+      ) {
    List<Patient> retVal = new ArrayList<Patient>();
    
    Patient patient = new Patient();

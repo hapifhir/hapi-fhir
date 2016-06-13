@@ -39,8 +39,8 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		IQueryParameterType param = (IQueryParameterType) theString;
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterType theValue) throws InternalErrorException {
+		IQueryParameterType param = theValue;
 		List<?> retVal = Collections.singletonList(MethodUtil.singleton(param));
 		return (List<IQueryParameterOr<?>>) retVal;
 	}

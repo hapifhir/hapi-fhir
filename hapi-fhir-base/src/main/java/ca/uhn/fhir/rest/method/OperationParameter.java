@@ -202,7 +202,7 @@ public class OperationParameter implements IParameter {
 				myParamType = "string";
 				mySearchParameterBinding = new SearchParameter(myName, myMin > 0);
 				mySearchParameterBinding.setCompositeTypes(COMPOSITE_TYPES);
-				mySearchParameterBinding.setType(theParameterType, theInnerCollectionType, theOuterCollectionType);
+				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new QueryParameterConverter();
 			} else {
 				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());

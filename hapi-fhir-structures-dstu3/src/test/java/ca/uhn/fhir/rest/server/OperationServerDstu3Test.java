@@ -91,6 +91,8 @@ public class OperationServerDstu3Test {
 		myFhirClient.registerInterceptor(loggingInterceptor);
 
 		Conformance p = myFhirClient.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+		
 		List<ConformanceRestOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 
@@ -107,7 +109,7 @@ public class OperationServerDstu3Test {
 	 */
 	@Test
 	public void testOperationDefinition() {
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/OP_TYPE").execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.annotation;
 
 /*
  * #%L
@@ -20,17 +20,24 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
-interface IParamBinder<T> {
-	
-	List<IQueryParameterOr<?>> encode(FhirContext theContext, T theString) throws InternalErrorException;
-
-	T parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
-
+/**
+ * Parameter annotation for the _at parameter, which indicates to the 
+ * server that only results dated since the given instant will be returned. 
+ * <p>
+ * Parameters with this annotation should be of type {@link DateParam} or {@link DateRangeParam}  
+ * </p>
+ * @see History
+ */
+@Target(value=ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface At {
+	//nothing
 }

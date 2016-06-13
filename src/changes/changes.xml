@@ -344,6 +344,21 @@
 				<![CDATA[@OperationParam]]> annotation describes. Thanks to Michael Lawley
 				for reporting!
 			</action>
+			<action type="fix">
+				Server parameters annotated with 
+				<![CDATA[<code>@Since</code>]]>
+				or
+				<![CDATA[<code>@CountS</code>]]>
+				which are of a FHIR type such as IntegerDt or DateTimeType will
+				now be set to null if the client's URL does not
+				contain this parameter. Previously they would be populated
+				with an empty instance of the FHIR type, which was inconsistent with
+				the way other server parameters worked.
+			</action>
+			<action type="add">
+				Server now supports the _at parameter (including multiple repetitions) 
+				for history operation
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

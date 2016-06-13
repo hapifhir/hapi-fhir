@@ -37,7 +37,7 @@ final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>> im
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterAnd<?> theString) throws InternalErrorException {
 		List<IQueryParameterOr<?>> retVal = (List<IQueryParameterOr<?>>) ((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
 		return retVal;
 	}

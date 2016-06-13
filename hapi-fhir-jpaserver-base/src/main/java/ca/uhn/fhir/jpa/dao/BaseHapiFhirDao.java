@@ -474,19 +474,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	private List<Object> extractValues(String thePath, IBaseResource theResource) {
-		List<Object> values = new ArrayList<Object>();
-		FhirTerser t = getContext().newTerser();
-		String nextPathTrimmed = thePath.trim();
-		try {
-			values.addAll(t.getValues(theResource, nextPathTrimmed));
-		} catch (Exception e) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-			ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() });
-		}
-		return values;
-	}
-
 	private void findMatchingTagIds(String theResourceName, IIdType theResourceId, Set<Long> tagIds, Class<? extends BaseTag> entityClass) {
 		{
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -621,13 +608,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
+	protected IBundleProvider history(String theResourceName, Long theId, Date theSince, Date theUntil) {
 
 		String resourceName = defaultIfBlank(theResourceName, null);
 
 		Search search = new Search();
 		search.setCreated(new Date());
-		search.setLastUpdated(null, theSince);
+		search.setLastUpdated(theSince, theUntil);
 		search.setUuid(UUID.randomUUID().toString());
 		search.setResourceType(resourceName);
 		search.setResourceId(theId);
@@ -661,7 +648,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theProvider.setContext(getContext());
 		theProvider.setEntityManager(myEntityManager);
 		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
-		theProvider.setResourceHistoryTableDao(myResourceHistoryTableDao);
 		theProvider.setSearchDao(mySearchDao);
 		theProvider.setSearchResultDao(mySearchResultDao);
 	}

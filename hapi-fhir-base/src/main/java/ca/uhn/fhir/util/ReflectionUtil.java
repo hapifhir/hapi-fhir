@@ -30,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import javassist.Modifier;
 
 public class ReflectionUtil {
 
@@ -151,6 +152,10 @@ public class ReflectionUtil {
 			ourLog.info("Failed to instantiate {}: {}", theClassName, e.toString());
 			return null;
 		}
+	}
+
+	public static boolean isInstantiable(Class<?> theType) {
+		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
 	}
 
 }

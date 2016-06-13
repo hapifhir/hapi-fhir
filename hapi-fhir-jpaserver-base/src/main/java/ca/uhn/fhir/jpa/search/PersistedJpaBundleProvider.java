@@ -29,9 +29,13 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +47,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -61,7 +63,6 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	private IDao myDao;
 	private EntityManager myEntityManager;
 	private PlatformTransactionManager myPlatformTransactionManager;
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	private ISearchDao mySearchDao;
 	private Search mySearchEntity;
 	private ISearchResultDao mySearchResultDao;
@@ -72,43 +73,52 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		myDao = theDao;
 	}
 
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
-	
 	protected List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
-		
-		Date cutoff = mySearchEntity.getLastUpdatedHigh();
-		
-		Pageable pageable = toPage(theFromIndex, theToIndex);
-		
 		List<ResourceHistoryTable> results;
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceHistoryTable> q = cb.createQuery(ResourceHistoryTable.class);
+		Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
+		List<Predicate> predicates = new ArrayList<Predicate>();
 		
-		if (cutoff != null) {
-			if (mySearchEntity.getResourceType() == null) {
-				results = myResourceHistoryTableDao.findForAllResourceTypes(cutoff, pageable);
-			} else if (mySearchEntity.getResourceId() == null) {
-				results = myResourceHistoryTableDao.findForResourceType(mySearchEntity.getResourceType(), cutoff, pageable);
-			} else {
-				results = myResourceHistoryTableDao.findForResourceInstance(mySearchEntity.getResourceId(), cutoff, pageable);
-			}
+		if (mySearchEntity.getResourceType() == null) {
+			// All resource types
+		} else if (mySearchEntity.getResourceId() == null) {
+			predicates.add(cb.equal(from.get("myResourceType"), mySearchEntity.getResourceType()));
 		} else {
-			if (mySearchEntity.getResourceType() == null) {
-				results = myResourceHistoryTableDao.findForAllResourceTypes(pageable);
-			} else if (mySearchEntity.getResourceId() == null) {
-				results = myResourceHistoryTableDao.findForResourceType(mySearchEntity.getResourceType(), pageable);
-			} else {
-				results = myResourceHistoryTableDao.findForResourceInstance(mySearchEntity.getResourceId(), pageable);
-			}
+			predicates.add(cb.equal(from.get("myResourceId"), mySearchEntity.getResourceId()));
 		}
+
+		if (mySearchEntity.getLastUpdatedLow() != null) {
+			predicates.add(cb.greaterThanOrEqualTo(from.get("myUpdated").as(Date.class), mySearchEntity.getLastUpdatedLow()));
+		}
+		if (mySearchEntity.getLastUpdatedHigh() != null) {
+			predicates.add(cb.lessThanOrEqualTo(from.get("myUpdated").as(Date.class), mySearchEntity.getLastUpdatedHigh()));
+		}
+		
+		if (predicates.size() > 0) {
+			q.where(predicates.toArray(new Predicate[predicates.size()]));
+		}
+		
+		q.orderBy(cb.desc(from.get("myUpdated")));
+		
+		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(q);
+
+		if (theToIndex - theFromIndex > 0) {
+			query.setFirstResult(theFromIndex);
+			query.setMaxResults(theToIndex - theFromIndex);
+		}
+		
+		results = query.getResultList();
 		
 		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
 			resource = next;
-			
+
 			retVal.add(myDao.toResource(resource, true));
 		}
-		
+
 		return retVal;
 	}
 
@@ -118,7 +128,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		if (page == null) {
 			return Collections.emptyList();
 		}
-		
+
 		Page<SearchResult> search = mySearchResultDao.findWithSearchUuid(mySearchEntity, page);
 
 		List<Long> pidsSubList = new ArrayList<Long>();
@@ -148,7 +158,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	public boolean ensureSearchEntityLoaded() {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
-			
+
 			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 			template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 			return template.execute(new TransactionCallback<Boolean>() {
@@ -156,14 +166,14 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 				public Boolean doInTransaction(TransactionStatus theStatus) {
 					try {
 						mySearchEntity = mySearchDao.findByUuid(myUuid);
-						
+
 						if (mySearchEntity == null) {
 							return false;
 						}
 
 						// Load the includes now so that they are available outside of this transaction
 						mySearchEntity.getIncludes().size();
-						
+
 						return true;
 					} catch (NoResultException e) {
 						return false;
@@ -176,7 +186,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private void ensureDependenciesInjected() {
 		if (myPlatformTransactionManager == null) {
-		myDao.injectDependenciesIntoBundleProvider(this);
+			myDao.injectDependenciesIntoBundleProvider(this);
 		}
 	}
 
@@ -207,7 +217,6 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 				}
 			}
 
-
 		});
 	}
 
@@ -229,13 +238,8 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		myEntityManager = theEntityManager;
 	}
 
-	
 	public void setPlatformTransactionManager(PlatformTransactionManager thePlatformTransactionManager) {
 		myPlatformTransactionManager = thePlatformTransactionManager;
-	}
-
-	public void setResourceHistoryTableDao(IResourceHistoryTableDao theResourceHistoryTableDao) {
-		myResourceHistoryTableDao = theResourceHistoryTableDao;
 	}
 
 	public void setSearchDao(ISearchDao theSearchDao) {

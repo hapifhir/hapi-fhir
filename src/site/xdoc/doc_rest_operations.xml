@@ -1379,8 +1379,22 @@
 				</li>
 			</ul>
 			<p>
-				The following snippet shows how to define a history method on a server:
+				The following snippet shows how to define a history method on a server. Note that
+				the following parameters are both optional, but may be useful in
+				implementing the history operation:
 			</p>
+			<u>
+				<li>
+					The <code>@Since</code> method argument implements the <code>_since</code>
+					parameter and should be of type <code>DateTimeDt</code> or <code>DateTimeType</code> 
+				</li>
+				<li>
+					The <code>@At</code> method argument implements the <code>_at</code>
+					parameter and may be of type 
+					<code>DateRangeParam</code>,
+					<code>DateTimeDt</code> or <code>DateTimeType</code> 
+				</li>
+			</u>
 
 			<macro name="snippet">
 				<param name="id" value="history" />

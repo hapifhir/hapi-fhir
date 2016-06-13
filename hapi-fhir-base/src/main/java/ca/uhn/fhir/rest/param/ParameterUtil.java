@@ -21,35 +21,23 @@ package ca.uhn.fhir.rest.param;
  */
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.time.DateUtils;
-
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ParameterUtil {
 
 	private static final Set<Class<?>> BINDABLE_INTEGER_TYPES;
-	private static final Set<Class<?>> BINDABLE_TIME_TYPES;
 
 	static {
 		HashSet<Class<?>> intTypes = new HashSet<Class<?>>();
 		intTypes.add(IntegerDt.class);
 		intTypes.add(Integer.class);
 		BINDABLE_INTEGER_TYPES = Collections.unmodifiableSet(intTypes);
-
-		HashSet<Class<?>> timeTypes = new HashSet<Class<?>>();
-		timeTypes.add(InstantDt.class);
-		timeTypes.add(Date.class);
-		timeTypes.add(Calendar.class);
-		BINDABLE_TIME_TYPES = Collections.unmodifiableSet(timeTypes);
 
 	}
 
@@ -68,32 +56,11 @@ public class ParameterUtil {
 		return -1;
 	}
 
-	public static Object fromInstant(Class<?> theType, InstantDt theArgument) {
-		if (theType.equals(InstantDt.class)) {
-			if (theArgument == null) {
-				return new InstantDt();
-			}
-			return theArgument;
-		}
-		if (theType.equals(Date.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return theArgument.getValue();
-		}
-		if (theType.equals(Calendar.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return DateUtils.toCalendar(theArgument.getValue());
-		}
-		throw new IllegalArgumentException("Invalid instant type:" + theType);
-	}
 
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
 		if (theType.equals(IntegerDt.class)) {
 			if (theArgument == null) {
-				return new IntegerDt();
+				return null;
 			}
 			return theArgument;
 		}
@@ -106,26 +73,10 @@ public class ParameterUtil {
 		throw new IllegalArgumentException("Invalid Integer type:" + theType);
 	}
 
-	public static Set<Class<?>> getBindableInstantTypes() {
-		return BINDABLE_TIME_TYPES;
-	}
-
 	public static Set<Class<?>> getBindableIntegerTypes() {
 		return BINDABLE_INTEGER_TYPES;
 	}
 
-	public static InstantDt toInstant(Object theArgument) {
-		if (theArgument instanceof InstantDt) {
-			return (InstantDt) theArgument;
-		}
-		if (theArgument instanceof Date) {
-			return new InstantDt((Date) theArgument);
-		}
-		if (theArgument instanceof Calendar) {
-			return new InstantDt((Calendar) theArgument);
-		}
-		return null;
-	}
 
 	public static IntegerDt toInteger(Object theArgument) {
 		if (theArgument instanceof IntegerDt) {

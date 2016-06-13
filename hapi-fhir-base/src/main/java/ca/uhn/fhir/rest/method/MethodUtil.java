@@ -45,11 +45,11 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Elements;
@@ -112,6 +112,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * #L%
  */
 
+@SuppressWarnings("deprecation")
 public class MethodUtil {
 	private static final String LABEL = "label=\"";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
@@ -360,7 +361,6 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static Integer findVersionIdParameterIndex(Method theMethod) {
 		return MethodUtil.findParamAnnotationIndex(theMethod, VersionIdParam.class);
 	}
@@ -422,7 +422,7 @@ public class MethodUtil {
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
 						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(), ((RequiredParam) nextAnnotation).chainBlacklist());
-						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
@@ -432,7 +432,7 @@ public class MethodUtil {
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
 						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(), ((OptionalParam) nextAnnotation).chainBlacklist());
-						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
+						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof IncludeParam) {
@@ -480,6 +480,10 @@ public class MethodUtil {
 						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
 						param = new SinceParameter();
+						((SinceParameter)param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+					} else if (nextAnnotation instanceof At) {
+						param = new AtParameter();
+						((AtParameter)param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
 					} else if (nextAnnotation instanceof Sort) {

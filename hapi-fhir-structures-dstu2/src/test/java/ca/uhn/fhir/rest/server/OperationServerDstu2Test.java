@@ -104,7 +104,7 @@ public class OperationServerDstu2Test {
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
 		
-		assertEquals("OperationDefinition/OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
+		assertEquals("OperationDefinition/Patient--OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class OperationServerDstu2Test {
 	 */
 	@Test
 	public void testOperationDefinition() {
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/OP_TYPE").execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		

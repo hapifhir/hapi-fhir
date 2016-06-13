@@ -25,9 +25,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+
 /**
  * Parameter annotation for the _since parameter, which indicates to the 
  * server that only results dated since the given instant will be returned. 
+ * <p>
+ * Parameters with this annotation should be of type {@link DateParam} or {@link DateRangeParam}  
+ * </p>
  * 
  * @see History
  */

@@ -3,15 +3,12 @@ package ca.uhn.fhir.model.primitive;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -36,30 +33,15 @@ public class BaseDateTimeDtDstu2Test {
 	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 
-
-
 	private SimpleDateFormat myDateInstantParser;
 
-	
 	private FastDateFormat myDateInstantZoneParser;
-	
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
-	
-	@Test
-	public void testEncodeZeroOffset() {
-		DateTimeDt dt = new DateTimeDt();
-		dt.setValueAsString("2011-01-01T12:00:00-04:00");
-		dt.setTimeZone(TimeZone.getTimeZone("GMT-0:00"));
 
-		String val = dt.getValueAsString();
-		assertEquals("2011-01-01T16:00:00+00:00", val);
-	}
-	
-	
 	@Test
 	public void setTimezoneToZulu() {
 		DateTimeDt dt = new DateTimeDt(new Date(816411488000L));
@@ -67,7 +49,7 @@ public class BaseDateTimeDtDstu2Test {
 		dt.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08Z", dt.getValueAsString());
 	}
-
+	
 	/**
 	 * Test for #57
 	 */
@@ -85,6 +67,37 @@ public class BaseDateTimeDtDstu2Test {
 		} catch (DataFormatException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
+	}
+
+	@Test
+	public void testDateFormatsInvalid() {
+		// No spaces in dates
+		verifyFails("1974 12-25");
+		verifyFails("1974-12 25");
+
+		// No letters
+		verifyFails("A974-12-25");
+		verifyFails("1974-A2-25");
+		verifyFails("1974-12-A5");
+
+		// Date shouldn't have a time zone
+		verifyFails("1974-12-25Z");
+		verifyFails("1974-12-25+10:00");
+
+		// Out of range
+		verifyFails("1974-13-25");
+		verifyFails("1974-12-32");
+		verifyFails("2015-02-29");
+		verifyFails("-016-02-01");
+		verifyFails("2016--2-01");
+		verifyFails("2016-02--1");
+
+		// Invalid length
+		verifyFails("2");
+		verifyFails("20");
+		verifyFails("201");
+		verifyFails("2016-0");
+		verifyFails("2016-02-0");
 	}
 
 	/**
@@ -113,6 +126,46 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testDateTimeFormatsInvalid() {
+		// Bad timezone
+		verifyFails("1974-12-01T00:00:00A");
+		verifyFails("1974-12-01T00:00:00=00:00");
+		verifyFails("1974-12-01T00:00:00+");
+		verifyFails("1974-12-01T00:00:00+25:00");
+		verifyFails("1974-12-01T00:00:00+00:61");
+		verifyFails("1974-12-01T00:00:00+00 401");
+		verifyFails("1974-12-01T00:00:00+0");
+		verifyFails("1974-12-01T00:00:00+01");
+		verifyFails("1974-12-01T00:00:00+011");
+		verifyFails("1974-12-01T00:00:00+0110");
+
+		// Out of range
+		verifyFails("1974-12-25T25:00:00Z");
+		verifyFails("1974-12-25T24:00:00Z");
+		verifyFails("1974-12-25T23:60:00Z");
+		verifyFails("1974-12-25T23:59:60Z");
+
+		// Invalid Separators
+		verifyFails("1974-12-25T23 59:00Z");
+		verifyFails("1974-12-25T23:59 00Z");
+
+		// Invalid length
+		verifyFails("1974-12-25T2Z");
+		verifyFails("1974-12-25T22:Z");
+		verifyFails("1974-12-25T22:1Z");
+		verifyFails("1974-12-25T22:11:Z");
+		verifyFails("1974-12-25T22:11:1Z");
+	}
+
+	@Test
+	public void testDateTimeFormatsInvalidMillis() {
+		verifyFails("1974-12-01T00:00:00.AZ");
+		verifyFails("1974-12-01T00:00:00.-Z");
+		verifyFails("1974-12-01T00:00:00.-1Z");
+		verifyFails("1974-12-01T00:00:00..1111Z");
+	}
+
+	@Test
 	public void testDateTimeInLocalTimezone() {
 		DateTimeDt dt = DateTimeDt.withCurrentTime();
 		String str = dt.getValueAsString();
@@ -128,7 +181,29 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
 	}
 
-	
+	@Test
+	public void testEncodeZeroOffset() {
+		DateTimeDt dt = new DateTimeDt();
+		dt.setValueAsString("2011-01-01T12:00:00-04:00");
+		dt.setTimeZone(TimeZone.getTimeZone("GMT-0:00"));
+
+		String val = dt.getValueAsString();
+		assertEquals("2011-01-01T16:00:00+00:00", val);
+	}
+
+	@Test
+	public void testGetValueAsCalendar() {
+		assertNull(new InstantDt().getValueAsCalendar());
+		
+		InstantDt dt = new InstantDt("2011-01-03T07:11:22.002-08:00");
+		GregorianCalendar cal = dt.getValueAsCalendar();
+		
+		assertEquals(2011, cal.get(Calendar.YEAR));
+		assertEquals(7, cal.get(Calendar.HOUR_OF_DAY));
+		assertEquals(2, cal.get(Calendar.MILLISECOND));
+		assertEquals("GMT-08:00", cal.getTimeZone().getID());
+	}
+
 	@Test
 	public void testInstantInLocalTimezone() {
 		InstantDt dt = InstantDt.withCurrentTime();
@@ -138,11 +213,11 @@ public class BaseDateTimeDtDstu2Test {
 			fail("No timezone provided: " + str);
 		}
 	}
-	
+
 	@Test
 	public void testLargePrecision() {
 		DateTimeDt dt = new DateTimeDt("2014-03-06T22:09:58.9121174+04:30");
-		
+
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("Z"));
 		assertEquals("2014-03-06 17:39:58.912", myDateInstantParser.format(dt.getValue()));
 	}
@@ -152,7 +227,7 @@ public class BaseDateTimeDtDstu2Test {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
-		
+
 		DateTimeDt date = new DateTimeDt();
 		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
 		date.setTimeZone(TimeZone.getTimeZone("EST"));
@@ -163,17 +238,16 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testParseDate() {
-		new DateDt("2012-03-31");
+	public void testNewInstance() throws InterruptedException {
+		InstantDt now = InstantDt.withCurrentTime();
+		Thread.sleep(100);
+		InstantDt then = InstantDt.withCurrentTime();
+		assertTrue(now.getValue().before(then.getValue()));
 	}
 
-	/*
-	 * Just to be lenient
-	 */
 	@Test
-	public void testParseIgnoresLeadingAndTrailingSpace() {
-		DateTimeDt dt = new DateTimeDt("  2014-10-11T12:11:00Z      ");
-		assertEquals("2014-10-11 10:11:00.000-0200", myDateInstantZoneParser.format(dt.getValue()));
+	public void testParseDate() {
+		new DateDt("2012-03-31");
 	}
 
 	@Test
@@ -231,95 +305,13 @@ public class BaseDateTimeDtDstu2Test {
 		validateMillisPartial("2015-06-22T00:00:00.00123Z", 1);
 	}
 
-	private void validateMillisPartial(String input, int expected) {
-		InstantDt dt = new InstantDt();
-		dt.setValueAsString(input);
-		Date date = dt.getValue();
-
-		assertEquals(expected, date.getTime() % 1000);
-	}
-
+	/*
+	 * Just to be lenient
+	 */
 	@Test
-	public void testDateTimeFormatsInvalidMillis() {
-		verifyFails("1974-12-01T00:00:00.AZ");
-		verifyFails("1974-12-01T00:00:00.-Z");
-		verifyFails("1974-12-01T00:00:00.-1Z");
-		verifyFails("1974-12-01T00:00:00..1111Z");
-	}
-	
-	@Test
-	public void testDateTimeFormatsInvalid() {
-		// Bad timezone
-		verifyFails("1974-12-01T00:00:00A");
-		verifyFails("1974-12-01T00:00:00=00:00");
-		verifyFails("1974-12-01T00:00:00+");
-		verifyFails("1974-12-01T00:00:00+25:00");
-		verifyFails("1974-12-01T00:00:00+00:61");
-		verifyFails("1974-12-01T00:00:00+00 401");
-		verifyFails("1974-12-01T00:00:00+0");
-		verifyFails("1974-12-01T00:00:00+01");
-		verifyFails("1974-12-01T00:00:00+011");
-		verifyFails("1974-12-01T00:00:00+0110");
-		
-		// Out of range
-		verifyFails("1974-12-25T25:00:00Z");
-		verifyFails("1974-12-25T24:00:00Z");
-		verifyFails("1974-12-25T23:60:00Z");
-		verifyFails("1974-12-25T23:59:60Z");
-		
-		// Invalid Separators
-		verifyFails("1974-12-25T23 59:00Z");
-		verifyFails("1974-12-25T23:59 00Z");
-		
-		// Invalid length
-		verifyFails("1974-12-25T2Z");
-		verifyFails("1974-12-25T22:Z");
-		verifyFails("1974-12-25T22:1Z");
-		verifyFails("1974-12-25T22:11:Z");
-		verifyFails("1974-12-25T22:11:1Z");
-	}
-	
-	
-	@Test
-	public void testDateFormatsInvalid() {
-		// No spaces in dates
-		verifyFails("1974 12-25");
-		verifyFails("1974-12 25");
-
-		// No letters
-		verifyFails("A974-12-25");
-		verifyFails("1974-A2-25");
-		verifyFails("1974-12-A5");
-
-		// Date shouldn't have a time zone
-		verifyFails("1974-12-25Z");
-		verifyFails("1974-12-25+10:00");
-		
-		// Out of range
-		verifyFails("1974-13-25");
-		verifyFails("1974-12-32");
-		verifyFails("2015-02-29");
-		verifyFails("-016-02-01");
-		verifyFails("2016--2-01");
-		verifyFails("2016-02--1");
-
-		// Invalid length
-		verifyFails("2");
-		verifyFails("20");
-		verifyFails("201");
-		verifyFails("2016-0");
-		verifyFails("2016-02-0");
-	}
-
-
-	private void verifyFails(String input) {
-		try {
-			DateTimeDt dt = new DateTimeDt();
-			dt.setValueAsString(input);
-			fail();
-		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertThat(e.getMessage(), containsString("Invalid date/time format: \"" + input + "\""));
-		}
+	public void testParseIgnoresLeadingAndTrailingSpace() {
+		DateTimeDt dt = new DateTimeDt("  2014-10-11T12:11:00Z      ");
+		assertEquals("2014-10-11 10:11:00.000-0200", myDateInstantZoneParser.format(dt.getValue()));
 	}
 
 	@Test
@@ -328,16 +320,14 @@ public class BaseDateTimeDtDstu2Test {
 			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid FHIR date/time string: 2010-01-01T00:00:00.1234-09:00Z", e.getMessage());
+			assertEquals("Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
 		}
 	}
 
-	
 	@Test(expected = DataFormatException.class)
 	public void testParseMalformatted() throws DataFormatException {
 		new DateTimeDt("20120102");
 	}
-
 
 	@Test
 	public void testParseMilli() throws DataFormatException {
@@ -362,7 +352,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(TimeZone.getTimeZone("GMT-02:00"), dt.getTimeZone());
 		assertEquals(TemporalPrecisionEnum.MILLI, dt.getPrecision());
 	}
-	
+
 	@Test
 	public void testParseMilliZulu() throws DataFormatException {
 		InstantDt dt = new InstantDt();
@@ -432,14 +422,14 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseTimeZoneOffsetCorrectly0millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.000", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
 		assertEquals("2010-01-01T09:00:00Z", dt.getValueAsString());
 	}
@@ -447,44 +437,44 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseTimeZoneOffsetCorrectly1millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00.1-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.001", myDateInstantParser.format(dt.getValue()));
+		assertEquals("2010-01-01 04:00:00.100", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.001Z", dt.getValueAsString());
+		assertEquals("2010-01-01T09:00:00.100Z", dt.getValueAsString());
 	}
 
 	@Test
 	public void testParseTimeZoneOffsetCorrectly2millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00.12-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.012", myDateInstantParser.format(dt.getValue()));
+		assertEquals("2010-01-01 04:00:00.120", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.012Z", dt.getValueAsString());
+		assertEquals("2010-01-01T09:00:00.120Z", dt.getValueAsString());
 	}
 
 	@Test
 	public void testParseTimeZoneOffsetCorrectly3millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.123-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00.123-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
 		assertEquals("2010-01-01T09:00:00.123Z", dt.getValueAsString());
 	}
@@ -492,14 +482,14 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseTimeZoneOffsetCorrectly4millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1234-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00.1234-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
 		assertEquals("2010-01-01T09:00:00.1234Z", dt.getValueAsString());
 	}
@@ -507,14 +497,14 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseTimeZoneOffsetCorrectly5millis() {
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
-		
+
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12345-09:00");
-		
+
 		assertEquals("2010-01-01T00:00:00.12345-09:00", dt.getValueAsString());
 		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
 		assertEquals("GMT-09:00", dt.getTimeZone().getID());
 		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
-		
+
 		dt.setTimeZoneZulu(true);
 		assertEquals("2010-01-01T09:00:00.12345Z", dt.getValueAsString());
 	}
@@ -599,6 +589,24 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(human, containsString("12"));
 	}
 
+	private void validateMillisPartial(String input, int expected) {
+		InstantDt dt = new InstantDt();
+		dt.setValueAsString(input);
+		Date date = dt.getValue();
+
+		assertEquals(expected, date.getTime() % 1000);
+	}
+
+	private void verifyFails(String input) {
+		try {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString(input);
+			fail();
+		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			assertThat(e.getMessage(), containsString("Invalid date/time format: \"" + input + "\""));
+		}
+	}
+
 	public static void afterClass() {
 		Locale.setDefault(ourDefaultLocale);
 	}
@@ -611,8 +619,7 @@ public class BaseDateTimeDtDstu2Test {
 	@BeforeClass
 	public static void beforeClass() {
 		/*
-		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure
-		 * that there are no language specific dependencies in the test.
+		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure that there are no language specific dependencies in the test.
 		 */
 		ourDefaultLocale = Locale.getDefault();
 

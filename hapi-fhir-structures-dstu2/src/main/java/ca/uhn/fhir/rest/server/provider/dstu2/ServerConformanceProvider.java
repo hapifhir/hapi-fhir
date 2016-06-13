@@ -163,14 +163,14 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			retVal.append(theMethodBinding.getResourceName());
 		}
 
-		retVal.append('_');
+		retVal.append('-');
 		if (theMethodBinding.isCanOperateAtInstanceLevel()) {
 			retVal.append('i');
 		}
 		if (theMethodBinding.isCanOperateAtServerLevel()) {
 			retVal.append('s');
 		}
-		retVal.append('_');
+		retVal.append('-');
 		
 		// Exclude the leading $
 		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
@@ -318,7 +318,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
-							rest.addOperation().setName(methodBinding.getName()).getDefinition().setReference("OperationDefinition/" + opName);
+							rest.addOperation().setName(methodBinding.getName().substring(1)).getDefinition().setReference("OperationDefinition/" + opName);
 						}
 					}
 				}
