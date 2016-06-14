@@ -63,8 +63,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.ReflectionUtil;
 
-public class OperationParameter implements IParameter {
+class OperationParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
@@ -74,7 +75,7 @@ public class OperationParameter implements IParameter {
 	private boolean myAllowGet;
 
 	private final FhirContext myContext;
-	private IConverter myConverter;
+	private IOperationParamConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
 	private int myMax;
@@ -203,7 +204,7 @@ public class OperationParameter implements IParameter {
 				mySearchParameterBinding = new SearchParameter(myName, myMin > 0);
 				mySearchParameterBinding.setCompositeTypes(COMPOSITE_TYPES);
 				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
-				myConverter = new QueryParameterConverter();
+				myConverter = new OperationParamConverter();
 			} else {
 				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
 			}
@@ -212,7 +213,7 @@ public class OperationParameter implements IParameter {
 
 	}
 
-	public OperationParameter setConverter(IConverter theConverter) {
+	public OperationParameter setConverter(IOperationParamConverter theConverter) {
 		myConverter = theConverter;
 		return this;
 	}
@@ -242,127 +243,9 @@ public class OperationParameter implements IParameter {
 		List<Object> matchingParamValues = new ArrayList<Object>();
 
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-			if (mySearchParameterBinding != null) {
-
-				List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
-				String nameWithQualifierColon = myName + ":";
-
-				for (String nextParamName : theRequest.getParameters().keySet()) {
-					String qualifier;
-					if (nextParamName.equals(myName)) {
-						qualifier = null;
-					} else if (nextParamName.startsWith(nameWithQualifierColon)) {
-						qualifier = nextParamName.substring(nextParamName.indexOf(':'));
-					} else {
-						// This is some other parameter, not the one bound by this instance
-						continue;
-					}
-					String[] values = theRequest.getParameters().get(nextParamName);
-					if (values != null) {
-						for (String nextValue : values) {
-							params.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, nextValue));
-						}
-					}
-				}
-				if (!params.isEmpty()) {
-					for (QualifiedParamList next : params) {
-						Object values = mySearchParameterBinding.parse(myContext, Collections.singletonList(next));
-						addValueToList(matchingParamValues, values);
-					}
-					
-				}
-
-			} else {
-				String[] paramValues = theRequest.getParameters().get(myName);
-				if (paramValues != null && paramValues.length > 0) {
-					if (myAllowGet) {
-
-						if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
-							List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
-							parameters.add(QualifiedParamList.singleton(paramValues[0]));
-							if (paramValues.length > 1) {
-								parameters.add(QualifiedParamList.singleton(paramValues[1]));
-							}
-							DateRangeParam dateRangeParam = new DateRangeParam();
-							dateRangeParam.setValuesAsQueryTokens(parameters);
-							matchingParamValues.add(dateRangeParam);
-						} else if (String.class.isAssignableFrom(myParameterType)) {
-
-							for (String next : paramValues) {
-								matchingParamValues.add(next);
-							}
-						} else if (ValidationModeEnum.class.equals(myParameterType)) {
-							
-							if (isNotBlank(paramValues[0])) {
-								ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
-								if (validationMode != null) {
-									matchingParamValues.add(validationMode);
-								} else {
-									throwInvalidMode(paramValues[0]);
-								}
-							}
-							
-						} else {
-							for (String nextValue : paramValues) {
-								FhirContext ctx = theRequest.getServer().getFhirContext();
-								RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class<? extends IBase>) myParameterType);
-								IPrimitiveType<?> instance = def.newInstance();
-								instance.setValueAsString(nextValue);
-								matchingParamValues.add(instance);
-							}
-						}
-					} else {
-						HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
-						String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
-						throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
-					}
-				}
-			}
-			
+			translateQueryParametersIntoServerArgumentForGet(theRequest, matchingParamValues);
 		} else {
-
-			IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
-			if (def.getName().equals("Parameters")) {
-
-				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-
-				RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
-				BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
-				BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
-
-				IAccessor paramChildAccessor = paramChild.getAccessor();
-				List<IBase> values = paramChildAccessor.getValues(requestContents);
-				for (IBase nextParameter : values) {
-					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-					if (nextNames != null && nextNames.size() > 0) {
-						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
-						if (myName.equals(nextName.getValueAsString())) {
-
-							if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
-								matchingParamValues.add(nextParameter);
-							} else {
-								List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
-								List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
-								if (paramValues != null && paramValues.size() > 0) {
-									tryToAddValues(paramValues, matchingParamValues);
-								} else if (paramResources != null && paramResources.size() > 0) {
-									tryToAddValues(paramResources, matchingParamValues);
-								}
-							}
-
-						}
-					}
-				}
-
-			} else {
-
-				if (myParameterType.isAssignableFrom(requestContents.getClass())) {
-					tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
-				}
-
-			}
+			translateQueryParametersIntoServerArgumentForPost(theRequest, matchingParamValues);
 		}
 
 		if (matchingParamValues.isEmpty()) {
@@ -373,19 +256,133 @@ public class OperationParameter implements IParameter {
 			return matchingParamValues.get(0);
 		}
 
-		try {
-			Collection<Object> retVal = myInnerCollectionType.newInstance();
-			retVal.addAll(matchingParamValues);
-			return retVal;
-		} catch (InstantiationException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
-		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
+		Collection<Object> retVal = ReflectionUtil.newInstance(myInnerCollectionType);
+		retVal.addAll(matchingParamValues);
+		return retVal;
+	}
+
+	private void translateQueryParametersIntoServerArgumentForGet(RequestDetails theRequest, List<Object> matchingParamValues) {
+		if (mySearchParameterBinding != null) {
+
+			List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
+			String nameWithQualifierColon = myName + ":";
+
+			for (String nextParamName : theRequest.getParameters().keySet()) {
+				String qualifier;
+				if (nextParamName.equals(myName)) {
+					qualifier = null;
+				} else if (nextParamName.startsWith(nameWithQualifierColon)) {
+					qualifier = nextParamName.substring(nextParamName.indexOf(':'));
+				} else {
+					// This is some other parameter, not the one bound by this instance
+					continue;
+				}
+				String[] values = theRequest.getParameters().get(nextParamName);
+				if (values != null) {
+					for (String nextValue : values) {
+						params.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, nextValue));
+					}
+				}
+			}
+			if (!params.isEmpty()) {
+				for (QualifiedParamList next : params) {
+					Object values = mySearchParameterBinding.parse(myContext, Collections.singletonList(next));
+					addValueToList(matchingParamValues, values);
+				}
+				
+			}
+
+		} else {
+			String[] paramValues = theRequest.getParameters().get(myName);
+			if (paramValues != null && paramValues.length > 0) {
+				if (myAllowGet) {
+
+					if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
+						List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
+						parameters.add(QualifiedParamList.singleton(paramValues[0]));
+						if (paramValues.length > 1) {
+							parameters.add(QualifiedParamList.singleton(paramValues[1]));
+						}
+						DateRangeParam dateRangeParam = new DateRangeParam();
+						dateRangeParam.setValuesAsQueryTokens(parameters);
+						matchingParamValues.add(dateRangeParam);
+					} else if (String.class.isAssignableFrom(myParameterType)) {
+
+						for (String next : paramValues) {
+							matchingParamValues.add(next);
+						}
+					} else if (ValidationModeEnum.class.equals(myParameterType)) {
+						
+						if (isNotBlank(paramValues[0])) {
+							ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
+							if (validationMode != null) {
+								matchingParamValues.add(validationMode);
+							} else {
+								throwInvalidMode(paramValues[0]);
+							}
+						}
+						
+					} else {
+						for (String nextValue : paramValues) {
+							FhirContext ctx = theRequest.getServer().getFhirContext();
+							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class<? extends IBase>) myParameterType);
+							IPrimitiveType<?> instance = def.newInstance();
+							instance.setValueAsString(nextValue);
+							matchingParamValues.add(instance);
+						}
+					}
+				} else {
+					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
+					String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
+					throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
+				}
+			}
 		}
 	}
 
-	public static void throwInvalidMode(String paramValues) {
-		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
+	private void translateQueryParametersIntoServerArgumentForPost(RequestDetails theRequest, List<Object> matchingParamValues) {
+		IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
+		if (def.getName().equals("Parameters")) {
+
+			BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+
+			RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
+			BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
+			BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
+
+			IAccessor paramChildAccessor = paramChild.getAccessor();
+			List<IBase> values = paramChildAccessor.getValues(requestContents);
+			for (IBase nextParameter : values) {
+				List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
+				if (nextNames != null && nextNames.size() > 0) {
+					IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
+					if (myName.equals(nextName.getValueAsString())) {
+
+						if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
+							matchingParamValues.add(nextParameter);
+						} else {
+							List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
+							List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
+							if (paramValues != null && paramValues.size() > 0) {
+								tryToAddValues(paramValues, matchingParamValues);
+							} else if (paramResources != null && paramResources.size() > 0) {
+								tryToAddValues(paramResources, matchingParamValues);
+							}
+						}
+
+					}
+				}
+			}
+
+		} else {
+
+			if (myParameterType.isAssignableFrom(requestContents.getClass())) {
+				tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
+			}
+
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -419,7 +416,11 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
-	public interface IConverter {
+	public static void throwInvalidMode(String paramValues) {
+		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
+	}
+
+	interface IOperationParamConverter {
 
 		Object incomingServer(Object theObject);
 
@@ -427,9 +428,9 @@ public class OperationParameter implements IParameter {
 
 	}
 
-	private class QueryParameterConverter implements IConverter {
+	class OperationParamConverter implements IOperationParamConverter {
 
-		public QueryParameterConverter() {
+		public OperationParamConverter() {
 			Validate.isTrue(mySearchParameterBinding != null);
 		}
 
