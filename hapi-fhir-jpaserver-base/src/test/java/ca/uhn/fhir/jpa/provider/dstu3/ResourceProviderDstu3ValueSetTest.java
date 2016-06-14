@@ -172,7 +172,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 		//@formatter:on
 
@@ -188,7 +188,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 		//@formatter:on
 

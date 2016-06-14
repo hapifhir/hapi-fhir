@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -26,6 +27,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
@@ -55,9 +57,10 @@ import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class BaseJpaTest {
+public abstract class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 	protected ServletRequestDetails mySrd;
@@ -72,6 +75,32 @@ public class BaseJpaTest {
 	@SuppressWarnings({ "rawtypes" })
 	protected List toList(IBundleProvider theSearch) {
 		return theSearch.getResources(0, theSearch.size());
+	}
+
+	protected abstract FhirContext getContext();
+	
+	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
+		List<String> retVal = new ArrayList<String>();
+
+		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		int size = res.size();
+		ourLog.info("Found {} results", size);
+		for (IBaseResource next : res) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
+		List<String> retVal = new ArrayList<String>();
+
+		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		int size = res.size();
+		ourLog.info("Found {} results", size);
+		for (IBaseResource next : res) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
+		}
+		return retVal;
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {

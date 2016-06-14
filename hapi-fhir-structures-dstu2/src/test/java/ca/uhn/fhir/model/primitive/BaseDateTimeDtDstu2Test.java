@@ -32,10 +32,126 @@ public class BaseDateTimeDtDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
-
 	private SimpleDateFormat myDateInstantParser;
-
 	private FastDateFormat myDateInstantZoneParser;
+
+	@Test
+	public void testSetPartialsYearFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setYear(2016);
+		assertEquals(2016, dt.getYear().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2016-03-11T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsMonthFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setMonth(3);
+		assertEquals(3, dt.getMonth().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-04-11T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsDayFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setDay(15);
+		assertEquals(15, dt.getDay().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-15T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsHourFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setHour(23);
+		assertEquals(23, dt.getHour().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-11T23:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsMinuteFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setMinute(54);
+		assertEquals(54, dt.getMinute().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-11T15:54:13.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsSecondFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setSecond(1);
+		assertEquals(1, dt.getSecond().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-11T15:44:01.27564757855254768473697463986328969635-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsMillisFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setMillis(12);
+		assertEquals(12, dt.getMillis().intValue());
+		assertEquals(12 * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-11T15:44:13.012-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsNanosFromExisting() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setNanos(100000000L);
+		assertEquals(100000000L, dt.getNanos().longValue());
+		assertEquals(100, dt.getMillis().intValue());
+		String valueAsString = dt.getValueAsString();
+		ourLog.info(valueAsString);
+		assertEquals("2011-03-11T15:44:13.100-08:00", valueAsString);
+	}
+
+	@Test
+	public void testSetPartialsInvalid() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		dt.setNanos(0);
+		dt.setNanos(BaseDateTimeDt.NANOS_PER_SECOND - 1);
+		try {
+			dt.setNanos(BaseDateTimeDt.NANOS_PER_SECOND);
+		} catch (IllegalArgumentException e) {
+			assertEquals("Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGetPartials() {
+		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
+		assertEquals(2011, dt.getYear().intValue());
+		assertEquals(2, dt.getMonth().intValue());
+		assertEquals(11, dt.getDay().intValue());
+		assertEquals(15, dt.getHour().intValue());
+		assertEquals(44, dt.getMinute().intValue());
+		assertEquals(13, dt.getSecond().intValue());
+		assertEquals(275, dt.getMillis().intValue());
+		assertEquals(275647578L, dt.getNanos().longValue());
+
+		dt = new InstantDt();
+		assertEquals(null, dt.getYear());
+		assertEquals(null, dt.getMonth());
+		assertEquals(null, dt.getDay());
+		assertEquals(null, dt.getHour());
+		assertEquals(null, dt.getMinute());
+		assertEquals(null, dt.getSecond());
+		assertEquals(null, dt.getMillis());
+		assertEquals(null, dt.getNanos());
+	}
+
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -49,7 +165,7 @@ public class BaseDateTimeDtDstu2Test {
 		dt.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08Z", dt.getValueAsString());
 	}
-	
+
 	/**
 	 * Test for #57
 	 */
@@ -194,10 +310,10 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testGetValueAsCalendar() {
 		assertNull(new InstantDt().getValueAsCalendar());
-		
+
 		InstantDt dt = new InstantDt("2011-01-03T07:11:22.002-08:00");
 		GregorianCalendar cal = dt.getValueAsCalendar();
-		
+
 		assertEquals(2011, cal.get(Calendar.YEAR));
 		assertEquals(7, cal.get(Calendar.HOUR_OF_DAY));
 		assertEquals(2, cal.get(Calendar.MILLISECOND));

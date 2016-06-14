@@ -29,7 +29,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -301,7 +300,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	/**
-	 * Sets the range from a pair of dates, inclusive on both ends
+	 * Sets the range from a pair of dates, inclusive on both ends. Note that if
+	 * theLowerBound is after theUpperBound, thie method will automatically reverse
+	 * the order of the arguments in order to create an inclusive range.
 	 * 
 	 * @param theLowerBound
 	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
@@ -313,8 +314,18 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(IPrimitiveType<Date> theLowerBound, IPrimitiveType<Date> theUpperBound) {
-		myLowerBound = theLowerBound != null ? new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
-		myUpperBound = theUpperBound != null ? new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		IPrimitiveType<Date> lowerBound = theLowerBound;
+		IPrimitiveType<Date> upperBound = theUpperBound;
+		if (lowerBound != null && lowerBound.getValue() != null && upperBound != null && upperBound.getValue() != null) {
+			if (lowerBound.getValue().after(upperBound.getValue())) {
+				IPrimitiveType<Date> temp = lowerBound;
+				lowerBound = upperBound;
+				upperBound = temp;
+			}
+		}
+		
+		myLowerBound = lowerBound != null ? new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lowerBound) : null;
+		myUpperBound = upperBound != null ? new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, upperBound) : null;
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 

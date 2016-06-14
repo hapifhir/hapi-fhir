@@ -50,28 +50,26 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 
-public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
+public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 
 	private static AnnotationConfigApplicationContext ourCtx;
+	private static EntityManager ourEntityManager;
 	private static FhirContext ourFhirContext;
 	private static IFhirResourceDao<Location> ourLocationDao;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1Test.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
-	private static EntityManager ourEntityManager;
 	private static PlatformTransactionManager ourTxManager;
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		ourCtx.close();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Before
 	public void before() {
 		super.purgeDatabase(ourEntityManager, ourTxManager);
+	}
+
+	@Override
+	protected FhirContext getContext() {
+		return ourFhirContext;
 	}
 
 	@Test
@@ -147,7 +145,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		assertEquals(1, values.size());
 
 	}
-	
+
 	@Test
 	public void testPersistWithSimpleLink() {
 		Patient patient = new Patient();
@@ -378,10 +376,9 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 		String encodeResourceToString = ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response.get(0));
 		ourLog.info(encodeResourceToString);
-		
+
 		assertThat(encodeResourceToString, not(containsString("smsp")));
 	}
-
 
 	/**
 	 * This is the correct way to do this, not {@link #testTransactionWithCidIds()}
@@ -479,6 +476,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourCtx.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass

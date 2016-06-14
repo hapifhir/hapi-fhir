@@ -45,26 +45,31 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
+	@CoverageIgnore
 	public String getPrefix(String theUri) throws XMLStreamException {
 		return myTarget.getPrefix(theUri);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void setPrefix(String thePrefix, String theUri) throws XMLStreamException {
 		myTarget.setPrefix(thePrefix, theUri);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void setDefaultNamespace(String theUri) throws XMLStreamException {
 		myTarget.setDefaultNamespace(theUri);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void setNamespaceContext(NamespaceContext theContext) throws XMLStreamException {
 		myTarget.setNamespaceContext(theContext);
 	}
 
 	@Override
+	@CoverageIgnore
 	public NamespaceContext getNamespaceContext() {
 		return myTarget.getNamespaceContext();
 	}
@@ -94,16 +99,19 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeEmptyElement(String theNamespaceURI, String theLocalName) throws XMLStreamException {
 		myTarget.writeEmptyElement(theNamespaceURI, theLocalName);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeEmptyElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
 		myTarget.writeEmptyElement(thePrefix, theLocalName, theNamespaceURI);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeEmptyElement(String theLocalName) throws XMLStreamException {
 		myTarget.writeEmptyElement(theLocalName);
 	}
@@ -127,11 +135,13 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeAttribute(String thePrefix, String theNamespaceURI, String theLocalName, String theValue) throws XMLStreamException {
 		myTarget.writeAttribute(thePrefix, theNamespaceURI, theLocalName, theValue);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeAttribute(String theNamespaceURI, String theLocalName, String theValue) throws XMLStreamException {
 		myTarget.writeAttribute(theNamespaceURI, theLocalName, theValue);
 	}
@@ -152,36 +162,43 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeProcessingInstruction(String theTarget) throws XMLStreamException {
 		myTarget.writeProcessingInstruction(theTarget);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeProcessingInstruction(String theTarget, String theData) throws XMLStreamException {
 		myTarget.writeProcessingInstruction(theTarget, theData);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeCData(String theData) throws XMLStreamException {
 		myTarget.writeCData(theData);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeDTD(String theDtd) throws XMLStreamException {
 		myTarget.writeDTD(theDtd);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeEntityRef(String theName) throws XMLStreamException {
 		myTarget.writeEntityRef(theName);
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeStartDocument() throws XMLStreamException {
 		myTarget.writeStartDocument();
 	}
 
 	@Override
+	@CoverageIgnore
 	public void writeStartDocument(String theVersion) throws XMLStreamException {
 		myTarget.writeStartDocument(theVersion);
 	}
@@ -206,9 +223,7 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	static void writeCharacters(char[] theText, int theStart, int theLen, XMLStreamWriter target, int insidePre) throws XMLStreamException {
-		if (theLen == 0) {
-			return;
-		} else {
+		if (theLen > 0) {
 			if (insidePre > 0) {
 				target.writeCharacters(theText, theStart, theLen);
 			} else {
@@ -240,6 +255,7 @@ public class NonPrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
+	@CoverageIgnore
 	public Object getProperty(String theName) throws IllegalArgumentException {
 		return myTarget.getProperty(theName);
 	}
