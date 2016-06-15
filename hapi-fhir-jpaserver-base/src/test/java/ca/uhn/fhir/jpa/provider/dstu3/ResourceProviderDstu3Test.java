@@ -175,7 +175,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
-			Thread.sleep(10);
+			Thread.sleep(100);
 			preDates.add(new Date());
 			patient.setId(id);
 			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");

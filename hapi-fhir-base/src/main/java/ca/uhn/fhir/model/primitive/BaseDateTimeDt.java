@@ -428,7 +428,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		myPrecision = thePrecision;
 		myFractionalSeconds = "";
 		if (theValue != null) {
-			myFractionalSeconds = Integer.toString((int) (theValue.getTime() % 1000));
+			String fractionalSeconds = Integer.toString((int) (theValue.getTime() % 1000));
+			myFractionalSeconds = StringUtils.leftPad(fractionalSeconds, 3, '0');
 		}
 		super.setValue(theValue);
 	}

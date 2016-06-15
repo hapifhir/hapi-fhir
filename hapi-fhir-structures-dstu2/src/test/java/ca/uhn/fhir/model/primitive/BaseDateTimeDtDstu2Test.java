@@ -36,6 +36,46 @@ public class BaseDateTimeDtDstu2Test {
 	private FastDateFormat myDateInstantZoneParser;
 
 	@Test
+	public void testFromTime() {
+		long millis;
+		InstantDt dt;
+		
+		millis = 1466022208001L;
+		String expected = "2016-06-15T20:23:28.001Z";
+		validate(millis, expected);
+		
+		millis = 1466022208123L;
+		expected = "2016-06-15T20:23:28.123Z";
+		validate(millis, expected);
+
+		millis = 1466022208100L;
+		expected = "2016-06-15T20:23:28.100Z";
+		validate(millis, expected);
+		
+		millis = 1466022208000L;
+		expected = "2016-06-15T20:23:28.000Z";
+		validate(millis, expected);
+		
+	}
+
+
+	private void validate(long millis, String expected) {
+		InstantDt dt;
+		dt = new InstantDt(new Date(millis));
+		dt.setTimeZoneZulu(true);
+		assertEquals(expected, dt.getValueAsString());
+
+		assertEquals(millis % 1000, dt.getMillis().longValue());
+		assertEquals((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
+		
+		dt = new InstantDt();
+		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
+		dt.setValue(new Date(millis));
+		assertEquals(expected.replace("Z", "+00:00"), dt.getValueAsString());
+	}
+	
+
+	@Test
 	public void testSetPartialsYearFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setYear(2016);

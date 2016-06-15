@@ -1559,6 +1559,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParamRp";
+		ourLog.info("Starting " + methodName);
 
 		int sleep = 100;
 		Thread.sleep(sleep);
@@ -1668,8 +1669,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
+		ourLog.info("Starting testSearchReturnsSearchDate");
+		
 		Date before = new Date();
-		Thread.sleep(1);
+		Thread.sleep(100);
 
 		//@formatter:off
 		ca.uhn.fhir.model.dstu2.resource.Bundle found = ourClient
@@ -1680,7 +1683,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 		//@formatter:on
 
-		Thread.sleep(1);
+		Thread.sleep(100);
 		Date after = new Date();
 
 		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
