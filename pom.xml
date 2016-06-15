@@ -804,7 +804,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8 -Xmx712m</argLine>
+						<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 						<forkCount>1</forkCount>
 						<!--<reuseForks>false</reuseForks> -->
 					</configuration>
@@ -859,6 +859,11 @@
 						<coberturaReports>
 						</coberturaReports>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.7.201606060606</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1123,7 +1128,8 @@
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken>\t</replacetoken>
-									<replacevalue>   </replacevalue>
+									<replacevalue>
+									</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
@@ -1367,6 +1373,30 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- 
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>jacoco-merge</id>
+						<goals>
+							<goal>merge</goal>
+						</goals>
+						<phase>install</phase>
+						<inherited>false</inherited>
+						<configuration>
+							<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+								<directory>hapi-fhir-base/target</directory>
+								<includes>
+									<include>*.exec</include>
+								</includes>
+							</fileSet>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			 -->
 			<!-- <plugin> <groupId>com.github.github</groupId> <artifactId>site-maven-plugin</artifactId> <version>0.12</version> <configuration> <message>Building site for ${project.version}</message> <server>github</server> 
 				</configuration> <executions> <execution> <goals> <goal>site</goal> </goals> <phase>site-deploy</phase> </execution> </executions> </plugin> -->
 		</plugins>
@@ -1376,6 +1406,21 @@
 		<plugins>
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
 				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.7.201606060606</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+						<configuration>
+							<dataFileIncludes>${baseDir}/hapi-fhir-base/target/jacoco.exec</dataFileIncludes>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -1524,30 +1569,11 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<!--<module>hapi-fhir-oauth2</module> -->
-				<module>hapi-fhir-base-test-mindeps-client</module>
-				<module>hapi-fhir-base-test-mindeps-server</module>
-				<module>hapi-tinder-plugin</module>
-				<module>hapi-tinder-test</module>
-				<module>hapi-fhir-structures-dstu</module>
-				<module>hapi-fhir-validation-resources-dstu2</module>
-				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-hl7org-dstu2</module>
-				<module>hapi-fhir-validation-resources-dstu3</module>
-				<module>hapi-fhir-structures-dstu3</module>
-				<module>hapi-fhir-jaxrsserver-base</module>
-				<module>hapi-fhir-jaxrsserver-example</module>
-				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-example</module>
-				<module>restful-server-example</module>
-				<module>restful-server-example-test</module>
-				<module>hapi-fhir-testpage-overlay</module>
-				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
-				<module>hapi-fhir-android</module>
-				<module>hapi-fhir-cli</module>
-				<module>hapi-fhir-dist</module>
-				<module>examples</module>
-				<module>hapi-fhir-base-example-embedded-ws</module>
+				<!-- <module>hapi-fhir-base-test-mindeps-client</module> <module>hapi-fhir-base-test-mindeps-server</module> <module>hapi-tinder-plugin</module> <module>hapi-tinder-test</module> <module>hapi-fhir-structures-dstu</module> 
+					<module>hapi-fhir-validation-resources-dstu2</module> <module>hapi-fhir-structures-dstu2</module> <module>hapi-fhir-structures-hl7org-dstu2</module> <module>hapi-fhir-validation-resources-dstu3</module> 
+					<module>hapi-fhir-structures-dstu3</module> <module>hapi-fhir-jaxrsserver-base</module> <module>hapi-fhir-jaxrsserver-example</module> <module>hapi-fhir-jpaserver-base</module> <module>hapi-fhir-jpaserver-example</module> 
+					<module>restful-server-example</module> <module>restful-server-example-test</module> <module>hapi-fhir-testpage-overlay</module> <module>hapi-fhir-jpaserver-uhnfhirtest</module> <module>hapi-fhir-android</module> 
+					<module>hapi-fhir-cli</module> <module>hapi-fhir-dist</module> <module>examples</module> <module>hapi-fhir-base-example-embedded-ws</module> -->
 			</modules>
 		</profile>
 		<profile>
