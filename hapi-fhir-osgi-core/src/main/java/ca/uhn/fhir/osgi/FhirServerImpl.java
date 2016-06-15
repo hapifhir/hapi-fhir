@@ -1,4 +1,4 @@
-package ca.uhn.fhir.osgi.impl;
+package ca.uhn.fhir.osgi;
 
 /*
  * #%L
@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.osgi.FhirConfigurationException;
-import ca.uhn.fhir.osgi.FhirServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 /**
