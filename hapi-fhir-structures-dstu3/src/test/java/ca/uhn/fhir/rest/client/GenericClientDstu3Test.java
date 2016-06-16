@@ -1,13 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.commons.lang3.time.FastDateParser;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -56,6 +55,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test;
 import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
@@ -97,6 +97,18 @@ public class GenericClientDstu3Test {
 		return body;
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testInvalidConformanceCall() {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		try {
+			client.conformance();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Must call fetchConformance() instead of conformance() for RI/STU3+ structures", e.getMessage());
+		}
+	}
+	
 	@Test
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -588,6 +600,19 @@ public class GenericClientDstu3Test {
 		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
+	
+	@Test
+	public void testSearchForUnknownType() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		try {
+			client.search(new UriDt("?aaaa"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determine the resource type from the given URI: ?aaaa", e.getMessage());
+		}
+	}
+	
+	
 	@Test
 	public void testUserAgentForBinary() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -703,6 +728,54 @@ public class GenericClientDstu3Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
+	}
+
+	@Test
+	public void testForceConformance() throws Exception {
+		final IParser p = ourCtx.newXmlParser();
+
+		final Conformance conf = new Conformance();
+		conf.setCopyright("COPY");
+
+		final Patient patient = new Patient();
+		patient.addName().addFamily("FAM");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			private int myCount = 0;
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				final String respString;
+				if (myCount == 1 || myCount == 2) {
+					ourLog.info("Encoding patient");
+					respString = p.encodeResourceToString(patient);
+				} else {
+					ourLog.info("Encoding conformance");
+					respString = p.encodeResourceToString(conf);
+				}
+				myCount++;
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformance.com/fhir");
+
+		client.read().resource("Patient").withId("1").execute();
+		assertEquals(2, capt.getAllValues().size());
+		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		
+		client.read().resource("Patient").withId("1").execute();
+		assertEquals(3, capt.getAllValues().size());
+		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		
+		client.forceConformanceCheck();
+		assertEquals(4, capt.getAllValues().size());
+		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
 	private List<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> theClass) {

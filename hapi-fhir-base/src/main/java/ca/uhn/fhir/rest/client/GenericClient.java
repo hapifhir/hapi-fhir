@@ -76,6 +76,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
@@ -174,8 +175,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IBaseConformance conformance() {
-		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/DSTU3+ structures");
+		if (myContext.getVersion().getVersion().isRi()) {
+			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/STU3+ structures");
 		}
 
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
@@ -376,7 +377,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 
-		throw new RuntimeException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
+		throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
 
 	}
 
@@ -385,6 +386,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	// return doReadOrVRead(theType, theId, false, null, null);
 	// }
 
+	/**
+	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
+	 * client instead, as this provides much more fine-grained control over what is logged. This
+	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
+	 */
+	@Deprecated
 	public boolean isLogRequestAndResponse() {
 		return myLogRequestAndResponse;
 	}

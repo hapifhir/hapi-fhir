@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -574,6 +575,8 @@ class ModelScanner {
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		} finally {
+			IOUtils.closeQuietly(str);
 		}
 
 		return retVal;
