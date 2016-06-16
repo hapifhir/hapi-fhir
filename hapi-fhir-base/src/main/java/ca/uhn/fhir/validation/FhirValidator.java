@@ -61,7 +61,7 @@ public class FhirValidator {
 		myContext = theFhirContext;
 
 		if (ourPhlocPresentOnClasspath == null) {
-			ourPhlocPresentOnClasspath = SchematronProvider.isScematronAvailable(theFhirContext);
+			ourPhlocPresentOnClasspath = SchematronProvider.isSchematronAvailable(theFhirContext);
 		}
 	}
 

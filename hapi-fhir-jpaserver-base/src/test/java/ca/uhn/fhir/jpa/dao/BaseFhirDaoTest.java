@@ -40,5 +40,11 @@ public class BaseFhirDaoTest  extends BaseJpaTest {
 		observation.setEffective(period);
 		
 	}
+
+
+	@Override
+	protected FhirContext getContext() {
+		return ourCtx;
+	}
 	
 }

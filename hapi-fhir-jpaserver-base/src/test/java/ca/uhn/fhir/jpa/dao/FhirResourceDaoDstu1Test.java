@@ -30,18 +30,22 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unused")
-public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
-
+public class FhirResourceDaoDstu1Test extends BaseJpaTest {
+	private static AnnotationConfigApplicationContext ourAppCtx;
+	private static FhirContext ourCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;
 	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
-	private static AnnotationConfigApplicationContext ourAppCtx;
 	private static IFhirResourceDao<Location> ourLocationDao;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu1Test.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
-	private static FhirContext ourCtx;
+
+	@Override
+	protected FhirContext getContext() {
+		return ourCtx;
+	}
 
 	@Test
 	public void testCreateDuplicateIdFails() {
@@ -64,7 +68,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 			assertThat(e.getMessage(), containsString("Can not create entity with ID[" + methodName + "], a resource with this ID already exists"));
 		}
 	}
-	
+
 	@Test
 	public void testCreateNumericIdFails() {
 		Patient p = new Patient();
@@ -125,6 +129,12 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		ourAppCtx.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
@@ -137,12 +147,6 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		ourLocationDao = ourAppCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
 		ourEncounterDao = ourAppCtx.getBean("myEncounterDaoDstu1", IFhirResourceDao.class);
 		ourCtx = ourAppCtx.getBean(FhirContext.class);
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		ourAppCtx.close();
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

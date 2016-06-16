@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -56,12 +55,14 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Fields;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
+import org.hibernate.search.indexes.interceptor.DontInterceptEntityInterceptor;
 
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 
 //@formatter:off
 @Entity
-@Indexed()	
+@Indexed(interceptor=DeferConceptIndexingInterceptor.class)	
 @Table(name="TRM_CONCEPT", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
 }, indexes= {

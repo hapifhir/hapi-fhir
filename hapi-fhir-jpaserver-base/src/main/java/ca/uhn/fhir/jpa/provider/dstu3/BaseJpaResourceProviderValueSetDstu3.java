@@ -62,7 +62,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		}
 
 		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
-			throw new InvalidRequestException("$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 		
 		startRequest(theServletRequest);

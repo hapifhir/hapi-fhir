@@ -160,12 +160,13 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		myPatientDao.create(p, mySrd).getId();
 
 		InstantDt start = InstantDt.withCurrentTime();
+		ourLog.info("First time: {}", start.getValueAsString());
 		Thread.sleep(100);
 		
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id = myPatientDao.create(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
+		ourLog.info("Created patient, got ID: {}", id);
 
 		Thread.sleep(100);
 
@@ -174,7 +175,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
 
-		myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
+		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
+		ourLog.info("URL is: {}", matchUrl);
+		myPatientDao.update(p, matchUrl, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));

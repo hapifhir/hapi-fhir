@@ -28,10 +28,12 @@ import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
@@ -48,10 +50,11 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 	}
 
 	@History
-	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
+	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate, null, theRequestDetails);
+			DateRangeParam range = super.processSinceOrAt(theDate, theAt);
+			return myDao.history(range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

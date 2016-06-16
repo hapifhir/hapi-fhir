@@ -106,9 +106,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myCarePlanDaoDstu3")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
-	@Qualifier("myConditionDaoDstu3")
-	protected IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
 	protected IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
@@ -117,6 +114,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	@Qualifier("myConditionDaoDstu3")
+	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -213,7 +213,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
-
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
@@ -249,6 +248,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
+	}
+
+	@Override
+	protected FhirContext getContext() {
+		return myFhirCtx;
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {

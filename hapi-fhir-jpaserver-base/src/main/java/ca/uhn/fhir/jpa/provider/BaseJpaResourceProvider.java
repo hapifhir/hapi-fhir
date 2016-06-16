@@ -65,24 +65,29 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			HttpServletRequest theRequest, 
 			@IdParam IIdType theId, 
 			@Since Date theSince, 
-//			@At DateRangeParam theAt, 
+			@At DateRangeParam theAt, 
 			RequestDetails theRequestDetails) {
 	//@formatter:on
 		
 		startRequest(theRequest);
 		try {
-//			DateRangeParam sinceOrAt = processSinceOrAt(theSince)
-			return myDao.history(theId, theSince, null, theRequestDetails);
+			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
+			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
+	public IBundleProvider getHistoryForResourceType(
+			HttpServletRequest theRequest, 
+			@Since Date theSince, 
+			@At DateRangeParam theAt, 
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate, null, theRequestDetails);
+			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
+			return myDao.history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

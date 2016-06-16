@@ -46,6 +46,13 @@ public class DateRangeParamTest {
 
 			DateRangeParam range = new DateRangeParam(startDateTime, endDateTime);
 			assertEquals("2009-12-31T19:00:00.000-05:00", range.getValuesAsQueryTokens().get(0).getValueAsString());
+			assertEquals("2009-12-31T19:00:00.001-05:00", range.getValuesAsQueryTokens().get(1).getValueAsString());
+
+			// Now try with arguments reversed (should still create same range)
+			range = new DateRangeParam(endDateTime, startDateTime);
+			assertEquals("2009-12-31T19:00:00.000-05:00", range.getValuesAsQueryTokens().get(0).getValueAsString());
+			assertEquals("2009-12-31T19:00:00.001-05:00", range.getValuesAsQueryTokens().get(1).getValueAsString());
+
 		} finally {
 			TimeZone.setDefault(tz);
 		}

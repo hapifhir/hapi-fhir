@@ -806,7 +806,6 @@
 						<runOrder>random</runOrder>
 						<argLine>-Dfile.encoding=UTF-8 -Xmx712m</argLine>
 						<forkCount>1</forkCount>
-						<!--<reuseForks>false</reuseForks> -->
 					</configuration>
 				</plugin>
 				<plugin>
@@ -859,6 +858,11 @@
 						<coberturaReports>
 						</coberturaReports>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.7.201606060606</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1123,7 +1127,8 @@
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken>\t</replacetoken>
-									<replacevalue>   </replacevalue>
+									<replacevalue>
+									</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
@@ -1376,6 +1381,8 @@
 		<plugins>
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
 				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
+			<!-- <plugin> <groupId>org.jacoco</groupId> <artifactId>jacoco-maven-plugin</artifactId> <version>0.7.7.201606060606</version> <reportSets> <reportSet> <reports> <report>report</report> </reports> <configuration> 
+				<dataFileIncludes>${baseDir}/hapi-fhir-base/target/jacoco.exec</dataFileIncludes> </configuration> </reportSet> </reportSets> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -1524,7 +1531,6 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<!--<module>hapi-fhir-oauth2</module> -->
 				<module>hapi-fhir-base-test-mindeps-client</module>
 				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
@@ -1548,6 +1554,7 @@
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
 				<module>hapi-fhir-base-example-embedded-ws</module>
+				<module>hapi-fhir-jacoco</module>
 			</modules>
 		</profile>
 		<profile>

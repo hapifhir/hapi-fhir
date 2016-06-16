@@ -63,7 +63,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu1Test  extends BaseJpaTest {
@@ -88,6 +87,10 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Override
+	protected FhirContext getContext() {
+		return ourCtx;
+	}
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -121,11 +124,11 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(10).execute();
+		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).count(10).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(10, found.getEntries().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(999).execute();
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).count(999).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(50, found.getEntries().size());
 

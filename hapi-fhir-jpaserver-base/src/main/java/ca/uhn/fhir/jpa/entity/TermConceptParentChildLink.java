@@ -35,8 +35,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-
 @Entity
 @Table(name="TRM_CONCEPT_PC_LINK")
 public class TermConceptParentChildLink implements Serializable {
