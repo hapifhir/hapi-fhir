@@ -211,7 +211,6 @@ public class GenericJaxRsClientDstu3Test {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -228,7 +227,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		//@formatter:off
-		Conformance resp = (Conformance)client.conformance();
+		Conformance resp = (Conformance)client.fetchConformance().ofType(Conformance.class).execute();
 
 		//@formatter:on
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
