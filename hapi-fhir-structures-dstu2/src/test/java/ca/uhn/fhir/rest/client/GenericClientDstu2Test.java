@@ -114,8 +114,8 @@ public class GenericClientDstu2Test {
 		try {
 			client.read(new UriDt("http://example.com/InvalidResource/1"));
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determine the resource type from the given URI: ?aaaa", e.getMessage());
+		} catch (DataFormatException e) {
+			assertEquals("Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
 
