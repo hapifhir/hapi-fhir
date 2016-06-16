@@ -185,22 +185,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<String> idValues;
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 		
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt2060");
-		assertThat(idValues, empty());
+		assertThat(idValues.toString(), idValues, empty());
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=" + InstantDt.withCurrentTime().getYear());
-		assertThat(idValues, hasSize(10)); // 10 is the page size
+		assertThat(idValues.toString(), idValues, hasSize(10)); // 10 is the page size
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=ge" + InstantDt.withCurrentTime().getYear());
-		assertThat(idValues, hasSize(10));
+		assertThat(idValues.toString(), idValues, hasSize(10));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + InstantDt.withCurrentTime().getYear());
 		assertThat(idValues, hasSize(0));
