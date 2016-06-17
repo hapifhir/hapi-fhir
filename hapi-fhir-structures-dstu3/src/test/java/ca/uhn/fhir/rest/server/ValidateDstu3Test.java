@@ -30,8 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;

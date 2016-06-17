@@ -61,6 +61,8 @@ import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
@@ -81,6 +83,9 @@ public class GenericClientDstu3Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myAnswerCount = 0;
+		
+		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
+
 	}
 
 	private String expectedUserAgent() {
@@ -279,7 +284,61 @@ public class GenericClientDstu3Test {
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
+	@Test
+	public void testUserInfoInterceptor() throws Exception {
+		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
 
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.registerInterceptor(new UserInfoInterceptor("user_id", "user_name", "app-name"));
+
+		//@formatter:off
+		Bundle resp = client
+			.history()
+			.onType(Patient.class)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+
+	}
+
+	@Test
+	public void testCookieInterceptor() throws Exception {
+		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.registerInterceptor(new CookieInterceptor("foo=bar"));
+
+		//@formatter:off
+		Bundle resp = client
+			.history()
+			.onType(Patient.class)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+
+		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
+	}
+	
 	@Test
 	public void testExplicitCustomTypeHistoryType() throws Exception {
 		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));

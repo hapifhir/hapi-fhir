@@ -127,6 +127,8 @@ public class GenericClientDstu2Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myResponseCount = 0;
+		
+		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
 	}
 
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {

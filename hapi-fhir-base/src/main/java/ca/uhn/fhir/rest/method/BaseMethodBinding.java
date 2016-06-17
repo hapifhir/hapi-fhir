@@ -516,7 +516,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				return new ValidateMethodBindingDstu1(theMethod, theContext, theProvider);
 			} else {
-				return new ValidateMethodBindingDstu2(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
+				return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 			}
 		} else if (getTags != null) {
 			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);

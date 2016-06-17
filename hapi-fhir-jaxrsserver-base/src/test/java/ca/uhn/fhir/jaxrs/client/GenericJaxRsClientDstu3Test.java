@@ -65,6 +65,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -94,6 +95,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 		ourCtx.setRestfulClientFactory(clientFactory);
 		ourResponseCount = 0;
+		System.setProperty("hapi.client.keepresponses", "true");
 	}
 
 	private String getPatientFeedWithOneResult() {

@@ -137,7 +137,7 @@ import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.method.SortParameter;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
-import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2;
+import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -556,7 +556,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
 		} else {
-			invocation = ValidateMethodBindingDstu2.createValidateInvocation(myContext, theResource);
+			invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, theResource);
 		}
 
 		if (isKeepResponses()) {
@@ -2409,7 +2409,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public MethodOutcome execute() {
-			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2.createValidateInvocation(myContext, myResource);
+			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
 			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<BaseOperationOutcome>(null, null);
 			IBaseOperationOutcome outcome = invoke(null, handler, invocation);
 			MethodOutcome retVal = new MethodOutcome();
