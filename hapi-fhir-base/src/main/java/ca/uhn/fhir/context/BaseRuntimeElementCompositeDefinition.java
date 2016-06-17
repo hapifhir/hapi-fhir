@@ -354,11 +354,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 					orderMap.put(order, def);
 
-				} else if (next.getType().equals(ExtensionDt.class)) {
-
-					RuntimeChildExtensionDt def = new RuntimeChildExtensionDt(next, elementName, childAnnotation, descriptionAnnotation);
-					orderMap.put(order, def);
-
 				} else if (extensionAttr != null) {
 					/*
 					 * Child is an extension
@@ -427,8 +422,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						} else {
 							def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 						}
-					} else if (IBaseXhtml.class.isAssignableFrom(nextElementType)) {
-						def = new RuntimeChildXhtmlDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					} else {
 						if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(next);

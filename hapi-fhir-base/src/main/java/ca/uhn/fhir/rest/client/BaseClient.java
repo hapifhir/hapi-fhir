@@ -209,7 +209,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
-		IHttpRequest httpRequest;
+		IHttpRequest httpRequest = null;
 		IHttpResponse response = null;
 		try {
 			Map<String, List<String>> params = createExtraParams();
@@ -355,11 +355,13 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 		} catch (DataFormatException e) {
-			throw new FhirClientConnectionException(e);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			throw new FhirClientConnectionException(msg, e);
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
-			throw new FhirClientConnectionException(e);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "ioExceptionDuringOperation", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			throw new FhirClientConnectionException(msg, e);
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {

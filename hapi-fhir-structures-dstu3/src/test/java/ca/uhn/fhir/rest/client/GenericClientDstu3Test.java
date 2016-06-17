@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +52,9 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.google.common.base.Charsets;
+import com.phloc.commons.io.streams.StringInputStream;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -61,10 +67,12 @@ import ca.uhn.fhir.parser.CustomTypeDstu3Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -83,7 +91,7 @@ public class GenericClientDstu3Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myAnswerCount = 0;
-		
+
 		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
 
 	}
@@ -113,7 +121,84 @@ public class GenericClientDstu3Test {
 			assertEquals("Must call fetchConformance() instead of conformance() for RI/STU3+ structures", e.getMessage());
 		}
 	}
-	
+
+	@Test
+	public void testReadWithUnparseableResponse() throws Exception {
+		String msg = "{\"resourceTypeeeee\":\"Patient\"}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.read().resource("Patient").withId("123").elementsSubset("name", "identifier").execute();
+			fail();
+		} catch (FhirClientConnectionException e) {
+			assertEquals("Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: Invalid JSON content detected, missing required element: 'resourceType'", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testHttp501() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 501, "Not Implemented"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public StringInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new StringInputStream("not implemented", Charsets.UTF_8);
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.read().resource(Patient.class).withId("1").execute();
+			fail();
+		} catch (NotImplementedOperationException e) {
+			assertEquals("HTTP 501 Not Implemented", e.getMessage());
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testClientFailures() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, Exception.class);
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client.read().resource(Patient.class).withId("1").execute();
+			fail();
+		} catch (FhirClientConnectionException e) {
+			assertEquals("java.lang.IllegalStateException", e.getMessage());
+		}
+
+		try {
+			client.read().resource(Patient.class).withId("1").execute();
+			fail();
+		} catch (RuntimeException e) {
+			assertEquals("java.lang.RuntimeException", e.toString());
+		}
+
+		try {
+			client.read().resource(Patient.class).withId("1").execute();
+			fail();
+		} catch (FhirClientConnectionException e) {
+			assertEquals("java.lang.Exception", e.getMessage());
+		}
+	}
+
 	@Test
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -284,6 +369,7 @@ public class GenericClientDstu3Test {
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
+
 	@Test
 	public void testUserInfoInterceptor() throws Exception {
 		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
@@ -338,7 +424,7 @@ public class GenericClientDstu3Test {
 
 		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
 	}
-	
+
 	@Test
 	public void testExplicitCustomTypeHistoryType() throws Exception {
 		final String respString = CustomTypeDstu3Test.createBundle(CustomTypeDstu3Test.createResource(false));
@@ -592,7 +678,7 @@ public class GenericClientDstu3Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
-				return new Header[] { };
+				return new Header[] {};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -659,7 +745,6 @@ public class GenericClientDstu3Test {
 		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
-	
 	@Test
 	public void testSearchForUnknownType() throws Exception {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -670,8 +755,7 @@ public class GenericClientDstu3Test {
 			assertEquals("Unable to determine the resource type from the given URI: ?aaaa", e.getMessage());
 		}
 	}
-	
-	
+
 	@Test
 	public void testUserAgentForBinary() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -733,7 +817,7 @@ public class GenericClientDstu3Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
-		
+
 		//@formatter:off
 		client
 			.search()
@@ -805,6 +889,7 @@ public class GenericClientDstu3Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			private int myCount = 0;
+
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				final String respString;
@@ -827,11 +912,11 @@ public class GenericClientDstu3Test {
 		assertEquals(2, capt.getAllValues().size());
 		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
-		
+
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(3, capt.getAllValues().size());
 		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
-		
+
 		client.forceConformanceCheck();
 		assertEquals(4, capt.getAllValues().size());
 		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
@@ -857,7 +942,7 @@ public class GenericClientDstu3Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu3();
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchByQuantity() throws Exception {
@@ -871,11 +956,12 @@ public class GenericClientDstu3Test {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}});
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Observation")
@@ -1010,11 +1096,12 @@ public class GenericClientDstu3Test {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}});
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Device")
@@ -1038,7 +1125,6 @@ public class GenericClientDstu3Test {
 
 	}
 
-	
 	@Test
 	public void testSearchByString() throws Exception {
 		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
@@ -1051,11 +1137,12 @@ public class GenericClientDstu3Test {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}});
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
@@ -1095,9 +1182,7 @@ public class GenericClientDstu3Test {
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient?name=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
-		
-		
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
@@ -1152,13 +1237,14 @@ public class GenericClientDstu3Test {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}});
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
-		
+
 		Date date = new DateTimeDt("2011-01-02T22:33:01Z").getValue();
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
@@ -1230,7 +1316,7 @@ public class GenericClientDstu3Test {
 		idx++;
 
 		String expDate = new DateTimeDt(date).getValueAsString();
-		
+
 		//@formatter:off
 		client.search()
 			.forResource("Patient")

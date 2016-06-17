@@ -300,7 +300,8 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			Class implementingClass = myContext.getResourceDefinition("Conformance").getImplementingClass();
 			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 		} catch (FhirClientConnectionException e) {
-			throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA), e);
+			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA);
+			throw new FhirClientConnectionException(msg, e);
 		}
 
 		FhirTerser t = myContext.newTerser();

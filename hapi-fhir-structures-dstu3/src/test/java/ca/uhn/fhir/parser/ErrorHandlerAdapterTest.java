@@ -1,4 +1,9 @@
-package ca.uhn.fhir.context;
+package ca.uhn.fhir.parser;
+
+import org.junit.Test;
+
+import ca.uhn.fhir.parser.ErrorHandlerAdapter;
+import ca.uhn.fhir.parser.IParserErrorHandler;
 
 /*
  * #%L
@@ -20,21 +25,15 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.lang.reflect.Field;
-
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-
-public class RuntimeChildExtensionDt extends RuntimeChildAny {
-
-	public RuntimeChildExtensionDt(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
-		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);
+/**
+ * Adapter implementation with NOP implementations of all {@link IParserErrorHandler} methods.
+ */
+public class ErrorHandlerAdapterTest  {
+	
+	@Test
+	public void testMethods() {
+		new ErrorHandlerAdapter().unexpectedRepeatingElement(null, null);
+		new ErrorHandlerAdapter().unknownAttribute(null, null);
+		new ErrorHandlerAdapter().unknownElement(null, null);
 	}
-
-	public IElement newInstance() {
-		return new ExtensionDt();
-	}
-
 }
