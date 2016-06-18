@@ -1148,6 +1148,45 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
+	public void testTransactionWithInvalidBody() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// Transaction
+		try {
+			client.transaction().withBundle("FOO");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+		}
+
+		// Create
+		try {
+			client.create().resource("FOO").execute();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+		}
+
+		// Update
+		try {
+			client.update().resource("FOO").execute();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+		}
+
+		// Validate
+		try {
+			client.validate().resource("FOO").execute();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+		}
+
+
+	}
+
+	@Test
 	public void testUpdateById() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 

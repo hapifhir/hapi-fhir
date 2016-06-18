@@ -721,7 +721,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
-				throw new InvalidRequestException("FHIR client can't determine resource encoding");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
@@ -2220,7 +2220,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myRawBundle = theBundle;
 			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
 			if (myRawBundleEncoding == null) {
-				throw new IllegalArgumentException("Can not determine encoding of raw resource body");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 		}
 
@@ -2431,7 +2431,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
 			if (enc == null) {
-				throw new IllegalArgumentException("Could not detect encoding (XML/JSON) in string. Is this a valid FHIR resource?");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			switch (enc) {
 			case XML:

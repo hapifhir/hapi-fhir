@@ -71,12 +71,11 @@ import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 //@formatter:on
 public class TermConcept implements Serializable {
 	private static final int MAX_DESC_LENGTH = 400;
-
 	private static final long serialVersionUID = 1L;
-	
+
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="myParent")
 	private Collection<TermConceptParentChildLink> myChildren;
-
+	
 	@Column(name="CODE", length=100, nullable=false)
 	@Fields({
 		@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),
@@ -86,7 +85,7 @@ public class TermConcept implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
-	
+
 	@Column(name="CODESYSTEM_PID", insertable=false, updatable=false)
 	@Fields({
 		@Field(name="myCodeSystemVersionPid")
@@ -103,7 +102,7 @@ public class TermConcept implements Serializable {
 	})
 	private String myDisplay;
 	//@formatter:on
-
+	
 	@Id()
 	@SequenceGenerator(name="SEQ_CONCEPT_PID", sequenceName="SEQ_CONCEPT_PID")
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PID")
@@ -187,6 +186,10 @@ public class TermConcept implements Serializable {
 
 	public Long getId() {
 		return myId;
+	}
+
+	public Long getIndexStatus() {
+		return myIndexStatus;
 	}
 
 	public Collection<TermConceptParentChildLink> getParents() {

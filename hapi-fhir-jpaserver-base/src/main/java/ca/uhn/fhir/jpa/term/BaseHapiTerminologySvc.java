@@ -216,7 +216,9 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 
 		theConcept.setCodeSystem(theCodeSystem);
-		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+		if (theTotalConcepts < myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+		}
 
 		myConceptDao.save(theConcept);
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
