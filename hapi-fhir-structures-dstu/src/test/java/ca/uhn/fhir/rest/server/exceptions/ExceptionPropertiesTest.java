@@ -24,6 +24,9 @@ public class ExceptionPropertiesTest {
 		new FhirClientConnectionException(new Exception());
 		new NotImplementedOperationException("");
 		new NotImplementedOperationException(null, new OperationOutcome());
+		new FhirClientConnectionException("");
+		new FhirClientConnectionException(new Exception());
+		new FhirClientConnectionException("", new Exception());
 	}
 	
 	@SuppressWarnings("deprecation")

@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
 import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Condition;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -67,6 +68,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -95,6 +97,21 @@ public class XmlParserTest {
 
 	}
 
+	@Test
+	public void testEncodeAndParseIdref() {
+		CarePlan cp = new CarePlan();
+		cp.addGoal().setNotes("Goal Notes").setElementSpecificId("goalId0");
+		
+		IdrefDt idref = new IdrefDt();
+		idref.setValue("#goalId0");
+		idref.setTarget(cp);
+		idref.getTarget();
+		cp.addActivity().getGoal().add(idref);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(cp);
+		ourLog.info(encoded);
+	}
+	
 	/**
 	 * Test for #82 - Not yet enabled because the test won't pass
 	 */

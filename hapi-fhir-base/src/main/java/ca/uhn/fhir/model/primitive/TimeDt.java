@@ -52,6 +52,7 @@ public class TimeDt extends StringDt implements IQueryParameterType {
 	 */
 	@SimpleSetter
 	public TimeDt(@SimpleSetter.Parameter(name = "theString") String theValue) {
+		this();
 		setValue(theValue);
 	}
 

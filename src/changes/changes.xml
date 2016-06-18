@@ -41,6 +41,16 @@
 					</ul>
 				]]>
 			</action>
+			<action type="remove">
+				Remove some clases that were deprecated over a year ago and have
+				suitable replacements:
+				<![CDATA[
+					<ul>
+						<li>QualifiedDateParam has been removed, but DateParam may be used instead</li>
+						<li>PathSpecification has been removedm but Include may be used instead</li>
+					</ul>
+				]]>
+			</action>
 			<action type="fix" issue="345">
 				ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations
 				that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!
@@ -359,6 +369,14 @@
 				Server now supports the _at parameter (including multiple repetitions) 
 				for history operation
 			</action>
+			<!--
+			This one actually doesn't seem possible without using a deprecated servlet API
+			<action type="fix">
+				When throwing UnclassifiedServerException in server methods, the HTTP response
+				status line contained the response code specified in the exception, but not the
+				response message
+			</action>
+			-->
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

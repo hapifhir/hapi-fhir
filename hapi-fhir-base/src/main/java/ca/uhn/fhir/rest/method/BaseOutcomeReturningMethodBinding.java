@@ -253,7 +253,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
 
-		return restfulResponse.streamResponseAsResource(outcome, prettyPrint, summaryMode, operationStatus, theRequest.isRespondGzip(), true);
+		return restfulResponse.streamResponseAsResource(outcome, prettyPrint, summaryMode, operationStatus, null, theRequest.isRespondGzip(), true);
 //		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
 	}
 

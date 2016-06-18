@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -61,12 +63,12 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	}
 
 	@Override
-	public Writer getResponseWriter(int statusCode, String contentType, String charset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		theHttpResponse.setCharacterEncoding(charset);
-		theHttpResponse.setStatus(statusCode);
-		theHttpResponse.setContentType(contentType);
+		theHttpResponse.setCharacterEncoding(theCharset);
+		theHttpResponse.setStatus(theStatusCode);
+		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), Constants.CHARSET_NAME_UTF8);

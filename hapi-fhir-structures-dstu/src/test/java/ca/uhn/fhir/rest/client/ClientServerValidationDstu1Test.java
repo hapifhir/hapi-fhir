@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerExcept
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
 
-public class ClientServerValidationTestDstu {
+public class ClientServerValidationDstu1Test {
 
 	private FhirContext myCtx;
 	private HttpClient myHttpClient;

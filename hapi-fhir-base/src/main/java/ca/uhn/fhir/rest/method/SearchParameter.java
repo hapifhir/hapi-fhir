@@ -59,7 +59,6 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.NumberOrListParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityOrListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -81,7 +80,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 
-@SuppressWarnings("deprecation")
 public class SearchParameter extends BaseQueryParameter {
 
 	private static final String EMPTY_STRING = "";
@@ -341,8 +339,6 @@ public class SearchParameter extends BaseQueryParameter {
 			// ok
 		} else if (StringDt.class.isAssignableFrom(type)) {
 			myParamType = RestSearchParameterTypeEnum.STRING;
-		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
-			myParamType = RestSearchParameterTypeEnum.DATE;
 		} else if (BaseIdentifierDt.class.isAssignableFrom(type)) {
 			myParamType = RestSearchParameterTypeEnum.TOKEN;
 		} else if (BaseQuantityDt.class.isAssignableFrom(type)) {

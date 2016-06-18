@@ -1,23 +1,20 @@
 package ca.uhn.fhir.validation;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
-import java.util.Locale;
-
-import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SchemaValidationTestDstu3 {
+public class SchemaValidationDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaValidationTestDstu3.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaValidationDstu3Test.class);
 
 	/**
 	 * See #339

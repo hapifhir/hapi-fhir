@@ -260,8 +260,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			
 			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 			
-			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(),
-					isAddContentLocationHeader());
+			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null,
+					theRequest.isRespondGzip(), isAddContentLocationHeader());
 			
 		} else {
 			// Is this request coming from a browser
