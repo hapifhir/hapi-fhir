@@ -314,21 +314,6 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
-		IResource resource = theEntry.getResource();
-		if (resource == null) {
-			return null;
-		}
-
-		String resourceBaseUrl = null;
-		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
-			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
-				resourceBaseUrl = resource.getId().getBaseUrl();
-			}
-		}
-		return resourceBaseUrl;
-	}
-
 	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
 	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;

@@ -12,6 +12,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionPropertiesTest {
@@ -24,9 +25,8 @@ public class ExceptionPropertiesTest {
 		new FhirClientConnectionException(new Exception());
 		new NotImplementedOperationException("");
 		new NotImplementedOperationException(null, new OperationOutcome());
-		new FhirClientConnectionException("");
-		new FhirClientConnectionException(new Exception());
-		new FhirClientConnectionException("", new Exception());
+		new FhirClientInappropriateForServerException(new Exception());
+		new FhirClientInappropriateForServerException("", new Exception());
 	}
 	
 	@SuppressWarnings("deprecation")
