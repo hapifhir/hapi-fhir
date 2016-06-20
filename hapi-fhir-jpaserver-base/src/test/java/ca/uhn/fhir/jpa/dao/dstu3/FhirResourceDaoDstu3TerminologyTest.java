@@ -344,6 +344,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void testIndexingIsDeferredForLargeCodeSystems() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
 		
+		myTermSvc.setProcessDeferred(false);
+		
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -353,10 +355,25 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addFilter().setProperty("display").setOp(FilterOperator.ISA).setValue("ParentA");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
 		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(encoded);
 		
+		assertEquals(0, result.getExpansion().getContains().size());
+		
+		myTermSvc.setProcessDeferred(true);
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		
+		result = myValueSetDao.expand(vs, null);
+		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		assertEquals(4, result.getExpansion().getContains().size());
+
 	}
 
 	@Test

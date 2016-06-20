@@ -48,4 +48,12 @@ public interface IHapiTerminologySvc {
 
 	List<TermConcept> findCodes(String theSystem);
 
+	void saveDeferred();
+
+	/**
+	 * This is mostly for unit tests - we can disable processing of deferred concepts
+	 * by changing this flag
+	 */
+	void setProcessDeferred(boolean theProcessDeferred);
+
 }

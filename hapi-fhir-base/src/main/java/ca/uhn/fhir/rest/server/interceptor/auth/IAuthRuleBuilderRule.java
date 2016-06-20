@@ -55,4 +55,9 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderRuleOp write();
 
+	/**
+	 * This rule applies to a FHIR operation (e.g. <code>$validate</code>)
+	 */
+	IAuthRuleBuilderOperation operation();
+
 }

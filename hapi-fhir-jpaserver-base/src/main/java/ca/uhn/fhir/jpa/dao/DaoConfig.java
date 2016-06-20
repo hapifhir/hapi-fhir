@@ -51,7 +51,7 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
-	private int myDeferIndexingForCodesystemsOfSize = 100;
+	private int myDeferIndexingForCodesystemsOfSize = 2000;
 	// ***
 	// update setter javadoc if default changes
 	// ***
@@ -90,7 +90,7 @@ public class DaoConfig {
 	 * the code system will be indexed later in an incremental process in order to
 	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
 	 * <p>
-	 * Defaults to 100
+	 * Defaults to 2000
 	 * </p>
 	 */
 	public int getDeferIndexingForCodesystemsOfSize() {
@@ -273,7 +273,7 @@ public class DaoConfig {
 	 * the code system will be indexed later in an incremental process in order to
 	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
 	 * <p>
-	 * Defaults to 100
+	 * Defaults to 2000
 	 * </p>
 	 */
 	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {

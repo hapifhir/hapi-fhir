@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -243,6 +244,80 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			
 		}
 
+		private class RuleBuilderRuleOperation implements IAuthRuleBuilderOperation {
+
+			private class RuleBuilderRuleOperationNamed implements IAuthRuleBuilderOperationNamed {
+
+				private String myOperationName;
+
+				public RuleBuilderRuleOperationNamed(String theOperationName) {
+					if (theOperationName != null && !theOperationName.startsWith("$")) {
+						myOperationName = '$' + theOperationName;
+					} else {
+						myOperationName = theOperationName;
+					}
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onServer() {
+					OperationRule rule = createRule();
+					rule.appliesToServer();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				private OperationRule createRule() {
+					OperationRule rule = new OperationRule(myRuleName);
+					rule.setOperationName(myOperationName);
+					rule.setMode(myRuleMode);
+					return rule;
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType) {
+					Validate.notNull(theType, "theType must not be null");
+					
+					OperationRule rule = createRule();
+					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
+					appliesToTypes.add(theType);
+					rule.appliesToTypes(appliesToTypes);					
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onInstance(IIdType theInstanceId) {
+					Validate.notNull(theInstanceId, "theInstanceId must not be null");
+					Validate.notBlank(theInstanceId.getResourceType(), "theInstanceId does not have a resource type");
+					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
+					
+					OperationRule rule = createRule();
+					ArrayList<IIdType> ids = new ArrayList<IIdType>();
+					ids.add(theInstanceId);
+					rule.appliesToInstances(ids);
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+				
+			}
+			
+			@Override
+			public IAuthRuleBuilderOperationNamed named(String theOperationName) {
+				Validate.notBlank(theOperationName, "theOperationName must not be null or empty");
+				return new RuleBuilderRuleOperationNamed(theOperationName);
+			}
+
+			@Override
+			public IAuthRuleBuilderOperationNamed withAnyName() {
+				return new RuleBuilderRuleOperationNamed(null);
+			}
+			
+		}
+
+		@Override
+		public IAuthRuleBuilderOperation operation() {
+			return new RuleBuilderRuleOperation();
+		}
 	}
 
 }

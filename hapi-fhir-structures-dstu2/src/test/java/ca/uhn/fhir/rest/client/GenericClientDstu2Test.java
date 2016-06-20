@@ -46,6 +46,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -77,6 +78,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
@@ -88,42 +91,24 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class GenericClientDstu2Test {
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientDstu2Test.class);
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientDstu2Test.class);
 	private HttpClient myHttpClient;
 
 	private HttpResponse myHttpResponse;
 
 	private int myResponseCount = 0;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@Test
-	public void testReadForUnknownType() throws Exception {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		try {
-			client.read(new UriDt("1"));
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
-		}
-
-		try {
-			client.read(new UriDt("http://example.com/InvalidResource/1"));
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
-		}
-	}
-
 	@Before
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.setRestfulClientFactory(new ApacheRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setConnectionRequestTimeout(10000);
+		ourCtx.getRestfulClientFactory().setConnectTimeout(10000);
+		ourCtx.getRestfulClientFactory().setPoolMaxPerRoute(100);
+		ourCtx.getRestfulClientFactory().setPoolMaxTotal(100);
+		
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myResponseCount = 0;
@@ -156,7 +141,7 @@ public class GenericClientDstu2Test {
 		//@formatter:on
 		return msg;
 	}
-
+	
 	@Test
 	public void testAcceptHeaderFetchConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -197,68 +182,6 @@ public class GenericClientDstu2Test {
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
 		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
 		idx++;
-	}
-
-	/**
-	 * See #322
-	 */
-	@Test
-	public void testFetchConformanceWithSmartExtensions() throws Exception {
-		final String respString = IOUtils.toString(GenericClientDstu2Test.class.getResourceAsStream("/conformance_322.json"));
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
-		Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
-
-		Rest rest = conf.getRest().get(0);
-		RestSecurity security = rest.getSecurity();
-
-		List<ExtensionDt> ext = security.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
-		List<ExtensionDt> tokenExts = ext.get(0).getUndeclaredExtensionsByUrl("token");
-		ExtensionDt tokenExt = tokenExts.get(0);
-		UriDt value = (UriDt) tokenExt.getValue();
-		assertEquals("https://my-server.org/token", value.getValueAsString());
-
-	}
-
-	/**
-	 * See #322
-	 */
-	@Test
-	public void testFetchConformanceWithSmartExtensionsAltCase() throws Exception {
-		final String respString = IOUtils.toString(GenericClientDstu2Test.class.getResourceAsStream("/conformance_322.json")).replace("valueuri", "valueUri");
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
-		Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
-
-		Rest rest = conf.getRest().get(0);
-		RestSecurity security = rest.getSecurity();
-
-		List<ExtensionDt> ext = security.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
-		List<ExtensionDt> tokenExts = ext.get(0).getUndeclaredExtensionsByUrl("token");
-		ExtensionDt tokenExt = tokenExts.get(0);
-		UriDt value = (UriDt) tokenExt.getValue();
-		assertEquals("https://my-server.org/token", value.getValueAsString());
-
 	}
 
 	@Test
@@ -561,6 +484,30 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
+	public void testDeleteByResource() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		
+		client.delete().resource(pat).execute();
+		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
+	}
+
+	@Test
 	public void testDeleteConditional() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -593,59 +540,6 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testDeleteNonFluent() throws Exception {
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		int idx = 0;
-
-		client.delete(Patient.class, new IdDt("Patient/123"));
-		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-		client.delete(Patient.class, "123");
-		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-	}
-
-	@Test
-	public void testDeleteByResource() throws Exception {
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		int idx = 0;
-
-		Patient pat = new Patient();
-		pat.setId("Patient/123");
-		
-		client.delete().resource(pat).execute();
-		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
 	}
 
 	@Test
@@ -689,6 +583,97 @@ public class GenericClientDstu2Test {
 		} catch (DataFormatException e){
 			assertEquals("Unknown resource name \"InvalidType\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testDeleteNonFluent() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		client.delete(Patient.class, new IdDt("Patient/123"));
+		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.delete(Patient.class, "123");
+		assertEquals("DELETE", capt.getAllValues().get(idx).getMethod());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+	}
+
+	/**
+	 * See #322
+	 */
+	@Test
+	public void testFetchConformanceWithSmartExtensions() throws Exception {
+		final String respString = IOUtils.toString(GenericClientDstu2Test.class.getResourceAsStream("/conformance_322.json"));
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
+		Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+
+		Rest rest = conf.getRest().get(0);
+		RestSecurity security = rest.getSecurity();
+
+		List<ExtensionDt> ext = security.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+		List<ExtensionDt> tokenExts = ext.get(0).getUndeclaredExtensionsByUrl("token");
+		ExtensionDt tokenExt = tokenExts.get(0);
+		UriDt value = (UriDt) tokenExt.getValue();
+		assertEquals("https://my-server.org/token", value.getValueAsString());
+
+	}
+
+	/**
+	 * See #322
+	 */
+	@Test
+	public void testFetchConformanceWithSmartExtensionsAltCase() throws Exception {
+		final String respString = IOUtils.toString(GenericClientDstu2Test.class.getResourceAsStream("/conformance_322.json")).replace("valueuri", "valueUri");
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
+		Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+
+		Rest rest = conf.getRest().get(0);
+		RestSecurity security = rest.getSecurity();
+
+		List<ExtensionDt> ext = security.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+		List<ExtensionDt> tokenExts = ext.get(0).getUndeclaredExtensionsByUrl("token");
+		ExtensionDt tokenExt = tokenExts.get(0);
+		UriDt value = (UriDt) tokenExt.getValue();
+		assertEquals("https://my-server.org/token", value.getValueAsString());
+
 	}
 
 	@Test
@@ -794,6 +779,16 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getURI().toString(), containsString("_since=2001-01"));
 		assertEquals(1, response.getEntry().size());
 		idx++;
+	}
+
+	@Test
+	public void testInvalidClient() {
+		try {
+			ourCtx.getRestfulClientFactory().newClient(RestfulClientInstance.class, "http://foo");
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("ca.uhn.fhir.context.ConfigurationException: ca.uhn.fhir.rest.client.GenericClientDstu2Test.RestfulClientInstance is not an interface", e.toString());
+		}
 	}
 
 	@Test
@@ -1664,6 +1659,24 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
+	public void testReadForUnknownType() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		try {
+			client.read(new UriDt("1"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
+		}
+
+		try {
+			client.read(new UriDt("http://example.com/InvalidResource/1"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
 
 		//@formatter:off
@@ -1787,6 +1800,76 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
+	public void testSearchByNumber() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.greaterThan().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=gt123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.lessThan().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=lt123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.greaterThanOrEqual().number("123"))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=ge123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.lessThanOrEqual().number("123"))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=le123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		//@formatter:off
+		client.search()
+			.forResource("Encounter")
+			.where(Encounter.LENGTH.exactly().number(123))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Encounter?length=123", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+	}
+
+	@Test
 	public void testSearchByPost() throws Exception {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
@@ -1889,76 +1972,6 @@ public class GenericClientDstu2Test {
 
 		assertEquals("http://example.com/fhir/Patient?name=james", capt.getValue().getURI().toString());
 		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
-
-	}
-
-	@Test
-	public void testSearchByNumber() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		int idx = 0;
-
-		//@formatter:off
-		client.search()
-			.forResource("Encounter")
-			.where(Encounter.LENGTH.greaterThan().number(123))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:on
-		assertEquals("http://example.com/fhir/Encounter?length=gt123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-		//@formatter:off
-		client.search()
-			.forResource("Encounter")
-			.where(Encounter.LENGTH.lessThan().number(123))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:on
-		assertEquals("http://example.com/fhir/Encounter?length=lt123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-		//@formatter:off
-		client.search()
-			.forResource("Encounter")
-			.where(Encounter.LENGTH.greaterThanOrEqual().number("123"))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:on
-		assertEquals("http://example.com/fhir/Encounter?length=ge123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-		//@formatter:off
-		client.search()
-			.forResource("Encounter")
-			.where(Encounter.LENGTH.lessThanOrEqual().number("123"))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:on
-		assertEquals("http://example.com/fhir/Encounter?length=le123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
-
-		//@formatter:off
-		client.search()
-			.forResource("Encounter")
-			.where(Encounter.LENGTH.exactly().number(123))
-			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.execute();
-		//@formatter:on
-		assertEquals("http://example.com/fhir/Encounter?length=123", capt.getAllValues().get(idx).getURI().toString());
-		idx++;
 
 	}
 
@@ -2630,9 +2643,61 @@ public class GenericClientDstu2Test {
 		return (OperationOutcome) theOperationOutcome;
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2();
+	}
+
+	public final static class RestfulClientInstance implements IRestfulClient {
+		@Override
+		public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
+			return null;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return null;
+		}
+
+		@Override
+		public IHttpClient getHttpClient() {
+			return null;
+		}
+
+		@Override
+		public String getServerBase() {
+			return null;
+		}
+
+		@Override
+		public void registerInterceptor(IClientInterceptor theInterceptor) {
+			//nothing
+		}
+
+		@Override
+		public void setEncoding(EncodingEnum theEncoding) {
+			//nothing
+		}
+
+		@Override
+		public void setPrettyPrint(Boolean thePrettyPrint) {
+			//nothing
+		}
+
+		@Override
+		public void setSummary(SummaryEnum theSummary) {
+			//nothing
+		}
+
+		@Override
+		public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+			//nothing
+		}
 	}
 
 }

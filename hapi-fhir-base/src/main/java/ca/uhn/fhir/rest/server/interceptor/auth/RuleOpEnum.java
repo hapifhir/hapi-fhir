@@ -28,5 +28,6 @@ enum RuleOpEnum {
 	TRANSACTION, 
 	METADATA, 
 	BATCH, 
-	DELETE
+	DELETE, 
+	OPERATION
 }

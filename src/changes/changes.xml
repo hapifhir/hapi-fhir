@@ -377,6 +377,10 @@
 				response message
 			</action>
 			-->
+			<action type="add">
+				AuthorizationInterceptor can now allow or deny requests to extended
+				operations (e.g. $everything)
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

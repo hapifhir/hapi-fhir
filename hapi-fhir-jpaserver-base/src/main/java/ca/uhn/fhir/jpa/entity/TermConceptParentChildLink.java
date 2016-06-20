@@ -66,6 +66,10 @@ public class TermConceptParentChildLink implements Serializable {
 		return myChild;
 	}
 
+	public RelationshipTypeEnum getRelationshipType() {
+		return myRelationshipType;
+	}
+
 	public TermCodeSystemVersion getCodeSystem() {
 		return myCodeSystem;
 	}

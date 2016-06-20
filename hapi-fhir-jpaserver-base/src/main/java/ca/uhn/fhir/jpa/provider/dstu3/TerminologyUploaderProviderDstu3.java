@@ -26,7 +26,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -85,7 +84,9 @@ public class TerminologyUploaderProviderDstu3 extends BaseJpaProvider {
 			} else if (thePackage == null || thePackage.getData() == null || thePackage.getData().length == 0) {
 				throw new InvalidRequestException("No 'localfile' or 'package' parameter, or package had no data");
 			} else {
-				data = Arrays.asList(thePackage.getData());
+				data = new ArrayList<byte[]>();
+				data.add(thePackage.getData());
+				thePackage.setData(null);
 			}
 			
 			String url = theUrl != null ? theUrl.getValueAsString() : null;

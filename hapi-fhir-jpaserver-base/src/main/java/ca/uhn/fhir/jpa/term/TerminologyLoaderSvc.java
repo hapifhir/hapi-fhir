@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -262,9 +263,16 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 		ourLog.info("Have {} total concepts, {} root concepts", code2concept.size(), codeSystemVersion.getConcepts().size());
 
-		myTermSvc.storeNewCodeSystemVersion(LOINC_URL, codeSystemVersion, theRequestDetails);
+		String url = LOINC_URL;
+		storeCodeSystem(theRequestDetails, codeSystemVersion, url);
 
 		return new UploadStatistics(code2concept.size());
+	}
+
+	private void storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion codeSystemVersion, String url) {
+		myTermSvc.setProcessDeferred(false);
+		myTermSvc.storeNewCodeSystemVersion(url, codeSystemVersion, theRequestDetails);
+		myTermSvc.setProcessDeferred(true);
 	}
 
 	UploadStatistics processSnomedCtFiles(List<byte[]> theZipBytes, RequestDetails theRequestDetails) {
@@ -289,6 +297,13 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 
 		theZipBytes.clear();
 
+		ourLog.info("Looking for root codes");
+		for (Iterator<Entry<String, TermConcept>> iter = rootConcepts.entrySet().iterator(); iter.hasNext(); ) {
+			if (iter.next().getValue().getParents().isEmpty() == false) {
+				iter.remove();
+			}
+		}
+		
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
 		Counter circularCounter = new Counter();
@@ -300,7 +315,8 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 		}
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
-		myTermSvc.storeNewCodeSystemVersion(SCT_URL, codeSystemVersion, theRequestDetails);
+		String url = SCT_URL;
+		storeCodeSystem(theRequestDetails, codeSystemVersion, url);
 
 		return new UploadStatistics(code2concept.size());
 	}
@@ -470,23 +486,33 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 			String destinationId = theRecord.get("destinationId");
 			String typeId = theRecord.get("typeId");
 			boolean active = "1".equals(theRecord.get("active"));
-			if (!active) {
-				return;
-			}
+			
 			TermConcept typeConcept = myCode2concept.get(typeId);
 			TermConcept sourceConcept = myCode2concept.get(sourceId);
 			TermConcept targetConcept = myCode2concept.get(destinationId);
 			if (sourceConcept != null && targetConcept != null && typeConcept != null) {
 				if (typeConcept.getDisplay().equals("Is a (attribute)")) {
+					RelationshipTypeEnum relationshipType = RelationshipTypeEnum.ISA;
 					if (!sourceId.equals(destinationId)) {
-						TermConceptParentChildLink link = new TermConceptParentChildLink();
-						link.setChild(sourceConcept);
-						link.setParent(targetConcept);
-						link.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-						link.setCodeSystem(myCodeSystemVersion);
-						myRootConcepts.remove(link.getChild().getCode());
-
-						targetConcept.addChild(sourceConcept, RelationshipTypeEnum.ISA);
+						if (active) {
+							TermConceptParentChildLink link = new TermConceptParentChildLink();
+							link.setChild(sourceConcept);
+							link.setParent(targetConcept);
+							link.setRelationshipType(relationshipType);
+							link.setCodeSystem(myCodeSystemVersion);
+	
+							targetConcept.addChild(sourceConcept, relationshipType);
+						} else {
+							// not active, so we're removing any existing links
+							for (TermConceptParentChildLink next : new ArrayList<TermConceptParentChildLink>(targetConcept.getChildren())) {
+								if (next.getRelationshipType() == relationshipType) {
+									if (next.getChild().getCode().equals(sourceConcept.getCode())) {
+										next.getParent().getChildren().remove(next);
+										next.getChild().getParents().remove(next);
+									}
+								}
+							}
+						}
 					}
 				} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
 					// ignore

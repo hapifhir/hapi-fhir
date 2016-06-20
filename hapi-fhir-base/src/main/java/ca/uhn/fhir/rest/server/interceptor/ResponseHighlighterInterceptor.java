@@ -340,19 +340,21 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		
 		b.append("<p>");
 		b.append("This result is being rendered in HTML for easy viewing. ");
-		b.append("You may view this content as ");
+		b.append("You may access this content as ");
 		
 		b.append("<a href=\"");
 		b.append(createLinkHref(parameters, Constants.FORMAT_JSON));
-		b.append("\">Raw JSON</a>, ");
+		b.append("\">Raw JSON</a> or ");
 
 		b.append("<a href=\"");
 		b.append(createLinkHref(parameters, Constants.FORMAT_XML));
 		b.append("\">Raw XML</a>, ");
 
+		b.append(" or view this content in ");
+		
 		b.append("<a href=\"");
 		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
-		b.append("\">HTML JSON</a>, ");
+		b.append("\">HTML JSON</a> ");
 
 		b.append("or ");
 		b.append("<a href=\"");

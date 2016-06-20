@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -12,8 +13,10 @@ import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,19 +43,19 @@ import ca.uhn.fhir.util.TestUtil;
 public class TerminologyLoaderSvcTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcTest.class);
 	private TerminologyLoaderSvc mySvc;
-	
+
 	@Mock
 	private IHapiTerminologySvc myTermSvc;
 
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
-	
+
 	@Before
 	public void before() {
 		mySvc = new TerminologyLoaderSvc();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -62,18 +65,18 @@ public class TerminologyLoaderSvcTest {
 	public void testLoadLoinc() throws Exception {
 		ByteArrayOutputStream bos1 = new ByteArrayOutputStream();
 		ZipOutputStream zos1 = new ZipOutputStream(bos1);
-		addEntry(zos1,"/loinc/",  "loinc.csv");
+		addEntry(zos1, "/loinc/", "loinc.csv");
 		zos1.close();
 		ourLog.info("ZIP file has {} bytes", bos1.toByteArray().length);
-		
+
 		ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
 		ZipOutputStream zos2 = new ZipOutputStream(bos2);
-		addEntry(zos2,"/loinc/",  "LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV");
+		addEntry(zos2, "/loinc/", "LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV");
 		zos2.close();
 		ourLog.info("ZIP file has {} bytes", bos2.toByteArray().length);
-		
+
 		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadLoinc(Arrays.asList(bos1.toByteArray(), bos2.toByteArray()), details);
+		mySvc.loadLoinc(list(bos1.toByteArray(), bos2.toByteArray()), details);
 	}
 
 	@Test
@@ -84,38 +87,48 @@ public class TerminologyLoaderSvcTest {
 		addEntry(zos, "/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
 		addEntry(zos, "/sct/", "sct2_Description_Full-en_INT_20160131.txt");
 		addEntry(zos, "/sct/", "sct2_Identifier_Full_INT_20160131.txt");
-		addEntry(zos,"/sct/",  "sct2_Relationship_Full_INT_20160131.txt");
-		addEntry(zos,"/sct/",  "sct2_StatedRelationship_Full_INT_20160131.txt");
+		addEntry(zos, "/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		addEntry(zos, "/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		addEntry(zos, "/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 		zos.close();
-		
+
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
-		
+
 		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
-		
+		mySvc.loadSnomedCt(list(bos.toByteArray()), details);
+
 		verify(myTermSvc).storeNewCodeSystemVersion(any(String.class), myCsvCaptor.capture(), any(RequestDetails.class));
-		
+
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
-		TreeSet<String> allCodes = toCodes(csv);
+		TreeSet<String> allCodes = toCodes(csv, true);
 		ourLog.info(allCodes.toString());
-		
+
 		assertThat(allCodes, containsInRelativeOrder("116680003"));
 		assertThat(allCodes, not(containsInRelativeOrder("207527008")));
+
+		allCodes = toCodes(csv, false);
+		ourLog.info(allCodes.toString());
+		assertThat(allCodes, hasItem("126816002"));
 	}
 
-	private TreeSet<String> toCodes(TermCodeSystemVersion theCsv) {
+	private List<byte[]> list(byte[]... theByteArray) {
+		return new ArrayList<byte[]>(Arrays.asList(theByteArray));
+	}
+
+	private TreeSet<String> toCodes(TermCodeSystemVersion theCsv, boolean theAddChildren) {
 		TreeSet<String> retVal = new TreeSet<String>();
 		for (TermConcept next : theCsv.getConcepts()) {
-			toCodes(retVal, next);
+			toCodes(retVal, next, theAddChildren);
 		}
 		return retVal;
 	}
 
-	private void toCodes(TreeSet<String> theCodes, TermConcept theConcept) {
+	private void toCodes(TreeSet<String> theCodes, TermConcept theConcept, boolean theAddChildren) {
 		theCodes.add(theConcept.getCode());
-		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			toCodes(theCodes, next.getChild());
+		if (theAddChildren) {
+			for (TermConceptParentChildLink next : theConcept.getChildren()) {
+				toCodes(theCodes, next.getChild(), theAddChildren);
+			}
 		}
 	}
 
@@ -125,9 +138,9 @@ public class TerminologyLoaderSvcTest {
 		ZipOutputStream zos = new ZipOutputStream(bos);
 		addEntry(zos, "/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		zos.close();
-		
+
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
-		
+
 		RequestDetails details = mock(RequestDetails.class);
 		try {
 			mySvc.loadSnomedCt(Collections.singletonList(bos.toByteArray()), details);
@@ -145,6 +158,5 @@ public class TerminologyLoaderSvcTest {
 		zos.write(byteArray);
 		zos.closeEntry();
 	}
-	
 
 }
