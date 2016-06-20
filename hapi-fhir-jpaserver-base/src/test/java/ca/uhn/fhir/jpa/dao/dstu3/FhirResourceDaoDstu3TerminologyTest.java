@@ -9,7 +9,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -22,11 +21,13 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -340,6 +341,42 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testIndexingIsDeferredForLargeCodeSystems() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		
+		myTermSvc.setProcessDeferred(false);
+		
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+
+		include.addFilter().setProperty("display").setOp(FilterOperator.ISA).setValue("ParentA");
+		
+		ValueSet result = myValueSetDao.expand(vs, null);
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		
+		assertEquals(0, result.getExpansion().getContains().size());
+		
+		myTermSvc.setProcessDeferred(true);
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		myTermSvc.saveDeferred();
+		
+		result = myValueSetDao.expand(vs, null);
+		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(encoded);
+		assertEquals(4, result.getExpansion().getContains().size());
+
+	}
+
+	@Test
 	public void testExpandWithExcludeInExternalValueSet() {
 		createExternalCsAndLocalVs();
 
@@ -485,6 +522,11 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
+	}
+
+	@After
+	public void after() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 	}
 	
 	@Test

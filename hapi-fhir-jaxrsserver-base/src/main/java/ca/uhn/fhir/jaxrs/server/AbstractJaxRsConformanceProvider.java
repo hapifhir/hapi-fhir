@@ -194,7 +194,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		
 		if (conformance != null) {
 			Set<SummaryEnum> summaryMode = Collections.emptySet();
-			return (Response) response.streamResponseAsResource(conformance, false, summaryMode, Constants.STATUS_HTTP_200_OK, true, false);
+			return (Response) response.streamResponseAsResource(conformance, false, summaryMode, Constants.STATUS_HTTP_200_OK, null, true, false);
 		}
 		return (Response) response.returnResponse(null, Constants.STATUS_HTTP_500_INTERNAL_ERROR, true, null, getResourceType().getSimpleName());
 	}

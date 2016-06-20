@@ -70,6 +70,13 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public abstract class BaseClient implements IRestfulClient {
 
+	/**
+	 * This property is used by unit tests - do not rely on it in production code
+	 * as it may change at any time. If you want to capture responses in a reliable
+	 * way in your own code, just use client interceptors
+	 */
+	static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
 	private final IHttpClient myClient;
@@ -89,6 +96,15 @@ public abstract class BaseClient implements IRestfulClient {
 		myClient = theClient;
 		myUrlBase = theUrlBase;
 		myFactory = theFactory;
+		
+		/*
+		 * This property is used by unit tests - do not rely on it in production code
+		 * as it may change at any time. If you want to capture responses in a reliable
+		 * way in your own code, just use client interceptors
+		 */
+		if ("true".equals(System.getProperty(HAPI_CLIENT_KEEPRESPONSES))) {
+			setKeepResponses(true);
+		}
 	}
 
 	protected Map<String, List<String>> createExtraParams() {
@@ -193,7 +209,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
-		IHttpRequest httpRequest;
+		IHttpRequest httpRequest = null;
 		IHttpResponse response = null;
 		try {
 			Map<String, List<String>> params = createExtraParams();
@@ -339,11 +355,13 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 		} catch (DataFormatException e) {
-			throw new FhirClientConnectionException(e);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			throw new FhirClientConnectionException(msg, e);
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
-			throw new FhirClientConnectionException(e);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "ioExceptionDuringOperation", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			throw new FhirClientConnectionException(msg, e);
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {

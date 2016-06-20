@@ -51,8 +51,13 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
+	private int myDeferIndexingForCodesystemsOfSize = 2000;
+	// ***
+	// update setter javadoc if default changes
+	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
 	private int myHardSearchLimit = 1000;
+	
 	private int myHardTagListLimit = 1000;
 	
 	private int myIncludeLimit = 2000;
@@ -61,24 +66,36 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private boolean myIndexContainedResources = true;
-	
+
 	private List<IServerInterceptor> myInterceptors;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
-
+	
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
-
 	private boolean mySchedulingDisabled;
-	
-	private boolean mySubscriptionEnabled;
-	
-	private long mySubscriptionPollDelay = 1000;
 
-	private Long mySubscriptionPurgeInactiveAfterMillis;
-	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
+	private boolean mySubscriptionEnabled;
+
+	private long mySubscriptionPollDelay = 1000;
 	
+	private Long mySubscriptionPurgeInactiveAfterMillis;
+	
+	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
+
+	/**
+	 * When a code system is added that contains more than this number of codes,
+	 * the code system will be indexed later in an incremental process in order to
+	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
+	 * <p>
+	 * Defaults to 2000
+	 * </p>
+	 */
+	public int getDeferIndexingForCodesystemsOfSize() {
+		return myDeferIndexingForCodesystemsOfSize;
+	}
 	/**
 	 * Sets the number of milliseconds that search results for a given client search 
 	 * should be preserved before being purged from the database.
@@ -117,6 +134,7 @@ public class DaoConfig {
 		}
 		return myInterceptors;
 	}
+	
 	/**
 	 * See {@link #setMaximumExpansionSize(int)}
 	 */
@@ -180,7 +198,6 @@ public class DaoConfig {
 	public boolean isAllowInlineMatchUrlReferences() {
 		return myAllowInlineMatchUrlReferences;
 	}
-
 	public boolean isAllowMultipleDelete() {
 		return myAllowMultipleDelete;
 	}
@@ -249,6 +266,18 @@ public class DaoConfig {
 
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
+	}
+
+	/**
+	 * When a code system is added that contains more than this number of codes,
+	 * the code system will be indexed later in an incremental process in order to
+	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
+	 * <p>
+	 * Defaults to 2000
+	 * </p>
+	 */
+	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
+		myDeferIndexingForCodesystemsOfSize = theDeferIndexingForCodesystemsOfSize;
 	}
 
 	/**

@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
@@ -288,7 +289,11 @@ public interface IGenericClient extends IRestfulClient {
 	 * 
 	 * @param theLogRequestAndResponse
 	 *            Should requests and responses be logged
+	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
+	 * client instead, as this provides much more fine-grained control over what is logged. This
+	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
 	 */
+	@Deprecated
 	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
 
 	/**

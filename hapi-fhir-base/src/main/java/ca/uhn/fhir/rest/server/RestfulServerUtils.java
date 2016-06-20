@@ -537,7 +537,7 @@ public class RestfulServerUtils {
 		String contentType = responseEncoding.getBundleContentType();
 
 		String charset = Constants.CHARSET_NAME_UTF8;
-		Writer writer = theRequestDetails.getResponse().getResponseWriter(status, contentType, charset, respondGzip);
+		Writer writer = theRequestDetails.getResponse().getResponseWriter(status, null, contentType, charset, respondGzip);
 
 		try {
 			IParser parser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), theRequestDetails);
@@ -552,11 +552,11 @@ public class RestfulServerUtils {
 	}
 
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
-		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
+		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 	
 	
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated) throws IOException {
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage, boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated) throws IOException {
 		IRestfulResponse restUtil = theRequestDetails.getResponse();
 
 		// Determine response encoding
@@ -596,7 +596,7 @@ public class RestfulServerUtils {
 			// malicious images or HTML blocks being served up as content.
 			restUtil.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 
-			return restUtil.sendAttachmentResponse(bin, stausCode, contentType);
+			return restUtil.sendAttachmentResponse(bin, theStausCode, contentType);
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding
@@ -656,7 +656,7 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = restUtil.getResponseWriter(stausCode, contentType, charset, respondGzip);
+		Writer writer = restUtil.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
@@ -666,7 +666,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 
-		return restUtil.sendWriterResponse(stausCode, contentType, charset, writer);
+		return restUtil.sendWriterResponse(theStausCode, contentType, charset, writer);
 	}
 
 	public static IIdType fullyQualifyResourceIdOrReturnNull(IRestfulServerDefaults theServer, IBaseResource theResource, String theServerBase, IIdType theResourceId) {

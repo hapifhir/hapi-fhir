@@ -10,11 +10,25 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);
 
+	@Test
+	public void testConstructors() {
+		new FhirClientConnectionException("");
+		new FhirClientConnectionException("", new Exception());
+		new FhirClientConnectionException(new Exception());
+		new NotImplementedOperationException("");
+		new NotImplementedOperationException(null, new OperationOutcome());
+		new FhirClientInappropriateForServerException(new Exception());
+		new FhirClientInappropriateForServerException("", new Exception());
+	}
+	
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testExceptionsAreGood() throws Exception {

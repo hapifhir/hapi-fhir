@@ -90,10 +90,10 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	}
 
 	@Override
-	public final Object streamResponseAsResource(IBaseResource resource, boolean prettyPrint, Set<SummaryEnum> summaryMode,
-			int statusCode, boolean respondGzip, boolean addContentLocationHeader)
+	public final Object streamResponseAsResource(IBaseResource theResource, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode,
+			int theStatusCode, String theStatusMessage, boolean theRespondGzip, boolean theAddContentLocation)
 					throws IOException {
-		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), resource, summaryMode, statusCode, addContentLocationHeader, respondGzip, getRequestDetails(), myOperationResourceId, myOperationResourceLastUpdated);
+		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResource, theSummaryMode, theStatusCode, theStatusMessage, theAddContentLocation, theRespondGzip, getRequestDetails(), myOperationResourceId, myOperationResourceLastUpdated);
 
 	}
 

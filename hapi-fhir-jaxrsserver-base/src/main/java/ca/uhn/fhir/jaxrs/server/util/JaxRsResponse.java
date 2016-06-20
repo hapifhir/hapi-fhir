@@ -65,7 +65,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	 * by the server.
 	 */
 	@Override
-	public Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip)
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip)
 			throws UnsupportedEncodingException, IOException {
 		return new StringWriter();
 	}

@@ -33,6 +33,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,8 +68,12 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	@Autowired
 	protected ITermConceptDao myConceptDao;
 
+	private List<TermConceptParentChildLink> myConceptLinksToSaveLater = new ArrayList<TermConceptParentChildLink>();
+
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
+
+	private List<TermConcept> myConceptsToSaveLater = new ArrayList<TermConcept>();
 
 	@Autowired
 	protected FhirContext myContext;
@@ -78,6 +83,8 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	
+	private boolean myProcessDeferred = true;
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
@@ -197,10 +204,18 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		return csv;
 	}
-
 	private TermCodeSystem getCodeSystem(String theSystem) {
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		return cs;
+	}
+	
+	private void parentPids(TermConcept theNextConcept, Set<Long> theParentPids) {
+		for (TermConceptParentChildLink nextParentLink : theNextConcept.getParents()){
+			TermConcept parent = nextParentLink.getParent();
+			if (parent != null && theParentPids.add(parent.getId())) {
+				parentPids(parent, theParentPids);
+			}
+		}
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
@@ -208,24 +223,82 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			return;
 		}
 
-		if (theConceptsStack.size() % 1000 == 0) {
+		if (theConceptsStack.size() == 1 || theConceptsStack.size() % 10000 == 0) {
 			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
-			ourLog.info("Have saved {}/{} concepts ({}%), flushing", theConceptsStack.size(), theTotalConcepts, (int)( pct*100.0f));
-			myConceptDao.flush();
-			myConceptParentChildLinkDao.flush();
+			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int)( pct*100.0f));
 		}
 
 		theConcept.setCodeSystem(theCodeSystem);
 		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
-		myConceptDao.save(theConcept);
+		Set<Long> parentPids = new HashSet<Long>();
+		parentPids(theConcept, parentPids);
+		theConcept.setParentPids(parentPids);
+
+		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			myConceptDao.save(theConcept);
+		} else {
+			myConceptsToSaveLater.add(theConcept);
+		}
+		
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			persistChildren(next.getChild(), theCodeSystem, theConceptsStack, theTotalConcepts);
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			myConceptParentChildLinkDao.save(next);
+			if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+				myConceptParentChildLinkDao.save(next);
+			} else {
+				myConceptLinksToSaveLater.add(next);
+			}
 		}
+		
+	}
+
+	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
+		if (theNext.getCodeSystem() != null) {
+			return;
+		}
+		theNext.setCodeSystem(theCodeSystemVersion);
+		for (TermConceptParentChildLink next : theNext.getChildren()) {
+			populateVersion(next.getChild(), theCodeSystemVersion);
+		}
+	}
+
+	@Scheduled(fixedRate=5000)
+	@Transactional(propagation=Propagation.REQUIRED)
+	@Override
+	public synchronized void saveDeferred() {
+		if (!myProcessDeferred || ((myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()))) {
+			return;
+		}
+		
+		int codeCount = 0, relCount = 0;
+		
+		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptsToSaveLater.size());
+		ourLog.info("Saving {} deferred concepts...", count);
+		while (codeCount < count && myConceptsToSaveLater.size() > 0) {
+			TermConcept next = myConceptsToSaveLater.remove(0);
+			myConceptDao.save(next);
+			codeCount++;
+		}
+
+		if (codeCount == 0) {
+			count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptLinksToSaveLater.size());
+			ourLog.info("Saving {} deferred concept relationships...", count);
+			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
+				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
+				myConceptParentChildLinkDao.save(next);
+				relCount++;
+			}
+		}
+		
+		ourLog.info("Saved {} deferred concepts ({} remain) and {} deferred relationships ({} remain)", new Object[] {codeCount, myConceptsToSaveLater.size(), relCount, myConceptLinksToSaveLater.size()});
+	}
+
+	@Override
+	public void setProcessDeferred(boolean theProcessDeferred) {
+		myProcessDeferred = theProcessDeferred;
 	}
 
 	@Override
@@ -263,7 +336,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
-		IdentityHashMap<TermConcept, Object> conceptsStack = new IdentityHashMap<TermConcept, Object>();
+		ArrayList<String> conceptsStack = new ArrayList<String>();
 		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
@@ -279,38 +352,23 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		codeSystem.setCurrentVersion(theCodeSystemVersion);
 		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 
-		ourLog.info("Saving {} concepts...", totalCodeCount);
+		ourLog.info("Setting codesystemversion on {} concepts...", totalCodeCount);
 
-		conceptsStack = new IdentityHashMap<TermConcept, Object>();
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-			persistChildren(next, codeSystemVersion, conceptsStack, totalCodeCount);
+			populateVersion(next, codeSystemVersion);
+		}
+
+		ourLog.info("Saving {} concepts...", totalCodeCount);
+		
+		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<TermConcept, Object>();
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
 		}
 
 		ourLog.info("Done saving concepts, flushing to database");
 
 		myConceptDao.flush();
 		myConceptParentChildLinkDao.flush();
-
-		ourLog.info("Building multi-axial hierarchy...");
-		
-		int index = 0;
-		int totalParents = 0;
-		for (TermConcept nextConcept : conceptsStack.keySet()) {
-			
-			if (index++ % 1000 == 0) {
-				float pct = (float) index / (float) totalCodeCount;
-				ourLog.info("Have built hierarchy for {}/{} concepts - {}%", index, totalCodeCount, (int)( pct*100.0f));
-			}
-			
-			Set<Long> parentPids = new HashSet<Long>();
-			parentPids(nextConcept, parentPids);
-			nextConcept.setParentPids(parentPids);
-			totalParents += parentPids.size();
-			
-			myConceptDao.save(nextConcept);
-		}
-		
-		ourLog.info("Done building hierarchy, found {} parents", totalParents);
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
@@ -324,17 +382,12 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 
 		ourLog.info("Done deleting old code system versions");
-	}
-
-	private void parentPids(TermConcept theNextConcept, Set<Long> theParentPids) {
-		for (TermConceptParentChildLink nextParentLink : theNextConcept.getParents()){
-			TermConcept parent = nextParentLink.getParent();
-			if (parent != null && theParentPids.add(parent.getId())) {
-				parentPids(parent, theParentPids);
-			}
+		
+		if (myConceptsToSaveLater.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
+			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size());
 		}
 	}
-
+	
 	@Override
 	public boolean supportsSystem(String theSystem) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -349,16 +402,17 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return retVal;
 	}
 
-	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack,
+	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 			IdentityHashMap<TermConcept, Object> theAllConcepts) {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() != null, "CodesystemValue is null");
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystem() == theCodeSystem, "CodeSystems are not equal");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
 
-		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
+		if (theConceptsStack.contains(theConcept.getCode())) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
-
+		theConceptsStack.add(theConcept.getCode());
+		
 		int retVal = 0;
 		if (theAllConcepts.put(theConcept, theAllConcepts) == null) {
 			if (theAllConcepts.size() % 1000 == 0) {
@@ -372,7 +426,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack, theAllConcepts);
 		}
 
-		theConceptsStack.remove(theConcept);
+		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
 	}

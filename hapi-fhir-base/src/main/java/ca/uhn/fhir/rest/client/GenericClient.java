@@ -76,6 +76,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
@@ -136,7 +137,7 @@ import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.method.SortParameter;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
-import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2;
+import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -174,8 +175,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IBaseConformance conformance() {
-		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/DSTU3+ structures");
+		if (myContext.getVersion().getVersion().isRi()) {
+			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/STU3+ structures");
 		}
 
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
@@ -376,7 +377,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 
-		throw new RuntimeException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
+		throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
 
 	}
 
@@ -385,6 +386,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	// return doReadOrVRead(theType, theId, false, null, null);
 	// }
 
+	/**
+	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
+	 * client instead, as this provides much more fine-grained control over what is logged. This
+	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
+	 */
+	@Deprecated
 	public boolean isLogRequestAndResponse() {
 		return myLogRequestAndResponse;
 	}
@@ -549,7 +556,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
 		} else {
-			invocation = ValidateMethodBindingDstu2.createValidateInvocation(myContext, theResource);
+			invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, theResource);
 		}
 
 		if (isKeepResponses()) {
@@ -714,7 +721,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
-				throw new InvalidRequestException("FHIR client can't determine resource encoding");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
@@ -2213,7 +2220,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myRawBundle = theBundle;
 			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
 			if (myRawBundleEncoding == null) {
-				throw new IllegalArgumentException("Can not determine encoding of raw resource body");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 		}
 
@@ -2402,7 +2409,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public MethodOutcome execute() {
-			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2.createValidateInvocation(myContext, myResource);
+			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
 			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<BaseOperationOutcome>(null, null);
 			IBaseOperationOutcome outcome = invoke(null, handler, invocation);
 			MethodOutcome retVal = new MethodOutcome();
@@ -2424,7 +2431,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
 			if (enc == null) {
-				throw new IllegalArgumentException("Could not detect encoding (XML/JSON) in string. Is this a valid FHIR resource?");
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			switch (enc) {
 			case XML:

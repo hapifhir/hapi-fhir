@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -156,6 +158,215 @@ public class AuthorizationInterceptorDstu2Test {
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testOperationServerLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onServer().andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testOperationInstanceLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		
+		// Wrong instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
+	public void testOperationAnyName() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().withAnyName().onServer().andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		
+	}
+
+	@Test
+	public void testOperationTypeLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Wrong type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Wrong name
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName2");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -762,6 +973,17 @@ public class AuthorizationInterceptorDstu2Test {
 			retVal.setResource(theResource);
 			return retVal;
 		}
+		@Operation(name="opName", idempotent=true)
+		public Parameters operation() {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+		@Operation(name="opName", idempotent=true)
+		public Parameters operation(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+
 
 	}
 
@@ -813,11 +1035,37 @@ public class AuthorizationInterceptorDstu2Test {
 			retVal.setResource(theResource);
 			return retVal;
 		}
+		
+		@Operation(name="opName", idempotent=true)
+		public Parameters operation() {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+		
+		@Operation(name="opName", idempotent=true)
+		public Parameters operation(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+
+		@Operation(name="opName2", idempotent=true)
+		public Parameters operation2(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
 
 	}
 	
 	public static class PlainProvider
 	{
+		
+		@Operation(name="opName", idempotent=true)
+		public Parameters operation() {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+		
+		
 		@Transaction()
 		public Bundle search(@TransactionParam Bundle theInput) {
 			ourHitMethod = true;

@@ -6,10 +6,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +21,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -40,14 +39,12 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -90,7 +87,9 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
 
 /*
  * #%L
@@ -114,6 +113,12 @@ import ca.uhn.fhir.util.ReflectionUtil;
 
 @SuppressWarnings("deprecation")
 public class MethodUtil {
+	
+	/** Non instantiable */
+	private MethodUtil() {
+		// nothing
+	}
+	
 	private static final String LABEL = "label=\"";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
 
@@ -133,19 +138,14 @@ public class MethodUtil {
 	}
 
 	
-	public static IIdType convertIdToType(IIdType value, Class<? extends IIdType> idParamType) {
-		if (value != null && !idParamType.isAssignableFrom(value.getClass())) {
-			try {
-				IIdType newValue = idParamType.newInstance();
-				newValue.setValue(value.getValue());
-				value = newValue;
-			} catch (InstantiationException e) {
-				throw new ConfigurationException("Failed to instantiate " + idParamType, e);
-			} catch (IllegalAccessException e) {
-				throw new ConfigurationException("Failed to instantiate " + idParamType, e);
-			}
+	@SuppressWarnings("unchecked")
+	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
+		if (value != null && !theIdParamType.isAssignableFrom(value.getClass())) {
+			IIdType newValue = ReflectionUtil.newInstance(theIdParamType);
+			newValue.setValue(value.getValue());
+			value = newValue;
 		}
-		return value;
+		return (T) value;
 	}
 
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
@@ -213,13 +213,9 @@ public class MethodUtil {
 			for (String nextValue : nextEntry.getValue()) {
 				b.append(haveQuestionMark ? '&' : '?');
 				haveQuestionMark = true;
-				try {
-					b.append(URLEncoder.encode(nextEntry.getKey(), "UTF-8"));
-					b.append('=');
-					b.append(URLEncoder.encode(nextValue, "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new ConfigurationException("UTF-8 not supported on this platform");
-				}
+				b.append(UrlUtil.escape(nextEntry.getKey()));
+				b.append('=');
+				b.append(UrlUtil.escape(nextValue));
 			}
 		}
 
@@ -288,9 +284,7 @@ public class MethodUtil {
 
 	public static EncodingEnum detectEncoding(String theBody) {
 		EncodingEnum retVal = detectEncodingNoDefault(theBody);
-		if (retVal == null) {
-			retVal = EncodingEnum.XML;
-		}
+		retVal = ObjectUtils.defaultIfNull(retVal, EncodingEnum.XML);
 		return retVal;
 	}
 
@@ -320,10 +314,6 @@ public class MethodUtil {
 				}
 			}
 		}
-	}
-
-	public static Integer findConditionalOperationParameterIndex(Method theMethod) {
-		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
 	}
 
 	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
@@ -366,7 +356,7 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
+	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -442,7 +432,7 @@ public class MethodUtil {
 						if (parameterType == String.class) {
 							instantiableCollectionType = null;
 							specType = String.class;
-						} else if ((parameterType != Include.class && parameterType != PathSpecification.class) || innerCollectionType == null || outerCollectionType != null) {
+						} else if ((parameterType != Include.class) || innerCollectionType == null || outerCollectionType != null) {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
 						} else {
 							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
@@ -515,7 +505,7 @@ public class MethodUtil {
 							
 							@Override
 							public Object outgoingClient(Object theObject) {
-								return new StringDt(((ValidationModeEnum)theObject).getCode());
+								return ParametersUtil.createString(theContext, ((ValidationModeEnum)theObject).getCode());
 							}
 						});
 					} else if (nextAnnotation instanceof Validate.Profile) {
@@ -530,7 +520,7 @@ public class MethodUtil {
 							
 							@Override
 							public Object outgoingClient(Object theObject) {
-								return new StringDt(theObject.toString());
+								return ParametersUtil.createString(theContext, theObject.toString());
 							}
 						});
 					} else {

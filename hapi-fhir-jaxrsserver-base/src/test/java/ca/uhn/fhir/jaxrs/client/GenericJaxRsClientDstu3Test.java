@@ -65,6 +65,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -94,6 +95,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 		ourCtx.setRestfulClientFactory(clientFactory);
 		ourResponseCount = 0;
+		System.setProperty("hapi.client.keepresponses", "true");
 	}
 
 	private String getPatientFeedWithOneResult() {
@@ -211,7 +213,6 @@ public class GenericJaxRsClientDstu3Test {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -228,7 +229,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		//@formatter:off
-		Conformance resp = (Conformance)client.conformance();
+		Conformance resp = (Conformance)client.fetchConformance().ofType(Conformance.class).execute();
 
 		//@formatter:on
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);

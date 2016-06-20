@@ -1656,10 +1656,6 @@ public class XmlUtil {
 		ourHaveLoggedStaxImplementation = true;
 	}
 
-	public static void main(String[] args) throws FactoryConfigurationError, XMLStreamException {
-		createXmlWriter(new StringWriter());
-	}
-
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
 		@Override
 		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) throws XMLStreamException {

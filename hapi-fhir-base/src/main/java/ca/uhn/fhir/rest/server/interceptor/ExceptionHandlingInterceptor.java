@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public class ExceptionHandlingInterceptor extends InterceptorAdapter {
@@ -79,7 +80,15 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 			}
 		}
 
-		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, false, false);
+		String statusMessage = null;
+		if (theException instanceof UnclassifiedServerFailureException) {
+			String sm = theException.getMessage();
+			if (isNotBlank(sm) && sm.indexOf('\n') == -1) {
+				statusMessage = sm;
+			}
+		}
+		
+		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
 		// theResponse.setContentType("text/plain");

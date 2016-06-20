@@ -57,6 +57,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	 * Constructor
 	 */
 	public ApacheRestfulClientFactory() {
+		super();
 	}
 
 	/**

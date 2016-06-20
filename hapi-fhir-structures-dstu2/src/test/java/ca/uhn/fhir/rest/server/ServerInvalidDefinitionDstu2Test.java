@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
@@ -62,6 +63,51 @@ public class ServerInvalidDefinitionDstu2Test {
 		}
 	}
 
+	@Test
+	public void testWrongResourceType() {
+		RestfulServer srv = new RestfulServer(ourCtx);
+		srv.setFhirContext(ourCtx);
+		srv.setResourceProviders(new UpdateWithWrongResourceType());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
+		}
+	}
+
+	@Test
+	public void testWrongValidateModeType() {
+		RestfulServer srv = new RestfulServer(ourCtx);
+		srv.setFhirContext(ourCtx);
+		srv.setResourceProviders(new ValidateWithWrongModeType());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("Parameter annotated with @Validate.Mode must be of type ca.uhn.fhir.rest.api.ValidationModeEnum"));
+		}
+	}
+
+	@Test
+	public void testWrongValidateProfileType() {
+		RestfulServer srv = new RestfulServer(ourCtx);
+		srv.setFhirContext(ourCtx);
+		srv.setResourceProviders(new ValidateWithWrongProfileType());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("Parameter annotated with @Validate.Profile must be of type java.lang.String"));
+		}
+	}
+
 	public static class OperationReturningOldBundleProvider implements IResourceProvider {
 
 		@Override
@@ -85,6 +131,48 @@ public class ServerInvalidDefinitionDstu2Test {
 
 		@Update
 		public MethodOutcome update(@ConditionalUrlParam TokenParam theToken, @ResourceParam Patient theParam2) {
+			return null;
+		}
+
+	}
+
+	public static class UpdateWithWrongResourceType implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam Integer theParam2) {
+			return null;
+		}
+
+	}
+
+	public static class ValidateWithWrongModeType implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Validate
+		public MethodOutcome update(@ResourceParam Patient thePatient, @Validate.Mode Integer theParam2) {
+			return null;
+		}
+
+	}
+
+	public static class ValidateWithWrongProfileType implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Validate
+		public MethodOutcome update(@ResourceParam Patient thePatient, @Validate.Profile Integer theParam2) {
 			return null;
 		}
 

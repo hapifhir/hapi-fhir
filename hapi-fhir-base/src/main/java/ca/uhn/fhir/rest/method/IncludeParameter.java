@@ -31,7 +31,6 @@ import java.util.TreeSet;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -60,7 +59,7 @@ class IncludeParameter extends BaseQueryParameter {
 		}
 
 		mySpecType = theSpecType;
-		if (mySpecType != Include.class && mySpecType != PathSpecification.class && mySpecType != String.class) {
+		if (mySpecType != Include.class && mySpecType != String.class) {
 			throw new ConfigurationException("Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
 		}
 
@@ -72,7 +71,7 @@ class IncludeParameter extends BaseQueryParameter {
 		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
 
 		if (myInstantiableCollectionType == null) {
-			if (mySpecType == Include.class || mySpecType == PathSpecification.class) {
+			if (mySpecType == Include.class) {
 				convertAndAddIncludeToList(retVal, (Include) theObject);
 			} else {
 				retVal.add(QualifiedParamList.singleton(((String) theObject)));

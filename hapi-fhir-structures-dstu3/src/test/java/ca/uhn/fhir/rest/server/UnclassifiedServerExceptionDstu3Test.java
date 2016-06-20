@@ -1,8 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +16,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
@@ -25,50 +27,36 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchSortDstu3Test {
+public class UnclassifiedServerExceptionDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSortDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UnclassifiedServerExceptionDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static String ourLastMethod;
-	private static SortSpec ourLastSortSpec;
-
-	@Before
-	public void before() {
-		ourLastMethod = null;
-		ourLastSortSpec = null;
-	}
+	public static UnclassifiedServerFailureException ourException;
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_sort=param1,-param2,param3,-param4");
+		
+		OperationOutcome operationOutcome = new OperationOutcome();
+		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
+		ourException = new UnclassifiedServerFailureException(477, "SOME MESSAGE", operationOutcome);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-
-			assertEquals("param1", ourLastSortSpec.getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
-
-			assertEquals("param2", ourLastSortSpec.getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
-
-			assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
-
-			assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
-
+			assertEquals(477, status.getStatusLine().getStatusCode());
+			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
+			assertThat(responseContent, stringContainsInOrder("business-rule"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -112,21 +100,10 @@ public class SearchSortDstu3Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
-		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(
-				@Sort SortSpec theSortSpec
-				) {
-			ourLastMethod = "search";
-			ourLastSortSpec = theSortSpec;
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
-			}
-			return retVal;
+		public List<Patient> search() {
+			throw ourException;
 		}
-		//@formatter:on
 
 	}
 

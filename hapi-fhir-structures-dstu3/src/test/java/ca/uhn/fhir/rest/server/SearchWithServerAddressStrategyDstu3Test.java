@@ -21,14 +21,11 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -53,6 +50,55 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
+	}
+
+	@Test
+	public void testApacheProxyAddressStrategy() throws Exception {
+		
+		ourServlet.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
+		
+		ourServlet.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		httpGet.addHeader("x-forwarded-host", "foo.com");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<fullUrl value=\"http://foo.com/Patient/1\"/>"));
+
+		ourServlet.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		httpGet.addHeader("x-forwarded-host", "foo.com");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
+
+		ourServlet.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		httpGet.addHeader("x-forwarded-host", "foo.com");
+		httpGet.addHeader("x-forwarded-proto", "https");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
+
 	}
 
 	@Test

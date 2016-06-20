@@ -24,7 +24,7 @@ public class FhirContextDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
+	
 	/**
 	 * See #344
 	 */

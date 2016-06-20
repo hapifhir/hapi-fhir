@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -200,9 +201,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		} else {
-			if (encoding == null) {
-				encoding = EncodingEnum.XML;
-			}
+			encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.XML);
 			String contents = encodeContents(thePrettyPrint, encoding);
 			String contentType = getContentType(encoding);
 			return httpClient.createByteRequest(getContext(), contents, contentType, encoding);

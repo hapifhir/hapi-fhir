@@ -37,9 +37,9 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
-public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
+public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTestDstu2.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu2Test.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@AfterClass

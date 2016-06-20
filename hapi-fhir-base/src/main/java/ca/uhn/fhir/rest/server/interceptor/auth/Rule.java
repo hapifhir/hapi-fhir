@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -40,20 +39,18 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 
-class Rule implements IAuthRule {
+class Rule extends BaseRule implements IAuthRule {
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
 	private String myClassifierCompartmentName;
 	private Collection<? extends IIdType> myClassifierCompartmentOwners;
 	private ClassifierTypeEnum myClassifierType;
-	private PolicyEnum myMode;
-	private String myName;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 
 	public Rule(String theRuleName) {
-		myName = theRuleName;
+		super(theRuleName);
 	}
 
 	@Override
@@ -77,7 +74,7 @@ class Rule implements IAuthRule {
 		case DELETE:
 			if (theOperation == RestOperationTypeEnum.DELETE) {
 				if (theInputResource == null) {
-					return new Verdict(myMode, this);
+					return newVerdict();
 				} else {
 					appliesTo = theInputResource;
 				}
@@ -88,13 +85,13 @@ class Rule implements IAuthRule {
 		case BATCH:
 		case TRANSACTION:
 			if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
-				if (myMode == PolicyEnum.DENY) {
+				if (getMode() == PolicyEnum.DENY) {
 					return new Verdict(PolicyEnum.DENY, this);
-				} else  {
+				} else {
 					List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
 					Verdict verdict = null;
 					for (BundleEntryParts nextPart : inputResources) {
-						
+
 						IBaseResource inputResource = nextPart.getResource();
 						RestOperationTypeEnum operation = null;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
@@ -111,13 +108,13 @@ class Rule implements IAuthRule {
 						/*
 						 * This is basically just being conservative - Be careful of transactions containing
 						 * nested operations and nested transactions. We block the by default. At some point
-						 * it would be nice to be more nuanced here. 
+						 * it would be nice to be more nuanced here.
 						 */
 						RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
 						if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());							
+							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
 						}
-						
+
 						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null);
 						if (newVerdict == null) {
 							continue;
@@ -155,7 +152,7 @@ class Rule implements IAuthRule {
 			return new Verdict(PolicyEnum.DENY, this);
 		case METADATA:
 			if (theOperation == RestOperationTypeEnum.METADATA) {
-				return new Verdict(myMode, this);
+				return newVerdict();
 			} else {
 				return null;
 			}
@@ -196,14 +193,15 @@ class Rule implements IAuthRule {
 			throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
-		return new Verdict(myMode, this);
+		return newVerdict();
 	}
+
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
 		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
 			return false;
 		}
-		
+
 		IBaseBundle request = (IBaseBundle) theInputResource;
 		String bundleType = BundleUtil.getBundleType(theContext, request);
 		switch (theOp) {
@@ -214,11 +212,6 @@ class Rule implements IAuthRule {
 		default:
 			return false;
 		}
-	}
-
-	@Override
-	public String getName() {
-		return myName;
 	}
 
 	public TransactionAppliesToEnum getTransactionAppliesToOp() {
@@ -245,9 +238,6 @@ class Rule implements IAuthRule {
 		myClassifierType = theClassifierType;
 	}
 
-	public void setMode(PolicyEnum theRuleMode) {
-		myMode = theRuleMode;
-	}
 
 	public Rule setOp(RuleOpEnum theRuleOp) {
 		myOp = theRuleOp;
@@ -257,4 +247,5 @@ class Rule implements IAuthRule {
 	public void setTransactionAppliesToOp(TransactionAppliesToEnum theOp) {
 		myTransactionAppliesToOp = theOp;
 	}
+
 }

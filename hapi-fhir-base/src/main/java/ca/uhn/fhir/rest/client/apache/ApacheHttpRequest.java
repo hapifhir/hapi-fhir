@@ -44,8 +44,8 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
  */
 public class ApacheHttpRequest implements IHttpRequest {
 
-	private HttpRequestBase myRequest;
 	private HttpClient myClient;
+	private HttpRequestBase myRequest;
 
 	public ApacheHttpRequest(HttpClient theClient, HttpRequestBase theApacheRequest) {
 		this.myClient = theClient;
@@ -55,14 +55,6 @@ public class ApacheHttpRequest implements IHttpRequest {
 	@Override
 	public void addHeader(String theName, String theValue) {
 		myRequest.addHeader(theName, theValue);
-	}
-
-	/**
-	 * Get the ApacheRequest
-	 * @return the ApacheRequest
-	 */
-	public HttpRequestBase getApacheRequest() {
-		return myRequest;
 	}
 
 	@Override
@@ -82,9 +74,17 @@ public class ApacheHttpRequest implements IHttpRequest {
 		return result;
 	}
 
+	/**
+	 * Get the ApacheRequest
+	 * @return the ApacheRequest
+	 */
+	public HttpRequestBase getApacheRequest() {
+		return myRequest;
+	}
+
 	@Override
-	public String toString() {
-		return myRequest.toString();
+	public String getHttpVerbName() {
+		return myRequest.getMethod();
 	}
 
 	@Override
@@ -96,6 +96,16 @@ public class ApacheHttpRequest implements IHttpRequest {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getUri() {
+		return myRequest.getURI().toString();
+	}
+
+	@Override
+	public String toString() {
+		return myRequest.toString();
 	}
 
 }

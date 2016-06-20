@@ -174,7 +174,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 				} else if (nextFilter.getOp() == FilterOperator.ISA) {
 					if (isNotBlank(nextFilter.getValue())) {
 						TermConcept code = super.findCode(system, nextFilter.getValue());
-						bool.must(qb.keyword().onField("myParentPids").matching(code.getId()).createQuery());
+						bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
 					}
 				} else {
 					throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");

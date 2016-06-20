@@ -1,8 +1,13 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.parser;
+
+import org.junit.Test;
+
+import ca.uhn.fhir.parser.ErrorHandlerAdapter;
+import ca.uhn.fhir.parser.IParserErrorHandler;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2016 University Health Network
  * %%
@@ -20,25 +25,15 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import org.springframework.beans.factory.annotation.Required;
-
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-
-public class BaseJpaPlainProvider extends BaseJpaProvider {
-
-	private IFhirSystemDao<?,?> myDao;
-
-	public BaseJpaPlainProvider() {
-		// nothing
+/**
+ * Adapter implementation with NOP implementations of all {@link IParserErrorHandler} methods.
+ */
+public class ErrorHandlerAdapterTest  {
+	
+	@Test
+	public void testMethods() {
+		new ErrorHandlerAdapter().unexpectedRepeatingElement(null, null);
+		new ErrorHandlerAdapter().unknownAttribute(null, null);
+		new ErrorHandlerAdapter().unknownElement(null, null);
 	}
-
-	@Required
-	public void setDao(IFhirSystemDao<?,?> theDao) {
-		myDao = theDao;
-	}
-
-	public IFhirSystemDao<?,?> getDao() {
-		return myDao;
-	}
-
 }

@@ -103,4 +103,14 @@ public class JaxRsHttpRequest implements IHttpRequest {
 		return null;
 	}
 
+	@Override
+	public String getUri() {
+		return ""; // TODO: can we get this from somewhere?
+	}
+
+	@Override
+	public String getHttpVerbName() {
+		return myRequestType.name();
+	}
+
 }

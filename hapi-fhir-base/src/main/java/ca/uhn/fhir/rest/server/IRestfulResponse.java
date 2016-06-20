@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.method.ParseAction;
 
 public interface IRestfulResponse {
 
-	Object streamResponseAsResource(IBaseResource theActualResourceToReturn, boolean prettyPrint, Set<SummaryEnum> summaryMode, int operationStatus, boolean respondGzip, boolean addContentLocationHeader) throws IOException;
+	Object streamResponseAsResource(IBaseResource theActualResourceToReturn, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage, boolean theRespondGzip, boolean theAddContentLocation) throws IOException;
 
 	Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser) throws IOException;
 
@@ -48,7 +48,7 @@ public interface IRestfulResponse {
 	 */
 	Object returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException;
 
-	Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip) throws UnsupportedEncodingException, IOException;
+	Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException;
 
 	Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException;
 

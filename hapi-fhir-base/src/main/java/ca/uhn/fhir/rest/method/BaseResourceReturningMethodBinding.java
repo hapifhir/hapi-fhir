@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -45,7 +46,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -232,7 +232,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				return resource;
 			case METHOD_OUTCOME:
 				MethodOutcome retVal = new MethodOutcome();
-				retVal.setOperationOutcome((BaseOperationOutcome) resource);
+				retVal.setOperationOutcome((IBaseOperationOutcome) resource);
 				return retVal;
 			}
 			break;
@@ -260,8 +260,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			
 			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 			
-			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(),
-					isAddContentLocationHeader());
+			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null,
+					theRequest.isRespondGzip(), isAddContentLocationHeader());
 			
 		} else {
 			// Is this request coming from a browser
