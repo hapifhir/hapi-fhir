@@ -103,12 +103,12 @@ public class GenericClientDstu2Test {
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.setRestfulClientFactory(new ApacheRestfulClientFactory(ourCtx));
-		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 		ourCtx.getRestfulClientFactory().setConnectionRequestTimeout(10000);
 		ourCtx.getRestfulClientFactory().setConnectTimeout(10000);
 		ourCtx.getRestfulClientFactory().setPoolMaxPerRoute(100);
 		ourCtx.getRestfulClientFactory().setPoolMaxTotal(100);
 		
+		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myResponseCount = 0;
