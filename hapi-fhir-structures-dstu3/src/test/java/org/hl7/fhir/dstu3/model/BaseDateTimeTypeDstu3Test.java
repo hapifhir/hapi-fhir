@@ -20,7 +20,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class BaseDateTimeTypeDstu3Test {
-	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeTypeDstu3Test.class);
 	private SimpleDateFormat myDateInstantParser;
 
@@ -207,25 +206,6 @@ public class BaseDateTimeTypeDstu3Test {
 		ourLog.info(human);
 		assertThat(human, containsString("2012"));
 		assertThat(human, containsString("12"));
-	}
-
-	public static void afterClass() {
-		Locale.setDefault(ourDefaultLocale);
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		/*
-		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure
-		 * that there are no language specific dependencies in the test.
-		 */
-		ourDefaultLocale = Locale.getDefault();
-
-		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
-		Locale newLocale = available[(int) (Math.random() * available.length)];
-		Locale.setDefault(newLocale);
-
-		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
 	}
 
 }
