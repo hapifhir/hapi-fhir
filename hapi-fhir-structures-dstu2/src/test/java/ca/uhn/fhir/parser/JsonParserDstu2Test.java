@@ -92,6 +92,24 @@ public class JsonParserDstu2Test {
 		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 	
+	/**
+	 * See #390
+	 */
+	@Test
+	public void testEncodeAndParseBundleWithNoEntries() {
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.setId("123");
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, containsString("123"));
+		assertThat(encoded, not(containsString("entry")));
+		
+		b = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, encoded);
+		assertEquals("123", b.getId().getIdPart());
+		assertEquals(0, b.getEntry().size());
+	}
+	
 	@Test
 	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
 		
