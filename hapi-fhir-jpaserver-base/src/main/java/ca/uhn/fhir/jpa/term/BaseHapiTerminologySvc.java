@@ -313,6 +313,24 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
 
 		/*
+		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
+		 */
+
+		ourLog.info("Deleting old code system versions");
+		for (TermCodeSystemVersion next : existing) {
+			ourLog.info(" * Deleting code system version {}", next.getPid());
+			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
+			myConceptDao.deleteByCodeSystemVersion(next.getPid());
+		}
+
+		ourLog.info("Flushing...");
+		
+		myConceptParentChildLinkDao.flush();
+		myConceptDao.flush();
+
+		ourLog.info("Done flushing");
+
+		/*
 		 * Do the upload
 		 */
 
@@ -369,17 +387,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 		myConceptDao.flush();
 		myConceptParentChildLinkDao.flush();
-
-		/*
-		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
-		 */
-
-		ourLog.info("Deleting old code system versions");
-		for (TermCodeSystemVersion next : existing) {
-			ourLog.info(" * Deleting code system version {}", next.getPid());
-			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
-			myConceptDao.deleteByCodeSystemVersion(next.getPid());
-		}
 
 		ourLog.info("Done deleting old code system versions");
 		

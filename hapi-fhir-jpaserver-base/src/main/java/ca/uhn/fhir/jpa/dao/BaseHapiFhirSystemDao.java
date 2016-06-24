@@ -253,6 +253,47 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				q.setParameter("status", INDEX_STATUS_INDEXING_FAILED);
 				q.setParameter("id", theId);
 				q.executeUpdate();
+				
+				q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
+				q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResourcePid = :id");
+				q.setParameter("id", theId);
+				q.executeUpdate();
+
 				return null;
 			}
 		});
