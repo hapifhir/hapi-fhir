@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -55,6 +54,7 @@ public class CreateDstu3Test {
 	 */
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
+		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
@@ -65,8 +65,9 @@ public class CreateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		String expected = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F' (code 70) in prolog; expected '&lt;'&#xa; at [row,col {unknown-source}]: [1,1]\"/></issue></OperationOutcome>";
-		assertEquals(expected, responseContent);
+		
+		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
+		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
 
 	}
 

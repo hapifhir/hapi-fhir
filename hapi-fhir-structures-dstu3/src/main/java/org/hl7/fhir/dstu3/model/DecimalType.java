@@ -74,7 +74,7 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 	 * Constructor
 	 */
 	public DecimalType(long theValue) {
-		setValue(new BigDecimal(theValue));
+		setValue(theValue);
 	}
 
 	/**
@@ -148,21 +148,21 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 	 * Sets a new value using an integer
 	 */
 	public void setValueAsInteger(int theValue) {
-		setValue(new BigDecimal(theValue));
+		setValue(BigDecimal.valueOf(theValue));
 	}
 
 	/**
 	 * Sets a new value using a long
 	 */
 	public void setValue(long theValue) {
-		setValue(new BigDecimal(theValue));
+		setValue(BigDecimal.valueOf(theValue));
 	}
 
 	/**
 	 * Sets a new value using a double
 	 */
 	public void setValue(double theValue) {
-		setValue(new BigDecimal(theValue));
+		setValue(BigDecimal.valueOf(theValue));
 	}
 
 	@Override

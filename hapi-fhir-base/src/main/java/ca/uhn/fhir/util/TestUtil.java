@@ -23,6 +23,7 @@ package ca.uhn.fhir.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
@@ -34,7 +35,6 @@ public class TestUtil {
 	 * tons of memory being used by the end and the JVM crashes in Travis. Manually clearing all of the
 	 * static fields seems to solve this.
 	 */
-	@CoverageIgnore
 	public static void clearAllStaticFieldsForUnitTest() {
 		
 		Class<?> theType;
@@ -64,6 +64,27 @@ public class TestUtil {
 				}
 			}
 		}
+
+		/*
+		 * Set some system properties randomly after each test.. this is kind of hackish,
+		 * but it helps us make sure we don't have any tests that depend on a particular
+		 * environment 
+		 */
+		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
+		Locale newLocale = available[(int) (Math.random() * available.length)];
+		Locale.setDefault(newLocale);
+		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
+		if (Math.random() < 0.5) {
+			ourLog.info("Tests are using WINDOWS line endings and ISO-8851-1");
+			System.setProperty("file.encoding", "ISO-8859-1");
+			System.setProperty("line.separator", "\r\n");
+		} else {
+			ourLog.info("Tests are using UNIX line endings and UTF-8");
+			System.setProperty("file.encoding", "UTF-8");
+			System.setProperty("line.separator", "\n");
+		}
+
+		
 	}
 	
 }

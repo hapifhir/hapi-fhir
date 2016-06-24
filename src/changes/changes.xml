@@ -381,6 +381,11 @@
 				AuthorizationInterceptor can now allow or deny requests to extended
 				operations (e.g. $everything)
 			</action>
+			<action type="fix">
+				DecimalType used BigDecimal constructor instead of valueOf method to
+				create a BigDecimal from a double, resulting in weird floating point
+				conversions. Thanks to Craig McClendon for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">
