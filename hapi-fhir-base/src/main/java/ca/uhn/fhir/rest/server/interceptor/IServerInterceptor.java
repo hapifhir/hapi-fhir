@@ -404,6 +404,16 @@ public interface IServerInterceptor {
 			this(theRequestDetails, theRequestDetails.getServer().getFhirContext(), theResourceType, theId);
 		}
 
+		/**
+		 * Constructor
+		 * 
+		 * @param theRequestDetails The request details to wrap
+		 * @param theId The ID of the resource being created (note that the ID should have the resource type populated)
+		 */
+		public ActionRequestDetails(RequestDetails theRequestDetails, IIdType theId) {
+			this(theRequestDetails, theId.getResourceType(), theId);
+		}
+
 		public FhirContext getContext() {
 			return myContext;
 		}

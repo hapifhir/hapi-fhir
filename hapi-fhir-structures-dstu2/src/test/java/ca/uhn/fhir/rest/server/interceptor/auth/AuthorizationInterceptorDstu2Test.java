@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -793,6 +794,7 @@ public class AuthorizationInterceptorDstu2Test {
 				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 1b").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1123")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
 				//@formatter:on
@@ -807,6 +809,17 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Conditional
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.addHeader("If-None-Exist", "Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
@@ -895,6 +908,16 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Conditional
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -1016,8 +1039,9 @@ public class AuthorizationInterceptorDstu2Test {
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			
 			if (isNotBlank(theConditionalUrl)) {
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails);
-				
+				IdDt actual = new IdDt("Patient", "1123");
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
 			}
 			
 			ourHitMethod = true;
@@ -1075,8 +1099,15 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Update()
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource) {
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
+
+			if (isNotBlank(theConditionalUrl)) {
+				IdDt actual = new IdDt("Patient", "1123");
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+			}
+			
 			theResource.setId(theId.withVersion("2"));
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setCreated(true);

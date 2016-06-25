@@ -167,6 +167,36 @@
 				<img src="./images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
 
 			</subsection>
+
+			<subsection name="Authorizing Sub-Operations">
+			
+				<p>
+					There are a number of situations where the REST framework doesn't 
+					actually know exactly what operation is going to be performed by
+					the implementing server code. For example, if your server implements
+					a <code>conditional update</code> operation, the server might not know 
+					which resource is actually being updated until the server code
+					is executed.
+				</p>
+				<p>
+					Because client code is actually determining which resources are
+					being modified, the server can not automatically apply security 
+					rules against these modifications without being provided hints
+					from client code. 
+				</p>
+				<p> 
+					In this type of situation, it is important to manually
+					notify the interceptor chain about the "sub-operation" being performed.
+					The following snippet shows how to notify interceptors about
+					a conditional create.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="conditionalUpdate" />
+					<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+				</macro>
+				
+			</subsection>
 			
 		</section>
 		
