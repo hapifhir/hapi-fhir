@@ -101,7 +101,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Interc
 		if (requestId != null && requestId.hasIdPart()) {
 			Subscription existing;
 			try {
-				existing = myDao.read(requestId, new ServletRequestDetails());
+				existing = myDao.read(requestId, null);
 				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
 					verifyActiveStatus(subscription, newStatus, existingStatus);

@@ -39,7 +39,6 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
@@ -390,7 +389,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		 */
 		
 		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(100, mySrd);
+		mySystemDao.performReindexingPass(100);
 
 		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
 

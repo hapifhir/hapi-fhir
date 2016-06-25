@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -55,6 +56,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
 		return retVal;
+	}
+
+	@Bean 
+	public IServerInterceptor securityInterceptor() {
+		return new PublicSecurityInterceptor();
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")

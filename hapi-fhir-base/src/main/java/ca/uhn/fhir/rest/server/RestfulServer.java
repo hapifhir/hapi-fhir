@@ -176,9 +176,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (response.getId().hasVersionIdPart()) {
 			b.append("/" + Constants.PARAM_HISTORY + "/");
 			b.append(response.getId().getVersionIdPart());
-		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getVersionId().getValue());
 		}
 		theResponse.addHeader(headerLocation, b.toString());
 

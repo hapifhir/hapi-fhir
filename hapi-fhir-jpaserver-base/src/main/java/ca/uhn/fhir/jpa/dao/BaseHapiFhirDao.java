@@ -129,7 +129,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -1076,8 +1075,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime, RequestDetails theRequestDetails) {
+	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+			boolean theUpdateVersion, Date theUpdateTime) {
 		ourLog.info("Starting entity update");
 
 		/*
@@ -1085,7 +1084,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 */
 		if (theResource != null) {
 			if (thePerformIndexing) {
-				validateResourceForStorage((T) theResource, theEntity, theRequestDetails);
+				validateResourceForStorage((T) theResource, theEntity);
 			}
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
@@ -1394,9 +1393,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return theEntity;
 	}
 
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime,
-			RequestDetails theRequestDetails) {
-		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime, theRequestDetails);
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
+		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
 	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
@@ -1423,10 +1421,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 *           The resource that is about to be persisted
 	 * @param theEntityToSave
 	 *           TODO
-	 * @param theRequestDetails
-	 *           TODO
 	 */
-	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
+	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		Object tag = null;
 		if (theResource instanceof IResource) {
 			IResource res = (IResource) theResource;

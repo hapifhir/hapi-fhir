@@ -3,7 +3,7 @@
 	xmlns="http://maven.apache.org/DECORATION/1.3.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd"
-	name="HAPI">
+	name="HAPI FHIR">
 	
 	<!-- 
 	<bannerLeft>
@@ -46,7 +46,7 @@
 			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
 			   font size
 			 -->
-			<link rel="shortcut icon" href="http://jamesagnew.github.io/hapi-fhir/images/favicon.png" />
+			<link rel="shortcut icon" href="http://hapifhir.io/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 			
 			<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
@@ -218,7 +218,7 @@
 				<name><![CDATA[
 					<span class="color-highlight">HAPI</span> FHIR
 				]]></name>
-				<href>http://jamesagnew.github.io/hapi-fhir/</href>
+				<href>http://hapifhir.io/</href>
 			</brand>
 			<titleTemplate>%2$s - HAPI FHIR</titleTemplate>
 		</reflowSkin>

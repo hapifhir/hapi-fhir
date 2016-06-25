@@ -68,7 +68,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code AB"));
 		//@formatter:on
 		
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
 		assertThat(toCodes(codes), containsInAnyOrder("A", "AA", "AB"));
@@ -177,7 +177,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
 
@@ -571,7 +571,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
 				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
 		//@formatter:on
-		myCodeSystemDao.create(codeSystem, new ServletRequestDetails());
+		myCodeSystemDao.create(codeSystem, mySrd);
 
 		createLocalVs(codeSystem);
 	}
@@ -590,13 +590,13 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
 		try {
-			myCodeSystemDao.create(codeSystem, new ServletRequestDetails());
+			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());

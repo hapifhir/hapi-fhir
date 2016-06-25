@@ -118,23 +118,54 @@
 					the response from the server in order to determine whether "read" operations
 					are legal.
 				</p>
+
+			</subsection>
+			
+			<subsection name="Authorizing Read Operations">			
+					
 				<p>
-					This approach has limitations however: If a request has a conditional operation, 
-					such as a delete operation which uses a search URL, or a create operation which
-					uses an <code>If-None-Exist</code> header, the interceptor will not know the
-					actual target until the server actually processes the request. 
+					When authorizing a read operation, the AuthorizationInterceptor 
+					always allows client code to execute and generate a response. 
+					It then examines the response that would be returned before
+					actually returning it to the client, and if rules do not permit
+					that data to be shown to the client the interceptor aborts the 
+					request.
 				</p>
+
 				<p>
-					For better security, individual resource providers should notify interceptors
-					about their actual targets in the event of any "write" operations (create, 
-					operations embedded in transactions, etc.)
+					Note that there are performance implications to this mechanism,
+					since an unauthorized user can still cause the server to fetch data
+					even if they won't get to see it. This mechanism should be comprehensive
+					however, since it will prevent clients from using various features
+					in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to
+					"trick" the server into showing them date they shouldn't be allowed to
+					see.					
 				</p>
+
 				<p>
-					The mechanism for doing this isn't yet fully documented, this will be improved
-					over the next release cycle (post 1.5). Please get in touch on our google group
-					if you want to help! 
+					See the following diagram for an example of how this works.
 				</p>
 				
+				<img src="./images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
+				
+			</subsection>
+
+			<subsection name="Authorizing Write Operations">
+				
+				<p>
+					Write operations (create, update, etc.) are typically authorized
+					by the interceptor by examining the parsed URL and making a decision
+					about whether to authorize the operation before allowing Resource Provider
+					code to proceed. This means that client code will not have a chance to execute
+					and create resources that the client does not have permissions to create.   
+				</p>
+				
+				<p>
+					See the following diagram for an example of how this works.
+				</p>
+				
+				<img src="./images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
+
 			</subsection>
 			
 		</section>

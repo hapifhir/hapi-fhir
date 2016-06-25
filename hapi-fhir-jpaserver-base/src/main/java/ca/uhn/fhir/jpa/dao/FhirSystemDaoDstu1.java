@@ -64,7 +64,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		long start = System.currentTimeMillis();
@@ -270,7 +270,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 				ResourceMetadataKeyEnum.DELETED_AT.put(resource, new InstantDt(deletedTimestampOrNull));
 			}
 
-			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime, theRequestDetails);
+			updateEntity(resource, table, deletedTimestampOrNull, updateTime);
 		}
 
 		long delay = System.currentTimeMillis() - start;

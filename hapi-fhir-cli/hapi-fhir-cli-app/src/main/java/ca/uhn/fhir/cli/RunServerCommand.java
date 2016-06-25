@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
 
 public class RunServerCommand extends BaseCommand {
 
+	private static final String OPTION_LOWMEM = "lowmem";
+	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
 	private static final int DEFAULT_PORT = 8080;
 	private static final String OPTION_P = "p";
 
@@ -45,7 +47,8 @@ public class RunServerCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		options.addOption(OPTION_P, "port", true, "The port to listen on (default is " + DEFAULT_PORT + ")");
-		options.addOption(null, "lowmem", false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
+		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
+		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		return options;
 	}
 
@@ -61,11 +64,16 @@ public class RunServerCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
 		
-		if (theCommandLine.hasOption("lowmem")) {
+		if (theCommandLine.hasOption(OPTION_LOWMEM)) {
 			ourLog.info("Running in low memory mode, some features disabled");
-			System.setProperty("lowmem", "lowmem");
+			System.setProperty(OPTION_LOWMEM, OPTION_LOWMEM);
 		}
 		
+		if (theCommandLine.hasOption(OPTION_ALLOW_EXTERNAL_REFS)) {
+			ourLog.info("Server is configured to allow external references");
+			ContextHolder.setAllowExternalRefs(true);
+		}
+
 		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));
 
 		ourLog.info("Preparing HAPI FHIR JPA server on port {}", myPort);

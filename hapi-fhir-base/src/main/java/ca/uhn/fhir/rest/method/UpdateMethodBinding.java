@@ -83,7 +83,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
-			parseContentLocation(getContext(), mo, getResourceName(), locationHeader);
+			parseContentLocation(getContext(), mo, locationHeader);
 			if (mo.getId() == null || mo.getId().isEmpty()) {
 				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
 			}

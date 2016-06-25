@@ -101,7 +101,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		});
 		assertEquals(null, entity.getIndexStatus());
 
-		mySystemDao.performReindexingPass(null, mySrd);
+		mySystemDao.performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override
@@ -112,7 +112,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
-		mySystemDao.performReindexingPass(100000, mySrd);
+		mySystemDao.performReindexingPass(100000);
 
 		// Try making the resource unparseable
 
@@ -134,7 +134,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			}
 		});
 
-		mySystemDao.performReindexingPass(null, mySrd);
+		mySystemDao.performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override

@@ -42,7 +42,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
 
@@ -109,14 +109,14 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		
 		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
 		
-		assertThat(mySystemDao.performReindexingPass(100, mySrd), greaterThan(0));
+		assertThat(mySystemDao.performReindexingPass(100), greaterThan(0));
 	}
 
 	private IIdType createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
 
@@ -173,7 +173,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
 
@@ -187,7 +187,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs = new TermCodeSystemVersion();
 		TermConcept parentA = new TermConcept(cs, "ParentA");
 		cs.getConcepts().add(parentA);
-		id = myCodeSystemDao.update(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		id = myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());
@@ -197,7 +197,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		id = myCodeSystemDao.create(codeSystem, new ServletRequestDetails()).getId().toUnqualified();
+		id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());

@@ -24,7 +24,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 public class MethodOutcome {
@@ -33,7 +32,6 @@ public class MethodOutcome {
 	private IIdType myId;
 	private IBaseOperationOutcome myOperationOutcome;
 	private IBaseResource myResource;
-	private IdDt myVersionId;
 
 	/**
 	 * Constructor
@@ -92,27 +90,6 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * @deprecated Use the constructor which accepts a single IIdType parameter, and include the logical ID and version ID in that IIdType instance
-	 */
-	@Deprecated
-	@CoverageIgnore
-	public MethodOutcome(IIdType theId, IdDt theVersionId) {
-		myId = theId;
-		myVersionId = theVersionId;
-	}
-
-	/**
-	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
-	 */
-	@Deprecated
-	@CoverageIgnore
-	public MethodOutcome(IIdType theId, IdDt theVersionId, IBaseOperationOutcome theBaseOperationOutcome) {
-		myId = theId;
-		myVersionId = theVersionId;
-		myOperationOutcome = theBaseOperationOutcome;
-	}
-
-	/**
 	 * Constructor
 	 * 
 	 * @param theId
@@ -120,6 +97,16 @@ public class MethodOutcome {
 	 */
 	public MethodOutcome(IIdType theId) {
 		myId = theId;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theOperationOutcome
+	 *            The operation outcome resource to return
+	 */
+	public MethodOutcome(IBaseOperationOutcome theOperationOutcome) {
+		myOperationOutcome = theOperationOutcome;
 	}
 
 	/**
@@ -150,15 +137,6 @@ public class MethodOutcome {
 	 */
 	public IBaseResource getResource() {
 		return myResource;
-	}
-
-	/**
-	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
-	 */
-	@Deprecated
-	@CoverageIgnore
-	public IdDt getVersionId() {
-		return myVersionId;
 	}
 
 	/**
@@ -203,15 +181,6 @@ public class MethodOutcome {
 	 */
 	public void setResource(IBaseResource theResource) {
 		myResource = theResource;
-	}
-
-	/**
-	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IIdType)}
-	 */
-	@Deprecated
-	@CoverageIgnore
-	public void setVersionId(IdDt theVersionId) {
-		myVersionId = theVersionId;
 	}
 
 }
