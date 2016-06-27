@@ -32,4 +32,14 @@ public class StopWatch {
 		return retVal;
 	}
 	
+	public long getMillis() {
+		long now = System.currentTimeMillis();
+		long retVal = now - myStarted;
+		return retVal;
+	}
+	
+	public double getMillisPerOperation(int theNumOperations) {
+		return ((double)getMillis()) / Math.max(1.0, theNumOperations);
+	}
+	
 }

@@ -30,10 +30,6 @@ public class TerminologyLoaderSvcIntegrationTest extends BaseJpaDstu3Test {
 	@Test
 	@Ignore
 	public void testLoadAndStoreSnomedCt() {
-		Map<String, File> files = new HashMap<String, File>();
-		files.put(TerminologyLoaderSvc.SCT_FILE_CONCEPT, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Concept_Full_INT_20160131.txt"));
-		files.put(TerminologyLoaderSvc.SCT_FILE_DESCRIPTION, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Description_Full-en_INT_20160131.txt"));
-		files.put(TerminologyLoaderSvc.SCT_FILE_RELATIONSHIP, new File("/Users/james/tmp/sct/SnomedCT_Release_INT_20160131_Full/Terminology/sct2_Relationship_Full_INT_20160131.txt"));
 //		myLoader.processSnomedCtFiles(files, mySrd);
 	}
 

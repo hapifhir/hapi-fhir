@@ -24,15 +24,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,7 +44,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -102,6 +98,8 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 				}
 				ourLog.info(b.toString(), theConcept.getCode());
 				childIter.remove();
+				nextChild.getParents().remove(next);
+				
 			} else {
 				dropCircularRefs(nextChild, theChain, theCode2concept, theCircularCounter);
 			}

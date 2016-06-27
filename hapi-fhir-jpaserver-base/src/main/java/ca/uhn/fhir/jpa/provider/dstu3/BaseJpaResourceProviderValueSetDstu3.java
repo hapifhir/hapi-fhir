@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDstu3<ValueSet> {
@@ -50,7 +51,8 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			@IdParam(optional=true) IdType theId,
 			@OperationParam(name="valueSet", min=0, max=1) ValueSet theValueSet,
 			@OperationParam(name="identifier", min=0, max=1) UriType theIdentifier,
-			@OperationParam(name = "filter", min=0, max=1) StringType theFilter) {
+			@OperationParam(name = "filter", min=0, max=1) StringType theFilter, 
+			RequestDetails theRequestDetails) {
 		//@formatter:on
 		
 		boolean haveId = theId != null && theId.hasIdPart();
@@ -69,7 +71,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			if (haveId) {
-				return dao.expand(theId, toFilterString(theFilter));
+				return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 			} else if (haveIdentifier) {
 				return dao.expandByIdentifier(theIdentifier.getValue(), toFilterString(theFilter));
 			} else {
@@ -118,14 +120,15 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="display", min=0, max=1) StringType theDisplay,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
-			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConcept theCodeableConcept
+			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConcept theCodeableConcept, 
+			RequestDetails theRequestDetails
 			) {
 		//@formatter:on
 		
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept);
+			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("result").setValue(new BooleanType(result.isResult()));
 			if (isNotBlank(result.getMessage())) {

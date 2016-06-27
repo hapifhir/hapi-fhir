@@ -367,6 +367,19 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testMarkResourcesForReindexing() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			assertEquals(200, http.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(http);;
+		}
+	}
+	
 	@Transactional(propagation = Propagation.NEVER)
 	@Test
 	public void testSuggestKeywords() throws Exception {

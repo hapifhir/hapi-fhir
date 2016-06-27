@@ -78,7 +78,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 	
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter) {
+	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
 		ValueSet source = loadValueSetForExpansion(theId);
 		return expand(source, theFilter);
 
@@ -179,7 +179,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept) {
+	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
 		List<IIdType> valueSetIds;
 
 		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
@@ -212,7 +212,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		}
 
 		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
@@ -314,7 +314,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		
 		List<IIdType> valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
 			LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {

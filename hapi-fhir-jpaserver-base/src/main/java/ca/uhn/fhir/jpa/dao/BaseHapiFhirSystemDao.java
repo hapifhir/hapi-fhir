@@ -37,8 +37,6 @@ import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,7 +48,6 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
@@ -89,7 +86,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		int retVal = doPerformReindexingPassForResources(theCount, txTemplate);
-		retVal += doPerformReindexingPassForConcepts(txTemplate);
 		return retVal;
 	}
 
@@ -148,37 +144,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				ourLog.info("Indexed {} / {} resources in {}ms - Avg {}ms / resource", new Object[] { count, resources.size(), delay, avg });
 
 				return resources.size();
-			}
-		});
-	}
-
-	private int doPerformReindexingPassForConcepts(TransactionTemplate txTemplate) {
-		return txTemplate.execute(new TransactionCallback<Integer>() {
-			@Override
-			public Integer doInTransaction(TransactionStatus theStatus) {
-				
-				int maxResult = 10000;
-				Page<TermConcept> resources = myTermConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
-				if (resources.hasContent() == false) {
-					return 0;
-				}
-
-				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
-
-				int count = 0;
-				long start = System.currentTimeMillis();
-
-				for (TermConcept resourceTable : resources) {
-					resourceTable.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-					myTermConceptDao.save(resourceTable);
-					count++;
-				}
-				
-				long delay = System.currentTimeMillis() - start;
-				long avg = (delay / resources.getContent().size());
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), delay, avg });
-
-				return resources.getContent().size();
 			}
 		});
 	}

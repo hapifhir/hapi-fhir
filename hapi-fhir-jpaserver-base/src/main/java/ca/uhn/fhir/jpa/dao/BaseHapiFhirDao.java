@@ -1174,7 +1174,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				coordsParams = extractSearchParamCoords(theEntity, theResource);
 
 				// ourLog.info("Indexing resource: {}", entity.getId());
-				ourLog.info("Storing date indexes: {}", dateParams);
+				ourLog.trace("Storing date indexes: {}", dateParams);
 
 				tokenParams = new HashSet<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {

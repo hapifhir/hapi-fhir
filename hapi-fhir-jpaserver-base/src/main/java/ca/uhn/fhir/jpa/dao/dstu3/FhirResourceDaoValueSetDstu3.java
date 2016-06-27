@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.nio.file.FileVisitOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -56,6 +57,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.util.LogicUtil;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
@@ -70,8 +72,8 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	private IFhirResourceDaoCodeSystem<CodeSystem, CodeableConcept, Coding> myCodeSystemDao;
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter) {
-		ValueSet source = myValidationSupport.fetchResource(getContext(), ValueSet.class, theId.getValue());
+	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
+		ValueSet source = read(theId, theRequestDetails);
 		return expand(source, theFilter);
 	}
 
@@ -86,6 +88,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
 
 		ValueSet retVal = new ValueSet();
+		retVal.getMeta().setLastUpdated(new Date());
 		retVal.setExpansion(expansion);
 		return retVal;
 	}
@@ -166,7 +169,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 	@Override
 	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
+			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
 		List<IIdType> valueSetIds = Collections.emptyList();
 		List<IIdType> codeSystemIds = Collections.emptyList();
@@ -205,7 +208,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		}
 
 		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
@@ -219,7 +222,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		}
 
 		for (IIdType nextId : codeSystemIds) {
-			ValueSet expansion = expand(nextId, null);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
