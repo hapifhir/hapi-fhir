@@ -39,11 +39,6 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-	@Bean 
-	public IServerInterceptor securityInterceptor() {
-		return new PublicSecurityInterceptor();
-	}
-
 	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
