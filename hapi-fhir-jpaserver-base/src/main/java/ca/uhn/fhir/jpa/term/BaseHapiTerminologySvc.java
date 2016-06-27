@@ -305,8 +305,11 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public synchronized void saveDeferred() {
-		if (!myProcessDeferred || ((myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()))) {
+		if (!myProcessDeferred) {
+			return;
+		} else if (myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
 			processReindexing();
+			return;
 		}
 		
 		int codeCount = 0, relCount = 0;
