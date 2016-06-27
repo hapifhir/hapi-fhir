@@ -2,12 +2,6 @@
 /target
 *.log
 *.log*
-.project
-/target/
-/target/
-/target/
-/target/
-/target/
 /target/
 
 # Created by https://www.gitignore.io
@@ -109,9 +103,6 @@ tmp/
 *~.nib
 local.properties
 .loadpath
-
-# Eclipse Core
-.project
 
 # External tool builders
 .externalToolBuilders/
