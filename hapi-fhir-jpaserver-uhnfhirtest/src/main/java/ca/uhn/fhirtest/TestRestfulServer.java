@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -71,13 +72,12 @@ public class TestRestfulServer extends RestfulServer {
 		// retrieve all the appropriate resource providers and the
 		// conformance provider
 		List<IResourceProvider> beans;
-		JpaSystemProviderDstu1 systemProviderDstu1 = null;
-		JpaSystemProviderDstu2 systemProviderDstu2 = null;
-		JpaSystemProviderDstu3 systemProviderDstu3 = null;
 		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
+		List<Object> plainProviders = new ArrayList<Object>();
+		
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU1": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
@@ -87,7 +87,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.DISABLED;
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
@@ -111,7 +111,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
-			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
@@ -134,12 +134,13 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu3());
 			beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
-			systemProviderDstu3 = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
+			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 			break;
 		}
 		default:
@@ -167,17 +168,7 @@ public class TestRestfulServer extends RestfulServer {
 		}
 		setResourceProviders(beans);
 
-		List<Object> provList = new ArrayList<Object>();
-		if (systemProviderDstu1 != null) {
-			provList.add(systemProviderDstu1);
-		}
-		if (systemProviderDstu2 != null) {
-			provList.add(systemProviderDstu2);
-		}
-		if (systemProviderDstu3 != null) {
-			provList.add(systemProviderDstu3);
-		}
-		setPlainProviders(provList);
+		setPlainProviders(plainProviders);
 
 		/*
 		 * We want to format the response using nice HTML if it's a browser, since this
