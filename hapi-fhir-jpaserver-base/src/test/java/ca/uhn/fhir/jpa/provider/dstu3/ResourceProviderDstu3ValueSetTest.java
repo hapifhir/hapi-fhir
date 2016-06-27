@@ -12,7 +12,6 @@ import java.io.IOException;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -20,11 +19,11 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
@@ -98,6 +97,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		
 	}
 
+	// 
+	
 	@Test
 	public void testExpandByIdentifier() {
 		//@formatter:off
@@ -112,6 +113,33 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp, stringContainsInOrder(
+				"<code value=\"11378-7\"/>", 
+				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		//@formatter:on
+
+	}
+
+	@Test
+	@Ignore
+	public void testValidateCode() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new StringType("BRN"))
+			.andParameter("identifier", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
+			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
+			.useHttpGet()
+			.execute();
+
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 

@@ -34,6 +34,7 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -169,7 +170,6 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		List<IIdType> valueSetIds = Collections.emptyList();
-		List<IIdType> codeSystemIds = Collections.emptyList();
 
 		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
 		boolean haveCoding = theCoding != null && theCoding.isEmpty() == false;
@@ -204,6 +204,26 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 			}
 		}
 
+		//		if (valueSetIds.isEmpty()) {
+//			if (haveIdentifierParam) {
+//				myValidationSupport.expandValueSet(getContext(), include);
+//				if (myValidationSupport.isCodeSystemSupported(getContext(), theValueSetIdentifier.getValue())) {
+//					String system = toStringOrNull(theSystem);
+//					String code = toStringOrNull(theCode);
+//					String display = toStringOrNull(theDisplay);
+//					CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, display);
+//					if (result != null) {
+//						if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
+//							if (!theDisplay.getValue().equals(result.getDisplay())) {
+//								return new ValidateCodeResult(false, "Display for code does not match", result.getDisplay());
+//							}
+//						}
+//						return new ValidateCodeResult(true, "Code validates", result.getDisplay());
+//					}
+//				}
+//			}
+//		}
+		
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null);
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
@@ -218,20 +238,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 			}
 		}
 
-		for (IIdType nextId : codeSystemIds) {
-			ValueSet expansion = expand(nextId, null);
-			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
-			if (result != null) {
-				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
-					if (!theDisplay.getValue().equals(result.getDisplay())) {
-						return new ValidateCodeResult(false, "Display for code does not match", result.getDisplay());
-					}
-				}
-				return result;
-			}
-		}
-
+		
 		return new ValidateCodeResult(false, "Code not found", null);
 	}
 

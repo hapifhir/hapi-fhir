@@ -82,27 +82,11 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 	}
 
 
-	private static boolean moreThanOneTrue(boolean... theBooleans) {
-		boolean haveOne = false;
-		for (boolean next : theBooleans) {
-			if (next) {
-				if (haveOne) {
-					return true;
-				} else {
-					haveOne = true;
-				}
-			}
-		}
-		return false;
-	}
-
-
 	private String toFilterString(StringType theFilter) {
 		return theFilter != null ? theFilter.getValue() : null;
 	}
 
-	
-	
+
 	//@formatter:off
 	@SuppressWarnings("unchecked")
 	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
@@ -138,6 +122,22 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	
+	
+	private static boolean moreThanOneTrue(boolean... theBooleans) {
+		boolean haveOne = false;
+		for (boolean next : theBooleans) {
+			if (next) {
+				if (haveOne) {
+					return true;
+				} else {
+					haveOne = true;
+				}
+			}
+		}
+		return false;
 	}
 
 	
